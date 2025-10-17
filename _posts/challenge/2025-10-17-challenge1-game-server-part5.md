@@ -303,7 +303,7 @@ kubectl get pods -n game-prod -o wide | grep compute
 kubectl get pods -n game-prod -o wide | grep backend
 ```
 
-![Pod 노드 배치](/assets/images/challenge1/part5-pod-distribution.png)
+![Pod 노드 배치]({{ site.baseurl }}/assets/images/challenge1/part5-pod-distribution.png)
 
 **주목할 점:**
 - game-room 3개가 전부 agent-0에 배치됨 → nodeSelector: compute 작동 ✅

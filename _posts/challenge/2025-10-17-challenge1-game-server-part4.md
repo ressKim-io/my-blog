@@ -192,7 +192,7 @@ kubectl get svc -n game-prod
 kubectl get endpoints -n game-prod
 ```
 
-![Service 목록](/assets/images/challenge1/part4-service-list.png)
+![Service 목록]({{ site.baseurl }}/assets/images/challenge1/part4-service-list.png)
 
 Endpoints가 Pod IP 3개를 가리키고 있으면 정상이다.
 

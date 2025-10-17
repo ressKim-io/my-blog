@@ -166,7 +166,7 @@ kubectl get ingress -n game-prod
 kubectl describe ingress game-ingress -n game-prod
 ```
 
-![Ingress 라우팅 규칙](/assets/images/challenge1/part7-ingress-rules.png)
+![Ingress 라우팅 규칙]({{ site.baseurl }}/assets/images/challenge1/part7-ingress-rules.png)
 
 
 ### 접속 테스트

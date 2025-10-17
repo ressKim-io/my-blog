@@ -137,7 +137,7 @@ resources:
 
 **limits**: 이 Pod가 최대로 쓸 수 있는 리소스다. 이걸 넘으면 컨테이너가 강제로 재시작된다.
 
-![Deployment 상세 정보](/assets/images/challenge1/part3-deployment-describe.png)
+![Deployment 상세 정보]({{ site.baseurl }}/assets/images/challenge1/part3-deployment-describe.png)
 
 식당으로 비유하면, requests는 "최소 테이블 2개는 필요해요", limits는 "테이블 4개 넘게는 안 써요"다.
 
@@ -185,7 +185,7 @@ kubectl logs -f deployment/game-lobby -n game-prod
 
 정상이면 이렇게 뜬다.
 
-![Pod 3개 실행](/assets/images/challenge1/part3-pods-running.png)
+![Pod 3개 실행]({{ site.baseurl }}/assets/images/challenge1/part3-pods-running.png)
 
 ```bash
 NAME                          READY   STATUS    RESTARTS   AGE
