@@ -10,8 +10,8 @@ tags:
   - k8s
 toc: true
 toc_sticky: true
-date: 2025-01-17
-last_modified_at: 2025-01-17
+date: 2025-10-17 10:10:00 +0900
+last_modified_at: 2025-10-17 10:10:00 +0900
 ---
 
 ## 🎯 핵심 개념
