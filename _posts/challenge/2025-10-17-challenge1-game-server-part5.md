@@ -373,6 +373,10 @@ Events:
 - PriorityClass로 중요한 Pod 우선 배치
 
 ## 🔗 참고
+- **[📂 프로젝트 GitHub 저장소](https://github.com/ressKim-io/game-server-k8s)**
+  - [GameRoom Deployment YAML](https://github.com/ressKim-io/game-server-k8s/blob/main/k8s-manifests/05-gameroom-deployment.yaml)
+  - [Chat Deployment YAML](https://github.com/ressKim-io/game-server-k8s/blob/main/k8s-manifests/06-chat-deployment.yaml)
+  - [Ranking Deployment YAML](https://github.com/ressKim-io/game-server-k8s/blob/main/k8s-manifests/07-ranking-deployment.yaml)
 
 - [Kubernetes Node Selection 공식 문서](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
 - [Resource Management 공식 문서](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)

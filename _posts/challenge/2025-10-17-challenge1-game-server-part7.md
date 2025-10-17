@@ -320,6 +320,9 @@ Ingress로 여러 서비스를 하나의 진입점으로 통합했다. nginx-ing
 - 다른 Ingress Controller (Traefik, HAProxy, Envoy)
 
 ## 🔗 참고
+- **[📂 프로젝트 GitHub 저장소](https://github.com/ressKim-io/game-server-k8s)**
+  - [Ingress YAML](https://github.com/ressKim-io/game-server-k8s/blob/main/k8s-manifests/09-ingress.yaml)
+  - [전체 매니페스트 보기](https://github.com/ressKim-io/game-server-k8s/tree/main/k8s-manifests)
 
 - [Kubernetes Ingress 공식 문서](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 - [nginx-ingress-controller GitHub](https://github.com/kubernetes/ingress-nginx)

@@ -256,6 +256,8 @@ Deployment로 게임 로비를 띄웠다. replicas로 개수를 정하고, resou
 - startupProbe는 언제 쓰나
 
 ## 🔗 참고
+- **[📂 프로젝트 GitHub 저장소](https://github.com/ressKim-io/game-server-k8s)**
+  - [Lobby Deployment YAML](https://github.com/ressKim-io/game-server-k8s/blob/main/k8s-manifests/03-lobby-deployment.yaml)
 
 - [Kubernetes Deployment 공식 문서](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 - [Pod Lifecycle 공식 문서](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
