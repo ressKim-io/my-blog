@@ -1,13 +1,16 @@
 ---
-title: "Deployment로 첫 Pod 띄우기"
+title: "[챌린지 #1] 게임 서버 K8s 배포 - Part 3: Deployment"
 excerpt: "게임 로비 서비스를 K8s에 배포하며 배운 것들"
 categories:
+  - challenge
   - kubernetes
 tags:
+  - bootcamp
   - deployment
   - pod
   - replicas
-  - k8s
+  - resources
+series: "challenge-1-game-server"
 toc: true
 toc_sticky: true
 date: 2025-10-17 10:20:00 +0900

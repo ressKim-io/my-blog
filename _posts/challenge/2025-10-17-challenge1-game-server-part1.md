@@ -1,13 +1,16 @@
 ---
-title: "WSL2에서 k3s 대신 k3d 선택한 이유"
-excerpt: "Mac → Windows WSL2 환경에서 k3s cgroup 문제 해결기"
+title: "[챌린지 #1] 게임 서버 K8s 배포 - Part 1: k3s → k3d"
+excerpt: "WSL2 환경에서 k3s 대신 k3d를 선택한 이유"
 categories:
+  - challenge
   - kubernetes
 tags:
+  - bootcamp
   - k3s
   - k3d
   - wsl2
   - troubleshooting
+series: "challenge-1-game-server"
 toc: true
 toc_sticky: true
 date: 2025-10-17 10:00:00 +0900

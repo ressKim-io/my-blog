@@ -1,13 +1,16 @@
 ---
-title: "나머지 서비스 배포하기 (nodeSelector 활용)"
+title: "[챌린지 #1] 게임 서버 K8s 배포 - Part 5: 나머지 서비스"
 excerpt: "게임 룸, 채팅, 랭킹 서비스를 워크로드 특성에 맞게 배치하기"
 categories:
+  - challenge
   - kubernetes
 tags:
+  - bootcamp
   - deployment
   - nodeSelector
   - workload
   - resource-optimization
+series: "challenge-1-game-server"
 toc: true
 toc_sticky: true
 date: 2025-10-17 10:40:00 +0900

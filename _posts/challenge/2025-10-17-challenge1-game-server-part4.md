@@ -1,13 +1,16 @@
 ---
-title: "Service로 Pod 네트워크 연결하기"
+title: "[챌린지 #1] 게임 서버 K8s 배포 - Part 4: Service"
 excerpt: "K8s에서 Pod끼리, 그리고 외부와 통신하는 방법"
 categories:
+  - challenge
   - kubernetes
 tags:
+  - bootcamp
   - service
   - clusterip
   - loadbalancer
   - networking
+series: "challenge-1-game-server"
 toc: true
 toc_sticky: true
 date: 2025-10-17 10:30:00 +0900

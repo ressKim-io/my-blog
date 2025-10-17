@@ -1,13 +1,15 @@
 ---
-title: "HPA로 Auto Scaling 구현하기"
+title: "[챌린지 #1] 게임 서버 K8s 배포 - Part 6: HPA"
 excerpt: "부하에 따라 Pod를 자동으로 늘리고 줄이는 방법"
 categories:
+  - challenge
   - kubernetes
 tags:
+  - bootcamp
   - hpa
   - autoscaling
   - metrics-server
-  - k8s
+series: "challenge-1-game-server"
 toc: true
 toc_sticky: true
 date: 2025-10-17 10:50:00 +0900

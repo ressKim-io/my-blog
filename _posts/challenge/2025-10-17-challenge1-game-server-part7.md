@@ -1,13 +1,15 @@
 ---
-title: "Ingress로 단일 진입점 구성하기"
+title: "[챌린지 #1] 게임 서버 K8s 배포 - Part 7: Ingress"
 excerpt: "여러 서비스를 하나의 URL로 통합하는 방법"
 categories:
+  - challenge
   - kubernetes
 tags:
+  - bootcamp
   - ingress
   - nginx-ingress
   - routing
-  - k8s
+series: "challenge-1-game-server"
 toc: true
 toc_sticky: true
 date: 2025-10-17 11:00:00 +0900

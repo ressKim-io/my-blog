@@ -1,13 +1,15 @@
 ---
-title: "Namespace와 ConfigMap으로 환경 분리하기"
+title: "[챌린지 #1] 게임 서버 K8s 배포 - Part 2: Namespace & ConfigMap"
 excerpt: "K8s에서 서비스별 설정을 깔끔하게 관리하는 방법"
 categories:
+  - challenge
   - kubernetes
 tags:
+  - bootcamp
   - namespace
   - configmap
   - environment
-  - k8s
+series: "challenge-1-game-server"
 toc: true
 toc_sticky: true
 date: 2025-10-17 10:10:00 +0900
