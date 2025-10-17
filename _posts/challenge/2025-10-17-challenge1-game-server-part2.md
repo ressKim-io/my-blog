@@ -122,6 +122,9 @@ data:
   MAX_PLAYERS: "1000"
   MATCH_TIMEOUT: "30"
 ```
+생성된 ConfigMap을 확인해보자.
+
+![ConfigMap 목록](/assets/images/challenge1/part2-configmap-list.png)
 
 이렇게 나누면 나중에 관리가 편하다. 공통 설정은 한 곳에서, 서비스별 설정은 각자 관리하면 된다.
 

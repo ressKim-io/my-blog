@@ -166,12 +166,8 @@ kubectl get ingress -n game-prod
 kubectl describe ingress game-ingress -n game-prod
 ```
 
-정상이면 이렇게 보인다.
+![Ingress 라우팅 규칙](/assets/images/challenge1/part7-ingress-rules.png)
 
-```bash
-NAME           CLASS   HOSTS   ADDRESS     PORTS   AGE
-game-ingress   nginx   *       localhost   80      1m
-```
 
 ### 접속 테스트
 

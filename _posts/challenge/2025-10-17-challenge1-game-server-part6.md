@@ -133,18 +133,22 @@ kubectl get hpa -n game-prod
 kubectl describe hpa game-lobby-hpa -n game-prod
 ```
 
-정상이면 이렇게 보인다.
+![HPA 상태](/assets/images/challenge1/part6-hpa-status.png)
 
-```bash
-NAME              REFERENCE              TARGETS   MINPODS   MAXPODS   REPLICAS
-game-lobby-hpa    Deployment/game-lobby  15%/70%   2         10        2
-```
 
 현재 CPU 사용량이 15%라 최소값인 2개로 유지되고 있다.
 
 ### 부하 테스트
 
 HPA가 제대로 동작하는지 부하를 줘보자. `hey` 도구를 사용한다.
+
+부하를 주기 전 상태를 먼저 확인한다.
+
+![부하 전 HPA 상태](/assets/images/challenge1/part6-hpa-ex-scaling.png)
+
+CPU 사용량이 낮아서 최소 replicas인 2개로 유지되고 있다.
+
+이제 부하를 줘보자.
 
 ```bash
 # hey 설치 (Mac)
@@ -162,24 +166,11 @@ kubectl get pods -n game-prod -w
 
 부하를 주면 CPU 사용량이 올라가고, HPA가 Pod를 늘린다.
 
-```bash
-# 부하 전
-game-lobby-hpa    15%/70%   2         10        2
+![부하 중 Pod 증가](/assets/images/challenge1/part6-hpa-scaling.png)
 
-# 부하 중 (1분 후)
-game-lobby-hpa    85%/70%   2         10        4
+CPU가 70%를 넘자 Pod가 2개에서 3개로 늘어났다. 부하가 계속되면 최대 10개까지 늘어난다.
 
-# 부하 중 (2분 후)
-game-lobby-hpa    92%/70%   2         10        8
-
-# 부하 종료 (5분 후)
-game-lobby-hpa    20%/70%   2         10        4
-
-# 안정화 (10분 후)
-game-lobby-hpa    15%/70%   2         10        2
-```
-
-CPU가 70%를 넘으면 Pod가 늘어나고, 낮아지면 다시 줄어든다.
+부하를 멈추면 5분 정도 후에 다시 2개로 줄어든다.
 
 ## 📌 메모리 기반 HPA
 

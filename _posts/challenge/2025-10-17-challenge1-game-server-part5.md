@@ -303,20 +303,14 @@ kubectl get pods -n game-prod -o wide | grep compute
 kubectl get pods -n game-prod -o wide | grep backend
 ```
 
-정상이면 이렇게 뜬다.
+![Pod 노드 배치](/assets/images/challenge1/part5-pod-distribution.png)
 
-```bash
-NAME                           READY   STATUS    NODE
-game-lobby-xxx                 1/1     Running   agent-0
-game-lobby-xxx                 1/1     Running   agent-1
-game-room-xxx                  1/1     Running   agent-0  # compute 노드
-game-room-xxx                  1/1     Running   agent-0
-game-chat-xxx                  1/1     Running   agent-1  # backend 노드
-game-chat-xxx                  1/1     Running   agent-1
-game-ranking-xxx               1/1     Running   agent-1
-```
+**주목할 점:**
+- game-room 3개가 전부 agent-0에 배치됨 → nodeSelector: compute 작동 ✅
+- game-chat 2개가 전부 agent-1에 배치됨 → nodeSelector: backend 작동 ✅
 
-게임 룸은 compute 노드(agent-0)에, 채팅과 랭킹은 backend 노드(agent-1)에 배치됐다.
+nodeSelector로 의도한 대로 워크로드를 분리했다.
+
 
 ## ⚠️ 주의사항
 
