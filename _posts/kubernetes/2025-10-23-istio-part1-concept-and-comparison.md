@@ -204,6 +204,7 @@ Istio를 이해하려면 먼저 Service Mesh 개념을 알아야 한다.
 - 정책 변경 시 모든 서비스 재배포
 
 ### Service Mesh의 해법
+<pre style="font-family: 'Consolas', 'Monaco', 'Courier New', monospace; white-space: pre;">
 
 ```
 ┌─────────────────────────────────────────┐
@@ -222,6 +223,7 @@ Istio를 이해하려면 먼저 Service Mesh 개념을 알아야 한다.
 │  └──────────────┘    └──────────────┘   │
 └─────────────────────────────────────────┘
 ```
+</pre>
 
 **Service Mesh는 네트워크 로직을 분리한다.**
 
