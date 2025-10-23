@@ -17,7 +17,7 @@ series: "istio-service-mesh-guide"
 toc: true
 toc_sticky: true
 date: 2025-10-23 11:00:00 +0900
-last_modified_at: 2025-10-23 11:00:00 +0900
+last_modified_at: 2025-10-23 10:10:00 +0900
 ---
 
 ## 🎯 이전 글 요약
