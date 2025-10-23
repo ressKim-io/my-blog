@@ -23,6 +23,7 @@ last_modified_at: 2025-10-23 10:20:00 +0900
 ## 🎯 이전 글 요약
 
 **Part 1**: Istio 개념, Istio만으로도 API Gateway 역할 가능
+
 **Part 2**: Control Plane (Istiod), Data Plane (Envoy), mTLS 자동화
 
 Part 3에서는 **Istio Gateway에서 JWT 인증을 하는 게 왜 좋은지** 실제 사례로 비교해보겠습니다.
@@ -449,10 +450,15 @@ jwtRules:
 Part 3에서는 Gateway 레벨 JWT 인증의 장점을 봤다.
 
 **Part 4에서는:**
+
 - VirtualService로 트래픽 라우팅
+
 - 카나리 배포 실전 (v1: 90%, v2: 10%)
+
 - A/B 테스팅 구현
+
 - Circuit Breaker로 장애 전파 방지
+
 - DestinationRule 활용
 
 코드 변경 없이 트래픽을 세밀하게 제어하는 방법을 보겠습니다.

@@ -432,9 +432,13 @@ Kubernetes를 어느 정도 이해해야 Istio를 배울 수 있다.
 Part 1에서는 Istio가 뭔지, Kong과 어떻게 다른지, 언제 써야 하는지 개념을 잡았다.
 
 **Part 2에서는:**
+
 - Istio 아키텍처 (Control Plane, Data Plane)
+
 - Sidecar가 정확히 어떻게 동작하는지
+
 - 요청이 실제로 어떤 경로로 흐르는지
+
 - mTLS 자동화의 원리
 
 실제로 Pod A에서 Pod B로 요청을 보낼 때 내부에서 무슨 일이 일어나는지 파헤쳐 보겠습니다.

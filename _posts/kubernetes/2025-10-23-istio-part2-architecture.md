@@ -536,10 +536,15 @@ YAML 파일 수정 없이도 Sidecar가 붙는 마법이 바로 Webhook이다.
 Part 2에서는 Istio의 아키텍처와 내부 동작 원리를 파헤쳤다.
 
 **Part 3에서는:**
+
 - Istio Gateway로 외부 트래픽 받기
+
 - **JWT 검증을 Gateway에서 하는 이유** ⭐
+
 - Gateway vs Pod 레벨 인증 비교
+
 - 실전: 모바일 앱 API 서버 구성
+
 - RequestAuthentication & AuthorizationPolicy
 
 "왜 모든 서비스 코드에 JWT 검증 로직을 넣지 않고 Gateway에서만 하는가?"라는 질문에 대한 답을 코드 비교와 함께 보겠습니다.

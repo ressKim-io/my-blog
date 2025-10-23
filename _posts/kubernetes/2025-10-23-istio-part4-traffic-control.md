@@ -23,7 +23,9 @@ last_modified_at: 2025-10-23 11:00:00 +0900
 ## 🎯 이전 글 요약
 
 **Part 1**: Istio 개념, Kong 없이도 가능
+
 **Part 2**: Control Plane/Data Plane, mTLS 자동화
+
 **Part 3**: Gateway에서 JWT 검증 (3-5일 → 5분)
 
 Part 4에서는 **코드 수정 없이 트래픽을 제어**하는 Istio의 진짜 강력한 기능을 보겠습니다.
@@ -479,10 +481,15 @@ kubectl exec -it order-pod -c istio-proxy -- \
 Part 4에서는 트래픽 제어를 배웠습니다.
 
 **Part 5에서는:**
+
 - Istio 도입 전 체크리스트
+
 - 단계적 도입 전략 (권장 패턴)
+
 - 흔한 문제와 해결법 (학습 중 겪은 것)
+
 - 트러블슈팅 (로컬 환경 기준)
+
 - 운영 팁
 
 실무에서 Istio를 도입할 때 참고할 수 있는 가이드를 만들어 정리해보겠습니다.

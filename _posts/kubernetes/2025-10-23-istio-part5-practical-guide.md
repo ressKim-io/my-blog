@@ -22,8 +22,11 @@ last_modified_at: 2025-10-23 11:11:00 +0900
 ## 🎯 이전 글 요약
 
 **Part 1**: Istio 개념, Kong과의 차이점
+
 **Part 2**: Control Plane/Data Plane 아키텍처
+
 **Part 3**: Gateway에서 JWT 인증 (3-5일 → 5분)
+
 **Part 4**: 카나리 배포, A/B 테스팅, Circuit Breaker
 
 Part 5에서는 **Istio를 도입할 때 필요한 실무 전략**과 로컬 환경(k3d)에서 겪은 트러블슈팅을 정리하겠습니다.
