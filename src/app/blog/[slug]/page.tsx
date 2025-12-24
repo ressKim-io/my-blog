@@ -6,6 +6,7 @@ import SeriesNav from '@/components/SeriesNav';
 import { getAllPosts, getPostBySlug, getSeriesPosts, extractHeadings } from '@/lib/posts';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { mdxComponents } from '@/components/MDXComponents';
+import remarkGfm from 'remark-gfm';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -79,7 +80,15 @@ export default async function BlogPost({ params }: Props) {
 
               {/* Post Content */}
               <div className="prose">
-                <MDXRemote source={post.content} components={mdxComponents} />
+                <MDXRemote
+                  source={post.content}
+                  components={mdxComponents}
+                  options={{
+                    mdxOptions: {
+                      remarkPlugins: [remarkGfm],
+                    },
+                  }}
+                />
               </div>
 
               {/* Series Navigation (Bottom) */}
