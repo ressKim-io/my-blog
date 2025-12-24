@@ -18,18 +18,65 @@ interface SidebarProps {
   posts: Post[];
 }
 
+interface SeriesGroup {
+  name: string;
+  posts: Post[];
+  latestSlug: string;
+}
+
 export default function Sidebar({ posts }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['kubernetes', 'challenge', 'cicd']));
 
-  // 카테고리별로 그룹화
-  const postsByCategory = posts.reduce((acc, post) => {
+  const currentSlug = pathname.replace('/blog/', '').replace(/\/$/, '');
+
+  // 시리즈와 개별 포스트 분리
+  const seriesMap = new Map<string, SeriesGroup>();
+  const standalonePosts: Post[] = [];
+
+  posts.forEach((post) => {
+    if (post.series) {
+      const existing = seriesMap.get(post.series.name);
+      if (existing) {
+        existing.posts.push(post);
+        // order가 1인 글을 대표로
+        if (post.series.order === 1) {
+          existing.latestSlug = post.slug;
+        }
+      } else {
+        seriesMap.set(post.series.name, {
+          name: post.series.name,
+          posts: [post],
+          latestSlug: post.slug,
+        });
+      }
+    } else {
+      standalonePosts.push(post);
+    }
+  });
+
+  // 시리즈 내 포스트 정렬
+  seriesMap.forEach((series) => {
+    series.posts.sort((a, b) => (a.series?.order || 0) - (b.series?.order || 0));
+    series.latestSlug = series.posts[0]?.slug || series.latestSlug;
+  });
+
+  // 카테고리별 그룹화 (시리즈는 하나로, 개별 글은 그대로)
+  const categoryItems: Record<string, Array<{ type: 'series'; data: SeriesGroup } | { type: 'post'; data: Post }>> = {};
+
+  seriesMap.forEach((series) => {
+    const category = series.posts[0]?.category || 'etc';
+    if (!categoryItems[category]) categoryItems[category] = [];
+    categoryItems[category].push({ type: 'series', data: series });
+  });
+
+  standalonePosts.forEach((post) => {
     const category = post.category || 'etc';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(post);
-    return acc;
-  }, {} as Record<string, Post[]>);
+    if (!categoryItems[category]) categoryItems[category] = [];
+    categoryItems[category].push({ type: 'post', data: post });
+  });
 
   const categoryLabels: Record<string, string> = {
     kubernetes: 'Kubernetes',
@@ -39,7 +86,7 @@ export default function Sidebar({ posts }: SidebarProps) {
   };
 
   const categoryOrder = ['kubernetes', 'challenge', 'cicd', 'etc'];
-  const sortedCategories = categoryOrder.filter((cat) => postsByCategory[cat]);
+  const sortedCategories = categoryOrder.filter((cat) => categoryItems[cat]);
 
   const toggleCategory = (category: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -51,7 +98,21 @@ export default function Sidebar({ posts }: SidebarProps) {
     setExpandedCategories(newExpanded);
   };
 
-  const currentSlug = pathname.replace('/blog/', '');
+  const toggleSeries = (seriesName: string) => {
+    const newExpanded = new Set(expandedSeries);
+    if (newExpanded.has(seriesName)) {
+      newExpanded.delete(seriesName);
+    } else {
+      newExpanded.add(seriesName);
+    }
+    setExpandedSeries(newExpanded);
+  };
+
+  const isPostActive = (slug: string) => currentSlug === slug;
+  const isSeriesActive = (series: SeriesGroup) => series.posts.some((p) => isPostActive(p.slug));
+
+  // 최대 표시 개수
+  const MAX_ITEMS_PER_CATEGORY = 5;
 
   return (
     <>
@@ -84,61 +145,154 @@ export default function Sidebar({ posts }: SidebarProps) {
         `}
       >
         <div className="p-4">
-          <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-4">
-            Posts ({posts.length})
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+              Posts
+            </h3>
+            <Link
+              href="/blog"
+              className="text-xs text-[var(--accent)] hover:underline"
+              onClick={() => setIsOpen(false)}
+            >
+              View All
+            </Link>
+          </div>
 
-          <nav className="space-y-2">
-            {sortedCategories.map((category) => (
-              <div key={category}>
-                <button
-                  onClick={() => toggleCategory(category)}
-                  className="w-full flex items-center justify-between px-2 py-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                  <span>{categoryLabels[category] || category}</span>
-                  <span className="flex items-center gap-2">
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {postsByCategory[category].length}
+          <nav className="space-y-1">
+            {sortedCategories.map((category) => {
+              const items = categoryItems[category];
+              const displayItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
+              const hasMore = items.length > MAX_ITEMS_PER_CATEGORY;
+
+              return (
+                <div key={category} className="mb-3">
+                  <button
+                    onClick={() => toggleCategory(category)}
+                    className="w-full flex items-center justify-between px-2 py-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded hover:bg-[var(--bg-tertiary)]"
+                  >
+                    <span>{categoryLabels[category] || category}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {items.length}
+                      </span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`w-3 h-3 transition-transform ${expandedCategories.has(category) ? 'rotate-90' : ''}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className={`w-3 h-3 transition-transform ${expandedCategories.has(category) ? 'rotate-90' : ''}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </span>
-                </button>
+                  </button>
 
-                {expandedCategories.has(category) && (
-                  <ul className="ml-2 mt-1 space-y-0.5 border-l border-[var(--border)]">
-                    {postsByCategory[category].map((post) => (
-                      <li key={post.slug}>
-                        <Link
-                          href={`/blog/${post.slug}`}
-                          onClick={() => setIsOpen(false)}
-                          className={`
-                            block pl-3 py-1.5 text-sm truncate transition-colors border-l-2 -ml-[1px]
-                            ${currentSlug === post.slug
-                              ? 'border-[var(--accent)] text-[var(--accent)] font-medium'
-                              : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)]'
-                            }
-                          `}
-                          title={post.title}
-                        >
-                          {post.series && (
-                            <span className="text-purple-400 mr-1">#{post.series.order}</span>
-                          )}
-                          {post.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+                  {expandedCategories.has(category) && (
+                    <ul className="mt-1 space-y-0.5">
+                      {displayItems.map((item) => {
+                        if (item.type === 'series') {
+                          const series = item.data;
+                          const isActive = isSeriesActive(series);
+                          const isExpanded = expandedSeries.has(series.name);
+
+                          return (
+                            <li key={series.name}>
+                              {/* 시리즈 헤더 */}
+                              <button
+                                onClick={() => toggleSeries(series.name)}
+                                className={`
+                                  w-full flex items-center justify-between px-3 py-1.5 text-sm rounded transition-colors
+                                  ${isActive
+                                    ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
+                                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'
+                                  }
+                                `}
+                              >
+                                <span className="flex items-center gap-1.5 truncate">
+                                  <span className="text-purple-400">📚</span>
+                                  <span className="truncate">{series.name}</span>
+                                </span>
+                                <span className="flex items-center gap-1 shrink-0">
+                                  <span className="text-xs px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">
+                                    {series.posts.length}
+                                  </span>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </span>
+                              </button>
+
+                              {/* 시리즈 내 포스트 목록 */}
+                              {isExpanded && (
+                                <ul className="ml-4 mt-1 space-y-0.5 border-l border-[var(--border)]">
+                                  {series.posts.map((post) => (
+                                    <li key={post.slug}>
+                                      <Link
+                                        href={`/blog/${post.slug}`}
+                                        onClick={() => setIsOpen(false)}
+                                        className={`
+                                          block pl-3 py-1 text-sm truncate transition-colors border-l-2 -ml-[1px]
+                                          ${isPostActive(post.slug)
+                                            ? 'border-[var(--accent)] text-[var(--accent)] font-medium'
+                                            : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)]'
+                                          }
+                                        `}
+                                        title={post.title}
+                                      >
+                                        <span className="text-purple-400 mr-1">#{post.series?.order}</span>
+                                        {post.title.replace(/\[.*?\]\s*/, '').slice(0, 25)}...
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          );
+                        } else {
+                          const post = item.data;
+                          return (
+                            <li key={post.slug}>
+                              <Link
+                                href={`/blog/${post.slug}`}
+                                onClick={() => setIsOpen(false)}
+                                className={`
+                                  block px-3 py-1.5 text-sm truncate transition-colors rounded
+                                  ${isPostActive(post.slug)
+                                    ? 'bg-[var(--accent)]/10 text-[var(--accent)] font-medium'
+                                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'
+                                  }
+                                `}
+                                title={post.title}
+                              >
+                                {post.title}
+                              </Link>
+                            </li>
+                          );
+                        }
+                      })}
+
+                      {hasMore && (
+                        <li>
+                          <Link
+                            href="/blog"
+                            onClick={() => setIsOpen(false)}
+                            className="block px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+                          >
+                            + {items.length - MAX_ITEMS_PER_CATEGORY} more →
+                          </Link>
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </div>
       </aside>
