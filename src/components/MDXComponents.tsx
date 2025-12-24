@@ -5,8 +5,27 @@ interface CodeProps {
   children?: React.ReactNode;
 }
 
+// basePath for production (GitHub Pages)
+const basePath = process.env.NODE_ENV === 'production' ? '/my-blog' : '';
+
 // MDX에서 사용할 커스텀 컴포넌트들
 export const mdxComponents = {
+  // 이미지 basePath 처리 (GitHub Pages)
+  img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+    const srcString = typeof src === 'string' ? src : '';
+    const imageSrc = srcString.startsWith('/') ? `${basePath}${srcString}` : srcString;
+
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={imageSrc}
+        alt={alt || ''}
+        className="max-w-full h-auto my-4 rounded-lg"
+        loading="lazy"
+        {...props}
+      />
+    );
+  },
   // pre 태그를 CodeBlock으로 대체
   pre: ({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) => {
     // children이 code 요소인지 확인

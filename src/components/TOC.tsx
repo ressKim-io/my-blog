@@ -14,6 +14,22 @@ interface TOCProps {
 
 export default function TOC({ headings }: TOCProps) {
   const [activeId, setActiveId] = useState<string>('');
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // localStorage에서 접힘 상태 복원
+  useEffect(() => {
+    const saved = localStorage.getItem('toc-collapsed');
+    if (saved === 'true') {
+      setIsCollapsed(true);
+    }
+  }, []);
+
+  // 접힘 상태 저장
+  const toggleCollapse = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem('toc-collapsed', String(newState));
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -46,14 +62,35 @@ export default function TOC({ headings }: TOCProps) {
 
   return (
     <nav className="text-sm">
-      <h4 className="text-[var(--text-primary)] font-semibold mb-4 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+      <button
+        onClick={toggleCollapse}
+        className="w-full text-[var(--text-primary)] font-semibold mb-4 flex items-center justify-between gap-2 hover:text-[var(--accent)] transition-colors"
+        title={isCollapsed ? '목차 펼치기' : '목차 접기'}
+      >
+        <span className="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+          목차
+          <span className="text-xs text-[var(--text-muted)] font-normal">({headings.length})</span>
+        </span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`w-4 h-4 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
-        목차
-      </h4>
+      </button>
 
-      <ul className="space-y-2">
+      <ul
+        className={`
+          space-y-2 overflow-hidden transition-all duration-300
+          ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[1000px] opacity-100'}
+        `}
+      >
         {headings.map((heading) => (
           <li key={heading.id} className={heading.level === 3 ? 'ml-4' : ''}>
             <a

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -27,8 +27,24 @@ interface SeriesGroup {
 export default function Sidebar({ posts }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['kubernetes', 'challenge', 'cicd']));
+
+  // localStorage에서 접힘 상태 복원
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebar-collapsed');
+    if (saved === 'true') {
+      setIsCollapsed(true);
+    }
+  }, []);
+
+  // 접힘 상태 저장
+  const toggleCollapse = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem('sidebar-collapsed', String(newState));
+  };
 
   const currentSlug = pathname.replace('/blog/', '').replace(/\/$/, '');
 
@@ -135,12 +151,36 @@ export default function Sidebar({ posts }: SidebarProps) {
         />
       )}
 
+      {/* 데스크톱 접기/펼치기 버튼 */}
+      <button
+        onClick={toggleCollapse}
+        className={`
+          hidden lg:flex fixed top-20 z-50 h-8 items-center justify-center
+          bg-[var(--bg-secondary)] border border-[var(--border)] rounded-r-md
+          text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]
+          transition-all duration-300 shadow-sm
+          ${isCollapsed ? 'left-0 w-8' : 'left-64 w-6'}
+        `}
+        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        title={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
       {/* 사이드바 */}
       <aside
         className={`
           fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-[var(--bg-secondary)] border-r border-[var(--border)]
           overflow-y-auto z-40 transition-transform duration-300
-          lg:translate-x-0
+          ${isCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
