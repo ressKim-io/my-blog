@@ -134,7 +134,7 @@ export default function Home() {
                 return (
                   <Link
                     key={category}
-                    href="/blog"
+                    href={`/blog?category=${category}`}
                     className="group p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/50 transition-all"
                   >
                     <div className="text-2xl mb-2">{info?.icon}</div>
