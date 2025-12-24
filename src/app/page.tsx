@@ -1,65 +1,121 @@
-import Image from "next/image";
+import Link from 'next/link';
+import Header from '@/components/Header';
+import { getAllPosts } from '@/lib/posts';
 
 export default function Home() {
+  const allPosts = getAllPosts();
+
+  // 카테고리별로 포스트 그룹화
+  const postsByCategory = allPosts.reduce((acc, post) => {
+    const category = post.category || 'etc';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(post);
+    return acc;
+  }, {} as Record<string, typeof allPosts>);
+
+  const categoryLabels: Record<string, string> = {
+    challenge: 'Challenge',
+    kubernetes: 'Kubernetes',
+    cicd: 'CI/CD',
+    etc: 'Etc',
+  };
+
+  const categoryOrder = ['kubernetes', 'challenge', 'cicd', 'etc'];
+  const sortedCategories = categoryOrder.filter((cat) => postsByCategory[cat]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+    <>
+      <Header posts={allPosts} />
+
+      <main className="pt-24 pb-16">
+        <div className="max-w-4xl mx-auto px-4">
+          {/* Profile Section */}
+          <section className="mb-16">
+            <div className="flex items-center gap-6 mb-6">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--accent)] to-purple-500 flex items-center justify-center text-3xl font-bold">
+                R
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold mb-1">Ress</h1>
+                <p className="text-[var(--text-secondary)]">
+                  Learning by doing, documenting the journey
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <a
+                href="https://github.com/resskim-io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-secondary)] hover:border-[var(--text-muted)] transition-colors"
+              >
+                GitHub
+              </a>
+              <Link
+                href="/blog"
+                className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-secondary)] hover:border-[var(--text-muted)] transition-colors"
+              >
+                All Posts
+              </Link>
+            </div>
+          </section>
+
+          {/* Posts by Category */}
+          {sortedCategories.map((category) => (
+            <section key={category} className="mb-12">
+              <h2 className="text-lg font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-4">
+                {categoryLabels[category] || category}
+                <span className="ml-2 text-sm font-normal">
+                  ({postsByCategory[category].length})
+                </span>
+              </h2>
+
+              <div className="grid gap-3">
+                {postsByCategory[category].slice(0, 5).map((post) => (
+                  <Link
+                    key={post.slug}
+                    href={`/blog/${post.slug}`}
+                    className="group flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/50 transition-all"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors truncate">
+                        {post.title}
+                      </h3>
+                      {post.series && (
+                        <span className="text-xs text-purple-400">
+                          {post.series.name} #{post.series.order}
+                        </span>
+                      )}
+                    </div>
+                    <time className="text-sm text-[var(--text-muted)] ml-4 shrink-0">
+                      {new Date(post.date).toLocaleDateString('ko-KR', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </time>
+                  </Link>
+                ))}
+
+                {postsByCategory[category].length > 5 && (
+                  <Link
+                    href="/blog"
+                    className="text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors pl-4"
+                  >
+                    + {postsByCategory[category].length - 5} more posts →
+                  </Link>
+                )}
+              </div>
+            </section>
+          ))}
         </div>
       </main>
-    </div>
+
+      {/* Footer */}
+      <footer className="py-8 border-t border-[var(--border)]">
+        <div className="max-w-4xl mx-auto px-4 text-center text-[var(--text-muted)] text-sm">
+          <p>© 2025 Ress Blog</p>
+        </div>
+      </footer>
+    </>
   );
 }
