@@ -13,35 +13,14 @@ date: "2024-12-24"
 
 지금까지 메트릭, 트레이싱, 로깅을 배웠습니다. 이제 이 모든 것을 **시각적으로** 보여주는 **Kiali**를 다룹니다.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Kiali가 제공하는 것                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   1. Service Graph (서비스 토폴로지)                            │
-│      ┌─────────┐       ┌─────────┐                              │
-│      │Frontend │──────▶│   API   │                              │
-│      └─────────┘       └────┬────┘                              │
-│                             │                                   │
-│               ┌─────────────┼─────────────┐                     │
-│               ▼             ▼             ▼                     │
-│         ┌─────────┐   ┌─────────┐   ┌─────────┐                 │
-│         │ Reviews │   │ Ratings │   │ Details │                 │
-│         └─────────┘   └─────────┘   └─────────┘                 │
-│                                                                 │
-│   2. Health Status (건강 상태)                                  │
-│      ● frontend: Healthy                                        │
-│      ● api: Degraded (에러율 5%)                                │
-│      ● reviews: Failure (50% 실패)                              │
-│                                                                 │
-│   3. Traffic Flow (트래픽 흐름)                                 │
-│      실시간 요청량, 에러율, 응답시간 표시                       │
-│                                                                 │
-│   4. Config Validation (설정 검증)                              │
-│      VirtualService, DestinationRule 오류 감지                  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Kiali Features](/images/istio-observability/kiali-features.svg)
+
+| 기능 | 설명 |
+|------|------|
+| Service Graph | 서비스 토폴로지 시각화 |
+| Health Status | Healthy/Degraded/Failure 상태 표시 |
+| Traffic Flow | 실시간 요청량, 에러율, 응답시간 |
+| Config Validation | VirtualService, DestinationRule 오류 감지 |
 
 학습하면서 궁금했던 것들입니다:
 - 서비스 간 의존 관계를 어떻게 파악할까?
@@ -85,39 +64,13 @@ $ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/sa
 
 ### 기본 화면
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│   Kiali - Graph                                                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   Namespace: [default ▼]   Display: [●App ○Service ○Workload]   │
-│   Time Range: [Last 5m ▼]  Traffic: [●Requests ○Throughput]     │
-│                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐   │
-│   │                                                         │   │
-│   │                    ┌──────────────┐                     │   │
-│   │   ┌─────────┐     │              │     ┌─────────┐     │   │
-│   │   │ ingress │────▶│  productpage │────▶│ details │     │   │
-│   │   │ gateway │     │    (100%)    │     │  (OK)   │     │   │
-│   │   └─────────┘     │              │     └─────────┘     │   │
-│   │                   └──────┬───────┘                      │   │
-│   │                          │                              │   │
-│   │              ┌───────────┴───────────┐                  │   │
-│   │              ▼                       ▼                  │   │
-│   │        ┌─────────┐             ┌─────────┐              │   │
-│   │        │ reviews │────────────▶│ ratings │              │   │
-│   │        │  v1:33% │             │  (OK)   │              │   │
-│   │        │  v2:33% │             │         │              │   │
-│   │        │  v3:33% │             └─────────┘              │   │
-│   │        └─────────┘                                      │   │
-│   │                                                         │   │
-│   └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│   Legend:  ● Healthy  ⚠ Degraded  ✖ Failure                     │
-│            ─── HTTP  ═══ gRPC  ─·─ TCP                          │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Kiali Service Graph](/images/istio-observability/kiali-graph.svg)
+
+| 요소 | 설명 |
+|------|------|
+| Node (서비스) | 서비스 상태 (Healthy/Degraded/Failure) 표시 |
+| Edge (연결선) | 요청량, 에러율, 프로토콜 표시 |
+| Version | 버전별 트래픽 비율 표시 |
 
 ### Display 옵션
 
@@ -165,29 +118,14 @@ $ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/sa
 
 ### 건강 상태 색상
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                   Health 상태 정의                              │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   ● Healthy (녹색)                                              │
-│     - 에러율 < 0.1%                                             │
-│     - 모든 Pod Ready                                            │
-│                                                                 │
-│   ⚠ Degraded (노란색)                                          │
-│     - 에러율 0.1% ~ 20%                                         │
-│     - 일부 Pod Not Ready                                        │
-│                                                                 │
-│   ✖ Failure (빨간색)                                            │
-│     - 에러율 > 20%                                              │
-│     - 모든 Pod Not Ready                                        │
-│                                                                 │
-│   ○ Unknown (회색)                                              │
-│     - 트래픽 없음                                               │
-│     - 데이터 수집 불가                                          │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Kiali Health Status](/images/istio-observability/kiali-health.svg)
+
+| 상태 | 색상 | 조건 |
+|------|------|------|
+| Healthy | 녹색 | 에러율 < 0.1%, 모든 Pod Ready |
+| Degraded | 노란색 | 에러율 0.1% ~ 20%, 일부 Pod Not Ready |
+| Failure | 빨간색 | 에러율 > 20%, 모든 Pod Not Ready |
+| Unknown | 회색 | 트래픽 없음, 데이터 수집 불가 |
 
 ### 상세 Health 정보
 
@@ -224,33 +162,14 @@ Kiali의 가장 유용한 기능 중 하나입니다. Istio 설정 오류를 자
 
 ### 검증 항목
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                   Kiali 설정 검증                               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   VirtualService 검증:                                          │
-│   ════════════════════                                          │
-│   ⚠ No matching DestinationRule for subset "v3"                │
-│   ✖ Host "reviews" not found in namespace                      │
-│   ⚠ Weighted routing sums to 90% (should be 100%)              │
-│                                                                 │
-│   DestinationRule 검증:                                         │
-│   ══════════════════════                                        │
-│   ⚠ Subset "v1" has no matching workloads                      │
-│   ✖ mTLS mode conflicts with PeerAuthentication                │
-│                                                                 │
-│   Gateway 검증:                                                 │
-│   ═════════════                                                 │
-│   ⚠ No VirtualService bound to this Gateway                    │
-│   ✖ Certificate secret not found                               │
-│                                                                 │
-│   ServiceEntry 검증:                                            │
-│   ═══════════════════                                           │
-│   ⚠ Duplicate ServiceEntry for host "api.external.com"         │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Kiali Config Validation](/images/istio-observability/kiali-config-validation.svg)
+
+| 리소스 | 검증 항목 |
+|--------|----------|
+| VirtualService | subset 매칭, host 존재 여부, weight 합계 |
+| DestinationRule | workload 매칭, mTLS 설정 충돌 |
+| Gateway | VirtualService 바인딩, 인증서 존재 |
+| ServiceEntry | 중복 host 검사 |
 
 ### 검증 결과 확인
 

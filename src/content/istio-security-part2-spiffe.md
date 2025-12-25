@@ -33,32 +33,15 @@ Part 2에서는 **서비스 신원(Identity)**을 파헤쳐보겠습니다. mTLS
 
 전통적으로 서비스를 식별할 때 IP 주소를 사용했습니다.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                   IP 기반 신원의 문제                               │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   "10.0.1.5에서 온 요청이니까 Order Service네"                      │
-│                                                                     │
-│   문제 1: Pod IP는 계속 바뀜                                        │
-│   ════════════════════════════                                      │
-│   Pod 재시작 → 새 IP 할당                                           │
-│   10.0.1.5 → 10.0.2.17 → 10.0.3.8...                                │
-│                                                                     │
-│   문제 2: 같은 IP를 다른 서비스가 쓸 수 있음                        │
-│   ══════════════════════════════════════════                        │
-│   t=0: Order Service = 10.0.1.5                                     │
-│   t=1: Order Service 삭제                                           │
-│   t=2: Payment Service = 10.0.1.5 (재사용!)                         │
-│                                                                     │
-│   문제 3: NAT 환경에서 IP가 같을 수 있음                            │
-│   ════════════════════════════════════════                          │
-│   여러 서비스가 같은 외부 IP로 보일 수 있음                         │
-│                                                                     │
-│   결론: IP는 신원(Identity)으로 부적합                              │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![IP Identity Problem](/images/istio-security/ip-identity-problem.svg)
+
+| 문제 | 설명 |
+|------|------|
+| **Pod IP 변경** | Pod 재시작 시 새 IP 할당 (10.0.1.5 → 10.0.2.17 → ...) |
+| **IP 재사용** | 삭제된 서비스의 IP를 다른 서비스가 재사용 가능 |
+| **NAT 환경** | 여러 서비스가 같은 외부 IP로 보일 수 있음 |
+
+**결론**: IP는 신원(Identity)으로 부적합
 
 ---
 
@@ -68,46 +51,29 @@ Part 2에서는 **서비스 신원(Identity)**을 파헤쳐보겠습니다. mTLS
 
 ### SPIFFE ID 구조
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        SPIFFE ID 구조                               │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   spiffe://cluster.local/ns/production/sa/order-service             │
-│   ═══════ ═════════════ ══ ══════════ ══ ═════════════              │
-│      │         │         │      │      │       │                    │
-│      │         │         │      │      │       └─ ServiceAccount 이름│
-│      │         │         │      │      └─ "sa" (ServiceAccount)     │
-│      │         │         │      └─ Namespace 이름                   │
-│      │         │         └─ "ns" (Namespace)                        │
-│      │         └─ Trust Domain (클러스터 식별자)                    │
-│      └─ SPIFFE 스킴                                                 │
-│                                                                     │
-│   예시:                                                             │
-│   • spiffe://cluster.local/ns/default/sa/my-service                 │
-│   • spiffe://cluster.local/ns/production/sa/payment                 │
-│   • spiffe://prod.example.com/ns/api/sa/gateway                     │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![SPIFFE ID Structure](/images/istio-security/spiffe-id-structure.svg)
+
+| 구성 요소 | 예시 | 설명 |
+|----------|------|------|
+| **Scheme** | `spiffe://` | SPIFFE 프로토콜 |
+| **Trust Domain** | `cluster.local` | 클러스터 식별자 |
+| **Namespace** | `/ns/production` | Kubernetes Namespace |
+| **ServiceAccount** | `/sa/order-service` | Kubernetes ServiceAccount |
+
+**예시**:
+- `spiffe://cluster.local/ns/default/sa/my-service`
+- `spiffe://cluster.local/ns/production/sa/payment`
 
 ### SPIFFE ID vs IP
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     SPIFFE ID vs IP                                 │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   항목              IP 기반              SPIFFE ID                  │
-│   ─────────────────────────────────────────────────────────────     │
-│   지속성            ❌ Pod 재시작 시 변경   ✅ 고정                  │
-│   고유성            ❌ 재사용 가능          ✅ 유일                  │
-│   의미              ❌ 숫자일 뿐            ✅ 서비스 정보 포함      │
-│   이식성            ❌ 환경에 종속          ✅ 환경 독립적           │
-│   인증              ❌ 위조 쉬움            ✅ 인증서 기반 검증      │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![SPIFFE vs IP](/images/istio-security/spiffe-vs-ip.svg)
+
+| 항목 | IP 기반 | SPIFFE ID |
+|------|--------|-----------|
+| **지속성** | ❌ Pod 재시작 시 변경 | ✅ 고정 |
+| **고유성** | ❌ 재사용 가능 | ✅ 유일 |
+| **의미** | ❌ 숫자일 뿐 | ✅ 서비스 정보 포함 |
+| **인증** | ❌ 위조 쉬움 | ✅ 인증서 기반 검증 |
 
 ---
 
@@ -115,34 +81,16 @@ Part 2에서는 **서비스 신원(Identity)**을 파헤쳐보겠습니다. mTLS
 
 **SVID** (SPIFFE Verifiable Identity Document)는 SPIFFE ID를 담은 인증서입니다.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         X.509 SVID                                  │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ┌─────────────────────────────────────────────────────────────┐   │
-│   │  X.509 Certificate                                          │   │
-│   │  ─────────────────────────────────────────────────────────  │   │
-│   │                                                             │   │
-│   │  Subject: ...                                               │   │
-│   │  Issuer: istiod (CA)                                        │   │
-│   │  Not Before: 2025-12-10 00:00:00                            │   │
-│   │  Not After: 2025-12-11 00:00:00  ← 24시간 유효              │   │
-│   │                                                             │   │
-│   │  Subject Alternative Name (SAN):                            │   │
-│   │    URI: spiffe://cluster.local/ns/default/sa/my-service     │   │
-│   │         ↑                                                   │   │
-│   │         SPIFFE ID가 여기에!                                 │   │
-│   │                                                             │   │
-│   │  Public Key: ...                                            │   │
-│   │  Signature: ... (istiod가 서명)                             │   │
-│   │                                                             │   │
-│   └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│   핵심: SAN 필드에 SPIFFE ID가 포함됨                               │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![X.509 SVID](/images/istio-security/x509-svid.svg)
+
+| 필드 | 값 | 설명 |
+|------|-----|------|
+| **Issuer** | istiod (CA) | 인증서 발급자 |
+| **Validity** | 24시간 | 짧은 유효기간으로 보안 강화 |
+| **SAN (URI)** | `spiffe://cluster.local/ns/default/sa/my-service` | **SPIFFE ID가 여기에!** |
+| **Signature** | istiod 서명 | CA가 서명한 검증 가능한 인증서 |
+
+**핵심**: SAN(Subject Alternative Name) 필드에 SPIFFE ID가 포함됨
 
 ### 인증서 확인하기
 
@@ -165,54 +113,14 @@ ROOTCA            CA             ACTIVE     true           xxx               203
 
 istiod가 워크로드에 인증서를 발급하는 과정입니다.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                   인증서 발급 과정                                  │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   1. Pod 시작                                                       │
-│      ┌─────────────────────────────────────────────────────────┐    │
-│      │  Pod (my-service)                                       │    │
-│      │  ┌───────────────┐  ┌───────────────────────────────┐   │    │
-│      │  │   App         │  │   istio-proxy (Envoy)         │   │    │
-│      │  └───────────────┘  │                               │   │    │
-│      │                     │   ServiceAccount Token        │   │    │
-│      │                     │   (자동 마운트)                │   │    │
-│      │                     └───────────────────────────────┘   │    │
-│      └─────────────────────────────────────────────────────────┘    │
-│                                    │                                │
-│   2. CSR 전송                      ▼                                │
-│      ┌─────────────────────────────────────────────────────────┐    │
-│      │  istio-proxy → istiod                                   │    │
-│      │                                                         │    │
-│      │  "나 my-service야, 인증서 주세요"                       │    │
-│      │  + ServiceAccount Token (증거)                          │    │
-│      │  + CSR (Certificate Signing Request)                    │    │
-│      └─────────────────────────────────────────────────────────┘    │
-│                                    │                                │
-│   3. 검증 및 발급                  ▼                                │
-│      ┌─────────────────────────────────────────────────────────┐    │
-│      │  istiod                                                 │    │
-│      │                                                         │    │
-│      │  1) ServiceAccount Token 검증 (K8s API)                 │    │
-│      │  2) Namespace, ServiceAccount 확인                      │    │
-│      │  3) SPIFFE ID 생성                                      │    │
-│      │     → spiffe://cluster.local/ns/default/sa/my-service   │    │
-│      │  4) X.509 인증서 서명                                   │    │
-│      │  5) SDS API로 Envoy에 전달                              │    │
-│      └─────────────────────────────────────────────────────────┘    │
-│                                    │                                │
-│   4. 인증서 수신                   ▼                                │
-│      ┌─────────────────────────────────────────────────────────┐    │
-│      │  istio-proxy                                            │    │
-│      │                                                         │    │
-│      │  • 인증서 메모리에 저장 (파일 X)                        │    │
-│      │  • mTLS 통신에 사용                                     │    │
-│      │  • 만료 전 자동 갱신                                    │    │
-│      └─────────────────────────────────────────────────────────┘    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![Certificate Issuance Flow](/images/istio-security/cert-issuance-flow.svg)
+
+| 단계 | 동작 |
+|------|------|
+| **1. Pod 시작** | App + istio-proxy(Envoy) + ServiceAccount Token 자동 마운트 |
+| **2. CSR 전송** | istio-proxy → istiod: "나 my-service야, 인증서 주세요" + SA Token + CSR |
+| **3. 검증/발급** | istiod: SA Token 검증 → SPIFFE ID 생성 → X.509 서명 → SDS API로 전달 |
+| **4. 인증서 수신** | istio-proxy: 메모리에 저장, mTLS 통신에 사용, 자동 갱신 |
 
 ---
 
@@ -220,35 +128,15 @@ istiod가 워크로드에 인증서를 발급하는 과정입니다.
 
 Istio 인증서는 기본 24시간 유효하고 자동으로 갱신됩니다.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    인증서 자동 갱신                                 │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   시간축 ─────────────────────────────────────────────────────►     │
-│                                                                     │
-│   T=0h        T=12h       T=18h       T=24h       T=36h             │
-│   ├───────────┼───────────┼───────────┼───────────┼────►            │
-│   │           │           │           │           │                 │
-│   │  인증서   │           │  갱신     │  (만료)   │                 │
-│   │  발급     │           │  시도     │           │                 │
-│   │           │           │  ↓        │           │                 │
-│   │           │           │  새 인증서 ─────────────────►            │
-│   │           │           │  발급     │           │                 │
-│   │                                                                 │
-│   └─────────────────────────────────────────────────────────────    │
-│                                                                     │
-│   기본 설정:                                                        │
-│   • 유효 기간: 24시간                                               │
-│   • 갱신 시점: 만료 6시간 전 (75% 지점)                             │
-│   • 갱신 방식: 무중단 (새 인증서 받은 후 전환)                      │
-│                                                                     │
-│   장점:                                                             │
-│   • 인증서 유출 시 피해 최소화                                      │
-│   • 개발자 개입 없이 자동 관리                                      │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![Certificate Auto-Renewal](/images/istio-security/cert-auto-renewal.svg)
+
+| 설정 | 값 | 설명 |
+|------|-----|------|
+| **유효 기간** | 24시간 | 짧은 유효기간으로 유출 피해 최소화 |
+| **갱신 시점** | 만료 6시간 전 (75%) | 충분한 여유 시간 확보 |
+| **갱신 방식** | 무중단 | 새 인증서 받은 후 전환 |
+
+**장점**: 인증서 유출 시 피해 최소화, 개발자 개입 없이 자동 관리
 
 ---
 
@@ -270,61 +158,28 @@ spec:
     image: order:latest
 ```
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│              ServiceAccount → SPIFFE ID 매핑                        │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   Kubernetes                          SPIFFE ID                     │
-│   ══════════                          ═════════                     │
-│                                                                     │
-│   Namespace: production      →   ns/production                      │
-│   ServiceAccount: order-sa   →   sa/order-sa                        │
-│   Trust Domain: cluster.local →  spiffe://cluster.local             │
-│                                                                     │
-│   결과:                                                             │
-│   spiffe://cluster.local/ns/production/sa/order-sa                  │
-│                                                                     │
-│   ─────────────────────────────────────────────────────────────     │
-│                                                                     │
-│   같은 ServiceAccount = 같은 SPIFFE ID                              │
-│                                                                     │
-│   order-service-pod-1 (order-sa) ──┐                                │
-│   order-service-pod-2 (order-sa) ──┼─► 같은 SPIFFE ID               │
-│   order-service-pod-3 (order-sa) ──┘                                │
-│                                                                     │
-│   다른 ServiceAccount = 다른 SPIFFE ID                              │
-│                                                                     │
-│   order-service (order-sa)   → spiffe://.../sa/order-sa             │
-│   payment-service (pay-sa)   → spiffe://.../sa/pay-sa               │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![ServiceAccount to SPIFFE Mapping](/images/istio-security/sa-to-spiffe-mapping.svg)
+
+| Kubernetes | SPIFFE ID |
+|------------|-----------|
+| Namespace: production | `/ns/production` |
+| ServiceAccount: order-sa | `/sa/order-sa` |
+| Trust Domain: cluster.local | `spiffe://cluster.local` |
+| **결과** | `spiffe://cluster.local/ns/production/sa/order-sa` |
+
+**같은 ServiceAccount = 같은 SPIFFE ID**
+- order-pod-1, order-pod-2, order-pod-3 (모두 order-sa) → 같은 SPIFFE ID
+
+**다른 ServiceAccount = 다른 SPIFFE ID**
+- order-service (order-sa) → `.../sa/order-sa`
+- payment-service (pay-sa) → `.../sa/pay-sa`
 
 ### ServiceAccount 설계 팁
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│               ServiceAccount 설계 권장사항                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ❌ 안 좋은 예                                                     │
-│   ═════════════                                                     │
-│   모든 서비스가 default ServiceAccount 사용                         │
-│   → 모두 같은 SPIFFE ID                                             │
-│   → 세밀한 권한 제어 불가능                                         │
-│                                                                     │
-│   ✅ 좋은 예                                                        │
-│   ═══════════                                                       │
-│   서비스별 전용 ServiceAccount                                      │
-│   • order-service → order-sa                                        │
-│   • payment-service → payment-sa                                    │
-│   • user-service → user-sa                                          │
-│   → 서비스별 다른 SPIFFE ID                                         │
-│   → AuthorizationPolicy로 세밀한 제어 가능                          │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+| 패턴 | 설명 |
+|------|------|
+| **❌ 안 좋은 예** | 모든 서비스가 default SA 사용 → 모두 같은 SPIFFE ID → 세밀한 권한 제어 불가 |
+| **✅ 좋은 예** | 서비스별 전용 SA (order-sa, payment-sa 등) → 서비스별 다른 SPIFFE ID → AuthorizationPolicy로 세밀한 제어 가능 |
 
 ---
 
@@ -332,37 +187,20 @@ spec:
 
 실제 mTLS 통신에서 SPIFFE ID가 어떻게 사용되는지 봅시다.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                  mTLS 통신과 SPIFFE ID                              │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   Order Service                        Payment Service              │
-│   (order-sa)                           (payment-sa)                 │
-│                                                                     │
-│   ┌───────────────┐                    ┌───────────────┐            │
-│   │  Envoy        │                    │  Envoy        │            │
-│   │               │                    │               │            │
-│   │  인증서:      │     TLS Handshake  │  인증서:      │            │
-│   │  spiffe://    │ ◄───────────────► │  spiffe://    │            │
-│   │  .../order-sa │                    │  .../pay-sa   │            │
-│   └───────────────┘                    └───────────────┘            │
-│                                                                     │
-│   Handshake 과정:                                                   │
-│   ═══════════════                                                   │
-│   1. Order: "내 인증서야" (SPIFFE ID: order-sa)                     │
-│   2. Payment: "검증할게... 서명 OK, SPIFFE ID 확인"                 │
-│   3. Payment: "내 인증서야" (SPIFFE ID: payment-sa)                 │
-│   4. Order: "검증할게... 서명 OK, SPIFFE ID 확인"                   │
-│   5. 양쪽 모두 확인 완료, 암호화 통신 시작                          │
-│                                                                     │
-│   결과:                                                             │
-│   • 양쪽 모두 상대방의 신원 확인                                    │
-│   • IP가 아닌 SPIFFE ID로 식별                                      │
-│   • AuthorizationPolicy에서 SPIFFE ID 기반 제어 가능                │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![mTLS SPIFFE Handshake](/images/istio-security/mtls-spiffe-handshake.svg)
+
+| 단계 | 동작 |
+|------|------|
+| **1** | Order: "내 인증서야" (SPIFFE ID: order-sa) |
+| **2** | Payment: "검증할게... 서명 OK, SPIFFE ID 확인" |
+| **3** | Payment: "내 인증서야" (SPIFFE ID: payment-sa) |
+| **4** | Order: "검증할게... 서명 OK, SPIFFE ID 확인" |
+| **5** | 양쪽 모두 확인 완료, 암호화 통신 시작 |
+
+**결과**:
+- 양쪽 모두 상대방의 신원 확인
+- IP가 아닌 SPIFFE ID로 식별
+- AuthorizationPolicy에서 SPIFFE ID 기반 제어 가능
 
 ---
 

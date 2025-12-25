@@ -57,46 +57,17 @@ Review Service
 
 모든 서비스가 외부 요청을 받는다면, JWT를 어디서 검증해야 할까?
 
-### 방법 1: 각 서비스에서 검증 (Before)
+### Before vs After 비교
 
-```
-모든 서비스 코드에 JWT 검증 로직 추가:
+![JWT Before After](/images/istio/jwt-before-after.svg)
 
-user-service (Python)
-order-service (Node.js)
-payment-service (Go)
-product-service (Java)
-...
-```
-
-**문제점:**
-
-```
-❌ 20개 서비스 × 50줄 코드 = 1,000줄 중복
-❌ 언어마다 다른 JWT 라이브러리
-❌ Auth Provider 변경 시 20개 서비스 모두 수정
-❌ 보안 패치 시 20개 서비스 재배포
-❌ 신규 서비스마다 JWT 로직 다시 작성
-```
-
-### 방법 2: Gateway에서 검증 (After)
-
-```
-Internet → Istio Gateway (JWT 검증) → Services
-
-Gateway에서 한 번만 검증
-서비스는 이미 검증된 요청만 받음
-```
-
-**장점:**
-
-```
-✅ Gateway 설정 10줄만 추가
-✅ 서비스 코드 수정 불필요
-✅ Auth Provider 변경 시 설정만 수정
-✅ 보안 패치 즉시 적용
-✅ 신규 서비스 자동으로 보호됨
-```
+| 구분 | Before (각 서비스) | After (Gateway) |
+|------|-------------------|-----------------|
+| **코드량** | 20개 × 50줄 = 1,000줄 | 설정 10줄 |
+| **라이브러리** | 언어마다 다른 JWT 라이브러리 | 불필요 |
+| **Auth 변경** | 20개 서비스 수정/재배포 | 설정만 변경 (5분) |
+| **보안 패치** | 20개 재배포 | 즉시 적용 |
+| **신규 서비스** | JWT 코드 재작성 | 자동 보호 |
 
 ---
 
@@ -185,46 +156,13 @@ user_id = claims['sub']
 
 ### 어떻게 동작하나?
 
-```
-Step 1: Client가 JWT와 함께 요청
-┌─────────────┐
-│   Client    │
-│             │
-│ GET /users  │
-│ Authorization: Bearer eyJhbG... (JWT)
-└─────────────┘
-      │
-      ↓
+![JWT Gateway Flow](/images/istio/jwt-gateway-flow.svg)
 
-Step 2: Istio Gateway에서 검증
-┌─────────────────────────────────────┐
-│       Istio Gateway                 │
-│                                     │
-│  RequestAuthentication 적용:        │
-│  1. JWT Signature 검증 (JWKS)       │
-│  2. Issuer 확인                     │
-│  3. Audience 확인                   │
-│  4. Expiration 확인                 │
-│  5. Claims 추출 → Header 추가       │
-│                                     │
-│  ✅ 검증 성공!                      │
-│  x-jwt-payload: eyJ1c2VyX2lkI...    │
-└─────────────────────────────────────┘
-      │
-      ↓ (검증된 요청 + JWT Claims)
-
-Step 3: User Service는 Header만 읽기
-┌──────────────────────────────────────┐
-│       User Service (Python)          │
-│                                      │
-│  # JWT 검증 안 함!                   │
-│  claims = get_claims(request)        │
-│  user_id = claims['sub']             │
-│                                      │
-│  # 바로 비즈니스 로직                │
-│  return get_user_from_db(user_id)    │
-└──────────────────────────────────────┘
-```
+| 단계 | 구성 요소 | 동작 |
+|------|----------|------|
+| **1** | Client | JWT 토큰과 함께 요청 (`Authorization: Bearer ...`) |
+| **2** | Istio Gateway | Signature/Issuer/Audience/Expiration 검증 → Claims 추출 |
+| **3** | Service | Header에서 `x-jwt-payload` 읽기만 (JWT 라이브러리 불필요) |
 
 **핵심:** Gateway가 검증하고, Claims를 Header에 담아서 전달한다.
 
