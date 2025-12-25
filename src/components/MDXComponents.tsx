@@ -20,7 +20,7 @@ export const mdxComponents = {
       <img
         src={imageSrc}
         alt={alt || ''}
-        className="max-w-full h-auto my-4 rounded-lg max-h-[500px] w-auto mx-auto block"
+        className="max-w-full h-auto my-4 rounded-lg max-h-[700px] w-auto mx-auto block"
         loading="lazy"
         {...props}
       />
