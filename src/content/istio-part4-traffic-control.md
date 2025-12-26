@@ -18,6 +18,8 @@ series:
   order: 4
 ---
 
+> ⚠️ **이 글은 초기 학습 기록입니다.** 트래픽 관리에 대한 더 체계적인 내용은 [istio-traffic 시리즈](/posts/istio-traffic-part1-four-resources)를 참고하세요.
+
 ## 🎯 이전 글 요약
 
 **Part 1**: Istio 개념, Kong 없이도 가능

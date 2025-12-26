@@ -15,6 +15,8 @@ series:
   order: 1
 ---
 
+> ⚠️ **이 글은 초기 학습 기록입니다.** 더 체계적인 내용은 [istio-intro 시리즈](/posts/istio-intro-part1-why-service-mesh)를 참고하세요. 이 시리즈는 학습 과정의 기록으로 남겨둡니다.
+
 ## 🎯 시작하며
 
 부트캠프에서 마이크로서비스 아키텍처를 배우면서 API Gateway로 Kong을 공부했다. 그런데 실무 아키텍처 자료를 보다 보니 Istio라는 게 자꾸 나왔다. "API Gateway는 Kong 쓰면 되는 거 아닌가?" 싶었는데, 알고 보니 둘이 해결하는 문제가 달랐다.

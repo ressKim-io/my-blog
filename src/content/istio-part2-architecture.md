@@ -18,6 +18,8 @@ series:
   order: 2
 ---
 
+> ⚠️ **이 글은 초기 학습 기록입니다.** 더 체계적인 내용은 [istio-intro 시리즈](/posts/istio-intro-part1-why-service-mesh)를 참고하세요.
+
 ## 🎯 이전 글 요약
 
 Part 1에서는 Istio가 뭔지, Kong과 어떻게 다른지 개념을 잡았다.

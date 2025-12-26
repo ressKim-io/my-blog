@@ -16,6 +16,8 @@ series:
   order: 3
 ---
 
+> ⚠️ **이 글은 초기 학습 기록입니다.** JWT 인증에 대한 더 체계적인 내용은 [istio-security 시리즈](/posts/istio-security-part4-jwt)를 참고하세요.
+
 ## 🎯 이전 글 요약
 
 **Part 1**: Istio 개념, Istio만으로도 API Gateway 역할 가능
