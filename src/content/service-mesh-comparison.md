@@ -1,17 +1,14 @@
 ---
-title: "Istio Ambient Part 7: Istio vs Linkerd vs Cilium 비교"
+title: "Service Mesh 비교: Istio vs Linkerd vs Cilium"
 excerpt: "Service Mesh 3대장의 철학, 아키텍처, 리소스 사용량을 비교하고 선택 기준을 정리합니다"
 category: "kubernetes"
 tags: ["istio", "linkerd", "cilium", "service-mesh", "kubernetes", "comparison"]
-series:
-  name: "istio-ambient"
-  order: 7
 date: "2025-12-26"
 ---
 
 ## 🎯 시작하며
 
-Istio Ambient 시리즈의 마지막 편입니다. Service Mesh를 도입하려면 **Istio, Linkerd, Cilium** 중 어떤 것을 선택해야 할까요?
+Service Mesh를 도입하려면 **Istio, Linkerd, Cilium** 중 어떤 것을 선택해야 할까요?
 
 ![Service Mesh Comparison|tall](/images/istio-ambient/mesh-comparison.svg)
 
