@@ -51,7 +51,7 @@ Ambient Mode가 2024년 11월 Istio 1.24에서 GA(Generally Available)가 되었
 |------|:-------:|:-------:|------|
 | EnvoyFilter | ✅ | ❌ | 미지원 |
 | WASM Plugin | ✅ | ⏳ | 지원 예정 |
-| 멀티클러스터 | ✅ | ⏳ | 2025년 지원 예정 |
+| 멀티클러스터 | ✅ | ⚠️ | Alpha (1.27+) |
 | 외부 컨트롤 플레인 | ✅ | ⏳ | 지원 예정 |
 | Sidecar 리소스 | ✅ | ❌ | 해당 없음 |
 | PeerAuthentication (Pod) | ✅ | ⚠️ | Namespace 레벨만 |
@@ -60,7 +60,7 @@ Ambient Mode가 2024년 11월 Istio 1.24에서 GA(Generally Available)가 되었
 
 EnvoyFilter는 가장 큰 제한입니다. Sidecar의 Envoy 설정을 직접 수정하는 강력한 도구인데, ztunnel은 Envoy가 아니므로 적용 자체가 불가능합니다. 커스텀 Rate Limiting, Lua 스크립트, 특수 헤더 조작 등에 EnvoyFilter를 사용 중이라면 대안을 마련해야 합니다.
 
-멀티클러스터는 여러 Kubernetes 클러스터를 하나의 메시로 연결하는 기능입니다. 대기업에서 리전별로 클러스터를 운영할 때 자주 사용합니다. 현재 Ambient에서는 지원되지 않지만 2025년 지원이 예정되어 있습니다.
+멀티클러스터는 여러 Kubernetes 클러스터를 하나의 메시로 연결하는 기능입니다. 대기업에서 리전별로 클러스터를 운영할 때 자주 사용합니다. Istio 1.27부터 Alpha로 지원되기 시작했지만, 프로덕션에서는 아직 Sidecar 방식이 더 안정적입니다.
 
 Sidecar 리소스는 특정 Pod의 egress 트래픽을 세밀하게 제어하는 CRD입니다. Ambient에서는 Pod 레벨 설정이 불가능하고 Namespace 레벨에서만 정책을 적용할 수 있습니다.
 

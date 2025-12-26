@@ -323,6 +323,16 @@ app.get('/api/process', async (req, res) => {
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+**검색 패널 이해하기**
+
+**Service 드롭다운**에서 분석하고 싶은 서비스를 선택합니다. Istio 환경에서는 모든 sidecar가 있는 서비스가 나타납니다. "istio-ingressgateway"를 선택하면 외부에서 들어온 모든 요청을 볼 수 있고, 특정 서비스를 선택하면 그 서비스가 참여한 Trace만 필터링됩니다.
+
+**Operation**은 해당 서비스의 엔드포인트를 의미합니다. "GET /api/users"처럼 HTTP method + path 형태로 표시됩니다. "all"을 선택하면 모든 엔드포인트를 봅니다.
+
+**Lookback**은 검색 시간 범위입니다. 장애가 "30분 전에 발생했다"고 보고받았다면, "Last Hour"로 설정하고 검색합니다. 너무 넓은 범위는 결과가 많아져 분석이 어렵습니다.
+
+**결과 목록**에서 각 줄은 하나의 Trace입니다. "frontend → api → payment"는 요청이 거쳐간 서비스 체인을 보여줍니다. **시간(350ms)**과 **Span 수(3 spans)**는 중요한 지표입니다. 같은 경로인데 시간 차이가 크다면, 느린 Trace를 클릭해서 원인을 파악합니다.
+
 ### Trace 상세 화면
 
 ```
@@ -357,6 +367,16 @@ app.get('/api/process', async (req, res) => {
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+**워터폴 다이어그램 읽기**
+
+Trace 상세 화면의 핵심은 **워터폴 다이어그램**입니다. 가로 막대의 길이가 해당 Span의 소요 시간입니다. 위 예시에서 가장 긴 막대는 bank-api(200ms)입니다. 전체 350ms 중 57%가 여기서 소비된 것입니다.
+
+**들여쓰기**는 호출 관계를 나타냅니다. frontend가 api-gateway를 호출하고, api-gateway가 payment와 inventory를 호출하는 구조가 한눈에 보입니다. 같은 레벨의 들여쓰기(payment와 inventory)는 병렬 호출을 의미합니다.
+
+**시간 분석**: 전체 350ms 중 api-gateway가 300ms를 차지하지만, 그 안에서 payment(250ms)를 호출합니다. "자체 처리 시간"은 300 - 250 = 50ms입니다. 만약 자체 처리 시간이 비정상적으로 길다면, 해당 서비스의 로직이나 DB 쿼리를 점검해야 합니다.
+
+**Tags 섹션**은 각 Span의 메타데이터입니다. http.status_code=200이면 성공, 500이면 에러입니다. upstream_cluster는 Envoy가 요청을 보낸 목적지를 나타냅니다. node_id는 어떤 Pod의 sidecar에서 생성된 Span인지 알려줍니다.
+
 ---
 
 ## 🛠️ 실전 디버깅
@@ -374,6 +394,16 @@ app.get('/api/process', async (req, res) => {
 - 특정 서비스에서 일관되게 느린가?
 ```
 
+**실제 분석 예시**: "결제가 느려요!"라는 보고를 받았다고 가정합니다.
+
+1. Service: "payment-service" 선택, Min Duration: 2s로 설정
+2. 느린 Trace 3-4개를 클릭해서 패턴을 찾습니다
+3. 공통점 발견: bank-api Span이 항상 2초 이상
+4. Tags 확인: upstream_cluster가 "outbound|443||bank.external.com"
+5. 결론: 외부 은행 API 응답이 느림 → 타임아웃 설정이나 캐싱 검토
+
+만약 느린 Trace마다 병목 위치가 다르다면, 특정 Pod의 문제(CPU throttling, GC)이거나 네트워크 이슈일 수 있습니다. node_id 태그로 어떤 Pod인지 확인하세요.
+
 ### 에러 추적
 
 ```
@@ -386,6 +416,8 @@ app.get('/api/process', async (req, res) => {
 - 에러 발생 직전 상황은?
 ```
 
+**에러 Trace 분석 팁**: 에러가 발생한 Span을 찾으면 그 **직전 Span**을 주목하세요. 예를 들어, payment에서 503 에러가 발생했다면, 그 직전의 api-gateway Span에서 재시도 횟수나 타임아웃 설정을 확인합니다. Logs 탭이 있다면 에러 스택트레이스도 볼 수 있습니다.
+
 ### 비교 분석
 
 ```
@@ -395,6 +427,40 @@ app.get('/api/process', async (req, res) => {
    - 특정 서비스가 더 느린가?
    - 재시도가 발생했는가?
 ```
+
+Jaeger UI에서 두 Trace를 비교하려면, 각각을 새 탭에서 열고 나란히 봅니다. Span 수가 다르다면 재시도나 추가 호출이 있었다는 뜻입니다. 같은 Span인데 시간이 10배 차이 나면, 해당 서비스의 상태를 점검하세요.
+
+### 헤더 전파 실패 디버깅
+
+Trace가 끊어져 보인다면 헤더 전파 문제입니다. 확인 방법:
+
+**증상**: frontend에서 시작한 요청이 api-gateway까지만 보이고, payment Span이 별도 Trace로 분리되어 있습니다. 이러면 전체 흐름 분석이 불가능합니다.
+
+**진단 1: Jaeger에서 확인**
+```
+1. 두 Trace의 시간대가 거의 같은지 확인
+2. 첫 번째 Trace의 마지막 Span 시간과 두 번째 Trace의 시작 시간이 일치하면
+   → 헤더 전파 실패 확정
+```
+
+**진단 2: 헤더 확인**
+```bash
+# 해당 서비스의 로그에서 들어오는 헤더 출력
+$ kubectl logs deploy/api-gateway -c istio-proxy | grep x-b3-traceid
+
+# 나가는 요청에 헤더가 있는지 확인
+$ kubectl logs deploy/api-gateway -c api-gateway | grep -i "x-b3\|traceparent"
+```
+
+**해결 방법**:
+1. 해당 서비스 코드에서 헤더 전파 로직이 있는지 확인
+2. 특히 비동기 호출, 스레드 풀, 메시지 큐 처리 부분 점검
+3. 라이브러리(OpenTelemetry, Jaeger Client) 사용 시 설정 확인
+
+**흔한 실수**:
+- HTTP 클라이언트를 새로 생성하면서 헤더 복사를 누락
+- async/await 함수에서 컨텍스트를 전달하지 않음
+- 메시지 큐(Kafka, RabbitMQ)로 보낼 때 헤더를 메시지 헤더로 변환하지 않음
 
 ---
 

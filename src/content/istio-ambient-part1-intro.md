@@ -302,8 +302,8 @@ kubectl label namespace production istio.io/dataplane-mode=ambient
 | mTLS | ✅ | ✅ |
 | L7 라우팅 | ✅ | ✅ (waypoint) |
 | JWT 인증 | ✅ | ✅ (waypoint) |
-| EnvoyFilter | ✅ | ❌ |
-| 멀티클러스터 | ✅ | ❌ (예정) |
+| EnvoyFilter | ✅ | ❌ (1.24 기준) |
+| 멀티클러스터 | ✅ | Alpha (1.27+) |
 | WASM Plugin | ✅ | ❌ (예정) |
 
 Ambient가 GA되었다고 해서 모든 기능이 Sidecar와 동등한 것은 아닙니다. 현재 상태를 정확히 알아야 도입 결정을 내릴 수 있습니다.
@@ -315,7 +315,7 @@ Ambient가 GA되었다고 해서 모든 기능이 Sidecar와 동등한 것은 �
 
 **아직 미지원인 기능**:
 - **EnvoyFilter**는 현재 Ambient에서 사용할 수 없습니다. 커스텀 Lua 스크립트나 특수한 Envoy 설정이 필요한 경우 Sidecar를 유지해야 합니다.
-- **멀티클러스터** 지원은 로드맵에 있지만 1.24에서는 미지원입니다. 여러 클러스터 간 Service Mesh를 구성해야 한다면 Sidecar가 필요합니다.
+- **멀티클러스터** 지원은 Istio 1.27부터 Alpha로 제공됩니다. 아직 프로덕션 환경에서는 Sidecar가 더 안정적입니다.
 - **WASM Plugin**도 예정된 기능입니다. Envoy에 커스텀 WASM 필터를 적용하고 싶다면 현재로서는 Sidecar를 써야 합니다.
 
 이런 제한사항을 고려해서 워크로드별로 Sidecar와 Ambient를 혼용할 수 있습니다. 대부분의 서비스는 Ambient로, EnvoyFilter가 필요한 일부 서비스는 Sidecar로 운영하는 전략이 가능합니다.

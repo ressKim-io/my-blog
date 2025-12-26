@@ -92,6 +92,38 @@ istio_requests_total{
 | `DC` | Downstream Connection | 클라이언트 연결 끊김 |
 | `UC` | Upstream Connection | 서버 연결 끊김 |
 
+### response_flags 트러블슈팅 가이드
+
+response_flags는 에러의 **원인**을 알려주는 강력한 도구입니다. 5xx 에러가 발생했을 때 단순히 "서버 에러"가 아니라, 정확히 어디서 문제가 생겼는지 파악할 수 있습니다.
+
+**UO (Upstream Overflow)** - Connection Pool이 가득 찼습니다. DestinationRule의 connectionPool 설정을 확인하세요. maxConnections나 maxRequestsPerConnection을 늘려야 할 수 있습니다. 근본적으로는 백엔드 서비스의 처리 속도가 느려서 커넥션이 쌓이는 것이므로, 백엔드 성능 개선도 검토해야 합니다.
+
+```yaml
+# UO 해결 예시
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+spec:
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100      # 기본값 1024지만 상황에 맞게 조정
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+```
+
+**UF (Upstream Failure)** - 백엔드 서비스에 연결할 수 없습니다. Pod가 살아있는지, 포트가 맞는지, NetworkPolicy가 차단하고 있지 않은지 확인하세요. `kubectl get endpoints`로 엔드포인트가 제대로 등록되어 있는지도 확인합니다.
+
+**URX (Upstream Retry Limit Exceeded)** - 재시도 횟수를 모두 소진했습니다. VirtualService의 retry 설정을 확인하되, 무작정 늘리면 안 됩니다. 재시도가 계속 실패하는 이유(UF, timeout 등)를 먼저 해결해야 합니다.
+
+**NR (No Route)** - 라우팅 규칙이 없습니다. VirtualService가 올바르게 설정되어 있는지, host 이름이 정확한지 확인하세요. `istioctl analyze`로 설정 문제를 진단할 수 있습니다.
+
+**RL (Rate Limited)** - 속도 제한에 걸렸습니다. 의도된 동작일 수 있습니다. 정상적인 트래픽이 제한되고 있다면 EnvoyFilter나 Rate Limit 설정을 완화해야 합니다.
+
+**DC (Downstream Connection Terminated)** - 클라이언트가 응답을 받기 전에 연결을 끊었습니다. 클라이언트 타임아웃이 서버보다 짧거나, 사용자가 페이지를 떠난 경우입니다. 간헐적이면 정상이지만, 많다면 클라이언트 타임아웃 설정을 확인하세요.
+
+**UC (Upstream Connection Terminated)** - 백엔드 서비스가 갑자기 연결을 끊었습니다. Pod 재시작, OOM Kill, 또는 애플리케이션 크래시를 의심하세요. `kubectl describe pod`와 `kubectl logs --previous`로 원인을 파악합니다.
+
 ---
 
 ## 📈 Golden Signals
@@ -106,6 +138,20 @@ Google SRE 책에서 정의한 4가지 핵심 지표입니다. Istio 메트릭�
 | Traffic | 얼마나 많은 요청이 들어오는가? | rate(istio_requests_total[5m]) |
 | Errors | 얼마나 많은 요청이 실패하는가? | response_code=~"5.." |
 | Saturation | 시스템이 얼마나 가득 찼는가? | CPU, Memory, Connection Pool |
+
+### 왜 이 4가지인가?
+
+Google SRE 팀이 수년간 대규모 시스템을 운영하면서 발견한 패턴입니다. 수백 개의 메트릭을 모니터링할 수 있지만, 대부분의 문제는 이 4가지 신호로 감지됩니다.
+
+**Latency(지연시간)**는 사용자 경험의 직접적인 지표입니다. 서비스가 정상적으로 응답하더라도 3초가 걸리면 사용자는 떠납니다. 단순 평균이 아닌 P50, P90, P99를 봐야 합니다. 평균 100ms여도 P99가 5초면 100명 중 1명은 5초를 기다리는 셈입니다.
+
+**Traffic(트래픽)**은 시스템 부하의 입력값입니다. "요청이 갑자기 줄었다"는 것은 서비스 장애보다 먼저 감지되는 신호일 수 있습니다. 반대로 트래픽 급증은 Saturation 문제의 전조입니다.
+
+**Errors(에러)**는 가장 명확한 신호입니다. 5xx 에러가 발생하면 뭔가 잘못된 것입니다. 하지만 에러율만 보면 안 됩니다. 요청이 10개일 때 1개 실패(10%)와 10000개 중 100개 실패(1%)는 심각도가 다릅니다.
+
+**Saturation(포화도)**은 시스템이 한계에 도달하기 전에 경고합니다. CPU 80%, 메모리 90%, Connection Pool 가득 참 등이 여기에 해당합니다. 이 신호가 위험 수준에 도달하면 Latency 증가와 Errors가 곧 따라옵니다.
+
+이 4가지를 조합하면 대부분의 장애를 조기에 감지하고 원인을 추론할 수 있습니다.
 
 ---
 
@@ -178,6 +224,20 @@ histogram_quantile(0.99,
   sum(rate(istio_request_duration_milliseconds_bucket[5m])) by (le, destination_service)
 )
 ```
+
+### histogram_quantile이 SLO에서 중요한 이유
+
+평균(average) 응답시간은 거짓말을 합니다. 평균 100ms라도 실제로는 99%가 20ms에 응답하고, 1%가 8초에 응답하는 것일 수 있습니다. 사용자 1%는 매우 나쁜 경험을 하고 있는데, 평균만 보면 알 수 없습니다.
+
+**P50 (중앙값)**: 50%의 요청이 이 시간 내에 완료됩니다. "일반적인" 사용자 경험을 나타냅니다.
+
+**P90**: 90%의 요청이 이 시간 내에 완료됩니다. 대부분의 사용자 경험입니다.
+
+**P99**: 99%의 요청이 이 시간 내에 완료됩니다. **SLO를 정의할 때 가장 많이 사용하는 지표입니다.** "최악의 1%"도 허용 가능한 경험을 해야 한다는 의미입니다.
+
+예를 들어, "P99 < 500ms" SLO는 "100개 요청 중 99개는 500ms 안에 응답해야 한다"는 뜻입니다. 이를 위반하면 사용자 1%가 나쁜 경험을 하고 있다는 신호입니다.
+
+histogram_quantile 함수는 Prometheus의 히스토그램 버킷 데이터를 이용해 근사치를 계산합니다. 정확한 백분위수가 아닌 추정치이므로, 버킷 경계값 설정이 중요합니다. Istio 기본 버킷은 대부분의 웹 서비스에 적합하지만, 특수한 경우 커스터마이징이 필요할 수 있습니다.
 
 #### 4. 성공률
 

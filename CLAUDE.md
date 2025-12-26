@@ -64,6 +64,16 @@ date: "2025-01-01"
 3. For series posts, include `series.name` and `series.order`
 4. Images go in `public/images/`
 
+### SVG Diagram Guidelines
+
+**다이어그램 텍스트는 반드시 영어로 작성합니다.** 한글은 폰트 임베딩 문제로 깨질 수 있습니다.
+
+**테두리(stroke) 스타일링**: D2로 다이어그램을 만들 때, 가시성을 위해 테두리를 명시적으로 설정합니다.
+```
+shape.style.stroke: "#color"
+shape.style.stroke-width: 2
+```
+
 ### Image Size Hints
 
 이미지(특히 SVG 다이어그램)의 높이를 조절하려면 alt 텍스트에 사이즈 힌트를 추가합니다.
