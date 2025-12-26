@@ -6,7 +6,7 @@ tags: ["istio", "observability", "metrics", "prometheus", "grafana", "kubernetes
 series:
   name: "istio-observability"
   order: 1
-date: "2024-12-24"
+date: "2025-12-18"
 ---
 
 ## 🎯 시작하며

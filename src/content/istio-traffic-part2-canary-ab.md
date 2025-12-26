@@ -6,7 +6,7 @@ tags: ["istio", "canary", "ab-testing", "deployment", "traffic-management", "kub
 series:
   name: "istio-traffic"
   order: 2
-date: "2024-12-24"
+date: "2025-12-14"
 ---
 
 ## 🎯 시작하며

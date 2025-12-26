@@ -6,7 +6,7 @@ tags: ["istio", "traffic-management", "virtualservice", "destinationrule", "gate
 series:
   name: "istio-traffic"
   order: 1
-date: "2024-12-24"
+date: "2025-12-13"
 ---
 
 ## 🎯 시작하며

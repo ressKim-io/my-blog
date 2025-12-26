@@ -6,7 +6,7 @@ tags: ["istio", "ambient-mesh", "rate-limiting", "redis", "go", "kubernetes"]
 series:
   name: "istio-ambient"
   order: 6
-date: "2024-12-24"
+date: "2025-12-25"
 ---
 
 ## 🎯 시작하며

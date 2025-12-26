@@ -6,7 +6,7 @@ tags: ["istio", "ambient-mesh", "sidecar", "comparison", "service-mesh", "kubern
 series:
   name: "istio-ambient"
   order: 3
-date: "2024-12-24"
+date: "2025-12-24"
 ---
 
 ## 🎯 시작하며

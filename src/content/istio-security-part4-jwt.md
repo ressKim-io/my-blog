@@ -6,7 +6,7 @@ tags: ["istio", "jwt", "authentication", "security", "kubernetes", "requestauthe
 series:
   name: "istio-security"
   order: 4
-date: "2024-12-24"
+date: "2025-12-12"
 ---
 
 ## 🎯 시작하며

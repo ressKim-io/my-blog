@@ -6,7 +6,7 @@ tags: ["istio", "ambient-mesh", "ztunnel", "waypoint", "service-mesh", "kubernet
 series:
   name: "istio-ambient"
   order: 1
-date: "2024-12-24"
+date: "2025-12-22"
 ---
 
 ## 🎯 시작하며

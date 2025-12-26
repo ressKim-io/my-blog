@@ -6,7 +6,7 @@ tags: ["istio", "observability", "access-log", "envoy", "debugging", "kubernetes
 series:
   name: "istio-observability"
   order: 3
-date: "2024-12-24"
+date: "2025-12-20"
 ---
 
 ## 🎯 시작하며

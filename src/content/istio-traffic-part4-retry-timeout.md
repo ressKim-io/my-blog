@@ -6,7 +6,7 @@ tags: ["istio", "retry", "timeout", "resilience", "virtualservice", "kubernetes"
 series:
   name: "istio-traffic"
   order: 4
-date: "2024-12-24"
+date: "2025-12-16"
 ---
 
 ## 🎯 시작하며

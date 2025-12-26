@@ -6,7 +6,7 @@ tags: ["istio", "ambient-mesh", "ztunnel", "waypoint", "l4-l7", "sidecar", "kube
 series:
   name: "istio-ambient"
   order: 2
-date: "2024-12-24"
+date: "2025-12-23"
 ---
 
 ## 🎯 시작하며

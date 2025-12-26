@@ -6,7 +6,7 @@ tags: ["istio", "traffic-mirroring", "shadow-testing", "virtualservice", "kubern
 series:
   name: "istio-traffic"
   order: 5
-date: "2024-12-24"
+date: "2025-12-17"
 ---
 
 ## 🎯 시작하며

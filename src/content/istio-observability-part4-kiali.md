@@ -6,7 +6,7 @@ tags: ["istio", "observability", "kiali", "visualization", "service-mesh", "kube
 series:
   name: "istio-observability"
   order: 4
-date: "2024-12-24"
+date: "2025-12-21"
 ---
 
 ## 🎯 시작하며

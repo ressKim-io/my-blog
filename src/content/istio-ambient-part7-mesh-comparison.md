@@ -6,7 +6,7 @@ tags: ["istio", "linkerd", "cilium", "service-mesh", "kubernetes", "comparison"]
 series:
   name: "istio-ambient"
   order: 7
-date: "2024-12-24"
+date: "2025-12-26"
 ---
 
 ## 🎯 시작하며

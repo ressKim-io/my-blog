@@ -6,7 +6,7 @@ tags: ["istio", "observability", "tracing", "jaeger", "distributed-tracing", "ku
 series:
   name: "istio-observability"
   order: 2
-date: "2024-12-24"
+date: "2025-12-19"
 ---
 
 ## 🎯 시작하며
