@@ -11,16 +11,34 @@ const basePath = process.env.NODE_ENV === 'production' ? '/my-blog' : '';
 // MDX에서 사용할 커스텀 컴포넌트들
 export const mdxComponents = {
   // 이미지 basePath 처리 (GitHub Pages)
+  // alt 텍스트에 |tall, |short 힌트로 높이 조절 가능
+  // 예: ![설명|tall](/image.svg) → 세로로 긴 다이어그램
   img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
     const srcString = typeof src === 'string' ? src : '';
     const imageSrc = srcString.startsWith('/') ? `${basePath}${srcString}` : srcString;
+
+    // alt 텍스트에서 사이즈 힌트 파싱
+    const altString = alt || '';
+    const sizeMatch = altString.match(/\|(xtall|tall|short|auto)$/);
+    const sizeHint = sizeMatch ? sizeMatch[1] : null;
+    const cleanAlt = altString.replace(/\|(xtall|tall|short|auto)$/, '').trim();
+
+    // 사이즈별 클래스
+    const sizeClasses: Record<string, string> = {
+      xtall: 'max-h-[1600px]', // 매우 세로로 긴 다이어그램 (2000px+)
+      tall: 'max-h-[1100px]',  // 세로로 긴 다이어그램
+      short: 'max-h-[600px]',  // 작은 다이어그램
+      auto: '',                 // 제한 없음
+    };
+
+    const heightClass = sizeHint ? sizeClasses[sizeHint] : 'max-h-[800px]';
 
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={imageSrc}
-        alt={alt || ''}
-        className="max-w-full h-auto my-4 rounded-lg max-h-[700px] w-auto mx-auto block"
+        alt={cleanAlt}
+        className={`max-w-full h-auto my-4 rounded-lg w-auto mx-auto block ${heightClass}`}
         loading="lazy"
         {...props}
       />

@@ -261,7 +261,7 @@ api-gateway-new          100m         150Mi    # 앱만
 
 ### 1. 순서 중요
 
-![Migration Steps](/images/istio-ambient/migration-steps.svg)
+![Migration Steps|tall](/images/istio-ambient/migration-steps.svg)
 
 | 단계 | 작업 | 설명 |
 |:----:|------|------|

@@ -156,7 +156,7 @@ user_id = claims['sub']
 
 ### 어떻게 동작하나?
 
-![JWT Gateway Flow](/images/istio/jwt-gateway-flow.svg)
+![JWT Gateway Flow|tall](/images/istio/jwt-gateway-flow.svg)
 
 | 단계 | 구성 요소 | 동작 |
 |------|----------|------|

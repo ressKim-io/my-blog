@@ -108,7 +108,7 @@ Istio를 쓰면 mTLS가 자동으로 적용됩니다. 개발자가 인증서를 
 
 ### 자동화 과정
 
-![Istio mTLS Automation](/images/istio-security/istio-mtls-automation.svg)
+![Istio mTLS Automation|xtall](/images/istio-security/istio-mtls-automation.svg)
 
 | 단계 | 동작 |
 |------|------|

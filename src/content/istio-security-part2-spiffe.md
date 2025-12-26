@@ -66,7 +66,7 @@ Part 2에서는 **서비스 신원(Identity)**을 파헤쳐보겠습니다. mTLS
 
 ### SPIFFE ID vs IP
 
-![SPIFFE vs IP](/images/istio-security/spiffe-vs-ip.svg)
+![SPIFFE vs IP|xtall](/images/istio-security/spiffe-vs-ip.svg)
 
 | 항목 | IP 기반 | SPIFFE ID |
 |------|--------|-----------|
@@ -113,7 +113,7 @@ ROOTCA            CA             ACTIVE     true           xxx               203
 
 istiod가 워크로드에 인증서를 발급하는 과정입니다.
 
-![Certificate Issuance Flow](/images/istio-security/cert-issuance-flow.svg)
+![Certificate Issuance Flow|xtall](/images/istio-security/cert-issuance-flow.svg)
 
 | 단계 | 동작 |
 |------|------|

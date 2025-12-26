@@ -13,7 +13,7 @@ date: "2024-12-24"
 
 Istio Ambient 시리즈의 마지막 편입니다. Service Mesh를 도입하려면 **Istio, Linkerd, Cilium** 중 어떤 것을 선택해야 할까요?
 
-![Service Mesh Comparison](/images/istio-ambient/mesh-comparison.svg)
+![Service Mesh Comparison|tall](/images/istio-ambient/mesh-comparison.svg)
 
 | 항목 | Istio | Linkerd | Cilium |
 |------|-------|---------|--------|

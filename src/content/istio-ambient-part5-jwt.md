@@ -51,7 +51,7 @@ RS256에서는 Auth Server만 Private Key를 갖고 있고, 이 키로 서명합
 
 ### JWKS의 동작 방식
 
-![JWKS Flow](/images/istio-ambient/jwks-flow.svg)
+![JWKS Flow|tall](/images/istio-ambient/jwks-flow.svg)
 
 | 단계 | 동작 | 설명 |
 |:----:|------|------|

@@ -52,7 +52,7 @@ Wealist에서는 3번을 선택했습니다. Redis는 이미 사용 중이었고
 
 ### 전체 구조
 
-![Rate Limiting Architecture](/images/istio-ambient/ratelimit-arch.svg)
+![Rate Limiting Architecture|tall](/images/istio-ambient/ratelimit-arch.svg)
 
 | 레이어 | 컴포넌트 | 역할 |
 |--------|----------|------|

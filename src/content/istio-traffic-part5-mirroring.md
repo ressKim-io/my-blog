@@ -13,7 +13,7 @@ date: "2024-12-24"
 
 지금까지 Canary 배포, Circuit Breaker, Retry/Timeout을 배웠습니다. 이번에는 **사용자에게 영향 없이** 새 버전을 실제 트래픽으로 테스트하는 **Traffic Mirroring**을 다룹니다.
 
-![Canary vs Mirroring](/images/istio-traffic/canary-vs-mirroring.svg)
+![Canary vs Mirroring|tall](/images/istio-traffic/canary-vs-mirroring.svg)
 
 | 구분 | Canary | Traffic Mirroring |
 |------|--------|-------------------|

@@ -159,7 +159,7 @@ HTTP/2 multiplexing 덕분에 하나의 TCP 연결로 여러 스트림을 동시
 
 ### HBONE 통신 흐름
 
-![HBONE Flow](/images/istio-ambient/hbone-flow.svg)
+![HBONE Flow|tall](/images/istio-ambient/hbone-flow.svg)
 
 1. **eBPF 캡처**: App A의 트래픽을 Node A의 ztunnel이 가로챔
 2. **HBONE 캡슐화**: HTTP/2 CONNECT + mTLS로 터널 생성

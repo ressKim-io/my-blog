@@ -49,7 +49,7 @@ k3d로 Istio를 설치하고 직접 테스트하면서 하나씩 이해해봤다
 
 Istio는 크게 **두 개의 영역**으로 나뉜다.
 
-![Istio Architecture](/images/istio/istio-architecture.svg)
+![Istio Architecture|tall](/images/istio/istio-architecture.svg)
 
 | 영역 | 구성 요소 | 역할 |
 |------|----------|------|

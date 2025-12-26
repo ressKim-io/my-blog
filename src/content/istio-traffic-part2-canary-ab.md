@@ -13,7 +13,7 @@ date: "2024-12-24"
 
 Part 1에서 Istio 트래픽 관리 4대 리소스를 배웠습니다. 이제 가장 실용적인 활용법인 **Canary 배포**와 **A/B Testing**을 다뤄보겠습니다.
 
-![Deployment Strategy Comparison](/images/istio-traffic/deployment-strategy-comparison.svg)
+![Deployment Strategy Comparison|tall](/images/istio-traffic/deployment-strategy-comparison.svg)
 
 | 전략 | 방식 | 도구 |
 |------|------|------|
@@ -242,7 +242,7 @@ spec:
 
 특정 조건에 따라 사용자를 그룹으로 나누어 다른 버전을 보여주는 방식입니다.
 
-![Canary vs A/B Testing](/images/istio-traffic/canary-vs-abtest.svg)
+![Canary vs A/B Testing|tall](/images/istio-traffic/canary-vs-abtest.svg)
 
 | 항목 | Canary | A/B Testing |
 |------|--------|-------------|

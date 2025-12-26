@@ -424,7 +424,7 @@ trafficPolicy:
 
 ## 📊 Connection Pool vs Outlier Detection 비교
 
-![Connection Pool vs Outlier Detection](/images/istio-traffic/connection-pool-vs-outlier.svg)
+![Connection Pool vs Outlier Detection|tall](/images/istio-traffic/connection-pool-vs-outlier.svg)
 
 **권장**: 둘 다 함께 사용하세요!
 

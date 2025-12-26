@@ -32,7 +32,7 @@ istio-traffic 시리즈에서 트래픽 관리를 배웠습니다. 이제 **관�
 
 ### 코드 수정 없이 메트릭이 수집되는 원리
 
-![Istio Metrics Collection](/images/istio-observability/istio-metrics-collection.svg)
+![Istio Metrics Collection|tall](/images/istio-observability/istio-metrics-collection.svg)
 
 | 방식 | 설명 |
 |------|------|
@@ -98,7 +98,7 @@ istio_requests_total{
 
 Google SRE 책에서 정의한 4가지 핵심 지표입니다. Istio 메트릭으로 모두 측정 가능합니다.
 
-![Golden Signals](/images/istio-observability/golden-signals.svg)
+![Golden Signals|tall](/images/istio-observability/golden-signals.svg)
 
 | Signal | 질문 | Istio 메트릭 |
 |--------|------|--------------|

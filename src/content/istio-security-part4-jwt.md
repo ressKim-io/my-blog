@@ -79,7 +79,7 @@ spec:
 
 Public Key를 JSON 형식으로 제공하는 표준입니다.
 
-![JWKS Flow](/images/istio-security/jwks-flow.svg)
+![JWKS Flow|tall](/images/istio-security/jwks-flow.svg)
 
 | 단계 | 동작 |
 |------|------|
