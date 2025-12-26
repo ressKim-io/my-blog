@@ -64,6 +64,32 @@ date: "2025-01-01"
 3. For series posts, include `series.name` and `series.order`
 4. Images go in `public/images/`
 
+### Image Size Hints
+
+이미지(특히 SVG 다이어그램)의 높이를 조절하려면 alt 텍스트에 사이즈 힌트를 추가합니다.
+
+```markdown
+![설명](/image.svg)           # 기본 (max-height: 800px)
+![설명|short](/image.svg)     # 작은 이미지 (max-height: 600px)
+![설명|tall](/image.svg)      # 세로로 긴 이미지 (max-height: 1100px)
+![설명|xtall](/image.svg)     # 매우 세로로 긴 이미지 (max-height: 1600px)
+![설명|auto](/image.svg)      # 제한 없음 (원본 크기)
+```
+
+**사이즈 선택 기준** (SVG viewBox 비율 기준):
+| 비율 (height/width) | 권장 힌트 |
+|---------------------|----------|
+| < 1.5 | 기본 (힌트 없음) |
+| 1.5 ~ 2.5 | `\|tall` |
+| > 2.5 | `\|xtall` |
+
+**SVG 비율 확인 명령어**:
+```bash
+# viewBox에서 width, height 추출하여 비율 계산
+grep -o 'viewBox="[^"]*"' file.svg
+# viewBox="0 0 500 1000" → 비율 = 1000/500 = 2.0 → |tall 사용
+```
+
 ## Theme System
 
 - Toggle via `data-theme` attribute on `<html>` (light/dark)
