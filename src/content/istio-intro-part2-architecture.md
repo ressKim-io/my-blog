@@ -61,11 +61,13 @@ istiod는 Istio의 두뇌입니다. 예전에는 Pilot, Citadel, Galley가 별�
 
 ![istiod Roles](/images/istio-intro/istiod-roles.svg)
 
-| 기능 | 역할 | 설명 |
-|------|------|------|
-| **Pilot** | 설정 관리 | VirtualService, DestinationRule 감시 → Envoy 형식으로 변환 |
-| **Citadel** | 인증서 관리 | 워크로드 인증서 발급, 자동 갱신, SPIFFE 기반 신원 부여 |
-| **Galley** | 설정 검증 | YAML 유효성 검사, 잘못된 설정 배포 방지 |
+istiod는 세 가지 역할을 통합한 컴포넌트입니다.
+
+**Pilot (설정 관리)**: VirtualService, DestinationRule 같은 Istio 리소스를 감시합니다. 변경이 감지되면 Envoy가 이해할 수 있는 형식으로 변환해서 xDS API로 각 프록시에 배포합니다.
+
+**Citadel (인증서 관리)**: 각 워크로드에 SPIFFE 기반 인증서를 발급합니다. 24시간마다 자동으로 갱신하므로 개발자가 인증서를 직접 관리할 필요가 없습니다.
+
+**Galley (설정 검증)**: 잘못된 YAML이 배포되는 것을 막습니다. Validation Webhook으로 kubectl apply 시점에 검증합니다.
 
 ### xDS API
 

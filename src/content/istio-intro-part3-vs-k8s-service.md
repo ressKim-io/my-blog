@@ -92,10 +92,11 @@ kube-proxy가 이걸 보고 iptables 규칙을 생성합니다:
 
 ![L4 vs L7](/images/istio-intro/l4-vs-l7.svg)
 
-| 레이어 | 볼 수 있는 것 | 볼 수 없는 것 |
-|--------|-------------|--------------|
-| **L4** | Source/Dest IP, Port, Protocol | HTTP Method, URL, Headers, Body |
-| **L7** | L4 정보 전부 + HTTP Method, URL, Headers, Body | - |
+kube-proxy는 L4(Transport Layer)에서 동작합니다. IP, Port, Protocol만 볼 수 있습니다.
+
+문제는 현대 마이크로서비스에서 필요한 라우팅 결정 대부분이 L7 정보에 의존한다는 것입니다. "이 URL로 오면 v2로 보내"나 "이 헤더가 있으면 다른 처리를 해"같은 것들이죠.
+
+Istio의 Envoy는 L7까지 볼 수 있어서 HTTP Method, URL Path, Headers, Body 전부를 기반으로 라우팅 결정을 할 수 있습니다.
 
 ### 2. L4만으로는 못하는 것들
 

@@ -164,12 +164,15 @@ Kiali의 가장 유용한 기능 중 하나입니다. Istio 설정 오류를 자
 
 ![Kiali Config Validation](/images/istio-observability/kiali-config-validation.svg)
 
-| 리소스 | 검증 항목 |
-|--------|----------|
-| VirtualService | subset 매칭, host 존재 여부, weight 합계 |
-| DestinationRule | workload 매칭, mTLS 설정 충돌 |
-| Gateway | VirtualService 바인딩, 인증서 존재 |
-| ServiceEntry | 중복 host 검사 |
+Kiali는 각 리소스 타입별로 다른 검증을 수행합니다.
+
+**VirtualService**: 가장 흔한 실수인 "subset이 DestinationRule에 없음" 오류를 잡아줍니다. Canary 배포 설정할 때 weight 합이 100%가 아니면 경고합니다.
+
+**DestinationRule**: mTLS 설정이 PeerAuthentication과 충돌하는지 확인합니다. STRICT 모드인데 DestinationRule에서 DISABLE하면 경고가 뜹니다.
+
+**Gateway**: Gateway를 만들어놓고 VirtualService에서 참조 안 하면 알려줍니다. TLS 설정 시 Secret이 없어도 감지합니다.
+
+**ServiceEntry**: 외부 서비스 정의가 중복되면 어떤 것이 적용될지 예측하기 어렵습니다. Kiali가 미리 경고해줍니다.
 
 ### 검증 결과 확인
 

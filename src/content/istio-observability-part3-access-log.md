@@ -98,18 +98,13 @@ Response Flags는 요청 처리 중 발생한 문제를 나타냅니다. 가장 
 
 ![Response Flags](/images/istio-observability/response-flags.svg)
 
-| 분류 | 플래그 | 설명 |
-|------|--------|------|
-| 정상 | - | 에러 없음 |
-| Upstream | UO | Upstream Overflow (Circuit Breaker) |
-| Upstream | UF | Upstream Connection Failure |
-| Upstream | UT | Upstream Request Timeout |
-| Upstream | URX | Retry Limit Exceeded |
-| Upstream | NR | No Route Configured |
-| Downstream | DC | Downstream Connection Termination |
-| Downstream | DT | Downstream Request Timeout |
-| Local | RL | Rate Limited |
-| Local | LR | Local Reset |
+Response Flags는 세 가지 분류로 나뉩니다.
+
+**Upstream(백엔드) 관련**: 가장 자주 보는 플래그들입니다. `UO`는 Circuit Breaker가 발동했다는 뜻이고, `UF`는 백엔드에 연결조차 못 했다는 뜻입니다. `NR`이 나오면 VirtualService 설정을 확인해야 합니다.
+
+**Downstream(클라이언트) 관련**: `DC`가 자주 보이면 클라이언트가 응답을 기다리지 못하고 연결을 끊는 것입니다. 타임아웃 설정을 검토해야 합니다.
+
+**Local(Envoy 자체) 관련**: `RL`은 Rate Limiting이 동작 중이라는 뜻입니다. 의도한 동작인지 확인하세요.
 
 ### 자주 보는 Response Flags 상세
 

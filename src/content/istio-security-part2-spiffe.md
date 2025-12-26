@@ -53,12 +53,15 @@ Part 2에서는 **서비스 신원(Identity)**을 파헤쳐보겠습니다. mTLS
 
 ![SPIFFE ID Structure](/images/istio-security/spiffe-id-structure.svg)
 
-| 구성 요소 | 예시 | 설명 |
-|----------|------|------|
-| **Scheme** | `spiffe://` | SPIFFE 프로토콜 |
-| **Trust Domain** | `cluster.local` | 클러스터 식별자 |
-| **Namespace** | `/ns/production` | Kubernetes Namespace |
-| **ServiceAccount** | `/sa/order-service` | Kubernetes ServiceAccount |
+SPIFFE ID는 URI 형식으로 구성됩니다. 각 부분이 의미를 가지고 있어서 ID만 봐도 서비스가 어디 소속인지 알 수 있습니다.
+
+**1. Scheme (`spiffe://`)**: 모든 SPIFFE ID는 이것으로 시작합니다. HTTP URL이 `http://`로 시작하는 것처럼, SPIFFE는 `spiffe://`로 시작합니다.
+
+**2. Trust Domain (`cluster.local`)**: 신뢰 경계를 정의합니다. 같은 Trust Domain 내의 서비스들만 서로 신뢰합니다. Kubernetes에서는 보통 `cluster.local`을 사용합니다. 멀티 클러스터 환경에서는 각 클러스터가 다른 Trust Domain을 가질 수 있습니다.
+
+**3. Namespace (`/ns/production`)**: Kubernetes Namespace를 그대로 반영합니다. `production` 네임스페이스의 서비스는 `/ns/production`이 됩니다.
+
+**4. ServiceAccount (`/sa/order-service`)**: 워크로드의 실제 신원입니다. Pod가 어떤 ServiceAccount로 실행되는지에 따라 이 부분이 결정됩니다.
 
 **예시**:
 - `spiffe://cluster.local/ns/default/sa/my-service`
@@ -111,16 +114,56 @@ ROOTCA            CA             ACTIVE     true           xxx               203
 
 ## ⚙️ Istio 인증서 발급 과정
 
-istiod가 워크로드에 인증서를 발급하는 과정입니다.
+istiod가 워크로드에 인증서를 발급하는 과정입니다. 4단계로 나눠서 살펴봅시다.
 
-![Certificate Issuance Flow|xtall](/images/istio-security/cert-issuance-flow.svg)
+### 전체 흐름
 
-| 단계 | 동작 |
-|------|------|
-| **1. Pod 시작** | App + istio-proxy(Envoy) + ServiceAccount Token 자동 마운트 |
-| **2. CSR 전송** | istio-proxy → istiod: "나 my-service야, 인증서 주세요" + SA Token + CSR |
-| **3. 검증/발급** | istiod: SA Token 검증 → SPIFFE ID 생성 → X.509 서명 → SDS API로 전달 |
-| **4. 인증서 수신** | istio-proxy: 메모리에 저장, mTLS 통신에 사용, 자동 갱신 |
+![Certificate Issuance Overview](/images/istio-security/cert-issuance-overview.svg)
+
+Pod가 시작되면 istio-proxy가 istiod에게 인증서를 요청하고, istiod가 검증 후 발급합니다. 이 과정이 완전 자동화되어 있어서 개발자가 인증서를 직접 관리할 필요가 없습니다.
+
+### Step 1: Pod 시작
+
+![Step 1: Pod Start](/images/istio-security/cert-issuance-step1.svg)
+
+Pod가 생성되면 Kubernetes가 자동으로 ServiceAccount Token을 마운트합니다. 이 토큰이 "나는 order-service야"라는 신원 증명의 시작점입니다.
+
+핵심은 **istio-proxy(Envoy)**가 Sidecar로 함께 주입된다는 것입니다. 이 프록시가 인증서 요청부터 mTLS 통신까지 모든 것을 처리합니다.
+
+### Step 2: CSR 전송
+
+![Step 2: Send CSR](/images/istio-security/cert-issuance-step2.svg)
+
+istio-proxy가 istiod에게 인증서를 요청합니다. 이때 두 가지를 함께 보냅니다:
+
+1. **ServiceAccount Token**: "나는 order-service야"라는 증명
+2. **CSR(Certificate Signing Request)**: "이 공개키로 인증서 만들어줘"
+
+istiod 입장에서는 "정말 order-service 맞아?"를 검증해야 합니다.
+
+### Step 3: 검증 및 발급
+
+![Step 3: Verify and Issue](/images/istio-security/cert-issuance-step3.svg)
+
+istiod는 CA(Certificate Authority) 역할을 합니다. 세 단계를 거칩니다:
+
+1. **SA Token 검증**: Kubernetes API에 토큰이 유효한지 확인
+2. **SPIFFE ID 생성**: Namespace와 ServiceAccount로 `spiffe://cluster.local/ns/{ns}/sa/{sa}` 생성
+3. **X.509 서명**: SPIFFE ID를 SAN 필드에 넣고 서명
+
+결과물은 24시간 유효한 X.509 인증서입니다.
+
+### Step 4: 인증서 수신
+
+![Step 4: Receive Certificate](/images/istio-security/cert-issuance-step4.svg)
+
+istio-proxy가 인증서를 받으면:
+
+- **메모리에 저장**: 파일 시스템에 쓰지 않아 보안이 강화됩니다
+- **mTLS 통신 시작**: 다른 서비스와 암호화 통신이 가능해집니다
+- **자동 갱신 예약**: 만료 전(75% 시점)에 자동으로 새 인증서를 요청합니다
+
+개발자가 할 일은 **아무것도 없습니다**. Istio가 전부 처리합니다.
 
 ---
 
@@ -189,18 +232,37 @@ spec:
 
 ![mTLS SPIFFE Handshake](/images/istio-security/mtls-spiffe-handshake.svg)
 
-| 단계 | 동작 |
-|------|------|
-| **1** | Order: "내 인증서야" (SPIFFE ID: order-sa) |
-| **2** | Payment: "검증할게... 서명 OK, SPIFFE ID 확인" |
-| **3** | Payment: "내 인증서야" (SPIFFE ID: payment-sa) |
-| **4** | Order: "검증할게... 서명 OK, SPIFFE ID 확인" |
-| **5** | 양쪽 모두 확인 완료, 암호화 통신 시작 |
+Order 서비스가 Payment 서비스를 호출할 때 일어나는 일입니다.
 
-**결과**:
-- 양쪽 모두 상대방의 신원 확인
-- IP가 아닌 SPIFFE ID로 식별
-- AuthorizationPolicy에서 SPIFFE ID 기반 제어 가능
+**Step 1-2: Order가 먼저 자신을 증명**
+
+Order가 "나는 order-sa야"라고 인증서를 보냅니다. Payment는 이 인증서를 검증합니다:
+- istiod CA 서명이 맞는지 확인
+- SPIFFE ID(`spiffe://cluster.local/ns/default/sa/order-sa`)를 추출
+
+**Step 3-4: Payment도 자신을 증명**
+
+Payment도 똑같이 자신의 인증서를 보냅니다. Order가 검증합니다. 이것이 **상호(Mutual)** 인증입니다.
+
+**Step 5: 암호화 통신 시작**
+
+양쪽 모두 상대방을 확인했으므로, TLS 세션이 수립되고 암호화 통신이 시작됩니다.
+
+이제 AuthorizationPolicy에서 SPIFFE ID를 기반으로 접근 제어가 가능합니다:
+
+```yaml
+# "order-sa만 payment에 접근 가능"
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+spec:
+  selector:
+    matchLabels:
+      app: payment
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/default/sa/order-sa"]
+```
 
 ---
 
