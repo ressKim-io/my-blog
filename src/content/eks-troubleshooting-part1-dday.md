@@ -1,6 +1,6 @@
 ---
-title: EKS 첫 배포 D-Day: 4개의 장애가 동시에 터졌다
-excerpt: Production EKS에 처음 배포한 날, Redis 연결 실패부터 ALB 미설치까지 4가지 문제를 해결한 기록
+title: "EKS 첫 배포 D-Day: 4개의 장애가 동시에 터졌다"
+excerpt: "Production EKS에 처음 배포한 날, Redis 연결 실패부터 ALB 미설치까지 4가지 문제를 해결한 기록"
 category: kubernetes
 tags:
   - EKS
@@ -41,7 +41,7 @@ Unable to connect to Redis
 Connection refused: redis:6379
 ```
 
-뭐지? Production 환경에서는 AWS ElastiCache를 사용하는데, 왜 `redis:6379`로 연결하려고 하는 걸까?
+뭐지? Production 환경에서는 AWS ElastiCache를 사용하는데, 왜 `redis:6379`로 연결하려고 하는 거지?
 
 ### 원인 분석
 

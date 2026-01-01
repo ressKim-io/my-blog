@@ -1,6 +1,6 @@
 ---
-title: External Secrets Operator의 함정들
-excerpt: 시크릿 관리 자동화의 어두운 면 - apiVersion부터 ArgoCD OutOfSync까지
+title: "External Secrets Operator의 함정들"
+excerpt: "시크릿 관리 자동화의 어두운 면 - apiVersion부터 ArgoCD OutOfSync까지"
 category: kubernetes
 tags:
   - ExternalSecrets

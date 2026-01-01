@@ -1,6 +1,6 @@
 ---
-title: Go 마이크로서비스 EKS 배포 삽질기
-excerpt: 예상치 못한 Go 의존성 지옥 - OAuth2 세션, genproto 충돌, OTel Schema
+title: "Go 마이크로서비스 EKS 배포 삽질기"
+excerpt: "예상치 못한 Go 의존성 지옥 - OAuth2 세션, genproto 충돌, OTel Schema"
 category: kubernetes
 tags:
   - Go

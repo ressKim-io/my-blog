@@ -1,6 +1,6 @@
 ---
-title: EKS 모니터링 구축기 (1): Prometheus가 안 뜬다
-excerpt: 모니터링 스택 띄우는 데만 겪은 6가지 장애물 - 이미지, 스토리지, 권한 문제
+title: "EKS 모니터링 구축기 (1): Prometheus가 안 뜬다"
+excerpt: "모니터링 스택 띄우는 데만 겪은 6가지 장애물 - 이미지, 스토리지, 권한 문제"
 category: kubernetes
 tags:
   - Prometheus

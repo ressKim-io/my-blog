@@ -1,6 +1,6 @@
 ---
-title: 8편 - ArgoCD + Helm 실전 문제들
-excerpt: GitOps 환경에서 발생하는 ArgoCD와 Helm 관련 문제들. Synced인데 적용 안 됨, OutOfSync 무한 루프, Job 미생성 등 실전 트러블슈팅
+title: "ArgoCD + Helm 실전 문제들"
+excerpt: "GitOps 환경에서 발생하는 ArgoCD와 Helm 관련 문제들 - Synced인데 적용 안 됨, OutOfSync 무한 루프, Job 미생성 등"
 category: kubernetes
 tags:
   - EKS
