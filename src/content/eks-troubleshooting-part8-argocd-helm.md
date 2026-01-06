@@ -4,11 +4,14 @@ excerpt: "GitOps 환경에서 발생하는 ArgoCD와 Helm 관련 문제들 - Syn
 category: kubernetes
 tags:
   - EKS
+  - Troubleshooting
   - ArgoCD
   - Helm
   - GitOps
   - HPA
-  - Troubleshooting
+series:
+  name: "eks-troubleshooting"
+  order: 8
 date: '2025-12-31'
 ---
 

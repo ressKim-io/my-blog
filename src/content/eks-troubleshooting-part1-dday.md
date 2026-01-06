@@ -4,10 +4,14 @@ excerpt: "Production EKS에 처음 배포한 날, Redis 연결 실패부터 ALB 
 category: kubernetes
 tags:
   - EKS
+  - Troubleshooting
   - ArgoCD
   - Redis
   - ALB
   - ExternalSecrets
+series:
+  name: "eks-troubleshooting"
+  order: 1
 date: '2025-12-27'
 ---
 

@@ -3,10 +3,15 @@ title: "External Secrets Operator의 함정들"
 excerpt: "시크릿 관리 자동화의 어두운 면 - apiVersion부터 ArgoCD OutOfSync까지"
 category: kubernetes
 tags:
+  - EKS
+  - Troubleshooting
   - ExternalSecrets
   - ArgoCD
   - AWS-SecretsManager
   - GitOps
+series:
+  name: "eks-troubleshooting"
+  order: 4
 date: '2025-12-30'
 ---
 

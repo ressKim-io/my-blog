@@ -3,11 +3,15 @@ title: "Go 마이크로서비스 EKS 배포 삽질기"
 excerpt: "예상치 못한 Go 의존성 지옥 - OAuth2 세션, genproto 충돌, OTel Schema"
 category: kubernetes
 tags:
+  - EKS
+  - Troubleshooting
   - Go
   - OAuth2
   - OpenTelemetry
-  - EKS
   - microservices
+series:
+  name: "eks-troubleshooting"
+  order: 7
 date: '2025-12-31'
 ---
 

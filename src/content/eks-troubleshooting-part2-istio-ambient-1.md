@@ -3,11 +3,16 @@ title: "Istio Ambient 모드 실전기 (1): Gateway가 없다"
 excerpt: "Sidecar 없는 서비스 메시, Ingress Gateway 누락부터 메트릭 수집 실패까지"
 category: kubernetes
 tags:
+  - EKS
+  - Troubleshooting
   - Istio
   - Ambient
   - Prometheus
   - mTLS
   - service-mesh
+series:
+  name: "eks-troubleshooting"
+  order: 2
 date: '2025-12-29'
 ---
 
