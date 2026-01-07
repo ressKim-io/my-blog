@@ -392,6 +392,138 @@ Synced
 
 ---
 
+## 🔥 5. ESO Webhook Not Ready - cert-controller 순서 문제
+
+### 증상
+
+ExternalSecret이 생성되지 않고 webhook validation 에러가 발생합니다:
+
+```
+ExternalSecret status: SecretSyncedError
+Message: could not get secret: webhook validation failed
+```
+
+모든 Go/Spring 서비스가 CrashLoopBackOff 상태가 됩니다:
+
+```
+로그: dial tcp 127.0.0.1:5432: connect: connection refused
+```
+
+서비스들이 localhost의 PostgreSQL/Redis에 연결을 시도합니다. 왜일까요?
+
+### 원인 분석
+
+ESO는 세 개의 컴포넌트로 구성됩니다:
+
+| 컴포넌트 | 역할 |
+|----------|------|
+| external-secrets | ExternalSecret → Secret 동기화 |
+| external-secrets-webhook | 리소스 validation |
+| **external-secrets-cert-controller** | **TLS 인증서 생성** |
+
+**시작 순서 문제**:
+
+```
+cert-controller 로그:
+"ca cert not yet ready, queuing for later"
+```
+
+1. cert-controller가 아직 TLS 인증서를 생성하지 못함
+2. webhook이 TLS 없이 시작됨
+3. Kubernetes control plane이 webhook에 연결 불가
+4. ExternalSecret validation 실패
+5. Secret이 생성되지 않음
+6. 서비스가 환경변수(DB_HOST, REDIS_HOST) 없이 시작
+7. **localhost를 기본값으로 사용** → CrashLoopBackOff
+
+### 진단
+
+```bash
+# ESO pods 상태
+kubectl get pods -n external-secrets
+# NAME                                              READY   STATUS
+# external-secrets-xxx                              1/1     Running
+# external-secrets-cert-controller-xxx              0/1     CrashLoopBackOff ← 문제!
+# external-secrets-webhook-xxx                      1/1     Running
+
+# cert-controller 로그
+kubectl logs -n external-secrets deploy/external-secrets-cert-controller
+# "ca cert not yet ready, queuing for later"
+
+# webhook 상태
+kubectl get validatingwebhookconfiguration | grep external-secrets
+```
+
+### 해결
+
+**ESO 컴포넌트를 올바른 순서로 재시작**:
+
+```bash
+# 1. cert-controller 먼저 재시작
+kubectl rollout restart deployment -n external-secrets external-secrets-cert-controller
+
+# 2. 인증서 생성 대기 (30초)
+sleep 30
+
+# 3. webhook 재시작
+kubectl rollout restart deployment -n external-secrets external-secrets-webhook
+
+# 4. 잠시 대기
+sleep 10
+
+# 5. main controller 재시작
+kubectl rollout restart deployment -n external-secrets external-secrets
+```
+
+그 후 서비스도 재시작:
+
+```bash
+kubectl rollout restart deployment -n wealist-prod -l environment=production
+```
+
+### 예방
+
+ArgoCD Application에 retry 설정 추가:
+
+```yaml
+# external-secrets Application
+syncPolicy:
+  retry:
+    limit: 10
+    backoff:
+      duration: 5s
+      factor: 2
+      maxDuration: 5m
+```
+
+더 근본적인 해결책은 **서비스에 Init Container 추가**:
+
+```yaml
+initContainers:
+  - name: wait-for-secrets
+    image: bitnami/kubectl:1.30
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for secret wealist-shared-secret..."
+        while ! kubectl get secret wealist-shared-secret -n $NAMESPACE; do
+          sleep 5
+        done
+        echo "Secret ready!"
+```
+
+이렇게 하면 Secret이 준비될 때까지 서비스가 시작하지 않습니다.
+
+### 핵심 포인트
+
+- **ESO는 세 컴포넌트의 시작 순서가 중요하다**: cert-controller → webhook → controller
+- **Secret이 없으면 앱은 기본값(localhost)을 사용한다**
+- **ArgoCD sync-wave는 "생성 순서"만 보장하고 "Ready 상태"를 기다리지 않는다**
+- **Init Container로 Secret 준비를 확실히 보장할 수 있다**
+
+---
+
 ## 📚 종합 정리
 
 ### ESO 트러블슈팅 체크리스트
@@ -401,6 +533,8 @@ Synced
 [ ] .gitignore가 파일을 무시하고 있지 않은가?
 [ ] CRD Conversion Webhook 상태가 정상인가?
 [ ] ArgoCD ignoreDifferences 설정이 되어 있는가?
+[ ] cert-controller가 정상 동작 중인가?
+[ ] ESO 컴포넌트 시작 순서가 올바른가? (cert-controller → webhook → controller)
 ```
 
 ### ESO API 버전 참고
@@ -417,6 +551,8 @@ Synced
 2. **.gitignore는 의도치 않은 부작용이 있을 수 있다**
 3. **CRD 업그레이드는 Webhook 설정까지 확인해야 한다**
 4. **Operator가 추가하는 기본값은 ArgoCD와 충돌한다**
+5. **ESO cert-controller가 먼저 준비되어야 webhook이 동작한다**
+6. **sync-wave는 "생성 순서"만 보장한다** - Ready 상태를 기다리지 않음
 
 ---
 
