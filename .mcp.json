@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "drawio": {
+      "command": "/Users/ress/.nvm/versions/node/v20.19.6/bin/npx",
+      "args": ["drawio-mcp"],
+      "env": {
+        "PATH": "/Users/ress/.nvm/versions/node/v20.19.6/bin:/usr/bin:/bin"
+      }
+    }
+  }
+}

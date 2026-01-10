@@ -181,13 +181,7 @@ Helm은 **TOP level 값만** 읽습니다. `storage-service.config.XXX` 형태�
 
 **3층 원인 구조:**
 
-```
-1층: CloudFront가 403을 HTML로 fallback
-    ↓ 왜 403?
-2층: HTTPRoute 리라이트 후 경로 불일치로 404
-    ↓ 왜 불일치?
-3층: ArgoCD parameters에 SERVER_BASE_PATH 없음 → 기본값 "/api" 사용
-```
+![3-Layer Root Cause Analysis|short](/images/cloudfront-s3/cloudfront-3layer-cause.svg)
 
 ---
 

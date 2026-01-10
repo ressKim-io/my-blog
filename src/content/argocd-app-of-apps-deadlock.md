@@ -85,14 +85,7 @@ root-app.yaml이 `k8s/argocd/apps/prod/` 디렉토리를 감시하는데, 자기
 
 ### 순환 참조 흐름
 
-```
-wealist-apps-prod (k8s/argocd/apps/prod/ 감시)
-  ├── auth-service.yaml → auth-service-prod Application ✅
-  ├── board-service.yaml → board-service-prod Application ✅
-  ├── ...
-  └── root-app.yaml → wealist-apps-prod Application (자기 자신!)
-        └── sync 시도 → 자기 자신의 healthy 대기 → DEADLOCK!
-```
+![ArgoCD App-of-Apps Circular Dependency](/images/argocd/argocd-circular-dependency.svg)
 
 ArgoCD가 `wealist-apps-prod` Application을 sync할 때:
 1. `k8s/argocd/apps/prod/` 디렉토리의 모든 yaml을 적용
