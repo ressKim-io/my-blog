@@ -41,6 +41,13 @@ npm run lint       # ESLint
 - `next.config.ts`: `output: 'export'` for GitHub Pages
 - Production uses `/my-blog` base path; development uses root
 
+## Blog Content Stats (2026-01-10 기준)
+
+- **총 글 수**: 62개
+- **카테고리**: kubernetes, challenge, cicd (3개)
+- **태그**: 모든 글에 tags 필드 존재 (48개 고유 태그)
+- **시리즈**: game-server (7), wealist-migration (5), eks-troubleshooting (8), istio (4), istio-intro (3), istio-security (4), istio-traffic (5), istio-observability (4), istio-ambient (7)
+
 ## Content (Blog Posts)
 
 ### Front Matter Format

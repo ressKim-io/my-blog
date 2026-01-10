@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface Post {
   slug: string;
@@ -29,17 +29,24 @@ interface BlogListProps {
 
 export default function BlogList({ posts }: BlogListProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const categoryParam = searchParams.get('category');
+  const tagParam = searchParams.get('tag');
 
   const [activeCategory, setActiveCategory] = useState<string>(categoryParam || 'all');
   const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
+  const [selectedTag, setSelectedTag] = useState<string | null>(tagParam);
 
-  // URL 파라미터 변경 시 카테고리 업데이트
+  // URL 파라미터 변경 시 카테고리/태그 업데이트
   useEffect(() => {
     if (categoryParam) {
       setActiveCategory(categoryParam);
     }
   }, [categoryParam]);
+
+  useEffect(() => {
+    setSelectedTag(tagParam);
+  }, [tagParam]);
 
   // 카테고리 목록
   const categories = useMemo(() => {
@@ -55,11 +62,30 @@ export default function BlogList({ posts }: BlogListProps) {
     etc: { label: 'Etc', icon: '📝' },
   };
 
+  // 인기 태그 계산
+  const popularTags = useMemo(() => {
+    const tagCount = new Map<string, number>();
+    posts.forEach((p) => {
+      p.tags?.forEach((tag) => {
+        tagCount.set(tag, (tagCount.get(tag) || 0) + 1);
+      });
+    });
+    return Array.from(tagCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+  }, [posts]);
+
   // 필터링된 포스트
   const filteredPosts = useMemo(() => {
-    if (activeCategory === 'all') return posts;
-    return posts.filter((p) => p.category === activeCategory);
-  }, [posts, activeCategory]);
+    let result = posts;
+    if (activeCategory !== 'all') {
+      result = result.filter((p) => p.category === activeCategory);
+    }
+    if (selectedTag) {
+      result = result.filter((p) => p.tags?.includes(selectedTag));
+    }
+    return result;
+  }, [posts, activeCategory, selectedTag]);
 
   // 시리즈 그룹화
   const { seriesGroups, standalonePosts } = useMemo(() => {
@@ -104,10 +130,31 @@ export default function BlogList({ posts }: BlogListProps) {
     setExpandedSeries(newExpanded);
   };
 
+  const handleTagClick = (tag: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setSelectedTag(tag);
+    const params = new URLSearchParams();
+    if (activeCategory !== 'all') {
+      params.set('category', activeCategory);
+    }
+    params.set('tag', tag);
+    router.push(`/blog?${params.toString()}`);
+  };
+
+  const clearTagFilter = () => {
+    setSelectedTag(null);
+    if (activeCategory !== 'all') {
+      router.push(`/blog?category=${activeCategory}`);
+    } else {
+      router.push('/blog');
+    }
+  };
+
   return (
     <div>
       {/* Category Tabs */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-4">
         {categories.map((cat) => {
           const info = categoryLabels[cat] || { label: cat, icon: '📁' };
           const count = cat === 'all' ? posts.length : posts.filter((p) => p.category === cat).length;
@@ -134,6 +181,43 @@ export default function BlogList({ posts }: BlogListProps) {
           );
         })}
       </div>
+
+      {/* Popular Tags */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {popularTags.map(([tag, count]) => (
+          <button
+            key={tag}
+            onClick={() => handleTagClick(tag)}
+            className={`text-xs px-2.5 py-1 rounded-full transition-all ${
+              selectedTag === tag
+                ? 'bg-[var(--accent)] text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] hover:bg-[var(--accent)] hover:text-white'
+            }`}
+          >
+            #{tag} ({count})
+          </button>
+        ))}
+      </div>
+
+      {/* Selected Tag Filter */}
+      {selectedTag && (
+        <div className="flex items-center gap-2 mb-6">
+          <span className="text-sm text-[var(--text-muted)]">태그 필터:</span>
+          <span className="px-3 py-1 bg-[var(--accent)] text-white rounded-full text-sm flex items-center gap-2">
+            #{selectedTag}
+            <button
+              onClick={clearTagFilter}
+              className="hover:opacity-70 ml-1"
+              aria-label="태그 필터 해제"
+            >
+              ×
+            </button>
+          </span>
+          <span className="text-xs text-[var(--text-muted)]">
+            ({filteredPosts.length}개 글)
+          </span>
+        </div>
+      )}
 
       {/* Series Groups */}
       {seriesGroups.length > 0 && (
@@ -232,9 +316,13 @@ export default function BlogList({ posts }: BlogListProps) {
                         {categoryLabels[post.category]?.label || post.category}
                       </span>
                       {post.tags?.slice(0, 2).map((tag) => (
-                        <span key={tag} className="text-xs text-[var(--text-muted)]">
+                        <button
+                          key={tag}
+                          onClick={(e) => handleTagClick(tag, e)}
+                          className="text-xs text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+                        >
                           #{tag}
-                        </span>
+                        </button>
                       ))}
                     </div>
                     <h3 className="font-medium text-[var(--text-primary)] mb-1">

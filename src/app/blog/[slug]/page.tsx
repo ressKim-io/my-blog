@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import TOC from '@/components/TOC';
 import Sidebar from '@/components/Sidebar';
@@ -52,12 +53,13 @@ export default async function BlogPost({ params }: Props) {
                     {post.category}
                   </span>
                   {post.tags?.map((tag) => (
-                    <span
+                    <Link
                       key={tag}
-                      className="px-2 py-1 bg-[var(--bg-tertiary)] text-[var(--text-muted)] text-sm rounded"
+                      href={`/blog?tag=${tag}`}
+                      className="px-2 py-1 bg-[var(--bg-tertiary)] text-[var(--text-muted)] hover:bg-[var(--accent)] hover:text-white text-sm rounded transition-colors"
                     >
-                      {tag}
-                    </span>
+                      #{tag}
+                    </Link>
                   ))}
                 </div>
                 <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
