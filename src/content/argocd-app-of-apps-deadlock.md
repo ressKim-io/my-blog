@@ -193,30 +193,6 @@ sleep 10 && kubectl get secret argocd-secret -n argocd
 
 ### 원인: ArgoCD가 자기 Secret을 prune
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  순환 삭제 문제 (Circular Deletion)                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  1. Helm 설치 → argocd-secret 생성                          │
-│           ↓                                                 │
-│  2. ArgoCD 서버 시작                                        │
-│           ↓                                                 │
-│  3. argocd-config Application sync 시작                     │
-│           ↓                                                 │
-│  4. k8s/argocd/base/external-secrets/ 디렉토리 sync         │
-│           ↓                                                 │
-│  5. argocd-secret은 Git에 정의 안됨 + prune: true           │
-│           ↓                                                 │
-│  6. ArgoCD가 argocd-secret 삭제!                            │
-│           ↓                                                 │
-│  7. argocd-server crash                                     │
-│           ↓                                                 │
-│  8. Helm 재설치해도 3번으로 돌아감 → 무한 반복               │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
 문제의 핵심:
 - `argocd-config` Application이 argocd namespace 리소스를 sync
 - `prune: true` 설정으로 Git에 없는 리소스는 자동 삭제

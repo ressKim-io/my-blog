@@ -29,26 +29,11 @@ series:
 
 ### 마이크로서비스의 복잡도 폭발
 
-모놀리식 시절에는 단순했다.
+모놀리식 시절에는 단순했다. 모든 게 하나의 애플리케이션 안에 있으니 네트워크 호출도 최소화되고, 디버깅도 쉬웠다. 하지만 확장성에 한계가 있다.
 
-```
-[Client] ──── HTTP ──── [Single App] ──── [Database]
-```
+마이크로서비스로 전환하면 갑자기 복잡도가 폭발한다.
 
-모든 게 하나의 애플리케이션 안에 있으니 네트워크 호출도 최소화되고, 디버깅도 쉬웠다. 하지만 확장성에 한계가 있다.
-
-마이크로서비스로 전환하면?
-
-```
-[Client] ──── ? ──── [User Service]
-                     [Order Service]
-                     [Payment Service]
-                     [Product Service]
-                     [Notification Service]
-                     ...
-```
-
-갑자기 복잡도가 폭발한다.
+![Monolith vs Microservices](/images/diagrams/istio-monolith-vs-microservices.drawio.svg)
 
 **문제점들:**
 1. 클라이언트가 어느 서비스로 가야 하나?

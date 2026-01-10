@@ -56,35 +56,7 @@ nginx   0/1     ContainerCreating   30s  # ← 왜 이렇게 오래 걸려?
 
 ## 📊 전체 흐름도
 
-```
-kubectl apply -f pod.yaml
-    ↓ (1) 0.1초
-┌─────────────────────────────────────┐
-│  API Server                          │
-│  - 인증/인가 확인                    │
-│  - YAML 검증                         │
-└──────────────┬──────────────────────┘
-               ↓ (2) 0.05초
-┌─────────────────────────────────────┐
-│  ETCD                                │
-│  - Pod 정보 저장                     │
-│  - status: "Pending"                 │
-└──────────────┬──────────────────────┘
-               ↓ (3) 0.5-2초
-┌─────────────────────────────────────┐
-│  Scheduler                           │
-│  - 적합한 노드 찾기                  │
-│  - nodeName 결정                     │
-└──────────────┬──────────────────────┘
-               ↓ (4) 0.1초
-┌─────────────────────────────────────┐
-│  Kubelet (워커 노드)                 │
-│  - 이미지 다운로드 ⭐ (가장 오래!)   │
-│  - 컨테이너 생성                     │
-└──────────────┬──────────────────────┘
-               ↓ (5) 5-30초
-        Pod Running ✅
-```
+![Pod Creation Flow](/images/diagrams/k8s-pod-creation-flow.drawio.svg)
 
 ---
 
@@ -176,24 +148,7 @@ ETCDCTL_API=3 etcdctl get /registry/pods/default/nginx \
 
 **Scheduler의 2단계 알고리즘:**
 
-**1단계: Filtering (불가능한 노드 제외)**
-```
-모든 노드 검사:
-├─ CPU 부족 노드 제외
-├─ Memory 부족 노드 제외
-├─ NodeSelector 불일치 제외
-├─ Taint/Toleration 불일치 제외
-└─ 결과: 가능한 노드 리스트
-```
-
-**2단계: Scoring (점수 매기기)**
-```
-각 노드에 점수 부여:
-├─ 리소스 여유도 (가중치 1)
-├─ Pod 분산도 (가중치 1)
-├─ Affinity 규칙 (가중치 2)
-└─ 결과: 최고 점수 노드 선택
-```
+![Scheduler Filtering Algorithm](/images/diagrams/k8s-scheduler-filtering.drawio.svg)
 
 **실제 예시:**
 ```
@@ -254,22 +209,8 @@ nginx        latest   187MB  # ← 약 6초 소요 (내 환경)
 ```
 
 **이미지 Pull 과정:**
-```
-1. 로컬에 이미지 있나? 확인 (0.1초)
-   └─ 있으면 → 즉시 컨테이너 생성 (1-2초)
-   └─ 없으면 → 다운로드 시작
 
-2. Docker Hub에서 다운로드
-   nginx:latest (187MB)
-   ├─ Layer 1: 50MB (2초)
-   ├─ Layer 2: 37MB (1초)
-   └─ Layer 3: 100MB (3초)
-   합계: 6초
-
-3. 압축 해제 & 검증 (1초)
-
-4. 컨테이너 생성 (1초)
-```
+![Image Pull Process](/images/diagrams/k8s-image-pull-process.drawio.svg)
 
 **실제 측정:**
 ```
