@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -27,17 +27,13 @@ interface SeriesGroup {
 export default function Sidebar({ posts }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // localStorage에서 초기값 읽기 (lazy initializer)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('sidebar-collapsed') === 'true';
+  });
   const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['kubernetes', 'challenge', 'cicd']));
-
-  // localStorage에서 접힘 상태 복원
-  useEffect(() => {
-    const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved === 'true') {
-      setIsCollapsed(true);
-    }
-  }, []);
 
   // 접힘 상태 저장
   const toggleCollapse = () => {

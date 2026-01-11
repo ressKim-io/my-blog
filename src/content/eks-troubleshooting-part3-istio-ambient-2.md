@@ -1,7 +1,7 @@
 ---
 title: "Istio Ambient 모드 실전기 (2): HTTPS 붙이기까지 3번의 삽질"
 excerpt: "Gateway API 마이그레이션부터 NLB + ACM 설정까지, HTTPS를 붙이기 위한 여정"
-category: kubernetes
+category: istio
 tags:
   - EKS
   - Troubleshooting

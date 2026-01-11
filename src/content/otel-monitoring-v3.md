@@ -1,7 +1,7 @@
 ---
 title: "트레이스에서 메트릭 자동 생성: OpenTelemetry Connectors 활용"
 excerpt: "OTEL Collector의 spanmetrics, servicegraph connector로 분산 트레이싱과 메트릭을 통합하는 방법"
-category: kubernetes
+category: monitoring
 tags:
   - OpenTelemetry
   - Observability

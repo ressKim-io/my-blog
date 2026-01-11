@@ -1,7 +1,7 @@
 ---
 title: "Service Mesh 비교: Istio vs Linkerd vs Cilium"
 excerpt: "Service Mesh 3대장의 철학, 아키텍처, 리소스 사용량을 비교하고 선택 기준을 정리합니다"
-category: "kubernetes"
+category: istio
 tags: ["istio", "linkerd", "cilium", "service-mesh", "kubernetes", "comparison"]
 date: "2025-12-26"
 ---

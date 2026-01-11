@@ -1,7 +1,7 @@
 ---
 title: Service Mesh 완벽 이해 Part 1 - Kong과 뭐가 다를까?
 excerpt: 마이크로서비스가 복잡해지면서 Istio가 필요한 이유. Kong API Gateway와의 차이점부터 언제 무엇을 써야 하는지까지
-category: kubernetes
+category: istio
 tags:
   - istio
   - kong

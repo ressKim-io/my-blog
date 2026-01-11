@@ -3,7 +3,7 @@ title: Service Mesh 완벽 이해 Part 2 - 아키텍처와 동작 원리
 excerpt: >-
   Control Plane과 Data Plane이 정확히 뭔지, Sidecar가 어떻게 동작하는지, Pod 간 요청이 실제로 어떤 경로로
   흐르는지 파헤치기
-category: kubernetes
+category: istio
 tags:
   - istio
   - envoy

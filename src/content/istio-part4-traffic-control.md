@@ -3,7 +3,7 @@ title: Service Mesh 완벽 이해 Part 4 - 트래픽 제어의 마법
 excerpt: >-
   코드 수정 없이 카나리 배포, A/B 테스팅, Circuit Breaker 구현하기. VirtualService와
   DestinationRule로 트래픽을 자유자재로
-category: kubernetes
+category: istio
 tags:
   - istio
   - virtualservice

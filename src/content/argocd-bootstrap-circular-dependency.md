@@ -1,7 +1,7 @@
 ---
 title: "GitOps의 Bootstrap 문제: ArgoCD가 자기 의존성을 배포할 수 없다"
 excerpt: "External Secrets Operator와 ArgoCD 간의 Bootstrap 순환 의존성을 Terraform으로 해결하는 방법"
-category: kubernetes
+category: argocd
 tags:
   - ArgoCD
   - GitOps

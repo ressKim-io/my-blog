@@ -1,7 +1,7 @@
 ---
 title: "EKS 모니터링 구축기 (2): S3로 전환하기"
 excerpt: "PVC에서 S3로 모니터링 스토리지 전환 - Pod Identity, 버전 호환성, 이미지 문제"
-category: kubernetes
+category: monitoring
 tags:
   - EKS
   - Troubleshooting

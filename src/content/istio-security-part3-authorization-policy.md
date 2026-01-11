@@ -1,7 +1,7 @@
 ---
 title: "AuthorizationPolicy 완전 정복"
 excerpt: "from, to, when 조건 상세 설명, ALLOW vs DENY 평가 순서, 서비스 간 접근 제어 실전 시나리오"
-category: "kubernetes"
+category: istio
 tags:
   - istio
   - authorization

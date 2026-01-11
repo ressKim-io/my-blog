@@ -1,7 +1,7 @@
 ---
 title: "Istio Traffic Part 2: Canary 배포와 A/B Testing 완전 가이드"
 excerpt: "VirtualService의 weight와 match를 활용한 점진적 배포와 A/B Testing 구현"
-category: "kubernetes"
+category: istio
 tags: ["istio", "canary", "ab-testing", "deployment", "traffic-management", "kubernetes"]
 series:
   name: "istio-traffic"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
 
@@ -20,13 +20,12 @@ interface SearchProps {
 export default function Search({ posts }: SearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Fuse.js 설정
-  const fuse = new Fuse(posts, {
+  // Fuse.js 설정 (memoized)
+  const fuse = useMemo(() => new Fuse(posts, {
     keys: [
       { name: 'title', weight: 0.4 },
       { name: 'excerpt', weight: 0.3 },
@@ -35,18 +34,22 @@ export default function Search({ posts }: SearchProps) {
     ],
     threshold: 0.3,
     includeScore: true,
-  });
+  }), [posts]);
 
-  // 검색 실행
-  useEffect(() => {
+  // 검색 결과 (memoized - useEffect 대신 useMemo로 동기 계산)
+  const results = useMemo(() => {
     if (query.trim()) {
-      const searchResults = fuse.search(query).map(r => r.item);
-      setResults(searchResults.slice(0, 8));
-      setSelectedIndex(0);
-    } else {
-      setResults([]);
+      return fuse.search(query).map(r => r.item).slice(0, 8);
     }
+    return [];
+  }, [query, fuse]);
+
+  // query 변경 시 selectedIndex 리셋 (query 변경에 대한 동기화 필수)
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setSelectedIndex(0);
   }, [query]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // 키보드 단축키 (Cmd+K / Ctrl+K)
   useEffect(() => {

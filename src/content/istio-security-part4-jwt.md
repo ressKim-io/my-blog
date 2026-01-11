@@ -1,7 +1,7 @@
 ---
 title: "Istio Security Part 4: JWT 인증으로 API 보호하기"
 excerpt: "RequestAuthentication과 AuthorizationPolicy를 조합해 JWT 기반 API 인증을 구현하는 방법"
-category: "kubernetes"
+category: istio
 tags: ["istio", "jwt", "authentication", "security", "kubernetes", "requestauthentication"]
 series:
   name: "istio-security"

@@ -1,7 +1,7 @@
 ---
 title: "ops-portal 메트릭이 모두 0인 이유: Prometheus Route Prefix"
 excerpt: "Prometheus의 --web.route-prefix 설정이 API endpoint 경로를 변경하는 문제와 ArgoCD 토큰 설정 방법"
-category: kubernetes
+category: monitoring
 tags:
   - Prometheus
   - ArgoCD

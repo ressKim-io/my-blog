@@ -1,7 +1,7 @@
 ---
 title: "Istio Observability Part 2: 분산 트레이싱으로 요청 흐름 추적하기"
 excerpt: "Jaeger를 활용한 분산 트레이싱과 헤더 전파의 중요성"
-category: "kubernetes"
+category: istio
 tags: ["istio", "observability", "tracing", "jaeger", "distributed-tracing", "kubernetes"]
 series:
   name: "istio-observability"

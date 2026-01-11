@@ -1,7 +1,7 @@
 ---
 title: "Kubernetes Service vs Istio: 뭐가 다른가?"
 excerpt: "kube-proxy의 한계, L4 vs L7 로드밸런싱 차이, 그리고 둘 다 필요한가에 대한 답"
-category: "kubernetes"
+category: istio
 tags:
   - istio
   - kubernetes

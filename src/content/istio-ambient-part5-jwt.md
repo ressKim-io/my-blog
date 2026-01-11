@@ -1,7 +1,7 @@
 ---
 title: "Istio Ambient Part 5: JWT 인증 구현과 HS512→RSA 전환기"
 excerpt: "Ambient Mode에서 JWT 인증을 구현하며 겪은 HS512에서 RSA로의 전환 과정"
-category: "kubernetes"
+category: istio
 tags: ["istio", "ambient-mesh", "jwt", "rsa", "authentication", "kubernetes"]
 series:
   name: "istio-ambient"

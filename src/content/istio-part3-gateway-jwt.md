@@ -1,7 +1,7 @@
 ---
 title: Service Mesh 완벽 이해 Part 3 - Gateway와 JWT 인증의 진짜 장점
 excerpt: 왜 모든 서비스에 JWT 검증 코드를 넣지 않고 Gateway에서만 할까? 20개 서비스 코드 수정 vs 설정 1줄 변경의 차이
-category: kubernetes
+category: istio
 tags:
   - istio
   - jwt

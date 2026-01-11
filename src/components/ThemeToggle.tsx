@@ -6,6 +6,8 @@ export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
 
+  // SSR → Client hydration 시 필수 패턴 (마운트 후 theme 설정)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setMounted(true);
     // 저장된 테마 또는 시스템 설정 확인
@@ -16,6 +18,7 @@ export default function ThemeToggle() {
     setTheme(initialTheme);
     document.documentElement.setAttribute('data-theme', initialTheme);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';

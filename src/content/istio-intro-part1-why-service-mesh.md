@@ -1,7 +1,7 @@
 ---
 title: "Service Mesh가 필요한 이유"
 excerpt: "마이크로서비스가 복잡해지면 네트워크도 복잡해진다. Spring Cloud 같은 라이브러리 방식과 Istio 같은 인프라 방식, 뭐가 다를까?"
-category: "kubernetes"
+category: istio
 tags:
   - istio
   - service-mesh

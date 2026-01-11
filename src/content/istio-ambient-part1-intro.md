@@ -1,7 +1,7 @@
 ---
 title: "Istio Ambient Part 1: Sidecar 없는 Service Mesh"
 excerpt: "Istio 1.24 GA된 Ambient Mode - ztunnel과 waypoint로 80-90% 리소스 절감"
-category: "kubernetes"
+category: istio
 tags: ["istio", "ambient-mesh", "ztunnel", "waypoint", "service-mesh", "kubernetes"]
 series:
   name: "istio-ambient"

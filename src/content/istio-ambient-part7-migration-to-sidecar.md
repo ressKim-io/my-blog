@@ -1,7 +1,7 @@
 ---
 title: "Istio Ambient에서 Sidecar로 돌아온 이유"
 excerpt: "카나리 배포와 Circuit Breaker가 필요해서 Ambient 모드를 Sidecar로 전환한 과정"
-category: kubernetes
+category: istio
 tags:
   - Istio
   - Ambient

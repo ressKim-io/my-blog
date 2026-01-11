@@ -1,7 +1,7 @@
 ---
 title: "Istio Observability Part 3: Envoy Access Log로 문제 진단하기"
 excerpt: "Envoy Access Log의 Response Flags를 이해하고 문제를 진단하는 방법"
-category: "kubernetes"
+category: istio
 tags: ["istio", "observability", "access-log", "envoy", "debugging", "kubernetes"]
 series:
   name: "istio-observability"

@@ -1,7 +1,7 @@
 ---
 title: "Istio 아키텍처 완전 정복"
 excerpt: "Control Plane과 Data Plane이 정확히 뭘 하는지, Sidecar가 어떻게 트래픽을 가로채는지, Pod 간 요청이 실제로 어떤 경로로 흐르는지"
-category: "kubernetes"
+category: istio
 tags:
   - istio
   - envoy

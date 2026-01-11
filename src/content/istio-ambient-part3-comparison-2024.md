@@ -1,7 +1,7 @@
 ---
 title: "Istio Ambient Part 3: Sidecar vs Ambient 기능 비교 (2024.12 기준)"
 excerpt: "Istio 1.24 GA 기준 Sidecar와 Ambient의 기능 비교, 제한사항, 선택 기준"
-category: "kubernetes"
+category: istio
 tags: ["istio", "ambient-mesh", "sidecar", "comparison", "service-mesh", "kubernetes"]
 series:
   name: "istio-ambient"

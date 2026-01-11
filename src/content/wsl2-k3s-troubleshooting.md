@@ -1,7 +1,7 @@
 ---
 title: WSL2에서 k3s가 계속 재시작? WSL2에서는 k3d를 사용하자
 excerpt: WSL2 환경에서 k3s 설치 시 겪은 트러블슈팅과 완전 초기화 방법
-category: Kubernetes
+category: kubernetes
 tags:
   - k3s
   - k3d

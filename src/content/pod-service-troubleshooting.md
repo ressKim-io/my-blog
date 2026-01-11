@@ -1,7 +1,7 @@
 ---
 title: Pod는 Running인데 왜 접근이 안 돼? K8s Service 트러블슈팅
 excerpt: ''
-category: Kubernetes
+category: kubernetes
 tags:
   - kubernetes
   - k8s

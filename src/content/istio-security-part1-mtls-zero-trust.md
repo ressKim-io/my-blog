@@ -1,7 +1,7 @@
 ---
 title: "Zero Trust 보안, Istio mTLS로 구현하기"
 excerpt: "경계 보안의 한계와 Zero Trust 개념, Istio가 mTLS를 자동으로 처리하는 방법, PeerAuthentication 모드별 차이"
-category: "kubernetes"
+category: istio
 tags:
   - istio
   - mtls

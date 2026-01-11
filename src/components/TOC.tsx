@@ -14,15 +14,11 @@ interface TOCProps {
 
 export default function TOC({ headings }: TOCProps) {
   const [activeId, setActiveId] = useState<string>('');
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // localStorage에서 접힘 상태 복원
-  useEffect(() => {
-    const saved = localStorage.getItem('toc-collapsed');
-    if (saved === 'true') {
-      setIsCollapsed(true);
-    }
-  }, []);
+  // localStorage에서 초기값 읽기 (lazy initializer)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('toc-collapsed') === 'true';
+  });
 
   // 접힘 상태 저장
   const toggleCollapse = () => {

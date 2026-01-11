@@ -1,7 +1,7 @@
 ---
 title: "ArgoCD가 9시간 동안 멈춘 이유: App of Apps 순환 참조"
 excerpt: "App of Apps 패턴에서 root-app.yaml이 자기 자신을 감시하면서 발생하는 deadlock과 argocd-secret 순환 삭제 문제"
-category: kubernetes
+category: argocd
 tags:
   - ArgoCD
   - GitOps

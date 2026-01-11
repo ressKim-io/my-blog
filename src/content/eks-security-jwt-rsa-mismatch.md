@@ -1,7 +1,7 @@
 ---
 title: "Multi-Pod 환경에서 JWT 인증이 50% 확률로 실패한다면"
 excerpt: "auth-service가 여러 Pod으로 스케일링될 때 발생하는 JWT 서명/검증 불일치 문제와 해결 방법"
-category: kubernetes
+category: istio
 tags:
   - EKS
   - JWT

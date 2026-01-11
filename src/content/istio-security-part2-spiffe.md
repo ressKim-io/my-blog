@@ -1,7 +1,7 @@
 ---
 title: "SPIFFE로 이해하는 서비스 신원(Identity)"
 excerpt: "IP 기반 신원의 문제점, SPIFFE ID 구조, Istio가 인증서를 발급하고 갱신하는 과정"
-category: "kubernetes"
+category: istio
 tags:
   - istio
   - spiffe

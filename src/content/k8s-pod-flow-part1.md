@@ -1,7 +1,7 @@
 ---
 title: Pod 생성 플로우 완벽 가이드 Part 1 - kubectl부터 Running까지
 excerpt: ''
-category: Kubernetes
+category: kubernetes
 tags:
   - kubernetes
   - k8s

@@ -1,7 +1,7 @@
 ---
 title: "Istio Ambient Part 2: L4/L7 분리와 Sidecar 아키텍처 비교"
 excerpt: "ztunnel과 waypoint의 역할 분담, HBONE 프로토콜, Sidecar 방식과의 상세 비교"
-category: "kubernetes"
+category: istio
 tags: ["istio", "ambient-mesh", "ztunnel", "waypoint", "l4-l7", "sidecar", "kubernetes"]
 series:
   name: "istio-ambient"

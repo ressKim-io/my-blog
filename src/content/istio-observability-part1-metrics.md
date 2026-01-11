@@ -1,7 +1,7 @@
 ---
 title: "Istio Observability Part 1: 코드 수정 없이 메트릭 수집하기"
 excerpt: "Istio가 자동으로 수집하는 메트릭과 Prometheus, Grafana를 활용한 모니터링"
-category: "kubernetes"
+category: istio
 tags: ["istio", "observability", "metrics", "prometheus", "grafana", "kubernetes"]
 series:
   name: "istio-observability"
