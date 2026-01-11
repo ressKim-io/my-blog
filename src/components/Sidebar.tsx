@@ -33,7 +33,7 @@ export default function Sidebar({ posts }: SidebarProps) {
     return localStorage.getItem('sidebar-collapsed') === 'true';
   });
   const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['kubernetes', 'challenge', 'cicd']));
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['istio', 'kubernetes', 'challenge', 'argocd', 'monitoring', 'cicd']));
 
   // 접힘 상태 저장
   const toggleCollapse = () => {
@@ -91,13 +91,16 @@ export default function Sidebar({ posts }: SidebarProps) {
   });
 
   const categoryLabels: Record<string, string> = {
+    istio: 'Istio',
     kubernetes: 'Kubernetes',
     challenge: 'Challenge',
+    argocd: 'ArgoCD',
+    monitoring: 'Monitoring',
     cicd: 'CI/CD',
     etc: 'Etc',
   };
 
-  const categoryOrder = ['kubernetes', 'challenge', 'cicd', 'etc'];
+  const categoryOrder = ['istio', 'kubernetes', 'challenge', 'argocd', 'monitoring', 'cicd', 'etc'];
   const sortedCategories = categoryOrder.filter((cat) => categoryItems[cat]);
 
   const toggleCategory = (category: string) => {
