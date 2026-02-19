@@ -138,7 +138,7 @@ export default function Home() {
                     {featuredPost.excerpt}
                   </p>
                 )}
-                <span className="inline-block mt-5 text-sm text-[var(--accent)] group-hover:text-[var(--accent-hover)] transition-colors">
+                <span className="inline-block mt-5 text-sm text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
                   Read more →
                 </span>
               </Link>
