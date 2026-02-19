@@ -5,30 +5,23 @@ interface CodeProps {
   children?: React.ReactNode;
 }
 
-// basePath for production (GitHub Pages)
 const basePath = process.env.NODE_ENV === 'production' ? '/my-blog' : '';
 
-// MDX에서 사용할 커스텀 컴포넌트들
 export const mdxComponents = {
-  // 이미지 basePath 처리 (GitHub Pages)
-  // alt 텍스트에 |tall, |short 힌트로 높이 조절 가능
-  // 예: ![설명|tall](/image.svg) → 세로로 긴 다이어그램
   img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
     const srcString = typeof src === 'string' ? src : '';
     const imageSrc = srcString.startsWith('/') ? `${basePath}${srcString}` : srcString;
 
-    // alt 텍스트에서 사이즈 힌트 파싱
     const altString = alt || '';
     const sizeMatch = altString.match(/\|(xtall|tall|short|auto)$/);
     const sizeHint = sizeMatch ? sizeMatch[1] : null;
     const cleanAlt = altString.replace(/\|(xtall|tall|short|auto)$/, '').trim();
 
-    // 사이즈별 클래스
     const sizeClasses: Record<string, string> = {
-      xtall: 'max-h-[1600px]', // 매우 세로로 긴 다이어그램 (2000px+)
-      tall: 'max-h-[1100px]',  // 세로로 긴 다이어그램
-      short: 'max-h-[600px]',  // 작은 다이어그램
-      auto: '',                 // 제한 없음
+      xtall: 'max-h-[1600px]',
+      tall: 'max-h-[1100px]',
+      short: 'max-h-[600px]',
+      auto: '',
     };
 
     const heightClass = sizeHint ? sizeClasses[sizeHint] : 'max-h-[800px]';
@@ -44,76 +37,51 @@ export const mdxComponents = {
       />
     );
   },
-  // pre 태그를 CodeBlock으로 대체
-  pre: ({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) => {
-    // children이 code 요소인지 확인
-    const codeElement = children as React.ReactElement<CodeProps>;
 
+  pre: ({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) => {
+    const codeElement = children as React.ReactElement<CodeProps>;
     if (codeElement?.type === 'code') {
       const { className, children: codeChildren } = codeElement.props as CodeProps;
-      return (
-        <CodeBlock className={className}>
-          {codeChildren}
-        </CodeBlock>
-      );
+      return <CodeBlock className={className}>{codeChildren}</CodeBlock>;
     }
-
     return <pre {...props}>{children}</pre>;
   },
 
-  // 인라인 코드 스타일링
   code: ({ children, className, ...props }: React.HTMLAttributes<HTMLElement>) => {
-    // 코드 블록 내부의 code는 그대로 반환 (pre에서 처리)
     if (className?.includes('language-')) {
       return <code className={className} {...props}>{children}</code>;
     }
-
-    // 인라인 코드
     return (
-      <code
-        className="px-1.5 py-0.5 bg-[var(--bg-tertiary)] rounded text-sm font-mono"
-        {...props}
-      >
+      <code className="px-1.5 py-0.5 bg-[var(--bg-tertiary)] rounded text-[0.85em] font-mono" {...props}>
         {children}
       </code>
     );
   },
 
-  // 테이블 스타일링
   table: ({ children, ...props }: React.HTMLAttributes<HTMLTableElement>) => (
     <div className="overflow-x-auto my-6">
-      <table className="w-full border-collapse" {...props}>
-        {children}
-      </table>
+      <table className="w-full border-collapse text-[0.95em]" {...props}>{children}</table>
     </div>
   ),
 
   th: ({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>) => (
-    <th
-      className="border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2 text-left font-semibold"
-      {...props}
-    >
+    <th className="border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2 text-left font-semibold text-[var(--text-primary)]" {...props}>
       {children}
     </th>
   ),
 
   td: ({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>) => (
-    <td className="border border-[var(--border)] px-4 py-2" {...props}>
+    <td className="border border-[var(--border)] px-4 py-2 text-[var(--text-secondary)]" {...props}>
       {children}
     </td>
   ),
 
-  // 블록쿼트 스타일링
   blockquote: ({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>) => (
-    <blockquote
-      className="border-l-4 border-[var(--accent)] pl-4 my-6 text-[var(--text-muted)] italic"
-      {...props}
-    >
+    <blockquote className="border-l-2 border-[var(--border-hover)] pl-4 my-6 text-[var(--text-muted)] italic" {...props}>
       {children}
     </blockquote>
   ),
 
-  // 링크 스타일링
   a: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a
       href={href}
@@ -126,18 +94,14 @@ export const mdxComponents = {
     </a>
   ),
 
-  // 헤딩에 앵커 추가
   h2: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => {
     const id = typeof children === 'string'
       ? children.toLowerCase().replace(/[^a-z0-9가-힣\s-]/g, '').replace(/\s+/g, '-')
       : '';
-
     return (
       <h2 id={id} className="group" {...props}>
         {children}
-        <a href={`#${id}`} className="ml-2 opacity-0 group-hover:opacity-100 text-[var(--text-muted)]">
-          #
-        </a>
+        <a href={`#${id}`} className="ml-2 opacity-0 group-hover:opacity-100 text-[var(--text-muted)]">#</a>
       </h2>
     );
   },
@@ -146,13 +110,10 @@ export const mdxComponents = {
     const id = typeof children === 'string'
       ? children.toLowerCase().replace(/[^a-z0-9가-힣\s-]/g, '').replace(/\s+/g, '-')
       : '';
-
     return (
       <h3 id={id} className="group" {...props}>
         {children}
-        <a href={`#${id}`} className="ml-2 opacity-0 group-hover:opacity-100 text-[var(--text-muted)]">
-          #
-        </a>
+        <a href={`#${id}`} className="ml-2 opacity-0 group-hover:opacity-100 text-[var(--text-muted)]">#</a>
       </h3>
     );
   },

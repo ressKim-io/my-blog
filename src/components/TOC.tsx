@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 interface Heading {
   id: string;
@@ -14,88 +14,56 @@ interface TOCProps {
 
 export default function TOC({ headings }: TOCProps) {
   const [activeId, setActiveId] = useState<string>('');
-  // localStorage에서 초기값 읽기 (lazy initializer)
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('toc-collapsed') === 'true';
-  });
+  const pendingId = useRef<string>('');
+  const rafRef = useRef<number>(0);
 
-  // 접힘 상태 저장
-  const toggleCollapse = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
-    localStorage.setItem('toc-collapsed', String(newState));
-  };
+  const scheduleUpdate = useCallback((id: string) => {
+    pendingId.current = id;
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        setActiveId(pendingId.current);
+        rafRef.current = 0;
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
+            scheduleUpdate(entry.target.id);
           }
-        });
+        }
       },
-      { rootMargin: '-80px 0px -80% 0px' }
+      { rootMargin: '-72px 0px -80% 0px' }
     );
 
     headings.forEach((heading) => {
-      const element = document.getElementById(heading.id);
-      if (element) observer.observe(element);
+      const el = document.getElementById(heading.id);
+      if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
-  }, [headings]);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [headings, scheduleUpdate]);
 
-  if (headings.length === 0) {
-    return (
-      <nav className="text-sm">
-        <h4 className="text-[var(--text-primary)] font-semibold mb-4">목차</h4>
-        <p className="text-[var(--text-muted)]">목차가 없습니다</p>
-      </nav>
-    );
-  }
+  if (headings.length === 0) return null;
 
   return (
-    <nav className="text-sm">
-      <button
-        onClick={toggleCollapse}
-        className="w-full text-[var(--text-primary)] font-semibold mb-4 flex items-center justify-between gap-2 hover:text-[var(--accent)] transition-colors"
-        title={isCollapsed ? '목차 펼치기' : '목차 접기'}
-      >
-        <span className="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-          </svg>
-          목차
-          <span className="text-xs text-[var(--text-muted)] font-normal">({headings.length})</span>
-        </span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className={`w-4 h-4 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      <ul
-        className={`
-          space-y-2 overflow-hidden transition-all duration-300
-          ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[1000px] opacity-100'}
-        `}
-      >
+    <nav className="text-xs">
+      <ul className="space-y-1.5">
         {headings.map((heading) => (
-          <li key={heading.id} className={heading.level === 3 ? 'ml-4' : ''}>
+          <li key={heading.id} className={heading.level === 3 ? 'ml-3' : ''}>
             <a
               href={`#${heading.id}`}
               className={`
-                toc-link block py-1 transition-colors relative
+                block py-0.5 transition-colors leading-snug
                 ${activeId === heading.id
-                  ? 'text-[var(--accent)] font-semibold'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                  ? 'text-[var(--text-primary)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                 }
               `}
               onClick={(e) => {
@@ -103,12 +71,6 @@ export default function TOC({ headings }: TOCProps) {
                 document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              <span
-                className={`
-                  absolute left-[-12px] top-1/2 -translate-y-1/2 w-[3px] rounded bg-[var(--accent)] transition-all
-                  ${activeId === heading.id ? 'h-4' : 'h-0'}
-                `}
-              />
               {heading.text}
             </a>
           </li>

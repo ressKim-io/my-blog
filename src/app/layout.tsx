@@ -6,13 +6,11 @@ export const metadata: Metadata = {
   description: "Learning by doing, documenting the journey",
 };
 
-// 테마 깜빡임 방지 스크립트
 const themeScript = `
   (function() {
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', theme);
+    var t = localStorage.getItem('theme');
+    if (!t) t = 'dark';
+    document.documentElement.setAttribute('data-theme', t);
   })();
 `;
 

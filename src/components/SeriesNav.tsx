@@ -33,18 +33,17 @@ export default function SeriesNav({
 
   return (
     <div className="my-8 border border-[var(--border)] rounded-lg overflow-hidden">
-      {/* 시리즈 헤더 */}
-      <div className="bg-[var(--bg-secondary)] px-4 py-3 flex items-center gap-2">
-        <span className="text-lg">📚</span>
-        <span className="font-semibold text-[var(--text-primary)]">{seriesDisplayName} 시리즈</span>
-        <span className="ml-auto text-sm text-[var(--text-muted)]">
+      {/* Series Header */}
+      <div className="bg-[var(--bg-secondary)] px-4 py-3 flex items-center justify-between">
+        <span className="font-medium text-sm text-[var(--text-primary)]">{seriesDisplayName} Series</span>
+        <span className="text-xs text-[var(--text-muted)]">
           {currentOrder} / {posts.length}
         </span>
       </div>
 
-      {/* 시리즈 목록 */}
+      {/* Series List */}
       {showList && (
-        <div className="px-4 py-3 space-y-2">
+        <div className="px-4 py-3 space-y-1">
           {posts.map((post, index) => {
             const order = post.series?.order || index + 1;
             const isCurrent = order === currentOrder;
@@ -54,39 +53,31 @@ export default function SeriesNav({
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
-                className={`
-                  flex items-center gap-3 py-2 px-3 rounded-lg transition-colors
-                  ${isCurrent
-                    ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
-                    : 'hover:bg-[var(--bg-tertiary)]'}
-                `}
+                className={`flex items-center gap-3 py-2 px-3 rounded-lg text-sm transition-colors ${
+                  isCurrent
+                    ? 'bg-[var(--accent-muted)] text-[var(--accent)]'
+                    : 'hover:bg-[var(--bg-tertiary)]'
+                }`}
               >
-                <span className={`
-                  flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
-                  ${isPast
-                    ? 'bg-green-500/20 text-green-400'
+                <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
+                  isPast
+                    ? 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
                     : isCurrent
-                      ? 'bg-[var(--accent)] text-[var(--bg-primary)]'
-                      : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'}
-                `}>
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
+                }`}>
                   {isPast ? '✓' : order}
                 </span>
-                <span className={`
-                  flex-1 text-sm
-                  ${isCurrent ? 'font-medium' : 'text-[var(--text-secondary)]'}
-                `}>
+                <span className={`flex-1 ${isCurrent ? 'font-medium' : 'text-[var(--text-secondary)]'}`}>
                   {post.title.replace(/^\[.*?\]\s*/, '')}
                 </span>
-                {isCurrent && (
-                  <span className="text-xs text-[var(--accent)]">현재</span>
-                )}
               </Link>
             );
           })}
         </div>
       )}
 
-      {/* 이전/다음 네비게이션 */}
+      {/* Prev/Next Navigation */}
       <div className="border-t border-[var(--border)] px-4 py-3 flex justify-between">
         {prevPost ? (
           <Link
@@ -94,10 +85,10 @@ export default function SeriesNav({
             className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
             <span>←</span>
-            <span className="max-w-[150px] truncate">이전: {prevPost.title.replace(/^\[.*?\]\s*/, '')}</span>
+            <span className="max-w-[150px] truncate">Prev</span>
           </Link>
         ) : (
-          <span></span>
+          <span />
         )}
 
         {nextPost ? (
@@ -105,11 +96,11 @@ export default function SeriesNav({
             href={`/blog/${nextPost.slug}`}
             className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
-            <span className="max-w-[150px] truncate">다음: {nextPost.title.replace(/^\[.*?\]\s*/, '')}</span>
+            <span className="max-w-[150px] truncate">Next</span>
             <span>→</span>
           </Link>
         ) : (
-          <span className="text-sm text-[var(--text-muted)]">시리즈 완료! 🎉</span>
+          <span className="text-sm text-[var(--text-muted)]">Series complete</span>
         )}
       </div>
     </div>

@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Design Change Rule
+
+**디자인/레이아웃 변경 시 반드시 ASCII 목업을 먼저 보여주고 사용자 승인 후 코드를 작성한다.**
+
+1. 변경할 레이아웃을 ASCII art로 시각화
+2. 여러 안이 있으면 각각 ASCII로 비교
+3. 사용자가 선택/승인하면 그때 코드 작성
+4. 사소한 색상/간격 조정은 예외 (바로 적용 가능)
+
 ## Project Overview
 
 Next.js 기반 개인 기술 블로그입니다. DevOps 학습 경험(Kubernetes, AWS, Terraform, Istio, CI/CD)을 기록합니다. 콘텐츠는 한국어로 작성됩니다.
