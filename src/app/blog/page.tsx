@@ -1,7 +1,16 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Header from '@/components/Header';
 import BlogList from '@/components/BlogList';
 import { getAllPosts } from '@/lib/posts';
+
+export const metadata: Metadata = {
+  title: 'Posts',
+  description: 'DevOps, Kubernetes, Service Mesh 관련 기술 블로그 글 목록',
+  alternates: {
+    canonical: '/blog/',
+  },
+};
 
 export default function BlogPage() {
   const posts = getAllPosts();

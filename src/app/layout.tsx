@@ -1,9 +1,28 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const SITE_URL = "https://resskim-io.github.io/my-blog";
+
 export const metadata: Metadata = {
-  title: "Ress Blog",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Ress Blog",
+    template: "%s | Ress Blog",
+  },
   description: "Learning by doing, documenting the journey",
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    siteName: "Ress Blog",
+  },
+  twitter: {
+    card: "summary",
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
 };
 
 const themeScript = `
