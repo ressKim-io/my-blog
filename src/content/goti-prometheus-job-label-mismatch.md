@@ -3,6 +3,7 @@ title: "Prometheus job 레이블에 namespace가 붙는다고?"
 excerpt: "OTel service.namespace 설정으로 job 레이블이 goti/goti-server로 바뀌면서 alert가 false positive로 firing된 트러블슈팅"
 category: monitoring
 tags:
+  - go-ti
   - Prometheus
   - OpenTelemetry
   - Grafana

@@ -3,6 +3,7 @@ title: "모니터링 대시보드 No Data 5건 종합 해결기"
 excerpt: "PromQL 폴백, OTel 히스토그램 버킷, Loki 라벨 승격, HikariCP 메트릭명, 크로스 데이터소스 변수까지 한 번에 정리"
 category: monitoring
 tags:
+  - go-ti
   - Prometheus
   - Grafana
   - Loki

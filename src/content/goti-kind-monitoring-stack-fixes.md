@@ -3,6 +3,7 @@ title: "Kind 모니터링 스택 일괄 정상화: Helm suffix부터 OTLP 포트
 excerpt: "Kind 클러스터에 ArgoCD로 배포한 모니터링 스택에서 발생한 9가지 문제를 해결한 기록 — Helm release suffix, values 키 불일치, Helm 이스케이프까지"
 category: "kubernetes"
 tags:
+  - go-ti
   - kind
   - monitoring
   - helm

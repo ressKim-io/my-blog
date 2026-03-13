@@ -3,6 +3,7 @@ title: "Istio VirtualService 503 에러: .svc와 .svc.cluster.local의 차이"
 excerpt: "VirtualService destination host를 .svc로 끝냈더니 503 에러 — Istio Gateway는 DNS search domain이 없다"
 category: "kubernetes"
 tags:
+  - go-ti
   - istio
   - virtualservice
   - gateway

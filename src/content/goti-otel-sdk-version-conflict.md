@@ -3,6 +3,7 @@ title: "OTel SDK 버전 충돌로 Spring Boot 기동 실패"
 excerpt: "Spring Boot dependency-management 플러그인이 OTel SDK 버전을 다운그레이드해서 ClassNotFoundException이 발생한 트러블슈팅"
 category: monitoring
 tags:
+  - go-ti
   - OpenTelemetry
   - Spring Boot
   - Gradle

@@ -3,6 +3,7 @@ title: "Grafana 대시보드가 전부 빨간색: CSRF Origin Not Allowed"
 excerpt: "ALB(HTTPS) → Grafana(HTTP) 구성에서 Origin 헤더 불일치로 모든 패널이 깨진 트러블슈팅"
 category: cicd
 tags:
+  - go-ti
   - grafana
   - csrf
   - alb

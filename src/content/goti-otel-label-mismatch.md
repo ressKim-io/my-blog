@@ -3,6 +3,7 @@ title: "OTel → Prometheus 레이블 매핑 함정: service_name은 없다"
 excerpt: "OTel의 service.name이 Prometheus에서 job 레이블로 변환되는 표준 동작을 몰라서 대시보드 전체가 No Data가 된 이야기"
 category: monitoring
 tags:
+  - go-ti
   - OpenTelemetry
   - Prometheus
   - Grafana

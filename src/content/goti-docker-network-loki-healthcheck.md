@@ -3,6 +3,7 @@ title: "Docker 네트워크 라벨 충돌 + Loki Healthcheck HEAD 미지원"
 excerpt: "docker-compose 네트워크 설정 변경으로 라벨 충돌이 발생하고, wget --spider가 Loki에서 실패한 두 가지 트러블슈팅"
 category: cicd
 tags:
+  - go-ti
   - docker-compose
   - docker-network
   - loki

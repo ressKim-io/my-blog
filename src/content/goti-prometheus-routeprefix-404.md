@@ -3,6 +3,7 @@ title: "Alloy/Tempo remote_write 404: Prometheus routePrefix 함정"
 excerpt: "Prometheus에 routePrefix를 설정하면 remote_write 엔드포인트 경로도 바뀐다 — Alloy와 Tempo에서 404가 발생한 원인과 해결"
 category: monitoring
 tags:
+  - go-ti
   - Prometheus
   - Grafana Alloy
   - Tempo

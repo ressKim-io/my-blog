@@ -3,6 +3,7 @@ title: "kubectl create secret에서 $ 문자가 사라진다: ECR 연쇄 장애"
 excerpt: "쉘 변수 치환으로 Secret 값이 잘려 ECR 토큰 갱신과 ExternalSecret 동기화가 전면 실패한 트러블슈팅 기록"
 category: argocd
 tags:
+  - go-ti
   - ArgoCD
   - GitOps
   - Troubleshooting
