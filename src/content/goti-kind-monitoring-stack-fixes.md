@@ -1,6 +1,6 @@
 ---
-title: "Kind 모니터링 스택 일괄 정상화: Helm suffix부터 OTLP 포트까지 9개 이슈 해결"
-excerpt: "Kind 클러스터에 ArgoCD로 배포한 모니터링 스택에서 발생한 9가지 문제를 해결한 기록 — Helm release suffix, values 키 불일치, Helm 이스케이프까지"
+title: "Kind 모니터링 스택 일괄 정상화: Helm suffix부터 OTLP 포트까지 8개 이슈 해결"
+excerpt: "Kind 클러스터에 ArgoCD로 배포한 모니터링 스택에서 발생한 8가지 문제를 해결한 기록 — Helm release suffix, values 키 불일치, Helm 이스케이프까지"
 category: "kubernetes"
 tags:
   - go-ti
@@ -21,19 +21,19 @@ date: "2026-03-12"
 
 ## 🎯 한 줄 요약
 
-> Kind 클러스터에 모니터링 스택을 ArgoCD로 배포했더니 거의 모든 Pod가 CrashLoopBackOff. 근본 원인은 Helm release 이름의 `-dev` suffix였고, 총 9개 이슈를 한 번에 해결했다.
+> Kind 클러스터에 모니터링 스택을 ArgoCD로 배포했더니 거의 모든 Pod가 CrashLoopBackOff. 근본 원인은 Helm release 이름의 `-dev` suffix였고, 총 8개 이슈를 한 번에 해결했다.
 
 ## 📊 Impact
 
 - **영향 범위**: 모니터링 파이프라인 전체 불가 (메트릭, 로그, 트레이스 모두)
-- **영향받은 컴포넌트**: Alloy, Loki, Tempo, Pyroscope, Grafana, goti-server
+- **영향받은 컴포넌트**: Alloy, Loki, Tempo, Grafana, goti-server
 - **발생일**: 2026-03-12
 
 ---
 
 ## 🔥 상황: 모니터링 스택이 전부 죽어있다
 
-Kind 클러스터에 kube-prometheus-stack, Alloy, Loki, Tempo, Pyroscope를 ArgoCD로 배포했습니다.
+Kind 클러스터에 kube-prometheus-stack, Alloy, Loki, Tempo를 ArgoCD로 배포했습니다.
 배포 자체는 성공했지만, 실제로 동작하는 컴포넌트가 거의 없었어요.
 
 다수 Pod가 CrashLoopBackOff이고, 텔레메트리 파이프라인이 전혀 동작하지 않았습니다.
@@ -42,7 +42,7 @@ Kind 클러스터에 kube-prometheus-stack, Alloy, Loki, Tempo, Pyroscope를 Arg
 
 ## 🤔 근본 원인: Helm release 이름 suffix
 
-9개 이슈의 대부분은 하나의 근본 원인에서 비롯됐습니다.
+8개 이슈의 대부분은 하나의 근본 원인에서 비롯됐습니다.
 
 ApplicationSet이 `{{component}}-{{env}}` 패턴으로 release 이름을 생성해요.
 그래서 모든 Service, ConfigMap, Secret 이름에 `-dev`가 자동으로 붙습니다.
@@ -66,41 +66,7 @@ Helm release 이름이 생성하는 리소스 이름에 직접 영향을 주기 
 
 ---
 
-## 🔥 이슈 1: Pyroscope CrashLoopBackOff — 미지원 CLI 플래그
-
-### 증상
-
-```bash
-$ kubectl get pods -n monitoring | grep pyroscope
-pyroscope-dev-0   0/1   CrashLoopBackOff   198
-```
-
-`pyroscope-dev-0`이 198회나 재시작을 반복하고 있었습니다.
-로그를 확인하니 원인이 명확했어요:
-
-```
-flag provided but not defined: -pyroscopedb.retention-period
-```
-
-### 원인
-
-Pyroscope chart v1.18.1에서 `-pyroscopedb.retention-period` CLI 플래그를 지원하지 않습니다.
-values의 `extraArgs`에 해당 플래그를 설정했지만, 이 버전에서는 인식하지 못하는 거예요.
-
-### 해결
-
-dev 환경에서 Pyroscope는 불필요하다고 판단했습니다.
-리소스를 전체 제거하는 방향으로 결정했어요:
-
-- `monitoring-appset.yaml`에서 pyroscope 항목 삭제
-- `pyroscope-values.yaml` 파일 삭제
-- kps grafana에서 Pyroscope 데이터소스 및 Tempo `tracesToProfiles` 참조 제거
-
-**불필요한 컴포넌트를 억지로 살리느니, 과감하게 제거하는 것이 낫다.**
-
----
-
-## 🔥 이슈 2: Alloy /tmp 볼륨 누락 (read-only filesystem)
+## 🔥 이슈 1: Alloy /tmp 볼륨 누락 (read-only filesystem)
 
 ### 증상
 
@@ -143,7 +109,7 @@ Helm chart마다 같은 기능이라도 키 구조가 다르기 때문에, `helm
 
 ---
 
-## 🔥 이슈 3: Alloy OTLP 포트 미노출
+## 🔥 이슈 2: Alloy OTLP 포트 미노출
 
 ### 증상
 
@@ -173,11 +139,11 @@ alloy:
 여기서도 처음에 `service.additionalPorts`로 작성했다가 무시당했습니다.
 올바른 키는 `alloy.extraPorts`예요.
 
-**이슈 2와 같은 패턴이다.** Helm chart의 values 키는 chart마다 다르므로, 문서가 아닌 `helm show values`를 기준으로 작성해야 합니다.
+**이슈 1과 같은 패턴이다.** Helm chart의 values 키는 chart마다 다르므로, 문서가 아닌 `helm show values`를 기준으로 작성해야 합니다.
 
 ---
 
-## 🔥 이슈 4: OTEL Exporter Endpoint — EC2 vs Kind 서비스 주소
+## 🔥 이슈 3: OTEL Exporter Endpoint — EC2 vs Kind 서비스 주소
 
 ### 증상
 
@@ -211,7 +177,7 @@ Docker Compose 서비스명과 K8s Service FQDN은 완전히 다른 체계예요
 
 ---
 
-## 🔥 이슈 5: Loki sidecar ServiceAccount 토큰 누락
+## 🔥 이슈 4: Loki sidecar ServiceAccount 토큰 누락
 
 ### 증상
 
@@ -245,12 +211,12 @@ serviceAccount:
 
 ---
 
-## 🔥 이슈 6: Loki extraObjects에서 Helm 렌더링 에러
+## 🔥 이슈 5: Loki extraObjects에서 Helm 렌더링 에러
 
 ### 증상
 
 `loki-dev` ArgoCD 앱이 **Unknown** 상태로 표시됩니다.
-Helm 렌더링 자체가 실패해서, 이슈 5의 수정을 포함한 모든 loki 리소스가 배포되지 않았어요.
+Helm 렌더링 자체가 실패해서, 이슈 4의 수정을 포함한 모든 loki 리소스가 배포되지 않았어요.
 
 ### 원인
 
@@ -274,7 +240,7 @@ Helm은 모든 `{{ }}`를 자신의 템플릿으로 해석하려고 시도하기
 
 ---
 
-## 🔥 이슈 7: Loki extraVolumes ConfigMap 이름 불일치
+## 🔥 이슈 6: Loki extraVolumes ConfigMap 이름 불일치
 
 ### 증상
 
@@ -306,30 +272,26 @@ ConfigMap 이름은 생성하는 곳과 참조하는 곳이 **정확히 일치**
 
 ---
 
-## 🔥 이슈 8: Grafana 데이터소스 URL + Pyroscope 참조
+## 🔥 이슈 7: Grafana 데이터소스 URL 수정
 
 ### 증상
 
 Grafana에서 Loki/Tempo 데이터소스 연결이 실패합니다.
-삭제한 Pyroscope의 데이터소스도 여전히 남아 있었어요.
 
 ### 원인
 
 근본 원인 섹션에서 설명한 `-dev` suffix 누락 문제가 Grafana 데이터소스에도 적용된 겁니다.
-추가로 이슈 1에서 Pyroscope를 제거했지만, Grafana 쪽 참조를 깨끗이 정리하지 않았어요.
 
 ### 해결
 
 - Loki URL: `loki.monitoring.svc` → `loki-dev.monitoring.svc`
 - Tempo URL: `tempo.monitoring.svc` → `tempo-dev.monitoring.svc`
-- Pyroscope 데이터소스 항목 제거
-- Tempo `tracesToProfiles` (pyroscope 연동) 블록 제거
 
-**컴포넌트를 제거할 때는 해당 컴포넌트를 참조하는 모든 곳을 함께 정리**해야 합니다.
+**서비스 주소를 하드코딩할 때는 실제 Service 이름을 반드시 확인**해야 합니다.
 
 ---
 
-## 🔥 이슈 9: Tempo metricsGenerator remote_write URL
+## 🔥 이슈 8: Tempo metricsGenerator remote_write URL
 
 ### 증상
 
@@ -390,9 +352,7 @@ extraObjects에서 생성하는 리소스와 extraVolumes에서 참조하는 이
 |------|------|------|
 | Goti-k8s | `environments/dev/monitoring/alloy-values.yaml` | /tmp 볼륨, OTLP 포트, exporter URL -dev suffix |
 | Goti-k8s | `environments/dev/monitoring/loki-values.yaml` | automountServiceAccountToken, Helm 이스케이프, ConfigMap 이름, alertmanager URL |
-| Goti-k8s | `environments/dev/monitoring/kube-prometheus-stack-values.yaml` | Loki/Tempo 데이터소스 URL, Pyroscope 제거 |
+| Goti-k8s | `environments/dev/monitoring/kube-prometheus-stack-values.yaml` | Loki/Tempo 데이터소스 URL 수정 |
 | Goti-k8s | `environments/dev/monitoring/tempo-values.yaml` | metricsGenerator remote_write URL |
-| Goti-k8s | `gitops/applicationsets/monitoring-appset.yaml` | Pyroscope 항목 제거 |
-| Goti-k8s | `environments/dev/monitoring/pyroscope-values.yaml` | 파일 삭제 |
 | Goti-Terraform | `terraform/dev/config/main.tf` | Kind 전용 OTEL endpoint 추가 |
 | Goti-Terraform | `terraform/dev/config/variables.tf` | kind_server_otel_exporter_endpoint 변수 |
