@@ -17,11 +17,11 @@ date: '2025-10-14'
 # Pod는 Running인데 왜 접근이 안 돼? Service 트러블슈팅
 
 ## 🔥 상황
-Kubernetes 학습 중 Service 설정 문제를 해결하는 과제를 받았다. `broken-frontend-service.yaml`이라는 의도적으로 깨진 YAML 파일을 분석하고 고쳐야 하는 상황. Pod는 멀쩡하게 떠있는데 Service로 접근이 안 된다.
+Kubernetes 학습 중 Service 설정 문제를 해결하는 과제를 받았습니다. `broken-frontend-service.yaml`이라는 의도적으로 깨진 YAML 파일을 분석하고 고쳐야 하는 상황이었습니다. Pod는 멀쩡하게 떠있는데 Service로 접근이 안 됐습니다.
 
 ## 💥 증상
 
-Pod 상태를 확인해보니 정상이었다.
+Pod 상태를 확인해보니 정상이었습니다.
 
 ```
 kubectl get pods -n day1-challenge -l app=frontend
@@ -31,7 +31,7 @@ frontend-54f549658d-csr6c   1/1     Running   0          8m
 frontend-54f549658d-ljtc5   1/1     Running   0          8m
 ```
 
-Service도 생성되어 있고, NodePort도 할당되어 있었다.
+Service도 생성되어 있고, NodePort도 할당되어 있었습니다.
 
 ```
 kubectl get svc -n day1-challenge
@@ -40,41 +40,41 @@ NAME               TYPE       CLUSTER-IP     PORT(S)
 frontend-service   NodePort   10.96.183.79   80:30080/TCP
 ```
 
-그런데 접근이 안 된다. 로컬에서 `curl localhost:30080`을 시도했지만 Connection refused. "뭐지? 설정이 틀렸나?"
+그런데 접근이 안 됐습니다. 로컬에서 `curl localhost:30080`을 시도했지만 Connection refused. "뭐지? 설정이 틀렸나?"
 
 ## 🔍 시도했던 것들
 
 ### 1차 시도: Pod 상태 확인
 
-먼저 Pod에 문제가 있는지 확인했다.
+먼저 Pod에 문제가 있는지 확인했습니다.
 
 ```
 kubectl describe pod frontend-54f549658d-csr6c -n day1-challenge
 ```
 
-Events를 확인해도 에러가 없었다. Pod는 Running 상태고, 이미지도 정상적으로 받아왔다. "Pod는 문제없네?"
+Events를 확인해도 에러가 없었습니다. Pod는 Running 상태고, 이미지도 정상적으로 받아왔습니다. "Pod는 문제없는 건가?"
 
 ### 2차 시도: Service 내부 접근 테스트
 
-클러스터 내부에서 Service로 접근해보기로 했다.
+클러스터 내부에서 Service로 접근해보기로 했습니다.
 
 ```
 kubectl run curl-test --rm -it -n day1-challenge --image=curlimages/curl -- sh
 ```
 
-프롬프트가 나오길 기다리다가 Enter를 눌러서 명령어를 입력했다.
+프롬프트가 나오길 기다리다가 Enter를 눌러서 명령어를 입력했습니다.
 
 ```
 curl frontend-service
 ```
 
-그런데... 응답이 오지 않는다. 계속 기다리는 중... Timeout인가? 😱
+그런데... 응답이 오지 않았습니다. 계속 기다리는 중... Timeout인가? 😱
 
-Ctrl+C로 중단하고 다른 방법을 시도해야겠다고 생각했다.
+Ctrl+C로 중단하고 다른 방법을 시도해야겠다고 생각했습니다.
 
 ### 3차 시도: Endpoints 확인 (결정적 단서!)
 
-"Service가 Pod을 제대로 찾고 있나?" 하는 의심이 들어서 Endpoints를 확인했다.
+"Service가 Pod을 제대로 찾고 있나?" 하는 의심이 들어서 Endpoints를 확인했습니다.
 
 ```
 kubectl get endpoints -n day1-challenge frontend-service
@@ -83,9 +83,9 @@ NAME               ENDPOINTS                       AGE
 frontend-service   10.244.0.70:80,10.244.0.71:80   9m
 ```
 
-어? IP는 있네? 그럼 Service가 Pod은 찾은 건데... 근데 포트 번호를 다시 보니 뭔가 이상했다. 
+IP는 있었습니다. 그럼 Service가 Pod은 찾은 건데... 근데 포트 번호를 다시 보니 뭔가 이상했습니다. 
 
-Service YAML을 다시 확인해봤다.
+Service YAML을 다시 확인해봤습니다.
 
 ```
 # Service 설정
@@ -96,7 +96,7 @@ spec:
     nodePort: 30080
 ```
 
-그리고 Pod의 실제 포트를 확인했다.
+그리고 Pod의 실제 포트를 확인했습니다.
 
 ```
 kubectl describe pod frontend-54f549658d-csr6c -n day1-challenge
@@ -105,14 +105,14 @@ Containers:
   nginx:
     Container ID:   containerd://16500ee4...
     Image:          nginx:1.27
-    Port:           80/TCP  # ← 응? 80이네?
+    Port:           80/TCP  # ← 80이었습니다
 ```
 
 **아! Service는 8080으로 트래픽을 보내는데, nginx는 80 포트에서 듣고 있었다!**
 
 ## 💡 원인
 
-문제를 정리하면 이랬다:
+문제를 정리하면 이랬습니다:
 
 **Service 설정 (broken-frontend-service.yaml)**
 ```
@@ -131,11 +131,11 @@ spec:
     - containerPort: 80  # nginx 기본 포트
 ```
 
-Service가 Pod으로 트래픽을 보낼 때 8080 포트로 보내고 있었는데, nginx는 80 포트에서만 듣고 있으니 당연히 연결이 안 된 것이다. **targetPort 미스매치!**
+Service가 Pod으로 트래픽을 보낼 때 8080 포트로 보내고 있었는데, nginx는 80 포트에서만 듣고 있으니 당연히 연결이 안 된 것입니다. **targetPort 미스매치!**
 
 ## ✅ 해결
 
-YAML 파일을 수정했다.
+YAML 파일을 수정했습니다.
 
 ```
 # broken-frontend-service.yaml 수정
@@ -146,7 +146,7 @@ spec:
     nodePort: 30080
 ```
 
-그리고 다시 적용했다.
+그리고 다시 적용했습니다.
 
 ```
 kubectl apply -f broken-frontend-service.yaml
@@ -154,7 +154,7 @@ kubectl apply -f broken-frontend-service.yaml
 service/frontend-service configured
 ```
 
-이제 테스트를 해봐야 하는데, 로컬에서 NodePort로 직접 접근이 안 되는 상황이었다 (kind 클러스터 특성). 그래서 port-forward를 사용했다.
+이제 테스트를 해봐야 하는데, 로컬에서 NodePort로 직접 접근이 안 되는 상황이었습니다 (kind 클러스터 특성). 그래서 port-forward를 사용했습니다.
 
 ```
 kubectl port-forward -n day1-challenge svc/frontend-service 8080:80
@@ -178,20 +178,20 @@ curl localhost:8080
 
 ### 1. Endpoints가 가장 중요한 단서
 
-Service 문제를 진단할 때 가장 먼저 확인해야 할 것은 Endpoints다.
+Service 문제를 진단할 때 가장 먼저 확인해야 할 것은 Endpoints입니다.
 
 ```
 kubectl get endpoints <service-name>
 ```
 
-- `<none>`: selector가 틀렸다. Pod을 못 찾고 있음
+- `<none>`: selector가 틀렸습니다. Pod을 못 찾고 있는 것입니다
 - `IP:포트`: Pod은 찾았는데 접근 안 되면 → **포트 문제 가능성 90%**
 
-이번 케이스에서 Endpoints에 `10.244.0.70:80`이 보였는데, 처음엔 "IP가 있으니까 정상이겠지" 하고 넘어갔다. 근데 Service의 targetPort(8080)와 Endpoints의 포트(80)를 비교했어야 했다.
+이번 케이스에서 Endpoints에 `10.244.0.70:80`이 보였는데, 처음엔 "IP가 있으니까 정상이겠지" 하고 넘어갔습니다. 근데 Service의 targetPort(8080)와 Endpoints의 포트(80)를 비교했어야 했습니다.
 
 ### 2. 진단은 단계별로
 
-Pod가 안 뜨는 문제와 Service 접근 문제는 진단 순서가 다르다.
+Pod가 안 뜨는 문제와 Service 접근 문제는 진단 순서가 다릅니다.
 
 **Pod이 안 뜰 때:**
 1. `kubectl get pods` → STATUS 확인 (ImagePullBackOff 등)
@@ -204,11 +204,11 @@ Pod가 안 뜨는 문제와 Service 접근 문제는 진단 순서가 다르다.
 3. 포트 비교 (targetPort vs containerPort)
 4. `kubectl describe` (필요시)
 
-이번 경험으로 Service 문제는 Endpoints를 먼저 보는 게 핵심이라는 걸 배웠다.
+이번 경험으로 Service 문제는 Endpoints를 먼저 보는 게 핵심이라는 걸 배웠습니다.
 
 ### 3. kind 클러스터 특성
 
-로컬 환경에서 kind를 사용하고 있었는데, kind는 NodePort를 바로 접근할 수 없다.
+로컬 환경에서 kind를 사용하고 있었는데, kind는 NodePort를 바로 접근할 수 없습니다.
 
 ```
 # 일반 클러스터 (k3s, EKS 등)
@@ -218,18 +218,18 @@ curl <node-ip>:30080  # ✅ 작동
 curl localhost:30080  # ❌ Connection refused
 ```
 
-이유는 kind의 노드들이 Docker 컨테이너로 돌아가기 때문에, 컨테이너 포트가 자동으로 호스트에 노출되지 않는다. 해결책은:
+이유는 kind의 노드들이 Docker 컨테이너로 돌아가기 때문에, 컨테이너 포트가 자동으로 호스트에 노출되지 않습니다. 해결책은:
 
 - **port-forward 사용** (가장 간단, 실무 90% 사용)
 - **extraPortMappings 설정** (kind 클러스터 생성 시)
 
-포트 문제를 해결한 후에도 접근이 안 돼서 한참 헤맸는데, 이건 kind의 특성이었다. kind를 사용할 때는 port-forward가 기본이라고 생각하면 된다.
+포트 문제를 해결한 후에도 접근이 안 돼서 한참 헤맸는데, 이건 kind의 특성이었습니다. kind를 사용할 때는 port-forward가 기본이라고 생각하면 됩니다.
 
 ## 🔧 실무 적용
 
 ### 빠른 진단 체크리스트
 
-실무에서 Service 문제가 생겼을 때 사용할 수 있는 체크리스트를 정리했다.
+실무에서 Service 문제가 생겼을 때 사용할 수 있는 체크리스트를 정리했습니다.
 
 ```
 1. Endpoints 확인 (5초)
@@ -249,7 +249,7 @@ curl localhost:30080  # ❌ Connection refused
    → 성공하면 Pod는 정상
 ```
 
-대부분의 Service 문제는 1~3번만으로 30초 내에 원인을 파악할 수 있다.
+대부분의 Service 문제는 1~3번만으로 30초 내에 원인을 파악할 수 있습니다.
 
 ### 실수 방지 팁
 
@@ -268,7 +268,7 @@ Service 트러블슈팅에서 실제로 자주 쓰는 명령어:
 | `kubectl port-forward` | ⭐⭐⭐ 85% | 로컬 접근 (개발 시) |
 | `kubectl describe` | ⭐⭐ 40% | 상세 정보 (애매할 때) |
 
-`kubectl describe`를 먼저 하는 것보다 `kubectl get endpoints`가 훨씬 빠르고 정확하다.
+`kubectl describe`를 먼저 하는 것보다 `kubectl get endpoints`가 훨씬 빠르고 정확합니다.
 
 
 ## 🎯 면접 예상 질문
@@ -298,4 +298,4 @@ Service 트러블슈팅의 핵심:
 3. **describe는 최후 수단**
 4. **로컬 개발은 port-forward가 기본**
 
-Pod는 Running인데 접근이 안 되면, 당황하지 말고 Endpoints부터 확인하자. 대부분 포트 문제다.
+Pod는 Running인데 접근이 안 되면, 당황하지 말고 Endpoints부터 확인해야 합니다. 대부분 포트 문제입니다.

@@ -17,7 +17,7 @@ date: '2026-01-05'
 
 ## 한 줄 요약
 
-> ArgoCD가 CrashLoopBackOff. `argocd-secret not found`. ArgoCD가 시작하려면 Secret이 필요한데, 그 Secret을 만드는 ESO는 ArgoCD가 배포해야 한다. 닭이 먼저냐 달걀이 먼저냐.
+> ArgoCD가 CrashLoopBackOff. `argocd-secret not found`. ArgoCD가 시작하려면 Secret이 필요한데, 그 Secret을 만드는 ESO는 ArgoCD가 배포해야 합니다. 닭이 먼저냐 달걀이 먼저냐.
 
 ## Impact
 
@@ -66,7 +66,7 @@ error retrieving argocd-secret: secret "argocd-secret" not found
 2. **ExternalSecret으로 관리**: OAuth 자격증명을 AWS Secrets Manager에서 가져옴
 3. **ESO를 ArgoCD Application으로 배포**: GitOps 원칙에 따라
 
-왜 이렇게 설정했냐면:
+이렇게 설정한 이유는 다음과 같습니다:
 - ArgoCD가 자기 자신을 sync할 때 Helm이 만든 secret을 `prune: true`로 삭제하는 것 방지
 - OAuth 자격증명 같은 민감 정보를 AWS Secrets Manager에서 안전하게 관리
 
@@ -101,7 +101,7 @@ error retrieving argocd-secret: secret "argocd-secret" not found
 
 ![ArgoCD ESO 순환 의존성](/images/eso_argocd_circular_dependency.png)
 
-흐름을 따라가보면:
+흐름을 따라가보겠습니다:
 
 1. ArgoCD가 시작하려면 `argocd-secret`이 필요
 2. `argocd-secret`은 ExternalSecret이 만듦

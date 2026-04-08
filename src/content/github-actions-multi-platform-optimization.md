@@ -13,7 +13,7 @@ date: '2026-01-02'
 
 ## 한 줄 요약
 
-> arm64 빌드가 10분+ 걸린다면 QEMU 에뮬레이션을 의심하라. Dockerfile에 `GOARCH=amd64` 하드코딩이 원인일 수 있다.
+> arm64 빌드가 10분+ 걸린다면 QEMU 에뮬레이션을 의심해야 합니다. Dockerfile에 `GOARCH=amd64` 하드코딩이 원인일 수 있습니다.
 
 ## Impact
 
@@ -171,7 +171,7 @@ build-and-push:
 
 ### QEMU 에뮬레이션 징후
 
-다음 상황에서 QEMU 에뮬레이션을 의심하세요:
+다음 상황에서 QEMU 에뮬레이션을 의심해야 합니다:
 
 1. **특정 플랫폼만 느림**: amd64는 빠른데 arm64만 느림
 2. **Docker 빌드 로그**: `[linux/arm64]`에서 `GOARCH=amd64` 같은 불일치

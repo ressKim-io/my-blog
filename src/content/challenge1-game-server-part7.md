@@ -15,7 +15,7 @@ series:
 
 ## 🎯 핵심 개념
 
-지금까지 각 서비스마다 LoadBalancer나 NodePort를 만들었다면, 서비스마다 다른 포트나 IP를 써야 한다.
+지금까지 각 서비스마다 LoadBalancer나 NodePort를 만들었다면, 서비스마다 다른 포트나 IP를 써야 합니다.
 
 ```bash
 게임 로비: http://localhost:30080
@@ -24,7 +24,7 @@ series:
 랭킹: http://localhost:30083
 ```
 
-이건 불편하다. 실제 서비스에서는 모든 기능이 하나의 도메인으로 들어온다.
+이건 불편합니다. 실제 서비스에서는 모든 기능이 하나의 도메인으로 들어옵니다.
 
 ```bash
 https://game.example.com/lobby
@@ -33,15 +33,15 @@ https://game.example.com/chat
 https://game.example.com/ranking
 ```
 
-이걸 가능하게 하는 게 **Ingress**다. 경로(path)를 보고 적절한 Service로 라우팅한다.
+이걸 가능하게 하는 게 **Ingress**입니다. 경로(path)를 보고 적절한 Service로 라우팅합니다.
 
-아파트 경비실로 비유하면, 방문객이 "101동 1005호"라고 말하면 경비가 해당 동으로 안내하는 것과 같다. Ingress는 경비실, 각 Service는 각 동이다.
+아파트 경비실로 비유하면, 방문객이 "101동 1005호"라고 말하면 경비가 해당 동으로 안내하는 것과 같습니다. Ingress는 경비실, 각 Service는 각 동입니다.
 
 ## 💡 왜 Ingress를 쓰나
 
 ### LoadBalancer의 문제
 
-각 서비스마다 LoadBalancer를 만들면 비용이 많이 든다.
+각 서비스마다 LoadBalancer를 만들면 비용이 많이 듭니다.
 
 ```yaml
 # 서비스 4개 = LoadBalancer 4개
@@ -53,7 +53,7 @@ https://game.example.com/ranking
 # 한 달 비용: $0.025 * 4 * 24 * 30 = $72
 ```
 
-Ingress를 쓰면 LoadBalancer 하나만 있으면 된다.
+Ingress를 쓰면 LoadBalancer 하나만 있으면 됩니다.
 
 ```yaml
 # Ingress 1개 = LoadBalancer 1개
@@ -62,11 +62,11 @@ Ingress를 쓰면 LoadBalancer 하나만 있으면 된다.
 # 한 달 비용: $0.025 * 24 * 30 = $18
 ```
 
-75% 절약된다.
+75% 절약됩니다.
 
 ### 경로 기반 라우팅
 
-Ingress는 URL 경로를 보고 Service를 선택한다.
+Ingress는 URL 경로를 보고 Service를 선택합니다.
 
 ```
 http://localhost/lobby  → game-lobby Service
@@ -75,13 +75,13 @@ http://localhost/chat   → game-chat Service
 http://localhost/ranking → game-ranking Service
 ```
 
-하나의 진입점으로 모든 서비스에 접근할 수 있다.
+하나의 진입점으로 모든 서비스에 접근할 수 있습니다.
 
 ## 📌 주요 특징
 
 ### Ingress Controller 설치
 
-Ingress 리소스만 만들어선 안 되고, **Ingress Controller**를 먼저 설치해야 한다. nginx-ingress를 사용한다.
+Ingress 리소스만 만들어선 안 되고, **Ingress Controller**를 먼저 설치해야 합니다. nginx-ingress를 사용합니다.
 
 ```bash
 # nginx-ingress-controller 설치
@@ -94,18 +94,18 @@ kubectl get pods -n ingress-nginx
 kubectl get svc -n ingress-nginx
 ```
 
-정상이면 이렇게 보인다.
+정상이면 이렇게 보입니다.
 
 ```bash
 NAME                                 TYPE           EXTERNAL-IP
 ingress-nginx-controller             LoadBalancer   localhost
 ```
 
-k3d에서는 자동으로 localhost에 매핑된다.
+k3d에서는 자동으로 localhost에 매핑됩니다.
 
 ### Ingress 리소스 작성
 
-이제 Ingress 리소스를 만든다. 경로별로 Service를 매핑한다.
+이제 Ingress 리소스를 만듭니다. 경로별로 Service를 매핑합니다.
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -150,7 +150,7 @@ spec:
               number: 80
 ```
 
-배포하고 확인해보자.
+배포하고 확인해보겠습니다.
 
 ```bash
 # Ingress 생성
@@ -168,7 +168,7 @@ kubectl describe ingress game-ingress -n game-prod
 
 ### 접속 테스트
 
-브라우저나 curl로 테스트해보자.
+브라우저나 curl로 테스트해보겠습니다.
 
 ```bash
 # 게임 로비
@@ -184,7 +184,7 @@ curl http://localhost/chat
 curl http://localhost/ranking
 ```
 
-각 경로마다 다른 Service로 연결된다.
+각 경로마다 다른 Service로 연결됩니다.
 
 ### rewrite-target 이해하기
 
@@ -193,7 +193,7 @@ annotations:
   nginx.ingress.kubernetes.io/rewrite-target: /
 ```
 
-이게 없으면 Service에 `/lobby` 경로 그대로 전달된다. 하지만 대부분 애플리케이션은 `/` 경로에서 시작한다.
+이게 없으면 Service에 `/lobby` 경로 그대로 전달됩니다. 하지만 대부분 애플리케이션은 `/` 경로에서 시작합니다.
 
 ```
 # rewrite-target 없으면
@@ -205,11 +205,11 @@ annotations:
 전달: http://game-lobby/  ← 정상
 ```
 
-경로를 `/`로 재작성해준다.
+경로를 `/`로 재작성해줍니다.
 
 ### 도메인 기반 라우팅 (옵션)
 
-경로뿐만 아니라 도메인으로도 라우팅할 수 있다.
+경로뿐만 아니라 도메인으로도 라우팅할 수 있습니다.
 
 ```yaml
 spec:
@@ -236,7 +236,7 @@ spec:
               number: 80
 ```
 
-이렇게 하면 서브도메인별로 다른 Service에 연결된다.
+이렇게 하면 서브도메인별로 다른 Service에 연결됩니다.
 
 ```
 lobby.game.example.com → game-lobby
@@ -247,7 +247,7 @@ chat.game.example.com  → game-chat
 
 ### Service는 ClusterIP로
 
-Ingress를 쓸 때 Service는 ClusterIP 타입으로 만든다. LoadBalancer는 필요 없다.
+Ingress를 쓸 때 Service는 ClusterIP 타입으로 만듭니다. LoadBalancer는 필요 없습니다.
 
 ```yaml
 # ❌ 이렇게 하지 말자
@@ -263,11 +263,11 @@ spec:
   type: ClusterIP  # Ingress가 알아서 연결
 ```
 
-Ingress Controller의 LoadBalancer 하나만 있으면 된다.
+Ingress Controller의 LoadBalancer 하나만 있으면 됩니다.
 
 ### pathType 선택
 
-pathType에는 세 가지가 있다.
+pathType에는 세 가지가 있습니다.
 
 ```yaml
 # Prefix: /lobby로 시작하는 모든 경로
@@ -280,11 +280,11 @@ pathType: Exact  # /lobby만 매칭
 pathType: ImplementationSpecific
 ```
 
-보통은 Prefix를 쓴다.
+보통은 Prefix를 씁니다.
 
 ### HTTPS 설정
 
-프로덕션에서는 HTTPS를 써야 한다. cert-manager로 자동으로 인증서를 발급받을 수 있다.
+프로덕션에서는 HTTPS를 써야 합니다. cert-manager로 자동으로 인증서를 발급받을 수 있습니다.
 
 ```yaml
 annotations:
@@ -296,19 +296,19 @@ spec:
     secretName: game-tls
 ```
 
-이번 챌린지에서는 로컬이라 HTTP만 사용했다.
+이번 챌린지에서는 로컬이라 HTTP만 사용했습니다.
 
 ## 정리
 
-Ingress로 여러 서비스를 하나의 진입점으로 통합했다. nginx-ingress-controller를 설치하고, 경로 기반 라우팅을 설정했다. LoadBalancer를 하나만 써서 비용도 절감했다.
+Ingress로 여러 서비스를 하나의 진입점으로 통합했습니다. nginx-ingress-controller를 설치하고, 경로 기반 라우팅을 설정했습니다. LoadBalancer를 하나만 써서 비용도 절감했습니다.
 
-이제 게임 서버 K8s 배포가 완료됐다. Namespace로 환경을 분리하고, ConfigMap으로 설정을 관리하고, Deployment로 서비스를 띄우고, Service로 네트워크를 연결하고, HPA로 자동 스케일링하고, Ingress로 단일 진입점을 만들었다.
+이제 게임 서버 K8s 배포가 완료됐습니다. Namespace로 환경을 분리하고, ConfigMap으로 설정을 관리하고, Deployment로 서비스를 띄우고, Service로 네트워크를 연결하고, HPA로 자동 스케일링하고, Ingress로 단일 진입점을 만들었습니다.
 
 ## 💭 생각해볼 점
 
 **Q**: Ingress가 죽으면 모든 서비스가 죽는 거 아닌가? 단일 장애점(SPOF) 문제는?
 
-**힌트**: nginx-ingress-controller도 Deployment로 실행된다. replicas를 2개 이상으로 설정하면 고가용성을 확보할 수 있다. 하나가 죽어도 다른 하나가 트래픽을 받는다. 프로덕션에서는 최소 2개, 보통 3개를 띄운다.
+**힌트**: nginx-ingress-controller도 Deployment로 실행됩니다. replicas를 2개 이상으로 설정하면 고가용성을 확보할 수 있습니다. 하나가 죽어도 다른 하나가 트래픽을 받습니다. 프로덕션에서는 최소 2개, 보통 3개를 띄웁니다.
 
 ## 🎯 추가 학습
 

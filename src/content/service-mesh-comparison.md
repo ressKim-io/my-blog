@@ -8,7 +8,7 @@ date: "2025-12-26"
 
 ## 🎯 시작하며
 
-Service Mesh를 도입하려면 **Istio, Linkerd, Cilium** 중 어떤 것을 선택해야 할까요?
+Service Mesh를 도입하려면 **Istio, Linkerd, Cilium** 중 어떤 것을 선택해야 합니까?
 
 ![Service Mesh Comparison|tall](/images/istio-ambient/mesh-comparison.svg)
 
@@ -338,7 +338,7 @@ Rate Limiting은 예상 외의 난관이었습니다. Ambient 모드가 EnvoyFil
 
 ### 핵심 메시지
 
-> **"정답은 없다. 팀과 상황에 맞는 선택이 최선이다."**
+> **"정답은 없습니다. 팀과 상황에 맞는 선택이 최선입니다."**
 
 - **Istio**: 기능이 풍부하고 Ambient로 리소스 문제도 해결됨
 - **Linkerd**: 심플함의 가치를 아는 팀에게 최적

@@ -15,7 +15,7 @@ date: '2026-01-06'
 
 ## 한 줄 요약
 
-> Prometheus에 `--web.route-prefix`가 설정되어 있으면 API endpoint 경로가 변경된다. `/api/v1/query`가 아니라 `/prefix/api/v1/query`로 호출해야 한다.
+> Prometheus에 `--web.route-prefix`가 설정되어 있으면 API endpoint 경로가 변경됩니다. `/api/v1/query`가 아니라 `/prefix/api/v1/query`로 호출해야 합니다.
 
 ## Impact
 

@@ -16,24 +16,24 @@ series:
 
 ## 🎯 핵심 개념
 
-로비 서비스를 띄웠으니 이제 나머지 서비스들을 배포할 차례다. 하지만 모든 서비스를 똑같이 배포하면 안 된다. 각 서비스의 특성이 다르기 때문이다.
+로비 서비스를 띄웠으니 이제 나머지 서비스들을 배포할 차례입니다. 하지만 모든 서비스를 똑같이 배포하면 안 됩니다. 각 서비스의 특성이 다르기 때문입니다.
 
 - **게임 룸**: CPU를 많이 쓴다 (게임 로직 계산)
 - **채팅**: 메모리를 많이 쓴다 (메시지 버퍼)
 - **랭킹**: 단일 인스턴스면 충분하다
 
-식당으로 비유하면, 주방장(게임 룸)은 화력 좋은 곳에, 바텐더(채팅)는 냉장고 큰 곳에, 계산대(랭킹)는 하나만 두는 것과 같다.
+식당으로 비유하면, 주방장(게임 룸)은 화력 좋은 곳에, 바텐더(채팅)는 냉장고 큰 곳에, 계산대(랭킹)는 하나만 두는 것과 같습니다.
 
 ## 💡 왜 워크로드를 분리하나
 
-k3d로 클러스터를 만들 때 워커 노드 2개에 라벨을 달아뒀었다.
+k3d로 클러스터를 만들 때 워커 노드 2개에 라벨을 달아뒀었습니다.
 
 ```bash
 kubectl label nodes k3d-k3s-local-agent-0 workload=compute
 kubectl label nodes k3d-k3s-local-agent-1 workload=backend
 ```
 
-이제 **nodeSelector**를 써서 서비스를 적절한 노드에 배치할 수 있다.
+이제 **nodeSelector**를 써서 서비스를 적절한 노드에 배치할 수 있습니다.
 
 ```yaml
 spec:
@@ -41,16 +41,16 @@ spec:
     workload: compute  # compute 라벨 가진 노드에만 배치
 ```
 
-실무에서는 이렇게 노드를 나눈다:
+실무에서는 이렇게 노드를 나눕니다:
 - CPU 집약적 워크로드 → 고성능 CPU 노드
 - 메모리 집약적 워크로드 → 고용량 메모리 노드
 - GPU 필요한 워크로드 → GPU 노드
 
-비용 최적화를 위해 워크로드 특성에 맞는 인스턴스 타입을 쓰는 거다.
+비용 최적화를 위해 워크로드 특성에 맞는 인스턴스 타입을 쓰는 것입니다.
 
 ## 📌 게임 룸 서비스 (CPU 집약적)
 
-게임 로직을 계산하는 서비스다. CPU를 많이 쓴다.
+게임 로직을 계산하는 서비스입니다. CPU를 많이 씁니다.
 
 ```yaml
 apiVersion: apps/v1
@@ -124,11 +124,11 @@ spec:
     protocol: TCP
 ```
 
-CPU requests/limits가 로비보다 5배 크다. 게임 로직 계산에 필요한 만큼 할당했다.
+CPU requests/limits가 로비보다 5배 큽니다. 게임 로직 계산에 필요한 만큼 할당했습니다.
 
 ## 📌 채팅 서비스 (메모리 집약적)
 
-실시간 메시지를 처리하는 서비스다. 메모리를 많이 쓴다.
+실시간 메시지를 처리하는 서비스입니다. 메모리를 많이 씁니다.
 
 ```yaml
 apiVersion: apps/v1
@@ -202,11 +202,11 @@ spec:
     protocol: TCP
 ```
 
-메모리 requests/limits가 크다. 메시지 버퍼를 메모리에 올려두기 때문이다.
+메모리 requests/limits가 큽니다. 메시지 버퍼를 메모리에 올려두기 때문입니다.
 
 ## 📌 랭킹 서비스 (단일 인스턴스)
 
-랭킹 데이터를 관리하는 서비스다. 일관성을 위해 하나만 띄운다.
+랭킹 데이터를 관리하는 서비스입니다. 일관성을 위해 하나만 띄웁니다.
 
 ```yaml
 apiVersion: apps/v1
@@ -279,7 +279,7 @@ spec:
     protocol: TCP
 ```
 
-replicas가 1이다. 실무에서는 DB를 쓰겠지만, 이번 챌린지에서는 단순하게 갔다.
+replicas가 1입니다. 실무에서는 DB를 쓰겠지만, 이번 챌린지에서는 단순하게 갔습니다.
 
 ## 📌 배포 및 확인
 
@@ -306,14 +306,14 @@ kubectl get pods -n game-prod -o wide | grep backend
 - game-room 3개가 전부 agent-0에 배치됨 → nodeSelector: compute 작동 ✅
 - game-chat 2개가 전부 agent-1에 배치됨 → nodeSelector: backend 작동 ✅
 
-nodeSelector로 의도한 대로 워크로드를 분리했다.
+nodeSelector로 의도한 대로 워크로드를 분리했습니다.
 
 
 ## ⚠️ 주의사항
 
 ### nodeSelector로 인한 Pending
 
-노드 라벨이 없으면 Pod가 Pending 상태로 남는다.
+노드 라벨이 없으면 Pod가 Pending 상태로 남습니다.
 
 ```bash
 $ kubectl get pods -n game-prod
@@ -325,7 +325,7 @@ Events:
   Warning  FailedScheduling  pod didn't match node selector
 ```
 
-이럴 때는 노드 라벨을 확인한다.
+이럴 때는 노드 라벨을 확인합니다.
 
 ```bash
 # 라벨 확인
@@ -337,7 +337,7 @@ kubectl label nodes k3d-k3s-local-agent-0 workload=compute
 
 ### 리소스 부족
 
-노드 리소스가 부족하면 Pod가 안 뜬다.
+노드 리소스가 부족하면 Pod가 안 뜹니다.
 
 ```bash
 $ kubectl describe pod game-room-xxx -n game-prod
@@ -345,23 +345,23 @@ Events:
   Warning  FailedScheduling  Insufficient cpu
 ```
 
-이럴 때는 requests를 줄이거나, 노드를 추가해야 한다.
+이럴 때는 requests를 줄이거나, 노드를 추가해야 합니다.
 
 ### replicas=1의 위험성
 
-랭킹 서비스는 replicas=1이라 Pod가 죽으면 서비스 전체가 중단된다. 실무에서는 이렇게 하면 안 되고, DB를 써서 상태를 분리하고 replicas를 2개 이상으로 가져간다.
+랭킹 서비스는 replicas=1이라 Pod가 죽으면 서비스 전체가 중단됩니다. 실무에서는 이렇게 하면 안 되고, DB를 써서 상태를 분리하고 replicas를 2개 이상으로 가져갑니다.
 
 ## 정리
 
-게임 룸, 채팅, 랭킹 서비스를 배포했다. nodeSelector로 워크로드 특성에 맞게 노드를 분리했고, 각 서비스에 적절한 리소스를 할당했다.
+게임 룸, 채팅, 랭킹 서비스를 배포했습니다. nodeSelector로 워크로드 특성에 맞게 노드를 분리했고, 각 서비스에 적절한 리소스를 할당했습니다.
 
-다음 글에서는 HPA로 부하에 따라 자동으로 Pod를 늘리고 줄이는 걸 해볼 예정이다.
+다음 글에서는 HPA로 부하에 따라 자동으로 Pod를 늘리고 줄이는 것을 해볼 예정입니다.
 
 ## 💭 생각해볼 점
 
 **Q**: nodeSelector 대신 더 유연한 방법은 없을까?
 
-**힌트**: nodeAffinity를 쓰면 "선호하는 노드"를 지정할 수 있다. nodeSelector는 "반드시 이 라벨"이지만, nodeAffinity는 "가능하면 이 라벨, 안 되면 다른 곳"도 가능하다. 더 복잡하지만 유연하다.
+**힌트**: nodeAffinity를 쓰면 "선호하는 노드"를 지정할 수 있습니다. nodeSelector는 "반드시 이 라벨"이지만, nodeAffinity는 "가능하면 이 라벨, 안 되면 다른 곳"도 가능합니다. 더 복잡하지만 유연합니다.
 
 ## 🎯 추가 학습
 

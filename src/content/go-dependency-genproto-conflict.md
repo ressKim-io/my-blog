@@ -12,7 +12,7 @@ date: '2025-12-31'
 
 ## 한 줄 요약
 
-> `ambiguous import: found package in multiple modules` 에러는 Go 의존성 체인에서 같은 패키지가 두 모듈에서 제공될 때 발생한다. `exclude` 블록으로 구버전을 차단하라.
+> `ambiguous import: found package in multiple modules` 에러는 Go 의존성 체인에서 같은 패키지가 두 모듈에서 제공될 때 발생합니다. `exclude` 블록으로 구버전을 차단해야 합니다.
 
 ## Impact
 

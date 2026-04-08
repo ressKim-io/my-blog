@@ -114,7 +114,7 @@ ROOTCA            CA             ACTIVE     true           xxx               203
 
 ## ⚙️ Istio 인증서 발급 과정
 
-istiod가 워크로드에 인증서를 발급하는 과정입니다. 4단계로 나눠서 살펴봅시다.
+istiod가 워크로드에 인증서를 발급하는 과정입니다. 4단계로 나눠서 살펴보겠습니다.
 
 ### 전체 흐름
 
@@ -228,7 +228,7 @@ spec:
 
 ## 🔍 mTLS 통신 시 SPIFFE ID 활용
 
-실제 mTLS 통신에서 SPIFFE ID가 어떻게 사용되는지 봅시다.
+실제 mTLS 통신에서 SPIFFE ID가 어떻게 사용되는지 보겠습니다.
 
 ![mTLS SPIFFE Handshake](/images/istio-security/mtls-spiffe-handshake.svg)
 

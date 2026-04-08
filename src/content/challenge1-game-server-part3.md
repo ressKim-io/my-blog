@@ -16,13 +16,13 @@ series:
 
 ## 🎯 핵심 개념
 
-이제 실제로 서비스를 띄워볼 차례다. K8s에서 애플리케이션을 실행하려면 **Deployment**를 만들어야 한다.
+이제 실제로 서비스를 띄워볼 차례입니다. K8s에서 애플리케이션을 실행하려면 **Deployment**를 만들어야 합니다.
 
-Deployment는 뭘까? 레스토랑 주방으로 비유해보자. 주방장(Deployment)이 요리사(Pod) 몇 명을 고용할지, 어떤 레시피(컨테이너 이미지)를 쓸지, 재료(리소스)는 얼마나 줄지 결정한다. 요리사 한 명이 아프면 자동으로 새 요리사를 뽑아주기도 한다.
+Deployment는 뭘까요? 레스토랑 주방으로 비유해보겠습니다. 주방장(Deployment)이 요리사(Pod) 몇 명을 고용할지, 어떤 레시피(컨테이너 이미지)를 쓸지, 재료(리소스)는 얼마나 줄지 결정합니다. 요리사 한 명이 아프면 자동으로 새 요리사를 뽑아주기도 합니다.
 
 ## 💡 왜 Deployment를 쓰나
 
-Pod를 직접 만들 수도 있지만, 실무에서는 거의 쓰지 않는다.
+Pod를 직접 만들 수도 있지만, 실무에서는 거의 쓰지 않습니다.
 
 ```yaml
 # ❌ Pod 직접 생성 (실무에서 안 씀)
@@ -36,7 +36,7 @@ spec:
     image: nginx:alpine
 ```
 
-이렇게 하면 Pod가 죽었을 때 자동으로 다시 안 뜬다. 수동으로 다시 만들어야 한다.
+이렇게 하면 Pod가 죽었을 때 자동으로 다시 안 뜹니다. 수동으로 다시 만들어야 합니다.
 
 ```yaml
 # ✅ Deployment 사용 (실무 방식)
@@ -48,7 +48,7 @@ spec:
   replicas: 3  # Pod 3개 유지
 ```
 
-Deployment는 Pod가 죽으면 자동으로 다시 띄워준다. 업데이트할 때도 하나씩 교체해서 무중단 배포가 가능하다.
+Deployment는 Pod가 죽으면 자동으로 다시 띄워줍니다. 업데이트할 때도 하나씩 교체해서 무중단 배포가 가능합니다.
 
 ## 📌 주요 특징
 
@@ -106,7 +106,7 @@ spec:
           periodSeconds: 5
 ```
 
-하나씩 뜯어보자.
+하나씩 뜯어보겠습니다.
 
 ### replicas: 몇 개 띄울까
 
@@ -114,9 +114,9 @@ spec:
 replicas: 3
 ```
 
-Pod를 3개 띄우겠다는 뜻이다. 게임 로비는 트래픽이 많으니 여러 개 띄워서 부하를 분산한다.
+Pod를 3개 띄우겠다는 뜻입니다. 게임 로비는 트래픽이 많으니 여러 개 띄워서 부하를 분산합니다.
 
-하나가 죽어도 나머지 2개가 서비스를 계속한다. 그 사이에 K8s가 새 Pod를 자동으로 띄워서 다시 3개를 맞춘다.
+하나가 죽어도 나머지 2개가 서비스를 계속합니다. 그 사이에 K8s가 새 Pod를 자동으로 띄워서 다시 3개를 맞춥니다.
 
 ### resources: 리소스 할당
 
@@ -130,13 +130,13 @@ resources:
     cpu: "200m"
 ```
 
-**requests**: 이 Pod가 최소한 필요한 리소스다. K8s는 이만큼 여유가 있는 노드에 Pod를 배치한다.
+**requests**: 이 Pod가 최소한 필요한 리소스입니다. K8s는 이만큼 여유가 있는 노드에 Pod를 배치합니다.
 
-**limits**: 이 Pod가 최대로 쓸 수 있는 리소스다. 이걸 넘으면 컨테이너가 강제로 재시작된다.
+**limits**: 이 Pod가 최대로 쓸 수 있는 리소스입니다. 이것을 넘으면 컨테이너가 강제로 재시작됩니다.
 
 ![Deployment 상세 정보](/images/challenge1/part3-deployment-describe.png)
 
-식당으로 비유하면, requests는 "최소 테이블 2개는 필요해요", limits는 "테이블 4개 넘게는 안 써요"다.
+식당으로 비유하면, requests는 "최소 테이블 2개는 필요합니다", limits는 "테이블 4개 넘게는 안 씁니다"입니다.
 
 ### probes: 건강 체크
 
@@ -150,7 +150,7 @@ livenessProbe:
   periodSeconds: 10        # 10초마다 체크
 ```
 
-이게 실패하면 Pod를 죽이고 새로 띄운다. 애플리케이션이 멈춰있을 때 자동으로 복구하는 장치다.
+이것이 실패하면 Pod를 죽이고 새로 띄웁니다. 애플리케이션이 멈춰있을 때 자동으로 복구하는 장치입니다.
 
 **readinessProbe**: Pod가 트래픽 받을 준비됐나 확인
 ```yaml
@@ -162,7 +162,7 @@ readinessProbe:
   periodSeconds: 5
 ```
 
-이게 실패하면 Service에서 이 Pod를 제외한다. 초기화 중이거나 과부하 상태일 때 트래픽을 안 보내는 거다.
+이것이 실패하면 Service에서 이 Pod를 제외합니다. 초기화 중이거나 과부하 상태일 때 트래픽을 보내지 않는 것입니다.
 
 ### 배포 및 확인
 
@@ -180,7 +180,7 @@ kubectl describe deployment game-lobby -n game-prod
 kubectl logs -f deployment/game-lobby -n game-prod
 ```
 
-정상이면 이렇게 뜬다.
+정상이면 이렇게 뜹니다.
 
 ![Pod 3개 실행](/images/challenge1/part3-pods-running.png)
 
@@ -206,7 +206,7 @@ spec:
         app: game-lobby  # 이거 같아야 함
 ```
 
-이 둘이 안 맞으면 Deployment가 Pod를 못 찾는다. 처음엔 헷갈리는데, selector는 "이 라벨 가진 Pod 관리해줘", template의 labels는 "내가 만드는 Pod 라벨이야"라는 뜻이다.
+이 둘이 안 맞으면 Deployment가 Pod를 못 찾습니다. 처음엔 헷갈리는데, selector는 "이 라벨 가진 Pod 관리해줘", template의 labels는 "내가 만드는 Pod 라벨이야"라는 뜻입니다.
 
 ### requests vs limits 설정
 
@@ -218,9 +218,9 @@ limits:
   cpu: "10000m"  # 터무니없이 큼
 ```
 
-limits를 너무 크게 잡으면 다른 Pod가 리소스를 못 쓴다. requests를 너무 작게 잡으면 Pod가 제대로 안 돌아간다.
+limits를 너무 크게 잡으면 다른 Pod가 리소스를 못 씁니다. requests를 너무 작게 잡으면 Pod가 제대로 안 돌아갑니다.
 
-실무에서는 보통 limits를 requests의 2배 정도로 잡는다.
+실무에서는 보통 limits를 requests의 2배 정도로 잡습니다.
 
 ### image 태그 명시
 
@@ -232,19 +232,19 @@ image: nginx
 image: nginx:alpine
 ```
 
-태그 없이 쓰면 `latest`가 적용되는데, 이건 버전이 계속 바뀐다. 프로덕션에서는 정확한 버전을 명시해야 한다.
+태그 없이 쓰면 `latest`가 적용되는데, 이것은 버전이 계속 바뀝니다. 프로덕션에서는 정확한 버전을 명시해야 합니다.
 
 ## 정리
 
-Deployment로 게임 로비를 띄웠다. replicas로 개수를 정하고, resources로 리소스를 할당하고, probes로 건강을 체크했다.
+Deployment로 게임 로비를 띄웠습니다. replicas로 개수를 정하고, resources로 리소스를 할당하고, probes로 건강을 체크했습니다.
 
-다음 글에서는 이 Pod들을 외부에서 접근할 수 있게 Service를 만들어볼 예정이다.
+다음 글에서는 이 Pod들을 외부에서 접근할 수 있게 Service를 만들어볼 예정입니다.
 
 ## 💭 생각해볼 점
 
 **Q**: replicas를 10개로 늘렸는데 노드가 2개밖에 없으면 어떻게 될까?
 
-**힌트**: K8s는 가능한 한 Pod를 여러 노드에 골고루 분산시킨다. 하지만 노드 리소스가 부족하면 일부 Pod는 Pending 상태로 남는다. 이때는 노드를 추가하거나, Pod의 requests를 줄여야 한다.
+**힌트**: K8s는 가능한 한 Pod를 여러 노드에 골고루 분산시킵니다. 하지만 노드 리소스가 부족하면 일부 Pod는 Pending 상태로 남습니다. 이때는 노드를 추가하거나, Pod의 requests를 줄여야 합니다.
 
 ## 🎯 추가 학습
 

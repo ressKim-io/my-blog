@@ -17,7 +17,7 @@ date: '2026-01-02'
 
 ## 한 줄 요약
 
-> Storage API가 JSON 대신 HTML을 반환한다. CloudFront 403 fallback이 1차, HTTPRoute 리라이트가 2차, ArgoCD 설정 불일치가 3차 원인. 3층까지 파고들어야 근본 원인을 찾았다.
+> Storage API가 JSON 대신 HTML을 반환합니다. CloudFront 403 fallback이 1차, HTTPRoute 리라이트가 2차, ArgoCD 설정 불일치가 3차 원인. 3층까지 파고들어야 근본 원인을 찾았습니다.
 
 ## Impact
 

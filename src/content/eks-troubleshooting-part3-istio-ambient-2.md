@@ -18,7 +18,7 @@ date: '2025-12-29'
 
 ## 🎯 한 줄 요약
 
-> HTTPS를 붙이려다 3번 삽질했다. Gateway API 마이그레이션, IAM 권한 부족, DNS 불일치를 거쳐 NLB + ACM으로 해결.
+> HTTPS를 붙이려다 3번 삽질했습니다. Gateway API 마이그레이션, IAM 권한 부족, DNS 불일치를 거쳐 NLB + ACM으로 해결.
 
 ## 📊 Impact
 

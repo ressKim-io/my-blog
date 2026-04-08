@@ -17,7 +17,7 @@ date: "2026-03-09"
 
 ## 🎯 한 줄 요약
 
-> OTel에 `service.namespace`를 설정하면 Prometheus `job` 레이블이 `<namespace>/<service.name>` 형태로 바뀐다. 기존 rules와 대시보드가 모두 깨진다.
+> OTel에 `service.namespace`를 설정하면 Prometheus `job` 레이블이 `<namespace>/<service.name>` 형태로 바뀝니다. 기존 rules와 대시보드가 모두 깨집니다.
 
 ## 📊 Impact
 
@@ -29,24 +29,24 @@ date: "2026-03-09"
 
 ## 🔥 상황
 
-Goti-monitoring 스택(EC2, Docker Compose)에서 `MetricsNotReceived` alert가 계속 firing되고 있었어요.
+Goti-monitoring 스택(EC2, Docker Compose)에서 `MetricsNotReceived` alert가 계속 firing되고 있었습니다.
 
 ```
 ALERTS{alertname="MetricsNotReceived", job="goti-server", severity="critical"} = 1 (firing)
 ```
 
 goti-server는 정상 가동 중이었습니다.
-메트릭도 잘 들어오고 있었어요.
+메트릭도 잘 들어오고 있었습니다.
 그런데 alert는 "메트릭이 안 들어온다"고 계속 울리고 있었습니다.
 
-Recording rules도 마찬가지였어요.
+Recording rules도 마찬가지였습니다.
 
 ```
 goti:sli:availability:5m → result: []
 goti:apdex:score → result: []
 ```
 
-전편에서 `service_name` → `job` 매핑을 수정한 직후였는데, 또 No Data가 발생한 거예요.
+전편에서 `service_name` → `job` 매핑을 수정한 직후였는데, 또 No Data가 발생한 것입니다.
 
 ---
 
@@ -54,16 +54,16 @@ goti:apdex:score → result: []
 
 ### 가설: job 레이블 값이 달라졌다
 
-Prometheus에서 실제 `job` 레이블 값을 조회해봤어요.
+Prometheus에서 실제 `job` 레이블 값을 조회해봤습니다.
 
 ```promql
 label_values(job)
 ```
 
 결과에 `goti/goti-server`가 있었습니다.
-`goti-server`가 아니라요.
+`goti-server`가 아닙니다.
 
-확인을 위해 두 가지 쿼리를 비교했어요.
+확인을 위해 두 가지 쿼리를 비교했습니다.
 
 ```promql
 # 데이터 있음 (8개 시리즈)
@@ -75,7 +75,7 @@ jvm_memory_used_bytes{job="goti-server"}
 
 ### 근본 원인
 
-OTel 설정에 `service.namespace=goti`가 있었어요.
+OTel 설정에 `service.namespace=goti`가 있었습니다.
 
 ```yaml
 # OTel SDK 설정
@@ -87,18 +87,18 @@ OTel-Prometheus 호환성 스펙에 따르면:
 
 > `service.namespace`가 존재하면 `job = <namespace>/<service.name>`
 
-그래서 `job` 레이블이 `goti-server`가 아니라 `goti/goti-server`로 매핑된 겁니다.
+그래서 `job` 레이블이 `goti-server`가 아니라 `goti/goti-server`로 매핑된 것입니다.
 
-전편에서 `service_name` → `job` 매핑은 수정했지만, `job`의 **값**이 `goti/goti-server`라는 걸 놓쳤어요.
+전편에서 `service_name` → `job` 매핑은 수정했지만, `job`의 **값**이 `goti/goti-server`라는 것을 놓쳤습니다.
 
-문제의 흐름을 정리하면 이래요.
+문제의 흐름을 정리하면 다음과 같습니다.
 
 1. Alert rule: `absent_over_time(jvm_memory_used_bytes{job="goti-server"}[5m])`
 2. 실제 메트릭: `jvm_memory_used_bytes{job="goti/goti-server"}`
 3. `job="goti-server"`로는 매칭되는 시리즈가 없음
 4. `absent_over_time()` → 항상 absent → alert firing
 
-메트릭이 잘 수집되고 있어도, job 레이블 값이 다르니 "메트릭 없음"으로 판단한 것이다.
+메트릭이 잘 수집되고 있어도, job 레이블 값이 다르니 "메트릭 없음"으로 판단한 것입니다.
 
 ---
 
@@ -121,7 +121,7 @@ OTel-Prometheus 호환성 스펙에 따르면:
 
 ### 2. Grafana 대시보드 수정
 
-5개 대시보드의 `service_name` 변수 기본값을 변경했어요.
+5개 대시보드의 `service_name` 변수 기본값을 변경했습니다.
 
 ```
 goti-server → goti/goti-server
@@ -136,18 +136,18 @@ goti-server → goti/goti-server
 
 ### 3. EC2 배포 및 추가 발견
 
-GitHub Actions CI가 S3 → SSM → EC2로 배포를 완료했어요(36초).
+GitHub Actions CI가 S3 → SSM → EC2로 배포를 완료했습니다(36초).
 
 그런데 여기서 추가 문제를 발견했습니다.
 
-CI의 `deploy.sh`는 `docker compose up -d`만 수행해요.
+CI의 `deploy.sh`는 `docker compose up -d`만 수행합니다.
 이미지가 변경되지 않으면 컨테이너를 재생성하지 않습니다.
 
-config 파일은 bind mount로 호스트에 갱신되었지만, Prometheus와 Grafana 프로세스가 새 config을 읽지 못했어요.
+config 파일은 bind mount로 호스트에 갱신되었지만, Prometheus와 Grafana 프로세스가 새 config을 읽지 못했습니다.
 
 게다가 Prometheus에 `--web.enable-lifecycle` 플래그가 설정되어 있지 않아서, `curl -X POST /-/reload`로 무중단 reload도 불가능했습니다.
 
-결국 SSM으로 수동 재시작했어요.
+결국 SSM으로 수동 재시작했습니다.
 
 ```bash
 $ docker restart goti-prometheus
@@ -172,7 +172,7 @@ $ grep -c 'job="goti-server"' prometheus/rules/*.yml grafana/dashboards/**/*.jso
 
 ### OTel service.namespace의 영향
 
-`service.namespace`를 설정하면 Prometheus `job` 레이블 형식이 바뀌어요.
+`service.namespace`를 설정하면 Prometheus `job` 레이블 형식이 바뀝니다.
 
 | OTel 설정 | Prometheus job 레이블 |
 |-----------|---------------------|
@@ -189,13 +189,13 @@ Docker Compose 환경에서 config 파일만 변경했을 때:
 2. bind mount로 파일은 갱신되지만, 프로세스가 자동으로 다시 읽지 않음
 3. Prometheus `--web.enable-lifecycle` 플래그가 없으면 API reload도 불가
 
-**후속 작업으로 `--web.enable-lifecycle` 플래그 추가와 `deploy.sh` 개선이 필요하다.**
+**후속 작업으로 `--web.enable-lifecycle` 플래그 추가와 `deploy.sh` 개선이 필요합니다.**
 
 ### 시리즈 교훈
 
-이 시리즈의 두 번째, 세 번째 글을 통해 느낀 건, OTel → Prometheus 레이블 매핑은 **한 번에 잡기 어렵다**는 거예요.
+이 시리즈의 두 번째, 세 번째 글을 통해 느낀 것은, OTel → Prometheus 레이블 매핑은 **한 번에 잡기 어렵다**는 것입니다.
 
 1. 먼저 `service_name`이 아니라 `job`이라는 걸 알아야 하고 (2편)
 2. 그다음 `service.namespace` 때문에 `job` 값이 바뀐다는 것도 알아야 합니다 (이 글)
 
-결국 스펙 문서를 꼼꼼히 읽는 것보다, **실제 메트릭 덤프로 검증**하는 게 가장 확실하다.
+결국 스펙 문서를 꼼꼼히 읽는 것보다, **실제 메트릭 덤프로 검증**하는 것이 가장 확실합니다.

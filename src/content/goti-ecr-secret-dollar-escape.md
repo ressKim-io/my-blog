@@ -18,7 +18,7 @@ date: '2026-03-11'
 
 ## 한 줄 요약
 
-> `kubectl create secret --from-literal`에서 큰따옴표를 썼더니 `$` 이후 값이 사라졌다. Secret 하나가 비어 ECR 토큰 갱신, ExternalSecret 동기화가 전면 실패.
+> `kubectl create secret --from-literal`에서 큰따옴표를 썼더니 `$` 이후 값이 사라졌습니다. Secret 하나가 비어 ECR 토큰 갱신, ExternalSecret 동기화가 전면 실패.
 
 ## Impact
 
@@ -32,7 +32,7 @@ date: '2026-03-11'
 ## 🔥 증상: ECR 이미지 풀과 ExternalSecret이 동시에 실패한다
 
 Kind 클러스터(Ubuntu 32GB, 3노드)에서 모니터링 정상화 작업 중이었습니다.
-Terraform으로 생성한 IAM User(`goti-dev-kind-ecr-readonly`)의 Access Key를 `kubectl create secret` 명령으로 등록하는 과정에서 문제가 발생했어요.
+Terraform으로 생성한 IAM User(`goti-dev-kind-ecr-readonly`)의 Access Key를 `kubectl create secret` 명령으로 등록하는 과정에서 문제가 발생했습니다.
 
 ### Secret 상태 확인
 
@@ -61,7 +61,7 @@ ECR CronJob 실패 → ECR 토큰 갱신 불가 → ImagePullBackOff
 ```
 
 ECR CronJob이 Access Key로 AWS에 인증해서 토큰을 갱신하는데, 키가 비어있으니 인증이 실패합니다.
-토큰이 갱신되지 않으면 모든 ECR 이미지 풀이 중단돼요.
+토큰이 갱신되지 않으면 모든 ECR 이미지 풀이 중단됩니다.
 
 **두 번째 연쇄**: ExternalSecret 전면 불능
 
@@ -70,7 +70,7 @@ ClusterSecretStore InvalidProviderConfig → ESO 전체 불능 → grafana-admin
 ```
 
 ClusterSecretStore도 같은 AWS 자격증명을 사용합니다.
-ESO가 동작하지 않으니 Grafana admin secret 등 모든 ExternalSecret 동기화가 중단되었어요.
+ESO가 동작하지 않으니 Grafana admin secret 등 모든 ExternalSecret 동기화가 중단되었습니다.
 
 ---
 
@@ -82,7 +82,7 @@ ESO가 동작하지 않으니 Grafana admin secret 등 모든 ExternalSecret 동
 2. IAM User 존재 확인 → Terraform으로 정상 생성됨
 3. AWS 콘솔에서 Access Key 재확인 → 키 정상 존재
 
-키 자체는 문제가 없었습니다. 그렇다면 등록 과정에서 값이 사라진 것이다.
+키 자체는 문제가 없었습니다. 그렇다면 등록 과정에서 값이 사라진 것입니다.
 
 ### 근본 원인
 
@@ -94,7 +94,7 @@ $ kubectl create secret generic aws-ecr-creds \
     --from-literal=AWS_ACCESS_KEY_ID="AKIA...X$abc123..."
 ```
 
-AWS Access Key에 `$` 문자가 포함되어 있었어요.
+AWS Access Key에 `$` 문자가 포함되어 있었습니다.
 Bash에서 큰따옴표 안의 `$`는 **변수 치환**이 발생합니다.
 
 ```bash
@@ -149,7 +149,7 @@ $ kubectl get secret aws-ecr-creds -n goti \
     -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d | wc -c
 ```
 
-글자 수가 원본 키와 일치하면 정상이에요.
+글자 수가 원본 키와 일치하면 정상입니다.
 
 ### 복구 결과
 
@@ -173,7 +173,7 @@ $ kubectl get pods -n goti
 
 `kubectl create secret --from-literal` 사용 시 값에 특수문자(`$`, `!`, `` ` ``)가 포함될 가능성이 있으면 **반드시 작은따옴표**를 사용해야 합니다.
 
-사실 더 안전한 방법은 `--from-literal` 대신 `--from-file`을 사용하는 것이에요:
+사실 더 안전한 방법은 `--from-literal` 대신 `--from-file`을 사용하는 것입니다:
 
 ```bash
 # 파일에 값 저장 (쉘 해석 없음)
@@ -191,12 +191,12 @@ $ rm /tmp/access-key-id
 ### Secret 등록 후 검증 필수
 
 Secret을 등록한 뒤에는 반드시 `kubectl get secret -o jsonpath`로 **실제 저장된 값을 검증**해야 합니다.
-명령어가 성공했다고 해서 값이 정확하게 저장된 것은 아니다.
+명령어가 성공했다고 해서 값이 정확하게 저장된 것은 아닙니다.
 
 ### 연쇄 장애의 교훈
 
 Secret 하나가 잘못되면 클러스터 전체가 영향받을 수 있습니다.
-특히 ECR 자격증명처럼 **여러 컴포넌트가 공유하는 Secret**은 한 번의 실수가 연쇄 장애로 이어져요.
+특히 ECR 자격증명처럼 **여러 컴포넌트가 공유하는 Secret**은 한 번의 실수가 연쇄 장애로 이어집니다.
 
 ---
 

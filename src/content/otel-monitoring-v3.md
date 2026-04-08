@@ -17,7 +17,7 @@ date: '2026-01-05'
 
 ## 한 줄 요약
 
-> 트레이스 데이터에서 RED 메트릭(Rate, Error, Duration)을 자동 생성한다. OTEL Collector의 spanmetrics connector가 핵심.
+> 트레이스 데이터에서 RED 메트릭(Rate, Error, Duration)을 자동 생성합니다. OTEL Collector의 spanmetrics connector가 핵심입니다.
 
 ## Impact
 
@@ -69,7 +69,7 @@ date: '2026-01-05'
 
 ---
 
-## 🔥 문제 1: Span Metrics가 생성되지 않는다
+## 🔥 문제 1: Span Metrics가 생성되지 않습니다
 
 ### 증상
 
@@ -127,7 +127,7 @@ service:
 
 ---
 
-## 🔥 문제 2: Histogram 단위가 이상하다
+## 🔥 문제 2: Histogram 단위가 이상합니다
 
 ### 증상
 
@@ -150,7 +150,7 @@ connectors:
 
 ---
 
-## 🔥 문제 3: Service Graph가 비어 있다
+## 🔥 문제 3: Service Graph가 비어 있습니다
 
 ### 증상
 
@@ -385,7 +385,7 @@ traces pipeline → spanmetrics connector → metrics pipeline → prometheusrem
 
 ### Span Context 전파의 중요성
 
-Service Graph가 작동하려면 서비스 간 호출에서 **trace context가 전파**되어야 합니다. HTTP 클라이언트에 `otelhttp.NewTransport`를 사용하세요.
+Service Graph가 작동하려면 서비스 간 호출에서 **trace context가 전파**되어야 합니다. HTTP 클라이언트에 `otelhttp.NewTransport`를 사용해야 합니다.
 
 ### Remote Write 활성화 필수
 

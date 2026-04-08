@@ -24,7 +24,7 @@ date: "2026-03-06"
 
 OTel 레이블 검증을 위해 `make verify-up`으로 goti-server와 모니터링 스택을 Docker에 올리는 중이었습니다.
 
-goti-server 컨테이너가 반복적으로 재시작되고 있었어요.
+goti-server 컨테이너가 반복적으로 재시작되고 있었습니다.
 
 ```bash
 $ docker ps
@@ -38,7 +38,7 @@ abc123        goti-server  Restarting (1) 5 seconds ago    goti-server
 
 ### 에러 메시지
 
-docker logs를 확인해봤습니다.
+docker logs를 확인했습니다.
 
 ```
 Failed to bind properties under 'jwt.social-verify-valid-time' to java.time.Duration:
@@ -48,12 +48,12 @@ Failed to bind properties under 'jwt.social-verify-valid-time' to java.time.Dura
     Reason: '${JWT_SOCIAL_VERIFY_TIME}' is not a valid duration
 ```
 
-Spring Boot가 `${JWT_SOCIAL_VERIFY_TIME}`이라는 **문자열 그 자체**를 Duration으로 파싱하려다 실패한 거예요.
+Spring Boot가 `${JWT_SOCIAL_VERIFY_TIME}`이라는 **문자열 그 자체**를 Duration으로 파싱하려다 실패한 것입니다.
 
 ### 왜 이런 일이 발생했나
 
 처음에는 OTel 관련 설정 문제를 의심했습니다.
-하지만 에러 메시지를 보면 JWT Duration 파싱 문제가 명확했어요.
+하지만 에러 메시지를 보면 JWT Duration 파싱 문제가 명확했습니다.
 
 다른 JWT 환경변수와 비교해봤습니다:
 
@@ -66,7 +66,7 @@ environment:
 ```
 
 `JWT_ACCESS_TIME`과 `JWT_REFRESH_TIME`은 `${VAR:-default}` 패턴으로 기본값이 설정되어 있었습니다.
-그런데 `JWT_SOCIAL_VERIFY_TIME`만 `docker-compose.app.yml`에 정의조차 되어 있지 않았어요.
+그런데 `JWT_SOCIAL_VERIFY_TIME`만 `docker-compose.app.yml`에 정의조차 되어 있지 않았습니다.
 
 `application.yml`도 마찬가지였습니다:
 
@@ -79,7 +79,7 @@ jwt:
 ```
 
 새 JWT 환경변수를 추가할 때 이 항목만 누락된 것으로 추정됩니다.
-`.env` 파일이 있는 환경에서는 값이 주입되니 문제가 없었지만, `.env` 없이 기동하면 바로 터지는 구조였어요.
+`.env` 파일이 있는 환경에서는 값이 주입되니 문제가 없었지만, `.env` 없이 기동하면 바로 터지는 구조였습니다.
 
 ---
 
@@ -139,7 +139,7 @@ Docker Compose 환경에서 Spring Boot 앱을 운영하면, 환경변수가 두
 | .env 없음, yml만 기본값 | ❌ | ✅ | 정상 (Spring이 처리) |
 | .env 없음, 둘 다 없음 | ❌ | ❌ | **파싱 에러** |
 
-가장 안전한 방법은 **양쪽 모두 기본값을 설정**하는 것이다.
+가장 안전한 방법은 **양쪽 모두 기본값을 설정**하는 것입니다.
 
 ### 새 환경변수 추가 시 체크리스트
 

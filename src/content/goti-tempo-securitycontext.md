@@ -31,7 +31,7 @@ date: "2026-03-13"
 ## 🔥 상황: Tempo만 Unknown 상태
 
 ArgoCD에서 모니터링 앱들의 sync 상태를 확인하고 있었습니다.
-다른 앱들은 정상인데, `tempo-dev`만 `Unknown` 상태로 남아 있었어요.
+다른 앱들은 정상인데, `tempo-dev`만 `Unknown` 상태로 남아 있었습니다.
 
 ---
 
@@ -48,7 +48,7 @@ error building typed value from config resource:
 field not declared in schema
 ```
 
-에러 메시지가 매우 명확해요.
+에러 메시지가 매우 명확합니다.
 `.spec.template.spec.securityContext`에 `allowPrivilegeEscalation` 필드가 **스키마에 선언되어 있지 않다**고 합니다.
 
 ### 두 가지 가설
@@ -65,7 +65,7 @@ field not declared in schema
 
 ## 🤔 근본 원인: Pod-level vs Container-level securityContext
 
-`helm show values grafana-community/tempo --version 1.24.4`로 chart 구조를 확인했어요.
+`helm show values grafana-community/tempo --version 1.24.4`로 chart 구조를 확인했습니다.
 
 Tempo chart에는 securityContext를 설정하는 곳이 두 군데 있습니다:
 
@@ -74,16 +74,16 @@ Tempo chart에는 securityContext를 설정하는 곳이 두 군데 있습니다
 | 최상위 `securityContext` | Pod-level (`spec.securityContext`) | `runAsUser`, `runAsGroup`, `fsGroup`, `runAsNonRoot` |
 | `tempo.securityContext` | Container-level (`spec.containers[].securityContext`) | `allowPrivilegeEscalation`, `capabilities`, `readOnlyRootFilesystem` 등 |
 
-이 두 가지는 Kubernetes에서 완전히 다른 스키마예요.
+이 두 가지는 Kubernetes에서 완전히 다른 스키마입니다.
 
 **Pod-level** securityContext는 `PodSecurityContext` 타입이고, **container-level**은 `SecurityContext` 타입입니다.
 이름은 비슷하지만 허용하는 필드가 다릅니다.
 
-`allowPrivilegeEscalation`과 `capabilities`는 `SecurityContext` (container-level)에만 존재하는 필드예요.
+`allowPrivilegeEscalation`과 `capabilities`는 `SecurityContext` (container-level)에만 존재하는 필드입니다.
 이걸 `PodSecurityContext` (Pod-level)에 넣으면, Kubernetes 스키마에서 해당 필드를 인식하지 못합니다.
 
-Helm template 렌더링은 통과하지만, ArgoCD가 structured merge diff를 계산할 때 스키마 검증에서 실패하는 거예요.
-**helm template으로는 이 에러를 감지할 수 없다는 것**이 까다로운 점이다.
+Helm template 렌더링은 통과하지만, ArgoCD가 structured merge diff를 계산할 때 스키마 검증에서 실패하는 것입니다.
+**helm template으로는 이 에러를 감지할 수 없다는 것**이 까다로운 점입니다.
 
 ---
 
@@ -117,29 +117,30 @@ tempo:
 
 ### Pod-level vs Container-level securityContext 정리
 
-Kubernetes securityContext는 두 가지 레벨이 있어요.
+Kubernetes securityContext는 두 가지 레벨이 있습니다.
 이름이 비슷해서 헷갈리기 쉽지만, 허용하는 필드가 다릅니다.
+
 
 **Pod-level (`PodSecurityContext`)**:
 
-Pod 전체에 적용되는 보안 설정이에요.
+Pod 전체에 적용되는 보안 설정입니다.
 - `runAsUser` / `runAsGroup`: Pod 내 모든 컨테이너의 실행 UID/GID
 - `fsGroup`: 볼륨 마운트 시 그룹 소유권
 - `runAsNonRoot`: root 실행 차단
 
 **Container-level (`SecurityContext`)**:
 
-개별 컨테이너에 적용되는 보안 설정이에요.
+개별 컨테이너에 적용되는 보안 설정입니다.
 - `allowPrivilegeEscalation`: 권한 상승 허용 여부
 - `capabilities`: Linux capability 추가/제거
 - `readOnlyRootFilesystem`: 읽기 전용 루트 파일시스템
 
 ### helm template으로 감지 불가
 
-이 에러의 까다로운 점은 `helm template` dry-run으로는 감지할 수 없다는 거예요.
+이 에러의 까다로운 점은 `helm template` dry-run으로는 감지할 수 없다는 것입니다.
 Helm은 YAML 렌더링만 수행하고, Kubernetes 스키마 검증은 하지 않습니다.
 
-ArgoCD의 structured merge diff가 실제 Kubernetes 스키마와 비교할 때 비로소 에러가 발생해요.
+ArgoCD의 structured merge diff가 실제 Kubernetes 스키마와 비교할 때 비로소 에러가 발생합니다.
 CI에서 `helm template`을 돌려도 이 문제는 통과합니다.
 
 ### 재발 방지

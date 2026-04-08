@@ -45,7 +45,7 @@ NAME    READY   STATUS              AGE
 nginx   0/1     ContainerCreating   30s  # ← 왜 이렇게 오래 걸려?
 ```
 
-간단 결론 >> 이미지 다운로드의 시간이 대부분이다. (이미지를 최적화하자.) 
+간단 결론 >> 이미지 다운로드의 시간이 대부분입니다. (이미지를 최적화해야 합니다.) 
 
 이 글에서는:
 - kubectl 입력부터 Pod Running까지의 **전체 흐름**
@@ -90,8 +90,8 @@ clusters:
 
 **3. 검증 (Validation)**
 - "YAML 문법 맞아?"
-- 필수 필드 있나?
-- 리소스 타입 맞나?
+- 필수 필드 있습니까?
+- 리소스 타입 맞습니까?
 
 **실제 측정:**
 ```
@@ -105,7 +105,7 @@ real    0m0.152s  # ← API Server 응답 시간
 
 ### [단계 2] API Server → ETCD (0.05초)
 
-API Server는 검증이 끝나면 ETCD에 저장한다.
+API Server는 검증이 끝나면 ETCD에 저장합니다.
 
 **ETCD에 저장되는 내용 (단순화):**
 ```
@@ -144,7 +144,7 @@ ETCDCTL_API=3 etcdctl get /registry/pods/default/nginx \
 
 ### [단계 3] Scheduler 작동 (0.5-2초) ⭐⭐⭐
 
-이 단계가 K8s의 핵심이다. Scheduler가 **어느 노드에 Pod를 배치할지** 결정한다.
+이 단계가 K8s의 핵심입니다. Scheduler가 **어느 노드에 Pod를 배치할지** 결정합니다.
 
 **Scheduler의 2단계 알고리즘:**
 
@@ -189,7 +189,7 @@ Events:
 
 #### 4-1. Kubelet이 감지 (0.1초)
 
-Scheduler가 nodeName을 node2로 설정하면, node2의 Kubelet이 Watch로 감지한다.
+Scheduler가 nodeName을 node2로 설정하면, node2의 Kubelet이 Watch로 감지합니다.
 
 ```
 Kubelet (node2):
@@ -199,7 +199,7 @@ Kubelet (node2):
 
 #### 4-2. 이미지 다운로드 (5-30초) ⭐⭐⭐
 
-**시간이 오래 걸리는 작업이였다.**
+**시간이 오래 걸리는 작업이었습니다.**
 
 **nginx 이미지 예시:**
 ```
@@ -236,7 +236,7 @@ time kubectl apply -f nginx-pod.yaml && \
 real    0m2.145s  # ← 2초! (이미지 캐시 사용)
 ```
 
-→ **용량 차이도 많이 나고, 속도도 차이가 많이 난다.**
+→ **용량 차이도 많이 나고, 속도도 차이가 많이 납니다.**
 
 ---
 
@@ -338,7 +338,7 @@ LAST SEEN   TYPE    REASON      MESSAGE
 8s          Normal  Started     Started container nginx
 ```
 
-→ **이런식으로 어떤게 오래걸리는지 모니터링할 수 있다.**
+→ **이런식으로 어떤게 오래걸리는지 모니터링할 수 있습니다.**
 
 **한 줄 명령으로 보기:**
 ```
