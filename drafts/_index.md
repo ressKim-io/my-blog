@@ -1,7 +1,7 @@
 # Blog Drafts Index
 
-최종 업데이트: 2026-04-05
-소스: `goti-team-controller/docs/dev-logs/` + `docs/adr/`
+최종 업데이트: 2026-04-19 (116편 추가 동기화)
+소스: `goti-team-controller/docs/dev-logs/` + `docs/adr/` + `docs/load-test/`
 
 ---
 
@@ -166,3 +166,159 @@
 ---
 
 ## 시리즈 구성 (안) — 업데이트
+
+---
+
+## 신규 동기화 (2026-04-19) — 116편
+
+블로그 제목/시리즈 분류는 추후 작성. 일단 파일명만 카테고리별로 나열.
+
+### 새 ADR — 12편
+
+| 상태 | 파일 | 주제 |
+|------|------|------|
+| ⬜ | `0010-jwks-distribution-automation.md` | |
+| ⬜ | `0011-prometheus-agent-mode.md` | |
+| ⬜ | `0012-read-replica-split.md` | |
+| ⬜ | `0013-pgbouncer-connection-pooling.md` | |
+| ⬜ | `0014-redis-first-ticketing.md` | |
+| ⬜ | `0015-jwt-issuer-sot-in-k8s-values.md` | |
+| ⬜ | `0016-multicloud-circuit-breaker-and-hpa.md` | |
+| ⬜ | `0017-redis-as-source-of-truth-adoption.md` | |
+| ⬜ | `0018-multicloud-db-replication-technology.md` | |
+| ⬜ | `0019-db-active-passive-with-read-split.md` | |
+| ⬜ | `0020-db-failback-reverse-replication.md` | |
+| ⬜ | `0021-pglogical-mr-replication-known-gaps-and-roadmap.md` | |
+
+### 새 Dev-logs — 2026-02-28 ~ 2026-04-19 (103편)
+
+기존 _index 의 '누락' 이었던 구간 (2026-02-28 ~ 2026-04-01) + 신규 2026-04-06 이후 포함.
+
+#### 2026-02-28 ~ 2026-03-31 누락 보강
+
+| 상태 | 파일 |
+|------|------|
+| ⬜ | `2026-02-28-otel-sdk-version-conflict.md` |
+| ⬜ | `2026-02-28-postgres-healthcheck-env-mismatch.md` |
+| ⬜ | `2026-03-01-cd-ssm-waiter-timeout.md` |
+| ⬜ | `2026-03-02-grafana-csrf-origin-not-allowed.md` |
+| ⬜ | `2026-03-02-network-label-conflict-and-loki-healthcheck.md` |
+| ⬜ | `2026-03-03-review-pr-gap-learning.md` |
+| ⬜ | `2026-03-06-cloudfront-swagger-403.md` |
+| ⬜ | `2026-03-06-jwt-social-verify-time-missing.md` |
+| ⬜ | `2026-03-06-otel-label-mismatch.md` |
+| ⬜ | `2026-03-09-dev-monitoring-502.md` |
+| ⬜ | `2026-03-09-hikaricp-otel-beanpostprocessor.md` |
+| ⬜ | `2026-03-09-monitoring-dashboard-nodata-comprehensive.md` |
+| ⬜ | `2026-03-09-prometheus-job-label-mismatch.md` |
+| ⬜ | `2026-03-11-ec2-cd-skill-improvement.md` |
+| ⬜ | `2026-03-11-k8s-skill-review-improvement.md` |
+| ⬜ | `2026-03-11-kind-ecr-secret-dollar-escape.md` |
+| ⬜ | `2026-03-11-monitoring-skill-review-improvement.md` |
+| ⬜ | `2026-03-11-otel-hikaricp-skill-improvement.md` |
+| ⬜ | `2026-03-12-image-updater-multisource.md` |
+| ⬜ | `2026-03-12-monitoring-external-access.md` |
+| ⬜ | `2026-03-12-monitoring-stack-kind-fixes.md` |
+| ⬜ | `2026-03-13-alloy-mimir-rules-duplicate-metrics.md` |
+| ⬜ | `2026-03-13-prometheus-routeprefix-remote-write-404.md` |
+| ⬜ | `2026-03-13-tempo-securitycontext-schema.md` |
+| ⬜ | `2026-03-13-virtualservice-fqdn-503.md` |
+| ⬜ | `2026-03-14-kafka-buffered-otel-pipeline.md` |
+| ⬜ | `2026-03-14-otel-agent-otlp-protocol-mismatch.md` |
+| ⬜ | `2026-03-15-dashboard-enhancement.md` |
+| ⬜ | `2026-03-15-monitoring-bugs-found.md` |
+| ⬜ | `2026-03-15-monitoring-pitfalls-system.md` |
+| ⬜ | `2026-03-17-monitoring-msa-and-mimir-crash.md` |
+| ⬜ | `2026-03-17-servicemap-promql-syntax-error.md` |
+| ⬜ | `2026-03-18-renovate-ecr-auth-failure.md` |
+| ⬜ | `2026-03-20-istio-injection-label-pg-max-connections.md` |
+| ⬜ | `2026-03-23-argocd-dashboard-zero-metrics.md` |
+| ⬜ | `2026-03-23-error-tracking-dashboard-logql-traceql-fix.md` |
+| ⬜ | `2026-03-23-error-tracking-dashboard-loki-nodata.md` |
+| ⬜ | `2026-03-24-cloudflare-cloudfront-301-redirect-loop.md` |
+| ⬜ | `2026-03-24-monitoring-e2e-multi-troubleshoot.md` |
+| ⬜ | `2026-03-24-tempo-overrides-legacyconfig-parsing-error.md` |
+| ⬜ | `2026-03-25-dashboard-query-validation-fixes.md` |
+| ⬜ | `2026-03-25-decision-redis-exporter-deployment.md` |
+| ⬜ | `2026-03-25-kafka-crashloop-netpol-egress.md` |
+| ⬜ | `2026-03-25-load-test-db-realistic-data.md` |
+| ⬜ | `2026-03-25-tempo-metricsgenerator-overrides-activation.md` |
+
+#### 2026-04-06 ~ 2026-04-19 신규
+
+| 상태 | 파일 |
+|------|------|
+| ⬜ | `2026-04-06-harbor-imagepull-403-cloudflare-waf.md` |
+| ⬜ | `2026-04-06-opencost-crashloop-prometheus-path.md` |
+| ⬜ | `2026-04-06-redis-managed-kafka-removal.md` |
+| ⬜ | `2026-04-06-review-comparison-claude-gemini-k8s-176.md` |
+| ⬜ | `2026-04-07-eks-node-join-401-missing-cluster-policy.md` |
+| ⬜ | `2026-04-07-google-oauth-500-social-providers-status-column.md` |
+| ⬜ | `2026-04-08-ai-rules-skills-agents-improvement.md` |
+| ⬜ | `2026-04-08-dev-loadtest-ssh-istio-turnstile.md` |
+| ⬜ | `2026-04-08-istio-peerauth-selector-prometheus-503.md` |
+| ⬜ | `2026-04-09-resale-istio-rbac-403.md` |
+| ⬜ | `2026-04-10-phase6-ticketing-implementation.md` |
+| ⬜ | `2026-04-10-phase6-ticketing-sql-optimization.md` |
+| ⬜ | `2026-04-10-resale-phase4-step10-tests.md` |
+| ⬜ | `2026-04-11-phase6-redis-inventory.md` |
+| ⬜ | `2026-04-12-capacity-planning-keda.md` |
+| ⬜ | `2026-04-12-go-migration-parallel-folder-proposal.md` |
+| ⬜ | `2026-04-12-phase7-audit-sdd-decision.md` |
+| ⬜ | `2026-04-12-phase7-D-overturn-phase6.5-decision.md` |
+| ⬜ | `2026-04-12-pr192-claude-vs-gemini-review-gap.md` |
+| ⬜ | `2026-04-13-cutover-smoke-trail-fixes.md` |
+| ⬜ | `2026-04-13-go-cutover-residual-fixes.md` |
+| ⬜ | `2026-04-13-go-otel-sdk-missing-labels.md` |
+| ⬜ | `2026-04-13-java-to-go-cutover-smoke-trouble.md` |
+| ⬜ | `2026-04-13-node-rightsizing-and-rebalancing.md` |
+| ⬜ | `2026-04-13-orphan-stadium-cleanup.md` |
+| ⬜ | `2026-04-13-phase8-p0-seat-booking-port.md` |
+| ⬜ | `2026-04-13-session-2-additional-findings.md` |
+| ⬜ | `2026-04-13-sql-audit-and-envelope-mismatch.md` |
+| ⬜ | `2026-04-14-3000vu-2nd-and-next-checklist.md` |
+| ⬜ | `2026-04-14-3000vu-queue-oneshot.md` |
+| ⬜ | `2026-04-14-cutover-residual-bugs-and-smoke-7of7.md` |
+| ⬜ | `2026-04-14-gcp-bringup-decisions.md` |
+| ⬜ | `2026-04-14-gcp-bringup-troubleshooting-chain.md` |
+| ⬜ | `2026-04-14-pgbouncer-rollout-and-load-test.md` |
+| ⬜ | `2026-04-14-prometheus-agent-mode-and-monitoring-cascade.md` |
+| ⬜ | `2026-04-15-cloudflare-multicloud-worker-and-cert-manager.md` |
+| ⬜ | `2026-04-15-pod-scaling-vs-karpenter-nodepool-discussion.md` |
+| ⬜ | `2026-04-15-redis-sot-d0-d2-implementation.md` |
+| ⬜ | `2026-04-15-ticketing-hotpath-and-scaling-overhaul.md` |
+| ⬜ | `2026-04-17-cloudflare-worker-lax-latency-investigation.md` |
+| ⬜ | `2026-04-17-gcp-redis-recovery-and-jwt-unification.md` |
+| ⬜ | `2026-04-17-jwt-issuer-401-root-fix.md` |
+| ⬜ | `2026-04-17-multi-cloud-failover-bringup.md` |
+| ⬜ | `2026-04-17-redis-sot-d0-d1-rollout.md` |
+| ⬜ | `2026-04-17-redis-sot-d2-d3-d4-rollout.md` |
+| ⬜ | `2026-04-17-signup-created-at-bug-and-sql-audit.md` |
+| ⬜ | `2026-04-17-signup-dtype-regression.md` |
+| ⬜ | `2026-04-18-db-cloud-sql-to-pg-primary-vm.md` |
+| ⬜ | `2026-04-18-multicloud-readonly-smoke.md` |
+| ⬜ | `2026-04-18-phase-b-pglogical-trial-and-cleanup.md` |
+| ⬜ | `2026-04-18-redis-sot-d5-d6-d7-rollout.md` |
+| ⬜ | `2026-04-19-aws-bringup-harbor-to-ecr.md` |
+| ⬜ | `2026-04-19-aws-full-destroy-and-gcp-only-latency-optimization.md` |
+| ⬜ | `2026-04-19-game-time-utc-json-contract-fix.md` |
+| ⬜ | `2026-04-19-resale-fe-be-contract-audit.md` |
+| ⬜ | `2026-04-19-resale-flow-end-to-end-fix.md` |
+| ⬜ | `2026-04-19-resale-listings-400-investigation.md` |
+| ⬜ | `2026-04-19-session-dropout-root-cause-audit.md` |
+
+### 새 Load-test — 1편 (이전 누락 보강 포함)
+
+| 상태 | 파일 |
+|------|------|
+| ⬜ | `synthetic-traffic.md` |
+
+### 주요 시리즈 후보 (116편 중에서)
+
+- **Redis SoT** (`2026-04-15-redis-sot-d0-d2-...`, `2026-04-17-redis-sot-d0-d1-rollout.md` 등 5편)
+- **Java → Go 마이그레이션 cutover** (`2026-04-13-cutover-*`, `2026-04-14-cutover-residual*` 등 10편)
+- **Multi-Cloud 전환** (`2026-04-14-gcp-bringup-*`, `2026-04-17-multi-cloud-failover-*`, `2026-04-19-aws-full-destroy-*` 등)
+- **pglogical 복제** (`2026-04-18-db-cloud-sql-to-pg-primary-vm`, `-phase-b-pglogical-trial-*`, ADR 0018/0019/0020/0021)
+- **PgBouncer + 부하테스트** (`2026-04-14-pgbouncer-rollout-*`, load-test/3000vu 2편)
+- **JWT / Auth 이슈 연쇄** (`2026-04-17-jwt-issuer-*`, `-gcp-redis-recovery-and-jwt-unification`, `0015 JWT issuer SoT`)
+- **2026-04-19 리셀 플로우 end-to-end** (5건 연쇄 수정 포스트모템)
