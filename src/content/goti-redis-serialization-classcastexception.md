@@ -376,7 +376,7 @@ Spring Boot의 기본 `jacksonObjectMapper`가 유일한 ObjectMapper Bean으로
 
 ---
 
-## 🤔 근본 원인: RedisTemplate\<String, Object\>의 구조적 한계
+## 🤔 근본 원인: RedisTemplate\&lt;String, Object\>의 구조적 한계
 
 두 장애 모두 같은 뿌리에서 나왔습니다.
 

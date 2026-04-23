@@ -267,7 +267,7 @@ operator 기반 아키텍처는 operator 자체가 스케줄되지 않으면 어
 평시 메모리는 절반 이하지만, WAL replay와 초기 scrape가 겹치는 기동 시점에는 평소의 2~3배 피크가 생깁니다. limit을 평시 실측 기준으로 낮게 잡으면 CrashLoop에 빠질 수 있습니다. 기동 피크를 흡수할 여유를 남겨 둬야 합니다.
 
 **Grafana `label_values()`는 내부적으로 `/api/v1/series`를 사용해 비교 연산자를 허용하지 않습니다.**
-변수 쿼리에 필터 조건이 필요하면 `query_result()` + regex 패턴을 써야 합니다. 이 제약은 Grafana 문서에 눈에 잘 띄지 않지만, 변수 panel이 "parse error: unexpected <op:>>" 같은 메시지를 내면 거의 이 원인입니다.
+변수 쿼리에 필터 조건이 필요하면 `query_result()` + regex 패턴을 써야 합니다. 이 제약은 Grafana 문서에 눈에 잘 띄지 않지만, 변수 panel이 "parse error: unexpected &lt;op:>>" 같은 메시지를 내면 거의 이 원인입니다.
 
 ---
 

@@ -50,7 +50,7 @@ order_creation의 2초대 p95는 티켓팅 도메인에서는 **실질적으로 
 |------|------|------|----------|
 | P0-2 inventory row contention | grade당 1 row에 수백 명이 UPDATE | Redis HINCRBY | 600ms → 0ms |
 | P0-3 이중 잠금 + pool 고갈 | TX 안에 inventory UPDATE 포함 | TX 범위 축소 | TX 5-10ms → 2-3ms |
-| NEW-1 pool cascading (victim) | P0-2, P0-3의 파생 효과 | 간접 해소 | order p95 2s → <200ms |
+| NEW-1 pool cascading (victim) | P0-2, P0-3의 파생 효과 | 간접 해소 | order p95 2s → &lt;200ms |
 | NEW-2 OrderItem N+1 INSERT | 좌석마다 개별 INSERT | BatchSave | 10 round-trip → 1 |
 | NEW-3 FindDuplicateSeats 인덱스 | JOIN 시 full scan | 인덱스 2개 | 데이터 증가에도 안정 |
 

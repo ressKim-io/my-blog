@@ -52,14 +52,14 @@ POC A의 단순 폴링 승격과 다른 점은 **이벤트 기반**이라는 것
 | Iterations | 457 (1.2/s) | - | - |
 | queue_pass_rate | 100% (458/458) | >70% | 통과 |
 | ticket_success_rate | 93.87% (429/457) | >20% | 통과 |
-| http_req_failed | 0.00% (1/34,894) | <10% | 통과 |
-| http_req_duration p95 | 309ms | <2000ms | 통과 |
-| queue_enter_ms p95 | 337ms | <1000ms | 통과 |
-| queue_status_ms p95 | 281ms | <500ms | 통과 |
-| queue_seat_enter_ms p95 | 324ms | <1000ms | 통과 |
+| http_req_failed | 0.00% (1/34,894) | &lt;10% | 통과 |
+| http_req_duration p95 | 309ms | &lt;2000ms | 통과 |
+| queue_enter_ms p95 | 337ms | &lt;1000ms | 통과 |
+| queue_status_ms p95 | 281ms | &lt;500ms | 통과 |
+| queue_seat_enter_ms p95 | 324ms | &lt;1000ms | 통과 |
 | queue_heartbeat_ms p95 | 278ms | - | - |
-| queue_wait p50 | 17s | <30s | 통과 |
-| queue_wait p95 | 3m59s | <120s | 미달 |
+| queue_wait p50 | 17s | &lt;30s | 통과 |
+| queue_wait p95 | 3m59s | &lt;120s | 미달 |
 | queue_e2e avg | 56s | - | - |
 | queue_immediate_pass_rate | 13.29% | - | - |
 | queue_poll_count avg/max | 9.2 / 65 | - | - |
@@ -75,14 +75,14 @@ POC A의 단순 폴링 승격과 다른 점은 **이벤트 기반**이라는 것
 | Iterations | 417 (1.1/s) | - | - |
 | queue_pass_rate | 100% (418/418) | >70% | 통과 |
 | ticket_success_rate | 90.90% (380/418) | >20% | 통과 |
-| http_req_failed | 0.00% (0/106,987) | <10% | 통과 |
-| http_req_duration p95 | 282ms | <2000ms | 통과 |
-| queue_enter_ms p95 | 293ms | <1000ms | 통과 |
-| queue_status_ms p95 | 279ms | <500ms | 통과 |
-| queue_seat_enter_ms p95 | 295ms | <1000ms | 통과 |
+| http_req_failed | 0.00% (0/106,987) | &lt;10% | 통과 |
+| http_req_duration p95 | 282ms | &lt;2000ms | 통과 |
+| queue_enter_ms p95 | 293ms | &lt;1000ms | 통과 |
+| queue_status_ms p95 | 279ms | &lt;500ms | 통과 |
+| queue_seat_enter_ms p95 | 295ms | &lt;1000ms | 통과 |
 | queue_heartbeat_ms p95 | 278ms | - | - |
-| queue_wait p50 | 11.7s | <30s | 통과 |
-| queue_wait p95 | 2m54s | <120s | 미달 |
+| queue_wait p50 | 11.7s | &lt;30s | 통과 |
+| queue_wait p95 | 2m54s | &lt;120s | 미달 |
 | queue_e2e avg | 45s | - | - |
 | queue_immediate_pass_rate | 7.07% | - | - |
 | queue_poll_count avg/max | 7.3 / 67 | - | - |
@@ -97,14 +97,14 @@ POC A의 단순 폴링 승격과 다른 점은 **이벤트 기반**이라는 것
 | Iterations | 290 (0.77/s) | - | - |
 | queue_pass_rate | 100% (292/292) | >70% | 통과 |
 | ticket_success_rate | 86.20% (250/290) | >20% | 통과 |
-| http_req_failed | 0.00% (2/309,449) | <10% | 통과 |
-| http_req_duration p95 | 501ms | <2000ms | 통과 |
-| queue_enter_ms p95 | 917ms | <1000ms | 통과 |
-| queue_status_ms p95 | 500ms | <500ms | 경계 |
-| queue_seat_enter_ms p95 | 562ms | <1000ms | 통과 |
+| http_req_failed | 0.00% (2/309,449) | &lt;10% | 통과 |
+| http_req_duration p95 | 501ms | &lt;2000ms | 통과 |
+| queue_enter_ms p95 | 917ms | &lt;1000ms | 통과 |
+| queue_status_ms p95 | 500ms | &lt;500ms | 경계 |
+| queue_seat_enter_ms p95 | 562ms | &lt;1000ms | 통과 |
 | queue_heartbeat_ms p95 | 482ms | - | - |
-| queue_wait p50 | 23s | <30s | 통과 |
-| queue_wait p95 | 4m48s | <120s | 미달 |
+| queue_wait p50 | 23s | &lt;30s | 통과 |
+| queue_wait p95 | 4m48s | &lt;120s | 미달 |
 | queue_e2e avg | 1m47s | - | - |
 | queue_immediate_pass_rate | 3.04% | - | - |
 | queue_poll_count avg/max | 19.6 / 67 | - | - |

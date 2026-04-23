@@ -100,7 +100,7 @@ $ terraform import 'module.config.google_secret_manager_secret.this["server-REDI
 # 3. terraform apply — 새 version이 생성되면서 drift 해소
 ```
 
-import 대상은 Secret container(`google_secret_manager_secret`)만입니다. Secret version은 Terraform이 새로 생성하여 새 Redis IP를 담은 URL로 교체합니다.
+`import` 대상은 Secret container(`google_secret_manager_secret`)만입니다. Secret version은 Terraform이 새로 생성하여 새 Redis IP를 담은 URL로 교체합니다.
 
 ### 시크릿 재주입 + 롤아웃
 

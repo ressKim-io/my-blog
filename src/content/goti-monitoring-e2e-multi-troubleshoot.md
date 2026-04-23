@@ -327,7 +327,7 @@ overrides 설정을 제거하고 ArgoCD ConfigMap이 갱신되지 않아 kubectl
 
 | 항목 | 내용 |
 |------|------|
-| Monolithic 권장 범위 | <50GB/일, <20 서비스 |
+| Monolithic 권장 범위 | &lt;50GB/일, &lt;20 서비스 |
 | 가장 효과적인 메모리 절감 | `max_block_duration` 축소 (30m→5m: ~50%) |
 | metrics_generator OFF 효과 | 200~500MB 절감 |
 | tail sampling 효과 | 볼륨 60~90% 감소 |
