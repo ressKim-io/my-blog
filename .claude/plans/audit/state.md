@@ -1,7 +1,7 @@
 # 현재 진행 상태
 
 **마지막 업데이트**: 2026-04-24
-**현재 Phase**: Phase 3 실행 — 🟢 6/8 결정 완료, 리라이트 2건 대기
+**현재 Phase**: Phase 3 실행 — 🟢 8/8 결정 완료 (리라이트 4편 포함)
 
 ## Phase 3 실행 결과
 
@@ -11,8 +11,8 @@
 | 2 | goti-meta 스킬보강 4편 → 1편 병합 | ✅ 완료 | `4db092f` |
 | 3 | error-tracking 2편 → 1편 병합 | ✅ 완료 | `f573402` |
 | 4 | Claude vs Gemini 2편 시리즈 분리 | ✅ 완료 | `f061589` |
-| 5 | wsl2-k3s-troubleshooting 리라이트 | ⏸ 보류 | 별도 세션 |
-| 6 | B유형 서사/컨텍스트 결여 리라이트 3편 | ⏸ 보류 | 별도 세션 |
+| 5 | wsl2-k3s-troubleshooting 리라이트 | ✅ 완료 | (커밋 대기) |
+| 6 | B유형 서사/컨텍스트 결여 리라이트 3편 | ✅ 완료 | (커밋 대기) |
 | 7 | 27편 2월 재배정 | ✅ 완료 | `1491db8` |
 | 8 | 유형 메타 태그 188편 부여 | ✅ 완료 | `95da1fb` |
 
@@ -30,16 +30,16 @@
   - retrospective: 9편
 - **CLAUDE.md 통계 업데이트 완료**
 
-## 다음에 할 일 (별도 세션 권장)
+## 다음에 할 일
 
-### 리라이트 (결정 5, 6)
+### 리라이트 (결정 5, 6) — ✅ 완료 (2026-04-24)
 
-공수 크고 개별 글별 신중한 접근 필요
+4편 모두 리라이트 완료, 커밋 대기 중
 
-1. `wsl2-k3s-troubleshooting` — 설명 보강 (코드 64% → 설명 비중 올리기, 맥락 why 추가)
-2. `multi-repo-cicd-strategy` — mono vs multi 대안 비교 + 우리 프로젝트 맥락 why
-3. `goti-queue-poc-performance-comparison` — 처리량 목표·POC 선택 기준 보강
-4. `queue-poc-loadtest-part3-selection` — 대용량/무중단 목표 → 왜 이 PoC를 택했는지 결정 서사
+1. ✅ `wsl2-k3s-troubleshooting` — WSL2+k3s 컨텍스트, systemd/iptables 충돌 원인, k3d 구조적 우월성 추가
+2. ✅ `multi-repo-cicd-strategy` — mono vs multi vs 중앙배포 3안 비교, 부트캠프 팀 협업 맥락 why
+3. ✅ `goti-queue-poc-performance-comparison` — 프로젝트 처리량 목표 명시, 세 명이 다른 방식 택한 의도, 비교 목적
+4. ✅ `queue-poc-loadtest-part3-selection` — 대용량/무중단/확장가능 3대 목표 명시, B 탈락 진짜 이유(확장곡선), A 선정으로 무엇을 얻고 포기했는지 정리
 
 ### 유형 태그 스팟 체크 (선택)
 
@@ -52,8 +52,9 @@
 
 ## 세션 인계 메모
 
-- **블로그 감사 프로젝트는 핵심 실행이 모두 완료**됨
-- 리라이트 2건은 글별로 컨텍스트가 커서 사용자와 동행하는 게 낫습니다
+- **블로그 감사 프로젝트 8/8 결정 모두 완료** (리라이트 4편 포함)
+- 리라이트 4편은 모두 마침표 규칙(문장·문단·bullet 끝 마침표 생략) 적용됨
 - 날짜 이동은 `tags[0]="go-ti"` 컨벤션 / 시리즈 연속성 모두 보존됨
 - 유형 태그는 자동 분류라 오분류 가능성 있음 → `type-assignments.md` 참조
 - 빌드/린트 확인은 아직 안 함 → 사용자가 `npm run build`로 최종 확인 권장
+- 리라이트 4편 커밋은 별도로 진행 (사용자 검토 후)
