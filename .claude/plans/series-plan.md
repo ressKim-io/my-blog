@@ -276,14 +276,13 @@ GCP bringup부터 AWS destroy, failover까지. 시리즈 1~7은 순서대로 읽
 
 ---
 
-### S17. `goti-prometheus-agent` (2편) — Prometheus Agent Mode
+### S17. `goti-prometheus-agent` (1편) — Prometheus Agent Mode
 
 | order | draft | 제목(안) |
 |---|---|---|
 | 1 | `0011-prometheus-agent-mode.md` | Prometheus Agent Mode 도입 (ADR) |
-| 2 | (S11-16에 있는 `prometheus-agent-mode-and-monitoring-cascade`와 쌍) | |
 
-**주의**: 2026-04-14 글은 S11에도 들어있습니다. 변환 시 실제로 **Prometheus Agent Mode가 핵심 주제면 S17**로, **모니터링 연쇄 장애가 핵심이면 S11**로 배치합니다. blog-writer가 원본 읽고 판단하되, 중복 배치는 금지.
+**주의**: 2026-04-14 `prometheus-agent-mode-and-monitoring-cascade`는 **S11 order 16에 배치됨**(2026-04-22 변환 시 결정 — 본문의 핵심 주제가 OTel 라벨 → NetworkPolicy → operator 데드락 → OOMKill → Grafana 변수 parse error로 이어진 "모니터링 연쇄 장애 복구"였기 때문). 따라서 S17은 이제 ADR 1편만 남아 단독 ADR로 취급.
 
 **tags**: `go-ti`, `Prometheus`, `Agent-Mode`, `Observability`
 
@@ -346,20 +345,20 @@ Claude Code/Gemini 사용 경험, skill/agent 개선 로그.
 
 - [x] S1 redis-sot (7) — 2026-04-22 완료
 - [x] S2 multicloud (11) — 2026-04-22 완료
-- [ ] S3 multicloud-db (7)
+- [x] S3 multicloud-db (7) — 2026-04-22 완료
 - [ ] S4 java-to-go (6)
 - [x] S5 queue-poc (11) — 2026-04-22 완료 (실명 익명화 포함)
 - [ ] S6 ticketing-phase (5)
 - [ ] S7 scaling (4)
 - [ ] S8 argocd (5)
-- [ ] S9 auth (7)
+- [x] S9 auth (7) — 2026-04-23 완료
 - [ ] S10 resale (5)
-- [ ] S11 observability-ops (16)
+- [x] S11 observability-ops (16) — 2026-04-22 완료
 - [ ] S12 istio-ops (3)
 - [ ] S13 eks (3)
 - [ ] S14 kafka (3)
 - [ ] S15 pgbouncer (2)
 - [ ] S16 loadtest (3)
 - [ ] S17 prometheus-agent (2)
-- [ ] S18 meta (10)
-- [ ] 단독 글 (13)
+- [x] S18 meta (10) — 2026-04-23 완료
+- [x] 단독 글 (13) — 2026-04-23 완료
