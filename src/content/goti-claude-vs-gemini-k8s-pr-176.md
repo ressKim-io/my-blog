@@ -10,8 +10,8 @@ tags:
   - Code-Review
   - Kubernetes
 series:
-  name: "goti-meta"
-  order: 7
+  name: "goti-ai-review-comparison"
+  order: 1
 date: "2026-04-06"
 ---
 

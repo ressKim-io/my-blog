@@ -11,8 +11,8 @@ tags:
   - Istio
   - Helm
 series:
-  name: "goti-meta"
-  order: 9
+  name: "goti-ai-review-comparison"
+  order: 2
 date: "2026-04-12"
 ---
 
