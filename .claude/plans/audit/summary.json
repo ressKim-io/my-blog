@@ -1,0 +1,23 @@
+{
+  "total": 196,
+  "typeDist": {
+    "A": 113,
+    "C": 8,
+    "D": 13,
+    "B": 62
+  },
+  "lowValueCount": 1,
+  "narrThinCount": 10,
+  "ctxThinCount": 5,
+  "movableToFebCount": 42,
+  "duplicatePairsCount": 23,
+  "monthDist": {
+    "2026-01": 9,
+    "2026-03": 73,
+    "2025-10": 19,
+    "2025-11": 1,
+    "2025-12": 33,
+    "2026-04": 59,
+    "2026-02": 2
+  }
+}

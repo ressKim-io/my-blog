@@ -50,20 +50,26 @@ npm run lint       # ESLint
 - `next.config.ts`: `output: 'export'` for GitHub Pages
 - Production uses `/my-blog` base path; development uses root
 
-## Blog Content Stats (2026-04-23 기준)
+## Blog Content Stats (2026-04-24 기준, 감사 이후)
 
-- **총 글 수**: 196개 (go-ti 프로젝트 실전 기록 127편 포함)
+- **총 글 수**: 188개 (go-ti 프로젝트 실전 기록 ~120편 포함)
 - **카테고리 (6개)**:
-  - `challenge` (51): 게임서버/POC/부하테스트/AI 워크플로우 경험 시리즈
-  - `monitoring` (46): Prometheus, OpenTelemetry, Grafana, Loki, Tempo, Mimir
-  - `kubernetes` (43): K8s 기본, EKS, Helm, KEDA, Karpenter, 스케일링
-  - `istio` (34): Service Mesh, Traffic/Security/Observability/Ambient, JWT
-  - `cicd` (13): CI/CD, ArgoCD GitOps, EC2 CD 파이프라인
+  - `challenge` (52): 게임서버/POC/부하테스트/AI 워크플로우 경험 시리즈
+  - `monitoring` (43): Prometheus, OpenTelemetry, Grafana, Loki, Tempo, Mimir
+  - `kubernetes` (42): K8s 기본, EKS, Helm, KEDA, Karpenter, 스케일링
+  - `istio` (30): Service Mesh, Traffic/Security/Observability/Ambient, JWT
+  - `cicd` (12): CI/CD, ArgoCD GitOps, EC2 CD 파이프라인
   - `argocd` (9): ArgoCD, SSA, ApplicationSet
-- **태그**: 모든 글에 tags 필드 존재 (~350개 고유 태그, 대소문자 변형 포함)
+- **유형 메타 태그** (감사 신설): `troubleshooting` (122) / `adr` (34) / `concept` (23) / `retrospective` (9)
+  - `/blog?tag=adr` — 의사결정 서사 글만 모아보기
+  - `/blog?tag=troubleshooting` — 단순 트러블슈팅 모아보기
+  - `/blog?tag=concept` — 개념·학습 글
+  - `/blog?tag=retrospective` — 메타 회고
+- **태그**: 모든 글에 tags 필드 존재 (~350개 고유 주제 태그 + 유형 메타 태그 4종)
 - **주요 시리즈** (편수 순):
-  - go-ti 프로젝트 (127편, 20개 시리즈): observability-ops (16), queue-poc (11), multicloud (11), meta (10), redis-sot (7), multicloud-db (7), auth (7), scaling (4), 그 외 포함
-  - 기존 시리즈: istio-ambient (7), eks-troubleshooting (8), game-server (7), wealist-migration (5), istio-traffic (5), istio-security (4), istio-observability (4), istio-intro (3), istio (4)
+  - go-ti 프로젝트 (20개 시리즈): observability-ops (15), queue-poc (11), multicloud (11), multicloud-db (7), auth (7), redis-sot (7), meta (7), scaling (4), ai-review-comparison (2), 그 외 포함
+  - 기존 시리즈: eks-troubleshooting (9), istio-ambient (7), game-server (7), challenge-2-wealist-migration (5), istio-traffic (5), argocd-troubleshooting (5), istio-security (3), istio-observability (4), istio-intro (3)
+- **월별 분포**: 2025-10: 15 / 2025-12: 33 / 2026-01: 9 / **2026-02: 29** / 2026-03: 47 / 2026-04: 54 (감사 후 2월로 재배정 완료)
 - **go-ti 태그 필터**: 모든 goti 글은 `tags[0] == "go-ti"`로 `/blog?tag=go-ti` 한 번에 조회 가능
 
 ## Content (Blog Posts)
