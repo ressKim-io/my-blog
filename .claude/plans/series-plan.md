@@ -349,7 +349,7 @@ Claude Code/Gemini 사용 경험, skill/agent 개선 로그.
 - [ ] S4 java-to-go (6)
 - [x] S5 queue-poc (11) — 2026-04-22 완료 (실명 익명화 포함)
 - [ ] S6 ticketing-phase (5)
-- [ ] S7 scaling (4)
+- [x] S7 scaling (4) — 2026-04-23 완료
 - [ ] S8 argocd (5)
 - [x] S9 auth (7) — 2026-04-23 완료
 - [ ] S10 resale (5)
