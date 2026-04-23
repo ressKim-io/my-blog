@@ -236,7 +236,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 border-t border-[var(--border)]">
         <div className="max-w-5xl mx-auto px-4 text-center text-[var(--text-muted)] text-xs">
-          <p>© 2025 Ress</p>
+          <p>© 2026 Ress</p>
         </div>
       </footer>
     </>

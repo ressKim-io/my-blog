@@ -50,18 +50,21 @@ npm run lint       # ESLint
 - `next.config.ts`: `output: 'export'` for GitHub Pages
 - Production uses `/my-blog` base path; development uses root
 
-## Blog Content Stats (2026-01-11 기준)
+## Blog Content Stats (2026-04-23 기준)
 
-- **총 글 수**: 62개
+- **총 글 수**: 196개 (go-ti 프로젝트 실전 기록 127편 포함)
 - **카테고리 (6개)**:
-  - `istio` (31): Service Mesh, Istio Traffic/Security/Observability/Ambient
-  - `challenge` (13): 게임서버, 마이그레이션 시리즈
-  - `kubernetes` (8): K8s 기본 (Pod, Service, EKS 트러블슈팅)
-  - `monitoring` (4): Prometheus, OTel, Grafana
-  - `argocd` (3): ArgoCD, GitOps, Helm
-  - `cicd` (3): CI/CD, Docker Compose
-- **태그**: 모든 글에 tags 필드 존재 (48개 고유 태그)
-- **시리즈**: game-server (7), wealist-migration (5), eks-troubleshooting (8), istio (4), istio-intro (3), istio-security (4), istio-traffic (5), istio-observability (4), istio-ambient (7)
+  - `challenge` (51): 게임서버/POC/부하테스트/AI 워크플로우 경험 시리즈
+  - `monitoring` (46): Prometheus, OpenTelemetry, Grafana, Loki, Tempo, Mimir
+  - `kubernetes` (43): K8s 기본, EKS, Helm, KEDA, Karpenter, 스케일링
+  - `istio` (34): Service Mesh, Traffic/Security/Observability/Ambient, JWT
+  - `cicd` (13): CI/CD, ArgoCD GitOps, EC2 CD 파이프라인
+  - `argocd` (9): ArgoCD, SSA, ApplicationSet
+- **태그**: 모든 글에 tags 필드 존재 (~350개 고유 태그, 대소문자 변형 포함)
+- **주요 시리즈** (편수 순):
+  - go-ti 프로젝트 (127편, 20개 시리즈): observability-ops (16), queue-poc (11), multicloud (11), meta (10), redis-sot (7), multicloud-db (7), auth (7), scaling (4), 그 외 포함
+  - 기존 시리즈: istio-ambient (7), eks-troubleshooting (8), game-server (7), wealist-migration (5), istio-traffic (5), istio-security (4), istio-observability (4), istio-intro (3), istio (4)
+- **go-ti 태그 필터**: 모든 goti 글은 `tags[0] == "go-ti"`로 `/blog?tag=go-ti` 한 번에 조회 가능
 
 ## Content (Blog Posts)
 
