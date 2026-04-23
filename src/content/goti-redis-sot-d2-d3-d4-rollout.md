@@ -10,6 +10,7 @@ tags:
   - Production
   - Lua
   - PostgreSQL
+  - adr
 series:
   name: "goti-redis-sot"
   order: 6

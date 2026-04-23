@@ -8,6 +8,7 @@ tags:
   - Sidecar
   - Service Mesh
   - EKS
+  - concept
 series:
   name: "istio-ambient"
   order: 7

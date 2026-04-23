@@ -11,6 +11,7 @@ tags:
   - Cloudflare
   - PostgreSQL
   - Architecture Decision Record
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 2

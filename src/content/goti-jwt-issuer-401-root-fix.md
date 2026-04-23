@@ -9,6 +9,7 @@ tags:
   - viper
   - Configuration
   - Multi-Cloud
+  - troubleshooting
 series:
   name: "goti-auth"
   order: 4

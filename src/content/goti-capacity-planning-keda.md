@@ -9,6 +9,7 @@ tags:
   - k6
   - LoadTest
   - Capacity-Planning
+  - troubleshooting
 series:
   name: "goti-scaling"
   order: 1

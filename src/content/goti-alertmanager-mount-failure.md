@@ -9,6 +9,7 @@ tags:
   - Prometheus
   - ExternalSecret
   - ArgoCD
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 14

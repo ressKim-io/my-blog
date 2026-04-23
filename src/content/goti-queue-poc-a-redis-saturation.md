@@ -9,6 +9,7 @@ tags:
   - LoadTest
   - Redis
   - Saturation
+  - troubleshooting
 series:
   name: "goti-queue-poc"
   order: 4

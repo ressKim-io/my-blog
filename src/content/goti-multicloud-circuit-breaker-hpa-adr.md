@@ -11,6 +11,7 @@ tags:
   - AWS
   - GCP
   - Cloudflare
+  - adr
 series:
   name: "goti-multicloud"
   order: 1

@@ -9,6 +9,7 @@ tags:
   - k6
   - 3000VU
   - Oneshot
+  - troubleshooting
 series:
   name: "goti-queue-poc"
   order: 10

@@ -9,6 +9,7 @@ tags:
   - LoadTest
   - Kafka
   - Saturation
+  - troubleshooting
 series:
   name: "goti-queue-poc"
   order: 5

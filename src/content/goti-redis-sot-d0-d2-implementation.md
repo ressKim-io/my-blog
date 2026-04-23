@@ -10,6 +10,7 @@ tags:
   - Rollout
   - Ticketing
   - Lua
+  - troubleshooting
 series:
   name: "goti-redis-sot"
   order: 4

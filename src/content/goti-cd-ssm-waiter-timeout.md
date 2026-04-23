@@ -9,6 +9,7 @@ tags:
   - ssm
   - cd
   - ec2
+  - troubleshooting
 series:
   name: "goti-ec2-deploy"
   order: 2

@@ -9,6 +9,7 @@ tags:
   - Architecture Decision Record
   - PostgreSQL
   - LoadTest
+  - adr
 series:
   name: "goti-redis-sot"
   order: 1

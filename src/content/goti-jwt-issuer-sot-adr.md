@@ -9,6 +9,7 @@ tags:
   - Istio
   - Configuration
   - viper
+  - adr
 series:
   name: "goti-auth"
   order: 2

@@ -7,6 +7,7 @@ tags:
   - hpa
   - autoscaling
   - metrics-server
+  - troubleshooting
 date: '2025-10-17'
 series:
   name: game-server

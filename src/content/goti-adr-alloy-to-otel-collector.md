@@ -9,6 +9,7 @@ tags:
   - Kafka
   - Mimir
   - Observability
+  - adr
 date: '2026-02-05'
 ---
 

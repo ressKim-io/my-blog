@@ -9,6 +9,7 @@ tags:
   - loki
   - healthcheck
   - ec2
+  - troubleshooting
 series:
   name: "goti-ec2-deploy"
   order: 4

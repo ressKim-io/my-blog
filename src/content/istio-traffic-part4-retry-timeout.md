@@ -2,7 +2,7 @@
 title: "Istio Traffic Part 4: Retry와 Timeout으로 복원력 높이기"
 excerpt: "VirtualService의 retry와 timeout 설정으로 안정적인 서비스 만들기"
 category: istio
-tags: ["istio", "retry", "timeout", "resilience", "virtualservice", "kubernetes"]
+tags: ["istio", "retry", "timeout", "resilience", "virtualservice", "kubernetes", concept]
 series:
   name: "istio-traffic"
   order: 4

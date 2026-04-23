@@ -7,6 +7,7 @@ tags:
   - JWT
   - Authentication
   - Frontend
+  - concept
 series:
   name: "eks-security"
   order: 2

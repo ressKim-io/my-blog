@@ -8,6 +8,7 @@ tags:
   - microservices
   - sidecar
   - kubernetes
+  - adr
 series:
   name: "istio-intro"
   order: 1

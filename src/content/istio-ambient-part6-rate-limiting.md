@@ -2,7 +2,7 @@
 title: "Istio Ambient Part 6: EnvoyFilter 없이 Rate Limiting 구현하기"
 excerpt: "Ambient Mode에서 EnvoyFilter 미지원 문제를 Redis 기반 애플리케이션 레벨 Rate Limiting으로 해결"
 category: istio
-tags: ["istio", "ambient-mesh", "rate-limiting", "redis", "go", "kubernetes"]
+tags: ["istio", "ambient-mesh", "rate-limiting", "redis", "go", "kubernetes", concept]
 series:
   name: "istio-ambient"
   order: 6

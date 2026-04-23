@@ -10,6 +10,7 @@ tags:
   - Rules
   - Skill
   - Prompt-Engineering
+  - retrospective
 series:
   name: "goti-meta"
   order: 10

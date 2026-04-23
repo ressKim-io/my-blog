@@ -11,6 +11,7 @@ tags:
   - Production
   - Lua
   - Outbox
+  - troubleshooting
 series:
   name: "goti-redis-sot"
   order: 7

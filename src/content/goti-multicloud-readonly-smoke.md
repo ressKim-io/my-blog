@@ -8,6 +8,7 @@ tags:
   - ReadOnly
   - SmokeTest
   - Failover
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 8

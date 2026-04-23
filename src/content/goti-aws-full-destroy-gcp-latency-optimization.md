@@ -9,6 +9,7 @@ tags:
   - GCP
   - Latency
   - Cost
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 10

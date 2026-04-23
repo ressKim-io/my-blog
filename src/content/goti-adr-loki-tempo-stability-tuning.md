@@ -10,6 +10,7 @@ tags:
   - GOMEMLIMIT
   - Observability
   - Performance-Tuning
+  - adr
 date: '2026-02-11'
 ---
 

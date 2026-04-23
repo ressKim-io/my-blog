@@ -8,6 +8,7 @@ tags:
   - argocd
   - gitops
   - microservices
+  - adr
 date: '2025-10-26'
 ---
 

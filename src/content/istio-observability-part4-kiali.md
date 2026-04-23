@@ -2,7 +2,7 @@
 title: "Istio Observability Part 4: Kiali로 Service Mesh 시각화하기"
 excerpt: "Kiali를 활용한 서비스 토폴로지 시각화와 Istio 설정 검증"
 category: istio
-tags: ["istio", "observability", "kiali", "visualization", "service-mesh", "kubernetes"]
+tags: ["istio", "observability", "kiali", "visualization", "service-mesh", "kubernetes", concept]
 series:
   name: "istio-observability"
   order: 4

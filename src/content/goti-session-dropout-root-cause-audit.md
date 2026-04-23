@@ -9,6 +9,7 @@ tags:
   - Frontend
   - Auth
   - Audit
+  - adr
 series:
   name: "goti-auth"
   order: 7

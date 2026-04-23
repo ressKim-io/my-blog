@@ -2,7 +2,7 @@
 title: "Istio Traffic Part 5: Traffic Mirroring으로 안전하게 테스트하기"
 excerpt: "실제 트래픽을 복제해서 새 버전을 검증하는 Shadow Testing 구현"
 category: istio
-tags: ["istio", "traffic-mirroring", "shadow-testing", "virtualservice", "kubernetes"]
+tags: ["istio", "traffic-mirroring", "shadow-testing", "virtualservice", "kubernetes", concept]
 series:
   name: "istio-traffic"
   order: 5

@@ -9,6 +9,7 @@ tags:
   - CDN
   - Decision
   - Architecture Decision Record
+  - adr
 series:
   name: "goti-queue-poc"
   order: 11

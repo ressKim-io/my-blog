@@ -8,6 +8,7 @@ tags:
   - Grafana-Alloy
   - Mimir
   - Prometheus
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 1

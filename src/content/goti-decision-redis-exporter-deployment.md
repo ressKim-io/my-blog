@@ -8,6 +8,7 @@ tags:
   - Exporter
   - Prometheus
   - Deployment
+  - troubleshooting
 date: "2026-02-15"
 ---
 

@@ -8,6 +8,7 @@ tags:
   - CloudSQL
   - GCP
   - Migration
+  - troubleshooting
 series:
   name: "goti-multicloud-db"
   order: 6

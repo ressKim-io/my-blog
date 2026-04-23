@@ -9,6 +9,7 @@ tags:
   - ECR
   - Harbor
   - ImageRegistry
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 9

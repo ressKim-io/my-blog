@@ -8,6 +8,7 @@ tags:
   - nodeSelector
   - workload
   - resource-optimization
+  - troubleshooting
 date: '2025-10-17'
 series:
   name: game-server

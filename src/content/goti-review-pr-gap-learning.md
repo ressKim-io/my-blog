@@ -9,6 +9,7 @@ tags:
   - Gemini
   - Code-Review
   - AI-Workflow
+  - retrospective
 series:
   name: "goti-meta"
   order: 1

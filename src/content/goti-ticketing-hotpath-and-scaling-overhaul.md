@@ -10,6 +10,7 @@ tags:
   - Hot-Path
   - SDD
   - Scaling
+  - troubleshooting
 series:
   name: "goti-scaling"
   order: 4

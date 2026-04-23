@@ -9,6 +9,7 @@ tags:
   - HPA
   - Scaling
   - Capacity-Planning
+  - adr
 series:
   name: "goti-scaling"
   order: 3

@@ -10,6 +10,7 @@ tags:
   - Istio
   - Service-Isolation
   - Spring-Security
+  - troubleshooting
 series:
   name: "queue-poc-loadtest"
   order: 1

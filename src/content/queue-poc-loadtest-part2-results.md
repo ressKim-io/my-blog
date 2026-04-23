@@ -10,6 +10,7 @@ tags:
   - Redis
   - Performance
   - Saturation
+  - troubleshooting
 series:
   name: "queue-poc-loadtest"
   order: 2

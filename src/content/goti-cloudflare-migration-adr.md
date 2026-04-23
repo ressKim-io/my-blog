@@ -11,6 +11,7 @@ tags:
   - DNS
   - SSL
   - Architecture Decision Record
+  - adr
 series:
   name: "goti-cloudflare-migration"
   order: 1

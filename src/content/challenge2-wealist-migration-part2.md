@@ -9,6 +9,7 @@ tags:
   - postgresql
   - pvc
   - storage
+  - retrospective
 date: '2025-10-20'
 series:
   name: challenge-2-wealist-migration

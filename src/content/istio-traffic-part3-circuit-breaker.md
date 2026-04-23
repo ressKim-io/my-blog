@@ -2,7 +2,7 @@
 title: "Istio Traffic Part 3: Circuit Breaker로 장애 격리하기"
 excerpt: "DestinationRule의 outlierDetection과 connectionPool로 장애 전파를 막는 방법"
 category: istio
-tags: ["istio", "circuit-breaker", "outlier-detection", "resilience", "kubernetes"]
+tags: ["istio", "circuit-breaker", "outlier-detection", "resilience", "kubernetes", concept]
 series:
   name: "istio-traffic"
   order: 3

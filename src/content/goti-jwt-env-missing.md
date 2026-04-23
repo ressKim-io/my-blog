@@ -8,6 +8,7 @@ tags:
   - spring-boot
   - environment-variable
   - ec2
+  - troubleshooting
 series:
   name: "goti-ec2-deploy"
   order: 5

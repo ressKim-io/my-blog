@@ -9,6 +9,7 @@ tags:
   - Tempo
   - Grafana
   - Monitoring
+  - concept
 series:
   name: "observability"
   order: 1

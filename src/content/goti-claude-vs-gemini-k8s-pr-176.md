@@ -9,6 +9,7 @@ tags:
   - Gemini
   - Code-Review
   - Kubernetes
+  - adr
 series:
   name: "goti-ai-review-comparison"
   order: 1

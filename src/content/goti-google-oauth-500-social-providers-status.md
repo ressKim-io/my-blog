@@ -10,6 +10,7 @@ tags:
   - Hibernate
   - RDS
   - Kyverno
+  - troubleshooting
 series:
   name: "goti-auth"
   order: 3

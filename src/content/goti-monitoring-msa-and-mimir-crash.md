@@ -11,6 +11,7 @@ tags:
   - Loki
   - Prometheus
   - Grafana
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 4

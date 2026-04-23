@@ -2,7 +2,7 @@
 title: "Istio Traffic Part 1: 트래픽 관리 4대 리소스 총정리"
 excerpt: "Gateway, VirtualService, DestinationRule, ServiceEntry - Istio 트래픽 관리의 핵심 리소스를 이해하기"
 category: istio
-tags: ["istio", "traffic-management", "virtualservice", "destinationrule", "gateway", "kubernetes"]
+tags: ["istio", "traffic-management", "virtualservice", "destinationrule", "gateway", "kubernetes", concept]
 series:
   name: "istio-traffic"
   order: 1

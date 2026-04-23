@@ -9,6 +9,7 @@ tags:
   - certificate
   - serviceaccount
   - kubernetes
+  - concept
 series:
   name: "istio-security"
   order: 2

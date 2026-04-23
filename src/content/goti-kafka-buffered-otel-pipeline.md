@@ -9,6 +9,7 @@ tags:
   - Kafka
   - Grafana-Alloy
   - Architecture-Decision-Record
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 3

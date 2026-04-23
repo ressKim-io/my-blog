@@ -9,6 +9,7 @@ tags:
   - OTLP
   - Alloy
   - Grafana
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 2

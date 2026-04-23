@@ -9,6 +9,7 @@ tags:
   - Architecture Decision Record
   - Ticketing
   - Rollout
+  - adr
 series:
   name: "goti-redis-sot"
   order: 2

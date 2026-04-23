@@ -9,6 +9,7 @@ tags:
   - control-plane
   - data-plane
   - kubernetes
+  - concept
 series:
   name: "istio-intro"
   order: 2

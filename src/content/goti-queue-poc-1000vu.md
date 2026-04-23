@@ -9,6 +9,7 @@ tags:
   - LoadTest
   - k6
   - 1000VU
+  - adr
 series:
   name: "goti-queue-poc"
   order: 9

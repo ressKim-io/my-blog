@@ -9,6 +9,7 @@ tags:
   - Prometheus
   - Mimir
   - FinOps
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 15

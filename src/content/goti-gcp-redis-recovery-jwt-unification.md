@@ -9,6 +9,7 @@ tags:
   - Redis
   - JWT
   - Memorystore
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 6

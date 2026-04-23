@@ -11,6 +11,7 @@ tags:
   - Monitoring
   - OpenTelemetry
   - EC2
+  - retrospective
 series:
   name: "goti-meta"
   order: 2

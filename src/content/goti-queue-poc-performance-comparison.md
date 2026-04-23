@@ -8,6 +8,7 @@ tags:
   - POC
   - Performance
   - Comparison
+  - adr
 series:
   name: "goti-queue-poc"
   order: 8

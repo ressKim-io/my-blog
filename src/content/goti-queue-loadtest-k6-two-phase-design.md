@@ -9,6 +9,7 @@ tags:
   - k6
   - POC
   - Design
+  - troubleshooting
 series:
   name: "goti-queue-poc"
   order: 1

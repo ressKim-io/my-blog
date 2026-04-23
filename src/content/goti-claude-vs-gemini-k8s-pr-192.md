@@ -10,6 +10,7 @@ tags:
   - Code-Review
   - Istio
   - Helm
+  - adr
 series:
   name: "goti-ai-review-comparison"
   order: 2

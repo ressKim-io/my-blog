@@ -9,6 +9,7 @@ tags:
   - security
   - peerauthentication
   - kubernetes
+  - concept
 series:
   name: "istio-security"
   order: 1

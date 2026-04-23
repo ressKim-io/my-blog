@@ -9,6 +9,7 @@ tags:
   - Cloudflare
   - WAF
   - ImagePull
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 11

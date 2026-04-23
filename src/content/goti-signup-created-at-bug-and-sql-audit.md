@@ -9,6 +9,7 @@ tags:
   - JPA
   - Migration
   - Cloudflare
+  - troubleshooting
 series:
   name: "goti-auth"
   order: 5

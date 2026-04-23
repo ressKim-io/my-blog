@@ -10,6 +10,7 @@ tags:
   - Grafana
   - ArgoCD
   - OpenTelemetry
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 16

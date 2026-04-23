@@ -9,6 +9,7 @@ tags:
   - AWS
   - GCP
   - Cloudflare
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 7

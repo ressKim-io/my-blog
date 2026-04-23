@@ -10,6 +10,7 @@ tags:
   - Phase6
   - PostgreSQL
   - Lua
+  - troubleshooting
 series:
   name: "goti-redis-sot"
   order: 3

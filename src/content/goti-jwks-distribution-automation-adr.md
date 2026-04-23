@@ -10,6 +10,7 @@ tags:
   - Istio
   - GitHub-Actions
   - mTLS
+  - adr
 series:
   name: "goti-auth"
   order: 1

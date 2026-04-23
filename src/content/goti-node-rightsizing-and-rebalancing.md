@@ -9,6 +9,7 @@ tags:
   - Karpenter
   - Resource-Planning
   - Terraform
+  - adr
 series:
   name: "goti-scaling"
   order: 2

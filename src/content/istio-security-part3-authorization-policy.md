@@ -9,6 +9,7 @@ tags:
   - rbac
   - security
   - kubernetes
+  - concept
 series:
   name: "istio-security"
   order: 3

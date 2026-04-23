@@ -13,6 +13,7 @@ tags:
   - Kafka
   - Prometheus
   - Architecture Decision Record
+  - adr
 series:
   name: "goti-observability-stack"
   order: 1

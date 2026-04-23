@@ -2,7 +2,7 @@
 title: "Istio Ambient Part 4: Wealist를 Ambient로 마이그레이션하기"
 excerpt: "실제 프로젝트를 Sidecar에서 Ambient로 전환하는 과정과 주의사항"
 category: istio
-tags: ["istio", "ambient-mesh", "migration", "wealist", "kubernetes"]
+tags: ["istio", "ambient-mesh", "migration", "wealist", "kubernetes", retrospective]
 series:
   name: "istio-ambient"
   order: 4

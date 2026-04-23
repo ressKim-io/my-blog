@@ -9,6 +9,7 @@ tags:
   - LoadTest
   - CDN
   - Saturation
+  - troubleshooting
 series:
   name: "goti-queue-poc"
   order: 3

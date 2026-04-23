@@ -11,6 +11,7 @@ tags:
   - TraceQL
   - LogQL
   - Grafana
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 8

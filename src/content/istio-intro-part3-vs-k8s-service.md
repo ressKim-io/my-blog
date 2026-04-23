@@ -8,6 +8,7 @@ tags:
   - kube-proxy
   - load-balancing
   - service-mesh
+  - adr
 series:
   name: "istio-intro"
   order: 3

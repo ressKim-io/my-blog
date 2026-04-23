@@ -10,6 +10,7 @@ tags:
   - Redis
   - Kafka
   - CDN
+  - adr
 series:
   name: "goti-queue-poc"
   order: 7

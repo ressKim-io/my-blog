@@ -10,6 +10,7 @@ tags:
   - Memory
   - Context-Window
   - AI-Workflow
+  - retrospective
 series:
   name: "goti-meta"
   order: 6

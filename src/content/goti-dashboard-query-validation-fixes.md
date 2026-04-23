@@ -10,6 +10,7 @@ tags:
   - PromQL
   - LogQL
   - Prometheus
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 13

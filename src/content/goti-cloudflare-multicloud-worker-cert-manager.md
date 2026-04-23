@@ -9,6 +9,7 @@ tags:
   - Worker
   - cert-manager
   - TLS
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 4

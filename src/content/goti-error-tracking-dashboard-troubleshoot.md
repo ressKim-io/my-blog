@@ -10,6 +10,7 @@ tags:
   - Loki
   - Tempo
   - Grafana
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 10

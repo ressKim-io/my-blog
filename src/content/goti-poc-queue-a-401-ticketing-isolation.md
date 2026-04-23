@@ -9,6 +9,7 @@ tags:
   - LoadTest
   - Isolation
   - Auth
+  - troubleshooting
 series:
   name: "goti-queue-poc"
   order: 2

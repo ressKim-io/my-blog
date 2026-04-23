@@ -10,6 +10,7 @@ tags:
   - Production
   - Memorystore
   - Ticketing
+  - troubleshooting
 series:
   name: "goti-redis-sot"
   order: 5

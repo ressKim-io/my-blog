@@ -9,6 +9,7 @@ tags:
   - Worker
   - Latency
   - SmartPlacement
+  - troubleshooting
 series:
   name: "goti-multicloud"
   order: 5

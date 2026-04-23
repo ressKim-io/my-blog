@@ -9,6 +9,7 @@ tags:
   - PostgreSQL
   - Migration
   - Cloudflare
+  - troubleshooting
 series:
   name: "goti-auth"
   order: 6

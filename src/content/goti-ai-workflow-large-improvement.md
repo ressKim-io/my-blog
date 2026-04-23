@@ -12,6 +12,7 @@ tags:
   - Istio
   - Kubernetes
   - Terraform
+  - retrospective
 series:
   name: "goti-meta"
   order: 8

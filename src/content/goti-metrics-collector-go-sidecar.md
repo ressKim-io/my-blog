@@ -8,6 +8,7 @@ tags:
   - Prometheus
   - Metrics
   - Architecture Decision Record
+  - troubleshooting
 series:
   name: "goti-metrics-collector"
   order: 1

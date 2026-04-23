@@ -11,6 +11,7 @@ tags:
   - CDN
   - Cloudflare
   - Architecture-Decision
+  - adr
 series:
   name: "queue-poc-loadtest"
   order: 3

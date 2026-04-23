@@ -8,6 +8,7 @@ tags:
   - clusterip
   - loadbalancer
   - networking
+  - troubleshooting
 date: '2025-10-17'
 series:
   name: game-server

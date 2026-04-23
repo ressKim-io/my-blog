@@ -10,6 +10,7 @@ tags:
   - Tempo
   - Loki
   - Prometheus
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 7

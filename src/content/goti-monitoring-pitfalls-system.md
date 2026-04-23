@@ -14,6 +14,7 @@ tags:
   - LogQL
   - TraceQL
   - AI-Workflow
+  - troubleshooting
 series:
   name: "goti-observability-ops"
   order: 9
