@@ -10,7 +10,7 @@ tags:
   - GOMEMLIMIT
   - Observability
   - Performance-Tuning
-date: '2026-03-31'
+date: '2026-02-11'
 ---
 
 ## 🎯 한 줄 요약

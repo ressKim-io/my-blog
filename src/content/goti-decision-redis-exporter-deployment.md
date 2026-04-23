@@ -8,7 +8,7 @@ tags:
   - Exporter
   - Prometheus
   - Deployment
-date: "2026-03-25"
+date: "2026-02-15"
 ---
 
 ## 한 줄 요약

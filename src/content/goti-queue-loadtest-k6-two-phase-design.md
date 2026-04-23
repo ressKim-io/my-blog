@@ -12,7 +12,7 @@ tags:
 series:
   name: "goti-queue-poc"
   order: 1
-date: "2026-03-27"
+date: "2026-02-20"
 ---
 
 ## 한 줄 요약

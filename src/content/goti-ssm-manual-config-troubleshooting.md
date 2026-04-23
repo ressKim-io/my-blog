@@ -12,7 +12,7 @@ tags:
   - Least-Privilege
   - Terraform
   - ExternalSecret
-date: "2026-04-01"
+date: "2026-02-18"
 ---
 
 ## 🎯 한 줄 요약

@@ -11,7 +11,7 @@ tags:
   - Code-Review
   - Security
   - Infrastructure-as-Code
-date: "2026-04-04"
+date: "2026-02-06"
 ---
 
 ## 🎯 한 줄 요약

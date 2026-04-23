@@ -8,7 +8,7 @@ tags:
   - Architecture
   - Isolation
   - Pattern
-date: "2026-03-29"
+date: "2026-02-24"
 ---
 
 ## 한 줄 요약

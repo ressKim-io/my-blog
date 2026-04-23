@@ -9,7 +9,7 @@ tags:
   - Kafka
   - Mimir
   - Observability
-date: '2026-03-29'
+date: '2026-02-05'
 ---
 
 ## 🎯 한 줄 요약

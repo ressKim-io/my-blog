@@ -9,7 +9,7 @@ tags:
   - Helm
   - Kind
   - Troubleshooting
-date: "2026-03-13"
+date: "2026-02-17"
 ---
 
 ## 한 줄 요약

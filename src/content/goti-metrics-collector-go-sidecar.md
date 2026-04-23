@@ -11,7 +11,7 @@ tags:
 series:
   name: "goti-metrics-collector"
   order: 1
-date: "2026-03-27"
+date: "2026-02-08"
 ---
 
 ## 한 줄 요약

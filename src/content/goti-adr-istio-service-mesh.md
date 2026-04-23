@@ -9,7 +9,7 @@ tags:
   - Envoy
   - Ambient-Mesh
   - mTLS
-date: '2026-03-14'
+date: '2026-02-03'
 ---
 
 ## 🎯 한 줄 요약

@@ -12,7 +12,7 @@ tags:
 series:
   name: "goti-redis-sot"
   order: 1
-date: "2026-04-14"
+date: "2026-02-22"
 ---
 
 ## 한 줄 요약

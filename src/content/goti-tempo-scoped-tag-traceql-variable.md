@@ -8,7 +8,7 @@ tags:
   - Grafana
   - TraceQL
   - Troubleshooting
-date: "2026-03-15"
+date: "2026-02-23"
 ---
 
 ## 한 줄 요약

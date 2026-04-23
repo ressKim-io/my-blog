@@ -13,7 +13,7 @@ tags:
 series:
   name: "goti-argocd-gitops"
   order: 1
-date: '2026-03-11'
+date: '2026-02-10'
 ---
 
 ## 한 줄 요약

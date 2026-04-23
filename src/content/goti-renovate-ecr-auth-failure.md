@@ -8,7 +8,7 @@ tags:
   - ECR
   - AWS
   - Troubleshooting
-date: "2026-03-18"
+date: "2026-02-12"
 ---
 
 ## 한 줄 요약

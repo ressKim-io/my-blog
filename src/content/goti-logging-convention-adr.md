@@ -8,7 +8,7 @@ tags:
   - logfmt
   - JSON
   - ADR
-date: "2026-03-28"
+date: "2026-02-09"
 ---
 
 ## 한 줄 요약

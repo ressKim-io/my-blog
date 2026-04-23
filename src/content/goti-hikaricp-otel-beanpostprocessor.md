@@ -12,7 +12,7 @@ tags:
 series:
   name: "goti-spring-otel"
   order: 1
-date: "2026-03-09"
+date: "2026-02-02"
 ---
 
 ## 한 줄 요약

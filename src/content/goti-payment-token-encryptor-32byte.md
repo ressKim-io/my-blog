@@ -8,7 +8,7 @@ tags:
   - Encryption
   - Payment
   - Troubleshooting
-date: "2026-04-01"
+date: "2026-02-16"
 ---
 
 ## 한 줄 요약

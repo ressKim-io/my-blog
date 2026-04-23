@@ -10,7 +10,7 @@ tags:
   - ECR
   - ImagePullBackOff
   - Troubleshooting
-date: "2026-03-22"
+date: "2026-02-25"
 ---
 
 ## 한 줄 요약

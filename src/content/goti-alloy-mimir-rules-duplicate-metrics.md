@@ -11,7 +11,7 @@ tags:
 series:
   name: "goti-observability-ops"
   order: 1
-date: "2026-03-13"
+date: "2026-02-07"
 ---
 
 ## 한 줄 요약

@@ -11,7 +11,7 @@ tags:
   - ArgoCD
   - Troubleshooting
   - Architecture-Decision
-date: "2026-03-31"
+date: "2026-02-13"
 ---
 
 ## 🎯 한 줄 요약
