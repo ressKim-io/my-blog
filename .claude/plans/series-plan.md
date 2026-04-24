@@ -346,19 +346,33 @@ Claude Code/Gemini 사용 경험, skill/agent 개선 로그.
 - [x] S1 redis-sot (7) — 2026-04-22 완료
 - [x] S2 multicloud (11) — 2026-04-22 완료
 - [x] S3 multicloud-db (7) — 2026-04-22 완료
-- [ ] S4 java-to-go (6)
+- [x] S4 java-to-go (6) — 2026-04-25 완료 (3단계 품질 게이트 적용)
 - [x] S5 queue-poc (11) — 2026-04-22 완료 (실명 익명화 포함)
-- [ ] S6 ticketing-phase (5)
+- [x] S6 ticketing-phase (5) — 2026-04-25 완료 (Phase 6/6.5/7/8 흐름 컨텍스트 주입)
 - [x] S7 scaling (4) — 2026-04-23 완료
-- [ ] S8 argocd (5)
+- [x] S8 argocd (5) — 2026-04-25 완료 (Alloy→OTel 전환 이유 컨텍스트 주입)
 - [x] S9 auth (7) — 2026-04-23 완료
-- [ ] S10 resale (5)
+- [x] S10 resale (5) — 2026-04-25 완료
 - [x] S11 observability-ops (16) — 2026-04-22 완료
-- [ ] S12 istio-ops (3)
-- [ ] S13 eks (3)
-- [ ] S14 kafka (3)
-- [ ] S15 pgbouncer (2)
-- [ ] S16 loadtest (3)
-- [ ] S17 prometheus-agent (2)
+- [x] S12 istio-ops (3) — 2026-04-25 완료 (Istio 1.29 sidecar Phase 진화 컨텍스트)
+- [x] S13 eks (3) — 2026-04-25 완료 (max-pods 35→110 + VPC /24→/20 서사)
+- [x] S14 kafka (3) — 2026-04-25 완료 (Strimzi+KRaft ADR + Managed 제거)
+- [x] S15 pgbouncer (2) — 2026-04-25 완료 (ADR=session 모드 / rollout=3000VU 트러블)
+- [x] S16 loadtest (3) — 2026-04-25 완료 (synthetic≠realistic 레이어 명시)
+- [x] S17 prometheus-agent (1) — 2026-04-25 완료 (단독 ADR로 처리)
 - [x] S18 meta (10) — 2026-04-23 완료
 - [x] 단독 글 (13) — 2026-04-23 완료
+
+---
+
+## 2026-04-25 마지막 36편 변환 — 3단계 품질 게이트 도입 회고
+
+**Why:** 감사 후 리라이트 4편으로 드러난 패턴 — blog-writer가 원본에 없는 서사는 만들어내지 못함. 단순 병렬 변환은 품질 균일성을 깨뜨림.
+
+**How to apply (다음 변환 작업 시):**
+- Stage 1 — Bash 신호 스캔으로 draft를 A(풍부)/B(중급)/C(단순) 3분류
+- Stage 2 — B그룹은 시리즈 공통 + 개별 컨텍스트 질문지 사용자에게 전달, 답변을 `goti-project-context.md` 같은 파일에 저장해 blog-writer가 참조하게 함
+- Stage 3 — 그룹별 병렬 변환, 프롬프트에 컨텍스트 파일 경로 명시
+- 후검증 — 실명·문체·코드블록 + 🧭 옵션 개수 대조 + B그룹 핵심 키워드 Grep
+
+**검증 결과**: 실명 2건 / MDX `{id}` 빌드 에러 1건 — Grep+빌드로 잡혀서 신속 수정 가능했음. 이 두 검사는 후검증 필수에 포함.
