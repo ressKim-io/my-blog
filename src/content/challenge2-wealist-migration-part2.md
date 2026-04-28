@@ -3,6 +3,7 @@ title: '팀 프로젝트 K8s 마이그레이션 - Part 2: PostgreSQL StatefulSet
 excerpt: 왜 데이터베이스는 StatefulSet을 써야 할까?
 category: challenge
 tags:
+  - wealist
   - bootcamp
   - statefulset
   - deployment

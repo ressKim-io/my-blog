@@ -3,6 +3,7 @@ title: '팀 프로젝트 K8s 마이그레이션 - Part 3: 백엔드 배포 & Sec
 excerpt: 로컬 이미지 사용부터 OOMKilled 해결까지
 category: challenge
 tags:
+  - wealist
   - bootcamp
   - k3d
   - secret

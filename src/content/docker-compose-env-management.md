@@ -1,8 +1,9 @@
 ---
 title: Docker Compose 환경변수 대통합 - 흩어진 .env 파일 정리하기
 excerpt: 멀티 서비스 프로젝트에서 환경변수 충돌 지옥을 끝낸 방법
-category: cicd
+category: challenge
 tags:
+  - wealist
   - docker-compose
   - environment-variables
   - team-project

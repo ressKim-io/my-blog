@@ -3,6 +3,7 @@ title: '팀 프로젝트 K8s 마이그레이션 - Part 4: 프론트엔드 & Ingr
 excerpt: nginx로 React 서빙하고 Ingress로 라우팅 설정하기
 category: challenge
 tags:
+  - wealist
   - bootcamp
   - nginx
   - ingress

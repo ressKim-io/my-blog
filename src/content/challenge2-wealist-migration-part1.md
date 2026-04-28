@@ -3,6 +3,7 @@ title: '팀 프로젝트 K8s 마이그레이션 - Part 1: 프로젝트 분석 & 
 excerpt: Docker Compose로 개발 중이던 weAlist를 K8s로 전환하기
 category: challenge
 tags:
+  - wealist
   - bootcamp
   - k3d
   - docker-compose

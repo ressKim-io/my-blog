@@ -3,6 +3,7 @@ title: '팀 프로젝트 K8s 마이그레이션 - Part 5: 트러블슈팅 & Helm
 excerpt: 5가지 에러를 겪으며 배운 것들과 더 나은 관리 방법
 category: challenge
 tags:
+  - wealist
   - bootcamp
   - troubleshooting
   - helm
