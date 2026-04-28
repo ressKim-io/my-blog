@@ -96,10 +96,10 @@ Goti-k8s에 `USER_TEST_USER_ENABLED=true` env를 추가했습니다.
 
 Goti-go의 CI/CD 구조를 파악하면 이유가 명확합니다.
 
-```text
-ci-user.yml  → pull_request 트리거만 (main push 대상 아님)
-cd-prod.yml  → deploy/prod 브랜치 push 또는 workflow_dispatch
-```
+| 워크플로우 | 트리거 | 비고 |
+|---|---|---|
+| `ci-user.yml` | `pull_request`만 | main push 대상 아님 |
+| `cd-prod.yml` | `deploy/prod` 브랜치 push 또는 `workflow_dispatch` | 실제 배포 트리거 |
 
 main push만으로는 배포 파이프라인이 작동하지 않는 구조입니다.
 
@@ -241,12 +241,7 @@ NOW() - make_interval(months => $N)
 
 ## 🤔 원인 6: smoke가 내부 중간 레이어를 직접 호출
 
-실제 프론트 `PurchaseDetailPage`의 호출 체인을 추적했습니다.
-
-```text
-Browser → GET /api/v1/payments/purchases  (payment-go 서비스)
-              └─→ GET /api/v1/orders/internal  (ticketing-go 내부 호출)
-```
+실제 프론트 `PurchaseDetailPage`의 호출 체인은 Browser → `GET /api/v1/payments/purchases`(payment-go 서비스) → `GET /api/v1/orders/internal`(ticketing-go 내부 호출) 순으로 흘렀습니다.
 
 smoke.js는 `/orders/internal`을 직접 호출하고 있었습니다. payment 집계 레이어 전체를 스킵하는 구조였습니다.
 
@@ -301,10 +296,10 @@ $ yq '.env | group_by(.name) | map(select(length > 1))' values.yaml
 
 **4. Goti-go의 CI/CD 브랜치 구조를 다시 명확히 했습니다**
 
-```text
-인프라 레포 (Goti-k8s, Goti-monitoring) — main push → 배포
-애플리케이션 레포 (Goti-go)            — deploy/prod push → 배포
-```
+| 레포 유형 | 대상 레포 | 배포 트리거 |
+|---|---|---|
+| 인프라 | Goti-k8s, Goti-monitoring | `main` push |
+| 애플리케이션 | Goti-go | `deploy/prod` push |
 
 레포마다 배포 트리거가 다릅니다. main merge로 끝났다고 착각하기 쉬운 구조입니다
 

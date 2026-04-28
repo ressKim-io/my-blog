@@ -2618,61 +2618,6 @@
     ]
   },
   {
-    "file": "goti-cutover-residual-bugs-smoke-7of7.md",
-    "category": "challenge",
-    "series": "goti-java-to-go",
-    "title": "Java→Go Cutover 잔존 버그 4건 해결 — Smoke 7/7 완결편",
-    "blockCount": 5,
-    "totalAsciiLines": 19,
-    "blocks": [
-      {
-        "startLine": 99,
-        "endLine": 101,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "ci-user.yml  → pull_request 트리거만 (main push 대상 아님) / cd-prod.yml  → deploy/prod 브랜치 push 또는 workflow_dispatch"
-      },
-      {
-        "startLine": 246,
-        "endLine": 248,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "flow-diagram",
-        "decision": "flatten",
-        "sample": "Browser → GET /api/v1/payments/purchases  (payment-go 서비스) /               └─→ GET /api/v1/orders/internal  (ticketing-g"
-      },
-      {
-        "startLine": 269,
-        "endLine": 276,
-        "lang": "text",
-        "lineCount": 7,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "✓ schedules            200 / ✓ signup (TestUser)    200 / ✓ signup returned token"
-      },
-      {
-        "startLine": 304,
-        "endLine": 306,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "인프라 레포 (Goti-k8s, Goti-monitoring) — main push → 배포 / 애플리케이션 레포 (Goti-go)            — deploy/prod push → 배포"
-      },
-      {
-        "startLine": 340,
-        "endLine": 346,
-        "lang": "text",
-        "lineCount": 6,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Goti-go  0e318ee — feat(user): port TestUser endpoints / Goti-k8s 0f22245 — enable USER_TEST_USER_ENABLED / Goti-go  2b5"
-      }
-    ]
-  },
-  {
     "file": "goti-harbor-imagepull-403-cloudflare-waf.md",
     "category": "kubernetes",
     "series": "goti-multicloud",
@@ -2920,6 +2865,34 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "lobby.game.example.com → game-lobby / chat.game.example.com  → game-chat"
+      }
+    ]
+  },
+  {
+    "file": "goti-cutover-residual-bugs-smoke-7of7.md",
+    "category": "challenge",
+    "series": "goti-java-to-go",
+    "title": "Java→Go Cutover 잔존 버그 4건 해결 — Smoke 7/7 완결편",
+    "blockCount": 2,
+    "totalAsciiLines": 13,
+    "blocks": [
+      {
+        "startLine": 264,
+        "endLine": 271,
+        "lang": "text",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "✓ schedules            200 / ✓ signup (TestUser)    200 / ✓ signup returned token"
+      },
+      {
+        "startLine": 335,
+        "endLine": 341,
+        "lang": "text",
+        "lineCount": 6,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "Goti-go  0e318ee — feat(user): port TestUser endpoints / Goti-k8s 0f22245 — enable USER_TEST_USER_ENABLED / Goti-go  2b5"
       }
     ]
   },
@@ -3733,25 +3706,6 @@
     ]
   },
   {
-    "file": "goti-cutover-smoke-trail-fixes.md",
-    "category": "challenge",
-    "series": "goti-java-to-go",
-    "title": "Cutover 스모크 트레일 수정 3건 — queueTokenJti·trailing slash·inventory drift",
-    "blockCount": 1,
-    "totalAsciiLines": 6,
-    "blocks": [
-      {
-        "startLine": 31,
-        "endLine": 37,
-        "lang": "text",
-        "lineCount": 6,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "prod-13 (P0) → prod-14 (display_color_hex) /   → prod-15 (seat-statuses 응답) /   → prod-16 (is_available)"
-      }
-    ]
-  },
-  {
     "file": "goti-ecr-secret-dollar-escape.md",
     "category": "argocd",
     "series": "goti-argocd-gitops",
@@ -3804,25 +3758,6 @@
         "kind": "code-arrow",
         "decision": "skip",
         "sample": "# Phase A: AWS SSM에서 키 추출 → /tmp/jwt-migration/ 임시 저장 / # Phase B: Terraform 코드 수정 (6 파일) / # Phase C: state rm tls_priv"
-      }
-    ]
-  },
-  {
-    "file": "goti-go-cutover-residual-fixes.md",
-    "category": "challenge",
-    "series": "goti-java-to-go",
-    "title": "Java→Go Cutover 잔존 이슈 4건 — DB 컬럼 불일치·쿠키 계약 위반",
-    "blockCount": 1,
-    "totalAsciiLines": 6,
-    "blocks": [
-      {
-        "startLine": 185,
-        "endLine": 191,
-        "lang": "text",
-        "lineCount": 6,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "prod-14: 커밋 0615087 (display_color_hex) / prod-15: 커밋 0615087 + e787280 (DTO 위임) / prod-16: 커밋 7861821 (is_available)"
       }
     ]
   },
@@ -4406,25 +4341,6 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "맥 localhost:18080 → SSH(2232) → Ubuntu → 172.20.0.2:31080(Kind NodePort) → Istio Gateway → Pod"
-      }
-    ]
-  },
-  {
-    "file": "goti-go-otel-sdk-missing-labels.md",
-    "category": "monitoring",
-    "series": "goti-java-to-go",
-    "title": "Go 전환 후 Grafana/Tempo/Mimir에서 OTel 라벨이 사라진 이유 — SDK 미초기화",
-    "blockCount": 1,
-    "totalAsciiLines": 2,
-    "blocks": [
-      {
-        "startLine": 42,
-        "endLine": 44,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "box-small",
-        "decision": "flatten",
-        "sample": "Goti-go/pkg/observability/ / └── (비어있음)"
       }
     ]
   },

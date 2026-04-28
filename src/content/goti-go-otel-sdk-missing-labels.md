@@ -37,12 +37,7 @@ Go 서비스를 배포하고 Grafana Explore에서 해당 서비스명으로 조
 
 ## 🤔 원인: OTel SDK 초기화 코드 자체가 없었음
 
-`pkg/observability/` 디렉토리는 존재했지만 내부가 비어 있었습니다.
-
-```text
-Goti-go/pkg/observability/
-└── (비어있음)
-```
+`Goti-go/pkg/observability/` 디렉토리는 존재했지만 내부가 비어 있었습니다.
 
 `cmd/*/main.go`에는 `middleware.RegisterMetrics(prometheus.DefaultRegisterer)`로 Prometheus `/metrics`만 노출하고 있었습니다. Prometheus scrape는 동작했지만 OTel resource attributes가 없는 상태였습니다. Tempo·OTLP 경로로는 아무 데이터도 전송되지 않았습니다.
 

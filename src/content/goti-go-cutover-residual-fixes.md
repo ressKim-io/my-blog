@@ -182,14 +182,14 @@ case memberNotFound:
 
 ### 배포 순서
 
-```text
-prod-14: 커밋 0615087 (display_color_hex)
-prod-15: 커밋 0615087 + e787280 (DTO 위임)
-prod-16: 커밋 7861821 (is_available)
-prod-17: 커밋 c5f5d1d (cookie baseline)
+| 이미지 | 커밋 | 변경 |
+|---|---|---|
+| prod-14 | `0615087` | `display_color_hex` |
+| prod-15 | `0615087` + `e787280` | DTO 위임 |
+| prod-16 | `7861821` | `is_available` |
+| prod-17 | `c5f5d1d` | cookie baseline |
 
-각 이미지 빌드 후 Goti-k8s auto bump PR 머지 → ArgoCD sync
-```
+각 이미지 빌드 후 Goti-k8s에서 auto bump PR을 머지하면 ArgoCD가 sync합니다.
 
 ---
 

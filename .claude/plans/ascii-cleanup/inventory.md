@@ -1,19 +1,19 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-28T21:44:49.293Z
+> 생성 시각: 2026-04-28T21:47:24.338Z
 
 ## 요약
 
-- ASCII 블록 포함 글: **133편**
-- 전체 ASCII 블록 수: **355개**
-- 전체 ASCII 라인 합계: **4078줄**
+- ASCII 블록 포함 글: **130편**
+- 전체 ASCII 블록 수: **349개**
+- 전체 ASCII 라인 합계: **4058줄**
 
 ## 자동 처리 추천 분포 (decision)
 
 | 결정 | 개수 | 설명 |
 |---|---|---|
-| `flatten` | 128 | 평탄화 (표/문장으로 변환 또는 삭제) |
+| `flatten` | 122 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
 
@@ -22,11 +22,11 @@
 | 유형 | 개수 | 설명 |
 |---|---|---|
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
-| `arrow-only` | 121 | 박스 없는 화살표 시퀀스 |
+| `arrow-only` | 117 | 박스 없는 화살표 시퀀스 |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
-| `flow-diagram` | 37 | 박스 + 화살표 (흐름도/시퀀스) |
+| `flow-diagram` | 36 | 박스 + 화살표 (흐름도/시퀀스) |
 | `tree` | 27 | 디렉토리/의존성 트리 (├ └ │ ─) |
-| `box-small` | 4 | 단순 박스 (≤14줄) |
+| `box-small` | 3 | 단순 박스 (≤14줄) |
 | `misc` | 2 | 기타 |
 
 ## 글별 상세 (총 라인 수 내림차순)
@@ -90,7 +90,6 @@
 | `istio-intro-part1-why-service-mesh.md` | istio | istio-intro | 2 | 21 | 2/0/0 | box-small, arrow-only |
 | `goti-pgbouncer-connection-pooling-adr.md` | challenge | goti-pgbouncer | 2 | 20 | 1/1/0 | arrow-only, architecture |
 | `queue-poc-loadtest-part3-selection.md` | kubernetes | queue-poc-loadtest | 1 | 20 | 0/1/0 | flow-diagram |
-| `goti-cutover-residual-bugs-smoke-7of7.md` | challenge | goti-java-to-go | 5 | 19 | 5/0/0 | arrow-only, flow-diagram |
 | `goti-harbor-imagepull-403-cloudflare-waf.md` | kubernetes | goti-multicloud | 2 | 19 | 0/1/1 | code-arrow, flow-diagram |
 | `goti-kind-db-connection-false-negative.md` | kubernetes | - | 3 | 19 | 0/0/3 | code-arrow |
 | `challenge2-wealist-migration-part5.md` | challenge | challenge-2-wealist-migration | 2 | 18 | 1/1/0 | tree, arrow-only |
@@ -100,6 +99,7 @@
 | `goti-queue-loadtest-k6-two-phase-design.md` | challenge | goti-queue-poc | 2 | 14 | 2/0/0 | arrow-only |
 | `websocket-token-refresh.md` | kubernetes | eks-security | 2 | 14 | 2/0/0 | arrow-only |
 | `challenge1-game-server-part7.md` | challenge | game-server | 3 | 13 | 3/0/0 | arrow-only |
+| `goti-cutover-residual-bugs-smoke-7of7.md` | challenge | goti-java-to-go | 2 | 13 | 2/0/0 | arrow-only |
 | `goti-postgres-healthcheck-env.md` | cicd | goti-ec2-deploy | 3 | 13 | 1/0/2 | code-arrow, misc |
 | `pod-service-troubleshooting.md` | kubernetes | - | 2 | 13 | 1/0/1 | code-arrow, arrow-only |
 | `goti-argocd-dashboard-zero-metrics.md` | argocd | goti-argocd | 1 | 12 | 0/0/1 | code-arrow |
@@ -130,10 +130,8 @@
 | `goti-eks-rolling-update-cascading-failures.md` | kubernetes | goti-eks | 1 | 7 | 1/0/0 | arrow-only |
 | `goti-poc-queue-a-401-ticketing-isolation.md` | challenge | goti-queue-poc | 3 | 7 | 3/0/0 | arrow-only |
 | `github-actions-multi-platform-optimization.md` | cicd | - | 1 | 6 | 0/1/0 | tree |
-| `goti-cutover-smoke-trail-fixes.md` | challenge | goti-java-to-go | 1 | 6 | 1/0/0 | arrow-only |
 | `goti-ecr-secret-dollar-escape.md` | argocd | goti-argocd-gitops | 3 | 6 | 2/0/1 | arrow-only, code-arrow |
 | `goti-gcp-redis-recovery-jwt-unification.md` | challenge | goti-multicloud | 1 | 6 | 0/0/1 | code-arrow |
-| `goti-go-cutover-residual-fixes.md` | challenge | goti-java-to-go | 1 | 6 | 1/0/0 | arrow-only |
 | `goti-metrics-collector-go-sidecar.md` | monitoring | goti-metrics-collector | 1 | 6 | 0/1/0 | flow-diagram |
 | `goti-redis-sot-d0-d1-rollout.md` | challenge | goti-redis-sot | 2 | 6 | 2/0/0 | arrow-only |
 | `goti-signup-created-at-bug-and-sql-audit.md` | challenge | goti-auth | 2 | 6 | 2/0/0 | arrow-only |
@@ -161,7 +159,6 @@
 | `goti-resale-fe-be-contract-audit.md` | challenge | goti-resale | 1 | 3 | 0/0/1 | code-arrow |
 | `challenge2-wealist-migration-part4.md` | challenge | challenge-2-wealist-migration | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-dev-loadtest-ssh-istio-turnstile.md` | istio | goti-istio-ops | 2 | 2 | 2/0/0 | arrow-only |
-| `goti-go-otel-sdk-missing-labels.md` | monitoring | goti-java-to-go | 1 | 2 | 1/0/0 | box-small |
 | `goti-prometheus-agent-mode-adr.md` | monitoring | - | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-session-dropout-root-cause-audit.md` | challenge | goti-auth | 1 | 2 | 0/0/1 | code-arrow |
 | `goti-3000vu-queue-oneshot.md` | challenge | goti-queue-poc | 1 | 1 | 0/0/1 | code-arrow |
@@ -969,22 +966,6 @@
 - L286-306 (20줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `{/* TODO: Draw.io로 교체 */} /  /                     B (ALB 직접)`
 
-### `goti-cutover-residual-bugs-smoke-7of7.md`
-
-- 카테고리: challenge / 시리즈: goti-java-to-go
-- 블록 5개 / ASCII 19줄
-
-- L99-101 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `ci-user.yml  → pull_request 트리거만 (main push 대상 아님) / cd-prod.yml  → deploy/prod 브랜치 push 또는 workflow_dispatch`
-- L246-248 (2줄, lang=`text`, kind=**flow-diagram**, decision=**flatten**)
-  - 샘플: `Browser → GET /api/v1/payments/purchases  (payment-go 서비스) /               └─→ GET /api/v1/orders/internal  (ticketing-g`
-- L269-276 (7줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `✓ schedules            200 / ✓ signup (TestUser)    200 / ✓ signup returned token`
-- L304-306 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `인프라 레포 (Goti-k8s, Goti-monitoring) — main push → 배포 / 애플리케이션 레포 (Goti-go)            — deploy/prod push → 배포`
-- L340-346 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Goti-go  0e318ee — feat(user): port TestUser endpoints / Goti-k8s 0f22245 — enable USER_TEST_USER_ENABLED / Goti-go  2b5`
-
 ### `goti-harbor-imagepull-403-cloudflare-waf.md`
 
 - 카테고리: kubernetes / 시리즈: goti-multicloud
@@ -1074,6 +1055,16 @@
   - 샘플: `# rewrite-target 없으면 / 요청: http://localhost/lobby / 전달: http://game-lobby/lobby  ← 404 에러`
 - L242-244 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `lobby.game.example.com → game-lobby / chat.game.example.com  → game-chat`
+
+### `goti-cutover-residual-bugs-smoke-7of7.md`
+
+- 카테고리: challenge / 시리즈: goti-java-to-go
+- 블록 2개 / ASCII 13줄
+
+- L264-271 (7줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `✓ schedules            200 / ✓ signup (TestUser)    200 / ✓ signup returned token`
+- L335-341 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `Goti-go  0e318ee — feat(user): port TestUser endpoints / Goti-k8s 0f22245 — enable USER_TEST_USER_ENABLED / Goti-go  2b5`
 
 ### `goti-postgres-healthcheck-env.md`
 
@@ -1369,14 +1360,6 @@
 - L61-67 (6줄, lang=`-`, kind=**tree**, decision=**keep**)
   - 샘플: `GitHub Actions / ├── amd64 러너 (ubuntu-latest) / │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅`
 
-### `goti-cutover-smoke-trail-fixes.md`
-
-- 카테고리: challenge / 시리즈: goti-java-to-go
-- 블록 1개 / ASCII 6줄
-
-- L31-37 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `prod-13 (P0) → prod-14 (display_color_hex) /   → prod-15 (seat-statuses 응답) /   → prod-16 (is_available)`
-
 ### `goti-ecr-secret-dollar-escape.md`
 
 - 카테고리: argocd / 시리즈: goti-argocd-gitops
@@ -1396,14 +1379,6 @@
 
 - L176-182 (6줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# Phase A: AWS SSM에서 키 추출 → /tmp/jwt-migration/ 임시 저장 / # Phase B: Terraform 코드 수정 (6 파일) / # Phase C: state rm tls_priv`
-
-### `goti-go-cutover-residual-fixes.md`
-
-- 카테고리: challenge / 시리즈: goti-java-to-go
-- 블록 1개 / ASCII 6줄
-
-- L185-191 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `prod-14: 커밋 0615087 (display_color_hex) / prod-15: 커밋 0615087 + e787280 (DTO 위임) / prod-16: 커밋 7861821 (is_available)`
 
 ### `goti-metrics-collector-go-sidecar.md`
 
@@ -1636,14 +1611,6 @@
   - 샘플: `맥(로컬) → SSH(2232) → Ubuntu 서버 → Kind 클러스터(goti-dev)`
 - L56-57 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `맥 localhost:18080 → SSH(2232) → Ubuntu → 172.20.0.2:31080(Kind NodePort) → Istio Gateway → Pod`
-
-### `goti-go-otel-sdk-missing-labels.md`
-
-- 카테고리: monitoring / 시리즈: goti-java-to-go
-- 블록 1개 / ASCII 2줄
-
-- L42-44 (2줄, lang=`text`, kind=**box-small**, decision=**flatten**)
-  - 샘플: `Goti-go/pkg/observability/ / └── (비어있음)`
 
 ### `goti-prometheus-agent-mode-adr.md`
 
