@@ -74,10 +74,10 @@ AES-256은 **정확히** 32바이트를 요구합니다.
 
 SSM Parameter Store에 등록된 값을 확인했습니다.
 
-```
-goti-prod-2026-queue-token-32ch    ← 31바이트 ❌
-goti-prod-2026-queue-token-32chr   ← 32바이트 ✅
-```
+| 값 | 길이 | 결과 |
+|---|---|---|
+| `goti-prod-2026-queue-token-32ch` | 31바이트 | ❌ |
+| `goti-prod-2026-queue-token-32chr` | 32바이트 | ✅ |
 
 끝에 `r` 한 글자가 빠져있었습니다.
 수동으로 SSM에 입력하면서 **1바이트가 누락**된 겁니다.
@@ -89,11 +89,11 @@ goti-prod-2026-queue-token-32chr   ← 32바이트 ✅
 `TokenEncryptor`는 **POC 브랜치에만 존재**하는 클래스입니다.
 메인 배포 브랜치(`deploy/prod`)에는 이 코드가 없습니다.
 
-```
-deploy/prod (메인 배포)        → TokenEncryptor 없음 → 영향 없음
-poc/queue-sungjeon-loadtest   → TokenEncryptor 있음 → CrashLoop!
-poc/queue-waiting-sungjeon    → TokenEncryptor 있음 → CrashLoop!
-```
+| 브랜치 | TokenEncryptor | 영향 |
+|---|---|---|
+| `deploy/prod` (메인 배포) | 없음 | 영향 없음 |
+| `poc/queue-sungjeon-loadtest` | 있음 | CrashLoop |
+| `poc/queue-waiting-sungjeon` | 있음 | CrashLoop |
 
 payment-prod, payment-junsang-prod 등 다른 payment 서비스는 `deploy/prod` 브랜치 기반이라 전혀 영향이 없었습니다.
 B님의 POC 브랜치에서만 사용하는 대기열 토큰 암호화 기능이었기 때문에, 다른 서비스가 정상이니 문제를 인지하기까지 시간이 걸렸습니다.

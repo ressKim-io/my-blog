@@ -18,13 +18,17 @@ date: '2025-10-13'
 
 **Pod 생성 플로우 요약 (정상 케이스)**
 
-```
-kubectl apply → API Server → ETCD → Scheduler → Kubelet → Running
-  0.1초        0.1초       0.5초     0.1초      5-30초
+흐름은 `kubectl apply → API Server → ETCD → Scheduler → Kubelet → Running` 순서로 이어집니다.
 
-가장 오래 걸리는 단계: 이미지 다운로드 (5-30초)
-전체 소요 시간: 7-35초 (이미지 크기에 따라)
-```
+| 단계 | 소요 시간 |
+|---|---|
+| kubectl apply → API Server | 0.1초 |
+| API Server → ETCD | 0.1초 |
+| Scheduler | 0.5초 |
+| Kubelet 감지 | 0.1초 |
+| 이미지 다운로드 + 컨테이너 실행 | 5~30초 |
+
+가장 오래 걸리는 단계는 이미지 다운로드(5~30초)이고, 전체 소요 시간은 이미지 크기에 따라 7~35초입니다.
 
 **이 글에서 배우는 것:**
 - K8s 컴포넌트 간 실제 통신 과정
@@ -39,8 +43,8 @@ kubectl apply → API Server → ETCD → Scheduler → Kubelet → Running
 k3s로 개인 프로젝트를 운영하면서 생성이 개인프로젝트이고 소규모인데 속도가 생각보다 많이 걸렸는데 이 이유를 찾고,
 k8s 환경에서 각 순서에서 얼마정도가 걸릴까 확인을 하려고 했습니다.
 
-```
-kubectl get pods --watch
+```bash
+$ kubectl get pods --watch
 NAME    READY   STATUS              AGE
 nginx   0/1     ContainerCreating   30s  # ← 왜 이렇게 오래 걸려?
 ```
@@ -72,7 +76,7 @@ cat ~/.kube/config
 ```
 
 출력:
-```
+```yaml
 clusters:
 - cluster:
     server: https://192.168.1.100:6443  # ← API Server 주소
@@ -94,9 +98,9 @@ clusters:
 - 리소스 타입 맞습니까?
 
 **실제 측정:**
-```
+```bash
 # time 명령으로 측정
-time kubectl apply -f simple-pod.yaml
+$ time kubectl apply -f simple-pod.yaml
 
 # 출력:
 real    0m0.152s  # ← API Server 응답 시간
@@ -108,21 +112,26 @@ real    0m0.152s  # ← API Server 응답 시간
 API Server는 검증이 끝나면 ETCD에 저장합니다.
 
 **ETCD에 저장되는 내용 (단순화):**
-```
-Key: /registry/pods/default/nginx
-Value: {
+
+- **Key**: `/registry/pods/default/nginx`
+- **Value**: 다음 JSON 형태로 저장됩니다.
+
+```json
+{
   "metadata": {
     "name": "nginx",
     "namespace": "default"
   },
   "spec": {
-    "containers": [...]
+    "containers": ["..."]
   },
   "status": {
-    "phase": "Pending"  # ← 초기 상태
+    "phase": "Pending"
   }
 }
 ```
+
+`status.phase`가 `Pending`으로 시작하는 게 초기 상태입니다.
 
 **실무 포인트:**
 - ETCD는 K8s의 **유일한 데이터베이스**
@@ -151,14 +160,14 @@ ETCDCTL_API=3 etcdctl get /registry/pods/default/nginx \
 ![Scheduler Filtering Algorithm](/images/diagrams/k8s-scheduler-filtering.drawio.svg)
 
 **실제 예시:**
-```
-초기 상태:
+
+초기 상태가 다음과 같다고 가정합니다.
+
 - node1: CPU 90%, Memory 80%
-- node2: CPU 50%, Memory 60%  ← 점수 높음!
+- node2: CPU 50%, Memory 60% ← 점수 높음
 - node3: CPU 70%, Memory 85%
 
-Scheduler 결정: node2 선택 ✅
-```
+Scheduler는 여유 자원이 가장 많은 **node2를 선택**합니다.
 
 **실제 측정:**
 ```
@@ -202,8 +211,8 @@ Kubelet (node2):
 **시간이 오래 걸리는 작업이었습니다.**
 
 **nginx 이미지 예시:**
-```
-docker images nginx
+```bash
+$ docker images nginx
 REPOSITORY   TAG      SIZE
 nginx        latest   187MB  # ← 약 6초 소요 (내 환경)
 ```
@@ -213,24 +222,24 @@ nginx        latest   187MB  # ← 약 6초 소요 (내 환경)
 ![Image Pull Process](/images/diagrams/k8s-image-pull-process.drawio.svg)
 
 **실제 측정:**
-```
+```bash
 # 로컬에 이미지 없는 상태로 테스트
-docker rmi nginx:latest
+$ docker rmi nginx:latest
 
 # Pod 생성 시간 측정
-kubectl delete pod nginx
-time kubectl apply -f nginx-pod.yaml && \
-  kubectl wait --for=condition=ready pod/nginx --timeout=60s
+$ kubectl delete pod nginx
+$ time kubectl apply -f nginx-pod.yaml && \
+    kubectl wait --for=condition=ready pod/nginx --timeout=60s
 
 # 출력:
 real    0m8.234s  # ← 8초 소요 (이미지 다운 포함)
 ```
 
-```
+```bash
 # 이미지 있는 상태로 재시도
-kubectl delete pod nginx
-time kubectl apply -f nginx-pod.yaml && \
-  kubectl wait --for=condition=ready pod/nginx --timeout=60s
+$ kubectl delete pod nginx
+$ time kubectl apply -f nginx-pod.yaml && \
+    kubectl wait --for=condition=ready pod/nginx --timeout=60s
 
 # 출력:
 real    0m2.145s  # ← 2초! (이미지 캐시 사용)
@@ -259,11 +268,13 @@ Container Runtime (containerd):
 ```
 
 **Kubelet이 API Server에 상태 보고:**
-```
-ETCD 업데이트:
+
+ETCD가 다음과 같이 업데이트됩니다(`phase`가 `Pending`에서 `Running`으로 바뀝니다).
+
+```json
 {
   "status": {
-    "phase": "Running",  # ← Pending에서 변경!
+    "phase": "Running",
     "containerStatuses": [{
       "ready": true,
       "restartCount": 0,
@@ -320,7 +331,7 @@ kubectl apply -f nginx-pod.yaml
 **실제 출력:**
 
 **터미널 1 (Pod 상태):**
-```
+```text
 NAME    READY   STATUS    AGE
 nginx   0/1     Pending   0s
 nginx   0/1     Pending   0s      # ← Scheduler 작동 전
@@ -352,7 +363,7 @@ kubectl get events --sort-by='.lastTimestamp' | tail -20
 ### 1. imagePullPolicy 설정은 필수! ⭐⭐⭐
 
 **Before (기본값):**
-```
+```yaml
 spec:
   containers:
   - name: nginx
@@ -381,15 +392,9 @@ spec:
 
 ### 2. alpine 이미지를 쓰자 ⭐⭐⭐
 
-**Before:**
-```
-nginx:latest  # 187MB → 6초
-```
+**Before**: `nginx:latest` — 187MB, 약 6초
 
-**After:**
-```
-nginx:alpine  # 42MB → 2초  ⭐
-```
+**After**: `nginx:alpine` — 42MB, 약 2초 ⭐
 
 **실제 비교:**
 ```
@@ -419,8 +424,8 @@ kubectl get events --sort-by='.lastTimestamp'
 
 Pod가 30초째 ContainerCreating인데 원인을 모를 때:
 
-```
-kubectl describe pod my-app
+```bash
+$ kubectl describe pod my-app
 
 # Events:
 Events:

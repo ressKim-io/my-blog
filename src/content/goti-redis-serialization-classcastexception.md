@@ -40,14 +40,7 @@ java.lang.ClassCastException: Cannot cast java.util.LinkedHashMap to com.goti.ti
     at com.goti.ticketing.session.service.application.ReservationSessionService.findReservationSession(ReservationSessionService.java:92)
 ```
 
-호출 경로를 따라가보면:
-
-```
-StadiumSeatController.getSeatSections
-  → SeatSectionServiceImpl.get
-    → ReservationSessionService.validateActiveSession
-      → RedisCache.get   ← 여기서 터짐
-```
+호출 경로를 따라가보면 `StadiumSeatController.getSeatSections` → `SeatSectionServiceImpl.get` → `ReservationSessionService.validateActiveSession` → `RedisCache.get` 순서로 진행되며, 마지막 `RedisCache.get`에서 예외가 터집니다.
 
 `LinkedHashMap`을 `ReservationSessionCache`로 캐스팅할 수 없다는 것입니다.
 분명히 `ReservationSessionCache` 객체를 Redis에 넣었는데, 꺼내니까 `LinkedHashMap`이 나옵니다.

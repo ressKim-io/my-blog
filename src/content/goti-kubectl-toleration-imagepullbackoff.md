@@ -132,11 +132,9 @@ kubectl 직접 수정은 "빠른 테스트"처럼 보입니다.
 
 이번 경우처럼 template 변경이 rolling update를 트리거하고, 그 타이밍에 ECR credential이 만료되면 전 서비스 장애가 발생합니다.
 
-```
-모든 변경은: 소스 코드 → git push → ArgoCD sync
-kubectl은: get, describe, logs (읽기 전용)
-긴급 장애 대응: kubectl 사용 후 즉시 소스에 반영
-```
+- **모든 변경**: 소스 코드 → git push → ArgoCD sync
+- **kubectl**: get, describe, logs (읽기 전용)
+- **긴급 장애 대응**: kubectl 사용 후 즉시 소스에 반영
 
 ### ImagePullBackOff는 exponential backoff 때문에 자동 복구가 느리다
 

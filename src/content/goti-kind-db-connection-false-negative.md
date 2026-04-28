@@ -109,11 +109,12 @@ Last State:     Terminated
 payment, resale, stadium Pod의 memory limit 512Mi가 OTel Java Agent + Spring Boot 조합에 부족했습니다.
 DB 연결 실패 로그는 OOM 직전의 메모리 부족 상태에서 발생한 **증상(symptom)**이었지, 근본 원인(cause)이 아니었습니다.
 
-```
-실제 인과 관계:
-메모리 부족 → JVM이 불안정 → DB 연결 시도 실패 (타임아웃) → 로그에 PSQLException
-           → 결국 OOMKilled → CrashLoopBackOff
-```
+실제 인과 관계는 다음과 같습니다.
+
+1. 메모리 부족이 시작점입니다.
+2. JVM이 불안정해지면서 DB 연결 시도가 타임아웃으로 실패하고 로그에 `PSQLException`이 찍힙니다.
+3. 결국 OOMKilled로 컨테이너가 종료됩니다.
+4. 재시작이 반복되며 CrashLoopBackOff에 빠집니다.
 
 ---
 

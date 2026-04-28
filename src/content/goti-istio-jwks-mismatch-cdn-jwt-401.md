@@ -38,11 +38,7 @@ date: "2026-04-04"
 CDN 캐싱 부하테스트를 준비하고 있었습니다.
 A님 대기열 구현체(queue-suyeon)를 Cloudflare CDN 경유로 테스트하려고 했습니다.
 
-테스트 경로는 이렇습니다.
-
-```
-K6 → Cloudflare (api.go-ti.shop) → ALB → Istio Ingress → queue-suyeon Pod
-```
+테스트 경로는 `K6 → Cloudflare (api.go-ti.shop) → ALB → Istio Ingress → queue-suyeon Pod` 순서로 흐릅니다.
 
 어제(4/3)는 ALB에 직접 접근해서 테스트했고, 그때는 성공했습니다.
 오늘은 CDN을 거치는 실제 경로로 테스트하려는 것이었습니다.
@@ -57,10 +53,10 @@ POST https://api.go-ti.shop/api/v1/queue/suyeon/enter status=401 body=Jwt verifi
 
 이상한 점이 있었습니다.
 
-```
-signup (user 서비스): 200 OK → JWT 발급 성공
-queue enter (queue-suyeon): 401 → 동일 JWT 거부
-```
+| 요청 | 결과 |
+|---|---|
+| `signup` (user 서비스) | 200 OK — JWT 발급 성공 |
+| `queue enter` (queue-suyeon) | 401 — 동일 JWT 거부 |
 
 같은 JWT를 사용하는데 user 서비스에서는 성공하고, queue-suyeon에서는 실패합니다.
 
@@ -235,24 +231,11 @@ Istio에서 JWT 인증은 **두 단계**로 동작합니다.
 
 queue-suyeon에는 `require-jwt` AuthorizationPolicy가 **누락**되어 있었습니다.
 
-{/* TODO: Draw.io로 교체 */}
+두 케이스의 차이를 정리하면 이렇습니다.
 
-```
-[AuthorizationPolicy 있음 (enforce)]              [AuthorizationPolicy 없음 (permissive)]
+**AuthorizationPolicy 있음 (enforce, 정상 서비스)**: JWT가 RequestAuthentication에서 검증 실패하면 `require-jwt` AuthorizationPolicy가 매칭되어 401로 차단합니다.
 
-  JWT → RequestAuth                                  JWT → RequestAuth
-         │                                                    │
-    검증 실패                                            검증 실패
-         │                                                    │
-    AuthPolicy                                           (정책 없음)
-    "require jwt"                                             │
-         │                                                    ▼
-    ❌ 401 차단                                      ✅ 요청 통과 (앱으로)
-                                                              │
-                                                              ▼
-                                                     Spring Filter가
-                                                     X-User-Id로 인증
-```
+**AuthorizationPolicy 없음 (permissive, queue-suyeon)**: JWT가 RequestAuthentication에서 검증 실패해도 매칭되는 AuthorizationPolicy가 없어 요청이 그대로 앱으로 통과합니다. 그러면 Spring Filter가 `X-User-Id` 헤더로 인증을 처리합니다.
 
 어제 테스트가 성공한 흐름을 정리하면 이렇습니다.
 
@@ -368,11 +351,7 @@ STRICT mTLS 환경에서는 `jwksUri`를 사용할 수 없습니다.
 JWKS를 하드코딩하지 않되, `jwksUri`도 사용할 수 없다면?
 **외부 Secret Store에서 JWKS를 가져와서 주입하면 됩니다.**
 
-구상한 파이프라인은 이렇습니다.
-
-```
-SSM Parameter Store → ExternalSecret → K8s Secret → Helm lookup → RequestAuthentication
-```
+구상한 파이프라인은 `SSM Parameter Store → ExternalSecret → K8s Secret → Helm lookup → RequestAuthentication` 순서입니다.
 
 1. AWS SSM Parameter Store에 JWKS를 저장
 2. ExternalSecret이 주기적으로 SSM에서 가져와서 K8s Secret으로 동기화
@@ -465,9 +444,7 @@ ArgoCD가 sync를 시작했는데... 문제가 생겼습니다.
 ArgoCD는 매니페스트를 생성할 때 `helm template`을 사용합니다.
 `helm template`은 **클러스터에 접근하지 않습니다**.
 
-```
-helm template → 클러스터 접근 없음 → lookup 함수 빈 값 반환 → jwks 없는 RequestAuthentication 생성
-```
+따라서 흐름은 `helm template → 클러스터 접근 없음 → lookup 함수가 빈 값 반환 → jwks 없는 RequestAuthentication 생성`이 됩니다.
 
 `lookup` 함수는 실제 클러스터의 API server에 요청을 보내서 리소스를 읽어오는 함수입니다.
 `helm install`이나 `helm upgrade` 때는 동작하지만, `helm template` 때는 항상 빈 값을 반환합니다.
