@@ -1384,133 +1384,6 @@
     ]
   },
   {
-    "file": "goti-cloudflare-migration-troubleshoot.md",
-    "category": "kubernetes",
-    "series": "goti-cloudflare-migration",
-    "title": "Cloudflare 전환 실전 — 5가지 라우팅 장애와 해결 과정",
-    "blockCount": 13,
-    "totalAsciiLines": 48,
-    "blocks": [
-      {
-        "startLine": 59,
-        "endLine": 62,
-        "lang": "",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Custom Error Response: /   - 403 → /index.html (200) /   - 404 → /index.html (200)"
-      },
-      {
-        "startLine": 70,
-        "endLine": 75,
-        "lang": "",
-        "lineCount": 5,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Backend → 404 {\"error\": \"User not found\"} /          ↓ / CloudFront → 404 감지 → index.html 반환 (200)"
-      },
-      {
-        "startLine": 98,
-        "endLine": 102,
-        "lang": "",
-        "lineCount": 4,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Client → Cloudflare (SSL 종단 #1, Flexible: Origin에 HTTP로 전송) /        → CloudFront (SSL 종단 #2, HTTP→HTTPS 리다이렉트) /       "
-      },
-      {
-        "startLine": 126,
-        "endLine": 128,
-        "lang": "",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "dev.go-ti.shop/api/* → Workers (API 프록시) / dev.go-ti.shop/*     → Pages (SPA)"
-      },
-      {
-        "startLine": 133,
-        "endLine": 135,
-        "lang": "bash",
-        "lineCount": 2,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "POST https://dev.go-ti.shop/api/v1/auth/reissue / → 405 Method Not Allowed"
-      },
-      {
-        "startLine": 146,
-        "endLine": 149,
-        "lang": "",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "1. Pages에서 커스텀 도메인(dev.go-ti.shop) 제거 / 2. Workers route를 dev.go-ti.shop/* (전체)로 변경 / 3. Worker 코드에서 /api/* → Kind PC, 나"
-      },
-      {
-        "startLine": 165,
-        "endLine": 167,
-        "lang": "javascript",
-        "lineCount": 2,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "return new Response('Worker OK'); / // → 200 OK ✅"
-      },
-      {
-        "startLine": 172,
-        "endLine": 176,
-        "lang": "javascript",
-        "lineCount": 4,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "fetch('http://resshome.iptime.org/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });"
-      },
-      {
-        "startLine": 183,
-        "endLine": 187,
-        "lang": "javascript",
-        "lineCount": 4,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "fetch('http://118.38.182.85/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });"
-      },
-      {
-        "startLine": 192,
-        "endLine": 194,
-        "lang": "bash",
-        "lineCount": 2,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "$ curl -H \"Host: dev.go-ti.shop\" http://resshome.iptime.org:80/api/v1/health / # → 200 JSON ✅"
-      },
-      {
-        "startLine": 223,
-        "endLine": 224,
-        "lang": "",
-        "lineCount": 1,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "dev-api.go-ti.shop → CNAME resshome.iptime.org (Cloudflare Proxy ON, SSL Flexible)"
-      },
-      {
-        "startLine": 287,
-        "endLine": 299,
-        "lang": "",
-        "lineCount": 12,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "브라우저 /   ├─ dev.go-ti.shop (정적 파일) /   │   → Cloudflare Pages (*.pages.dev)"
-      },
-      {
-        "startLine": 323,
-        "endLine": 327,
-        "lang": "",
-        "lineCount": 4,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Step 1: Worker 자체가 동작하는가? → return new Response('OK') / Step 2: Origin에 도달하는가? → 응답 시간으로 확인 (751ms = 도달) / Step 3: Origi"
-      }
-    ]
-  },
-  {
     "file": "eks-troubleshooting-part7-go-service.md",
     "category": "kubernetes",
     "series": "eks-troubleshooting",
@@ -1905,61 +1778,6 @@
     ]
   },
   {
-    "file": "goti-cloudflare-migration-adr.md",
-    "category": "kubernetes",
-    "series": "goti-cloudflare-migration",
-    "title": "CloudFront에서 Cloudflare로 — CDN 전환을 결정한 이유",
-    "blockCount": 5,
-    "totalAsciiLines": 38,
-    "blocks": [
-      {
-        "startLine": 31,
-        "endLine": 33,
-        "lang": "",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Client → CloudFront → S3 (React SPA, 정적 파일) /                     → Kind PC (API, /api/*)"
-      },
-      {
-        "startLine": 46,
-        "endLine": 51,
-        "lang": "bash",
-        "lineCount": 5,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# 기대한 동작 / GET /api/users/999 → 404 {\"error\": \"User not found\"} / "
-      },
-      {
-        "startLine": 69,
-        "endLine": 72,
-        "lang": "",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Client → Cloudflare (SSL 종단 #1, HTTP→HTTPS 리다이렉트) /        → CloudFront (SSL 종단 #2, HTTP→HTTPS 리다이렉트) /        → 무한 301 "
-      },
-      {
-        "startLine": 170,
-        "endLine": 195,
-        "lang": "",
-        "lineCount": 25,
-        "kind": "flow-diagram",
-        "decision": "keep",
-        "sample": "                     ┌─ dev.go-ti.shop ──────────────────┐ /                      │                                    │"
-      },
-      {
-        "startLine": 276,
-        "endLine": 279,
-        "lang": "",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "해결: Pages 커스텀 도메인 제거 / → Workers가 모든 라우트 처리 / → 정적 파일은 Workers에서 Pages *.pages.dev URL로 프록시"
-      }
-    ]
-  },
-  {
     "file": "eks-security-jwt-rsa-mismatch.md",
     "category": "istio",
     "series": "eks-security",
@@ -2246,6 +2064,34 @@
     ]
   },
   {
+    "file": "goti-cloudflare-migration-adr.md",
+    "category": "kubernetes",
+    "series": "goti-cloudflare-migration",
+    "title": "CloudFront에서 Cloudflare로 — CDN 전환을 결정한 이유",
+    "blockCount": 2,
+    "totalAsciiLines": 30,
+    "blocks": [
+      {
+        "startLine": 46,
+        "endLine": 51,
+        "lang": "bash",
+        "lineCount": 5,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# 기대한 동작 / GET /api/users/999 → 404 {\"error\": \"User not found\"} / "
+      },
+      {
+        "startLine": 168,
+        "endLine": 193,
+        "lang": "",
+        "lineCount": 25,
+        "kind": "flow-diagram",
+        "decision": "keep",
+        "sample": "                     ┌─ dev.go-ti.shop ──────────────────┐ /                      │                                    │"
+      }
+    ]
+  },
+  {
     "file": "istio-traffic-part4-retry-timeout.md",
     "category": "istio",
     "series": "istio-traffic",
@@ -2354,6 +2200,70 @@
         "kind": "tree",
         "decision": "keep",
         "sample": "load-tests/ / ├── k8s/ / │   └── synthetic-traffic.yaml      # K8s 리소스 전체 (SA + AuthzPolicy + ConfigMap + CronJob)"
+      }
+    ]
+  },
+  {
+    "file": "goti-cloudflare-migration-troubleshoot.md",
+    "category": "kubernetes",
+    "series": "goti-cloudflare-migration",
+    "title": "Cloudflare 전환 실전 — 5가지 라우팅 장애와 해결 과정",
+    "blockCount": 6,
+    "totalAsciiLines": 26,
+    "blocks": [
+      {
+        "startLine": 122,
+        "endLine": 124,
+        "lang": "bash",
+        "lineCount": 2,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "POST https://dev.go-ti.shop/api/v1/auth/reissue / → 405 Method Not Allowed"
+      },
+      {
+        "startLine": 152,
+        "endLine": 154,
+        "lang": "javascript",
+        "lineCount": 2,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "return new Response('Worker OK'); / // → 200 OK ✅"
+      },
+      {
+        "startLine": 159,
+        "endLine": 163,
+        "lang": "javascript",
+        "lineCount": 4,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "fetch('http://resshome.iptime.org/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });"
+      },
+      {
+        "startLine": 170,
+        "endLine": 174,
+        "lang": "javascript",
+        "lineCount": 4,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "fetch('http://118.38.182.85/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });"
+      },
+      {
+        "startLine": 179,
+        "endLine": 181,
+        "lang": "bash",
+        "lineCount": 2,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "$ curl -H \"Host: dev.go-ti.shop\" http://resshome.iptime.org:80/api/v1/health / # → 200 JSON ✅"
+      },
+      {
+        "startLine": 272,
+        "endLine": 284,
+        "lang": "",
+        "lineCount": 12,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "브라우저 /   ├─ dev.go-ti.shop (정적 파일) /   │   → Cloudflare Pages (*.pages.dev)"
       }
     ]
   },

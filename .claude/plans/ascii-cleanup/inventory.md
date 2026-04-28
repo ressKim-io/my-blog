@@ -1,20 +1,20 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-28T21:49:12.680Z
+> 생성 시각: 2026-04-28T21:51:57.645Z
 
 ## 요약
 
 - ASCII 블록 포함 글: **130편**
-- 전체 ASCII 블록 수: **346개**
-- 전체 ASCII 라인 합계: **4026줄**
+- 전체 ASCII 블록 수: **336개**
+- 전체 ASCII 라인 합계: **3996줄**
 
 ## 자동 처리 추천 분포 (decision)
 
 | 결정 | 개수 | 설명 |
 |---|---|---|
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
-| `flatten` | 119 | 평탄화 (표/문장으로 변환 또는 삭제) |
+| `flatten` | 109 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
 
 ## 블록 유형 분포 (kind)
@@ -22,7 +22,7 @@
 | 유형 | 개수 | 설명 |
 |---|---|---|
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
-| `arrow-only` | 114 | 박스 없는 화살표 시퀀스 |
+| `arrow-only` | 104 | 박스 없는 화살표 시퀀스 |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
 | `flow-diagram` | 36 | 박스 + 화살표 (흐름도/시퀀스) |
 | `tree` | 27 | 디렉토리/의존성 트리 (├ └ │ ─) |
@@ -59,7 +59,6 @@
 | `goti-gcp-terraform-cross-cloud-review.md` | kubernetes | - | 3 | 53 | 0/2/1 | architecture, code-arrow |
 | `istio-traffic-part3-circuit-breaker.md` | istio | istio-traffic | 5 | 50 | 1/1/3 | code-arrow, arrow-only, architecture |
 | `eks-troubleshooting-part3-istio-ambient-2.md` | istio | eks-troubleshooting | 3 | 48 | 0/1/2 | code-arrow, flow-diagram |
-| `goti-cloudflare-migration-troubleshoot.md` | kubernetes | goti-cloudflare-migration | 13 | 48 | 7/1/5 | arrow-only, code-arrow, tree |
 | `eks-troubleshooting-part7-go-service.md` | kubernetes | eks-troubleshooting | 4 | 47 | 0/2/2 | architecture, code-arrow, tree |
 | `eks-troubleshooting-part9-rolling-update-cascading.md` | kubernetes | eks-troubleshooting | 3 | 47 | 0/2/1 | flow-diagram, code-arrow |
 | `queue-poc-loadtest-part1-design.md` | kubernetes | queue-poc-loadtest | 6 | 47 | 4/1/1 | arrow-only, code-arrow, flow-diagram |
@@ -69,7 +68,6 @@
 | `eks-troubleshooting-part8-argocd-helm.md` | argocd | eks-troubleshooting | 2 | 40 | 0/0/2 | code-arrow |
 | `istio-ambient-part5-jwt.md` | istio | istio-ambient | 4 | 39 | 0/0/4 | code-arrow |
 | `eks-troubleshooting-part5-monitoring-1.md` | monitoring | eks-troubleshooting | 4 | 38 | 0/1/3 | architecture, code-arrow |
-| `goti-cloudflare-migration-adr.md` | kubernetes | goti-cloudflare-migration | 5 | 38 | 3/1/1 | arrow-only, code-arrow, flow-diagram |
 | `eks-security-jwt-rsa-mismatch.md` | istio | eks-security | 2 | 37 | 0/2/0 | flow-diagram, architecture |
 | `goti-argocd-otel-collector-crashloop.md` | argocd | goti-argocd | 3 | 35 | 1/0/2 | arrow-only, code-arrow |
 | `goti-monitoring-e2e-multi-troubleshoot.md` | monitoring | goti-observability-ops | 5 | 35 | 3/0/2 | arrow-only, code-arrow |
@@ -78,10 +76,12 @@
 | `eks-troubleshooting-part4-external-secrets.md` | kubernetes | eks-troubleshooting | 4 | 31 | 1/0/3 | code-arrow, arrow-only |
 | `goti-resale-phase4-step10-tests.md` | challenge | goti-resale | 2 | 31 | 0/0/2 | code-arrow |
 | `eks-troubleshooting-part6-monitoring-2.md` | monitoring | eks-troubleshooting | 3 | 30 | 0/1/2 | code-arrow, flow-diagram |
+| `goti-cloudflare-migration-adr.md` | kubernetes | goti-cloudflare-migration | 2 | 30 | 0/1/1 | code-arrow, flow-diagram |
 | `istio-traffic-part4-retry-timeout.md` | istio | istio-traffic | 2 | 30 | 0/1/1 | code-arrow, architecture |
 | `otel-monitoring-v3.md` | monitoring | observability | 3 | 30 | 1/1/1 | architecture, code-arrow, arrow-only |
 | `goti-db-active-passive-with-read-split-adr.md` | kubernetes | goti-multicloud-db | 1 | 28 | 0/1/0 | architecture |
 | `goti-synthetic-traffic.md` | monitoring | goti-loadtest | 2 | 27 | 0/2/0 | architecture, tree |
+| `goti-cloudflare-migration-troubleshoot.md` | kubernetes | goti-cloudflare-migration | 6 | 26 | 0/1/5 | code-arrow, tree |
 | `goti-image-updater-multisource.md` | argocd | goti-argocd-gitops | 4 | 26 | 1/0/3 | code-arrow, arrow-only |
 | `istio-ambient-part4-wealist-migration.md` | istio | istio-ambient | 2 | 25 | 0/0/2 | code-arrow |
 | `cloudfront-s3-troubleshooting.md` | kubernetes | eks-infra | 4 | 23 | 3/0/1 | arrow-only, code-arrow |
@@ -574,38 +574,6 @@
 - L446-484 (38줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │                        Internet                     `
 
-### `goti-cloudflare-migration-troubleshoot.md`
-
-- 카테고리: kubernetes / 시리즈: goti-cloudflare-migration
-- 블록 13개 / ASCII 48줄
-
-- L59-62 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Custom Error Response: /   - 403 → /index.html (200) /   - 404 → /index.html (200)`
-- L70-75 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Backend → 404 {"error": "User not found"} /          ↓ / CloudFront → 404 감지 → index.html 반환 (200)`
-- L98-102 (4줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Client → Cloudflare (SSL 종단 #1, Flexible: Origin에 HTTP로 전송) /        → CloudFront (SSL 종단 #2, HTTP→HTTPS 리다이렉트) /       `
-- L126-128 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `dev.go-ti.shop/api/* → Workers (API 프록시) / dev.go-ti.shop/*     → Pages (SPA)`
-- L133-135 (2줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `POST https://dev.go-ti.shop/api/v1/auth/reissue / → 405 Method Not Allowed`
-- L146-149 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `1. Pages에서 커스텀 도메인(dev.go-ti.shop) 제거 / 2. Workers route를 dev.go-ti.shop/* (전체)로 변경 / 3. Worker 코드에서 /api/* → Kind PC, 나`
-- L165-167 (2줄, lang=`javascript`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `return new Response('Worker OK'); / // → 200 OK ✅`
-- L172-176 (4줄, lang=`javascript`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `fetch('http://resshome.iptime.org/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });`
-- L183-187 (4줄, lang=`javascript`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `fetch('http://118.38.182.85/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });`
-- L192-194 (2줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `$ curl -H "Host: dev.go-ti.shop" http://resshome.iptime.org:80/api/v1/health / # → 200 JSON ✅`
-- L223-224 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `dev-api.go-ti.shop → CNAME resshome.iptime.org (Cloudflare Proxy ON, SSL Flexible)`
-- L287-299 (12줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `브라우저 /   ├─ dev.go-ti.shop (정적 파일) /   │   → Cloudflare Pages (*.pages.dev)`
-- L323-327 (4줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Step 1: Worker 자체가 동작하는가? → return new Response('OK') / Step 2: Origin에 도달하는가? → 응답 시간으로 확인 (751ms = 도달) / Step 3: Origi`
-
 ### `eks-troubleshooting-part7-go-service.md`
 
 - 카테고리: kubernetes / 시리즈: eks-troubleshooting
@@ -728,22 +696,6 @@
 - L396-401 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `$ kubectl get pods -n wealist-prod | grep -E "prometheus|loki" / prometheus-68ddd48c9c-vmxdg   0/1   CrashLoopBackOff   `
 
-### `goti-cloudflare-migration-adr.md`
-
-- 카테고리: kubernetes / 시리즈: goti-cloudflare-migration
-- 블록 5개 / ASCII 38줄
-
-- L31-33 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Client → CloudFront → S3 (React SPA, 정적 파일) /                     → Kind PC (API, /api/*)`
-- L46-51 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# 기대한 동작 / GET /api/users/999 → 404 {"error": "User not found"} / `
-- L69-72 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Client → Cloudflare (SSL 종단 #1, HTTP→HTTPS 리다이렉트) /        → CloudFront (SSL 종단 #2, HTTP→HTTPS 리다이렉트) /        → 무한 301 `
-- L170-195 (25줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
-  - 샘플: `                     ┌─ dev.go-ti.shop ──────────────────┐ /                      │                                    │`
-- L276-279 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `해결: Pages 커스텀 도메인 제거 / → Workers가 모든 라우트 처리 / → 정적 파일은 Workers에서 Pages *.pages.dev URL로 프록시`
-
 ### `eks-security-jwt-rsa-mismatch.md`
 
 - 카테고리: istio / 시리즈: eks-security
@@ -838,6 +790,16 @@
 - L377-398 (21줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │                    Monitoring Stack                 `
 
+### `goti-cloudflare-migration-adr.md`
+
+- 카테고리: kubernetes / 시리즈: goti-cloudflare-migration
+- 블록 2개 / ASCII 30줄
+
+- L46-51 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# 기대한 동작 / GET /api/users/999 → 404 {"error": "User not found"} / `
+- L168-193 (25줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+  - 샘플: `                     ┌─ dev.go-ti.shop ──────────────────┐ /                      │                                    │`
+
 ### `istio-traffic-part4-retry-timeout.md`
 
 - 카테고리: istio / 시리즈: istio-traffic
@@ -877,6 +839,24 @@
   - 샘플: `┌──────────────────────────────────┐ / │  CronJob: synthetic-traffic      │ / │  (*/5 * * * *, 4분 duration)     │`
 - L134-145 (11줄, lang=`text`, kind=**tree**, decision=**keep**)
   - 샘플: `load-tests/ / ├── k8s/ / │   └── synthetic-traffic.yaml      # K8s 리소스 전체 (SA + AuthzPolicy + ConfigMap + CronJob)`
+
+### `goti-cloudflare-migration-troubleshoot.md`
+
+- 카테고리: kubernetes / 시리즈: goti-cloudflare-migration
+- 블록 6개 / ASCII 26줄
+
+- L122-124 (2줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `POST https://dev.go-ti.shop/api/v1/auth/reissue / → 405 Method Not Allowed`
+- L152-154 (2줄, lang=`javascript`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `return new Response('Worker OK'); / // → 200 OK ✅`
+- L159-163 (4줄, lang=`javascript`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `fetch('http://resshome.iptime.org/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });`
+- L170-174 (4줄, lang=`javascript`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `fetch('http://118.38.182.85/api/...', { /   headers: { 'Host': 'dev.go-ti.shop' } / });`
+- L179-181 (2줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `$ curl -H "Host: dev.go-ti.shop" http://resshome.iptime.org:80/api/v1/health / # → 200 JSON ✅`
+- L272-284 (12줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `브라우저 /   ├─ dev.go-ti.shop (정적 파일) /   │   → Cloudflare Pages (*.pages.dev)`
 
 ### `goti-image-updater-multisource.md`
 
