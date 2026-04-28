@@ -32,7 +32,7 @@
 - [x] **G6.** `cat:cicd` — 3편 / 7블록 / 36줄 (2026-04-29)
 - [x] **G7.** `series:goti-observability-stack` — 5편 / 8블록 / 34줄 (2026-04-29)
 - [x] **G8.** `series:goti-java-to-go` — 4편 / 8블록 / 33줄 (2026-04-29)
-- [ ] **G9.** `series:istio-observability` — 2편 / 3블록 / 32줄
+- [x] **G9.** `series:istio-observability` — 2편 / 3블록 / 32줄 (2026-04-29)
 - [ ] **G10.** `series:goti-cloudflare-migration` — 2편 / 10블록 / 30줄
 - [ ] **G11.** `series:goti-auth` — 3편 / 5블록 / 26줄
 - [ ] **G12.** `cat:challenge` — 3편 / 6블록 / 24줄
@@ -73,9 +73,10 @@
 | G6 `cat:cicd` | 3 | 3 | 4 (lang 명시 + 옵션 비교 일관성) |
 | G7 `goti-observability-stack` | 5 | 7 | 1 (lang=`text` 명시) |
 | G8 `goti-java-to-go` | 4 | 6 | 2 (lang=`text` 명시 메타데이터) |
-| **합계** | **42** | **90** | **18** |
+| G9 `istio-observability` | 2 | 3 | 0 |
+| **합계** | **44** | **93** | **18** |
 
-전체 211 flatten 추천 중 **90 블록 처리(약 43%)** + keep 보정 18건. 다음 진입점은 **G9 `series:istio-observability`** (2편 / 3블록 / 32줄).
+전체 211 flatten 추천 중 **93 블록 처리(약 44%)** + keep 보정 18건. 다음 진입점은 **G10 `series:goti-cloudflare-migration`** (2편 / 10블록 / 30줄).
 
 ### 다음 세션 재개 절차
 
@@ -96,3 +97,4 @@
 - 2026-04-29: G6 (`cat:cicd`) 완료 — 3편 / 7블록 중 3블록 평탄화(굵은 글씨+bullet 2, 인라인 1), 4블록은 lang 명시 keep 보정. 옵션 비교 다이어그램(A/B/C)은 본문 일관성 위해 보존. Before/After 박스는 운영 효과 강조라 풀어쓰기. 다음은 G7 `goti-observability-stack`.
 - 2026-04-29: G7 (`goti-observability-stack`) 완료 — 5편 / 8블록 중 7블록 평탄화(인라인 3, 표 3, 번호 목록 1), 1블록 keep 보정. Before/After 비교와 단계별 지연 누적이 표 형식으로 가장 가독성 좋음. 다음은 G8 `goti-java-to-go`.
 - 2026-04-29: G8 (`goti-java-to-go`) 완료 — 4편 / 8블록 중 6블록 평탄화(표 4, 인라인 2), 2블록 keep(실 smoke 출력 + 커밋 목록 lang 명시). 이미지 배포 시퀀스·커밋-변경 매핑·트리거 차이가 구조적 매핑이라 표 비중 50%. 다음은 G9 `istio-observability`.
+- 2026-04-29: G9 (`istio-observability`) 완료 — 2편 / 3블록 모두 평탄화. 20줄 Span 타임라인 ASCII 시각화는 표(Span/서비스/시작ms/종료ms/비고)로 변환 + 부모-자식 관계 + latency 누적 설명 본문 보강. 진단 절차 2건은 번호 목록. 다음은 G10 `goti-cloudflare-migration`.

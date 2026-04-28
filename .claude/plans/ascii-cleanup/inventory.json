@@ -4,8 +4,8 @@
     "category": "istio",
     "series": "istio-observability",
     "title": "Istio Observability Part 4: Kiali로 Service Mesh 시각화하기",
-    "blockCount": 10,
-    "totalAsciiLines": 210,
+    "blockCount": 9,
+    "totalAsciiLines": 201,
     "blocks": [
       {
         "startLine": 86,
@@ -80,17 +80,8 @@
         "sample": "┌─────────────────────────────────────────────────────────────────┐ / │   Service: reviews - Traces                     "
       },
       {
-        "startLine": 394,
-        "endLine": 403,
-        "lang": "",
-        "lineCount": 9,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "1. Istio Config 메뉴 /  / 2. Validation 상태 확인"
-      },
-      {
-        "startLine": 410,
-        "endLine": 435,
+        "startLine": 403,
+        "endLine": 428,
         "lang": "",
         "lineCount": 25,
         "kind": "architecture",
@@ -512,61 +503,6 @@
     ]
   },
   {
-    "file": "istio-observability-part2-tracing.md",
-    "category": "istio",
-    "series": "istio-observability",
-    "title": "Istio Observability Part 2: 분산 트레이싱으로 요청 흐름 추적하기",
-    "blockCount": 5,
-    "totalAsciiLines": 92,
-    "blocks": [
-      {
-        "startLine": 44,
-        "endLine": 64,
-        "lang": "",
-        "lineCount": 20,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "시간 → / |────────────────────────────────────────────────| / |                                                |"
-      },
-      {
-        "startLine": 303,
-        "endLine": 323,
-        "lang": "",
-        "lineCount": 20,
-        "kind": "flow-diagram",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │                     Jaeger UI                   "
-      },
-      {
-        "startLine": 338,
-        "endLine": 367,
-        "lang": "",
-        "lineCount": 29,
-        "kind": "architecture",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │   Trace abc123                                  "
-      },
-      {
-        "startLine": 440,
-        "endLine": 443,
-        "lang": "",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "1. 두 Trace의 시간대가 거의 같은지 확인 / 2. 첫 번째 Trace의 마지막 Span 시간과 두 번째 Trace의 시작 시간이 일치하면 /    → 헤더 전파 실패 확정"
-      },
-      {
-        "startLine": 587,
-        "endLine": 607,
-        "lang": "",
-        "lineCount": 20,
-        "kind": "architecture",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │              분산 트레이싱 체크리스트                      "
-      }
-    ]
-  },
-  {
     "file": "istio-traffic-part5-mirroring.md",
     "category": "istio",
     "series": "istio-traffic",
@@ -979,6 +915,43 @@
         "kind": "flow-diagram",
         "decision": "keep",
         "sample": "┌─────────────────────────────────────────────────────────────┐ / │               악순환 차단 — 3가지 축 적용 후                  │"
+      }
+    ]
+  },
+  {
+    "file": "istio-observability-part2-tracing.md",
+    "category": "istio",
+    "series": "istio-observability",
+    "title": "Istio Observability Part 2: 분산 트레이싱으로 요청 흐름 추적하기",
+    "blockCount": 3,
+    "totalAsciiLines": 69,
+    "blocks": [
+      {
+        "startLine": 291,
+        "endLine": 311,
+        "lang": "",
+        "lineCount": 20,
+        "kind": "flow-diagram",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │                     Jaeger UI                   "
+      },
+      {
+        "startLine": 326,
+        "endLine": 355,
+        "lang": "",
+        "lineCount": 29,
+        "kind": "architecture",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │   Trace abc123                                  "
+      },
+      {
+        "startLine": 573,
+        "endLine": 593,
+        "lang": "",
+        "lineCount": 20,
+        "kind": "architecture",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │              분산 트레이싱 체크리스트                      "
       }
     ]
   },

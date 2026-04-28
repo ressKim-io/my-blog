@@ -1,20 +1,20 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-28T21:47:24.338Z
+> 생성 시각: 2026-04-28T21:49:12.680Z
 
 ## 요약
 
 - ASCII 블록 포함 글: **130편**
-- 전체 ASCII 블록 수: **349개**
-- 전체 ASCII 라인 합계: **4058줄**
+- 전체 ASCII 블록 수: **346개**
+- 전체 ASCII 라인 합계: **4026줄**
 
 ## 자동 처리 추천 분포 (decision)
 
 | 결정 | 개수 | 설명 |
 |---|---|---|
-| `flatten` | 122 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
+| `flatten` | 119 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
 
 ## 블록 유형 분포 (kind)
@@ -22,7 +22,7 @@
 | 유형 | 개수 | 설명 |
 |---|---|---|
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
-| `arrow-only` | 117 | 박스 없는 화살표 시퀀스 |
+| `arrow-only` | 114 | 박스 없는 화살표 시퀀스 |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
 | `flow-diagram` | 36 | 박스 + 화살표 (흐름도/시퀀스) |
 | `tree` | 27 | 디렉토리/의존성 트리 (├ └ │ ─) |
@@ -33,7 +33,7 @@
 
 | 글 | 카테고리 | 시리즈 | 블록 | 총 라인 | flatten/keep/skip | 주요 유형 |
 |---|---|---|---|---|---|---|
-| `istio-observability-part4-kiali.md` | istio | istio-observability | 10 | 210 | 1/9/0 | flow-diagram, architecture, arrow-only |
+| `istio-observability-part4-kiali.md` | istio | istio-observability | 9 | 201 | 0/9/0 | flow-diagram, architecture |
 | `istio-observability-part3-access-log.md` | istio | istio-observability | 9 | 162 | 0/9/0 | architecture, tree |
 | `goti-redis-serialization-classcastexception.md` | kubernetes | - | 8 | 155 | 0/2/6 | code-arrow, flow-diagram |
 | `argocd-otel-crashloop-networkpolicy.md` | argocd | argocd-troubleshooting | 6 | 144 | 0/3/3 | architecture, flow-diagram, code-arrow |
@@ -42,7 +42,6 @@
 | `argocd-bootstrap-circular-dependency.md` | argocd | argocd-troubleshooting | 3 | 118 | 1/2/0 | architecture, flow-diagram, arrow-only |
 | `argocd-probe-crd-appproject-retry.md` | argocd | argocd-troubleshooting | 3 | 117 | 0/2/1 | flow-diagram, code-arrow |
 | `eks-troubleshooting-part2-istio-ambient-1.md` | istio | eks-troubleshooting | 6 | 96 | 0/3/3 | architecture, code-arrow, flow-diagram |
-| `istio-observability-part2-tracing.md` | istio | istio-observability | 5 | 92 | 2/3/0 | arrow-only, flow-diagram, architecture |
 | `istio-traffic-part5-mirroring.md` | istio | istio-traffic | 4 | 91 | 0/3/1 | flow-diagram, architecture, code-arrow |
 | `argocd-ssa-sync-pitfalls.md` | argocd | argocd-troubleshooting | 5 | 88 | 0/2/3 | flow-diagram, code-arrow |
 | `docker-compose-env-management.md` | challenge | - | 7 | 87 | 3/4/0 | tree, arrow-only, architecture |
@@ -50,6 +49,7 @@
 | `multi-repo-cicd-strategy.md` | cicd | - | 8 | 72 | 2/6/0 | tree, arrow-only, architecture, flow-diagram |
 | `goti-adr-alloy-to-otel-collector.md` | monitoring | - | 3 | 71 | 0/3/0 | architecture, flow-diagram |
 | `goti-adr-loki-tempo-stability-tuning.md` | monitoring | - | 4 | 71 | 2/2/0 | flow-diagram, arrow-only |
+| `istio-observability-part2-tracing.md` | istio | istio-observability | 3 | 69 | 0/3/0 | flow-diagram, architecture |
 | `argocd-app-of-apps-deadlock.md` | argocd | argocd-troubleshooting | 6 | 67 | 0/3/3 | code-arrow, tree |
 | `goti-adr-istio-service-mesh.md` | kubernetes | - | 2 | 66 | 0/2/0 | architecture, flow-diagram |
 | `goti-otel-agent-otlp-protocol-mismatch.md` | monitoring | goti-observability-ops | 2 | 65 | 1/1/0 | architecture, misc |
@@ -169,7 +169,7 @@
 ### `istio-observability-part4-kiali.md`
 
 - 카테고리: istio / 시리즈: istio-observability
-- 블록 10개 / ASCII 210줄
+- 블록 9개 / ASCII 201줄
 
 - L86-112 (26줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │              트래픽 표시 방식                          `
@@ -187,9 +187,7 @@
   - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │   Istio Config                                  `
 - L330-355 (25줄, lang=`-`, kind=**architecture**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │   Service: reviews - Traces                     `
-- L394-403 (9줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `1. Istio Config 메뉴 /  / 2. Validation 상태 확인`
-- L410-435 (25줄, lang=`-`, kind=**architecture**, decision=**keep**)
+- L403-428 (25줄, lang=`-`, kind=**architecture**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │                   Kiali 활용 체크리스트                `
 
 ### `istio-observability-part3-access-log.md`
@@ -314,22 +312,6 @@
 - L426-458 (32줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │                 Istio Ambient Mesh (wealist-prod)   `
 
-### `istio-observability-part2-tracing.md`
-
-- 카테고리: istio / 시리즈: istio-observability
-- 블록 5개 / ASCII 92줄
-
-- L44-64 (20줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `시간 → / |────────────────────────────────────────────────| / |                                                |`
-- L303-323 (20줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │                     Jaeger UI                   `
-- L338-367 (29줄, lang=`-`, kind=**architecture**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │   Trace abc123                                  `
-- L440-443 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `1. 두 Trace의 시간대가 거의 같은지 확인 / 2. 첫 번째 Trace의 마지막 Span 시간과 두 번째 Trace의 시작 시간이 일치하면 /    → 헤더 전파 실패 확정`
-- L587-607 (20줄, lang=`-`, kind=**architecture**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │              분산 트레이싱 체크리스트                      `
-
 ### `istio-traffic-part5-mirroring.md`
 
 - 카테고리: istio / 시리즈: istio-traffic
@@ -449,6 +431,18 @@
   - 샘플: `Before: block 30m 체류 + 무제한 ingestion → ~2Gi 초과 → OOM (limit: 2Gi) / After:  block 5m 체류 + 15MB/s rate limit + GOMEMLIMIT`
 - L238-278 (40줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │               악순환 차단 — 3가지 축 적용 후                  │`
+
+### `istio-observability-part2-tracing.md`
+
+- 카테고리: istio / 시리즈: istio-observability
+- 블록 3개 / ASCII 69줄
+
+- L291-311 (20줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │                     Jaeger UI                   `
+- L326-355 (29줄, lang=`-`, kind=**architecture**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │   Trace abc123                                  `
+- L573-593 (20줄, lang=`-`, kind=**architecture**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │              분산 트레이싱 체크리스트                      `
 
 ### `argocd-app-of-apps-deadlock.md`
 
