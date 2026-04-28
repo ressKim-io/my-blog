@@ -61,6 +61,24 @@
 - 다이어그램 시스템 결정: MDX 컴포넌트 / drawio / Mermaid / HTML→PNG (D2 제외)
 - 다크모드 제거 후 일관 변환
 
+## Phase 3 누적 진행 (~G3)
+
+| 그룹 | 글 | 평탄화 | keep (분류 보정) |
+|---|---|---|---|
+| G1 `cat:kubernetes` | 8 | 33 | 1 (lang=`log`) |
+| G2 `argocd-troubleshooting` | 3 | 5 | 1 (lang=`hcl`) |
+| G3 `eks-troubleshooting` | 7 | 23 | 1 (lang=`diff`) |
+| **합계** | **18** | **61** | **3** |
+
+전체 211 flatten 추천 중 **64 블록 처리(약 30%)**. 다음 진입점은 **G4 `series:goti-multicloud`** (7편 / 12블록 / 60줄).
+
+### 다음 세션 재개 절차
+
+1. 이 파일(`state.md`) 확인 — Phase 3 체크박스 + 진행 로그
+2. `groups.md`의 G4 섹션에서 글 목록과 블록 위치 확인
+3. `criteria.md` 평탄화 방법론 + 분류 보정 룰("lang 명시 코드는 keep") 적용
+4. `decisions.md`의 G1~G3 결정 로그 패턴 참고 (bullet/표/번호목록/인라인 분포)
+
 ## 진행 로그
 
 - 2026-04-28 오전: Phase 1 인벤토리 자동 추출 (141편/429블록/4,425줄)
