@@ -38,10 +38,10 @@ date: "2026-04-19"
 
 멀티클라우드용으로 짜여있던 네트워크 경로는 시연 1주일 전에는 오히려 부담이었습니다.
 
-```
-Before: 브라우저 → CF Edge (LAX) → Worker (LAX) → AWS/GCP failover → Seoul
-After:  브라우저 → gcp-api.go-ti.shop (DNS Only) → 34.22.80.226 (GCP LB Seoul)
-```
+| 시점 | 경로 |
+|---|---|
+| Before | 브라우저 → CF Edge(LAX) → Worker(LAX) → AWS/GCP failover → Seoul |
+| After | 브라우저 → `gcp-api.go-ti.shop`(DNS Only) → 34.22.80.226 (GCP LB Seoul) |
 
 의도는 명확했습니다. Cloudflare Edge의 Anycast가 한국 ISP 특성상 LAX로 잡히는 문제를 회피하고, 브라우저가 서울 리전의 GCP LB로 직접 붙도록 경로를 단순화하는 것입니다.
 
@@ -51,12 +51,11 @@ After:  브라우저 → gcp-api.go-ti.shop (DNS Only) → 34.22.80.226 (GCP LB 
 
 GCP-only 전환 후에도 브라우저 실측은 500~900ms가 지속됐습니다. 네트워크를 의심했지만 `curl`로는 60ms 수준으로 돌아왔습니다.
 
-```
-gcp-api.go-ti.shop DNS Only 확인
-→ Remote Address: 34.22.80.226
-→ server: istio-envoy
-→ curl 직접 측정: ~60ms
-```
+`gcp-api.go-ti.shop`을 DNS Only로 확인한 결과는 다음과 같습니다.
+
+- Remote Address: 34.22.80.226
+- server: `istio-envoy`
+- `curl` 직접 측정: 약 60ms
 
 네트워크는 빠른데 브라우저는 느립니다. Pod 내부 `latency_ms` 로그를 봤더니 p50 189ms, p95 785ms였습니다. 병목이 Pod 내부에 있었습니다.
 
@@ -158,12 +157,11 @@ Cloudflare Proxy를 OFF로 하고 gcp-api에 직통하면 `go-ti.shop → gcp-ap
 
 세 가지를 모두 적용한 뒤 preflight가 정상 응답했습니다.
 
-```
-OPTIONS /api/v1/stadium-seats/.../seat-grades
-→ 200 OK (server: istio-envoy)
-→ access-control-allow-origin: https://go-ti.shop
-→ access-control-allow-headers: Authorization, Content-Type, X-Requested-With, X-GR-BS
-```
+`OPTIONS /api/v1/stadium-seats/.../seat-grades` 응답:
+
+- 200 OK (server: `istio-envoy`)
+- `access-control-allow-origin: https://go-ti.shop`
+- `access-control-allow-headers: Authorization, Content-Type, X-Requested-With, X-GR-BS`
 
 ### Phase C — Latency 최적화
 

@@ -173,11 +173,13 @@ Host:        harbor.go-ti.shop
 
 Cloudflare에는 User-Agent에 봇 관련 문자열이 포함된 요청을 차단하는 Custom Rule이 설정되어 있었습니다.
 
-```
+```text
 (http.user_agent contains "Headless") or
-(http.user_agent contains "bot") or      ← "bottlerocket"이 여기 매칭
+(http.user_agent contains "bot") or
 (http.user_agent contains "crawler")
 ```
+
+문제는 가운데 줄입니다. `"bot"` 부분 문자열 매칭이 `bottlerocket`까지 잡아버립니다.
 
 EKS 노드 OS가 Bottlerocket인데, containerd가 자신의 User-Agent를 `containerd/2.1.6+bottlerocket`으로 보냈습니다. `bottlerocket`에 `bot`이 포함되어 있어서 WAF 규칙에 걸린 것입니다.
 
@@ -248,11 +250,7 @@ Private Hosted Zone은 VPC 내부 DNS 조회에서 Public DNS보다 우선합니
 
 ### 전체 경로 배경
 
-Harbor는 사실 EKS 클러스터 안의 Pod으로 동작하고 있었습니다. 외부 접근 경로는 다음과 같았습니다.
-
-```
-외부 → Cloudflare (TLS terminate) → ALB/NLB → Istio Gateway (HTTP) → Harbor Pod
-```
+Harbor는 사실 EKS 클러스터 안의 Pod으로 동작하고 있었습니다. 외부 접근 경로는 외부 → Cloudflare(TLS terminate) → ALB/NLB → Istio Gateway(HTTP) → Harbor Pod 순이었습니다.
 
 Istio Gateway는 `protocol: HTTP`만 받도록 구성되어 있었습니다. TLS는 Cloudflare가 처리하는 전제였습니다. EC2 IP로 직접 443 연결을 시도하면 TLS handshake할 대상이 없어 timeout이 나는 것이 당연한 결과였습니다.
 

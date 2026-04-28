@@ -52,7 +52,7 @@ npm run lint       # ESLint
 
 <!-- STATS:START -->
 <!-- 자동 생성: scripts/update-stats.mjs (prebuild 훅), 수동 편집 금지 -->
-## Blog Content Stats (2026-04-25 기준, 자동 생성)
+## Blog Content Stats (2026-04-28 기준, 자동 생성)
 
 - **총 글 수**: 224개 (go-ti 프로젝트 실전 기록 132편 포함)
 - **카테고리 (6개)**:

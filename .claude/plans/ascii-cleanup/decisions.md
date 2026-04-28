@@ -178,3 +178,55 @@
 | **합계** | **24** |
 
 이 그룹은 "문제 N — 상황" 박스 패턴이 많아 bullet 목록 변환이 압도적으로 많았습니다. lang=`diff`로 명시된 실제 ArgoCD diff 1건은 keep으로 분류 보정 (이전 그룹의 lang=`log`/`hcl` keep과 동일 패턴 — lang이 명시된 코드는 화살표 토큰만으로 flatten 추천돼도 사람 판단으로 보존).
+
+---
+
+## G4 — `series:goti-multicloud` (2026-04-29)
+
+7편 / inventory flatten 추천 12블록 → 실제 평탄화 12블록.
+
+### `goti-aws-full-destroy-gcp-latency-optimization.md` (3블록)
+
+- L41-43 Before/After 경로 비교 → **표** (시점/경로 2열)
+- L54-58 DNS 검증 결과 → **bullet 목록** (Remote Address/server/curl 측정값 3건)
+- L161-165 preflight 응답 → **bullet 목록** (3개 헤더 인라인 코드)
+
+### `goti-harbor-imagepull-403-cloudflare-waf.md` (2블록)
+
+- L176-179 WAF 표현식 (한국어 화살표 주석) → **lang=`text` 명시 + 주석 외부 문장으로 분리** (룰 본문 자체는 정보 가치 있는 코드라 보존, 화살표 주석만 본문 한 줄로 풀어씀)
+- L253-254 외부→Cloudflare→ALB→Istio→Pod 단순 흐름 → **인라인**
+
+### `goti-cloudflare-worker-lax-latency-investigation.md` (2블록)
+
+- L89-93 수학적 분해 (계산식) → **bullet 목록** (프론트/백엔드/차이 3행)
+- L127-140 LAX 왕복 13줄 경로 분해 → **번호 목록** (5단계 왕복 흐름, 각 구간 ms 포함)
+
+### `goti-gcp-bringup-troubleshooting-chain.md` (2블록)
+
+- L58-61 HTTP 525→404→403 chain → **bullet 목록**
+- L114-118 viper 설정 누락 흐름 → **번호 목록** (4단계, panic까지 인과 사슬)
+
+### `goti-multi-cloud-failover-bringup.md` (1블록, 14줄 box-small)
+
+- L66-80 Worker fanout 다이어그램 → **번호 목록** (4단계, fetch URL 인라인 코드 + Grafana 대시보드 결론)
+
+### `goti-gcp-redis-recovery-jwt-unification.md` (1블록)
+
+- L77-82 Terraform 관리 vs 수동 drift 박스 → **표** (시크릿/관리 주체/갱신 여부/비고 4열)
+
+### `goti-multicloud-circuit-breaker-hpa-adr.md` (1블록)
+
+- L37-40 TCP timeout 10s 흐름 → **인라인** (Client→Worker→AWS→GCP 한 문장)
+
+### G4 통계
+
+| 변환 | 건수 |
+|---|---|
+| 인라인 | 2 |
+| 표 | 2 |
+| bullet 목록 | 3 |
+| 번호 목록 | 4 |
+| lang 명시 + 주석 분리 | 1 |
+| **합계** | **12** |
+
+이 그룹은 멀티클라우드 트래픽 경로/장애 사슬 박스가 많아 **번호 목록** 비중이 가장 높았습니다 (4건). 단계별 ms 또는 인과 사슬을 풀어쓰는 데 번호 목록이 가독성을 가장 잘 보존했습니다. WAF 룰은 lang을 명시하면서도 한국어 주석 화살표만 본문 한 줄로 분리하는 하이브리드 패턴 — 전 그룹의 "lang 명시 코드는 keep" 보정 룰을 살짝 변형해 적용했습니다.

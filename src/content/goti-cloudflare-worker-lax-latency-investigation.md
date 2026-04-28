@@ -86,12 +86,9 @@ content-encoding:               br
 
 세 지점의 수치를 맞춰보면 설명되지 않는 구간이 드러났습니다.
 
-```
-프론트 측정:  966ms
-백엔드 실제:   32ms (x-envoy-upstream-service-time)
-           ────
-네트워크:    934ms 이 설명되지 않음
-```
+- 프론트 측정: 966ms
+- 백엔드 실제: 32ms (`x-envoy-upstream-service-time`)
+- 차이: 934ms — 네트워크 경로에서 설명되지 않음
 
 934ms 대부분이 네트워크 경로에서 소비되고 있었습니다.
 
@@ -122,23 +119,13 @@ Speed test는 Worker를 경유하지 않는 Cloudflare 직접 서비스입니다
 
 ### 경로 분해
 
-현재 요청이 실제로 어떻게 흐르고 있는지 따라가보겠습니다.
+현재 요청이 실제로 어떻게 흐르고 있는지 단계별로 따라가보겠습니다.
 
-```
-한국 사용자 브라우저
-    ↓ (정상이면 ~20ms, ICN PoP)
-    ↓ (실제 라우팅) 200~300ms
-Cloudflare LAX PoP
-    ↓ Worker 실행 (서킷 체크, 헤더 파싱)
-    ↓ fetch('gcp-api.go-ti.shop') — LAX에서 Seoul로
-    ↓ 태평양 왕복 150~250ms
-GCP Cloud Load Balancer (Seoul)
-    ↓ Istio Ingress Gateway
-    ↓ 티켓팅 pod (32ms 실제 처리)
-    ↑ 역순 반환
-    ↑ Seoul에서 LAX로 150~250ms
-    ↑ LAX에서 한국으로 200~300ms
-```
+1. 한국 사용자 브라우저 → Cloudflare LAX PoP까지 200~300ms (정상이면 ICN PoP에서 약 20ms)
+2. LAX PoP의 Worker가 실행됩니다 (서킷 체크, 헤더 파싱)
+3. Worker가 `fetch('gcp-api.go-ti.shop')`을 호출 — LAX에서 Seoul로 태평양 왕복 150~250ms
+4. GCP Cloud Load Balancer(Seoul) → Istio Ingress Gateway → 티켓팅 pod에서 32ms 실제 처리
+5. 응답이 역순으로 Seoul → LAX 150~250ms, LAX → 한국 200~300ms 반환
 
 누적 네트워크 오버헤드는 700~1100ms입니다. 실측 934ms와 일치합니다.
 

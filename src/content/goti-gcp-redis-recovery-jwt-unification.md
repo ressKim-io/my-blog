@@ -74,13 +74,12 @@ Terraform 모듈은 Redis 인스턴스가 재생성될 때 다음 세 개의 Sec
 
 ### 문제의 구조
 
-```
-Terraform 관리               수동 생성 (drift)
-─────────────────            ──────────────────
-REDIS_HOST        갱신됨     REDIS_URL         갱신 안 됨 ❌
-REDIS_PORT        갱신됨     (실제로 앱이 읽는 값)
-REDIS_AUTH_TOKEN  갱신됨
-```
+| 시크릿 | 관리 주체 | 갱신 여부 | 비고 |
+|---|---|---|---|
+| `REDIS_HOST` | Terraform | 갱신됨 | 새 IP로 업데이트 |
+| `REDIS_PORT` | Terraform | 갱신됨 | |
+| `REDIS_AUTH_TOKEN` | Terraform | 갱신됨 | |
+| `REDIS_URL` | 수동 (drift) | 갱신 안 됨 | 실제로 앱이 읽는 값 |
 
 Go 앱은 `REDIS_HOST`가 아니라 `REDIS_URL`을 참조했기 때문에, Terraform apply 뒤에도 앱 관점에서는 아무것도 바뀌지 않은 것처럼 보였습니다.
 
