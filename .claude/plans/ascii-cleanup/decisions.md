@@ -86,3 +86,34 @@
 | **합계** | **34** |
 
 본문 흐름은 손대지 않고 코드블록 형태만 정리. 정보는 모두 보존.
+
+---
+
+## G2 — `series:argocd-troubleshooting` (2026-04-28)
+
+3편 / inventory flatten 추천 6블록 → 실제 평탄화 5블록 + keep 1블록.
+
+### `argocd-bootstrap-circular-dependency.md`
+
+- L153-228 Terraform 75줄 (lang=`hcl`) → **keep** (실제 Terraform 코드라 인벤토리 분류 보정. 화살표 토큰은 한국어 주석 `← ArgoCD보다 먼저!` 때문에 잡힘)
+- L385-388 Before 순환 의존성 + L392-395 After 올바른 순서 → **표 (병합)** (영역 / Before / After 3열로 합쳐 비교 명료화)
+
+### `argocd-otel-crashloop-networkpolicy.md`
+
+- L257-264 ArgoCD Server 시작 순서 → **목록** (nested 번호 목록, `NewServer`/`Init` 2단계 + 하위 호출)
+- L379-386 argocd-server 시작 순서 → **목록** (nested 번호 목록, ConfigMap informer 차단 지점 강조)
+
+### `argocd-ssa-sync-pitfalls.md`
+
+- L38-45 ArgoCD 리소스 상태 + sync 결과 → **표 (병합)** (리소스 / 변경 감지 / sync 결과 3열로 두 시점 합침)
+
+### G2 통계
+
+| 변환 | 건수 |
+|---|---|
+| 표 | 2 (각 두 블록 병합) |
+| 목록 | 2 |
+| keep (분류 보정) | 1 |
+| **합계** | **6** (병합으로 실 결과물 4개) |
+
+블록 2개를 표 1개로 병합한 사례 2건 — 비교 정보가 자연스럽게 합쳐지는 경우 가독성을 위해 병합.

@@ -254,15 +254,14 @@ gRPC 연결이 startup을 blocking하는 것 아닌가 의심했습니다.
 
 - **검증**: ArgoCD 소스 코드를 분석했습니다.
 
-```
-ArgoCD Server 시작 순서:
-1. NewServer()
-2.   → ensureSynced()
-3.     → WaitForCacheSync()  ← 여기서 hang!
-4. Init()
-5.   → Listen(:8080)
-6.   → InitTracer()  ← OTLP 초기화는 여기서 (도달 못 함)
-```
+ArgoCD Server 시작 순서는 다음과 같습니다.
+
+1. `NewServer()`
+   - `ensureSynced()` 호출
+   - `WaitForCacheSync()` ← 여기서 hang
+2. `Init()`
+   - `Listen(:8080)`
+   - `InitTracer()` ← OTLP 초기화 (도달 못 함)
 
 OTLP tracer 초기화는 `InitTracer()` 단계에서 발생하는데, 서버가 `WaitForCacheSync()`에서 멈추고 있으니 `InitTracer()`까지 도달하지 못합니다. 원인이 아닙니다.
 
@@ -376,15 +375,14 @@ repo-server가 "우연히" 동작한 것이 흥미로운 포인트입니다. Git
 
 argocd-server는 시작 시 `WaitForCacheSync()`에서 K8s informer를 초기화합니다. Informer는 K8s API server에 LIST/WATCH 요청을 보내서 ConfigMap, Secret, Application 등의 리소스를 캐시합니다.
 
-```
-argocd-server 시작 순서:
-1. Redis 연결 (ClusterIP 내부 통신 → NetworkPolicy와 무관)
-2. configmap/secret informers 시작
-3.   → K8s API server에 LIST 요청 ← 여기서 차단!
-4.   → WaitForCacheSync() 무한 대기
-5. liveness probe 실패 (30초 후)
-6. kubelet이 SIGTERM → 재시작
-```
+argocd-server 시작 순서는 다음과 같습니다.
+
+1. Redis 연결 (ClusterIP 내부 통신, NetworkPolicy 무관)
+2. ConfigMap/Secret informer 시작
+   - K8s API server에 LIST 요청 ← 여기서 차단
+   - `WaitForCacheSync()`가 무한 대기
+3. liveness probe가 30초 후 실패
+4. kubelet이 SIGTERM을 보내고 재시작
 
 Egress가 차단되어 있으니 LIST 요청이 K8s API에 도달하지 못하고, informer가 영원히 대기하는 겁니다.
 

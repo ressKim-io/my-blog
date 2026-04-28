@@ -35,15 +35,10 @@ date: '2026-03-29'
 Queue POC 3종에 `GOTI_MESH_ENABLED=true` 환경변수를 추가하고 git push했습니다.
 ArgoCD가 변경을 감지해서 OutOfSync로 표시했지만, sync를 실행하면 **Deployment가 적용 대상에서 빠져 있었습니다**.
 
-```
-# ArgoCD 리소스 상태
-Deployment      goti-queue-dev          OutOfSync   ← 변경 감지했지만
-ExternalSecret  goti-queue-dev-secrets  OutOfSync
-
-# sync 결과
-ExternalSecret goti-queue-dev-secrets: Synced   ← 이것만 적용됨
-(Deployment는 목록에 없음)
-```
+| 리소스 | ArgoCD 리소스 상태 | sync 결과 |
+|---|---|---|
+| Deployment `goti-queue-dev` | OutOfSync (변경 감지) | 목록에서 빠짐 |
+| ExternalSecret `goti-queue-dev-secrets` | OutOfSync | Synced |
 
 OutOfSync라고 말해놓고 정작 sync하면 무시합니다. 이상한 상황이었습니다.
 
