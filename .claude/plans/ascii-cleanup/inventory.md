@@ -1,19 +1,19 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-28T21:41:58.868Z
+> 생성 시각: 2026-04-28T21:44:49.293Z
 
 ## 요약
 
-- ASCII 블록 포함 글: **134편**
-- 전체 ASCII 블록 수: **362개**
-- 전체 ASCII 라인 합계: **4109줄**
+- ASCII 블록 포함 글: **133편**
+- 전체 ASCII 블록 수: **355개**
+- 전체 ASCII 라인 합계: **4078줄**
 
 ## 자동 처리 추천 분포 (decision)
 
 | 결정 | 개수 | 설명 |
 |---|---|---|
-| `flatten` | 135 | 평탄화 (표/문장으로 변환 또는 삭제) |
+| `flatten` | 128 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
 
@@ -21,8 +21,8 @@
 
 | 유형 | 개수 | 설명 |
 |---|---|---|
-| `arrow-only` | 128 | 박스 없는 화살표 시퀀스 |
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
+| `arrow-only` | 121 | 박스 없는 화살표 시퀀스 |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
 | `flow-diagram` | 37 | 박스 + 화살표 (흐름도/시퀀스) |
 | `tree` | 27 | 디렉토리/의존성 트리 (├ └ │ ─) |
@@ -98,11 +98,9 @@
 | `goti-kafka-adoption-decision-adr.md` | challenge | goti-kafka | 1 | 15 | 0/1/0 | tree |
 | `goti-istio-injection-label-pg-max-connections.md` | istio | goti-istio-ops | 2 | 14 | 1/0/1 | arrow-only, code-arrow |
 | `goti-queue-loadtest-k6-two-phase-design.md` | challenge | goti-queue-poc | 2 | 14 | 2/0/0 | arrow-only |
-| `goti-tempo-spanmetrics-batch-timeout.md` | monitoring | goti-observability-stack | 2 | 14 | 1/0/1 | arrow-only, code-arrow |
 | `websocket-token-refresh.md` | kubernetes | eks-security | 2 | 14 | 2/0/0 | arrow-only |
 | `challenge1-game-server-part7.md` | challenge | game-server | 3 | 13 | 3/0/0 | arrow-only |
 | `goti-postgres-healthcheck-env.md` | cicd | goti-ec2-deploy | 3 | 13 | 1/0/2 | code-arrow, misc |
-| `goti-tempo-oom-kafka-buffer-sampling.md` | monitoring | goti-observability-stack | 3 | 13 | 2/0/1 | arrow-only, code-arrow |
 | `pod-service-troubleshooting.md` | kubernetes | - | 2 | 13 | 1/0/1 | code-arrow, arrow-only |
 | `goti-argocd-dashboard-zero-metrics.md` | argocd | goti-argocd | 1 | 12 | 0/0/1 | code-arrow |
 | `goti-load-test-db-realistic-data.md` | challenge | goti-loadtest | 3 | 12 | 1/0/2 | code-arrow, arrow-only |
@@ -114,7 +112,6 @@
 | `goti-multicloud-db-replication-technology-adr.md` | kubernetes | goti-multicloud-db | 1 | 11 | 0/1/0 | tree |
 | `goti-signup-dtype-regression.md` | challenge | goti-auth | 2 | 11 | 2/0/0 | arrow-only |
 | `goti-kafka-buffered-otel-pipeline.md` | monitoring | goti-observability-ops | 4 | 10 | 3/1/0 | arrow-only, tree |
-| `goti-mimir-ingester-oom-webhook-deadlock.md` | monitoring | goti-observability-stack | 2 | 10 | 1/0/1 | arrow-only, code-arrow |
 | `goti-phase7-d-overturn-decision.md` | challenge | goti-ticketing-phase | 2 | 10 | 2/0/0 | arrow-only |
 | `goti-poc-ab-test-dependency-isolation-pattern.md` | challenge | - | 2 | 10 | 2/0/0 | arrow-only |
 | `goti-redis-sot-adoption-adr.md` | challenge | goti-redis-sot | 2 | 10 | 2/0/0 | arrow-only |
@@ -131,7 +128,6 @@
 | `goti-argocd-ssa-diff-deployment-skip.md` | argocd | goti-argocd | 1 | 7 | 1/0/0 | arrow-only |
 | `goti-docker-network-loki-healthcheck.md` | cicd | goti-ec2-deploy | 1 | 7 | 1/0/0 | arrow-only |
 | `goti-eks-rolling-update-cascading-failures.md` | kubernetes | goti-eks | 1 | 7 | 1/0/0 | arrow-only |
-| `goti-loki-otlp-native-migration.md` | monitoring | goti-observability-stack | 3 | 7 | 3/0/0 | arrow-only |
 | `goti-poc-queue-a-401-ticketing-isolation.md` | challenge | goti-queue-poc | 3 | 7 | 3/0/0 | arrow-only |
 | `github-actions-multi-platform-optimization.md` | cicd | - | 1 | 6 | 0/1/0 | tree |
 | `goti-cutover-smoke-trail-fixes.md` | challenge | goti-java-to-go | 1 | 6 | 1/0/0 | arrow-only |
@@ -145,6 +141,7 @@
 | `goti-dashboard-query-validation-fixes.md` | monitoring | goti-observability-ops | 1 | 5 | 1/0/0 | arrow-only |
 | `goti-hikaricp-otel-beanpostprocessor.md` | monitoring | goti-spring-otel | 1 | 5 | 1/0/0 | arrow-only |
 | `goti-java-to-go-cutover-smoke-trouble.md` | challenge | goti-java-to-go | 1 | 5 | 0/0/1 | code-arrow |
+| `goti-mimir-ingester-oom-webhook-deadlock.md` | monitoring | goti-observability-stack | 1 | 5 | 0/0/1 | code-arrow |
 | `goti-monitoring-dashboard-nodata.md` | monitoring | goti-otel-prometheus | 2 | 5 | 2/0/0 | arrow-only |
 | `goti-monitoring-pitfalls-system.md` | monitoring | goti-observability-ops | 1 | 5 | 0/0/1 | code-arrow |
 | `goti-phase8-p0-seat-booking-port.md` | challenge | goti-ticketing-phase | 1 | 5 | 1/0/0 | arrow-only |
@@ -153,6 +150,8 @@
 | `goti-dev-monitoring-502.md` | cicd | goti-cloudfront-alb | 2 | 4 | 2/0/0 | arrow-only |
 | `goti-metrics-collector-pipeline-e2e.md` | monitoring | goti-metrics-collector | 1 | 4 | 1/0/0 | arrow-only |
 | `goti-renovate-ecr-auth-failure.md` | cicd | - | 1 | 4 | 1/0/0 | arrow-only |
+| `goti-tempo-oom-kafka-buffer-sampling.md` | monitoring | goti-observability-stack | 1 | 4 | 0/0/1 | code-arrow |
+| `goti-tempo-spanmetrics-batch-timeout.md` | monitoring | goti-observability-stack | 1 | 4 | 0/0/1 | code-arrow |
 | `challenge2-wealist-migration-part2.md` | challenge | challenge-2-wealist-migration | 1 | 3 | 1/0/0 | arrow-only |
 | `goti-grafana-csrf-origin.md` | cicd | goti-ec2-deploy | 1 | 3 | 0/0/1 | code-arrow |
 | `goti-node-rightsizing-and-rebalancing.md` | kubernetes | goti-scaling | 1 | 3 | 1/0/0 | arrow-only |
@@ -807,7 +806,7 @@
 - 카테고리: monitoring / 시리즈: goti-observability-stack
 - 블록 2개 / ASCII 33줄
 
-- L255-258 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+- L255-258 (3줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `메트릭:  App → OTel SDK → Alloy scrape → remote_write → Mimir / 로그:    App → OTel SDK → Alloy → Kafka(otlp_logs) → Alloy Ga`
 - L281-311 (30줄, lang=`-`, kind=**architecture**, decision=**keep**)
   - 샘플: `                        ┌─────────────────────────────┐ /                         │     Grafana (Dashboard)      │ /    `
@@ -1054,16 +1053,6 @@
 - L139-152 (13줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `load-tests/ /   helpers/ /     queue-poc-c.js       # PR #309 대기열 액션`
 
-### `goti-tempo-spanmetrics-batch-timeout.md`
-
-- 카테고리: monitoring / 시리즈: goti-observability-stack
-- 블록 2개 / ASCII 14줄
-
-- L73-83 (10줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `App에서 span 생성 (타임스탬프 기록) /   → Alloy OTLP receiver /   → tail_sampling (decision_wait: 5s)          +5초`
-- L110-114 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# alloy-values.yaml / batch "kafka_traces": /   timeout: "2s"  # 10s → 2s`
-
 ### `websocket-token-refresh.md`
 
 - 카테고리: kubernetes / 시리즈: eks-security
@@ -1097,18 +1086,6 @@
   - 샘플: `$ ./scripts/validate-deploy.sh / [CHECK] Healthcheck 환경변수 정합성... /   postgres: $${POSTGRES_USER} → environment 키 확인 → PA`
 - L121-125 (4줄, lang=`-`, kind=**misc**, decision=**flatten**)
   - 샘플: `environment: /   CONTAINER_VAR: ${HOST_VAR} /   ─────────────   ──────────`
-
-### `goti-tempo-oom-kafka-buffer-sampling.md`
-
-- 카테고리: monitoring / 시리즈: goti-observability-stack
-- 블록 3개 / ASCII 13줄
-
-- L78-79 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `goti pods → Alloy → OTLP gRPC → Tempo (직접)`
-- L96-100 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# tempo-values.yaml / resources: /   limits:`
-- L131-139 (8줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `[Before] / goti pods → Alloy(100%) → OTLP → Tempo → OOMKilled / `
 
 ### `pod-service-troubleshooting.md`
 
@@ -1217,16 +1194,6 @@
   - 샘플: `App → Alloy Agent (otelcol.exporter.kafka) /         → Kafka (otlp_proto) /             → Alloy Gateway (otelcol.receive`
 - L77-81 (4줄, lang=`text`, kind=**tree**, decision=**keep**)
   - 샘플: `App → Alloy Agent /         ├─ Metrics → 직접 Mimir (현재 구조 유지) /         ├─ Logs   → Kafka → Alloy Gateway → Loki`
-
-### `goti-mimir-ingester-oom-webhook-deadlock.md`
-
-- 카테고리: monitoring / 시리즈: goti-observability-stack
-- 블록 2개 / ASCII 10줄
-
-- L93-98 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Ingester OOMKilled → rollout-operator: "비정상이니 변경 불가" /                     → ArgoCD sync 실패 /                     → 메모리 `
-- L132-137 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# rollout-operator 스케일 다운 + webhook 삭제 후 / sleep 60  # API server 캐시 만료 대기 / `
 
 ### `goti-phase7-d-overturn-decision.md`
 
@@ -1382,18 +1349,6 @@
 - L96-103 (7줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `[terraform apply -target=module.config] /   → aws_security_group.this: inline ingress로 규칙 통합 ← Terraform state에 기록 / `
 
-### `goti-loki-otlp-native-migration.md`
-
-- 카테고리: monitoring / 시리즈: goti-observability-stack
-- 블록 3개 / ASCII 7줄
-
-- L59-60 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Spring Boot → OTel SDK → Alloy (OTLP receiver) → otelcol.exporter.loki → Loki`
-- L90-91 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `OTLP → exporter.loki → loki.process (JSON 파싱 → label 승격) → loki.write`
-- L190-195 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Before: /   OTLP → transform(hints 설정) → exporter.loki → loki.write / `
-
 ### `goti-poc-queue-a-401-ticketing-isolation.md`
 
 - 카테고리: challenge / 시리즈: goti-queue-poc
@@ -1510,6 +1465,14 @@
 - L65-70 (5줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# Java 시크릿 키명 → Go env 키명 매핑 / GOOGLE_CLIENT       → OAUTH_GOOGLE_CLIENT_ID / GOOGLE_SECRET       → OAUTH_GOOGLE_CLIENT_`
 
+### `goti-mimir-ingester-oom-webhook-deadlock.md`
+
+- 카테고리: monitoring / 시리즈: goti-observability-stack
+- 블록 1개 / ASCII 5줄
+
+- L130-135 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# rollout-operator 스케일 다운 + webhook 삭제 후 / sleep 60  # API server 캐시 만료 대기 / `
+
 ### `goti-monitoring-dashboard-nodata.md`
 
 - 카테고리: monitoring / 시리즈: goti-otel-prometheus
@@ -1577,6 +1540,22 @@
 
 - L26-30 (4줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `goti-server CD → ECR push /               → Renovate: ECR 태그 조회 /               → Goti-k8s values.yaml 태그 업데이트 PR`
+
+### `goti-tempo-oom-kafka-buffer-sampling.md`
+
+- 카테고리: monitoring / 시리즈: goti-observability-stack
+- 블록 1개 / ASCII 4줄
+
+- L94-98 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# tempo-values.yaml / resources: /   limits:`
+
+### `goti-tempo-spanmetrics-batch-timeout.md`
+
+- 카테고리: monitoring / 시리즈: goti-observability-stack
+- 블록 1개 / ASCII 4줄
+
+- L109-113 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# alloy-values.yaml / batch "kafka_traces": /   timeout: "2s"  # 10s → 2s`
 
 ### `challenge2-wealist-migration-part2.md`
 

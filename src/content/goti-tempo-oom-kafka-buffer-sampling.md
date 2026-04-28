@@ -75,9 +75,7 @@ Tempo 3Gi 메모리로는 감당이 안 됐습니다.
 
 ### 2. 유입 속도 제어 불가
 
-```
-goti pods → Alloy → OTLP gRPC → Tempo (직접)
-```
+기존 흐름은 goti pods → Alloy → OTLP gRPC → Tempo로 직접 전송하는 구조였습니다.
 
 Alloy에서 Tempo로 직접 전송하는 구조라서, 부하가 급증해도 Tempo가 "잠깐 멈춰"라고 할 수 없었습니다.
 gRPC는 backpressure가 있지만, 이미 Alloy 쪽에 데이터가 쌓이면 Alloy도 메모리 부담이 커집니다.
@@ -128,16 +126,10 @@ tail sampling 설정의 핵심 파라미터:
 
 ### 조치 3: Kafka 버퍼 — Tempo 앞에 충격 흡수기
 
-```
-[Before]
-goti pods → Alloy(100%) → OTLP → Tempo → OOMKilled
-
-[After]
-goti pods → Alloy(tail sampling 10%)
-              → Kafka(observability.traces.v1)
-                → Alloy consumer(batch)
-                  → OTLP → Tempo
-```
+| 시점 | 파이프라인 |
+|---|---|
+| Before | goti pods → Alloy(100% 샘플링) → OTLP → Tempo → **OOMKilled** |
+| After | goti pods → Alloy(tail sampling 10%) → Kafka(`observability.traces.v1`) → Alloy consumer(batch) → OTLP → Tempo |
 
 Kafka를 Alloy와 Tempo 사이에 넣었습니다.
 Strimzi Kafka가 이미 비즈니스 이벤트용으로 운영 중이라 **토픽 추가만으로 구현** 가능했습니다.

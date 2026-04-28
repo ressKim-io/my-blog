@@ -30,7 +30,7 @@
 - [x] **G4.** `series:goti-multicloud` — 7편 / 12블록 / 60줄 (2026-04-29)
 - [x] **G5.** `series:goti-observability-ops` — 5편 / 9블록 / 46줄 (2026-04-29)
 - [x] **G6.** `cat:cicd` — 3편 / 7블록 / 36줄 (2026-04-29)
-- [ ] **G7.** `series:goti-observability-stack` — 5편 / 8블록 / 34줄
+- [x] **G7.** `series:goti-observability-stack` — 5편 / 8블록 / 34줄 (2026-04-29)
 - [ ] **G8.** `series:goti-java-to-go` — 4편 / 8블록 / 33줄
 - [ ] **G9.** `series:istio-observability` — 2편 / 3블록 / 32줄
 - [ ] **G10.** `series:goti-cloudflare-migration` — 2편 / 10블록 / 30줄
@@ -71,9 +71,10 @@
 | G4 `goti-multicloud` | 7 | 12 | 0 (lang 명시는 하이브리드) |
 | G5 `goti-observability-ops` | 5 | 1 | 8 (lang=`text`/`alloy`/`promql`) |
 | G6 `cat:cicd` | 3 | 3 | 4 (lang 명시 + 옵션 비교 일관성) |
-| **합계** | **33** | **77** | **15** |
+| G7 `goti-observability-stack` | 5 | 7 | 1 (lang=`text` 명시) |
+| **합계** | **38** | **84** | **16** |
 
-전체 211 flatten 추천 중 **80 블록 처리(약 38%)** + keep 보정 15건. 다음 진입점은 **G7 `series:goti-observability-stack`** (5편 / 8블록 / 34줄).
+전체 211 flatten 추천 중 **84 블록 처리(약 40%)** + keep 보정 16건. 다음 진입점은 **G8 `series:goti-java-to-go`** (4편 / 8블록 / 33줄).
 
 ### 다음 세션 재개 절차
 
@@ -92,3 +93,4 @@
 - 2026-04-29: G4 (`series:goti-multicloud`) 완료 — 7편 / 12블록 평탄화. 멀티클라우드 트래픽 경로/장애 사슬 박스가 많아 번호 목록 비중이 가장 높음(4건). 표 2개, bullet 목록 3개, 인라인 2개, lang 명시+주석 분리 1개. 다음은 G5 `goti-observability-ops`.
 - 2026-04-29: G5 (`series:goti-observability-ops`) 완료 — 5편 / 9블록 중 1블록만 평탄화(번호 목록), 8블록은 분류 보정으로 keep. 관측성 시리즈는 lang=`text`/`alloy`/`promql` 명시 + 실제 응답·설정·옵션 비교 다이어그램이 대부분이라 keep 비중 압도적. 다음은 G6 `cat:cicd`.
 - 2026-04-29: G6 (`cat:cicd`) 완료 — 3편 / 7블록 중 3블록 평탄화(굵은 글씨+bullet 2, 인라인 1), 4블록은 lang 명시 keep 보정. 옵션 비교 다이어그램(A/B/C)은 본문 일관성 위해 보존. Before/After 박스는 운영 효과 강조라 풀어쓰기. 다음은 G7 `goti-observability-stack`.
+- 2026-04-29: G7 (`goti-observability-stack`) 완료 — 5편 / 8블록 중 7블록 평탄화(인라인 3, 표 3, 번호 목록 1), 1블록 keep 보정. Before/After 비교와 단계별 지연 누적이 표 형식으로 가장 가독성 좋음. 다음은 G8 `goti-java-to-go`.

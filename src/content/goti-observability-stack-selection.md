@@ -252,7 +252,7 @@ prometheusOperator:
 | 로그 | **Kafka 버퍼** | 2~24시간 지연 허용, 버스트 시 유실 방지 |
 | 트레이스 | **Kafka 버퍼** | 대용량 payload, OOM 위험 — 배압 흡수 필수 |
 
-```
+```text
 메트릭:  App → OTel SDK → Alloy scrape → remote_write → Mimir
 로그:    App → OTel SDK → Alloy → Kafka(otlp_logs) → Alloy Gateway → Loki
 트레이스: App → OTel SDK → Alloy(tail sampling) → Kafka(otlp_spans) → Alloy Gateway → Tempo

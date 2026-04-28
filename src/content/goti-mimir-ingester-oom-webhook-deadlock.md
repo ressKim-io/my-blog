@@ -88,15 +88,13 @@ kubectl patch도 같은 webhook에 의해 blocking됐습니다.
 Mimir Helm chart에 포함된 rollout-operator가 3개의 ValidatingWebhookConfiguration을 생성합니다.
 이 webhook의 목적은 "Ingester가 비정상일 때 unsafe한 변경을 막는 것"입니다.
 
-문제는 **Ingester가 OOM으로 비정상인 상태에서 메모리를 올리는 변경도 차단한다**는 것입니다.
+문제는 **Ingester가 OOM으로 비정상인 상태에서 메모리를 올리는 변경도 차단한다**는 것입니다. 교착 사슬을 단계별로 풀어보면 다음과 같습니다.
 
-```
-Ingester OOMKilled → rollout-operator: "비정상이니 변경 불가"
-                    → ArgoCD sync 실패
-                    → 메모리 못 올림
-                    → Ingester 계속 OOMKilled
-                    → 교착
-```
+1. Ingester가 OOMKilled로 비정상 상태에 들어갑니다
+2. rollout-operator의 webhook이 "비정상이니 변경 불가"라며 차단합니다
+3. ArgoCD sync가 실패합니다
+4. 메모리 limit을 못 올립니다
+5. Ingester가 계속 OOMKilled로 떨어집니다 (1번으로 돌아가 사이클 형성)
 
 복구하려면 변경이 필요한데, 변경하려면 복구가 필요한 상태.
 dev 환경에서 replicas가 1이라 더 심각했습니다.

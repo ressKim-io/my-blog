@@ -54,11 +54,7 @@ stream selector에서 존재하지 않는 label로 필터링하니 당연히 결
 
 ## 🤔 원인: exporter.loki의 hint attribute가 silent fail
 
-파이프라인 구조는 이랬습니다:
-
-```
-Spring Boot → OTel SDK → Alloy (OTLP receiver) → otelcol.exporter.loki → Loki
-```
+파이프라인 구조는 Spring Boot → OTel SDK → Alloy(OTLP receiver) → `otelcol.exporter.loki` → Loki 순이었습니다.
 
 Alloy의 `otelcol.processor.transform`에서 hint attribute를 설정해놨습니다:
 
@@ -85,11 +81,7 @@ hint가 작동하지 않으면 label 승격 자체가 불가능합니다.
 
 ### 기존 방식 유지 + 우회
 
-`loki.process`를 사용해서 JSON body를 파싱하고 `stage.labels`로 승격하는 방법입니다.
-
-```
-OTLP → exporter.loki → loki.process (JSON 파싱 → label 승격) → loki.write
-```
+`loki.process`를 사용해서 JSON body를 파싱하고 `stage.labels`로 승격하는 방법입니다. 흐름은 OTLP → `exporter.loki` → `loki.process`(JSON 파싱 후 label 승격) → `loki.write` 순입니다.
 
 동작은 하지만, `exporter.loki` 자체가 deprecation 논의 중이라 장기적으로 좋지 않습니다.
 
@@ -187,13 +179,10 @@ hint attribute에 의존하던 방식보다 훨씬 안정적입니다.
 
 ### Alloy 파이프라인: exporter.loki → exporter.otlphttp
 
-```
-Before:
-  OTLP → transform(hints 설정) → exporter.loki → loki.write
-
-After:
-  OTLP → transform(PII 마스킹 + log_type→resource 복사) → batch → exporter.otlphttp → Loki /otlp
-```
+| 시점 | 파이프라인 |
+|---|---|
+| Before | OTLP → `transform`(hints 설정) → `exporter.loki` → `loki.write` |
+| After | OTLP → `transform`(PII 마스킹 + log_type→resource 복사) → `batch` → `exporter.otlphttp` → Loki `/otlp` |
 
 핵심 변경 두 가지:
 1. `exporter.loki` → `exporter.otlphttp`로 교체 (OTLP native 엔드포인트 사용)

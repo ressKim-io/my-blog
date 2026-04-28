@@ -2144,7 +2144,7 @@
       {
         "startLine": 255,
         "endLine": 258,
-        "lang": "",
+        "lang": "text",
         "lineCount": 3,
         "kind": "arrow-only",
         "decision": "flatten",
@@ -2859,34 +2859,6 @@
     ]
   },
   {
-    "file": "goti-tempo-spanmetrics-batch-timeout.md",
-    "category": "monitoring",
-    "series": "goti-observability-stack",
-    "title": "Tempo spanmetrics 전량 폐기 — batch timeout과 ingestion slack의 함정",
-    "blockCount": 2,
-    "totalAsciiLines": 14,
-    "blocks": [
-      {
-        "startLine": 73,
-        "endLine": 83,
-        "lang": "",
-        "lineCount": 10,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "App에서 span 생성 (타임스탬프 기록) /   → Alloy OTLP receiver /   → tail_sampling (decision_wait: 5s)          +5초"
-      },
-      {
-        "startLine": 110,
-        "endLine": 114,
-        "lang": "yaml",
-        "lineCount": 4,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# alloy-values.yaml / batch \"kafka_traces\": /   timeout: \"2s\"  # 10s → 2s"
-      }
-    ]
-  },
-  {
     "file": "websocket-token-refresh.md",
     "category": "kubernetes",
     "series": "eks-security",
@@ -2985,43 +2957,6 @@
         "kind": "misc",
         "decision": "flatten",
         "sample": "environment: /   CONTAINER_VAR: ${HOST_VAR} /   ─────────────   ──────────"
-      }
-    ]
-  },
-  {
-    "file": "goti-tempo-oom-kafka-buffer-sampling.md",
-    "category": "monitoring",
-    "series": "goti-observability-stack",
-    "title": "Tempo OOM 85회 — Kafka 버퍼와 tail sampling으로 해결하기",
-    "blockCount": 3,
-    "totalAsciiLines": 13,
-    "blocks": [
-      {
-        "startLine": 78,
-        "endLine": 79,
-        "lang": "",
-        "lineCount": 1,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "goti pods → Alloy → OTLP gRPC → Tempo (직접)"
-      },
-      {
-        "startLine": 96,
-        "endLine": 100,
-        "lang": "yaml",
-        "lineCount": 4,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# tempo-values.yaml / resources: /   limits:"
-      },
-      {
-        "startLine": 131,
-        "endLine": 139,
-        "lang": "",
-        "lineCount": 8,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "[Before] / goti pods → Alloy(100%) → OTLP → Tempo → OOMKilled / "
       }
     ]
   },
@@ -3319,34 +3254,6 @@
         "kind": "tree",
         "decision": "keep",
         "sample": "App → Alloy Agent /         ├─ Metrics → 직접 Mimir (현재 구조 유지) /         ├─ Logs   → Kafka → Alloy Gateway → Loki"
-      }
-    ]
-  },
-  {
-    "file": "goti-mimir-ingester-oom-webhook-deadlock.md",
-    "category": "monitoring",
-    "series": "goti-observability-stack",
-    "title": "Mimir Ingester OOM — 카디널리티 폭발과 webhook 교착",
-    "blockCount": 2,
-    "totalAsciiLines": 10,
-    "blocks": [
-      {
-        "startLine": 93,
-        "endLine": 98,
-        "lang": "",
-        "lineCount": 5,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Ingester OOMKilled → rollout-operator: \"비정상이니 변경 불가\" /                     → ArgoCD sync 실패 /                     → 메모리 "
-      },
-      {
-        "startLine": 132,
-        "endLine": 137,
-        "lang": "bash",
-        "lineCount": 5,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# rollout-operator 스케일 다운 + webhook 삭제 후 / sleep 60  # API server 캐시 만료 대기 / "
       }
     ]
   },
@@ -3771,43 +3678,6 @@
     ]
   },
   {
-    "file": "goti-loki-otlp-native-migration.md",
-    "category": "monitoring",
-    "series": "goti-observability-stack",
-    "title": "Loki OTLP Native 전환 — exporter.loki에서 벗어나기",
-    "blockCount": 3,
-    "totalAsciiLines": 7,
-    "blocks": [
-      {
-        "startLine": 59,
-        "endLine": 60,
-        "lang": "",
-        "lineCount": 1,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Spring Boot → OTel SDK → Alloy (OTLP receiver) → otelcol.exporter.loki → Loki"
-      },
-      {
-        "startLine": 90,
-        "endLine": 91,
-        "lang": "",
-        "lineCount": 1,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "OTLP → exporter.loki → loki.process (JSON 파싱 → label 승격) → loki.write"
-      },
-      {
-        "startLine": 190,
-        "endLine": 195,
-        "lang": "",
-        "lineCount": 5,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Before: /   OTLP → transform(hints 설정) → exporter.loki → loki.write / "
-      }
-    ]
-  },
-  {
     "file": "goti-poc-queue-a-401-ticketing-isolation.md",
     "category": "challenge",
     "series": "goti-queue-poc",
@@ -4108,6 +3978,25 @@
     ]
   },
   {
+    "file": "goti-mimir-ingester-oom-webhook-deadlock.md",
+    "category": "monitoring",
+    "series": "goti-observability-stack",
+    "title": "Mimir Ingester OOM — 카디널리티 폭발과 webhook 교착",
+    "blockCount": 1,
+    "totalAsciiLines": 5,
+    "blocks": [
+      {
+        "startLine": 130,
+        "endLine": 135,
+        "lang": "bash",
+        "lineCount": 5,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# rollout-operator 스케일 다운 + webhook 삭제 후 / sleep 60  # API server 캐시 만료 대기 / "
+      }
+    ]
+  },
+  {
     "file": "goti-monitoring-dashboard-nodata.md",
     "category": "monitoring",
     "series": "goti-otel-prometheus",
@@ -4272,6 +4161,44 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "goti-server CD → ECR push /               → Renovate: ECR 태그 조회 /               → Goti-k8s values.yaml 태그 업데이트 PR"
+      }
+    ]
+  },
+  {
+    "file": "goti-tempo-oom-kafka-buffer-sampling.md",
+    "category": "monitoring",
+    "series": "goti-observability-stack",
+    "title": "Tempo OOM 85회 — Kafka 버퍼와 tail sampling으로 해결하기",
+    "blockCount": 1,
+    "totalAsciiLines": 4,
+    "blocks": [
+      {
+        "startLine": 94,
+        "endLine": 98,
+        "lang": "yaml",
+        "lineCount": 4,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# tempo-values.yaml / resources: /   limits:"
+      }
+    ]
+  },
+  {
+    "file": "goti-tempo-spanmetrics-batch-timeout.md",
+    "category": "monitoring",
+    "series": "goti-observability-stack",
+    "title": "Tempo spanmetrics 전량 폐기 — batch timeout과 ingestion slack의 함정",
+    "blockCount": 1,
+    "totalAsciiLines": 4,
+    "blocks": [
+      {
+        "startLine": 109,
+        "endLine": 113,
+        "lang": "yaml",
+        "lineCount": 4,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# alloy-values.yaml / batch \"kafka_traces\": /   timeout: \"2s\"  # 10s → 2s"
       }
     ]
   },

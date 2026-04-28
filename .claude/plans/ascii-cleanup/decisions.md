@@ -307,3 +307,44 @@
 | **합계** | **7** |
 
 cicd 그룹은 옵션 비교 다이어그램(A/B/C) 일관성이 본문 핵심이라 옵션 B/C 두 블록은 lang 명시 후 keep으로 흡수했습니다. Before/After 박스는 같은 본문에 옵션 비교와 별개로 "운영 효과"를 강조하는 부분이라 풀어쓰는 것이 더 가독성에 좋다고 판단했습니다.
+
+---
+
+## G7 — `series:goti-observability-stack` (2026-04-29)
+
+5편 / inventory flatten 추천 8블록 → 실제 평탄화 7블록 + keep 보정 1블록.
+
+### `goti-loki-otlp-native-migration.md` (3블록)
+
+- L59-60 Spring Boot → Alloy → Loki 단순 흐름 → **인라인**
+- L90-91 우회 방안 흐름 (`exporter.loki` + `loki.process`) → **인라인**
+- L190-195 Before/After 파이프라인 비교 → **표** (시점/파이프라인 2열)
+
+### `goti-tempo-oom-kafka-buffer-sampling.md` (2블록)
+
+- L78-79 단순 직접 전송 흐름 → **인라인**
+- L131-139 Before/After Kafka 버퍼 도입 → **표** (시점/파이프라인 2열, OOMKilled는 굵은 글씨)
+
+### `goti-observability-stack-selection.md` (1블록, keep 보정)
+
+- L255-258 시그널별 파이프라인 정리 (메트릭/로그/트레이스 3행) → **keep** (lang=`text` 추가, 위쪽 표와 보완 시각으로 보존)
+
+### `goti-tempo-spanmetrics-batch-timeout.md` (1블록)
+
+- L73-83 트레이스 파이프라인 단계별 지연 (10줄) → **표** (단계/누적 지연/비고 3열, batch kafka_traces 10초는 굵은 글씨로 병목 표시)
+
+### `goti-mimir-ingester-oom-webhook-deadlock.md` (1블록)
+
+- L93-98 Ingester OOM ↔ webhook 차단 교착 사슬 → **번호 목록** (5단계 사이클, 마지막에 1번으로 돌아가는 구조 명시)
+
+### G7 통계
+
+| 변환 | 건수 |
+|---|---|
+| 인라인 | 3 |
+| 표 | 3 |
+| 번호 목록 | 1 |
+| keep (분류 보정) | 1 |
+| **합계** | **8** |
+
+이 그룹은 **표 변환 비중이 높았습니다(3건)**. Before/After 비교, 파이프라인 단계별 지연 누적이 표 형식으로 가장 가독성이 좋았습니다. 단순 직접 전송 흐름은 인라인으로, 인과 사슬은 번호 목록으로 분기 처리했습니다.

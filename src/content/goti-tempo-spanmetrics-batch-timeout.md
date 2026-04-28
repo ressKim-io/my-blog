@@ -68,20 +68,19 @@ span이 생성된 후 30초 이내에 Tempo에 도착해야 metrics_generator가
 
 ## 🤔 원인: 파이프라인 지연 합산이 30초를 넘는다
 
-전체 트레이스 파이프라인의 지연을 계산했습니다.
+전체 트레이스 파이프라인의 지연을 단계별로 계산했습니다.
 
-```
-App에서 span 생성 (타임스탬프 기록)
-  → Alloy OTLP receiver
-  → tail_sampling (decision_wait: 5s)          +5초
-  → batch "traces" (timeout: 5s)               +5초
-  → Kafka exporter → Kafka topic               +~1초
-  → Kafka consumer (Alloy)
-  → batch "kafka_traces" (timeout: 10s)        +10초  ← 병목
-  → Tempo OTLP exporter
-──────────────────────────────────────────────
-최악 합계:                                      ~21초 + Kafka lag
-```
+| 단계 | 누적 지연 | 비고 |
+|---|---|---|
+| App에서 span 생성 | 0초 | 타임스탬프 기록 시점 |
+| Alloy OTLP receiver | 0초 | |
+| `tail_sampling` (`decision_wait: 5s`) | +5초 | |
+| `batch "traces"` (`timeout: 5s`) | +5초 | |
+| Kafka exporter → Kafka topic | 약 +1초 | |
+| Kafka consumer (Alloy) | 0초 | lag 없을 때 |
+| `batch "kafka_traces"` (`timeout: 10s`) | +10초 | **병목** |
+| Tempo OTLP exporter | 0초 | |
+| **최악 합계** | **약 21초** | + Kafka lag |
 
 최악 케이스에서 21초 + Kafka lag.
 간헐적으로 Kafka consumer lag이 10초 이상 추가되면 30초를 넘깁니다.
