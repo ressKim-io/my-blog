@@ -274,3 +274,36 @@
 | **합계** | **9** |
 
 이 그룹은 유일하게 **keep 비중이 압도적**(9건 중 8건)이었습니다. lang이 `text`/`alloy`/`promql`로 명시된 실제 코드/출력/비교 다이어그램이 대부분이라, 평탄화하면 정보 손실 또는 시각 비교가 깨지는 케이스. 자동 분류 룰이 `arrow-only`/`misc`로 잡았어도 사람 판단으로 보존했습니다.
+
+---
+
+## G6 — `cat:cicd` (2026-04-29)
+
+3편 / inventory flatten 추천 7블록 → 실제 평탄화 3블록 + keep 보정 4블록.
+
+### `multi-repo-cicd-strategy.md` (5블록 → 2 flatten + 3 keep)
+
+- L53-55 옵션 B 디렉토리 흐름 → **keep** (lang=`text` 추가, 옵션 A/C 비교 일관성)
+- L64-67 옵션 C 디렉토리 흐름 → **keep** (lang=`text` 추가, 옵션 비교 일관성)
+- L367-374 Before(배포 레포 없이) 박스 → **굵은 글씨 + bullet 목록** (CI 흐름은 한 문장으로, 문제점 3건은 bullet)
+- L378-386 After(중앙 배포 레포) 박스 → **굵은 글씨 + bullet 목록** (After 구조 한 문장 + 장점 3건 bullet)
+- L400-410 학습 곡선 박스 (Local Docker → Compose+GitOps → K8s+ArgoCD) → **인라인** (한 문장으로 진화 흐름 풀어쓰기)
+
+### `github-actions-multi-platform-optimization.md` (1블록, keep 보정)
+
+- L34-36 빌드 로그 + 한국어 화살표 주석 → **keep** (lang=`text` 추가, 실제 빌드 로그. 화살표 주석은 본문 한 줄로 분리 — G4 WAF 룰과 동일 하이브리드 패턴)
+
+### `goti-renovate-ecr-auth-failure.md` (1블록, keep)
+
+- L26-30 Renovate 파이프라인 흐름 → **keep** (이미 lang=`text` 명시. 단순 흐름 다이어그램 보조 시각으로 보존, 본문에 컴포넌트 설명 이어짐)
+
+### G6 통계
+
+| 변환 | 건수 |
+|---|---|
+| 인라인 | 1 |
+| 굵은 글씨 + bullet 목록 | 2 |
+| keep (분류 보정) | 4 |
+| **합계** | **7** |
+
+cicd 그룹은 옵션 비교 다이어그램(A/B/C) 일관성이 본문 핵심이라 옵션 B/C 두 블록은 lang 명시 후 keep으로 흡수했습니다. Before/After 박스는 같은 본문에 옵션 비교와 별개로 "운영 효과"를 강조하는 부분이라 풀어쓰는 것이 더 가독성에 좋다고 판단했습니다.

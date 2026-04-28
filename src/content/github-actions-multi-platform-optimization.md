@@ -29,12 +29,13 @@ date: '2026-01-02'
 
 ### 발견 상황
 
-ops-service CI 빌드에서 arm64 빌드가 비정상적으로 오래 걸렸습니다:
+ops-service CI 빌드에서 arm64 빌드가 비정상적으로 오래 걸렸습니다.
 
-```
+```text
 #29 [linux/arm64 builder 8/8] RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ...
-                    ↑ arm64 플랫폼에서 amd64 빌드 = QEMU 에뮬레이션 = 매우 느림
 ```
+
+`linux/arm64` 빌더 위에서 `GOARCH=amd64` 바이너리를 빌드하고 있어 QEMU 에뮬레이션이 발생했고, 이로 인해 빌드 시간이 폭발했습니다.
 
 | 플랫폼 | 빌드 시간 | 원인 |
 |--------|----------|------|

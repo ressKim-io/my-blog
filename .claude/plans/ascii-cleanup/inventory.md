@@ -1,19 +1,19 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-28T21:23:49.860Z
+> 생성 시각: 2026-04-28T21:41:58.868Z
 
 ## 요약
 
 - ASCII 블록 포함 글: **134편**
-- 전체 ASCII 블록 수: **366개**
-- 전체 ASCII 라인 합계: **4136줄**
+- 전체 ASCII 블록 수: **362개**
+- 전체 ASCII 라인 합계: **4109줄**
 
 ## 자동 처리 추천 분포 (decision)
 
 | 결정 | 개수 | 설명 |
 |---|---|---|
-| `flatten` | 139 | 평탄화 (표/문장으로 변환 또는 삭제) |
+| `flatten` | 135 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
 
@@ -21,12 +21,12 @@
 
 | 유형 | 개수 | 설명 |
 |---|---|---|
-| `arrow-only` | 131 | 박스 없는 화살표 시퀀스 |
+| `arrow-only` | 128 | 박스 없는 화살표 시퀀스 |
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
 | `flow-diagram` | 37 | 박스 + 화살표 (흐름도/시퀀스) |
 | `tree` | 27 | 디렉토리/의존성 트리 (├ └ │ ─) |
-| `box-small` | 5 | 단순 박스 (≤14줄) |
+| `box-small` | 4 | 단순 박스 (≤14줄) |
 | `misc` | 2 | 기타 |
 
 ## 글별 상세 (총 라인 수 내림차순)
@@ -41,13 +41,13 @@
 | `goti-cloudflare-multicloud-worker-cert-manager.md` | kubernetes | goti-multicloud | 1 | 125 | 0/0/1 | code-arrow |
 | `argocd-bootstrap-circular-dependency.md` | argocd | argocd-troubleshooting | 3 | 118 | 1/2/0 | architecture, flow-diagram, arrow-only |
 | `argocd-probe-crd-appproject-retry.md` | argocd | argocd-troubleshooting | 3 | 117 | 0/2/1 | flow-diagram, code-arrow |
-| `multi-repo-cicd-strategy.md` | cicd | - | 11 | 97 | 5/6/0 | tree, arrow-only, architecture, flow-diagram, box-small |
 | `eks-troubleshooting-part2-istio-ambient-1.md` | istio | eks-troubleshooting | 6 | 96 | 0/3/3 | architecture, code-arrow, flow-diagram |
 | `istio-observability-part2-tracing.md` | istio | istio-observability | 5 | 92 | 2/3/0 | arrow-only, flow-diagram, architecture |
 | `istio-traffic-part5-mirroring.md` | istio | istio-traffic | 4 | 91 | 0/3/1 | flow-diagram, architecture, code-arrow |
 | `argocd-ssa-sync-pitfalls.md` | argocd | argocd-troubleshooting | 5 | 88 | 0/2/3 | flow-diagram, code-arrow |
 | `docker-compose-env-management.md` | challenge | - | 7 | 87 | 3/4/0 | tree, arrow-only, architecture |
 | `goti-discord-alerting-architecture.md` | monitoring | - | 8 | 87 | 2/3/3 | code-arrow, architecture, arrow-only, flow-diagram |
+| `multi-repo-cicd-strategy.md` | cicd | - | 8 | 72 | 2/6/0 | tree, arrow-only, architecture, flow-diagram |
 | `goti-adr-alloy-to-otel-collector.md` | monitoring | - | 3 | 71 | 0/3/0 | architecture, flow-diagram |
 | `goti-adr-loki-tempo-stability-tuning.md` | monitoring | - | 4 | 71 | 2/2/0 | flow-diagram, arrow-only |
 | `argocd-app-of-apps-deadlock.md` | argocd | argocd-troubleshooting | 6 | 67 | 0/3/3 | code-arrow, tree |
@@ -122,7 +122,6 @@
 | `goti-istio-peerauth-selector-prometheus-503.md` | istio | goti-istio-ops | 3 | 9 | 2/0/1 | arrow-only, code-arrow |
 | `goti-jwks-distribution-automation-adr.md` | istio | goti-auth | 1 | 9 | 1/0/0 | arrow-only |
 | `goti-resale-istio-rbac-403.md` | istio | goti-resale | 3 | 9 | 2/0/1 | arrow-only, code-arrow |
-| `github-actions-multi-platform-optimization.md` | cicd | - | 2 | 8 | 1/1/0 | arrow-only, tree |
 | `goti-cloudfront-swagger-403.md` | cicd | goti-cloudfront-alb | 2 | 8 | 2/0/0 | arrow-only |
 | `goti-phase6-redis-inventory.md` | challenge | goti-redis-sot | 3 | 8 | 3/0/0 | arrow-only |
 | `goti-phase6-ticketing-implementation.md` | challenge | goti-ticketing-phase | 2 | 8 | 2/0/0 | arrow-only |
@@ -134,6 +133,7 @@
 | `goti-eks-rolling-update-cascading-failures.md` | kubernetes | goti-eks | 1 | 7 | 1/0/0 | arrow-only |
 | `goti-loki-otlp-native-migration.md` | monitoring | goti-observability-stack | 3 | 7 | 3/0/0 | arrow-only |
 | `goti-poc-queue-a-401-ticketing-isolation.md` | challenge | goti-queue-poc | 3 | 7 | 3/0/0 | arrow-only |
+| `github-actions-multi-platform-optimization.md` | cicd | - | 1 | 6 | 0/1/0 | tree |
 | `goti-cutover-smoke-trail-fixes.md` | challenge | goti-java-to-go | 1 | 6 | 1/0/0 | arrow-only |
 | `goti-ecr-secret-dollar-escape.md` | argocd | goti-argocd-gitops | 3 | 6 | 2/0/1 | arrow-only, code-arrow |
 | `goti-gcp-redis-recovery-jwt-unification.md` | challenge | goti-multicloud | 1 | 6 | 0/0/1 | code-arrow |
@@ -300,34 +300,6 @@
 - L201-244 (43줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │              ArgoCD Auto Sync Retry 메커니즘        `
 
-### `multi-repo-cicd-strategy.md`
-
-- 카테고리: cicd / 시리즈: -
-- 블록 11개 / ASCII 97줄
-
-- L39-44 (5줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `team-project/ / ├── user-service/ / ├── board-service/`
-- L53-55 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `user-service/      ← CI에서 EC2에 SSH → docker-compose up / board-service/     ← CI에서 EC2에 SSH → docker-compose up`
-- L64-67 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `user-service/      ← CI: 이미지 빌드/푸시만 / board-service/     ← CI: 이미지 빌드/푸시만 / deploy-config/     ← compose/env/nginx 관리, 실`
-- L139-147 (8줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `deploy-config/ / ├── docker-compose.yml / ├── .env.example`
-- L222-241 (19줄, lang=`-`, kind=**architecture**, decision=**keep**)
-  - 샘플: `┌──────────────────────────────────────────────────────────┐ / │                    Git Repositories                    `
-- L249-266 (17줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `k8s-infra/ / ├── argocd/ / │   └── applications/`
-- L337-348 (11줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
-  - 샘플: `┌──────────────────────────────────────────────────────────┐ / │                    GitOps Pattern                      `
-- L367-374 (7줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `user-service CI → EC2 SSH → docker-compose up user / board-service CI → EC2 SSH → docker-compose up board / `
-- L378-386 (8줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `user-service CI → 이미지 빌드만 / board-service CI → 이미지 빌드만 / deploy-config → 통합 배포 관리`
-- L400-410 (10줄, lang=`-`, kind=**box-small**, decision=**flatten**)
-  - 샘플: `학습 곡선: /      Simple                                Complex /         │                                     │`
-- L432-439 (7줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `초기: Docker Compose + 중앙 배포 레포 /   └─ 개념 이해하기 쉬움 /   └─ 빠른 피드백`
-
 ### `eks-troubleshooting-part2-istio-ambient-1.md`
 
 - 카테고리: istio / 시리즈: eks-troubleshooting
@@ -433,6 +405,28 @@
   - 샘플: `# Goti-monitoring/charts/goti-monitoring/values-prod.yaml (변경 후) / grafanaAdminSecret: /   enabled: false  # ← external-`
 - L530-539 (9줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────┐     ┌─────────────────┐     ┌─────────────────────┐ / │ 1. Terraform    │────▶│ 2. Goti-k8s     │───`
+
+### `multi-repo-cicd-strategy.md`
+
+- 카테고리: cicd / 시리즈: -
+- 블록 8개 / ASCII 72줄
+
+- L39-44 (5줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `team-project/ / ├── user-service/ / ├── board-service/`
+- L53-55 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `user-service/      ← CI에서 EC2에 SSH → docker-compose up / board-service/     ← CI에서 EC2에 SSH → docker-compose up`
+- L64-67 (3줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `user-service/      ← CI: 이미지 빌드/푸시만 / board-service/     ← CI: 이미지 빌드/푸시만 / deploy-config/     ← compose/env/nginx 관리, 실`
+- L139-147 (8줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `deploy-config/ / ├── docker-compose.yml / ├── .env.example`
+- L222-241 (19줄, lang=`-`, kind=**architecture**, decision=**keep**)
+  - 샘플: `┌──────────────────────────────────────────────────────────┐ / │                    Git Repositories                    `
+- L249-266 (17줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `k8s-infra/ / ├── argocd/ / │   └── applications/`
+- L337-348 (11줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+  - 샘플: `┌──────────────────────────────────────────────────────────┐ / │                    GitOps Pattern                      `
+- L410-417 (7줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `초기: Docker Compose + 중앙 배포 레포 /   └─ 개념 이해하기 쉬움 /   └─ 빠른 피드백`
 
 ### `goti-adr-alloy-to-otel-collector.md`
 
@@ -1306,16 +1300,6 @@
 - L95-99 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `excludePaths: /   - "/api/v1/resales/histories" /   - "/api/v1/resales/histories/*"`
 
-### `github-actions-multi-platform-optimization.md`
-
-- 카테고리: cicd / 시리즈: -
-- 블록 2개 / ASCII 8줄
-
-- L34-36 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `#29 [linux/arm64 builder 8/8] RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ... /                     ↑ arm64 플랫폼에서 amd64 빌드`
-- L60-66 (6줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `GitHub Actions / ├── amd64 러너 (ubuntu-latest) / │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅`
-
 ### `goti-cloudfront-swagger-403.md`
 
 - 카테고리: cicd / 시리즈: goti-cloudfront-alb
@@ -1421,6 +1405,14 @@
   - 샘플: `GET /api/v1/stadium-seats/.../seat-grades → 403 /   {"code":"CLIENT_ERROR","message":"좌석 조회는 대기열 입장 완료 후에만 가능합니다."} / `
 - L161-162 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `POST /api/v1/queue/poc-a/validate → 200 OK (isPassed=true, token 발급)`
+
+### `github-actions-multi-platform-optimization.md`
+
+- 카테고리: cicd / 시리즈: -
+- 블록 1개 / ASCII 6줄
+
+- L61-67 (6줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `GitHub Actions / ├── amd64 러너 (ubuntu-latest) / │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅`
 
 ### `goti-cutover-smoke-trail-fixes.md`
 

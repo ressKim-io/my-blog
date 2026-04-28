@@ -50,7 +50,7 @@ team-project/
 
 ### 옵션 B: Multi-repo, 각 레포에서 직접 배포
 
-```
+```text
 user-service/      ← CI에서 EC2에 SSH → docker-compose up
 board-service/     ← CI에서 EC2에 SSH → docker-compose up
 ```
@@ -61,7 +61,7 @@ board-service/     ← CI에서 EC2에 SSH → docker-compose up
 
 ### 옵션 C: Multi-repo + 중앙 배포 레포 (선택)
 
-```
+```text
 user-service/      ← CI: 이미지 빌드/푸시만
 board-service/     ← CI: 이미지 빌드/푸시만
 deploy-config/     ← compose/env/nginx 관리, 실제 배포 담당
@@ -363,28 +363,17 @@ images:
 
 ### 1. 중앙 배포 레포의 장점
 
-**Before (배포 레포 없이):**
-```
-user-service CI → EC2 SSH → docker-compose up user
-board-service CI → EC2 SSH → docker-compose up board
+**Before (배포 레포 없이)** — 두 서비스 CI가 각각 EC2에 SSH로 붙어 직접 `docker-compose up`을 실행하는 구조였습니다.
 
-문제점:
-- docker-compose.yml이 두 레포에 중복
-- 환경변수 관리가 분산됨
-- 전체 아키텍처 파악 어려움
-```
+- `docker-compose.yml`이 두 레포에 중복으로 관리됩니다
+- 환경변수 관리가 두 레포로 분산됩니다
+- 전체 아키텍처를 한 곳에서 파악하기 어렵습니다
 
-**After (중앙 배포 레포 사용):**
-```
-user-service CI → 이미지 빌드만
-board-service CI → 이미지 빌드만
-deploy-config → 통합 배포 관리
+**After (중앙 배포 레포 사용)** — 앱 레포 두 곳은 이미지 빌드만 담당하고, `deploy-config`가 통합 배포를 책임집니다.
 
-장점:
-- 명확한 책임 분리 ✅
-- 인프라 설정 중앙화 ✅
-- 독립적인 배포 가능 ✅
-```
+- 책임 분리가 명확합니다 (앱 = 빌드, deploy = 배포)
+- 인프라 설정이 한 레포로 중앙화됩니다
+- 각 서비스가 독립적으로 배포 가능합니다
 
 ### 2. GitOps 패턴의 본질
 
@@ -397,18 +386,7 @@ deploy-config → 통합 배포 관리
 
 ### 3. Docker Compose → K8s는 자연스러운 진화
 
-```
-학습 곡선:
-     Simple                                Complex
-        │                                     │
-        ▼                                     ▼
-┌───────────────┬─────────────────┬──────────────┐
-│ Local Docker  │ Docker Compose  │  Kubernetes  │
-│               │   + GitOps      │   + ArgoCD   │
-└───────────────┴─────────────────┴──────────────┘
-        └─────────────┬─────────────┘
-              같은 패턴, 다른 도구
-```
+학습 곡선은 Local Docker → Docker Compose + GitOps → Kubernetes + ArgoCD 순서로 단순함에서 복잡함으로 옮겨갑니다. 핵심은 가운데와 오른쪽이 **같은 GitOps 패턴, 다른 도구**라는 점입니다.
 
 Docker Compose로 시작해서 K8s로 확장하는 게 이해하기 쉬웠습니다
 **구조가 같고 도구만 바뀌기 때문입니다**

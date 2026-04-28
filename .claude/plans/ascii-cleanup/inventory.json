@@ -448,114 +448,6 @@
     ]
   },
   {
-    "file": "multi-repo-cicd-strategy.md",
-    "category": "cicd",
-    "title": "여러 레포지토리를 한 서버에 배포하기 - Docker Compose부터 K8s까지",
-    "blockCount": 11,
-    "totalAsciiLines": 97,
-    "blocks": [
-      {
-        "startLine": 39,
-        "endLine": 44,
-        "lang": "",
-        "lineCount": 5,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "team-project/ / ├── user-service/ / ├── board-service/"
-      },
-      {
-        "startLine": 53,
-        "endLine": 55,
-        "lang": "",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "user-service/      ← CI에서 EC2에 SSH → docker-compose up / board-service/     ← CI에서 EC2에 SSH → docker-compose up"
-      },
-      {
-        "startLine": 64,
-        "endLine": 67,
-        "lang": "",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "user-service/      ← CI: 이미지 빌드/푸시만 / board-service/     ← CI: 이미지 빌드/푸시만 / deploy-config/     ← compose/env/nginx 관리, 실"
-      },
-      {
-        "startLine": 139,
-        "endLine": 147,
-        "lang": "",
-        "lineCount": 8,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "deploy-config/ / ├── docker-compose.yml / ├── .env.example"
-      },
-      {
-        "startLine": 222,
-        "endLine": 241,
-        "lang": "",
-        "lineCount": 19,
-        "kind": "architecture",
-        "decision": "keep",
-        "sample": "┌──────────────────────────────────────────────────────────┐ / │                    Git Repositories                    "
-      },
-      {
-        "startLine": 249,
-        "endLine": 266,
-        "lang": "",
-        "lineCount": 17,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "k8s-infra/ / ├── argocd/ / │   └── applications/"
-      },
-      {
-        "startLine": 337,
-        "endLine": 348,
-        "lang": "",
-        "lineCount": 11,
-        "kind": "flow-diagram",
-        "decision": "keep",
-        "sample": "┌──────────────────────────────────────────────────────────┐ / │                    GitOps Pattern                      "
-      },
-      {
-        "startLine": 367,
-        "endLine": 374,
-        "lang": "",
-        "lineCount": 7,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "user-service CI → EC2 SSH → docker-compose up user / board-service CI → EC2 SSH → docker-compose up board / "
-      },
-      {
-        "startLine": 378,
-        "endLine": 386,
-        "lang": "",
-        "lineCount": 8,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "user-service CI → 이미지 빌드만 / board-service CI → 이미지 빌드만 / deploy-config → 통합 배포 관리"
-      },
-      {
-        "startLine": 400,
-        "endLine": 410,
-        "lang": "",
-        "lineCount": 10,
-        "kind": "box-small",
-        "decision": "flatten",
-        "sample": "학습 곡선: /      Simple                                Complex /         │                                     │"
-      },
-      {
-        "startLine": 432,
-        "endLine": 439,
-        "lang": "",
-        "lineCount": 7,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "초기: Docker Compose + 중앙 배포 레포 /   └─ 개념 이해하기 쉬움 /   └─ 빠른 피드백"
-      }
-    ]
-  },
-  {
     "file": "eks-troubleshooting-part2-istio-ambient-1.md",
     "category": "istio",
     "series": "eks-troubleshooting",
@@ -925,6 +817,87 @@
         "kind": "flow-diagram",
         "decision": "keep",
         "sample": "┌─────────────────┐     ┌─────────────────┐     ┌─────────────────────┐ / │ 1. Terraform    │────▶│ 2. Goti-k8s     │───"
+      }
+    ]
+  },
+  {
+    "file": "multi-repo-cicd-strategy.md",
+    "category": "cicd",
+    "title": "여러 레포지토리를 한 서버에 배포하기 - Docker Compose부터 K8s까지",
+    "blockCount": 8,
+    "totalAsciiLines": 72,
+    "blocks": [
+      {
+        "startLine": 39,
+        "endLine": 44,
+        "lang": "",
+        "lineCount": 5,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "team-project/ / ├── user-service/ / ├── board-service/"
+      },
+      {
+        "startLine": 53,
+        "endLine": 55,
+        "lang": "text",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "user-service/      ← CI에서 EC2에 SSH → docker-compose up / board-service/     ← CI에서 EC2에 SSH → docker-compose up"
+      },
+      {
+        "startLine": 64,
+        "endLine": 67,
+        "lang": "text",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "user-service/      ← CI: 이미지 빌드/푸시만 / board-service/     ← CI: 이미지 빌드/푸시만 / deploy-config/     ← compose/env/nginx 관리, 실"
+      },
+      {
+        "startLine": 139,
+        "endLine": 147,
+        "lang": "",
+        "lineCount": 8,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "deploy-config/ / ├── docker-compose.yml / ├── .env.example"
+      },
+      {
+        "startLine": 222,
+        "endLine": 241,
+        "lang": "",
+        "lineCount": 19,
+        "kind": "architecture",
+        "decision": "keep",
+        "sample": "┌──────────────────────────────────────────────────────────┐ / │                    Git Repositories                    "
+      },
+      {
+        "startLine": 249,
+        "endLine": 266,
+        "lang": "",
+        "lineCount": 17,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "k8s-infra/ / ├── argocd/ / │   └── applications/"
+      },
+      {
+        "startLine": 337,
+        "endLine": 348,
+        "lang": "",
+        "lineCount": 11,
+        "kind": "flow-diagram",
+        "decision": "keep",
+        "sample": "┌──────────────────────────────────────────────────────────┐ / │                    GitOps Pattern                      "
+      },
+      {
+        "startLine": 410,
+        "endLine": 417,
+        "lang": "",
+        "lineCount": 7,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "초기: Docker Compose + 중앙 배포 레포 /   └─ 개념 이해하기 쉬움 /   └─ 빠른 피드백"
       }
     ]
   },
@@ -3582,33 +3555,6 @@
     ]
   },
   {
-    "file": "github-actions-multi-platform-optimization.md",
-    "category": "cicd",
-    "title": "CI 빌드 시간을 15분에서 3분으로: QEMU 에뮬레이션 제거",
-    "blockCount": 2,
-    "totalAsciiLines": 8,
-    "blocks": [
-      {
-        "startLine": 34,
-        "endLine": 36,
-        "lang": "",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "#29 [linux/arm64 builder 8/8] RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ... /                     ↑ arm64 플랫폼에서 amd64 빌드"
-      },
-      {
-        "startLine": 60,
-        "endLine": 66,
-        "lang": "",
-        "lineCount": 6,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "GitHub Actions / ├── amd64 러너 (ubuntu-latest) / │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅"
-      }
-    ]
-  },
-  {
     "file": "goti-cloudfront-swagger-403.md",
     "category": "cicd",
     "series": "goti-cloudfront-alb",
@@ -3895,6 +3841,24 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "POST /api/v1/queue/poc-a/validate → 200 OK (isPassed=true, token 발급)"
+      }
+    ]
+  },
+  {
+    "file": "github-actions-multi-platform-optimization.md",
+    "category": "cicd",
+    "title": "CI 빌드 시간을 15분에서 3분으로: QEMU 에뮬레이션 제거",
+    "blockCount": 1,
+    "totalAsciiLines": 6,
+    "blocks": [
+      {
+        "startLine": 61,
+        "endLine": 67,
+        "lang": "",
+        "lineCount": 6,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "GitHub Actions / ├── amd64 러너 (ubuntu-latest) / │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅"
       }
     ]
   },
