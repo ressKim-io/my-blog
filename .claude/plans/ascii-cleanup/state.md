@@ -1,0 +1,67 @@
+# ASCII Cleanup — 진행 상황 (todo list)
+
+> 작업을 재개할 때 항상 이 파일부터 확인. 완료 `[x]`, 진행 중 `[~]`, 대기 `[ ]`.
+
+## Phase 1 — 인벤토리 (완료)
+
+- [x] `scripts/scan.mjs` 작성 + 분류 로직 개선 (2026-04-28)
+  - tree 토큰 카운트 (`├──`/`└──` ≥3) → tree 27개로 정상 분류
+  - 코드 lang 필터 → code-arrow 113개 분리
+  - decision 자동 추천 (flatten/keep/skip)
+- [x] `inventory.json` / `inventory.md` 재생성 — 141편/429블록/4,425줄
+
+## Phase 2 — 처리 기준 확정 (완료)
+
+- [x] `criteria.md` 작성 — 두 갈래(평탄화/보존) 결정 룰
+- [x] 시각화 도구 도입은 다음 세션으로 미룸 (단계 분리 결정)
+- [x] 분포 확정: flatten 211 / keep 105 / skip 113
+
+## Phase 3 — 평탄화 작업 (대기)
+
+### 그룹 진행 (시리즈/카테고리 단위, 자동 산출)
+
+> `groups.md` 참고. 41 그룹 / 211 flatten 블록 / 1,017줄. 라인 수 내림차순.
+
+상위 14 그룹 (전체의 ~75% 라인 차지):
+
+- [ ] **G1.** `cat:kubernetes` — 8편 / 34블록 / 174줄
+- [ ] **G2.** `series:argocd-troubleshooting` — 3편 / 6블록 / 102줄
+- [ ] **G3.** `series:eks-troubleshooting` — 7편 / 24블록 / 97줄
+- [ ] **G4.** `series:goti-multicloud` — 7편 / 12블록 / 60줄
+- [ ] **G5.** `series:goti-observability-ops` — 5편 / 9블록 / 46줄
+- [ ] **G6.** `cat:cicd` — 3편 / 7블록 / 36줄
+- [ ] **G7.** `series:goti-observability-stack` — 5편 / 8블록 / 34줄
+- [ ] **G8.** `series:goti-java-to-go` — 4편 / 8블록 / 33줄
+- [ ] **G9.** `series:istio-observability` — 2편 / 3블록 / 32줄
+- [ ] **G10.** `series:goti-cloudflare-migration` — 2편 / 10블록 / 30줄
+- [ ] **G11.** `series:goti-auth` — 3편 / 5블록 / 26줄
+- [ ] **G12.** `cat:challenge` — 3편 / 6블록 / 24줄
+- [ ] **G13.** `series:goti-redis-sot` — 3편 / 7블록 / 24줄
+- [ ] **G14.** `series:goti-ticketing-phase` — 3편 / 5블록 / 23줄
+- [ ] **G15~G41.** 잔여 27 그룹 (`groups.md` 참고) — 글당 1~3 블록의 작은 그룹
+
+### 그룹별 작업 절차
+
+1. `inventory.md`에서 그룹의 flatten 블록 위치 확인
+2. 각 글 본문 읽고 컨텍스트 파악
+3. `criteria.md` 평탄화 방법론 적용
+4. 그룹 단위 commit
+5. 이 파일 체크박스 업데이트
+
+## Phase 4 — 마무리 (대기)
+
+- [ ] `CLAUDE.md` 재발 방지 룰 추가 (박스+5줄+ 금지 등)
+- [ ] `scan.mjs` 재실행 — Before/After 비교
+- [ ] `decisions.md` 작성 (그룹별 처리 로그)
+- [ ] 작업 폴더 보존 (git 추적, audit 패턴)
+
+## 다음 세션 인계 항목
+
+- `keep` 105 블록 = 디자인 개편 세션의 입력
+- 다이어그램 시스템 결정: MDX 컴포넌트 / drawio / Mermaid / HTML→PNG (D2 제외)
+- 다크모드 제거 후 일관 변환
+
+## 진행 로그
+
+- 2026-04-28 오전: Phase 1 인벤토리 자동 추출 (141편/429블록/4,425줄)
+- 2026-04-28 오후: Plan 리뷰 후 v2로 전환 — 단계 분리 결정 (시각화 도구는 다음 세션). scan.mjs 분류 로직 개선(tree 토큰 + lang 필터 + decision 추천). Phase 2 완료, `criteria.md` + `groups.md` 산출 (41 그룹 / 211 flatten 블록 / 1,017줄). Phase 3 시작 대기.
