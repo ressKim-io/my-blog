@@ -160,13 +160,11 @@ $ go test ./internal/ticketing/...
 
 ### 배포 흐름
 
-```text
-main 푸시
-  → cd-prod-aws.yml / cd-prod-gcp.yml 트리거
-  → deploy/prod 푸시 → Harbor 이미지 prod-13 빌드
-  → goti-k8s 자동 image bump PR 생성
-  → 사용자 머지 후 ArgoCD sync
-```
+1. `main`에 푸시합니다
+2. `cd-prod-aws.yml` / `cd-prod-gcp.yml`가 트리거됩니다
+3. `deploy/prod` 푸시로 Harbor 이미지 `prod-13`이 빌드됩니다
+4. goti-k8s에 자동으로 image bump PR이 생성됩니다
+5. 사용자가 머지하면 ArgoCD가 sync합니다
 
 ticketing-go만 변경했으므로 다른 5개 서비스는 이미지 tag bump가 발생하지 않을 수 있습니다.
 

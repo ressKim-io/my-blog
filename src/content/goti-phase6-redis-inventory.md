@@ -25,11 +25,7 @@ date: "2026-04-11"
 
 ## 🔥 문제: 동일 row에 수백 UPDATE가 쏟아지는 구조
 
-Phase 6-1까지의 아키텍처는 다음과 같습니다.
-
-```text
-Redis Lock → DB TX { status + hold + ★inventory★ } → Unlock
-```
+Phase 6-1까지의 아키텍처는 Redis Lock → DB TX(`status` + `hold` + **`inventory`**) → Unlock 한 줄로 요약됩니다.
 
 `game_seat_inventories`가 grade당 1 row만 존재합니다. 한 경기에서 같은 등급을 고르는 사용자는 전부 이 한 row에 `UPDATE ... SET available_count = available_count - 1`을 수행합니다. 트래픽이 몰리면 해당 row가 **서비스 전체의 직렬화 지점**이 됩니다.
 
@@ -95,11 +91,10 @@ Lua script로 EXISTS → HGET 비교 → HINCRBY → SADD dirty를 한 덩어리
 
 ### Before / After 아키텍처
 
-```text
-Before: Redis Lock → DB TX { status + hold + ★inventory★ } → Unlock
-After:  Redis Lock → DB TX { status + hold } → Unlock → Redis HINCRBY
-        Background: Redis → DB sync (5초)
-```
+| 시점 | hot path 흐름 | 추가 |
+|---|---|---|
+| Before | Redis Lock → DB TX(`status` + `hold` + **`inventory`**) → Unlock | — |
+| After | Redis Lock → DB TX(`status` + `hold`) → Unlock → Redis HINCRBY | Background: Redis → DB sync (5초 주기) |
 
 핵심 변화는 두 가지입니다. inventory가 DB TX 밖으로 나갔고, Redis가 hot path의 source of truth가 되었습니다. DB는 파생 집계의 영속화 대상으로 역할이 바뀝니다.
 

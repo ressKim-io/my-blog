@@ -604,78 +604,6 @@
     ]
   },
   {
-    "file": "docker-compose-env-management.md",
-    "category": "challenge",
-    "title": "Docker Compose 환경변수 대통합 - 흩어진 .env 파일 정리하기",
-    "blockCount": 7,
-    "totalAsciiLines": 87,
-    "blocks": [
-      {
-        "startLine": 25,
-        "endLine": 38,
-        "lang": "bash",
-        "lineCount": 13,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "project-root/ / ├── user-service/ / │   ├── .env"
-      },
-      {
-        "startLine": 47,
-        "endLine": 50,
-        "lang": "",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "frontend/.env          ← VITE_API_URL=localhost / docker-compose.yml     ← API_URL=ec2-domain / user-service/.env      ←"
-      },
-      {
-        "startLine": 79,
-        "endLine": 105,
-        "lang": "",
-        "lineCount": 26,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "project-root/ / ├── docker/ / │   ├── compose/"
-      },
-      {
-        "startLine": 249,
-        "endLine": 251,
-        "lang": "",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "\"이거 board-service 바뀐 거 같은데 뭐 바꿔줘야 되나요??\" / → 30분 설명, 1시간 디버깅, docker system prune까지 몇 번 반복"
-      },
-      {
-        "startLine": 256,
-        "endLine": 262,
-        "lang": "",
-        "lineCount": 6,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "\"환경 설정 어떻게 하나요?\" / → \"이것만 하세요\" / "
-      },
-      {
-        "startLine": 275,
-        "endLine": 290,
-        "lang": "",
-        "lineCount": 15,
-        "kind": "architecture",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───"
-      },
-      {
-        "startLine": 295,
-        "endLine": 317,
-        "lang": "",
-        "lineCount": 22,
-        "kind": "architecture",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───"
-      }
-    ]
-  },
-  {
     "file": "goti-discord-alerting-architecture.md",
     "category": "monitoring",
     "title": "Discord 알림 구축기: 아키텍처 결정부터 배포 3연속 장애까지",
@@ -753,6 +681,51 @@
         "kind": "flow-diagram",
         "decision": "keep",
         "sample": "┌─────────────────┐     ┌─────────────────┐     ┌─────────────────────┐ / │ 1. Terraform    │────▶│ 2. Goti-k8s     │───"
+      }
+    ]
+  },
+  {
+    "file": "docker-compose-env-management.md",
+    "category": "challenge",
+    "title": "Docker Compose 환경변수 대통합 - 흩어진 .env 파일 정리하기",
+    "blockCount": 4,
+    "totalAsciiLines": 76,
+    "blocks": [
+      {
+        "startLine": 25,
+        "endLine": 38,
+        "lang": "bash",
+        "lineCount": 13,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "project-root/ / ├── user-service/ / │   ├── .env"
+      },
+      {
+        "startLine": 79,
+        "endLine": 105,
+        "lang": "",
+        "lineCount": 26,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "project-root/ / ├── docker/ / │   ├── compose/"
+      },
+      {
+        "startLine": 265,
+        "endLine": 280,
+        "lang": "",
+        "lineCount": 15,
+        "kind": "architecture",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───"
+      },
+      {
+        "startLine": 285,
+        "endLine": 307,
+        "lang": "",
+        "lineCount": 22,
+        "kind": "architecture",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───"
       }
     ]
   },
@@ -1577,7 +1550,7 @@
       {
         "startLine": 72,
         "endLine": 75,
-        "lang": "",
+        "lang": "text",
         "lineCount": 3,
         "kind": "box-small",
         "decision": "flatten",
@@ -3114,89 +3087,6 @@
     ]
   },
   {
-    "file": "goti-phase7-d-overturn-decision.md",
-    "category": "challenge",
-    "series": "goti-ticketing-phase",
-    "title": "Phase 7 D 옵션 번복 — Phase 6.5 신설로 Go prod 인프라 갭을 해소하다",
-    "blockCount": 2,
-    "totalAsciiLines": 10,
-    "blocks": [
-      {
-        "startLine": 44,
-        "endLine": 45,
-        "lang": "text",
-        "lineCount": 1,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Phase 6 ✅ → Phase 7 D-마감(보여주기용) → 끝"
-      },
-      {
-        "startLine": 61,
-        "endLine": 70,
-        "lang": "text",
-        "lineCount": 9,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Phase 6 ✅ /   → Phase 6.5 신설 (Go 5서비스 prod 인프라 W1~W7)  ← 진입 차단 갭 해소 /   → Phase 7 재개 (Audit 풀세트 G1~G8)"
-      }
-    ]
-  },
-  {
-    "file": "goti-poc-ab-test-dependency-isolation-pattern.md",
-    "category": "challenge",
-    "title": "POC A/B 테스트 의존성 격리 패턴 — Uber/DoorDash/Netflix는 어떻게 푸는가",
-    "blockCount": 2,
-    "totalAsciiLines": 10,
-    "blocks": [
-      {
-        "startLine": 39,
-        "endLine": 41,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "POST /api/v1/queue/poc-a/validate → 200 (대기열 통과) / POST /api/v1/ticketing/reserve    → 403 / 400 (ticketing 차단)"
-      },
-      {
-        "startLine": 168,
-        "endLine": 176,
-        "lang": "text",
-        "lineCount": 8,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "[문제] 공유 ticketing pod에 POC C의 ReservationSession 검증이 내장 /        → POC A 대기열을 통과한 요청이 ticketing에서 403/400 / "
-      }
-    ]
-  },
-  {
-    "file": "goti-redis-sot-adoption-adr.md",
-    "category": "challenge",
-    "series": "goti-redis-sot",
-    "title": "Redis를 SoT로 채택한 이유 — SDD-0005 전면 승격 (ADR)",
-    "blockCount": 2,
-    "totalAsciiLines": 10,
-    "blocks": [
-      {
-        "startLine": 31,
-        "endLine": 33,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "GET /game-seats/{gameId}/sections/{sectionId}/seat-statuses / → 558~967ms (2026-04-17)"
-      },
-      {
-        "startLine": 167,
-        "endLine": 175,
-        "lang": "text",
-        "lineCount": 8,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "D0 인프라 /  → D1 seat_statuses /  → D2 seat_holds"
-      }
-    ]
-  },
-  {
     "file": "istio-ambient-part7-migration-to-sidecar.md",
     "category": "istio",
     "series": "istio-ambient",
@@ -3262,25 +3152,6 @@
     ]
   },
   {
-    "file": "goti-jwks-distribution-automation-adr.md",
-    "category": "istio",
-    "series": "goti-auth",
-    "title": "JWKS 배포 자동화 (ADR) — Istio STRICT mTLS가 jwksUri를 막은 이유",
-    "blockCount": 1,
-    "totalAsciiLines": 9,
-    "blocks": [
-      {
-        "startLine": 112,
-        "endLine": 121,
-        "lang": "text",
-        "lineCount": 9,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Terraform apply / user-service key rotation /   → SSM /prod/server/JWT_JWKS 업데이트 (Terraform outputs) /   → GitHub Action"
-      }
-    ]
-  },
-  {
     "file": "goti-resale-istio-rbac-403.md",
     "category": "istio",
     "series": "goti-resale",
@@ -3342,71 +3213,6 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "/api/*          → ALB → goti-server:8080 / /swagger-ui/*   → ALB → goti-server:8080 / /v3/*           → ALB → goti-serve"
-      }
-    ]
-  },
-  {
-    "file": "goti-phase6-redis-inventory.md",
-    "category": "challenge",
-    "series": "goti-redis-sot",
-    "title": "Phase6 Redis 재고 모델 설계 — Hot Path에서 DB UPDATE를 들어내다",
-    "blockCount": 3,
-    "totalAsciiLines": 8,
-    "blocks": [
-      {
-        "startLine": 30,
-        "endLine": 31,
-        "lang": "text",
-        "lineCount": 1,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Redis Lock → DB TX { status + hold + ★inventory★ } → Unlock"
-      },
-      {
-        "startLine": 83,
-        "endLine": 87,
-        "lang": "text",
-        "lineCount": 4,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Client A: HGET inventory:g1 grade_vip  → 1 / Client B: HGET inventory:g1 grade_vip  → 1 / Client A: HINCRBY inventory:g1"
-      },
-      {
-        "startLine": 98,
-        "endLine": 101,
-        "lang": "text",
-        "lineCount": 3,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Before: Redis Lock → DB TX { status + hold + ★inventory★ } → Unlock / After:  Redis Lock → DB TX { status + hold } → Unl"
-      }
-    ]
-  },
-  {
-    "file": "goti-phase6-ticketing-implementation.md",
-    "category": "challenge",
-    "series": "goti-ticketing-phase",
-    "title": "Phase 6 Ticketing 구현 — 58 Go 파일, N+1 제거, Redis Lua 재고 스크립트",
-    "blockCount": 2,
-    "totalAsciiLines": 8,
-    "blocks": [
-      {
-        "startLine": 73,
-        "endLine": 75,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Java: seat_statuses(30만+ row) → IN절 + COUNT + GROUP BY / Go:   game_seat_inventories(900 row) → ANY($1) + SUM + GROUP BY"
-      },
-      {
-        "startLine": 187,
-        "endLine": 193,
-        "lang": "text",
-        "lineCount": 6,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "- GameRepo:       Save / Find + 중복 검사 / - InventoryRepo:  AdjustCounts 원자적 증감 + RemainingSeats 배치 조회 / - SeatHoldRepo:  "
       }
     ]
   },
@@ -3664,34 +3470,6 @@
     ]
   },
   {
-    "file": "goti-redis-sot-d0-d1-rollout.md",
-    "category": "challenge",
-    "series": "goti-redis-sot",
-    "title": "Redis SoT D0~D1 프로덕션 롤아웃 — 558ms를 32ms로",
-    "blockCount": 2,
-    "totalAsciiLines": 6,
-    "blocks": [
-      {
-        "startLine": 174,
-        "endLine": 176,
-        "lang": "text",
-        "lineCount": 2,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "latency_ms: 62, 60, 69, 7, 8, 10, 15, 6, 28, 31, 37, 9, 27, 8, 10, 7, 28, 31, 37, 11, 9 / → 평균 20ms, 최대 70ms (첫 3건은 lazy"
-      },
-      {
-        "startLine": 187,
-        "endLine": 191,
-        "lang": "text",
-        "lineCount": 4,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "프론트: 966ms / 백엔드:  32ms (x-envoy-upstream-service-time) /        ────"
-      }
-    ]
-  },
-  {
     "file": "goti-signup-created-at-bug-and-sql-audit.md",
     "category": "challenge",
     "series": "goti-auth",
@@ -3862,25 +3640,6 @@
     ]
   },
   {
-    "file": "goti-phase8-p0-seat-booking-port.md",
-    "category": "challenge",
-    "series": "goti-ticketing-phase",
-    "title": "Phase 8 P0 — Java 계약에 맞춰 좌석 예매 플로우를 Go로 포팅하다",
-    "blockCount": 1,
-    "totalAsciiLines": 5,
-    "blocks": [
-      {
-        "startLine": 163,
-        "endLine": 168,
-        "lang": "text",
-        "lineCount": 5,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "main 푸시 /   → cd-prod-aws.yml / cd-prod-gcp.yml 트리거 /   → deploy/prod 푸시 → Harbor 이미지 prod-13 빌드"
-      }
-    ]
-  },
-  {
     "file": "goti-tempo-scoped-tag-traceql-variable.md",
     "category": "monitoring",
     "title": "Tempo v2 scoped tag 400 에러 — TraceQL과 Grafana 변수의 불일치",
@@ -3961,6 +3720,25 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "# /metrics 응답 / goti_match_active_total 0 / goti_guardrail_blacklist_size 0"
+      }
+    ]
+  },
+  {
+    "file": "goti-phase6-redis-inventory.md",
+    "category": "challenge",
+    "series": "goti-redis-sot",
+    "title": "Phase6 Redis 재고 모델 설계 — Hot Path에서 DB UPDATE를 들어내다",
+    "blockCount": 1,
+    "totalAsciiLines": 4,
+    "blocks": [
+      {
+        "startLine": 79,
+        "endLine": 83,
+        "lang": "text",
+        "lineCount": 4,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "Client A: HGET inventory:g1 grade_vip  → 1 / Client B: HGET inventory:g1 grade_vip  → 1 / Client A: HINCRBY inventory:g1"
       }
     ]
   },
@@ -4228,6 +4006,24 @@
     ]
   },
   {
+    "file": "goti-poc-ab-test-dependency-isolation-pattern.md",
+    "category": "challenge",
+    "title": "POC A/B 테스트 의존성 격리 패턴 — Uber/DoorDash/Netflix는 어떻게 푸는가",
+    "blockCount": 1,
+    "totalAsciiLines": 2,
+    "blocks": [
+      {
+        "startLine": 39,
+        "endLine": 41,
+        "lang": "text",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "POST /api/v1/queue/poc-a/validate → 200 (대기열 통과) / POST /api/v1/ticketing/reserve    → 403 / 400 (ticketing 차단)"
+      }
+    ]
+  },
+  {
     "file": "goti-prometheus-agent-mode-adr.md",
     "category": "monitoring",
     "title": "Prometheus Agent Mode 전환 — 4Gi 메모리를 1.2Gi로 줄인 아키텍처 결정",
@@ -4242,6 +4038,44 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "App/Istio → Prometheus (scrape + 로컬 TSDB 2h + remote_write) → Mimir (장기 저장) / Grafana → Mimir query-frontend (datasource"
+      }
+    ]
+  },
+  {
+    "file": "goti-redis-sot-adoption-adr.md",
+    "category": "challenge",
+    "series": "goti-redis-sot",
+    "title": "Redis를 SoT로 채택한 이유 — SDD-0005 전면 승격 (ADR)",
+    "blockCount": 1,
+    "totalAsciiLines": 2,
+    "blocks": [
+      {
+        "startLine": 31,
+        "endLine": 33,
+        "lang": "text",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "GET /game-seats/{gameId}/sections/{sectionId}/seat-statuses / → 558~967ms (2026-04-17)"
+      }
+    ]
+  },
+  {
+    "file": "goti-redis-sot-d0-d1-rollout.md",
+    "category": "challenge",
+    "series": "goti-redis-sot",
+    "title": "Redis SoT D0~D1 프로덕션 롤아웃 — 558ms를 32ms로",
+    "blockCount": 1,
+    "totalAsciiLines": 2,
+    "blocks": [
+      {
+        "startLine": 174,
+        "endLine": 176,
+        "lang": "text",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "latency_ms: 62, 60, 69, 7, 8, 10, 15, 6, 28, 31, 37, 9, 27, 8, 10, 7, 28, 31, 37, 11, 9 / → 평균 20ms, 최대 70ms (첫 3건은 lazy"
       }
     ]
   },

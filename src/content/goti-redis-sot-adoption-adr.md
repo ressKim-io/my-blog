@@ -162,18 +162,16 @@ AWS 쪽은 prod 재기동 시점에 **현재는 동급 최소 구성**을 유지
 
 ### 롤아웃 단계
 
-전체 흐름은 다음과 같습니다.
+전체 흐름은 D0~D7 8단계로 구성됩니다.
 
-```text
-D0 인프라
- → D1 seat_statuses
- → D2 seat_holds
- → D3 inventory
- → D4 orders/items
- → D5 payment + Outbox worker
- → D6 tickets
- → D7 dual-write off
-```
+1. **D0** — 인프라 준비
+2. **D1** — `seat_statuses` 전환
+3. **D2** — `seat_holds` 전환
+4. **D3** — `inventory` 전환
+5. **D4** — `orders` / `items` 전환
+6. **D5** — `payment` + Outbox worker 도입
+7. **D6** — `tickets` 전환
+8. **D7** — dual-write off
 
 각 D 단계의 PR 체크리스트, Exit criteria, Rollback trigger는 SDD-0005 갱신에서 정의합니다. 본 ADR은 이 순서와 의존성만 고정합니다.
 

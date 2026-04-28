@@ -69,7 +69,7 @@ gopter v0.2.11 (property-based testing)
 ```
 
 **동시에 common package에서:**
-```
+```text
 wealist-advanced-go-pkg
   └── grpc-gateway/v2 v2.23.0
       └── genproto/googleapis/api v0.0.0-20241104 (신버전)

@@ -1,28 +1,28 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-28T21:51:57.645Z
+> 생성 시각: 2026-04-28T22:37:09.942Z
 
 ## 요약
 
-- ASCII 블록 포함 글: **130편**
-- 전체 ASCII 블록 수: **336개**
-- 전체 ASCII 라인 합계: **3996줄**
+- ASCII 블록 포함 글: **126편**
+- 전체 ASCII 블록 수: **322개**
+- 전체 ASCII 라인 합계: **3929줄**
 
 ## 자동 처리 추천 분포 (decision)
 
 | 결정 | 개수 | 설명 |
 |---|---|---|
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
-| `flatten` | 109 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
+| `flatten` | 95 | 평탄화 (표/문장으로 변환 또는 삭제) |
 
 ## 블록 유형 분포 (kind)
 
 | 유형 | 개수 | 설명 |
 |---|---|---|
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
-| `arrow-only` | 104 | 박스 없는 화살표 시퀀스 |
+| `arrow-only` | 90 | 박스 없는 화살표 시퀀스 |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
 | `flow-diagram` | 36 | 박스 + 화살표 (흐름도/시퀀스) |
 | `tree` | 27 | 디렉토리/의존성 트리 (├ └ │ ─) |
@@ -44,8 +44,8 @@
 | `eks-troubleshooting-part2-istio-ambient-1.md` | istio | eks-troubleshooting | 6 | 96 | 0/3/3 | architecture, code-arrow, flow-diagram |
 | `istio-traffic-part5-mirroring.md` | istio | istio-traffic | 4 | 91 | 0/3/1 | flow-diagram, architecture, code-arrow |
 | `argocd-ssa-sync-pitfalls.md` | argocd | argocd-troubleshooting | 5 | 88 | 0/2/3 | flow-diagram, code-arrow |
-| `docker-compose-env-management.md` | challenge | - | 7 | 87 | 3/4/0 | tree, arrow-only, architecture |
 | `goti-discord-alerting-architecture.md` | monitoring | - | 8 | 87 | 2/3/3 | code-arrow, architecture, arrow-only, flow-diagram |
+| `docker-compose-env-management.md` | challenge | - | 4 | 76 | 0/4/0 | tree, architecture |
 | `multi-repo-cicd-strategy.md` | cicd | - | 8 | 72 | 2/6/0 | tree, arrow-only, architecture, flow-diagram |
 | `goti-adr-alloy-to-otel-collector.md` | monitoring | - | 3 | 71 | 0/3/0 | architecture, flow-diagram |
 | `goti-adr-loki-tempo-stability-tuning.md` | monitoring | - | 4 | 71 | 2/2/0 | flow-diagram, arrow-only |
@@ -112,16 +112,10 @@
 | `goti-multicloud-db-replication-technology-adr.md` | kubernetes | goti-multicloud-db | 1 | 11 | 0/1/0 | tree |
 | `goti-signup-dtype-regression.md` | challenge | goti-auth | 2 | 11 | 2/0/0 | arrow-only |
 | `goti-kafka-buffered-otel-pipeline.md` | monitoring | goti-observability-ops | 4 | 10 | 3/1/0 | arrow-only, tree |
-| `goti-phase7-d-overturn-decision.md` | challenge | goti-ticketing-phase | 2 | 10 | 2/0/0 | arrow-only |
-| `goti-poc-ab-test-dependency-isolation-pattern.md` | challenge | - | 2 | 10 | 2/0/0 | arrow-only |
-| `goti-redis-sot-adoption-adr.md` | challenge | goti-redis-sot | 2 | 10 | 2/0/0 | arrow-only |
 | `istio-ambient-part7-migration-to-sidecar.md` | istio | istio-ambient | 2 | 10 | 1/0/1 | arrow-only, code-arrow |
 | `goti-istio-peerauth-selector-prometheus-503.md` | istio | goti-istio-ops | 3 | 9 | 2/0/1 | arrow-only, code-arrow |
-| `goti-jwks-distribution-automation-adr.md` | istio | goti-auth | 1 | 9 | 1/0/0 | arrow-only |
 | `goti-resale-istio-rbac-403.md` | istio | goti-resale | 3 | 9 | 2/0/1 | arrow-only, code-arrow |
 | `goti-cloudfront-swagger-403.md` | cicd | goti-cloudfront-alb | 2 | 8 | 2/0/0 | arrow-only |
-| `goti-phase6-redis-inventory.md` | challenge | goti-redis-sot | 3 | 8 | 3/0/0 | arrow-only |
-| `goti-phase6-ticketing-implementation.md` | challenge | goti-ticketing-phase | 2 | 8 | 2/0/0 | arrow-only |
 | `goti-phase6-ticketing-sql-optimization.md` | challenge | goti-ticketing-phase | 1 | 8 | 0/0/1 | code-arrow |
 | `goti-resale-flow-end-to-end-fix.md` | challenge | goti-resale | 1 | 8 | 0/0/1 | code-arrow |
 | `challenge2-wealist-migration-part3.md` | challenge | challenge-2-wealist-migration | 2 | 7 | 1/1/0 | tree, arrow-only |
@@ -133,7 +127,6 @@
 | `goti-ecr-secret-dollar-escape.md` | argocd | goti-argocd-gitops | 3 | 6 | 2/0/1 | arrow-only, code-arrow |
 | `goti-gcp-redis-recovery-jwt-unification.md` | challenge | goti-multicloud | 1 | 6 | 0/0/1 | code-arrow |
 | `goti-metrics-collector-go-sidecar.md` | monitoring | goti-metrics-collector | 1 | 6 | 0/1/0 | flow-diagram |
-| `goti-redis-sot-d0-d1-rollout.md` | challenge | goti-redis-sot | 2 | 6 | 2/0/0 | arrow-only |
 | `goti-signup-created-at-bug-and-sql-audit.md` | challenge | goti-auth | 2 | 6 | 2/0/0 | arrow-only |
 | `challenge1-game-server-part2.md` | challenge | game-server | 1 | 5 | 0/0/1 | code-arrow |
 | `goti-dashboard-query-validation-fixes.md` | monitoring | goti-observability-ops | 1 | 5 | 1/0/0 | arrow-only |
@@ -142,11 +135,11 @@
 | `goti-mimir-ingester-oom-webhook-deadlock.md` | monitoring | goti-observability-stack | 1 | 5 | 0/0/1 | code-arrow |
 | `goti-monitoring-dashboard-nodata.md` | monitoring | goti-otel-prometheus | 2 | 5 | 2/0/0 | arrow-only |
 | `goti-monitoring-pitfalls-system.md` | monitoring | goti-observability-ops | 1 | 5 | 0/0/1 | code-arrow |
-| `goti-phase8-p0-seat-booking-port.md` | challenge | goti-ticketing-phase | 1 | 5 | 1/0/0 | arrow-only |
 | `goti-tempo-scoped-tag-traceql-variable.md` | monitoring | - | 1 | 5 | 1/0/0 | arrow-only |
 | `queue-poc-loadtest-part2-results.md` | kubernetes | queue-poc-loadtest | 1 | 5 | 0/0/1 | code-arrow |
 | `goti-dev-monitoring-502.md` | cicd | goti-cloudfront-alb | 2 | 4 | 2/0/0 | arrow-only |
 | `goti-metrics-collector-pipeline-e2e.md` | monitoring | goti-metrics-collector | 1 | 4 | 1/0/0 | arrow-only |
+| `goti-phase6-redis-inventory.md` | challenge | goti-redis-sot | 1 | 4 | 1/0/0 | arrow-only |
 | `goti-renovate-ecr-auth-failure.md` | cicd | - | 1 | 4 | 1/0/0 | arrow-only |
 | `goti-tempo-oom-kafka-buffer-sampling.md` | monitoring | goti-observability-stack | 1 | 4 | 0/0/1 | code-arrow |
 | `goti-tempo-spanmetrics-batch-timeout.md` | monitoring | goti-observability-stack | 1 | 4 | 0/0/1 | code-arrow |
@@ -159,7 +152,10 @@
 | `goti-resale-fe-be-contract-audit.md` | challenge | goti-resale | 1 | 3 | 0/0/1 | code-arrow |
 | `challenge2-wealist-migration-part4.md` | challenge | challenge-2-wealist-migration | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-dev-loadtest-ssh-istio-turnstile.md` | istio | goti-istio-ops | 2 | 2 | 2/0/0 | arrow-only |
+| `goti-poc-ab-test-dependency-isolation-pattern.md` | challenge | - | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-prometheus-agent-mode-adr.md` | monitoring | - | 1 | 2 | 1/0/0 | arrow-only |
+| `goti-redis-sot-adoption-adr.md` | challenge | goti-redis-sot | 1 | 2 | 1/0/0 | arrow-only |
+| `goti-redis-sot-d0-d1-rollout.md` | challenge | goti-redis-sot | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-session-dropout-root-cause-audit.md` | challenge | goti-auth | 1 | 2 | 0/0/1 | code-arrow |
 | `goti-3000vu-queue-oneshot.md` | challenge | goti-queue-poc | 1 | 1 | 0/0/1 | code-arrow |
 | `goti-virtualservice-fqdn-503.md` | kubernetes | goti-kind-monitoring | 1 | 1 | 1/0/0 | arrow-only |
@@ -342,26 +338,6 @@
 - L296-309 (13줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# 1. Application JSON 백업 / $ kubectl get application goti-queue-sungjeon-dev -n argocd -o json > app-backup.json / `
 
-### `docker-compose-env-management.md`
-
-- 카테고리: challenge / 시리즈: -
-- 블록 7개 / ASCII 87줄
-
-- L25-38 (13줄, lang=`bash`, kind=**tree**, decision=**keep**)
-  - 샘플: `project-root/ / ├── user-service/ / │   ├── .env`
-- L47-50 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `frontend/.env          ← VITE_API_URL=localhost / docker-compose.yml     ← API_URL=ec2-domain / user-service/.env      ←`
-- L79-105 (26줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `project-root/ / ├── docker/ / │   ├── compose/`
-- L249-251 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `"이거 board-service 바뀐 거 같은데 뭐 바꿔줘야 되나요??" / → 30분 설명, 1시간 디버깅, docker system prune까지 몇 번 반복`
-- L256-262 (6줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `"환경 설정 어떻게 하나요?" / → "이것만 하세요" / `
-- L275-290 (15줄, lang=`-`, kind=**architecture**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───`
-- L295-317 (22줄, lang=`-`, kind=**architecture**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───`
-
 ### `goti-discord-alerting-architecture.md`
 
 - 카테고리: monitoring / 시리즈: -
@@ -383,6 +359,20 @@
   - 샘플: `# Goti-monitoring/charts/goti-monitoring/values-prod.yaml (변경 후) / grafanaAdminSecret: /   enabled: false  # ← external-`
 - L530-539 (9줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────┐     ┌─────────────────┐     ┌─────────────────────┐ / │ 1. Terraform    │────▶│ 2. Goti-k8s     │───`
+
+### `docker-compose-env-management.md`
+
+- 카테고리: challenge / 시리즈: -
+- 블록 4개 / ASCII 76줄
+
+- L25-38 (13줄, lang=`bash`, kind=**tree**, decision=**keep**)
+  - 샘플: `project-root/ / ├── user-service/ / │   ├── .env`
+- L79-105 (26줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `project-root/ / ├── docker/ / │   ├── compose/`
+- L265-280 (15줄, lang=`-`, kind=**architecture**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───`
+- L285-307 (22줄, lang=`-`, kind=**architecture**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────┐ / │             Git Repository                   │ / ├──────────────┬───`
 
 ### `multi-repo-cicd-strategy.md`
 
@@ -635,7 +625,7 @@
 
 - L59-68 (9줄, lang=`-`, kind=**tree**, decision=**keep**)
   - 샘플: `gopter v0.2.11 (property-based testing) /   └── goconvey v1.8.1 /       └── gopherjs v1.17.2`
-- L72-75 (3줄, lang=`-`, kind=**box-small**, decision=**flatten**)
+- L72-75 (3줄, lang=`text`, kind=**box-small**, decision=**flatten**)
   - 샘플: `wealist-advanced-go-pkg /   └── grpc-gateway/v2 v2.23.0 /       └── genproto/googleapis/api v0.0.0-20241104 (신버전)`
 - L123-152 (29줄, lang=`go`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `// go.mod /  / // Exclude old genproto to avoid ambiguous import errors`
@@ -1160,36 +1150,6 @@
 - L77-81 (4줄, lang=`text`, kind=**tree**, decision=**keep**)
   - 샘플: `App → Alloy Agent /         ├─ Metrics → 직접 Mimir (현재 구조 유지) /         ├─ Logs   → Kafka → Alloy Gateway → Loki`
 
-### `goti-phase7-d-overturn-decision.md`
-
-- 카테고리: challenge / 시리즈: goti-ticketing-phase
-- 블록 2개 / ASCII 10줄
-
-- L44-45 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Phase 6 ✅ → Phase 7 D-마감(보여주기용) → 끝`
-- L61-70 (9줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Phase 6 ✅ /   → Phase 6.5 신설 (Go 5서비스 prod 인프라 W1~W7)  ← 진입 차단 갭 해소 /   → Phase 7 재개 (Audit 풀세트 G1~G8)`
-
-### `goti-poc-ab-test-dependency-isolation-pattern.md`
-
-- 카테고리: challenge / 시리즈: -
-- 블록 2개 / ASCII 10줄
-
-- L39-41 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `POST /api/v1/queue/poc-a/validate → 200 (대기열 통과) / POST /api/v1/ticketing/reserve    → 403 / 400 (ticketing 차단)`
-- L168-176 (8줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `[문제] 공유 ticketing pod에 POC C의 ReservationSession 검증이 내장 /        → POC A 대기열을 통과한 요청이 ticketing에서 403/400 / `
-
-### `goti-redis-sot-adoption-adr.md`
-
-- 카테고리: challenge / 시리즈: goti-redis-sot
-- 블록 2개 / ASCII 10줄
-
-- L31-33 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `GET /game-seats/{gameId}/sections/{sectionId}/seat-statuses / → 558~967ms (2026-04-17)`
-- L167-175 (8줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `D0 인프라 /  → D1 seat_statuses /  → D2 seat_holds`
-
 ### `istio-ambient-part7-migration-to-sidecar.md`
 
 - 카테고리: istio / 시리즈: istio-ambient
@@ -1212,14 +1172,6 @@
 - L114-116 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `Prometheus targets → health: "down" / lastError: "server returned HTTP status 403 Forbidden"`
 
-### `goti-jwks-distribution-automation-adr.md`
-
-- 카테고리: istio / 시리즈: goti-auth
-- 블록 1개 / ASCII 9줄
-
-- L112-121 (9줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Terraform apply / user-service key rotation /   → SSM /prod/server/JWT_JWKS 업데이트 (Terraform outputs) /   → GitHub Action`
-
 ### `goti-resale-istio-rbac-403.md`
 
 - 카테고리: istio / 시리즈: goti-resale
@@ -1241,28 +1193,6 @@
   - 샘플: `/api/*          → ALB (goti-dev-alb) / /monitoring/*   → ALB (goti-dev-alb) / /* (default)    → S3 (프론트엔드)`
 - L106-111 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `/api/*          → ALB → goti-server:8080 / /swagger-ui/*   → ALB → goti-server:8080 / /v3/*           → ALB → goti-serve`
-
-### `goti-phase6-redis-inventory.md`
-
-- 카테고리: challenge / 시리즈: goti-redis-sot
-- 블록 3개 / ASCII 8줄
-
-- L30-31 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Redis Lock → DB TX { status + hold + ★inventory★ } → Unlock`
-- L83-87 (4줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Client A: HGET inventory:g1 grade_vip  → 1 / Client B: HGET inventory:g1 grade_vip  → 1 / Client A: HINCRBY inventory:g1`
-- L98-101 (3줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Before: Redis Lock → DB TX { status + hold + ★inventory★ } → Unlock / After:  Redis Lock → DB TX { status + hold } → Unl`
-
-### `goti-phase6-ticketing-implementation.md`
-
-- 카테고리: challenge / 시리즈: goti-ticketing-phase
-- 블록 2개 / ASCII 8줄
-
-- L73-75 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Java: seat_statuses(30만+ row) → IN절 + COUNT + GROUP BY / Go:   game_seat_inventories(900 row) → ANY($1) + SUM + GROUP BY`
-- L187-193 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `- GameRepo:       Save / Find + 중복 검사 / - InventoryRepo:  AdjustCounts 원자적 증감 + RemainingSeats 배치 조회 / - SeatHoldRepo:  `
 
 ### `goti-phase6-ticketing-sql-optimization.md`
 
@@ -1362,16 +1292,6 @@
 - L135-141 (6줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `PostgreSQL ──┐ /              ├── goti-metrics-collector (Go) ──→ :9090/metrics / Redis    ────┘         │`
 
-### `goti-redis-sot-d0-d1-rollout.md`
-
-- 카테고리: challenge / 시리즈: goti-redis-sot
-- 블록 2개 / ASCII 6줄
-
-- L174-176 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `latency_ms: 62, 60, 69, 7, 8, 10, 15, 6, 28, 31, 37, 9, 27, 8, 10, 7, 28, 31, 37, 11, 9 / → 평균 20ms, 최대 70ms (첫 3건은 lazy`
-- L187-191 (4줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `프론트: 966ms / 백엔드:  32ms (x-envoy-upstream-service-time) /        ────`
-
 ### `goti-signup-created-at-bug-and-sql-audit.md`
 
 - 카테고리: challenge / 시리즈: goti-auth
@@ -1440,14 +1360,6 @@
 - L181-186 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# 대시보드 수정 후, push 전 (클러스터 불필요) / ./validate.sh --lint-only    # 오프라인 lint + 커버리지 / `
 
-### `goti-phase8-p0-seat-booking-port.md`
-
-- 카테고리: challenge / 시리즈: goti-ticketing-phase
-- 블록 1개 / ASCII 5줄
-
-- L163-168 (5줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `main 푸시 /   → cd-prod-aws.yml / cd-prod-gcp.yml 트리거 /   → deploy/prod 푸시 → Harbor 이미지 prod-13 빌드`
-
 ### `goti-tempo-scoped-tag-traceql-variable.md`
 
 - 카테고리: monitoring / 시리즈: -
@@ -1481,6 +1393,14 @@
 
 - L112-116 (4줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `# /metrics 응답 / goti_match_active_total 0 / goti_guardrail_blacklist_size 0`
+
+### `goti-phase6-redis-inventory.md`
+
+- 카테고리: challenge / 시리즈: goti-redis-sot
+- 블록 1개 / ASCII 4줄
+
+- L79-83 (4줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `Client A: HGET inventory:g1 grade_vip  → 1 / Client B: HGET inventory:g1 grade_vip  → 1 / Client A: HINCRBY inventory:g1`
 
 ### `goti-renovate-ecr-auth-failure.md`
 
@@ -1586,6 +1506,14 @@
 - L56-57 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `맥 localhost:18080 → SSH(2232) → Ubuntu → 172.20.0.2:31080(Kind NodePort) → Istio Gateway → Pod`
 
+### `goti-poc-ab-test-dependency-isolation-pattern.md`
+
+- 카테고리: challenge / 시리즈: -
+- 블록 1개 / ASCII 2줄
+
+- L39-41 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `POST /api/v1/queue/poc-a/validate → 200 (대기열 통과) / POST /api/v1/ticketing/reserve    → 403 / 400 (ticketing 차단)`
+
 ### `goti-prometheus-agent-mode-adr.md`
 
 - 카테고리: monitoring / 시리즈: -
@@ -1593,6 +1521,22 @@
 
 - L33-35 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `App/Istio → Prometheus (scrape + 로컬 TSDB 2h + remote_write) → Mimir (장기 저장) / Grafana → Mimir query-frontend (datasource`
+
+### `goti-redis-sot-adoption-adr.md`
+
+- 카테고리: challenge / 시리즈: goti-redis-sot
+- 블록 1개 / ASCII 2줄
+
+- L31-33 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `GET /game-seats/{gameId}/sections/{sectionId}/seat-statuses / → 558~967ms (2026-04-17)`
+
+### `goti-redis-sot-d0-d1-rollout.md`
+
+- 카테고리: challenge / 시리즈: goti-redis-sot
+- 블록 1개 / ASCII 2줄
+
+- L174-176 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `latency_ms: 62, 60, 69, 7, 8, 10, 15, 6, 28, 31, 37, 9, 27, 8, 10, 7, 28, 31, 37, 11, 9 / → 평균 20ms, 최대 70ms (첫 3건은 lazy`
 
 ### `goti-session-dropout-root-cause-audit.md`
 

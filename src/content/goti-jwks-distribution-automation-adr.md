@@ -107,19 +107,15 @@ Option E가 이 네 축을 모두 만족합니다
 
 ## ✅ 결정: Option E 채택 (GitHub Actions 자동화 PR)
 
-JWT 키 회전 이벤트를 GitHub Actions로 감지해 Goti-k8s 6개 values.yaml을 일괄 수정하는 PR을 자동 생성합니다
+JWT 키 회전 이벤트를 GitHub Actions로 감지해 Goti-k8s 6개 values.yaml을 일괄 수정하는 PR을 자동 생성합니다.
 
-```text
-Terraform apply / user-service key rotation
-  → SSM /prod/server/JWT_JWKS 업데이트 (Terraform outputs)
-  → GitHub Actions (schedule 또는 repository_dispatch)
-     - SSM JWKS pull
-     - 현재 values.yaml inline jwks와 비교
-     - 차이 있으면 6개 values 일괄 sed/yq 치환
-     - peter-evans/create-pull-request 로 PR 생성
-  → Renovate automerge 또는 수동 머지
-  → ArgoCD sync → Istio 재적용
-```
+자동화 흐름은 다음 단계로 동작합니다.
+
+1. Terraform apply 또는 user-service 키 회전이 일어납니다
+2. Terraform outputs가 `/prod/server/JWT_JWKS` SSM 파라미터를 업데이트합니다
+3. GitHub Actions가 schedule 또는 `repository_dispatch`로 트리거됩니다 — SSM JWKS를 pull하고 현재 values.yaml의 inline jwks와 비교한 뒤, 차이가 있으면 6개 values를 일괄 sed/yq로 치환하고 `peter-evans/create-pull-request`로 PR을 생성합니다
+4. Renovate가 automerge하거나 수동으로 머지합니다
+5. ArgoCD가 sync해 Istio에 재적용됩니다
 
 ### 장점
 

@@ -44,11 +44,11 @@ project-root/
 
 ## 💥 문제 1: 어디 설정이 적용되는 건가요?
 
-```
-frontend/.env          ← VITE_API_URL=localhost
-docker-compose.yml     ← API_URL=ec2-domain
-user-service/.env      ← 또 다른 값...
-```
+환경변수가 세 곳에 흩어져 있었습니다.
+
+- `frontend/.env`: `VITE_API_URL=localhost`
+- `docker-compose.yml`: `API_URL=ec2-domain`
+- `user-service/.env`: 또 다른 값
 
 **git pull 받고 docker-compose up 하면:**
 
@@ -244,23 +244,13 @@ $ ./docker/scripts/dev.sh up
 
 ### Step 6: 팀원들에게 공유
 
-**Before:**
+**Before** — "이거 board-service 바뀐 거 같은데 뭐 바꿔줘야 되나요?"라는 질문이 들어오면 30분 설명, 1시간 디버깅, `docker system prune`까지 몇 번 반복하는 일이 생겼습니다.
 
-```
-"이거 board-service 바뀐 거 같은데 뭐 바꿔줘야 되나요??"
-→ 30분 설명, 1시간 디버깅, docker system prune까지 몇 번 반복
-```
+**After** — "환경 설정 어떻게 하나요?"라는 질문에는 다음 3단계만 안내하면 됐습니다.
 
-**After:**
-
-```
-"환경 설정 어떻게 하나요?"
-→ "이것만 하세요"
-
-1. cp docker/env/.env.dev.example docker/env/.env.dev
-2. vi docker/env/.env.dev  # DB 비번만 수정
-3. ./docker/scripts/dev.sh up
-```
+1. `cp docker/env/.env.dev.example docker/env/.env.dev`
+2. `vi docker/env/.env.dev`로 DB 비번만 수정
+3. `./docker/scripts/dev.sh up`
 
 5분 만에 끝났습니다.
 

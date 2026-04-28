@@ -34,10 +34,10 @@
 - [x] **G8.** `series:goti-java-to-go` — 4편 / 8블록 / 33줄 (2026-04-29)
 - [x] **G9.** `series:istio-observability` — 2편 / 3블록 / 32줄 (2026-04-29)
 - [x] **G10.** `series:goti-cloudflare-migration` — 2편 / 10블록 / 30줄 (2026-04-29)
-- [ ] **G11.** `series:goti-auth` — 3편 / 5블록 / 26줄
-- [ ] **G12.** `cat:challenge` — 3편 / 6블록 / 24줄
-- [ ] **G13.** `series:goti-redis-sot` — 3편 / 7블록 / 24줄
-- [ ] **G14.** `series:goti-ticketing-phase` — 3편 / 5블록 / 23줄
+- [x] **G11.** `series:goti-auth` — 3편 / 5블록 / 26줄 (2026-04-29)
+- [x] **G12.** `cat:challenge` — 3편 / 6블록 / 24줄 (2026-04-29)
+- [x] **G13.** `series:goti-redis-sot` — 3편 / 7블록 / 24줄 (2026-04-29)
+- [x] **G14.** `series:goti-ticketing-phase` — 3편 / 5블록 / 23줄 (2026-04-29)
 - [ ] **G15~G41.** 잔여 27 그룹 (`groups.md` 참고) — 글당 1~3 블록의 작은 그룹
 
 ### 그룹별 작업 절차
@@ -75,9 +75,13 @@
 | G8 `goti-java-to-go` | 4 | 6 | 2 (lang=`text` 명시 메타데이터) |
 | G9 `istio-observability` | 2 | 3 | 0 |
 | G10 `goti-cloudflare-migration` | 2 | 10 | 0 |
-| **합계** | **46** | **103** | **18** |
+| G11 `goti-auth` | 3 | 1 | 4 (lang=`diff`/`text` 명시) |
+| G12 `cat:challenge` | 3 | 4 | 2 (lang=`text` 명시) |
+| G13 `goti-redis-sot` | 3 | 4 | 3 (lang=`text` 명시 + race 시퀀스) |
+| G14 `goti-ticketing-phase` | 3 | 5 | 0 |
+| **합계** | **58** | **117** | **27** |
 
-전체 211 flatten 추천 중 **103 블록 처리(약 49%)** + keep 보정 18건. 다음 진입점은 **G11 `series:goti-auth`** (3편 / 5블록 / 26줄).
+전체 211 flatten 추천 중 **117 블록 처리(약 55%)** + keep 보정 27건. 다음 진입점은 **G15 `series:istio-intro`** (1편 / 2블록 / 21줄).
 
 ### 다음 세션 재개 절차
 
@@ -100,3 +104,4 @@
 - 2026-04-29: G8 (`goti-java-to-go`) 완료 — 4편 / 8블록 중 6블록 평탄화(표 4, 인라인 2), 2블록 keep(실 smoke 출력 + 커밋 목록 lang 명시). 이미지 배포 시퀀스·커밋-변경 매핑·트리거 차이가 구조적 매핑이라 표 비중 50%. 다음은 G9 `istio-observability`.
 - 2026-04-29: G9 (`istio-observability`) 완료 — 2편 / 3블록 모두 평탄화. 20줄 Span 타임라인 ASCII 시각화는 표(Span/서비스/시작ms/종료ms/비고)로 변환 + 부모-자식 관계 + latency 누적 설명 본문 보강. 진단 절차 2건은 번호 목록. 다음은 G10 `goti-cloudflare-migration`.
 - 2026-04-29: G10 (`goti-cloudflare-migration`) 완료 — 2편 / 10블록 모두 평탄화. 번호 목록 6, bullet 3, 인라인 1. CloudFront/Cloudflare 마이그레이션 서사 자체가 "5가지 문제 연쇄"이고 각 문제가 단계별 사이클이라 번호 목록 비중 60%. SSL 이중 종단 흐름은 두 글에서 반복되는데 일관되게 번호 목록으로 변환. **누적 50% 통과** (103/211). 다음은 G11 `goti-auth`.
+- 2026-04-29: G11~G14 묶음 처리 완료 — 13편 / 23블록 중 14블록 평탄화(번호 목록 4, 인라인 3, 표 3, bullet 3, 굵은+번호 1), 9블록 keep(go-ti 시리즈가 lang=`diff`/`text`로 실제 diff/로그/측정값 많이 인용). D0~D7 롤아웃, Phase 7 경로 B 9단계, GitHub Actions 자동화 같은 다단계 흐름은 번호 목록이 압도적. 누적 117/211 (55%) + keep 27. 다음은 G15 `istio-intro`.
