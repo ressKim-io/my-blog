@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "stats": "node scripts/update-stats.mjs",
+    "prebuild": "npm run stats",
     "build": "next build && node scripts/postbuild.mjs",
     "start": "next start",
     "lint": "eslint"
