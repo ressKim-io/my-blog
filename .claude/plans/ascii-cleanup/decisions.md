@@ -117,3 +117,64 @@
 | **합계** | **6** (병합으로 실 결과물 4개) |
 
 블록 2개를 표 1개로 병합한 사례 2건 — 비교 정보가 자연스럽게 합쳐지는 경우 가독성을 위해 병합.
+
+---
+
+## G3 — `series:eks-troubleshooting` (2026-04-28)
+
+7편 / inventory flatten 추천 24블록 → 실제 평탄화 23블록 + keep 1블록.
+
+### `eks-troubleshooting-part8-argocd-helm.md` (6블록)
+
+- L47-50, L145-148, L238-240, L454-456 ArgoCD 상태 박스 → **bullet 목록** (4건)
+- L182-183 ConfigMap 흐름 → **인라인** (`ConfigMap 변경 → 해시 → rolling update`)
+- L353-355 HPA 비용 낭비 흐름 → **인라인 (문장 풀어쓰기)**
+
+### `eks-troubleshooting-part4-external-secrets.md` (4블록)
+
+- L43-46 ESO 동기화 흐름 → **인라인**
+- L143-146 gitignore 매칭 미니 박스 → **인라인 (본문 흡수)**
+- L284-294 ESO diff (10줄, lang=`diff`) → **keep** (실제 ArgoCD diff 출력, 분류 보정)
+- L531-537 ESO 체크리스트 → **체크박스 목록**
+
+### `eks-troubleshooting-part1-dday.md` (4블록)
+
+- L73-76 values 우선순위 박스 → **인라인 (문장 풀어쓰기)**
+- L237-240 "나중에 하지" 컨텍스트 박스 → **bullet 목록**
+- L287-296 Terraform 체크리스트 → **체크박스 목록**
+- L339-343 main vs k8s-deploy-prod 박스 → **bullet + 결론 문장**
+
+### `eks-troubleshooting-part3-istio-ambient-2.md` (3블록)
+
+- L44-53 ALB→NLB Before/After 흐름 (9줄) → **표** (항목/이전/이후 3열)
+- L296-300 NLB 비교 (이전 vs 새) → **bullet + 결론 문장**
+- L357-360 최종 HTTPS 아키텍처 흐름 → **인라인**
+
+### `eks-troubleshooting-part7-go-service.md` (3블록)
+
+- L65-66 OAuth 결과 패턴 → **인라인** (성공/실패 시퀀스 인라인)
+- L93-96 OAuth2 흐름 → **번호 목록** (3단계)
+- L146-155 HttpSession Before/After (9줄) → **굵은 글씨 + 문장 풀어쓰기 (2케이스)**
+
+### `eks-troubleshooting-part5-monitoring-1.md` (2블록)
+
+- L424-426 PVC lock 충돌 다이어그램 → **bullet 목록** (기존/새 Pod 2건)
+- L497-500 Production 아키텍처 흐름 → **인라인**
+
+### `eks-troubleshooting-part6-monitoring-2.md` (2블록)
+
+- L49-53 스토리지 Before/After → **굵은 글씨 + bullet 하위 목록**
+- L111-116 minio-go 버전 의존성 → **bullet 목록** (3단계)
+
+### G3 통계
+
+| 변환 | 건수 |
+|---|---|
+| 인라인 | 5 |
+| 표 | 1 |
+| bullet 목록 | 14 (체크박스 2건 포함) |
+| 번호 목록 | 3 |
+| keep (분류 보정) | 1 |
+| **합계** | **24** |
+
+이 그룹은 "문제 N — 상황" 박스 패턴이 많아 bullet 목록 변환이 압도적으로 많았습니다. lang=`diff`로 명시된 실제 ArgoCD diff 1건은 keep으로 분류 보정 (이전 그룹의 lang=`log`/`hcl` keep과 동일 패턴 — lang이 명시된 코드는 화살표 토큰만으로 flatten 추천돼도 사람 판단으로 보존).

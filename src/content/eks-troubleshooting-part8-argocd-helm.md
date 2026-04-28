@@ -44,11 +44,9 @@ EKS 트러블슈팅 시리즈의 마지막 편입니다. 이번에는 GitOps의 
 
 ### 상황
 
-```
-ArgoCD: db-init-prod → Synced, Healthy ✅
-실제: Job 생성 안 됨
-서비스: "database does not exist" → CrashLoopBackOff
-```
+- **ArgoCD**: `db-init-prod` Synced, Healthy ✅
+- **실제**: Job 생성 안 됨
+- **서비스**: `database does not exist` → CrashLoopBackOff
 
 ArgoCD는 정상이라고 하는데, DB 초기화 Job이 없어서 서비스들이 전부 죽었습니다.
 
@@ -142,11 +140,9 @@ Creating database wealist_board_db... OK
 
 ### 상황
 
-```
-ArgoCD: storage-service → Synced ✅
-ConfigMap: S3_BUCKET 변경됨 ✅
-Pod: 여전히 이전 S3_BUCKET 사용 ❌
-```
+- **ArgoCD**: `storage-service` Synced ✅
+- **ConfigMap**: `S3_BUCKET` 변경됨 ✅
+- **Pod**: 여전히 이전 `S3_BUCKET` 사용 ❌
 
 ### 증상
 
@@ -177,11 +173,7 @@ ArgoCD 관점에서:
 
 ### 해결: ConfigMap Checksum Annotation
 
-Deployment의 pod template에 ConfigMap 내용의 해시값을 annotation으로 추가합니다.
-
-```
-ConfigMap 변경 → 해시값 변경 → pod template 변경 → rolling update 트리거
-```
+Deployment의 pod template에 ConfigMap 내용의 해시값을 annotation으로 추가합니다. 그러면 `ConfigMap 변경 → 해시값 변경 → pod template 변경 → rolling update` 순서로 자동 트리거됩니다.
 
 **1. Helper 함수 추가**:
 
@@ -235,10 +227,8 @@ $ helm template storage-service k8s/helm/charts/storage-service \
 
 ### 상황
 
-```
-ArgoCD: metrics-server → OutOfSync (계속)
-Sync 눌러도 다시 OutOfSync
-```
+- **ArgoCD**: `metrics-server` OutOfSync (계속)
+- Sync를 눌러도 다시 OutOfSync로 돌아감
 
 ### 증상
 
@@ -350,10 +340,7 @@ Synced
 
 ### 상황
 
-```
-트래픽 감소 → 5분 이상 대기 → 그제서야 replica 감소
-→ 불필요한 Pod 유지 → 비용 낭비
-```
+트래픽이 감소해도 5분 이상 대기한 뒤에야 replica가 줄어듭니다. 그 사이 불필요한 Pod가 유지되어 비용이 낭비됩니다.
 
 ### 증상
 
@@ -451,10 +438,8 @@ autoscaling:
 
 ### 상황
 
-```
-ArgoCD: external-secrets-config-prod → OutOfSync (계속)
-ExternalSecret은 정상 동작
-```
+- **ArgoCD**: `external-secrets-config-prod` OutOfSync (계속)
+- ExternalSecret 자체는 정상 동작
 
 ### 증상
 

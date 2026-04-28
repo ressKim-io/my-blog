@@ -60,13 +60,7 @@ date: '2025-12-31'
 
 ### 증상
 
-Google 로그인이 어떨 때는 성공하고, 어떨 때는 실패합니다:
-
-```
-성공 → 성공 → 실패 → 성공 → 실패 → 실패 → 성공
-```
-
-완전 랜덤입니다.
+Google 로그인 결과가 `성공 → 성공 → 실패 → 성공 → 실패 → 실패 → 성공`처럼 완전 랜덤이었습니다.
 
 ```bash
 $ kubectl logs deploy/auth-service -n wealist-prod | grep -i csrf
@@ -90,11 +84,9 @@ auth-service-7b9f8c6d4-def34    1/1     Running
 
 **OAuth2 흐름을 생각해보면:**
 
-```
-1. 사용자 → Google 로그인 요청 → Pod A (state=abc123 메모리에 저장)
-2. Google OAuth 완료
-3. Google → 콜백 → Pod B (state를 찾을 수 없음 → 실패!)
-```
+1. 사용자가 Google 로그인을 요청 → Pod A가 `state=abc123`을 메모리에 저장합니다.
+2. Google OAuth 인증이 완료됩니다.
+3. Google이 콜백을 보내는데 이번에는 Pod B로 라우팅 → Pod B에는 state가 없어 실패합니다.
 
 Spring Security OAuth2는 state 파라미터를 **HttpSession(메모리)**에 저장합니다.
 
@@ -143,17 +135,9 @@ spring:
 
 ### 동작 원리
 
-```
-Before (문제):
-  Pod A: HttpSession{state=abc123} (메모리)
-  Pod B: HttpSession{} (state 없음)
-  → 콜백이 Pod B로 가면 실패
+**Before (문제)**: Pod A가 `HttpSession{state=abc123}`을 메모리에 보관하고 Pod B는 비어 있는 상태였습니다. 콜백이 Pod B로 가면 state를 찾을 수 없어 실패합니다.
 
-After (해결):
-  Redis: wealist:auth:session:xyz → {state=abc123}
-  Pod A/B 모두 Redis에서 동일 세션 조회
-  → 어느 Pod로 가도 state 검증 성공
-```
+**After (해결)**: 세션이 Redis(`wealist:auth:session:xyz → {state=abc123}`)에 저장되어 Pod A/B 모두 동일 세션을 조회합니다. 어느 Pod로 콜백이 가더라도 state 검증이 성공합니다.
 
 ### 검증
 

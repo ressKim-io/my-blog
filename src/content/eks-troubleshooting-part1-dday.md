@@ -68,13 +68,7 @@ config:
 
 아! `values.yaml`에 로컬 개발용 값이 하드코딩되어 있었습니다.
 
-**우선순위 문제였다:**
-
-```
-values.yaml (하드코딩) > ExternalSecret (AWS Secrets Manager)
-                ↓
-        "redis:6379"로 연결 시도 → 실패
-```
+**우선순위 문제였습니다.** `values.yaml`의 하드코딩 값이 ExternalSecret(AWS Secrets Manager에서 동기화한 값)보다 우선이라, Pod가 `redis:6379`로 연결을 시도하다 실패했던 겁니다.
 
 ### 해결
 
@@ -234,11 +228,9 @@ module "pod_identity_alb_controller" {
 
 IAM 역할은 만들어뒀는데, 정작 **AWS Load Balancer Controller Helm 릴리스가 없었습니다**.
 
-```
-Terraform으로 관리할 예정이었지만...
-→ "나중에 하지" 하고 넘어갔던 것
-→ 프로덕션 배포일에 터짐
-```
+- Terraform으로 관리할 예정이었습니다.
+- "나중에 하지" 하고 넘어갔던 항목이었습니다.
+- 결국 프로덕션 배포일에 터졌습니다.
 
 ### 해결
 
@@ -282,19 +274,17 @@ aws-load-balancer-controller-xxx   1/1   Running   0
 
 ### Terraform 체크리스트 (교훈)
 
-이 사건 이후 체크리스트를 만들었습니다:
+이 사건 이후 체크리스트를 만들었습니다.
 
-```
-[ ] EKS 클러스터
-[ ] Gateway API CRDs
-[ ] Istio (base, istiod, cni, ztunnel, ingress)
-[ ] ArgoCD
-[ ] AWS Load Balancer Controller  ← 빠뜨렸던 것
-[ ] External Secrets Operator
-[ ] cert-manager
-[ ] Cluster Autoscaler
-[ ] ArgoCD Bootstrap App
-```
+- [ ] EKS 클러스터
+- [ ] Gateway API CRDs
+- [ ] Istio (base, istiod, cni, ztunnel, ingress)
+- [ ] ArgoCD
+- [ ] AWS Load Balancer Controller ← 빠뜨렸던 것
+- [ ] External Secrets Operator
+- [ ] cert-manager
+- [ ] Cluster Autoscaler
+- [ ] ArgoCD Bootstrap App
 
 ### 핵심 포인트
 
@@ -336,12 +326,10 @@ spec:
 
 그런데 Production 배포는 `k8s-deploy-prod` 브랜치를 사용하기로 했었습니다.
 
-```
-main 브랜치: 개발 중인 코드
-k8s-deploy-prod 브랜치: 프로덕션 배포용
+- `main`: 개발 중인 코드
+- `k8s-deploy-prod`: 프로덕션 배포용
 
-ArgoCD가 main을 보고 있었음 → 프로덕션 변경사항 미반영
-```
+ArgoCD가 `main`을 보고 있었으니, 프로덕션용 변경사항이 반영되지 않은 채 sync되고 있었습니다.
 
 ### 해결
 

@@ -46,12 +46,12 @@ S3 기반 스토리지의 장점:
 - **멀티 AZ 내구성**
 - **Lock 충돌 없음**
 
-```
-Before: Prometheus/Loki/Tempo → PVC (gp3)
-After:  Prometheus → PVC (메트릭, 단기)
-        Loki → S3 (로그, 장기)
-        Tempo → S3 (트레이스, 장기)
-```
+**Before**: Prometheus / Loki / Tempo → PVC (gp3)
+
+**After**:
+- Prometheus → PVC (메트릭, 단기)
+- Loki → S3 (로그, 장기)
+- Tempo → S3 (트레이스, 장기)
 
 ---
 
@@ -108,13 +108,9 @@ AWS CLI는 성공합니다! 그런데 Tempo 자체는 실패합니다.
 
 Tempo 2.3.1은 내부적으로 `minio-go` 라이브러리를 사용합니다. 이 버전의 minio-go는 **EKS Pod Identity를 지원하지 않습니다**.
 
-```
-EKS Pod Identity (2023년 출시)
-  ↓
-minio-go 7.0.70+ 에서 지원
-  ↓
-Tempo 2.3.1은 minio-go 7.0.50 사용 → Pod Identity 미지원!
-```
+- EKS Pod Identity는 2023년 출시되었습니다.
+- minio-go는 7.0.70+ 부터 Pod Identity를 지원합니다.
+- Tempo 2.3.1은 내부적으로 minio-go 7.0.50을 사용 → Pod Identity 미지원.
 
 ### 해결
 

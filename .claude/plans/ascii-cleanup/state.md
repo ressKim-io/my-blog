@@ -26,7 +26,7 @@
 
 - [x] **G1.** `cat:kubernetes` — 8편 / 34블록 / 174줄 (2026-04-28)
 - [x] **G2.** `series:argocd-troubleshooting` — 3편 / 6블록 / 102줄 (2026-04-28)
-- [ ] **G3.** `series:eks-troubleshooting` — 7편 / 24블록 / 97줄
+- [x] **G3.** `series:eks-troubleshooting` — 7편 / 24블록 / 97줄 (2026-04-28)
 - [ ] **G4.** `series:goti-multicloud` — 7편 / 12블록 / 60줄
 - [ ] **G5.** `series:goti-observability-ops` — 5편 / 9블록 / 46줄
 - [ ] **G6.** `cat:cicd` — 3편 / 7블록 / 36줄
@@ -67,3 +67,4 @@
 - 2026-04-28 오후: Plan 리뷰 후 v2로 전환 — 단계 분리 결정 (시각화 도구는 다음 세션). scan.mjs 분류 로직 개선(tree 토큰 + lang 필터 + decision 추천). Phase 2 완료, `criteria.md` + `groups.md` 산출 (41 그룹 / 211 flatten 블록 / 1,017줄). Phase 3 시작 대기.
 - 2026-04-28 저녁: G1 (`cat:kubernetes`) 완료 — 8편 / 33블록 평탄화 (1블록은 실로그라 keep 처리). 표 5개, 인라인 7개, lang 명시 13개, 마크다운 목록 8개로 변환. 자세한 결정 로그는 `decisions.md` 참조.
 - 2026-04-28 저녁: G2 (`series:argocd-troubleshooting`) 완료 — 3편 / 5블록 평탄화 (75줄 hcl 코드 1블록은 실제 Terraform 코드라 keep 처리). 표 2개, nested 번호 목록 3개로 변환.
+- 2026-04-28 저녁: G3 (`series:eks-troubleshooting`) 완료 — 7편 / 23블록 평탄화 (10줄 diff 코드 1블록은 실제 ArgoCD diff라 keep 처리). 표 1개, bullet 목록 14개, 인라인 5개, 번호 목록 3개로 변환.

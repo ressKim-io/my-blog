@@ -421,10 +421,8 @@ failed to init delete store: timeout
 2. 기존 Pod가 PVC lock을 잡고 있음 (ReadWriteOnce)
 3. 새 Pod가 같은 PVC에 접근하려다 lock 획득 실패
 
-```
-기존 Pod (prometheus-54846bb74f-xxx) ─── lock ───> PVC
-새 Pod (prometheus-68ddd48c9c-xxx)  ─── blocked ──> PVC  → CrashLoopBackOff
-```
+- **기존 Pod** `prometheus-54846bb74f-xxx`가 PVC lock을 잡고 있음
+- **새 Pod** `prometheus-68ddd48c9c-xxx`는 같은 PVC에 접근 시도 → blocked → CrashLoopBackOff
 
 ### 해결
 
@@ -494,11 +492,7 @@ ECR에 frontend 이미지가 없습니다.
 
 **Production에서는 CloudFront + S3로 프론트엔드를 제공합니다.**
 
-```
-Production 아키텍처:
-GitHub Actions → S3 업로드 → CloudFront 배포
-                     (EKS에 frontend 불필요!)
-```
+Production 아키텍처는 `GitHub Actions → S3 업로드 → CloudFront 배포`이므로 EKS에 frontend가 필요하지 않습니다.
 
 frontend 리소스 삭제:
 
