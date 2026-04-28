@@ -1,19 +1,19 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-28T21:17:38.008Z
+> 생성 시각: 2026-04-28T21:23:49.860Z
 
 ## 요약
 
-- ASCII 블록 포함 글: **135편**
-- 전체 ASCII 블록 수: **367개**
-- 전체 ASCII 라인 합계: **4142줄**
+- ASCII 블록 포함 글: **134편**
+- 전체 ASCII 블록 수: **366개**
+- 전체 ASCII 라인 합계: **4136줄**
 
 ## 자동 처리 추천 분포 (decision)
 
 | 결정 | 개수 | 설명 |
 |---|---|---|
-| `flatten` | 140 | 평탄화 (표/문장으로 변환 또는 삭제) |
+| `flatten` | 139 | 평탄화 (표/문장으로 변환 또는 삭제) |
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
 
@@ -21,7 +21,7 @@
 
 | 유형 | 개수 | 설명 |
 |---|---|---|
-| `arrow-only` | 132 | 박스 없는 화살표 시퀀스 |
+| `arrow-only` | 131 | 박스 없는 화살표 시퀀스 |
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
 | `flow-diagram` | 37 | 박스 + 화살표 (흐름도/시퀀스) |
@@ -135,7 +135,6 @@
 | `goti-loki-otlp-native-migration.md` | monitoring | goti-observability-stack | 3 | 7 | 3/0/0 | arrow-only |
 | `goti-poc-queue-a-401-ticketing-isolation.md` | challenge | goti-queue-poc | 3 | 7 | 3/0/0 | arrow-only |
 | `goti-cutover-smoke-trail-fixes.md` | challenge | goti-java-to-go | 1 | 6 | 1/0/0 | arrow-only |
-| `goti-dashboard-enhancement.md` | monitoring | goti-observability-ops | 1 | 6 | 1/0/0 | arrow-only |
 | `goti-ecr-secret-dollar-escape.md` | argocd | goti-argocd-gitops | 3 | 6 | 2/0/1 | arrow-only, code-arrow |
 | `goti-gcp-redis-recovery-jwt-unification.md` | challenge | goti-multicloud | 1 | 6 | 0/0/1 | code-arrow |
 | `goti-go-cutover-residual-fixes.md` | challenge | goti-java-to-go | 1 | 6 | 1/0/0 | arrow-only |
@@ -1430,14 +1429,6 @@
 
 - L31-37 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `prod-13 (P0) → prod-14 (display_color_hex) /   → prod-15 (seat-statuses 응답) /   → prod-16 (is_available)`
-
-### `goti-dashboard-enhancement.md`
-
-- 카테고리: monitoring / 시리즈: goti-observability-ops
-- 블록 1개 / ASCII 6줄
-
-- L80-86 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `Alert → API Health Matrix에서 문제 API 발견 /      → Error Analysis에서 원인 좁히기 /      → Logs에서 예외 확인`
 
 ### `goti-ecr-secret-dollar-escape.md`
 

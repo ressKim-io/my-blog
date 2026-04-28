@@ -3918,25 +3918,6 @@
     ]
   },
   {
-    "file": "goti-dashboard-enhancement.md",
-    "category": "monitoring",
-    "series": "goti-observability-ops",
-    "title": "Developer 대시보드 실무 고도화 — 어디 API에서 에러가 났는지 찾을 수 있게",
-    "blockCount": 1,
-    "totalAsciiLines": 6,
-    "blocks": [
-      {
-        "startLine": 80,
-        "endLine": 86,
-        "lang": "text",
-        "lineCount": 6,
-        "kind": "arrow-only",
-        "decision": "flatten",
-        "sample": "Alert → API Health Matrix에서 문제 API 발견 /      → Error Analysis에서 원인 좁히기 /      → Logs에서 예외 확인"
-      }
-    ]
-  },
-  {
     "file": "goti-ecr-secret-dollar-escape.md",
     "category": "argocd",
     "series": "goti-argocd-gitops",

@@ -230,3 +230,47 @@
 | **합계** | **12** |
 
 이 그룹은 멀티클라우드 트래픽 경로/장애 사슬 박스가 많아 **번호 목록** 비중이 가장 높았습니다 (4건). 단계별 ms 또는 인과 사슬을 풀어쓰는 데 번호 목록이 가독성을 가장 잘 보존했습니다. WAF 룰은 lang을 명시하면서도 한국어 주석 화살표만 본문 한 줄로 분리하는 하이브리드 패턴 — 전 그룹의 "lang 명시 코드는 keep" 보정 룰을 살짝 변형해 적용했습니다.
+
+---
+
+## G5 — `series:goti-observability-ops` (2026-04-29)
+
+5편 / inventory flatten 추천 9블록 → 실제 평탄화 1블록 + keep 보정 8블록.
+
+**G5 특징**: 관측성 시리즈는 본문 자체가 OTLP/Mimir/Loki/Tempo 같은 파이프라인 다이어그램을 많이 인용합니다. 자동 추천이 `arrow-only`로 분류해도 lang이 `text`/`alloy`/`promql`로 명시된 케이스가 많고, 실제 응답·설정·옵션 비교 다이어그램이라 정보 가치가 높아 보정 룰("lang 명시 + 정보 가치 → keep")로 흡수했습니다.
+
+### `goti-monitoring-e2e-multi-troubleshoot.md` (3블록 모두 keep)
+
+- L44-47 실제 HTTP 응답 (POST + 응답 헤더 + body) → **keep** (lang=`text`, 실제 출력 보존이 자연스러움)
+- L117-125 세 가지 에러 케이스(GET/응답코드 시퀀스) → **keep** (lang=`text`, 실 출력)
+- L237-246 Alloy `queue_config` 설정 → **keep** (lang=`alloy`, 실제 설정 코드 — 화살표 토큰은 0건이지만 misc로 잡힘)
+
+### `goti-kafka-buffered-otel-pipeline.md` (3블록 모두 keep)
+
+- L32-33 Option A 흐름 (1줄, `App → Alloy → Mimir/Loki/Tempo`) → **keep**
+- L56-57 Option A(중복) → **keep**
+- L65-69 Option B 들여쓰기 흐름(4줄) → **keep**
+
+이유: Option C(인벤토리에 안 잡힘, tree 토큰)와 함께 **3개 옵션 비교 다이어그램의 일관성**이 본문 핵심. lang=`text` 명시 + 비교 다이어그램 의도. 일부만 인라인으로 풀면 옵션 간 시각 비교가 깨집니다.
+
+### `goti-otel-agent-otlp-protocol-mismatch.md` (1블록 keep)
+
+- L228-237 통신 방향 다이어그램 (Java Agent → Alloy → Mimir/Tempo/Loki + Grafana 쿼리 4줄) → **keep** (lang=`text`, 본문에 "다이어그램을 위에서 아래로 따라가면..."로 명시적 다이어그램 인용)
+
+### `goti-dashboard-enhancement.md` (1블록 flatten)
+
+- L80-86 디버깅 워크플로우 6단계 → **번호 목록** (Alert → Health Matrix → Error Analysis → Logs → Trace → JVM → Profiling 단계별 풀어쓰기)
+
+### `goti-dashboard-query-validation-fixes.md` (1블록 keep)
+
+- L115-120 PromQL Before/After 비교 (5줄) → **keep** (lang=`promql`, 실제 PromQL 코드 + 한국어 주석 화살표만 코멘트로 잔존 — 전형적인 "lang 명시 코드는 keep" 보정 패턴)
+
+### G5 통계
+
+| 변환 | 건수 |
+|---|---|
+| 번호 목록 | 1 |
+| keep (분류 보정) | 8 |
+| **합계** | **9** |
+
+이 그룹은 유일하게 **keep 비중이 압도적**(9건 중 8건)이었습니다. lang이 `text`/`alloy`/`promql`로 명시된 실제 코드/출력/비교 다이어그램이 대부분이라, 평탄화하면 정보 손실 또는 시각 비교가 깨지는 케이스. 자동 분류 룰이 `arrow-only`/`misc`로 잡았어도 사람 판단으로 보존했습니다.

@@ -28,7 +28,7 @@
 - [x] **G2.** `series:argocd-troubleshooting` — 3편 / 6블록 / 102줄 (2026-04-28)
 - [x] **G3.** `series:eks-troubleshooting` — 7편 / 24블록 / 97줄 (2026-04-28)
 - [x] **G4.** `series:goti-multicloud` — 7편 / 12블록 / 60줄 (2026-04-29)
-- [ ] **G5.** `series:goti-observability-ops` — 5편 / 9블록 / 46줄
+- [x] **G5.** `series:goti-observability-ops` — 5편 / 9블록 / 46줄 (2026-04-29)
 - [ ] **G6.** `cat:cicd` — 3편 / 7블록 / 36줄
 - [ ] **G7.** `series:goti-observability-stack` — 5편 / 8블록 / 34줄
 - [ ] **G8.** `series:goti-java-to-go` — 4편 / 8블록 / 33줄
@@ -61,7 +61,7 @@
 - 다이어그램 시스템 결정: MDX 컴포넌트 / drawio / Mermaid / HTML→PNG (D2 제외)
 - 다크모드 제거 후 일관 변환
 
-## Phase 3 누적 진행 (~G4)
+## Phase 3 누적 진행 (~G5)
 
 | 그룹 | 글 | 평탄화 | keep (분류 보정) |
 |---|---|---|---|
@@ -69,16 +69,17 @@
 | G2 `argocd-troubleshooting` | 3 | 5 | 1 (lang=`hcl`) |
 | G3 `eks-troubleshooting` | 7 | 23 | 1 (lang=`diff`) |
 | G4 `goti-multicloud` | 7 | 12 | 0 (lang 명시는 하이브리드) |
-| **합계** | **25** | **73** | **3** |
+| G5 `goti-observability-ops` | 5 | 1 | 8 (lang=`text`/`alloy`/`promql`) |
+| **합계** | **30** | **74** | **11** |
 
-전체 211 flatten 추천 중 **76 블록 처리(약 36%)**. 다음 진입점은 **G5 `series:goti-observability-ops`** (5편 / 9블록 / 46줄).
+전체 211 flatten 추천 중 **77 블록 처리(약 36%)** + keep 보정 11건. 다음 진입점은 **G6 `cat:cicd`** (3편 / 7블록 / 36줄).
 
 ### 다음 세션 재개 절차
 
 1. 이 파일(`state.md`) 확인 — Phase 3 체크박스 + 진행 로그
-2. `groups.md`의 G5 섹션에서 글 목록과 블록 위치 확인
+2. `groups.md`의 G6 섹션에서 글 목록과 블록 위치 확인
 3. `criteria.md` 평탄화 방법론 + 분류 보정 룰("lang 명시 코드는 keep") 적용
-4. `decisions.md`의 G1~G4 결정 로그 패턴 참고 (bullet/표/번호목록/인라인 분포)
+4. `decisions.md`의 G1~G5 결정 로그 패턴 참고 (bullet/표/번호목록/인라인 분포 + G5의 keep 비중 사례)
 
 ## 진행 로그
 
@@ -88,3 +89,4 @@
 - 2026-04-28 저녁: G2 (`series:argocd-troubleshooting`) 완료 — 3편 / 5블록 평탄화 (75줄 hcl 코드 1블록은 실제 Terraform 코드라 keep 처리). 표 2개, nested 번호 목록 3개로 변환.
 - 2026-04-28 저녁: G3 (`series:eks-troubleshooting`) 완료 — 7편 / 23블록 평탄화 (10줄 diff 코드 1블록은 실제 ArgoCD diff라 keep 처리). 표 1개, bullet 목록 14개, 인라인 5개, 번호 목록 3개로 변환.
 - 2026-04-29: G4 (`series:goti-multicloud`) 완료 — 7편 / 12블록 평탄화. 멀티클라우드 트래픽 경로/장애 사슬 박스가 많아 번호 목록 비중이 가장 높음(4건). 표 2개, bullet 목록 3개, 인라인 2개, lang 명시+주석 분리 1개. 다음은 G5 `goti-observability-ops`.
+- 2026-04-29: G5 (`series:goti-observability-ops`) 완료 — 5편 / 9블록 중 1블록만 평탄화(번호 목록), 8블록은 분류 보정으로 keep. 관측성 시리즈는 lang=`text`/`alloy`/`promql` 명시 + 실제 응답·설정·옵션 비교 다이어그램이 대부분이라 keep 비중 압도적. 다음은 G6 `cat:cicd`.
