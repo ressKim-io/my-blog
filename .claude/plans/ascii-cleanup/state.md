@@ -38,8 +38,8 @@
 - [x] **G12.** `cat:challenge` — 3편 / 6블록 / 24줄 (2026-04-29)
 - [x] **G13.** `series:goti-redis-sot` — 3편 / 7블록 / 24줄 (2026-04-29)
 - [x] **G14.** `series:goti-ticketing-phase` — 3편 / 5블록 / 23줄 (2026-04-29)
-- [x] **G15~G24.** 묶음 처리 (2026-04-30) — 12편 / 37블록 평탄화 28 + keep 9
-- [ ] **G25~G41.** 잔여 17 그룹 (`groups.md` 참고) — 글당 1~3 블록의 작은 그룹
+- [x] **G15~G24.** 묶음 처리 (2026-04-30) — 20편 / 37블록 평탄화 28 + keep 9
+- [x] **G25~G41.** 묶음 처리 (2026-04-30) — 24편 / 30블록 평탄화 26 + keep 4 (전체 그룹 종료)
 
 ### 그룹별 작업 절차
 
@@ -90,9 +90,26 @@
 | G22 `goti-istio-ops` | 3 | 3 | 2 (lang=`text` Prom 출력) |
 | G23 `eks-security` | 1 | 1 | 1 (lang=`text` 콘솔 로그) |
 | G24 `game-server` | 1 | 3 | 0 |
-| **합계** | **78** | **145** | **36** |
+| G25 `goti-multicloud-db` | 1 | 1 | 0 |
+| G26 `goti-cloudfront-alb` | 2 | 4 | 0 |
+| G27 `goti-ec2-deploy` | 2 | 1 | 1 (lang=`text` 헬스체크 로그) |
+| G28 `cat:argocd` | 1 | 1 | 0 |
+| G29 `goti-argocd` | 2 | 2 | 0 |
+| G30 `goti-otel-prometheus` | 2 | 3 | 1 (lang=`promql` 코드) |
+| G31 `goti-pgbouncer` | 2 | 3 | 0 |
+| G32 `goti-argocd-gitops` | 2 | 3 | 0 |
+| G33 `goti-resale` | 1 | 2 | 0 |
+| G34 `goti-spring-otel` | 1 | 1 | 0 |
+| G35 `goti-loadtest` | 1 | 1 | 0 |
+| G36 `goti-metrics-collector` | 1 | 1 | 0 |
+| G37 `istio-ambient` | 1 | 0 | 1 (lang=`hcl` Terraform) |
+| G38 `goti-scaling` | 1 | 0 | 1 (lang=`text` Descheduler 로그) |
+| G39 `istio-traffic` | 1 | 1 | 0 |
+| G40 `observability` | 1 | 1 | 0 |
+| G41 `goti-kind-monitoring` | 1 | 1 | 0 |
+| **합계** | **102** | **171** | **40** |
 
-전체 211 flatten 추천 중 **145 블록 처리(약 69%)** + keep 보정 36건. 다음 진입점은 **G25 `series:goti-multicloud-db`** (1편 / 1블록 / 12줄).
+전체 211 flatten 추천 211개 = **171 평탄화 + 40 keep 보정**으로 완전 처리. 본문 흐름은 손대지 않고 코드블록 형태만 정리. 정보는 모두 보존.
 
 ### 다음 세션 재개 절차
 
@@ -117,3 +134,4 @@
 - 2026-04-29: G10 (`goti-cloudflare-migration`) 완료 — 2편 / 10블록 모두 평탄화. 번호 목록 6, bullet 3, 인라인 1. CloudFront/Cloudflare 마이그레이션 서사 자체가 "5가지 문제 연쇄"이고 각 문제가 단계별 사이클이라 번호 목록 비중 60%. SSL 이중 종단 흐름은 두 글에서 반복되는데 일관되게 번호 목록으로 변환. **누적 50% 통과** (103/211). 다음은 G11 `goti-auth`.
 - 2026-04-29: G11~G14 묶음 처리 완료 — 13편 / 23블록 중 14블록 평탄화(번호 목록 4, 인라인 3, 표 3, bullet 3, 굵은+번호 1), 9블록 keep(go-ti 시리즈가 lang=`diff`/`text`로 실제 diff/로그/측정값 많이 인용). D0~D7 롤아웃, Phase 7 경로 B 9단계, GitHub Actions 자동화 같은 다단계 흐름은 번호 목록이 압도적. 누적 117/211 (55%) + keep 27. 다음은 G15 `istio-intro`.
 - 2026-04-30: G15~G24 묶음 처리 완료 — 20편(istio-intro/queue-poc/eks/monitoring/cicd 일부 + wealist 4파트 + game-server) / 37블록 중 28블록 평탄화(번호 목록 11, 인라인 8, bullet 6, 표 3), 9블록 keep(lang=`text`/`hcl` 명시 출력·토폴로지·Terraform). 누적 145/211 (69%) + keep 36. 짧은 토폴로지 화살표 흐름이 lang=`text` 명시되어 있을 때는 keep 보정으로 일관 처리. 다음은 G25 `goti-multicloud-db`.
+- 2026-04-30: G25~G41 묶음 처리 완료 — 24편(잔여 17 그룹) / 30블록 중 26블록 평탄화(인라인 12, 번호 목록 6, bullet 5, 표 3, lang+풀어쓰기 1), 4블록 keep(lang=`text`/`hcl`/`promql` 명시 출력·코드). **누적 171/211 (81%) + keep 40 = 211 전체 종료**. Phase 3 평탄화 작업 완료. 본문 흐름은 손대지 않고 코드블록 형태만 정리, 정보는 모두 보존. 다음 단계는 Phase 4(CLAUDE.md 재발 방지 룰 + scan 재실행 + 작업 폴더 정리).

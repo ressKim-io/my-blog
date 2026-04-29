@@ -33,12 +33,9 @@ goti-ticketing 로그를 확인하면 다음 에러가 나타났습니다
 
 호출 흐름을 따라가보겠습니다
 
-```text
-프론트 → GET /api/v1/tickets/myinfo → goti-ticketing
-                                         ↓ (내부 RestClient 호출)
-                                    goti-resale GET /api/v1/resales/listings/count
-                                         ↑ Istio RBAC 403 차단
-```
+1. 프론트 → `GET /api/v1/tickets/myinfo` → `goti-ticketing`
+2. `goti-ticketing`이 내부 RestClient로 `goti-resale`의 `GET /api/v1/resales/listings/count` 호출
+3. `goti-resale` 사이드카가 Istio RBAC로 **403 차단**
 
 `TicketResaleApiClient.getMySales()`가 goti-resale의 `/api/v1/resales/listings/count`를 호출하는 순간 Istio Envoy 사이드카가 요청을 차단했습니다
 
@@ -58,11 +55,7 @@ goti-resale의 `authorizationPolicy.allowFrom`에 `goti-ticketing` ServiceAccoun
 
 ### 2단계: require-jwt DENY 정책 우선 평가
 
-Istio AuthorizationPolicy 평가 순서는 다음과 같습니다
-
-```text
-CUSTOM → DENY → ALLOW
-```
+Istio AuthorizationPolicy 평가 순서는 `CUSTOM → DENY → ALLOW` 순으로 진행됩니다.
 
 `goti-resale-dev-require-jwt` 정책이 **DENY action**으로 설정되어 있었습니다. DENY 정책은 ALLOW 정책보다 항상 먼저 평가됩니다
 

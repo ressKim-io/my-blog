@@ -39,12 +39,10 @@ goti-server는 정상 가동 중이었습니다.
 메트릭도 잘 들어오고 있었습니다.
 그런데 alert는 "메트릭이 안 들어온다"고 계속 울리고 있었습니다.
 
-Recording rules도 마찬가지였습니다.
+Recording rules도 마찬가지였습니다
 
-```
-goti:sli:availability:5m → result: []
-goti:apdex:score → result: []
-```
+- `goti:sli:availability:5m` → `result: []`
+- `goti:apdex:score` → `result: []`
 
 전편에서 `service_name` → `job` 매핑을 수정한 직후였는데, 또 No Data가 발생한 것입니다.
 
@@ -121,11 +119,7 @@ OTel-Prometheus 호환성 스펙에 따르면:
 
 ### 2. Grafana 대시보드 수정
 
-5개 대시보드의 `service_name` 변수 기본값을 변경했습니다.
-
-```
-goti-server → goti/goti-server
-```
+5개 대시보드의 `service_name` 변수 기본값을 `goti-server`에서 `goti/goti-server`로 변경했습니다.
 
 수정한 대시보드:
 - `developer/jvm-deep-dive.json`

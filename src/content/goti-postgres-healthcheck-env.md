@@ -118,12 +118,12 @@ $ ./scripts/validate-deploy.sh
 
 ### compose environment 매핑의 핵심 규칙
 
-```
+```yaml
 environment:
   CONTAINER_VAR: ${HOST_VAR}
-  ─────────────   ──────────
-  좌변 (내부)      우변 (호스트)
 ```
+
+여기서 좌변(`CONTAINER_VAR`)은 컨테이너 **내부** 변수명이고, 우변(`${HOST_VAR}`)은 호스트(셸)에서 가져오는 값입니다.
 
 이 구조에서 **healthcheck는 컨테이너 내부에서 실행**됩니다.
 따라서 항상 **좌변**(컨테이너 내부 변수명)을 참조해야 합니다.

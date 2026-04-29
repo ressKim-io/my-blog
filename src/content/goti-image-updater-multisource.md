@@ -225,13 +225,7 @@ SSM 파라미터 path가 key에 포함되어 애플리케이션에서 인식할 
 
 ### 원인
 
-ExternalSecret의 `dataFrom.find`가 SSM 파라미터를 경로로 검색합니다.
-
-```
-SSM 파라미터: /dev/server/JWT_SECRET
-                          ↓
-K8s Secret key: _dev_server_JWT_SECRET
-```
+ExternalSecret의 `dataFrom.find`가 SSM 파라미터를 경로로 검색합니다. SSM 파라미터 `/dev/server/JWT_SECRET`이 K8s Secret key에서는 `_dev_server_JWT_SECRET`으로 변환됩니다.
 
 `path: /dev/server`로 파라미터를 찾으면, 전체 경로(`/dev/server/JWT_SECRET`)가 key로 사용됩니다.
 K8s Secret key에 `/`는 허용되지 않아 `_`로 치환되면서 `_dev_server_JWT_SECRET`이 되어버린 것입니다.

@@ -32,13 +32,11 @@ date: "2026-03-15"
 
 로그와 메트릭을 추적하니 DB 연결 수 폭증이 가장 강한 신호였습니다.
 
-RDS t3.large의 `max_connections=300`인 상황에서, 6개 Go 서비스가 각각 HPA로 스케일아웃하면 per-pod pool 합산이 순식간에 한계를 넘어섭니다.
+RDS t3.large의 `max_connections=300`인 상황에서, 6개 Go 서비스가 각각 HPA로 스케일아웃하면 per-pod pool 합산이 순식간에 한계를 넘어섭니다
 
-```text
-6 Go 서비스 × HPA × per-pod pool = 논리적 peak 250+ 연결
-→ max_connections 300에 빠르게 도달
-→ 이후 연결 요청은 대기 또는 거부
-```
+1. **6 Go 서비스 × HPA × per-pod pool** = 논리적 peak 250+ 연결
+2. `max_connections=300`에 빠르게 도달
+3. 이후 연결 요청은 대기 또는 거부
 
 ### PgBouncer가 해결하는 구조적 문제
 

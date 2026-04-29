@@ -154,15 +154,17 @@ wget -qO /dev/null "$url"
 - **이슈 1**: Server CD(deploy/dev) 배포 성공
 - **이슈 2**: Monitoring CD 배포 성공 — Loki 포함 6개 서비스 전체 healthcheck 통과 (37초)
 
-```
+```text
 [7/8] 서비스 헬스체크...
   ✓ Prometheus OK
   ✓ Grafana OK
-  ✓ Loki OK          ← 드디어 통과!
+  ✓ Loki OK
   ✓ Tempo OK
   ✓ Alertmanager OK
   ✓ Alloy OK
 ```
+
+문제였던 Loki까지 포함해 6개가 모두 통과했습니다.
 
 ---
 

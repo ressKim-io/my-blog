@@ -37,11 +37,7 @@ $ curl -s -o /dev/null -w "%{http_code}" https://kind.go-ti.shop/grafana/
 503
 ```
 
-트래픽 흐름은 이렇습니다:
-
-```
-CloudFront → Kind PC:80 → Istio Gateway:31080 → Grafana
-```
+트래픽 흐름은 `CloudFront → Kind PC:80 → Istio Gateway:31080 → Grafana`입니다.
 
 503이라는 것은 Istio Gateway까지는 도달했다는 의미입니다.
 Gateway 뒤에서 라우팅이 실패한 것이 분명합니다.

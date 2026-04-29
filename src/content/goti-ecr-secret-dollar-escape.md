@@ -54,20 +54,12 @@ Access Key ID가 비어있으니 AWS API 인증 자체가 불가능합니다.
 
 하나의 Secret 값이 비어있을 뿐인데, 영향은 클러스터 전체로 퍼졌습니다.
 
-**첫 번째 연쇄**: ECR 이미지 풀 실패
-
-```
-ECR CronJob 실패 → ECR 토큰 갱신 불가 → ImagePullBackOff
-```
+**첫 번째 연쇄**: ECR 이미지 풀 실패 — `ECR CronJob 실패 → ECR 토큰 갱신 불가 → ImagePullBackOff` 사슬이 만들어졌습니다.
 
 ECR CronJob이 Access Key로 AWS에 인증해서 토큰을 갱신하는데, 키가 비어있으니 인증이 실패합니다.
 토큰이 갱신되지 않으면 모든 ECR 이미지 풀이 중단됩니다.
 
-**두 번째 연쇄**: ExternalSecret 전면 불능
-
-```
-ClusterSecretStore InvalidProviderConfig → ESO 전체 불능 → grafana-admin-secret 미생성
-```
+**두 번째 연쇄**: ExternalSecret 전면 불능 — `ClusterSecretStore InvalidProviderConfig → ESO 전체 불능 → grafana-admin-secret 미생성`으로 이어졌습니다.
 
 ClusterSecretStore도 같은 AWS 자격증명을 사용합니다.
 ESO가 동작하지 않으니 Grafana admin secret 등 모든 ExternalSecret 동기화가 중단되었습니다.

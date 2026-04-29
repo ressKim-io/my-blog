@@ -107,14 +107,11 @@ egress:
 
 ## 🤔 2차 원인: DB 스키마 불일치
 
-scrape가 성공한 뒤 `/metrics`를 확인했는데, 비즈니스 메트릭이 없었습니다.
+scrape가 성공한 뒤 `/metrics`를 확인했는데, 비즈니스 메트릭이 없었습니다
 
-```
-# /metrics 응답
-goti_match_active_total 0
-goti_guardrail_blacklist_size 0
-# goti_seats_*, goti_payment_* → 아예 없음
-```
+- `goti_match_active_total` → 0
+- `goti_guardrail_blacklist_size` → 0
+- `goti_seats_*`, `goti_payment_*` → 응답 자체에 없음
 
 health 메트릭만 있고 비즈니스 메트릭이 전무했습니다.
 

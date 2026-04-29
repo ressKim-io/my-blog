@@ -75,15 +75,10 @@ WARN 로그가 바로 이 상황을 알려주고 있었습니다.
 OTel의 `DataSourcePostProcessor`는 `postProcessAfterInitialization`에서 `HikariDataSource`를 `OpenTelemetryDataSource`로 래핑합니다.
 
 우리 BeanPostProcessor도 `postProcessAfterInitialization`을 사용하고 있었습니다.
-문제는 OTel의 BPP가 먼저 실행되면, 우리 BPP가 받는 빈은 이미 프록시로 래핑된 상태라는 것입니다.
+문제는 OTel의 BPP가 먼저 실행되면, 우리 BPP가 받는 빈은 이미 프록시로 래핑된 상태라는 것입니다
 
-```
-OTel DataSourcePostProcessor (After)
-    → HikariDataSource를 OpenTelemetryDataSource로 래핑
-        → 우리 BPP (After)
-            → bean instanceof HikariDataSource → false!
-            → 아무것도 안 함
-```
+1. OTel `DataSourcePostProcessor` (After)가 `HikariDataSource`를 `OpenTelemetryDataSource`로 래핑
+2. 우리 BPP (After)가 호출되지만 `bean instanceof HikariDataSource`가 **false** → 아무것도 안 함
 
 INFO 로그도, WARN 로그도 찍히지 않은 이유가 이것이었습니다.
 `instanceof` 체크 자체를 통과하지 못했기 때문입니다.

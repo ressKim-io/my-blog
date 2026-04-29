@@ -118,20 +118,14 @@ A 방식이 구조적으로 더 깔끔하고 GCP 이식성도 높습니다.
 
 ### 목표 구성
 
-```text
-                                       ┌─────────────────┐
-                                       │  RDS Primary    │ (t3.large, max_conn=300)
-                              writes   │  goti-prod-pg   │
-┌──────────────┐  tx=true ─────────────▶│  Writer         │
-│ Go Service   │                        └─────────────────┘
-│ (ticketing,  │                                 │ async replication
-│  stadium,    │                                 ▼
-│  user, etc)  │                        ┌─────────────────┐
-│              │  reads   ──────────────▶│  RDS Replica   │ (t3.large, max_conn=300)
-└──────────────┘ tx=false               │  goti-prod-pg   │
-                                        │  Reader         │
-                                        └─────────────────┘
-```
+목표 구성은 Go 서비스 한 대에서 트랜잭션 종류에 따라 두 endpoint로 트래픽을 분기하는 구조입니다
+
+| 흐름 | 출발 | 도착 | 인스턴스 |
+|---|---|---|---|
+| 쓰기 (`tx=true`) | Go Service (ticketing, stadium, user 등) | RDS Primary `goti-prod-pg` Writer | t3.large, max_conn=300 |
+| 읽기 (`tx=false`) | Go Service | RDS Replica `goti-prod-pg` Reader | t3.large, max_conn=300 |
+
+Primary → Replica는 RDS의 비동기 복제로 따라옵니다.
 
 아키텍처의 핵심은 **서비스 당 두 개의 커넥션 풀**입니다.
 

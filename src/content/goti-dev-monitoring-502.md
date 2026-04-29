@@ -33,21 +33,14 @@ date: '2026-03-09'
 
 ### 발생 시점
 
-모니터링 스택 리뷰 기반 일괄 개선(#52) 배포 직후에 발생했습니다.
+모니터링 스택 리뷰 기반 일괄 개선(#52) 배포 직후에 발생했습니다. `dev.go-ti.shop/monitoring/*`와 `dev.go-ti.shop/api/*` 두 경로가 모두 **502 Bad Gateway**로 떨어졌습니다.
 
-```
-dev.go-ti.shop/monitoring/*  → 502 Bad Gateway
-dev.go-ti.shop/api/*         → 502 Bad Gateway
-```
-
-인프라 경로는 CloudFront → ALB(goti-dev-alb) → EC2(Docker containers) 구조입니다.
+인프라 경로는 CloudFront → ALB(`goti-dev-alb`) → EC2(Docker containers) 구조입니다.
 
 ### ALB Target Group 상태
 
-```
-ALB Target Group: goti-dev-grafana-tg → unhealthy (Health checks failed)
-ALB Target Group: goti-dev-tg → unhealthy (Health checks failed with codes: [401])
-```
+- `goti-dev-grafana-tg` → unhealthy (Health checks failed)
+- `goti-dev-tg` → unhealthy (Health checks failed with codes: [401])
 
 두 타겟 그룹 모두 unhealthy 상태였습니다.
 ALB는 unhealthy 타겟에 트래픽을 전달하지 않으므로 502를 반환한 겁니다.

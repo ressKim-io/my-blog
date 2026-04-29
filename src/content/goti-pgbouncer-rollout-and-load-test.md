@@ -109,11 +109,7 @@ pgbouncer-exporter를 붙이는 과정에서 이미지 버전·DSN 파싱·Prome
 
 ### 단계 2: DSN URL 특수문자 파싱 실패
 
-DB 비밀번호에 `|`, `%`, `^`, `#` 같은 특수문자가 포함되어 있어 DSN 파싱이 실패했습니다.
-
-```text
-postgres://goti:-bh||...  → parse error: invalid URL
-```
+DB 비밀번호에 `|`, `%`, `^`, `#` 같은 특수문자가 포함되어 있어 DSN 파싱이 실패했습니다. `postgres://goti:-bh||...` 같은 URL은 파서가 `parse error: invalid URL`로 떨어뜨립니다.
 
 특수문자를 포함한 비밀번호를 DSN URL에 그대로 넣으면 URL 파서가 구분자로 오해합니다.
 
@@ -341,10 +337,7 @@ ANALYZE order_items;
 
 **2. ticketing MaxConns 조정**
 
-```text
-TICKETING_DATABASE_MAX_CONNS: 18 → 10
-(6 replica × 10 = 60 client 연결)
-```
+`TICKETING_DATABASE_MAX_CONNS`를 **18 → 10**으로 낮췄습니다. replica 6개 × 10 = 총 60개 client 연결로 PgBouncer 풀을 통과합니다.
 
 **3. PgBouncer ticketing DB pool 확대**
 

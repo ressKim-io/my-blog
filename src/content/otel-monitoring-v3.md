@@ -380,9 +380,7 @@ OTEL Collector에서 spanmetrics와 servicegraph는 **connector**입니다. Expo
 - **Exporter**: 데이터를 외부로 내보냄 (Prometheus, Tempo 등)
 - **Connector**: 파이프라인 간 데이터를 변환 (traces → metrics)
 
-```
-traces pipeline → spanmetrics connector → metrics pipeline → prometheusremotewrite
-```
+따라서 spanmetrics는 `traces pipeline → spanmetrics connector → metrics pipeline → prometheusremotewrite` 흐름으로 연결됩니다.
 
 ### Span Context 전파의 중요성
 

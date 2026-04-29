@@ -32,15 +32,10 @@ Queue POC 3개 Application에 `GOTI_MESH_ENABLED=true` 환경변수를 추가한
 
 ArgoCD가 Deployment를 OutOfSync로 표시하지만, sync 실행 시 **Deployment가 syncResult resources에 아예 포함되지 않았습니다**.
 
-```text
-# ArgoCD 리소스 상태
-Deployment    goti-queue-dev          OutOfSync  ← 변경 감지됨
-ExternalSecret goti-queue-dev-secrets OutOfSync
-
-# sync 결과
-ExternalSecret goti-queue-dev-secrets: Synced   ← 이것만 적용됨
-# Deployment는 결과 목록에 없음
-```
+| 리소스 | ArgoCD 상태 | sync 결과 |
+|---|---|---|
+| `Deployment goti-queue-dev` | OutOfSync (변경 감지됨) | 결과 목록에서 누락 |
+| `ExternalSecret goti-queue-dev-secrets` | OutOfSync | Synced |
 
 ExternalSecret(syncWave -1)만 sync되고 Deployment는 결과에서 완전히 제외되었습니다. sync를 반복해도 동일한 상태가 이어졌습니다.
 

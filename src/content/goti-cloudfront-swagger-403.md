@@ -55,13 +55,11 @@ S3에서 반환하는 전형적인 403 응답입니다.
 `dev.go-ti.shop`은 Route53에서 CloudFront를 가리키고 있습니다.
 CloudFront는 경로 패턴에 따라 요청을 S3(프론트엔드) 또는 ALB(백엔드)로 분기합니다.
 
-당시 CloudFront behavior 구성은 이랬습니다:
+당시 CloudFront behavior 구성은 다음과 같았습니다
 
-```
-/api/*          → ALB (goti-dev-alb)
-/monitoring/*   → ALB (goti-dev-alb)
-/* (default)    → S3 (프론트엔드)
-```
+- `/api/*` → ALB (`goti-dev-alb`)
+- `/monitoring/*` → ALB (`goti-dev-alb`)
+- `/*` (default) → S3 (프론트엔드)
 
 ### 문제 발견
 
@@ -103,13 +101,13 @@ CloudFront의 `/*` 패턴은 **하위 경로만** 매칭하고, 정확한 경로
 
 ### 최종 CloudFront Behavior 구성
 
-```
-/api/*          → ALB → goti-server:8080
-/swagger-ui/*   → ALB → goti-server:8080
-/v3/*           → ALB → goti-server:8080
-/monitoring/*   → ALB → Grafana:3000
-/* (default)    → S3 (프론트엔드)
-```
+| 경로 패턴 | 라우팅 대상 |
+|---|---|
+| `/api/*` | ALB → `goti-server:8080` |
+| `/swagger-ui/*` | ALB → `goti-server:8080` |
+| `/v3/*` | ALB → `goti-server:8080` |
+| `/monitoring/*` | ALB → `Grafana:3000` |
+| `/*` (default) | S3 (프론트엔드) |
 
 수정 후 `https://dev.go-ti.shop/swagger-ui/index.html` 정상 접근을 확인했습니다.
 

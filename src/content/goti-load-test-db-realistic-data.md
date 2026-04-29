@@ -139,14 +139,14 @@ Step 3: 유저 + 주문/결제 (대량)
 
 ### 제약 위반 트러블슈팅
 
-시드 실행 과정에서 CHECK 제약 위반이 여러 건 발생했습니다. 각각 실제 스키마를 확인해 수정했습니다.
+시드 실행 과정에서 CHECK 제약 위반이 여러 건 발생했습니다. 각각 실제 스키마를 확인해 수정했습니다
 
-```text
-game_ticketing_statuses: 'CLOSED' 없음 → 'TERMINATED' 사용
-users:                   'ROLE_MEMBER' → 'MEMBER', 'ACTIVE' → 'ACTIVATED'
-order_items:             'CONFIRMED' → 'PAID'
-payments:                'PAID' → 'SUCCESS', 'NORMAL' → 'PAYMENT'
-```
+| 테이블 | 직관적 추측 | 실제 Enum 값 |
+|---|---|---|
+| `game_ticketing_statuses` | `CLOSED` | `TERMINATED` |
+| `users` | `ROLE_MEMBER` / `ACTIVE` | `MEMBER` / `ACTIVATED` |
+| `order_items` | `CONFIRMED` | `PAID` |
+| `payments` | `PAID` / `NORMAL` | `SUCCESS` / `PAYMENT` |
 
 이 과정에서 알게 된 것은 **내부 Enum 값이 직관적인 이름과 다를 수 있다**는 점입니다. 시드 스크립트를 작성하기 전 스키마의 CHECK 제약 조건을 먼저 조회하는 것이 더 효율적입니다.
 

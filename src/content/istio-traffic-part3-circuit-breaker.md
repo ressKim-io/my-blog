@@ -355,10 +355,7 @@ cluster.outbound|8000||httpbin.default.svc.cluster.local.upstream_rq_pending_ove
 
 ### Kiali에서 확인
 
-```
-Kiali UI → Graph → httpbin 서비스 클릭
-→ "Traffic" 탭에서 Circuit Breaker 상태 확인
-```
+Kiali UI에서 **Graph → httpbin 서비스 클릭 → Traffic 탭** 순으로 들어가면 Circuit Breaker 상태를 확인할 수 있습니다.
 
 ---
 

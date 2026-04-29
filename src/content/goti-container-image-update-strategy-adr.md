@@ -204,19 +204,19 @@ Renovate는 세 기준을 모두 만족합니다. GitHub Actions에서 실행되
 
 ### 목표 배포 흐름
 
-```text
-goti-server CI/CD
-  → ECR에 dev-{sha} 태그로 이미지 push
-  → (기존 흐름, 변경 없음)
+목표 흐름은 두 파이프라인이 ECR을 매개로 비동기 연결되는 구조입니다.
 
-Renovate (GitHub Actions, 주기적 실행)
-  → ECR 이미지 태그 스캔
-  → 새 태그 감지 시 goti-k8s에 PR 생성
-    (environments/dev/goti-{service}/values.yaml의 image.tag 업데이트)
-  → automerge
-  → ArgoCD auto-sync
-  → Pod 배포
-```
+**goti-server CI/CD (기존, 변경 없음)**
+
+1. ECR에 `dev-{sha}` 태그로 이미지 push
+
+**Renovate (GitHub Actions, 주기적 실행)**
+
+1. ECR 이미지 태그 스캔
+2. 새 태그 감지 시 `goti-k8s`에 PR 생성 (`environments/dev/goti-{service}/values.yaml`의 `image.tag` 업데이트)
+3. automerge
+4. ArgoCD auto-sync
+5. Pod 배포
 
 goti-server 측 파이프라인은 기존 그대로 두고, goti-k8s에 Renovate 레이어만 추가하는 구조입니다. 기존 팀의 작업을 차단하지 않는 것이 1순위였습니다.
 
