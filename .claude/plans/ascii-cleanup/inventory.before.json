@@ -607,8 +607,8 @@
     "file": "goti-discord-alerting-architecture.md",
     "category": "monitoring",
     "title": "Discord 알림 구축기: 아키텍처 결정부터 배포 3연속 장애까지",
-    "blockCount": 6,
-    "totalAsciiLines": 79,
+    "blockCount": 8,
+    "totalAsciiLines": 87,
     "blocks": [
       {
         "startLine": 43,
@@ -629,8 +629,26 @@
         "sample": "┌─────────────────────────────────────────────────────────────────────────┐ / │                    Discord Alerting Pipe"
       },
       {
-        "startLine": 343,
-        "endLine": 345,
+        "startLine": 269,
+        "endLine": 274,
+        "lang": "",
+        "lineCount": 5,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "실제 발생한 순서: / 1. Goti-monitoring PR 머지 → ArgoCD가 Alertmanager config 먼저 sync / 2. Alertmanager가 Secret 마운트 시도 → Secret 없음"
+      },
+      {
+        "startLine": 305,
+        "endLine": 308,
+        "lang": "",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "1. Terraform apply (SSM 파라미터 생성) / 2. Goti-k8s 배포 (ExternalSecret → Secret 생성) / 3. Goti-monitoring 배포 (Alertmanager con"
+      },
+      {
+        "startLine": 348,
+        "endLine": 350,
         "lang": "yaml",
         "lineCount": 2,
         "kind": "code-arrow",
@@ -638,8 +656,8 @@
         "sample": "spec: /   refreshInterval: 1h  # ← 1시간마다 polling"
       },
       {
-        "startLine": 427,
-        "endLine": 449,
+        "startLine": 432,
+        "endLine": 454,
         "lang": "",
         "lineCount": 22,
         "kind": "flow-diagram",
@@ -647,8 +665,8 @@
         "sample": "┌──────────────────────────────────────────────────────────────┐ / │                   ArgoCD Resource Conflict         "
       },
       {
-        "startLine": 458,
-        "endLine": 461,
+        "startLine": 463,
+        "endLine": 466,
         "lang": "yaml",
         "lineCount": 3,
         "kind": "code-arrow",
@@ -656,8 +674,8 @@
         "sample": "# Goti-monitoring/charts/goti-monitoring/values-prod.yaml (변경 후) / grafanaAdminSecret: /   enabled: false  # ← external-"
       },
       {
-        "startLine": 525,
-        "endLine": 534,
+        "startLine": 530,
+        "endLine": 539,
         "lang": "",
         "lineCount": 9,
         "kind": "flow-diagram",
@@ -829,6 +847,51 @@
     ]
   },
   {
+    "file": "goti-adr-loki-tempo-stability-tuning.md",
+    "category": "monitoring",
+    "title": "Loki/Tempo OOM과의 전쟁: Kafka Consumer Throttling과 GOMEMLIMIT",
+    "blockCount": 4,
+    "totalAsciiLines": 71,
+    "blocks": [
+      {
+        "startLine": 30,
+        "endLine": 57,
+        "lang": "",
+        "lineCount": 27,
+        "kind": "flow-diagram",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────────────────────┐ / │                    OOM 악순환 사이클                      "
+      },
+      {
+        "startLine": 221,
+        "endLine": 223,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "Before: chunk 2h 체류 x stream 수 + GC 미개입 → ~1Gi 초과 → OOM (limit: 1Gi) / After:  chunk 30m 체류 x stream 수 + GOMEMLIMIT GC →"
+      },
+      {
+        "startLine": 230,
+        "endLine": 232,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "Before: block 30m 체류 + 무제한 ingestion → ~2Gi 초과 → OOM (limit: 2Gi) / After:  block 5m 체류 + 15MB/s rate limit + GOMEMLIMIT"
+      },
+      {
+        "startLine": 238,
+        "endLine": 278,
+        "lang": "",
+        "lineCount": 40,
+        "kind": "flow-diagram",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────────────────────┐ / │               악순환 차단 — 3가지 축 적용 후                  │"
+      }
+    ]
+  },
+  {
     "file": "istio-observability-part2-tracing.md",
     "category": "istio",
     "series": "istio-observability",
@@ -926,33 +989,6 @@
         "kind": "tree",
         "decision": "keep",
         "sample": "k8s/argocd/ / ├── root-apps/              # Root Applications (Terraform 또는 kubectl로 직접 apply) / │   ├── prod.yaml"
-      }
-    ]
-  },
-  {
-    "file": "goti-adr-loki-tempo-stability-tuning.md",
-    "category": "monitoring",
-    "title": "Loki/Tempo OOM과의 전쟁: Kafka Consumer Throttling과 GOMEMLIMIT",
-    "blockCount": 2,
-    "totalAsciiLines": 67,
-    "blocks": [
-      {
-        "startLine": 30,
-        "endLine": 57,
-        "lang": "",
-        "lineCount": 27,
-        "kind": "flow-diagram",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────────────────────┐ / │                    OOM 악순환 사이클                      "
-      },
-      {
-        "startLine": 234,
-        "endLine": 274,
-        "lang": "",
-        "lineCount": 40,
-        "kind": "flow-diagram",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────────────────────┐ / │               악순환 차단 — 3가지 축 적용 후                  │"
       }
     ]
   },
@@ -1229,6 +1265,61 @@
     ]
   },
   {
+    "file": "istio-traffic-part3-circuit-breaker.md",
+    "category": "istio",
+    "series": "istio-traffic",
+    "title": "Istio Traffic Part 3: Circuit Breaker로 장애 격리하기",
+    "blockCount": 5,
+    "totalAsciiLines": 50,
+    "blocks": [
+      {
+        "startLine": 168,
+        "endLine": 174,
+        "lang": "yaml",
+        "lineCount": 6,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# Pod가 2개일 때 maxEjectionPercent: 50 / # → 최대 1개만 제외 가능 (50%) / # → 나머지 1개가 문제여도 제외 불가"
+      },
+      {
+        "startLine": 358,
+        "endLine": 360,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "Kiali UI → Graph → httpbin 서비스 클릭 / → \"Traffic\" 탭에서 Circuit Breaker 상태 확인"
+      },
+      {
+        "startLine": 383,
+        "endLine": 388,
+        "lang": "yaml",
+        "lineCount": 5,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# Pod 2개 + maxEjectionPercent: 50 / # → 1개만 제외 가능 / # → 남은 1개가 문제여도 트래픽 계속 감"
+      },
+      {
+        "startLine": 393,
+        "endLine": 409,
+        "lang": "yaml",
+        "lineCount": 16,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# VirtualService의 retry / http: / - route:"
+      },
+      {
+        "startLine": 447,
+        "endLine": 468,
+        "lang": "",
+        "lineCount": 21,
+        "kind": "architecture",
+        "decision": "keep",
+        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │               Circuit Breaker 설정 체크리스트          "
+      }
+    ]
+  },
+  {
     "file": "eks-troubleshooting-part3-istio-ambient-2.md",
     "category": "istio",
     "series": "eks-troubleshooting",
@@ -1262,52 +1353,6 @@
         "kind": "flow-diagram",
         "decision": "keep",
         "sample": "┌─────────────────────────────────────────────────────────────┐ / │                        Internet                     "
-      }
-    ]
-  },
-  {
-    "file": "istio-traffic-part3-circuit-breaker.md",
-    "category": "istio",
-    "series": "istio-traffic",
-    "title": "Istio Traffic Part 3: Circuit Breaker로 장애 격리하기",
-    "blockCount": 4,
-    "totalAsciiLines": 48,
-    "blocks": [
-      {
-        "startLine": 168,
-        "endLine": 174,
-        "lang": "yaml",
-        "lineCount": 6,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# Pod가 2개일 때 maxEjectionPercent: 50 / # → 최대 1개만 제외 가능 (50%) / # → 나머지 1개가 문제여도 제외 불가"
-      },
-      {
-        "startLine": 380,
-        "endLine": 385,
-        "lang": "yaml",
-        "lineCount": 5,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# Pod 2개 + maxEjectionPercent: 50 / # → 1개만 제외 가능 / # → 남은 1개가 문제여도 트래픽 계속 감"
-      },
-      {
-        "startLine": 390,
-        "endLine": 406,
-        "lang": "yaml",
-        "lineCount": 16,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# VirtualService의 retry / http: / - route:"
-      },
-      {
-        "startLine": 444,
-        "endLine": 465,
-        "lang": "",
-        "lineCount": 21,
-        "kind": "architecture",
-        "decision": "keep",
-        "sample": "┌─────────────────────────────────────────────────────────────────┐ / │               Circuit Breaker 설정 체크리스트          "
       }
     ]
   },
@@ -1399,21 +1444,39 @@
     "category": "kubernetes",
     "series": "queue-poc-loadtest",
     "title": "대기열 POC 부하테스트 (1): K6 테스트 설계와 의존성 격리",
-    "blockCount": 4,
-    "totalAsciiLines": 45,
+    "blockCount": 6,
+    "totalAsciiLines": 47,
     "blocks": [
       {
-        "startLine": 104,
-        "endLine": 117,
-        "lang": "text",
+        "startLine": 67,
+        "endLine": 68,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "enterQueue() → waitForAdmission() → enterSeat() → [ticketing] → leaveQueue()"
+      },
+      {
+        "startLine": 108,
+        "endLine": 121,
+        "lang": "",
         "lineCount": 13,
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "load-tests/ /   helpers/ /     queue-josuyeon.js    # PR #309 대기열 액션"
       },
       {
-        "startLine": 141,
-        "endLine": 150,
+        "startLine": 137,
+        "endLine": 138,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "POST /api/v1/queue/junsang/validate → 401 (empty body)"
+      },
+      {
+        "startLine": 149,
+        "endLine": 158,
         "lang": "java",
         "lineCount": 9,
         "kind": "code-arrow",
@@ -1421,17 +1484,17 @@
         "sample": "@SpringBootApplication(scanBasePackages = { /     \"com.goti.queue\",      // queue 패키지 /     \"com.goti.config\",     // We"
       },
       {
-        "startLine": 171,
-        "endLine": 176,
-        "lang": "text",
+        "startLine": 179,
+        "endLine": 184,
+        "lang": "",
         "lineCount": 5,
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "GET /api/v1/stadium-seats/.../seat-grades → 403 /   {\"message\": \"좌석 조회는 대기열 입장 완료 후에만 가능합니다.\"} / "
       },
       {
-        "startLine": 186,
-        "endLine": 204,
+        "startLine": 194,
+        "endLine": 212,
         "lang": "",
         "lineCount": 18,
         "kind": "flow-diagram",
@@ -1716,6 +1779,43 @@
     ]
   },
   {
+    "file": "goti-argocd-otel-collector-crashloop.md",
+    "category": "argocd",
+    "series": "goti-argocd",
+    "title": "Alloy → OTel Collector 전환 직후 CrashLoop — NetworkPolicy egress 누락 + Loki rate limit 초과",
+    "blockCount": 3,
+    "totalAsciiLines": 35,
+    "blocks": [
+      {
+        "startLine": 125,
+        "endLine": 127,
+        "lang": "text",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "NewServer() → ensureSynced() → WaitForCacheSync()  ← 여기서 hang / Init() → Listen() → InitTracer()  ← OTLP는 여기서 초기화 (도달 못 "
+      },
+      {
+        "startLine": 146,
+        "endLine": 152,
+        "lang": "yaml",
+        "lineCount": 6,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# loki-values.yaml (dev) / limits_config: /   ingestion_rate_mb: 16          # 기본 4 → 16"
+      },
+      {
+        "startLine": 161,
+        "endLine": 188,
+        "lang": "yaml",
+        "lineCount": 27,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "apiVersion: networking.k8s.io/v1 / kind: NetworkPolicy / metadata:"
+      }
+    ]
+  },
+  {
     "file": "goti-monitoring-e2e-multi-troubleshoot.md",
     "category": "monitoring",
     "series": "goti-observability-ops",
@@ -1794,34 +1894,6 @@
         "kind": "flow-diagram",
         "decision": "keep",
         "sample": "수정 전: / ┌─────────────────┐     user=goti (master)     ┌──────────┐ / │  payment-prod   │──────────────────────────→ │  "
-      }
-    ]
-  },
-  {
-    "file": "goti-argocd-otel-collector-crashloop.md",
-    "category": "argocd",
-    "series": "goti-argocd",
-    "title": "Alloy → OTel Collector 전환 직후 CrashLoop — NetworkPolicy egress 누락 + Loki rate limit 초과",
-    "blockCount": 2,
-    "totalAsciiLines": 33,
-    "blocks": [
-      {
-        "startLine": 144,
-        "endLine": 150,
-        "lang": "yaml",
-        "lineCount": 6,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# loki-values.yaml (dev) / limits_config: /   ingestion_rate_mb: 16          # 기본 4 → 16"
-      },
-      {
-        "startLine": 159,
-        "endLine": 186,
-        "lang": "yaml",
-        "lineCount": 27,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "apiVersion: networking.k8s.io/v1 / kind: NetworkPolicy / metadata:"
       }
     ]
   },
@@ -2025,8 +2097,8 @@
     "category": "monitoring",
     "series": "observability",
     "title": "트레이스에서 메트릭 자동 생성: OpenTelemetry Connectors 활용",
-    "blockCount": 2,
-    "totalAsciiLines": 29,
+    "blockCount": 3,
+    "totalAsciiLines": 30,
     "blocks": [
       {
         "startLine": 36,
@@ -2045,6 +2117,15 @@
         "kind": "code-arrow",
         "decision": "skip",
         "sample": "connectors: /   spanmetrics: /     histogram:"
+      },
+      {
+        "startLine": 383,
+        "endLine": 384,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "traces pipeline → spanmetrics connector → metrics pipeline → prometheusremotewrite"
       }
     ]
   },
@@ -2160,6 +2241,52 @@
     ]
   },
   {
+    "file": "goti-image-updater-multisource.md",
+    "category": "argocd",
+    "series": "goti-argocd-gitops",
+    "title": "argocd-image-updater가 이미지를 무시한다: multi-source의 함정",
+    "blockCount": 4,
+    "totalAsciiLines": 26,
+    "blocks": [
+      {
+        "startLine": 69,
+        "endLine": 79,
+        "lang": "yaml",
+        "lineCount": 10,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# multi-source 구조 / spec: /   sources:   # ← 복수형 (sources)"
+      },
+      {
+        "startLine": 89,
+        "endLine": 99,
+        "lang": "yaml",
+        "lineCount": 10,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# image-updater가 인식하는 구조 / spec: /   source:    # ← 단수형만 지원"
+      },
+      {
+        "startLine": 115,
+        "endLine": 118,
+        "lang": "yaml",
+        "lineCount": 3,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# environments/dev/goti-server/values.yaml / image: /   tag: \"dev-b08daa9\"  # dev-latest → dev-b08daa9"
+      },
+      {
+        "startLine": 230,
+        "endLine": 233,
+        "lang": "",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "SSM 파라미터: /dev/server/JWT_SECRET /                           ↓ / K8s Secret key: _dev_server_JWT_SECRET"
+      }
+    ]
+  },
+  {
     "file": "istio-ambient-part4-wealist-migration.md",
     "category": "istio",
     "series": "istio-ambient",
@@ -2188,39 +2315,48 @@
     ]
   },
   {
-    "file": "goti-image-updater-multisource.md",
-    "category": "argocd",
-    "series": "goti-argocd-gitops",
-    "title": "argocd-image-updater가 이미지를 무시한다: multi-source의 함정",
-    "blockCount": 3,
+    "file": "cloudfront-s3-troubleshooting.md",
+    "category": "kubernetes",
+    "series": "eks-infra",
+    "title": "Storage 페이지가 HTML을 반환한다: 3층 원인 분석",
+    "blockCount": 4,
     "totalAsciiLines": 23,
     "blocks": [
       {
-        "startLine": 69,
+        "startLine": 43,
+        "endLine": 48,
+        "lang": "",
+        "lineCount": 5,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "Request: /api/svc/storage/storage/folders/contents / Response Headers: /   server: AmazonS3"
+      },
+      {
+        "startLine": 72,
         "endLine": 79,
-        "lang": "yaml",
-        "lineCount": 10,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# multi-source 구조 / spec: /   sources:   # ← 복수형 (sources)"
+        "lang": "",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "storage-service가 404 반환 /     ↓ / CloudFront가 403/404 감지"
       },
       {
-        "startLine": 89,
-        "endLine": 99,
+        "startLine": 173,
+        "endLine": 177,
         "lang": "yaml",
-        "lineCount": 10,
+        "lineCount": 4,
         "kind": "code-arrow",
         "decision": "skip",
-        "sample": "# image-updater가 인식하는 구조 / spec: /   source:    # ← 단수형만 지원"
+        "sample": "# prod.yaml 구조 / storage-service:       # ← 이 키 아래 값은 umbrella chart용 /   config:"
       },
       {
-        "startLine": 115,
-        "endLine": 118,
-        "lang": "yaml",
-        "lineCount": 3,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# environments/dev/goti-server/values.yaml / image: /   tag: \"dev-b08daa9\"  # dev-latest → dev-b08daa9"
+        "startLine": 355,
+        "endLine": 362,
+        "lang": "",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "클라이언트 요청: /api/svc/storage/storage/folders/contents /                      ↓ / HTTPRoute 리라이트: /api/svc/storage/* → /*"
       }
     ]
   },
@@ -2259,6 +2395,62 @@
         "kind": "code-arrow",
         "decision": "skip",
         "sample": "# monitoring-project.yaml / spec: /   namespaceResourceWhitelist:"
+      }
+    ]
+  },
+  {
+    "file": "istio-intro-part1-why-service-mesh.md",
+    "category": "istio",
+    "series": "istio-intro",
+    "title": "Service Mesh가 필요한 이유",
+    "blockCount": 2,
+    "totalAsciiLines": 21,
+    "blocks": [
+      {
+        "startLine": 30,
+        "endLine": 42,
+        "lang": "",
+        "lineCount": 12,
+        "kind": "box-small",
+        "decision": "flatten",
+        "sample": "┌─────────────────────────────────────────────────────────────┐ / │                        단순한 세계                       "
+      },
+      {
+        "startLine": 89,
+        "endLine": 98,
+        "lang": "",
+        "lineCount": 9,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "서킷브레이커 정책 변경 /     ↓ / 모든 서비스 코드 수정"
+      }
+    ]
+  },
+  {
+    "file": "goti-pgbouncer-connection-pooling-adr.md",
+    "category": "challenge",
+    "series": "goti-pgbouncer",
+    "title": "PgBouncer 도입 결정 — pool_mode와 배포 방식을 고른 이유",
+    "blockCount": 2,
+    "totalAsciiLines": 20,
+    "blocks": [
+      {
+        "startLine": 37,
+        "endLine": 40,
+        "lang": "text",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "6 Go 서비스 × HPA × per-pod pool = 논리적 peak 250+ 연결 / → max_connections 300에 빠르게 도달 / → 이후 연결 요청은 대기 또는 거부"
+      },
+      {
+        "startLine": 139,
+        "endLine": 156,
+        "lang": "text",
+        "lineCount": 17,
+        "kind": "architecture",
+        "decision": "keep",
+        "sample": "┌──────────┐   ┌──────────┐   ┌──────────┐ / │ ticketing│   │ stadium  │   │  user    │   (Go services) / └─────┬────┘  "
       }
     ]
   },
@@ -2346,6 +2538,34 @@
     ]
   },
   {
+    "file": "challenge2-wealist-migration-part5.md",
+    "category": "challenge",
+    "series": "challenge-2-wealist-migration",
+    "title": "팀 프로젝트 K8s 마이그레이션 - Part 5: 트러블슈팅 & Helm",
+    "blockCount": 2,
+    "totalAsciiLines": 18,
+    "blocks": [
+      {
+        "startLine": 346,
+        "endLine": 357,
+        "lang": "",
+        "lineCount": 11,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "wealist-chart/ / ├── Chart.yaml           # 차트 메타데이터 / ├── values.yaml          # 기본 설정값"
+      },
+      {
+        "startLine": 428,
+        "endLine": 435,
+        "lang": "",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "개발 단계: / ConfigMap (평문) → Secret (Base64) → Helm (템플릿화) → Vault (암호화) / "
+      }
+    ]
+  },
+  {
     "file": "goti-db-failback-reverse-replication-adr.md",
     "category": "kubernetes",
     "series": "goti-multicloud-db",
@@ -2365,25 +2585,6 @@
     ]
   },
   {
-    "file": "goti-pgbouncer-connection-pooling-adr.md",
-    "category": "challenge",
-    "series": "goti-pgbouncer",
-    "title": "PgBouncer 도입 결정 — pool_mode와 배포 방식을 고른 이유",
-    "blockCount": 1,
-    "totalAsciiLines": 17,
-    "blocks": [
-      {
-        "startLine": 137,
-        "endLine": 154,
-        "lang": "text",
-        "lineCount": 17,
-        "kind": "architecture",
-        "decision": "keep",
-        "sample": "┌──────────┐   ┌──────────┐   ┌──────────┐ / │ ticketing│   │ stadium  │   │  user    │   (Go services) / └─────┬────┘  "
-      }
-    ]
-  },
-  {
     "file": "goti-kafka-adoption-decision-adr.md",
     "category": "challenge",
     "series": "goti-kafka",
@@ -2399,6 +2600,127 @@
         "kind": "tree",
         "decision": "keep",
         "sample": "Strimzi 0.51.0 ── Kafka 4.1.0, 4.2.0 (default) /     │                  │ /     ├─ K8s >=1.30 ✅ (1.34 호환)"
+      }
+    ]
+  },
+  {
+    "file": "goti-istio-injection-label-pg-max-connections.md",
+    "category": "istio",
+    "series": "goti-istio-ops",
+    "title": "Istio sidecar 미주입 + PostgreSQL 연결 고갈 — 복합 트러블슈팅",
+    "blockCount": 2,
+    "totalAsciiLines": 14,
+    "blocks": [
+      {
+        "startLine": 156,
+        "endLine": 163,
+        "lang": "text",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "서비스 5개 × replica 2 = 10 Pod / HikariCP maximumPoolSize 기본값 = 10 (Pod당) / → 최대 100 연결"
+      },
+      {
+        "startLine": 168,
+        "endLine": 175,
+        "lang": "bash",
+        "lineCount": 7,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# DB 연결 정상 확인 / bash -c 'echo > /dev/tcp/172.20.0.1/5432' / # → 연결 성공"
+      }
+    ]
+  },
+  {
+    "file": "goti-queue-loadtest-k6-two-phase-design.md",
+    "category": "challenge",
+    "series": "goti-queue-poc",
+    "title": "K6 부하테스트 2-Phase 설계 — E2E 3인분과 비교 시나리오 3종의 분리",
+    "blockCount": 2,
+    "totalAsciiLines": 14,
+    "blocks": [
+      {
+        "startLine": 88,
+        "endLine": 89,
+        "lang": "text",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "enterQueue() → waitForAdmission() → enterSeat() → [ticketing] → leaveQueue()"
+      },
+      {
+        "startLine": 139,
+        "endLine": 152,
+        "lang": "text",
+        "lineCount": 13,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "load-tests/ /   helpers/ /     queue-poc-c.js       # PR #309 대기열 액션"
+      }
+    ]
+  },
+  {
+    "file": "websocket-token-refresh.md",
+    "category": "kubernetes",
+    "series": "eks-security",
+    "title": "WebSocket 재연결 시 토큰 갱신 안 되는 이유",
+    "blockCount": 2,
+    "totalAsciiLines": 14,
+    "blocks": [
+      {
+        "startLine": 34,
+        "endLine": 42,
+        "lang": "",
+        "lineCount": 8,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "🔌 [Chat WS] 연결 시도: wss://wealist.co.kr/api/svc/chat/...?token=eyJ... / ❌ WebSocket connection failed / 🔌 [Chat WS] 연결 "
+      },
+      {
+        "startLine": 93,
+        "endLine": 99,
+        "lang": "",
+        "lineCount": 6,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "1. 토큰 만료됨 (exp: 30분 전) / 2. WebSocket 연결 끊김 (code: 1006) / 3. 재연결 시도 → localStorage에서 만료된 토큰 읽음"
+      }
+    ]
+  },
+  {
+    "file": "challenge1-game-server-part7.md",
+    "category": "challenge",
+    "series": "game-server",
+    "title": "게임 서버 K8s 배포 - Part 7: Ingress",
+    "blockCount": 3,
+    "totalAsciiLines": 13,
+    "blocks": [
+      {
+        "startLine": 72,
+        "endLine": 76,
+        "lang": "",
+        "lineCount": 4,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "http://localhost/lobby  → game-lobby Service / http://localhost/room   → game-room Service / http://localhost/chat   → g"
+      },
+      {
+        "startLine": 199,
+        "endLine": 206,
+        "lang": "",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "# rewrite-target 없으면 / 요청: http://localhost/lobby / 전달: http://game-lobby/lobby  ← 404 에러"
+      },
+      {
+        "startLine": 242,
+        "endLine": 244,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "lobby.game.example.com → game-lobby / chat.game.example.com  → game-chat"
       }
     ]
   },
@@ -2431,21 +2753,39 @@
     ]
   },
   {
-    "file": "goti-queue-loadtest-k6-two-phase-design.md",
-    "category": "challenge",
-    "series": "goti-queue-poc",
-    "title": "K6 부하테스트 2-Phase 설계 — E2E 3인분과 비교 시나리오 3종의 분리",
-    "blockCount": 1,
+    "file": "goti-postgres-healthcheck-env.md",
+    "category": "cicd",
+    "series": "goti-ec2-deploy",
+    "title": "PostgreSQL Healthcheck가 계속 실패한 이유: 환경변수 이름 혼동",
+    "blockCount": 3,
     "totalAsciiLines": 13,
     "blocks": [
       {
-        "startLine": 135,
-        "endLine": 148,
-        "lang": "text",
-        "lineCount": 13,
-        "kind": "arrow-only",
+        "startLine": 48,
+        "endLine": 54,
+        "lang": "yaml",
+        "lineCount": 6,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# docker-compose.deploy.yml / postgres: /   environment:"
+      },
+      {
+        "startLine": 109,
+        "endLine": 112,
+        "lang": "bash",
+        "lineCount": 3,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "$ ./scripts/validate-deploy.sh / [CHECK] Healthcheck 환경변수 정합성... /   postgres: $${POSTGRES_USER} → environment 키 확인 → PA"
+      },
+      {
+        "startLine": 121,
+        "endLine": 125,
+        "lang": "",
+        "lineCount": 4,
+        "kind": "misc",
         "decision": "flatten",
-        "sample": "load-tests/ /   helpers/ /     queue-poc-c.js       # PR #309 대기열 액션"
+        "sample": "environment: /   CONTAINER_VAR: ${HOST_VAR} /   ─────────────   ──────────"
       }
     ]
   },
@@ -2496,21 +2836,58 @@
     ]
   },
   {
-    "file": "challenge2-wealist-migration-part5.md",
+    "file": "goti-load-test-db-realistic-data.md",
     "category": "challenge",
-    "series": "challenge-2-wealist-migration",
-    "title": "팀 프로젝트 K8s 마이그레이션 - Part 5: 트러블슈팅 & Helm",
-    "blockCount": 1,
-    "totalAsciiLines": 11,
+    "series": "goti-loadtest",
+    "title": "부하테스트 정확도를 높이는 DB 시드 전략 — 2025 KBO 스케줄 기반 360만 행 생성",
+    "blockCount": 3,
+    "totalAsciiLines": 12,
     "blocks": [
       {
-        "startLine": 346,
-        "endLine": 357,
-        "lang": "",
-        "lineCount": 11,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "wealist-chart/ / ├── Chart.yaml           # 차트 메타데이터 / ├── values.yaml          # 기본 설정값"
+        "startLine": 113,
+        "endLine": 118,
+        "lang": "bash",
+        "lineCount": 5,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# KBO 공식 사이트 AJAX 엔드포인트 활용 / # https://www.koreabaseball.com/ws/Schedule.asmx/GetScheduleList / # 2025 정규시즌 720경기 완료 데이터"
+      },
+      {
+        "startLine": 144,
+        "endLine": 148,
+        "lang": "text",
+        "lineCount": 4,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "game_ticketing_statuses: 'CLOSED' 없음 → 'TERMINATED' 사용 / users:                   'ROLE_MEMBER' → 'MEMBER', 'ACTIVE' → '"
+      },
+      {
+        "startLine": 171,
+        "endLine": 174,
+        "lang": "bash",
+        "lineCount": 3,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# Docker 이미지 + 빌드 캐시 정리 / $ docker system prune -af --volumes / # → 약 45GB 확보"
+      }
+    ]
+  },
+  {
+    "file": "goti-read-replica-split-adr.md",
+    "category": "kubernetes",
+    "series": "goti-multicloud-db",
+    "title": "Read Replica 분리 결정 — RDS 수직 확장의 벽을 피하는 수평 확장 경로",
+    "blockCount": 1,
+    "totalAsciiLines": 12,
+    "blocks": [
+      {
+        "startLine": 121,
+        "endLine": 133,
+        "lang": "text",
+        "lineCount": 12,
+        "kind": "box-small",
+        "decision": "flatten",
+        "sample": "                                       ┌─────────────────┐ /                                        │  RDS Primary    │ "
       }
     ]
   },
@@ -2567,6 +2944,52 @@
         "kind": "code-arrow",
         "decision": "skip",
         "sample": "# 권장: spot 노드 +3 (현재 5 → 8) / aws eks update-nodegroup-config \\ /   --cluster-name goti-prod \\"
+      }
+    ]
+  },
+  {
+    "file": "goti-container-image-update-strategy-adr.md",
+    "category": "argocd",
+    "title": "컨테이너 이미지 자동 업데이트 — Renovate vs ArgoCD Image Updater",
+    "blockCount": 1,
+    "totalAsciiLines": 11,
+    "blocks": [
+      {
+        "startLine": 207,
+        "endLine": 218,
+        "lang": "text",
+        "lineCount": 11,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "goti-server CI/CD /   → ECR에 dev-{sha} 태그로 이미지 push /   → (기존 흐름, 변경 없음)"
+      }
+    ]
+  },
+  {
+    "file": "goti-eks-node-join-401-cluster-policy.md",
+    "category": "kubernetes",
+    "series": "goti-eks",
+    "title": "EKS 노드 조인 401 Unauthorized — AmazonEKSClusterPolicy 누락이 진짜 원인이었습니다",
+    "blockCount": 2,
+    "totalAsciiLines": 11,
+    "blocks": [
+      {
+        "startLine": 138,
+        "endLine": 144,
+        "lang": "text",
+        "lineCount": 6,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "kubelet → STS 토큰 → API 서버 → Authenticator webhook /   → IAM Role 매칭 ✅ /   → username 템플릿 렌더링: {{EC2PrivateDNSName}}"
+      },
+      {
+        "startLine": 151,
+        "endLine": 156,
+        "lang": "hcl",
+        "lineCount": 5,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "# auto_mode OFF → Standard 정책 세트 (AmazonEKSClusterPolicy 포함) / eks_standard_iam_role_policies = { ... }  # !auto_mode_en"
       }
     ]
   },
@@ -2729,58 +3152,67 @@
     ]
   },
   {
-    "file": "goti-postgres-healthcheck-env.md",
-    "category": "cicd",
-    "series": "goti-ec2-deploy",
-    "title": "PostgreSQL Healthcheck가 계속 실패한 이유: 환경변수 이름 혼동",
-    "blockCount": 2,
+    "file": "goti-resale-istio-rbac-403.md",
+    "category": "istio",
+    "series": "goti-resale",
+    "title": "ticketing → resale 내부 호출 시 Istio RBAC 403 — DENY 정책 우선 평가 함정",
+    "blockCount": 3,
     "totalAsciiLines": 9,
     "blocks": [
       {
-        "startLine": 48,
-        "endLine": 54,
-        "lang": "yaml",
-        "lineCount": 6,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# docker-compose.deploy.yml / postgres: /   environment:"
+        "startLine": 36,
+        "endLine": 40,
+        "lang": "text",
+        "lineCount": 4,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "프론트 → GET /api/v1/tickets/myinfo → goti-ticketing /                                          ↓ (내부 RestClient 호출) /     "
       },
       {
-        "startLine": 109,
-        "endLine": 112,
-        "lang": "bash",
-        "lineCount": 3,
+        "startLine": 63,
+        "endLine": 64,
+        "lang": "text",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "CUSTOM → DENY → ALLOW"
+      },
+      {
+        "startLine": 95,
+        "endLine": 99,
+        "lang": "yaml",
+        "lineCount": 4,
         "kind": "code-arrow",
         "decision": "skip",
-        "sample": "$ ./scripts/validate-deploy.sh / [CHECK] Healthcheck 환경변수 정합성... /   postgres: $${POSTGRES_USER} → environment 키 확인 → PA"
+        "sample": "excludePaths: /   - \"/api/v1/resales/histories\" /   - \"/api/v1/resales/histories/*\""
       }
     ]
   },
   {
-    "file": "goti-load-test-db-realistic-data.md",
-    "category": "challenge",
-    "series": "goti-loadtest",
-    "title": "부하테스트 정확도를 높이는 DB 시드 전략 — 2025 KBO 스케줄 기반 360만 행 생성",
+    "file": "goti-cloudfront-swagger-403.md",
+    "category": "cicd",
+    "series": "goti-cloudfront-alb",
+    "title": "Swagger UI가 S3로 빠진다: CloudFront Behavior 누락 트러블슈팅",
     "blockCount": 2,
     "totalAsciiLines": 8,
     "blocks": [
       {
-        "startLine": 113,
-        "endLine": 118,
-        "lang": "bash",
-        "lineCount": 5,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# KBO 공식 사이트 AJAX 엔드포인트 활용 / # https://www.koreabaseball.com/ws/Schedule.asmx/GetScheduleList / # 2025 정규시즌 720경기 완료 데이터"
+        "startLine": 60,
+        "endLine": 63,
+        "lang": "",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "/api/*          → ALB (goti-dev-alb) / /monitoring/*   → ALB (goti-dev-alb) / /* (default)    → S3 (프론트엔드)"
       },
       {
-        "startLine": 171,
-        "endLine": 174,
-        "lang": "bash",
-        "lineCount": 3,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# Docker 이미지 + 빌드 캐시 정리 / $ docker system prune -af --volumes / # → 약 45GB 확보"
+        "startLine": 106,
+        "endLine": 111,
+        "lang": "",
+        "lineCount": 5,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "/api/*          → ALB → goti-server:8080 / /swagger-ui/*   → ALB → goti-server:8080 / /v3/*           → ALB → goti-serve"
       }
     ]
   },
@@ -2823,21 +3255,124 @@
     ]
   },
   {
-    "file": "goti-istio-injection-label-pg-max-connections.md",
-    "category": "istio",
-    "series": "goti-istio-ops",
-    "title": "Istio sidecar 미주입 + PostgreSQL 연결 고갈 — 복합 트러블슈팅",
+    "file": "challenge2-wealist-migration-part3.md",
+    "category": "challenge",
+    "series": "challenge-2-wealist-migration",
+    "title": "팀 프로젝트 K8s 마이그레이션 - Part 3: 백엔드 배포 & Secret 관리",
+    "blockCount": 2,
+    "totalAsciiLines": 7,
+    "blocks": [
+      {
+        "startLine": 263,
+        "endLine": 267,
+        "lang": "",
+        "lineCount": 4,
+        "kind": "tree",
+        "decision": "keep",
+        "sample": "my-app (namespace) / ├── frontend / ├── backend"
+      },
+      {
+        "startLine": 272,
+        "endLine": 275,
+        "lang": "",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "postgresql-prod (namespace) ← 여러 앱이 공유 / board-api-prod (namespace) / user-api-prod (namespace)"
+      }
+    ]
+  },
+  {
+    "file": "goti-argocd-ssa-diff-deployment-skip.md",
+    "category": "argocd",
+    "series": "goti-argocd",
+    "title": "SSA sync 시 Deployment가 skip되는 영구 OutOfSync — ServerSideDiff=true로 해결",
     "blockCount": 1,
     "totalAsciiLines": 7,
     "blocks": [
       {
-        "startLine": 163,
-        "endLine": 170,
-        "lang": "bash",
+        "startLine": 35,
+        "endLine": 42,
+        "lang": "text",
         "lineCount": 7,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# DB 연결 정상 확인 / bash -c 'echo > /dev/tcp/172.20.0.1/5432' / # → 연결 성공"
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "# ArgoCD 리소스 상태 / Deployment    goti-queue-dev          OutOfSync  ← 변경 감지됨 / ExternalSecret goti-queue-dev-secrets OutO"
+      }
+    ]
+  },
+  {
+    "file": "goti-docker-network-loki-healthcheck.md",
+    "category": "cicd",
+    "series": "goti-ec2-deploy",
+    "title": "Docker 네트워크 라벨 충돌 + Loki Healthcheck HEAD 미지원",
+    "blockCount": 1,
+    "totalAsciiLines": 7,
+    "blocks": [
+      {
+        "startLine": 157,
+        "endLine": 164,
+        "lang": "",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "[7/8] 서비스 헬스체크... /   ✓ Prometheus OK /   ✓ Grafana OK"
+      }
+    ]
+  },
+  {
+    "file": "goti-eks-rolling-update-cascading-failures.md",
+    "category": "kubernetes",
+    "series": "goti-eks",
+    "title": "EKS max-pods rolling update가 부른 연쇄 장애 4건 — SG 삭제, IP 소진, RDS 단절, OOM",
+    "blockCount": 1,
+    "totalAsciiLines": 7,
+    "blocks": [
+      {
+        "startLine": 96,
+        "endLine": 103,
+        "lang": "text",
+        "lineCount": 7,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "[terraform apply -target=module.config] /   → aws_security_group.this: inline ingress로 규칙 통합 ← Terraform state에 기록 / "
+      }
+    ]
+  },
+  {
+    "file": "goti-poc-queue-a-401-ticketing-isolation.md",
+    "category": "challenge",
+    "series": "goti-queue-poc",
+    "title": "POC 환경 401 티켓팅 격리 — A/B 비교는 의존성까지 분리해야 한다",
+    "blockCount": 3,
+    "totalAsciiLines": 7,
+    "blocks": [
+      {
+        "startLine": 50,
+        "endLine": 51,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "POST /api/v1/queue/poc-a/validate → 401 (empty body)"
+      },
+      {
+        "startLine": 69,
+        "endLine": 74,
+        "lang": "",
+        "lineCount": 5,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "GET /api/v1/stadium-seats/.../seat-grades → 403 /   {\"code\":\"CLIENT_ERROR\",\"message\":\"좌석 조회는 대기열 입장 완료 후에만 가능합니다.\"} / "
+      },
+      {
+        "startLine": 161,
+        "endLine": 162,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "POST /api/v1/queue/poc-a/validate → 200 OK (isPassed=true, token 발급)"
       }
     ]
   },
@@ -2856,6 +3391,43 @@
         "kind": "tree",
         "decision": "keep",
         "sample": "GitHub Actions / ├── amd64 러너 (ubuntu-latest) / │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅"
+      }
+    ]
+  },
+  {
+    "file": "goti-ecr-secret-dollar-escape.md",
+    "category": "argocd",
+    "series": "goti-argocd-gitops",
+    "title": "kubectl create secret에서 $ 문자가 사라진다: ECR 연쇄 장애",
+    "blockCount": 3,
+    "totalAsciiLines": 6,
+    "blocks": [
+      {
+        "startLine": 59,
+        "endLine": 60,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "ECR CronJob 실패 → ECR 토큰 갱신 불가 → ImagePullBackOff"
+      },
+      {
+        "startLine": 68,
+        "endLine": 69,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "ClusterSecretStore InvalidProviderConfig → ESO 전체 불능 → grafana-admin-secret 미생성"
+      },
+      {
+        "startLine": 100,
+        "endLine": 104,
+        "lang": "bash",
+        "lineCount": 4,
+        "kind": "code-arrow",
+        "decision": "skip",
+        "sample": "# 쉘이 해석하는 과정 / \"AKIA...X$abc123...\" /          ^^^^^^^^"
       }
     ]
   },
@@ -2964,21 +3536,21 @@
     ]
   },
   {
-    "file": "goti-eks-node-join-401-cluster-policy.md",
-    "category": "kubernetes",
-    "series": "goti-eks",
-    "title": "EKS 노드 조인 401 Unauthorized — AmazonEKSClusterPolicy 누락이 진짜 원인이었습니다",
+    "file": "goti-hikaricp-otel-beanpostprocessor.md",
+    "category": "monitoring",
+    "series": "goti-spring-otel",
+    "title": "HikariCP OTel 메트릭이 안 나온다: BeanPostProcessor 초기화 순서 함정",
     "blockCount": 1,
     "totalAsciiLines": 5,
     "blocks": [
       {
-        "startLine": 150,
-        "endLine": 155,
-        "lang": "hcl",
+        "startLine": 80,
+        "endLine": 85,
+        "lang": "",
         "lineCount": 5,
         "kind": "arrow-only",
         "decision": "flatten",
-        "sample": "# auto_mode OFF → Standard 정책 세트 (AmazonEKSClusterPolicy 포함) / eks_standard_iam_role_policies = { ... }  # !auto_mode_en"
+        "sample": "OTel DataSourcePostProcessor (After) /     → HikariDataSource를 OpenTelemetryDataSource로 래핑 /         → 우리 BPP (After)"
       }
     ]
   },
@@ -3021,6 +3593,34 @@
     ]
   },
   {
+    "file": "goti-monitoring-dashboard-nodata.md",
+    "category": "monitoring",
+    "series": "goti-otel-prometheus",
+    "title": "모니터링 대시보드 No Data 5건 종합 해결기",
+    "blockCount": 2,
+    "totalAsciiLines": 5,
+    "blocks": [
+      {
+        "startLine": 75,
+        "endLine": 78,
+        "lang": "promql",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "# MSA 전환 후 깨지는 패턴 / sum(rate({5xx}[5m])) by (job) or vector(0) / # → vector(0)에 job 레이블 없음 → or 매칭 실패"
+      },
+      {
+        "startLine": 166,
+        "endLine": 168,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "Before: otelcol.exporter.loki → loki.write / After:  otelcol.exporter.loki → loki.process → loki.write"
+      }
+    ]
+  },
+  {
     "file": "goti-monitoring-pitfalls-system.md",
     "category": "monitoring",
     "series": "goti-observability-ops",
@@ -3040,21 +3640,20 @@
     ]
   },
   {
-    "file": "goti-poc-queue-a-401-ticketing-isolation.md",
-    "category": "challenge",
-    "series": "goti-queue-poc",
-    "title": "POC 환경 401 티켓팅 격리 — A/B 비교는 의존성까지 분리해야 한다",
+    "file": "goti-tempo-scoped-tag-traceql-variable.md",
+    "category": "monitoring",
+    "title": "Tempo v2 scoped tag 400 에러 — TraceQL과 Grafana 변수의 불일치",
     "blockCount": 1,
     "totalAsciiLines": 5,
     "blocks": [
       {
-        "startLine": 65,
-        "endLine": 70,
-        "lang": "text",
+        "startLine": 40,
+        "endLine": 45,
+        "lang": "",
         "lineCount": 5,
         "kind": "arrow-only",
         "decision": "flatten",
-        "sample": "GET /api/v1/stadium-seats/.../seat-grades → 403 /   {\"code\":\"CLIENT_ERROR\",\"message\":\"좌석 조회는 대기열 입장 완료 후에만 가능합니다.\"} / "
+        "sample": "# PromQL — Grafana가 변환해줌 ✅ / {__name__=~\"val1|val2|val3\"} / "
       }
     ]
   },
@@ -3078,59 +3677,49 @@
     ]
   },
   {
-    "file": "challenge2-wealist-migration-part3.md",
-    "category": "challenge",
-    "series": "challenge-2-wealist-migration",
-    "title": "팀 프로젝트 K8s 마이그레이션 - Part 3: 백엔드 배포 & Secret 관리",
+    "file": "goti-dev-monitoring-502.md",
+    "category": "cicd",
+    "series": "goti-cloudfront-alb",
+    "title": "502 Bad Gateway 동시다발: Docker 포트 바인딩과 ALB 헬스체크의 합작",
+    "blockCount": 2,
+    "totalAsciiLines": 4,
+    "blocks": [
+      {
+        "startLine": 38,
+        "endLine": 40,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "dev.go-ti.shop/monitoring/*  → 502 Bad Gateway / dev.go-ti.shop/api/*         → 502 Bad Gateway"
+      },
+      {
+        "startLine": 47,
+        "endLine": 49,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "ALB Target Group: goti-dev-grafana-tg → unhealthy (Health checks failed) / ALB Target Group: goti-dev-tg → unhealthy (He"
+      }
+    ]
+  },
+  {
+    "file": "goti-metrics-collector-pipeline-e2e.md",
+    "category": "monitoring",
+    "series": "goti-metrics-collector",
+    "title": "메트릭 파이프라인 E2E 개통 — AuthorizationPolicy부터 DB 스키마까지",
     "blockCount": 1,
     "totalAsciiLines": 4,
     "blocks": [
       {
-        "startLine": 263,
-        "endLine": 267,
+        "startLine": 112,
+        "endLine": 116,
         "lang": "",
         "lineCount": 4,
-        "kind": "tree",
-        "decision": "keep",
-        "sample": "my-app (namespace) / ├── frontend / ├── backend"
-      }
-    ]
-  },
-  {
-    "file": "cloudfront-s3-troubleshooting.md",
-    "category": "kubernetes",
-    "series": "eks-infra",
-    "title": "Storage 페이지가 HTML을 반환한다: 3층 원인 분석",
-    "blockCount": 1,
-    "totalAsciiLines": 4,
-    "blocks": [
-      {
-        "startLine": 170,
-        "endLine": 174,
-        "lang": "yaml",
-        "lineCount": 4,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# prod.yaml 구조 / storage-service:       # ← 이 키 아래 값은 umbrella chart용 /   config:"
-      }
-    ]
-  },
-  {
-    "file": "goti-ecr-secret-dollar-escape.md",
-    "category": "argocd",
-    "series": "goti-argocd-gitops",
-    "title": "kubectl create secret에서 $ 문자가 사라진다: ECR 연쇄 장애",
-    "blockCount": 1,
-    "totalAsciiLines": 4,
-    "blocks": [
-      {
-        "startLine": 92,
-        "endLine": 96,
-        "lang": "bash",
-        "lineCount": 4,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "# 쉘이 해석하는 과정 / \"AKIA...X$abc123...\" /          ^^^^^^^^"
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "# /metrics 응답 / goti_match_active_total 0 / goti_guardrail_blacklist_size 0"
       }
     ]
   },
@@ -3168,25 +3757,6 @@
         "kind": "arrow-only",
         "decision": "flatten",
         "sample": "goti-server CD → ECR push /               → Renovate: ECR 태그 조회 /               → Goti-k8s values.yaml 태그 업데이트 PR"
-      }
-    ]
-  },
-  {
-    "file": "goti-resale-istio-rbac-403.md",
-    "category": "istio",
-    "series": "goti-resale",
-    "title": "ticketing → resale 내부 호출 시 Istio RBAC 403 — DENY 정책 우선 평가 함정",
-    "blockCount": 1,
-    "totalAsciiLines": 4,
-    "blocks": [
-      {
-        "startLine": 88,
-        "endLine": 92,
-        "lang": "yaml",
-        "lineCount": 4,
-        "kind": "code-arrow",
-        "decision": "skip",
-        "sample": "excludePaths: /   - \"/api/v1/resales/histories\" /   - \"/api/v1/resales/histories/*\""
       }
     ]
   },
@@ -3229,6 +3799,25 @@
     ]
   },
   {
+    "file": "challenge2-wealist-migration-part2.md",
+    "category": "challenge",
+    "series": "challenge-2-wealist-migration",
+    "title": "팀 프로젝트 K8s 마이그레이션 - Part 2: PostgreSQL StatefulSet",
+    "blockCount": 1,
+    "totalAsciiLines": 3,
+    "blocks": [
+      {
+        "startLine": 108,
+        "endLine": 111,
+        "lang": "",
+        "lineCount": 3,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "postgres-0 → postgres-data-postgres-0 (5Gi) / postgres-1 → postgres-data-postgres-1 (5Gi) / postgres-2 → postgres-data-p"
+      }
+    ]
+  },
+  {
     "file": "goti-grafana-csrf-origin.md",
     "category": "cicd",
     "series": "goti-ec2-deploy",
@@ -3248,21 +3837,77 @@
     ]
   },
   {
-    "file": "goti-monitoring-dashboard-nodata.md",
-    "category": "monitoring",
-    "series": "goti-otel-prometheus",
-    "title": "모니터링 대시보드 No Data 5건 종합 해결기",
+    "file": "goti-node-rightsizing-and-rebalancing.md",
+    "category": "kubernetes",
+    "series": "goti-scaling",
+    "title": "Go cutover 후 노드 Rightsizing — Descheduler가 알려준 축소 한계",
     "blockCount": 1,
     "totalAsciiLines": 3,
     "blocks": [
       {
-        "startLine": 75,
-        "endLine": 78,
-        "lang": "promql",
+        "startLine": 58,
+        "endLine": 61,
+        "lang": "text",
         "lineCount": 3,
         "kind": "arrow-only",
         "decision": "flatten",
-        "sample": "# MSA 전환 후 깨지는 패턴 / sum(rate({5xx}[5m])) by (job) or vector(0) / # → vector(0)에 job 레이블 없음 → or 매칭 실패"
+        "sample": "\"Number of overutilized nodes\" totalNumber=7   ← 전 노드 CPU 95~100% / \"Number of underutilized nodes\" totalNumber=0 / \"No "
+      }
+    ]
+  },
+  {
+    "file": "goti-pgbouncer-rollout-and-load-test.md",
+    "category": "challenge",
+    "series": "goti-pgbouncer",
+    "title": "PgBouncer 도입 + 1차 3000 VU — 쓰러지고 나서야 보인 것들",
+    "blockCount": 2,
+    "totalAsciiLines": 3,
+    "blocks": [
+      {
+        "startLine": 114,
+        "endLine": 115,
+        "lang": "text",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "postgres://goti:-bh||...  → parse error: invalid URL"
+      },
+      {
+        "startLine": 344,
+        "endLine": 346,
+        "lang": "text",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "TICKETING_DATABASE_MAX_CONNS: 18 → 10 / (6 replica × 10 = 60 client 연결)"
+      }
+    ]
+  },
+  {
+    "file": "goti-prometheus-job-label-mismatch.md",
+    "category": "monitoring",
+    "series": "goti-otel-prometheus",
+    "title": "Prometheus job 레이블에 namespace가 붙는다고?",
+    "blockCount": 2,
+    "totalAsciiLines": 3,
+    "blocks": [
+      {
+        "startLine": 44,
+        "endLine": 46,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "goti:sli:availability:5m → result: [] / goti:apdex:score → result: []"
+      },
+      {
+        "startLine": 126,
+        "endLine": 127,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "goti-server → goti/goti-server"
       }
     ]
   },
@@ -3310,6 +3955,53 @@
         "kind": "code-arrow",
         "decision": "skip",
         "sample": "// 백엔드 실제 응답 / response.Success(c, gin.H{\"order\": order, \"listings\": listings}) / // → { \"order\": {...}, \"listings\": [.."
+      }
+    ]
+  },
+  {
+    "file": "challenge2-wealist-migration-part4.md",
+    "category": "challenge",
+    "series": "challenge-2-wealist-migration",
+    "title": "팀 프로젝트 K8s 마이그레이션 - Part 4: 프론트엔드 & Ingress",
+    "blockCount": 1,
+    "totalAsciiLines": 2,
+    "blocks": [
+      {
+        "startLine": 170,
+        "endLine": 172,
+        "lang": "",
+        "lineCount": 2,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "wealist.local/       → frontend-service / wealist.local/api/   → board-api-service"
+      }
+    ]
+  },
+  {
+    "file": "goti-dev-loadtest-ssh-istio-turnstile.md",
+    "category": "istio",
+    "series": "goti-istio-ops",
+    "title": "dev 부하테스트 연결 3단 트러블 — SSH 터널·Istio 정책·Turnstile",
+    "blockCount": 2,
+    "totalAsciiLines": 2,
+    "blocks": [
+      {
+        "startLine": 30,
+        "endLine": 31,
+        "lang": "text",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "맥(로컬) → SSH(2232) → Ubuntu 서버 → Kind 클러스터(goti-dev)"
+      },
+      {
+        "startLine": 56,
+        "endLine": 57,
+        "lang": "text",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "맥 localhost:18080 → SSH(2232) → Ubuntu → 172.20.0.2:31080(Kind NodePort) → Istio Gateway → Pod"
       }
     ]
   },
@@ -3422,6 +4114,25 @@
         "kind": "code-arrow",
         "decision": "skip",
         "sample": "TICKETING_DATABASE_MAX_CONNS: 10  # 18 → 10"
+      }
+    ]
+  },
+  {
+    "file": "goti-virtualservice-fqdn-503.md",
+    "category": "kubernetes",
+    "series": "goti-kind-monitoring",
+    "title": "Istio VirtualService 503 에러: .svc와 .svc.cluster.local의 차이",
+    "blockCount": 1,
+    "totalAsciiLines": 1,
+    "blocks": [
+      {
+        "startLine": 42,
+        "endLine": 43,
+        "lang": "",
+        "lineCount": 1,
+        "kind": "arrow-only",
+        "decision": "flatten",
+        "sample": "CloudFront → Kind PC:80 → Istio Gateway:31080 → Grafana"
       }
     ]
   }

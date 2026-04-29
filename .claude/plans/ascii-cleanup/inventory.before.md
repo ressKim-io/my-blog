@@ -1,13 +1,13 @@
 # ASCII Cleanup — Inventory
 
 > 자동 생성: `.claude/plans/ascii-cleanup/scripts/scan.mjs`
-> 생성 시각: 2026-04-29T22:36:46.329Z
+> 생성 시각: 2026-04-28T22:37:09.942Z
 
 ## 요약
 
-- ASCII 블록 포함 글: **106편**
-- 전체 ASCII 블록 수: **265개**
-- 전체 ASCII 라인 합계: **3707줄**
+- ASCII 블록 포함 글: **126편**
+- 전체 ASCII 블록 수: **322개**
+- 전체 ASCII 라인 합계: **3929줄**
 
 ## 자동 처리 추천 분포 (decision)
 
@@ -15,19 +15,19 @@
 |---|---|---|
 | `skip` | 122 | 다이어그램 의도 아님 (코드 슈도코드 등) — 무시 |
 | `keep` | 105 | 보존 (디자인 개편 세션에서 재처리) |
-| `flatten` | 38 | 평탄화 (표/문장으로 변환 또는 삭제) |
+| `flatten` | 95 | 평탄화 (표/문장으로 변환 또는 삭제) |
 
 ## 블록 유형 분포 (kind)
 
 | 유형 | 개수 | 설명 |
 |---|---|---|
 | `code-arrow` | 122 | 코드 lang 안의 화살표 (슈도코드 가능성) |
+| `arrow-only` | 90 | 박스 없는 화살표 시퀀스 |
 | `architecture` | 42 | 박스 다수 (아키텍처/스택) |
 | `flow-diagram` | 36 | 박스 + 화살표 (흐름도/시퀀스) |
-| `arrow-only` | 36 | 박스 없는 화살표 시퀀스 |
 | `tree` | 27 | 디렉토리/의존성 트리 (├ └ │ ─) |
-| `misc` | 1 | 기타 |
-| `box-small` | 1 | 단순 박스 (≤14줄) |
+| `box-small` | 3 | 단순 박스 (≤14줄) |
+| `misc` | 2 | 기타 |
 
 ## 글별 상세 (총 라인 수 내림차순)
 
@@ -44,24 +44,24 @@
 | `eks-troubleshooting-part2-istio-ambient-1.md` | istio | eks-troubleshooting | 6 | 96 | 0/3/3 | architecture, code-arrow, flow-diagram |
 | `istio-traffic-part5-mirroring.md` | istio | istio-traffic | 4 | 91 | 0/3/1 | flow-diagram, architecture, code-arrow |
 | `argocd-ssa-sync-pitfalls.md` | argocd | argocd-troubleshooting | 5 | 88 | 0/2/3 | flow-diagram, code-arrow |
-| `goti-discord-alerting-architecture.md` | monitoring | - | 6 | 79 | 0/3/3 | code-arrow, architecture, flow-diagram |
+| `goti-discord-alerting-architecture.md` | monitoring | - | 8 | 87 | 2/3/3 | code-arrow, architecture, arrow-only, flow-diagram |
 | `docker-compose-env-management.md` | challenge | - | 4 | 76 | 0/4/0 | tree, architecture |
 | `multi-repo-cicd-strategy.md` | cicd | - | 8 | 72 | 2/6/0 | tree, arrow-only, architecture, flow-diagram |
 | `goti-adr-alloy-to-otel-collector.md` | monitoring | - | 3 | 71 | 0/3/0 | architecture, flow-diagram |
+| `goti-adr-loki-tempo-stability-tuning.md` | monitoring | - | 4 | 71 | 2/2/0 | flow-diagram, arrow-only |
 | `istio-observability-part2-tracing.md` | istio | istio-observability | 3 | 69 | 0/3/0 | flow-diagram, architecture |
 | `argocd-app-of-apps-deadlock.md` | argocd | argocd-troubleshooting | 6 | 67 | 0/3/3 | code-arrow, tree |
-| `goti-adr-loki-tempo-stability-tuning.md` | monitoring | - | 2 | 67 | 0/2/0 | flow-diagram |
 | `goti-adr-istio-service-mesh.md` | kubernetes | - | 2 | 66 | 0/2/0 | architecture, flow-diagram |
 | `goti-otel-agent-otlp-protocol-mismatch.md` | monitoring | goti-observability-ops | 2 | 65 | 1/1/0 | architecture, misc |
 | `goti-istio-retry-duplicate-payment.md` | kubernetes | - | 5 | 63 | 1/3/1 | arrow-only, code-arrow, tree, flow-diagram |
 | `k8s-pod-flow-part1.md` | kubernetes | - | 10 | 62 | 1/1/8 | code-arrow, tree, arrow-only |
 | `istio-observability-part1-metrics.md` | istio | istio-observability | 2 | 58 | 0/2/0 | architecture |
 | `goti-gcp-terraform-cross-cloud-review.md` | kubernetes | - | 3 | 53 | 0/2/1 | architecture, code-arrow |
+| `istio-traffic-part3-circuit-breaker.md` | istio | istio-traffic | 5 | 50 | 1/1/3 | code-arrow, arrow-only, architecture |
 | `eks-troubleshooting-part3-istio-ambient-2.md` | istio | eks-troubleshooting | 3 | 48 | 0/1/2 | code-arrow, flow-diagram |
-| `istio-traffic-part3-circuit-breaker.md` | istio | istio-traffic | 4 | 48 | 0/1/3 | code-arrow, architecture |
 | `eks-troubleshooting-part7-go-service.md` | kubernetes | eks-troubleshooting | 4 | 47 | 0/2/2 | architecture, code-arrow, tree |
 | `eks-troubleshooting-part9-rolling-update-cascading.md` | kubernetes | eks-troubleshooting | 3 | 47 | 0/2/1 | flow-diagram, code-arrow |
-| `queue-poc-loadtest-part1-design.md` | kubernetes | queue-poc-loadtest | 4 | 45 | 2/1/1 | arrow-only, code-arrow, flow-diagram |
+| `queue-poc-loadtest-part1-design.md` | kubernetes | queue-poc-loadtest | 6 | 47 | 4/1/1 | arrow-only, code-arrow, flow-diagram |
 | `istio-ambient-part6-rate-limiting.md` | istio | istio-ambient | 2 | 44 | 0/1/1 | tree, code-arrow |
 | `go-dependency-genproto-conflict.md` | challenge | - | 3 | 41 | 1/1/1 | tree, box-small, code-arrow |
 | `goti-istio-jwks-mismatch-cdn-jwt-401.md` | kubernetes | - | 6 | 41 | 0/2/4 | code-arrow, flow-diagram |
@@ -69,76 +69,96 @@
 | `istio-ambient-part5-jwt.md` | istio | istio-ambient | 4 | 39 | 0/0/4 | code-arrow |
 | `eks-troubleshooting-part5-monitoring-1.md` | monitoring | eks-troubleshooting | 4 | 38 | 0/1/3 | architecture, code-arrow |
 | `eks-security-jwt-rsa-mismatch.md` | istio | eks-security | 2 | 37 | 0/2/0 | flow-diagram, architecture |
+| `goti-argocd-otel-collector-crashloop.md` | argocd | goti-argocd | 3 | 35 | 1/0/2 | arrow-only, code-arrow |
 | `goti-monitoring-e2e-multi-troubleshoot.md` | monitoring | goti-observability-ops | 5 | 35 | 3/0/2 | arrow-only, code-arrow |
 | `goti-ssm-manual-config-troubleshooting.md` | kubernetes | - | 2 | 34 | 0/1/1 | code-arrow, flow-diagram |
-| `goti-argocd-otel-collector-crashloop.md` | argocd | goti-argocd | 2 | 33 | 0/0/2 | code-arrow |
 | `goti-observability-stack-selection.md` | monitoring | goti-observability-stack | 2 | 33 | 1/1/0 | arrow-only, architecture |
 | `eks-troubleshooting-part4-external-secrets.md` | kubernetes | eks-troubleshooting | 4 | 31 | 1/0/3 | code-arrow, arrow-only |
 | `goti-resale-phase4-step10-tests.md` | challenge | goti-resale | 2 | 31 | 0/0/2 | code-arrow |
 | `eks-troubleshooting-part6-monitoring-2.md` | monitoring | eks-troubleshooting | 3 | 30 | 0/1/2 | code-arrow, flow-diagram |
 | `goti-cloudflare-migration-adr.md` | kubernetes | goti-cloudflare-migration | 2 | 30 | 0/1/1 | code-arrow, flow-diagram |
 | `istio-traffic-part4-retry-timeout.md` | istio | istio-traffic | 2 | 30 | 0/1/1 | code-arrow, architecture |
-| `otel-monitoring-v3.md` | monitoring | observability | 2 | 29 | 0/1/1 | architecture, code-arrow |
+| `otel-monitoring-v3.md` | monitoring | observability | 3 | 30 | 1/1/1 | architecture, code-arrow, arrow-only |
 | `goti-db-active-passive-with-read-split-adr.md` | kubernetes | goti-multicloud-db | 1 | 28 | 0/1/0 | architecture |
 | `goti-synthetic-traffic.md` | monitoring | goti-loadtest | 2 | 27 | 0/2/0 | architecture, tree |
 | `goti-cloudflare-migration-troubleshoot.md` | kubernetes | goti-cloudflare-migration | 6 | 26 | 0/1/5 | code-arrow, tree |
+| `goti-image-updater-multisource.md` | argocd | goti-argocd-gitops | 4 | 26 | 1/0/3 | code-arrow, arrow-only |
 | `istio-ambient-part4-wealist-migration.md` | istio | istio-ambient | 2 | 25 | 0/0/2 | code-arrow |
-| `goti-image-updater-multisource.md` | argocd | goti-argocd-gitops | 3 | 23 | 0/0/3 | code-arrow |
+| `cloudfront-s3-troubleshooting.md` | kubernetes | eks-infra | 4 | 23 | 3/0/1 | arrow-only, code-arrow |
 | `istio-traffic-part2-canary-ab.md` | istio | istio-traffic | 1 | 22 | 0/0/1 | code-arrow |
 | `goti-argocd-probe-crd-not-permitted.md` | argocd | goti-argocd | 1 | 21 | 0/0/1 | code-arrow |
+| `istio-intro-part1-why-service-mesh.md` | istio | istio-intro | 2 | 21 | 2/0/0 | box-small, arrow-only |
+| `goti-pgbouncer-connection-pooling-adr.md` | challenge | goti-pgbouncer | 2 | 20 | 1/1/0 | arrow-only, architecture |
 | `queue-poc-loadtest-part3-selection.md` | kubernetes | queue-poc-loadtest | 1 | 20 | 0/1/0 | flow-diagram |
 | `goti-harbor-imagepull-403-cloudflare-waf.md` | kubernetes | goti-multicloud | 2 | 19 | 0/1/1 | code-arrow, flow-diagram |
 | `goti-kind-db-connection-false-negative.md` | kubernetes | - | 3 | 19 | 0/0/3 | code-arrow |
+| `challenge2-wealist-migration-part5.md` | challenge | challenge-2-wealist-migration | 2 | 18 | 1/1/0 | tree, arrow-only |
 | `goti-db-failback-reverse-replication-adr.md` | kubernetes | goti-multicloud-db | 1 | 17 | 0/1/0 | tree |
-| `goti-pgbouncer-connection-pooling-adr.md` | challenge | goti-pgbouncer | 1 | 17 | 0/1/0 | architecture |
 | `goti-kafka-adoption-decision-adr.md` | challenge | goti-kafka | 1 | 15 | 0/1/0 | tree |
+| `goti-istio-injection-label-pg-max-connections.md` | istio | goti-istio-ops | 2 | 14 | 1/0/1 | arrow-only, code-arrow |
+| `goti-queue-loadtest-k6-two-phase-design.md` | challenge | goti-queue-poc | 2 | 14 | 2/0/0 | arrow-only |
+| `websocket-token-refresh.md` | kubernetes | eks-security | 2 | 14 | 2/0/0 | arrow-only |
+| `challenge1-game-server-part7.md` | challenge | game-server | 3 | 13 | 3/0/0 | arrow-only |
 | `goti-cutover-residual-bugs-smoke-7of7.md` | challenge | goti-java-to-go | 2 | 13 | 2/0/0 | arrow-only |
-| `goti-queue-loadtest-k6-two-phase-design.md` | challenge | goti-queue-poc | 1 | 13 | 1/0/0 | arrow-only |
+| `goti-postgres-healthcheck-env.md` | cicd | goti-ec2-deploy | 3 | 13 | 1/0/2 | code-arrow, misc |
 | `pod-service-troubleshooting.md` | kubernetes | - | 2 | 13 | 1/0/1 | code-arrow, arrow-only |
 | `goti-argocd-dashboard-zero-metrics.md` | argocd | goti-argocd | 1 | 12 | 0/0/1 | code-arrow |
-| `challenge2-wealist-migration-part5.md` | challenge | challenge-2-wealist-migration | 1 | 11 | 0/1/0 | tree |
+| `goti-load-test-db-realistic-data.md` | challenge | goti-loadtest | 3 | 12 | 1/0/2 | code-arrow, arrow-only |
+| `goti-read-replica-split-adr.md` | kubernetes | goti-multicloud-db | 1 | 12 | 1/0/0 | box-small |
 | `eks-troubleshooting-part1-dday.md` | kubernetes | eks-troubleshooting | 2 | 11 | 0/0/2 | code-arrow |
 | `goti-3000vu-2nd-and-next-checklist.md` | challenge | goti-loadtest | 2 | 11 | 0/0/2 | code-arrow |
+| `goti-container-image-update-strategy-adr.md` | argocd | - | 1 | 11 | 1/0/0 | arrow-only |
+| `goti-eks-node-join-401-cluster-policy.md` | kubernetes | goti-eks | 2 | 11 | 2/0/0 | arrow-only |
 | `goti-multicloud-db-replication-technology-adr.md` | kubernetes | goti-multicloud-db | 1 | 11 | 0/1/0 | tree |
 | `goti-signup-dtype-regression.md` | challenge | goti-auth | 2 | 11 | 2/0/0 | arrow-only |
 | `goti-kafka-buffered-otel-pipeline.md` | monitoring | goti-observability-ops | 4 | 10 | 3/1/0 | arrow-only, tree |
 | `istio-ambient-part7-migration-to-sidecar.md` | istio | istio-ambient | 2 | 10 | 1/0/1 | arrow-only, code-arrow |
 | `goti-istio-peerauth-selector-prometheus-503.md` | istio | goti-istio-ops | 3 | 9 | 2/0/1 | arrow-only, code-arrow |
-| `goti-postgres-healthcheck-env.md` | cicd | goti-ec2-deploy | 2 | 9 | 0/0/2 | code-arrow |
-| `goti-load-test-db-realistic-data.md` | challenge | goti-loadtest | 2 | 8 | 0/0/2 | code-arrow |
+| `goti-resale-istio-rbac-403.md` | istio | goti-resale | 3 | 9 | 2/0/1 | arrow-only, code-arrow |
+| `goti-cloudfront-swagger-403.md` | cicd | goti-cloudfront-alb | 2 | 8 | 2/0/0 | arrow-only |
 | `goti-phase6-ticketing-sql-optimization.md` | challenge | goti-ticketing-phase | 1 | 8 | 0/0/1 | code-arrow |
 | `goti-resale-flow-end-to-end-fix.md` | challenge | goti-resale | 1 | 8 | 0/0/1 | code-arrow |
-| `goti-istio-injection-label-pg-max-connections.md` | istio | goti-istio-ops | 1 | 7 | 0/0/1 | code-arrow |
+| `challenge2-wealist-migration-part3.md` | challenge | challenge-2-wealist-migration | 2 | 7 | 1/1/0 | tree, arrow-only |
+| `goti-argocd-ssa-diff-deployment-skip.md` | argocd | goti-argocd | 1 | 7 | 1/0/0 | arrow-only |
+| `goti-docker-network-loki-healthcheck.md` | cicd | goti-ec2-deploy | 1 | 7 | 1/0/0 | arrow-only |
+| `goti-eks-rolling-update-cascading-failures.md` | kubernetes | goti-eks | 1 | 7 | 1/0/0 | arrow-only |
+| `goti-poc-queue-a-401-ticketing-isolation.md` | challenge | goti-queue-poc | 3 | 7 | 3/0/0 | arrow-only |
 | `github-actions-multi-platform-optimization.md` | cicd | - | 1 | 6 | 0/1/0 | tree |
+| `goti-ecr-secret-dollar-escape.md` | argocd | goti-argocd-gitops | 3 | 6 | 2/0/1 | arrow-only, code-arrow |
 | `goti-gcp-redis-recovery-jwt-unification.md` | challenge | goti-multicloud | 1 | 6 | 0/0/1 | code-arrow |
 | `goti-metrics-collector-go-sidecar.md` | monitoring | goti-metrics-collector | 1 | 6 | 0/1/0 | flow-diagram |
 | `goti-signup-created-at-bug-and-sql-audit.md` | challenge | goti-auth | 2 | 6 | 2/0/0 | arrow-only |
 | `challenge1-game-server-part2.md` | challenge | game-server | 1 | 5 | 0/0/1 | code-arrow |
 | `goti-dashboard-query-validation-fixes.md` | monitoring | goti-observability-ops | 1 | 5 | 1/0/0 | arrow-only |
-| `goti-eks-node-join-401-cluster-policy.md` | kubernetes | goti-eks | 1 | 5 | 1/0/0 | arrow-only |
+| `goti-hikaricp-otel-beanpostprocessor.md` | monitoring | goti-spring-otel | 1 | 5 | 1/0/0 | arrow-only |
 | `goti-java-to-go-cutover-smoke-trouble.md` | challenge | goti-java-to-go | 1 | 5 | 0/0/1 | code-arrow |
 | `goti-mimir-ingester-oom-webhook-deadlock.md` | monitoring | goti-observability-stack | 1 | 5 | 0/0/1 | code-arrow |
+| `goti-monitoring-dashboard-nodata.md` | monitoring | goti-otel-prometheus | 2 | 5 | 2/0/0 | arrow-only |
 | `goti-monitoring-pitfalls-system.md` | monitoring | goti-observability-ops | 1 | 5 | 0/0/1 | code-arrow |
-| `goti-poc-queue-a-401-ticketing-isolation.md` | challenge | goti-queue-poc | 1 | 5 | 1/0/0 | arrow-only |
+| `goti-tempo-scoped-tag-traceql-variable.md` | monitoring | - | 1 | 5 | 1/0/0 | arrow-only |
 | `queue-poc-loadtest-part2-results.md` | kubernetes | queue-poc-loadtest | 1 | 5 | 0/0/1 | code-arrow |
-| `challenge2-wealist-migration-part3.md` | challenge | challenge-2-wealist-migration | 1 | 4 | 0/1/0 | tree |
-| `cloudfront-s3-troubleshooting.md` | kubernetes | eks-infra | 1 | 4 | 0/0/1 | code-arrow |
-| `goti-ecr-secret-dollar-escape.md` | argocd | goti-argocd-gitops | 1 | 4 | 0/0/1 | code-arrow |
+| `goti-dev-monitoring-502.md` | cicd | goti-cloudfront-alb | 2 | 4 | 2/0/0 | arrow-only |
+| `goti-metrics-collector-pipeline-e2e.md` | monitoring | goti-metrics-collector | 1 | 4 | 1/0/0 | arrow-only |
 | `goti-phase6-redis-inventory.md` | challenge | goti-redis-sot | 1 | 4 | 1/0/0 | arrow-only |
 | `goti-renovate-ecr-auth-failure.md` | cicd | - | 1 | 4 | 1/0/0 | arrow-only |
-| `goti-resale-istio-rbac-403.md` | istio | goti-resale | 1 | 4 | 0/0/1 | code-arrow |
 | `goti-tempo-oom-kafka-buffer-sampling.md` | monitoring | goti-observability-stack | 1 | 4 | 0/0/1 | code-arrow |
 | `goti-tempo-spanmetrics-batch-timeout.md` | monitoring | goti-observability-stack | 1 | 4 | 0/0/1 | code-arrow |
+| `challenge2-wealist-migration-part2.md` | challenge | challenge-2-wealist-migration | 1 | 3 | 1/0/0 | arrow-only |
 | `goti-grafana-csrf-origin.md` | cicd | goti-ec2-deploy | 1 | 3 | 0/0/1 | code-arrow |
-| `goti-monitoring-dashboard-nodata.md` | monitoring | goti-otel-prometheus | 1 | 3 | 1/0/0 | arrow-only |
+| `goti-node-rightsizing-and-rebalancing.md` | kubernetes | goti-scaling | 1 | 3 | 1/0/0 | arrow-only |
+| `goti-pgbouncer-rollout-and-load-test.md` | challenge | goti-pgbouncer | 2 | 3 | 2/0/0 | arrow-only |
+| `goti-prometheus-job-label-mismatch.md` | monitoring | goti-otel-prometheus | 2 | 3 | 2/0/0 | arrow-only |
 | `goti-redis-sot-d2-d3-d4-rollout.md` | challenge | goti-redis-sot | 2 | 3 | 0/0/2 | code-arrow |
 | `goti-resale-fe-be-contract-audit.md` | challenge | goti-resale | 1 | 3 | 0/0/1 | code-arrow |
+| `challenge2-wealist-migration-part4.md` | challenge | challenge-2-wealist-migration | 1 | 2 | 1/0/0 | arrow-only |
+| `goti-dev-loadtest-ssh-istio-turnstile.md` | istio | goti-istio-ops | 2 | 2 | 2/0/0 | arrow-only |
 | `goti-poc-ab-test-dependency-isolation-pattern.md` | challenge | - | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-prometheus-agent-mode-adr.md` | monitoring | - | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-redis-sot-adoption-adr.md` | challenge | goti-redis-sot | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-redis-sot-d0-d1-rollout.md` | challenge | goti-redis-sot | 1 | 2 | 1/0/0 | arrow-only |
 | `goti-session-dropout-root-cause-audit.md` | challenge | goti-auth | 1 | 2 | 0/0/1 | code-arrow |
 | `goti-3000vu-queue-oneshot.md` | challenge | goti-queue-poc | 1 | 1 | 0/0/1 | code-arrow |
+| `goti-virtualservice-fqdn-503.md` | kubernetes | goti-kind-monitoring | 1 | 1 | 1/0/0 | arrow-only |
 
 ## 블록 단위 상세
 
@@ -321,19 +341,23 @@
 ### `goti-discord-alerting-architecture.md`
 
 - 카테고리: monitoring / 시리즈: -
-- 블록 6개 / ASCII 79줄
+- 블록 8개 / ASCII 87줄
 
 - L43-55 (12줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# alertmanager.yml (변경 전) / receivers: /   - name: "null"`
 - L113-144 (31줄, lang=`-`, kind=**architecture**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────────────────┐ / │                    Discord Alerting Pipe`
-- L343-345 (2줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+- L269-274 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `실제 발생한 순서: / 1. Goti-monitoring PR 머지 → ArgoCD가 Alertmanager config 먼저 sync / 2. Alertmanager가 Secret 마운트 시도 → Secret 없음`
+- L305-308 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `1. Terraform apply (SSM 파라미터 생성) / 2. Goti-k8s 배포 (ExternalSecret → Secret 생성) / 3. Goti-monitoring 배포 (Alertmanager con`
+- L348-350 (2줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `spec: /   refreshInterval: 1h  # ← 1시간마다 polling`
-- L427-449 (22줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+- L432-454 (22줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌──────────────────────────────────────────────────────────────┐ / │                   ArgoCD Resource Conflict         `
-- L458-461 (3줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+- L463-466 (3줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# Goti-monitoring/charts/goti-monitoring/values-prod.yaml (변경 후) / grafanaAdminSecret: /   enabled: false  # ← external-`
-- L525-534 (9줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+- L530-539 (9줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────┐     ┌─────────────────┐     ┌─────────────────────┐ / │ 1. Terraform    │────▶│ 2. Goti-k8s     │───`
 
 ### `docker-compose-env-management.md`
@@ -384,6 +408,20 @@
 - L175-208 (33줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `{/* TODO: Draw.io로 교체 */} /  / ┌──────────────────┐`
 
+### `goti-adr-loki-tempo-stability-tuning.md`
+
+- 카테고리: monitoring / 시리즈: -
+- 블록 4개 / ASCII 71줄
+
+- L30-57 (27줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │                    OOM 악순환 사이클                      `
+- L221-223 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `Before: chunk 2h 체류 x stream 수 + GC 미개입 → ~1Gi 초과 → OOM (limit: 1Gi) / After:  chunk 30m 체류 x stream 수 + GOMEMLIMIT GC →`
+- L230-232 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `Before: block 30m 체류 + 무제한 ingestion → ~2Gi 초과 → OOM (limit: 2Gi) / After:  block 5m 체류 + 15MB/s rate limit + GOMEMLIMIT`
+- L238-278 (40줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │               악순환 차단 — 3가지 축 적용 후                  │`
+
 ### `istio-observability-part2-tracing.md`
 
 - 카테고리: istio / 시리즈: istio-observability
@@ -413,16 +451,6 @@
   - 샘플: `# k8s/argocd/base/external-secrets/argocd-oauth-secret.yaml / apiVersion: external-secrets.io/v1 / kind: ExternalSecret`
 - L308-318 (10줄, lang=`-`, kind=**tree**, decision=**keep**)
   - 샘플: `k8s/argocd/ / ├── root-apps/              # Root Applications (Terraform 또는 kubectl로 직접 apply) / │   ├── prod.yaml`
-
-### `goti-adr-loki-tempo-stability-tuning.md`
-
-- 카테고리: monitoring / 시리즈: -
-- 블록 2개 / ASCII 67줄
-
-- L30-57 (27줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │                    OOM 악순환 사이클                      `
-- L234-274 (40줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │               악순환 차단 — 3가지 축 적용 후                  │`
 
 ### `goti-adr-istio-service-mesh.md`
 
@@ -508,6 +536,22 @@
 - L638-655 (17줄, lang=`-`, kind=**architecture**, decision=**keep**)
   - 샘플: `┌──────────────────────────────────────────────────────────────┐ / │                    해결 구조                           `
 
+### `istio-traffic-part3-circuit-breaker.md`
+
+- 카테고리: istio / 시리즈: istio-traffic
+- 블록 5개 / ASCII 50줄
+
+- L168-174 (6줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# Pod가 2개일 때 maxEjectionPercent: 50 / # → 최대 1개만 제외 가능 (50%) / # → 나머지 1개가 문제여도 제외 불가`
+- L358-360 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `Kiali UI → Graph → httpbin 서비스 클릭 / → "Traffic" 탭에서 Circuit Breaker 상태 확인`
+- L383-388 (5줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# Pod 2개 + maxEjectionPercent: 50 / # → 1개만 제외 가능 / # → 남은 1개가 문제여도 트래픽 계속 감`
+- L393-409 (16줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# VirtualService의 retry / http: / - route:`
+- L447-468 (21줄, lang=`-`, kind=**architecture**, decision=**keep**)
+  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │               Circuit Breaker 설정 체크리스트          `
+
 ### `eks-troubleshooting-part3-istio-ambient-2.md`
 
 - 카테고리: istio / 시리즈: eks-troubleshooting
@@ -519,20 +563,6 @@
   - 샘플: `# 현재 NLB 확인 / $ kubectl get svc -n istio-system wealist-gateway-istio -o jsonpath='{.status.loadBalancer.ingress[0].host`
 - L446-484 (38줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │                        Internet                     `
-
-### `istio-traffic-part3-circuit-breaker.md`
-
-- 카테고리: istio / 시리즈: istio-traffic
-- 블록 4개 / ASCII 48줄
-
-- L168-174 (6줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# Pod가 2개일 때 maxEjectionPercent: 50 / # → 최대 1개만 제외 가능 (50%) / # → 나머지 1개가 문제여도 제외 불가`
-- L380-385 (5줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# Pod 2개 + maxEjectionPercent: 50 / # → 1개만 제외 가능 / # → 남은 1개가 문제여도 트래픽 계속 감`
-- L390-406 (16줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# VirtualService의 retry / http: / - route:`
-- L444-465 (21줄, lang=`-`, kind=**architecture**, decision=**keep**)
-  - 샘플: `┌─────────────────────────────────────────────────────────────────┐ / │               Circuit Breaker 설정 체크리스트          `
 
 ### `eks-troubleshooting-part7-go-service.md`
 
@@ -563,15 +593,19 @@
 ### `queue-poc-loadtest-part1-design.md`
 
 - 카테고리: kubernetes / 시리즈: queue-poc-loadtest
-- 블록 4개 / ASCII 45줄
+- 블록 6개 / ASCII 47줄
 
-- L104-117 (13줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+- L67-68 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `enterQueue() → waitForAdmission() → enterSeat() → [ticketing] → leaveQueue()`
+- L108-121 (13줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `load-tests/ /   helpers/ /     queue-josuyeon.js    # PR #309 대기열 액션`
-- L141-150 (9줄, lang=`java`, kind=**code-arrow**, decision=**skip**)
+- L137-138 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `POST /api/v1/queue/junsang/validate → 401 (empty body)`
+- L149-158 (9줄, lang=`java`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `@SpringBootApplication(scanBasePackages = { /     "com.goti.queue",      // queue 패키지 /     "com.goti.config",     // We`
-- L171-176 (5줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+- L179-184 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `GET /api/v1/stadium-seats/.../seat-grades → 403 /   {"message": "좌석 조회는 대기열 입장 완료 후에만 가능합니다."} / `
-- L186-204 (18줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
+- L194-212 (18줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `{/* TODO: Draw.io로 교체 */} /  / ┌──────────────┐     ┌──────────────────────────────────┐`
 
 ### `istio-ambient-part6-rate-limiting.md`
@@ -662,6 +696,18 @@
 - L155-177 (22줄, lang=`-`, kind=**architecture**, decision=**keep**)
   - 샘플: `┌───────────────────────┐ / │  AWS Secrets Manager  │ / │  wealist/prod/app/    │`
 
+### `goti-argocd-otel-collector-crashloop.md`
+
+- 카테고리: argocd / 시리즈: goti-argocd
+- 블록 3개 / ASCII 35줄
+
+- L125-127 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `NewServer() → ensureSynced() → WaitForCacheSync()  ← 여기서 hang / Init() → Listen() → InitTracer()  ← OTLP는 여기서 초기화 (도달 못 `
+- L146-152 (6줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# loki-values.yaml (dev) / limits_config: /   ingestion_rate_mb: 16          # 기본 4 → 16`
+- L161-188 (27줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `apiVersion: networking.k8s.io/v1 / kind: NetworkPolicy / metadata:`
+
 ### `goti-monitoring-e2e-multi-troubleshoot.md`
 
 - 카테고리: monitoring / 시리즈: goti-observability-ops
@@ -687,16 +733,6 @@
   - 샘플: `# 1. SSM 값 수정 (AWS 콘솔에서 32바이트로 변경) / # goti-prod-2026-queue-token-32ch → goti-prod-2026-queue-token-32chr / `
 - L335-359 (24줄, lang=`-`, kind=**flow-diagram**, decision=**keep**)
   - 샘플: `수정 전: / ┌─────────────────┐     user=goti (master)     ┌──────────┐ / │  payment-prod   │──────────────────────────→ │  `
-
-### `goti-argocd-otel-collector-crashloop.md`
-
-- 카테고리: argocd / 시리즈: goti-argocd
-- 블록 2개 / ASCII 33줄
-
-- L144-150 (6줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# loki-values.yaml (dev) / limits_config: /   ingestion_rate_mb: 16          # 기본 4 → 16`
-- L159-186 (27줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `apiVersion: networking.k8s.io/v1 / kind: NetworkPolicy / metadata:`
 
 ### `goti-observability-stack-selection.md`
 
@@ -767,12 +803,14 @@
 ### `otel-monitoring-v3.md`
 
 - 카테고리: monitoring / 시리즈: observability
-- 블록 2개 / ASCII 29줄
+- 블록 3개 / ASCII 30줄
 
 - L36-59 (23줄, lang=`-`, kind=**architecture**, decision=**keep**)
   - 샘플: `┌─────────────────┐      ┌─────────────────────────────────────┐ / │   Go Services   │─────▶│         OTEL Collector    `
 - L143-149 (6줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `connectors: /   spanmetrics: /     histogram:`
+- L383-384 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `traces pipeline → spanmetrics connector → metrics pipeline → prometheusremotewrite`
 
 ### `goti-db-active-passive-with-read-split-adr.md`
 
@@ -810,6 +848,20 @@
 - L272-284 (12줄, lang=`-`, kind=**tree**, decision=**keep**)
   - 샘플: `브라우저 /   ├─ dev.go-ti.shop (정적 파일) /   │   → Cloudflare Pages (*.pages.dev)`
 
+### `goti-image-updater-multisource.md`
+
+- 카테고리: argocd / 시리즈: goti-argocd-gitops
+- 블록 4개 / ASCII 26줄
+
+- L69-79 (10줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# multi-source 구조 / spec: /   sources:   # ← 복수형 (sources)`
+- L89-99 (10줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# image-updater가 인식하는 구조 / spec: /   source:    # ← 단수형만 지원`
+- L115-118 (3줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# environments/dev/goti-server/values.yaml / image: /   tag: "dev-b08daa9"  # dev-latest → dev-b08daa9`
+- L230-233 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `SSM 파라미터: /dev/server/JWT_SECRET /                           ↓ / K8s Secret key: _dev_server_JWT_SECRET`
+
 ### `istio-ambient-part4-wealist-migration.md`
 
 - 카테고리: istio / 시리즈: istio-ambient
@@ -820,17 +872,19 @@
 - L165-177 (12줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# 모든 Deployment 재시작 / $ kubectl rollout restart deployment -n default / `
 
-### `goti-image-updater-multisource.md`
+### `cloudfront-s3-troubleshooting.md`
 
-- 카테고리: argocd / 시리즈: goti-argocd-gitops
-- 블록 3개 / ASCII 23줄
+- 카테고리: kubernetes / 시리즈: eks-infra
+- 블록 4개 / ASCII 23줄
 
-- L69-79 (10줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# multi-source 구조 / spec: /   sources:   # ← 복수형 (sources)`
-- L89-99 (10줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# image-updater가 인식하는 구조 / spec: /   source:    # ← 단수형만 지원`
-- L115-118 (3줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# environments/dev/goti-server/values.yaml / image: /   tag: "dev-b08daa9"  # dev-latest → dev-b08daa9`
+- L43-48 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `Request: /api/svc/storage/storage/folders/contents / Response Headers: /   server: AmazonS3`
+- L72-79 (7줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `storage-service가 404 반환 /     ↓ / CloudFront가 403/404 감지`
+- L173-177 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# prod.yaml 구조 / storage-service:       # ← 이 키 아래 값은 umbrella chart용 /   config:`
+- L355-362 (7줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `클라이언트 요청: /api/svc/storage/storage/folders/contents /                      ↓ / HTTPRoute 리라이트: /api/svc/storage/* → /*`
 
 ### `istio-traffic-part2-canary-ab.md`
 
@@ -847,6 +901,26 @@
 
 - L79-100 (21줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# monitoring-project.yaml / spec: /   namespaceResourceWhitelist:`
+
+### `istio-intro-part1-why-service-mesh.md`
+
+- 카테고리: istio / 시리즈: istio-intro
+- 블록 2개 / ASCII 21줄
+
+- L30-42 (12줄, lang=`-`, kind=**box-small**, decision=**flatten**)
+  - 샘플: `┌─────────────────────────────────────────────────────────────┐ / │                        단순한 세계                       `
+- L89-98 (9줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `서킷브레이커 정책 변경 /     ↓ / 모든 서비스 코드 수정`
+
+### `goti-pgbouncer-connection-pooling-adr.md`
+
+- 카테고리: challenge / 시리즈: goti-pgbouncer
+- 블록 2개 / ASCII 20줄
+
+- L37-40 (3줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `6 Go 서비스 × HPA × per-pod pool = 논리적 peak 250+ 연결 / → max_connections 300에 빠르게 도달 / → 이후 연결 요청은 대기 또는 거부`
+- L139-156 (17줄, lang=`text`, kind=**architecture**, decision=**keep**)
+  - 샘플: `┌──────────┐   ┌──────────┐   ┌──────────┐ / │ ticketing│   │ stadium  │   │  user    │   (Go services) / └─────┬────┘  `
 
 ### `queue-poc-loadtest-part3-selection.md`
 
@@ -878,6 +952,16 @@
 - L156-164 (8줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# ❌ sh에서 /dev/tcp 미지원 → false negative / sh -c 'cat < /dev/tcp/HOST/PORT' / `
 
+### `challenge2-wealist-migration-part5.md`
+
+- 카테고리: challenge / 시리즈: challenge-2-wealist-migration
+- 블록 2개 / ASCII 18줄
+
+- L346-357 (11줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `wealist-chart/ / ├── Chart.yaml           # 차트 메타데이터 / ├── values.yaml          # 기본 설정값`
+- L428-435 (7줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `개발 단계: / ConfigMap (평문) → Secret (Base64) → Helm (템플릿화) → Vault (암호화) / `
+
 ### `goti-db-failback-reverse-replication-adr.md`
 
 - 카테고리: kubernetes / 시리즈: goti-multicloud-db
@@ -886,14 +970,6 @@
 - L117-134 (17줄, lang=`text`, kind=**tree**, decision=**keep**)
   - 샘플: `[T3] GCP 복구 (VM 재기동, PostgreSQL 서비스 up) /   │ /   ├─▶ (1) GCP 쪽 subscription (죽어 있는 것) 정리`
 
-### `goti-pgbouncer-connection-pooling-adr.md`
-
-- 카테고리: challenge / 시리즈: goti-pgbouncer
-- 블록 1개 / ASCII 17줄
-
-- L137-154 (17줄, lang=`text`, kind=**architecture**, decision=**keep**)
-  - 샘플: `┌──────────┐   ┌──────────┐   ┌──────────┐ / │ ticketing│   │ stadium  │   │  user    │   (Go services) / └─────┬────┘  `
-
 ### `goti-kafka-adoption-decision-adr.md`
 
 - 카테고리: challenge / 시리즈: goti-kafka
@@ -901,6 +977,48 @@
 
 - L176-191 (15줄, lang=`text`, kind=**tree**, decision=**keep**)
   - 샘플: `Strimzi 0.51.0 ── Kafka 4.1.0, 4.2.0 (default) /     │                  │ /     ├─ K8s >=1.30 ✅ (1.34 호환)`
+
+### `goti-istio-injection-label-pg-max-connections.md`
+
+- 카테고리: istio / 시리즈: goti-istio-ops
+- 블록 2개 / ASCII 14줄
+
+- L156-163 (7줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `서비스 5개 × replica 2 = 10 Pod / HikariCP maximumPoolSize 기본값 = 10 (Pod당) / → 최대 100 연결`
+- L168-175 (7줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# DB 연결 정상 확인 / bash -c 'echo > /dev/tcp/172.20.0.1/5432' / # → 연결 성공`
+
+### `goti-queue-loadtest-k6-two-phase-design.md`
+
+- 카테고리: challenge / 시리즈: goti-queue-poc
+- 블록 2개 / ASCII 14줄
+
+- L88-89 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `enterQueue() → waitForAdmission() → enterSeat() → [ticketing] → leaveQueue()`
+- L139-152 (13줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `load-tests/ /   helpers/ /     queue-poc-c.js       # PR #309 대기열 액션`
+
+### `websocket-token-refresh.md`
+
+- 카테고리: kubernetes / 시리즈: eks-security
+- 블록 2개 / ASCII 14줄
+
+- L34-42 (8줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `🔌 [Chat WS] 연결 시도: wss://wealist.co.kr/api/svc/chat/...?token=eyJ... / ❌ WebSocket connection failed / 🔌 [Chat WS] 연결 `
+- L93-99 (6줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `1. 토큰 만료됨 (exp: 30분 전) / 2. WebSocket 연결 끊김 (code: 1006) / 3. 재연결 시도 → localStorage에서 만료된 토큰 읽음`
+
+### `challenge1-game-server-part7.md`
+
+- 카테고리: challenge / 시리즈: game-server
+- 블록 3개 / ASCII 13줄
+
+- L72-76 (4줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `http://localhost/lobby  → game-lobby Service / http://localhost/room   → game-room Service / http://localhost/chat   → g`
+- L199-206 (7줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `# rewrite-target 없으면 / 요청: http://localhost/lobby / 전달: http://game-lobby/lobby  ← 404 에러`
+- L242-244 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `lobby.game.example.com → game-lobby / chat.game.example.com  → game-chat`
 
 ### `goti-cutover-residual-bugs-smoke-7of7.md`
 
@@ -912,13 +1030,17 @@
 - L335-341 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `Goti-go  0e318ee — feat(user): port TestUser endpoints / Goti-k8s 0f22245 — enable USER_TEST_USER_ENABLED / Goti-go  2b5`
 
-### `goti-queue-loadtest-k6-two-phase-design.md`
+### `goti-postgres-healthcheck-env.md`
 
-- 카테고리: challenge / 시리즈: goti-queue-poc
-- 블록 1개 / ASCII 13줄
+- 카테고리: cicd / 시리즈: goti-ec2-deploy
+- 블록 3개 / ASCII 13줄
 
-- L135-148 (13줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `load-tests/ /   helpers/ /     queue-poc-c.js       # PR #309 대기열 액션`
+- L48-54 (6줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# docker-compose.deploy.yml / postgres: /   environment:`
+- L109-112 (3줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `$ ./scripts/validate-deploy.sh / [CHECK] Healthcheck 환경변수 정합성... /   postgres: $${POSTGRES_USER} → environment 키 확인 → PA`
+- L121-125 (4줄, lang=`-`, kind=**misc**, decision=**flatten**)
+  - 샘플: `environment: /   CONTAINER_VAR: ${HOST_VAR} /   ─────────────   ──────────`
 
 ### `pod-service-troubleshooting.md`
 
@@ -938,13 +1060,25 @@
 - L37-49 (12줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# ArgoCD metrics Service 없음 / $ kubectl get svc -n argocd | grep metrics / (빈 결과)`
 
-### `challenge2-wealist-migration-part5.md`
+### `goti-load-test-db-realistic-data.md`
 
-- 카테고리: challenge / 시리즈: challenge-2-wealist-migration
-- 블록 1개 / ASCII 11줄
+- 카테고리: challenge / 시리즈: goti-loadtest
+- 블록 3개 / ASCII 12줄
 
-- L346-357 (11줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `wealist-chart/ / ├── Chart.yaml           # 차트 메타데이터 / ├── values.yaml          # 기본 설정값`
+- L113-118 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# KBO 공식 사이트 AJAX 엔드포인트 활용 / # https://www.koreabaseball.com/ws/Schedule.asmx/GetScheduleList / # 2025 정규시즌 720경기 완료 데이터`
+- L144-148 (4줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `game_ticketing_statuses: 'CLOSED' 없음 → 'TERMINATED' 사용 / users:                   'ROLE_MEMBER' → 'MEMBER', 'ACTIVE' → '`
+- L171-174 (3줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# Docker 이미지 + 빌드 캐시 정리 / $ docker system prune -af --volumes / # → 약 45GB 확보`
+
+### `goti-read-replica-split-adr.md`
+
+- 카테고리: kubernetes / 시리즈: goti-multicloud-db
+- 블록 1개 / ASCII 12줄
+
+- L121-133 (12줄, lang=`text`, kind=**box-small**, decision=**flatten**)
+  - 샘플: `                                       ┌─────────────────┐ /                                        │  RDS Primary    │ `
 
 ### `eks-troubleshooting-part1-dday.md`
 
@@ -965,6 +1099,24 @@
   - 샘플: `# environments/prod/goti-ticketing-v2/values.yaml / - name: TICKETING_DATABASE_MAX_CONNS /   value: "18"        # 10 → 1`
 - L101-107 (6줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# 권장: spot 노드 +3 (현재 5 → 8) / aws eks update-nodegroup-config \ /   --cluster-name goti-prod \`
+
+### `goti-container-image-update-strategy-adr.md`
+
+- 카테고리: argocd / 시리즈: -
+- 블록 1개 / ASCII 11줄
+
+- L207-218 (11줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `goti-server CI/CD /   → ECR에 dev-{sha} 태그로 이미지 push /   → (기존 흐름, 변경 없음)`
+
+### `goti-eks-node-join-401-cluster-policy.md`
+
+- 카테고리: kubernetes / 시리즈: goti-eks
+- 블록 2개 / ASCII 11줄
+
+- L138-144 (6줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `kubelet → STS 토큰 → API 서버 → Authenticator webhook /   → IAM Role 매칭 ✅ /   → username 템플릿 렌더링: {{EC2PrivateDNSName}}`
+- L151-156 (5줄, lang=`hcl`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `# auto_mode OFF → Standard 정책 세트 (AmazonEKSClusterPolicy 포함) / eks_standard_iam_role_policies = { ... }  # !auto_mode_en`
 
 ### `goti-multicloud-db-replication-technology-adr.md`
 
@@ -1020,25 +1172,27 @@
 - L114-116 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `Prometheus targets → health: "down" / lastError: "server returned HTTP status 403 Forbidden"`
 
-### `goti-postgres-healthcheck-env.md`
+### `goti-resale-istio-rbac-403.md`
 
-- 카테고리: cicd / 시리즈: goti-ec2-deploy
-- 블록 2개 / ASCII 9줄
+- 카테고리: istio / 시리즈: goti-resale
+- 블록 3개 / ASCII 9줄
 
-- L48-54 (6줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# docker-compose.deploy.yml / postgres: /   environment:`
-- L109-112 (3줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `$ ./scripts/validate-deploy.sh / [CHECK] Healthcheck 환경변수 정합성... /   postgres: $${POSTGRES_USER} → environment 키 확인 → PA`
+- L36-40 (4줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `프론트 → GET /api/v1/tickets/myinfo → goti-ticketing /                                          ↓ (내부 RestClient 호출) /     `
+- L63-64 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `CUSTOM → DENY → ALLOW`
+- L95-99 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `excludePaths: /   - "/api/v1/resales/histories" /   - "/api/v1/resales/histories/*"`
 
-### `goti-load-test-db-realistic-data.md`
+### `goti-cloudfront-swagger-403.md`
 
-- 카테고리: challenge / 시리즈: goti-loadtest
+- 카테고리: cicd / 시리즈: goti-cloudfront-alb
 - 블록 2개 / ASCII 8줄
 
-- L113-118 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# KBO 공식 사이트 AJAX 엔드포인트 활용 / # https://www.koreabaseball.com/ws/Schedule.asmx/GetScheduleList / # 2025 정규시즌 720경기 완료 데이터`
-- L171-174 (3줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# Docker 이미지 + 빌드 캐시 정리 / $ docker system prune -af --volumes / # → 약 45GB 확보`
+- L60-63 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `/api/*          → ALB (goti-dev-alb) / /monitoring/*   → ALB (goti-dev-alb) / /* (default)    → S3 (프론트엔드)`
+- L106-111 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `/api/*          → ALB → goti-server:8080 / /swagger-ui/*   → ALB → goti-server:8080 / /v3/*           → ALB → goti-serve`
 
 ### `goti-phase6-ticketing-sql-optimization.md`
 
@@ -1056,13 +1210,51 @@
 - L56-64 (8줄, lang=`go`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `// ticket_repo.go — EnrichForTicket / func (r *TicketRepository) EnrichForTicket(...) (*TicketEnrichment, error) { /    `
 
-### `goti-istio-injection-label-pg-max-connections.md`
+### `challenge2-wealist-migration-part3.md`
 
-- 카테고리: istio / 시리즈: goti-istio-ops
+- 카테고리: challenge / 시리즈: challenge-2-wealist-migration
+- 블록 2개 / ASCII 7줄
+
+- L263-267 (4줄, lang=`-`, kind=**tree**, decision=**keep**)
+  - 샘플: `my-app (namespace) / ├── frontend / ├── backend`
+- L272-275 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `postgresql-prod (namespace) ← 여러 앱이 공유 / board-api-prod (namespace) / user-api-prod (namespace)`
+
+### `goti-argocd-ssa-diff-deployment-skip.md`
+
+- 카테고리: argocd / 시리즈: goti-argocd
 - 블록 1개 / ASCII 7줄
 
-- L163-170 (7줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# DB 연결 정상 확인 / bash -c 'echo > /dev/tcp/172.20.0.1/5432' / # → 연결 성공`
+- L35-42 (7줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `# ArgoCD 리소스 상태 / Deployment    goti-queue-dev          OutOfSync  ← 변경 감지됨 / ExternalSecret goti-queue-dev-secrets OutO`
+
+### `goti-docker-network-loki-healthcheck.md`
+
+- 카테고리: cicd / 시리즈: goti-ec2-deploy
+- 블록 1개 / ASCII 7줄
+
+- L157-164 (7줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `[7/8] 서비스 헬스체크... /   ✓ Prometheus OK /   ✓ Grafana OK`
+
+### `goti-eks-rolling-update-cascading-failures.md`
+
+- 카테고리: kubernetes / 시리즈: goti-eks
+- 블록 1개 / ASCII 7줄
+
+- L96-103 (7줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `[terraform apply -target=module.config] /   → aws_security_group.this: inline ingress로 규칙 통합 ← Terraform state에 기록 / `
+
+### `goti-poc-queue-a-401-ticketing-isolation.md`
+
+- 카테고리: challenge / 시리즈: goti-queue-poc
+- 블록 3개 / ASCII 7줄
+
+- L50-51 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `POST /api/v1/queue/poc-a/validate → 401 (empty body)`
+- L69-74 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `GET /api/v1/stadium-seats/.../seat-grades → 403 /   {"code":"CLIENT_ERROR","message":"좌석 조회는 대기열 입장 완료 후에만 가능합니다."} / `
+- L161-162 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `POST /api/v1/queue/poc-a/validate → 200 OK (isPassed=true, token 발급)`
 
 ### `github-actions-multi-platform-optimization.md`
 
@@ -1071,6 +1263,18 @@
 
 - L61-67 (6줄, lang=`-`, kind=**tree**, decision=**keep**)
   - 샘플: `GitHub Actions / ├── amd64 러너 (ubuntu-latest) / │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅`
+
+### `goti-ecr-secret-dollar-escape.md`
+
+- 카테고리: argocd / 시리즈: goti-argocd-gitops
+- 블록 3개 / ASCII 6줄
+
+- L59-60 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `ECR CronJob 실패 → ECR 토큰 갱신 불가 → ImagePullBackOff`
+- L68-69 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `ClusterSecretStore InvalidProviderConfig → ESO 전체 불능 → grafana-admin-secret 미생성`
+- L100-104 (4줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
+  - 샘플: `# 쉘이 해석하는 과정 / "AKIA...X$abc123..." /          ^^^^^^^^`
 
 ### `goti-gcp-redis-recovery-jwt-unification.md`
 
@@ -1114,13 +1318,13 @@
 - L115-120 (5줄, lang=`promql`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `# Before (range vector 누락 → 파싱 에러) / rate(kafka_server_brokertopicmetrics_messagesinpersec{...}) / `
 
-### `goti-eks-node-join-401-cluster-policy.md`
+### `goti-hikaricp-otel-beanpostprocessor.md`
 
-- 카테고리: kubernetes / 시리즈: goti-eks
+- 카테고리: monitoring / 시리즈: goti-spring-otel
 - 블록 1개 / ASCII 5줄
 
-- L150-155 (5줄, lang=`hcl`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `# auto_mode OFF → Standard 정책 세트 (AmazonEKSClusterPolicy 포함) / eks_standard_iam_role_policies = { ... }  # !auto_mode_en`
+- L80-85 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `OTel DataSourcePostProcessor (After) /     → HikariDataSource를 OpenTelemetryDataSource로 래핑 /         → 우리 BPP (After)`
 
 ### `goti-java-to-go-cutover-smoke-trouble.md`
 
@@ -1138,6 +1342,16 @@
 - L130-135 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# rollout-operator 스케일 다운 + webhook 삭제 후 / sleep 60  # API server 캐시 만료 대기 / `
 
+### `goti-monitoring-dashboard-nodata.md`
+
+- 카테고리: monitoring / 시리즈: goti-otel-prometheus
+- 블록 2개 / ASCII 5줄
+
+- L75-78 (3줄, lang=`promql`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `# MSA 전환 후 깨지는 패턴 / sum(rate({5xx}[5m])) by (job) or vector(0) / # → vector(0)에 job 레이블 없음 → or 매칭 실패`
+- L166-168 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `Before: otelcol.exporter.loki → loki.write / After:  otelcol.exporter.loki → loki.process → loki.write`
+
 ### `goti-monitoring-pitfalls-system.md`
 
 - 카테고리: monitoring / 시리즈: goti-observability-ops
@@ -1146,13 +1360,13 @@
 - L181-186 (5줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# 대시보드 수정 후, push 전 (클러스터 불필요) / ./validate.sh --lint-only    # 오프라인 lint + 커버리지 / `
 
-### `goti-poc-queue-a-401-ticketing-isolation.md`
+### `goti-tempo-scoped-tag-traceql-variable.md`
 
-- 카테고리: challenge / 시리즈: goti-queue-poc
+- 카테고리: monitoring / 시리즈: -
 - 블록 1개 / ASCII 5줄
 
-- L65-70 (5줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `GET /api/v1/stadium-seats/.../seat-grades → 403 /   {"code":"CLIENT_ERROR","message":"좌석 조회는 대기열 입장 완료 후에만 가능합니다."} / `
+- L40-45 (5줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `# PromQL — Grafana가 변환해줌 ✅ / {__name__=~"val1|val2|val3"} / `
 
 ### `queue-poc-loadtest-part2-results.md`
 
@@ -1162,29 +1376,23 @@
 - L76-81 (5줄, lang=`java`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `// Before — GenericJackson2JsonRedisSerializer가 ARGV를 이중 직렬화 / // Lua: HGET key "maxCapacity"  →  실제 전달: "\"maxCapacity\`
 
-### `challenge2-wealist-migration-part3.md`
+### `goti-dev-monitoring-502.md`
 
-- 카테고리: challenge / 시리즈: challenge-2-wealist-migration
+- 카테고리: cicd / 시리즈: goti-cloudfront-alb
+- 블록 2개 / ASCII 4줄
+
+- L38-40 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `dev.go-ti.shop/monitoring/*  → 502 Bad Gateway / dev.go-ti.shop/api/*         → 502 Bad Gateway`
+- L47-49 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `ALB Target Group: goti-dev-grafana-tg → unhealthy (Health checks failed) / ALB Target Group: goti-dev-tg → unhealthy (He`
+
+### `goti-metrics-collector-pipeline-e2e.md`
+
+- 카테고리: monitoring / 시리즈: goti-metrics-collector
 - 블록 1개 / ASCII 4줄
 
-- L263-267 (4줄, lang=`-`, kind=**tree**, decision=**keep**)
-  - 샘플: `my-app (namespace) / ├── frontend / ├── backend`
-
-### `cloudfront-s3-troubleshooting.md`
-
-- 카테고리: kubernetes / 시리즈: eks-infra
-- 블록 1개 / ASCII 4줄
-
-- L170-174 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# prod.yaml 구조 / storage-service:       # ← 이 키 아래 값은 umbrella chart용 /   config:`
-
-### `goti-ecr-secret-dollar-escape.md`
-
-- 카테고리: argocd / 시리즈: goti-argocd-gitops
-- 블록 1개 / ASCII 4줄
-
-- L92-96 (4줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `# 쉘이 해석하는 과정 / "AKIA...X$abc123..." /          ^^^^^^^^`
+- L112-116 (4줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `# /metrics 응답 / goti_match_active_total 0 / goti_guardrail_blacklist_size 0`
 
 ### `goti-phase6-redis-inventory.md`
 
@@ -1202,14 +1410,6 @@
 - L26-30 (4줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
   - 샘플: `goti-server CD → ECR push /               → Renovate: ECR 태그 조회 /               → Goti-k8s values.yaml 태그 업데이트 PR`
 
-### `goti-resale-istio-rbac-403.md`
-
-- 카테고리: istio / 시리즈: goti-resale
-- 블록 1개 / ASCII 4줄
-
-- L88-92 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
-  - 샘플: `excludePaths: /   - "/api/v1/resales/histories" /   - "/api/v1/resales/histories/*"`
-
 ### `goti-tempo-oom-kafka-buffer-sampling.md`
 
 - 카테고리: monitoring / 시리즈: goti-observability-stack
@@ -1226,6 +1426,14 @@
 - L109-113 (4줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# alloy-values.yaml / batch "kafka_traces": /   timeout: "2s"  # 10s → 2s`
 
+### `challenge2-wealist-migration-part2.md`
+
+- 카테고리: challenge / 시리즈: challenge-2-wealist-migration
+- 블록 1개 / ASCII 3줄
+
+- L108-111 (3줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `postgres-0 → postgres-data-postgres-0 (5Gi) / postgres-1 → postgres-data-postgres-1 (5Gi) / postgres-2 → postgres-data-p`
+
 ### `goti-grafana-csrf-origin.md`
 
 - 카테고리: cicd / 시리즈: goti-ec2-deploy
@@ -1234,13 +1442,33 @@
 - L136-139 (3줄, lang=`bash`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `# PR #37 merge → Monitoring CD 실행 / $ curl -s -o /dev/null -w "%{http_code}" https://dev.go-ti.shop/monitoring/api/healt`
 
-### `goti-monitoring-dashboard-nodata.md`
+### `goti-node-rightsizing-and-rebalancing.md`
 
-- 카테고리: monitoring / 시리즈: goti-otel-prometheus
+- 카테고리: kubernetes / 시리즈: goti-scaling
 - 블록 1개 / ASCII 3줄
 
-- L75-78 (3줄, lang=`promql`, kind=**arrow-only**, decision=**flatten**)
-  - 샘플: `# MSA 전환 후 깨지는 패턴 / sum(rate({5xx}[5m])) by (job) or vector(0) / # → vector(0)에 job 레이블 없음 → or 매칭 실패`
+- L58-61 (3줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `"Number of overutilized nodes" totalNumber=7   ← 전 노드 CPU 95~100% / "Number of underutilized nodes" totalNumber=0 / "No `
+
+### `goti-pgbouncer-rollout-and-load-test.md`
+
+- 카테고리: challenge / 시리즈: goti-pgbouncer
+- 블록 2개 / ASCII 3줄
+
+- L114-115 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `postgres://goti:-bh||...  → parse error: invalid URL`
+- L344-346 (2줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `TICKETING_DATABASE_MAX_CONNS: 18 → 10 / (6 replica × 10 = 60 client 연결)`
+
+### `goti-prometheus-job-label-mismatch.md`
+
+- 카테고리: monitoring / 시리즈: goti-otel-prometheus
+- 블록 2개 / ASCII 3줄
+
+- L44-46 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `goti:sli:availability:5m → result: [] / goti:apdex:score → result: []`
+- L126-127 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `goti-server → goti/goti-server`
 
 ### `goti-redis-sot-d2-d3-d4-rollout.md`
 
@@ -1259,6 +1487,24 @@
 
 - L98-101 (3줄, lang=`go`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `// 백엔드 실제 응답 / response.Success(c, gin.H{"order": order, "listings": listings}) / // → { "order": {...}, "listings": [..`
+
+### `challenge2-wealist-migration-part4.md`
+
+- 카테고리: challenge / 시리즈: challenge-2-wealist-migration
+- 블록 1개 / ASCII 2줄
+
+- L170-172 (2줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `wealist.local/       → frontend-service / wealist.local/api/   → board-api-service`
+
+### `goti-dev-loadtest-ssh-istio-turnstile.md`
+
+- 카테고리: istio / 시리즈: goti-istio-ops
+- 블록 2개 / ASCII 2줄
+
+- L30-31 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `맥(로컬) → SSH(2232) → Ubuntu 서버 → Kind 클러스터(goti-dev)`
+- L56-57 (1줄, lang=`text`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `맥 localhost:18080 → SSH(2232) → Ubuntu → 172.20.0.2:31080(Kind NodePort) → Istio Gateway → Pod`
 
 ### `goti-poc-ab-test-dependency-isolation-pattern.md`
 
@@ -1307,3 +1553,11 @@
 
 - L143-144 (1줄, lang=`yaml`, kind=**code-arrow**, decision=**skip**)
   - 샘플: `TICKETING_DATABASE_MAX_CONNS: 10  # 18 → 10`
+
+### `goti-virtualservice-fqdn-503.md`
+
+- 카테고리: kubernetes / 시리즈: goti-kind-monitoring
+- 블록 1개 / ASCII 1줄
+
+- L42-43 (1줄, lang=`-`, kind=**arrow-only**, decision=**flatten**)
+  - 샘플: `CloudFront → Kind PC:80 → Istio Gateway:31080 → Grafana`
