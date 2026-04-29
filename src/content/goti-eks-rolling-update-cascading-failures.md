@@ -91,17 +91,10 @@ memory limit: 1Gi
 
 rolling update 전 단계에서 `terraform apply -target=module.config`로 SSM과 SG inline ingress를 통합 적용했습니다. 이후 `terraform apply` (full)을 실행하자 별도 `aws_security_group_rule` 리소스가 destroy됐고, **AWS에서 실제 규칙이 삭제됐습니다**.
 
-문제의 구조는 다음과 같습니다.
+문제의 구조는 두 단계 apply가 같은 SG 규칙을 서로 다른 방식으로 관리하면서 발생합니다
 
-```text
-[terraform apply -target=module.config]
-  → aws_security_group.this: inline ingress로 규칙 통합 ← Terraform state에 기록
-
-[terraform apply (full)]
-  → aws_security_group_rule.from_eks_primary: destroy
-  → AWS가 실제 SG ingress 규칙을 삭제
-  → EKS primary SG(sg-0a7b4cec82230ff01) → RDS/ElastiCache 인바운드 소실
-```
+1. **`terraform apply -target=module.config`** — `aws_security_group.this`의 inline ingress로 규칙을 통합해 Terraform state에 기록합니다
+2. **`terraform apply` (full)** — `aws_security_group_rule.from_eks_primary`가 destroy되면서 AWS의 실제 SG ingress 규칙이 삭제됩니다. 그 결과 EKS primary SG(`sg-0a7b4cec82230ff01`)에서 RDS/ElastiCache로 가는 인바운드가 소실됩니다
 
 Terraform은 동일한 SG 규칙을 `aws_security_group` 블록의 inline ingress와 `aws_security_group_rule` 두 곳에서 관리하면, full apply 시 중복 상태를 정리하면서 실제 규칙을 지웁니다. EKS cluster primary SG에서 RDS(5432)와 ElastiCache(6379)로의 인바운드가 전부 사라진 것이 RDS 접속 불가의 직접 원인이었습니다.
 

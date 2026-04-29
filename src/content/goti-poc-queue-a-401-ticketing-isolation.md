@@ -45,11 +45,7 @@ POC A는 Istio VirtualService로 `/api/v1/queue/poc-a/**`를 받아 `/api/v1/que
 
 ### 1차 증상: 401 Empty Body
 
-부하테스트를 시작하자 대기열 API가 전부 401로 떨어졌습니다.
-
-```
-POST /api/v1/queue/poc-a/validate → 401 (empty body)
-```
+부하테스트를 시작하자 대기열 API(`POST /api/v1/queue/poc-a/validate`)가 전부 **401(empty body)** 로 떨어졌습니다.
 
 응답 body가 비어 있어서 Istio 레벨 차단인지 Spring Security 기본 차단인지조차 판단이 어려웠습니다.
 
@@ -66,7 +62,7 @@ required a bean of type 'com.goti.service.QueueService' that could not be found.
 
 대기열 통과(200 OK)까지는 성공했지만, 그 이후 예매 플로우에서 실패가 쏟아졌습니다.
 
-```
+```text
 GET /api/v1/stadium-seats/.../seat-grades → 403
   {"code":"CLIENT_ERROR","message":"좌석 조회는 대기열 입장 완료 후에만 가능합니다."}
 
@@ -156,11 +152,7 @@ POC C 테스트 시에는 POC C queue가 `ReservationSession`을 발급하므로
 
 ### 2차 수정 후 결과
 
-1차·2차 수정을 적용한 뒤 정상 동작을 확인했습니다.
-
-```
-POST /api/v1/queue/poc-a/validate → 200 OK (isPassed=true, token 발급)
-```
+1차·2차 수정을 적용한 뒤 `POST /api/v1/queue/poc-a/validate`가 **200 OK** (isPassed=true, token 발급)로 응답하면서 정상 동작을 확인했습니다.
 
 - pod 2/2 Running, restart 0
 - smoke 1 VU: `queue_pass_rate: 100%`, `queue_validate_ms p95: 314ms`

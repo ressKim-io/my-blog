@@ -83,11 +83,7 @@ Option C는 이 불편함을 감수하지 않고 각 목적에 맞는 구조를 
 
 ### 공통 인터페이스
 
-사람별로 API는 다르지만, 부하테스트 관점에서 대기열 흐름은 네 단계로 추상화할 수 있습니다.
-
-```text
-enterQueue() → waitForAdmission() → enterSeat() → [ticketing] → leaveQueue()
-```
+사람별로 API는 다르지만, 부하테스트 관점에서 대기열 흐름은 `enterQueue() → waitForAdmission() → enterSeat() → [ticketing] → leaveQueue()` 네 단계로 추상화할 수 있습니다.
 
 각 헬퍼는 이 인터페이스를 구현하면서, 내부에서 PR별 API 차이를 흡수합니다.
 

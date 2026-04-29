@@ -31,18 +31,18 @@ date: '2026-01-02'
 
 ### 콘솔 로그
 
-```
+```text
 🔌 [Chat WS] 연결 시도: wss://wealist.co.kr/api/svc/chat/...?token=eyJ...
 ❌ WebSocket connection failed
 🔌 [Chat WS] 연결 닫힘: 1006
 🔄 [Chat WS] 재연결 시도 1/5...
-🔌 [Chat WS] 연결 시도: wss://...?token=eyJ...  ← 같은 만료된 토큰!
+🔌 [Chat WS] 연결 시도: wss://...?token=eyJ...
 ❌ WebSocket connection failed
 ...
 ❌ [Chat WS] 최대 재연결 시도 초과
 ```
 
-**관찰 포인트**: 재연결할 때마다 **같은 토큰**을 사용하고 있었습니다.
+**관찰 포인트**: 재연결할 때마다 두 번째 `연결 시도` 로그의 `token=eyJ...` 값이 첫 번째와 동일합니다. **같은(만료된) 토큰**을 그대로 다시 사용하고 있었습니다.
 
 ---
 
@@ -90,14 +90,12 @@ const connect = () => {
 
 ### 문제의 흐름
 
-```
 1. 토큰 만료됨 (exp: 30분 전)
 2. WebSocket 연결 끊김 (code: 1006)
 3. 재연결 시도 → localStorage에서 만료된 토큰 읽음
 4. 서버에서 401 → 연결 거부
 5. 3~4 반복 5회
 6. 최대 재시도 초과 → 채팅 사용 불가
-```
 
 ---
 

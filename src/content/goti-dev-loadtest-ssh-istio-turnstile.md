@@ -25,11 +25,7 @@ date: "2026-04-08"
 
 ### 환경
 
-go-ti 프로젝트의 `feature/queue-poc-c` 브랜치를 main에 머지한 뒤, dev(Kind) 환경에서 K6 부하테스트를 실행하려 했습니다.
-
-```text
-맥(로컬) → SSH(2232) → Ubuntu 서버 → Kind 클러스터(goti-dev)
-```
+go-ti 프로젝트의 `feature/queue-poc-c` 브랜치를 main에 머지한 뒤, dev(Kind) 환경에서 K6 부하테스트를 실행하려 했습니다. 경로는 `맥(로컬) → SSH(2232) → Ubuntu 서버 → Kind 클러스터(goti-dev)` 흐름이었습니다.
 
 맥에서 Kind 클러스터로 트래픽을 보내는 경로를 먼저 확보해야 했습니다.
 
@@ -51,11 +47,7 @@ port-forward는 Istio sidecar를 우회하기 때문에 mTLS principal이 없는
 
 **시도 3 — SSH 터널 → NodePort**
 
-성공했습니다. 이후 이 경로로 진행했습니다.
-
-```text
-맥 localhost:18080 → SSH(2232) → Ubuntu → 172.20.0.2:31080(Kind NodePort) → Istio Gateway → Pod
-```
+성공했습니다. 이후 이 경로로 진행했습니다. 최종 트래픽 흐름은 `맥 localhost:18080 → SSH(2232) → Ubuntu → 172.20.0.2:31080 (Kind NodePort) → Istio Gateway → Pod`였습니다.
 
 탐색 과정에서 두 가지 추가 장애물이 있었습니다.
 

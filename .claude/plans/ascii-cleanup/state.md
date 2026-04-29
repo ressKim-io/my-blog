@@ -38,7 +38,8 @@
 - [x] **G12.** `cat:challenge` — 3편 / 6블록 / 24줄 (2026-04-29)
 - [x] **G13.** `series:goti-redis-sot` — 3편 / 7블록 / 24줄 (2026-04-29)
 - [x] **G14.** `series:goti-ticketing-phase` — 3편 / 5블록 / 23줄 (2026-04-29)
-- [ ] **G15~G41.** 잔여 27 그룹 (`groups.md` 참고) — 글당 1~3 블록의 작은 그룹
+- [x] **G15~G24.** 묶음 처리 (2026-04-30) — 12편 / 37블록 평탄화 28 + keep 9
+- [ ] **G25~G41.** 잔여 17 그룹 (`groups.md` 참고) — 글당 1~3 블록의 작은 그룹
 
 ### 그룹별 작업 절차
 
@@ -79,9 +80,19 @@
 | G12 `cat:challenge` | 3 | 4 | 2 (lang=`text` 명시) |
 | G13 `goti-redis-sot` | 3 | 4 | 3 (lang=`text` 명시 + race 시퀀스) |
 | G14 `goti-ticketing-phase` | 3 | 5 | 0 |
-| **합계** | **58** | **117** | **27** |
+| G15 `istio-intro` | 1 | 2 | 0 |
+| G16 `goti-queue-poc` | 2 | 3 | 2 (lang=`text` 명시) |
+| G17 `queue-poc-loadtest` | 1 | 2 | 2 (lang=`text` 명시 트리/응답) |
+| G18 `cat:monitoring` | 4 | 5 | 1 (lang=`text` 토폴로지) |
+| G19 `eks-infra` | 1 | 3 | 0 |
+| G20 `goti-eks` | 2 | 2 | 1 (lang=`hcl` Terraform) |
+| G21 `challenge-2-wealist-migration` | 4 | 4 | 0 |
+| G22 `goti-istio-ops` | 3 | 3 | 2 (lang=`text` Prom 출력) |
+| G23 `eks-security` | 1 | 1 | 1 (lang=`text` 콘솔 로그) |
+| G24 `game-server` | 1 | 3 | 0 |
+| **합계** | **78** | **145** | **36** |
 
-전체 211 flatten 추천 중 **117 블록 처리(약 55%)** + keep 보정 27건. 다음 진입점은 **G15 `series:istio-intro`** (1편 / 2블록 / 21줄).
+전체 211 flatten 추천 중 **145 블록 처리(약 69%)** + keep 보정 36건. 다음 진입점은 **G25 `series:goti-multicloud-db`** (1편 / 1블록 / 12줄).
 
 ### 다음 세션 재개 절차
 
@@ -105,3 +116,4 @@
 - 2026-04-29: G9 (`istio-observability`) 완료 — 2편 / 3블록 모두 평탄화. 20줄 Span 타임라인 ASCII 시각화는 표(Span/서비스/시작ms/종료ms/비고)로 변환 + 부모-자식 관계 + latency 누적 설명 본문 보강. 진단 절차 2건은 번호 목록. 다음은 G10 `goti-cloudflare-migration`.
 - 2026-04-29: G10 (`goti-cloudflare-migration`) 완료 — 2편 / 10블록 모두 평탄화. 번호 목록 6, bullet 3, 인라인 1. CloudFront/Cloudflare 마이그레이션 서사 자체가 "5가지 문제 연쇄"이고 각 문제가 단계별 사이클이라 번호 목록 비중 60%. SSL 이중 종단 흐름은 두 글에서 반복되는데 일관되게 번호 목록으로 변환. **누적 50% 통과** (103/211). 다음은 G11 `goti-auth`.
 - 2026-04-29: G11~G14 묶음 처리 완료 — 13편 / 23블록 중 14블록 평탄화(번호 목록 4, 인라인 3, 표 3, bullet 3, 굵은+번호 1), 9블록 keep(go-ti 시리즈가 lang=`diff`/`text`로 실제 diff/로그/측정값 많이 인용). D0~D7 롤아웃, Phase 7 경로 B 9단계, GitHub Actions 자동화 같은 다단계 흐름은 번호 목록이 압도적. 누적 117/211 (55%) + keep 27. 다음은 G15 `istio-intro`.
+- 2026-04-30: G15~G24 묶음 처리 완료 — 20편(istio-intro/queue-poc/eks/monitoring/cicd 일부 + wealist 4파트 + game-server) / 37블록 중 28블록 평탄화(번호 목록 11, 인라인 8, bullet 6, 표 3), 9블록 keep(lang=`text`/`hcl` 명시 출력·토폴로지·Terraform). 누적 145/211 (69%) + keep 36. 짧은 토폴로지 화살표 흐름이 lang=`text` 명시되어 있을 때는 keep 보정으로 일관 처리. 다음은 G25 `goti-multicloud-db`.

@@ -103,13 +103,11 @@ Pod가 재시작해도 이름이 안 바뀝니다. `postgres-0`은 항상 `postg
 
 **특징 2: 각 Pod마다 전용 볼륨**
 
-`volumeClaimTemplates`를 쓰면 Pod마다 PVC를 자동으로 만들어줍니다.
+`volumeClaimTemplates`를 쓰면 Pod마다 PVC를 자동으로 만들어줍니다
 
-```
-postgres-0 → postgres-data-postgres-0 (5Gi)
-postgres-1 → postgres-data-postgres-1 (5Gi)
-postgres-2 → postgres-data-postgres-2 (5Gi)
-```
+- `postgres-0` → `postgres-data-postgres-0` (5Gi)
+- `postgres-1` → `postgres-data-postgres-1` (5Gi)
+- `postgres-2` → `postgres-data-postgres-2` (5Gi)
 
 각 Pod가 독립적인 저장소를 갖습니다. 데이터가 섞이지 않습니다.
 

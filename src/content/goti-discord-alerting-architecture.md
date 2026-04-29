@@ -264,15 +264,12 @@ $ kubectl get secret alertmanager-discord-webhook -n monitoring
 Error from server (NotFound): secrets "alertmanager-discord-webhook" not found
 ```
 
-Secret이 진짜 없었습니다. 원인은 **배포 순서 역전**이었습니다.
+Secret이 진짜 없었습니다. 원인은 **배포 순서 역전**이었습니다. 실제 발생한 순서는 다음과 같습니다
 
-```
-실제 발생한 순서:
 1. Goti-monitoring PR 머지 → ArgoCD가 Alertmanager config 먼저 sync
 2. Alertmanager가 Secret 마운트 시도 → Secret 없음 → FailedMount
 3. Goti-k8s PR 머지 → ExternalSecret 배포 (아직 안 됨)
 4. Terraform apply → SSM 파라미터 생성 (아직 안 됨)
-```
 
 정상적인 순서는 Terraform → Goti-k8s → Goti-monitoring인데, 3개 레포에 거의 동시에 PR을 올리다 보니 **Goti-monitoring이 가장 먼저 sync**되어 버렸습니다.
 
@@ -300,13 +297,11 @@ alertmanager-kube-prometheus-stack-alertmanager-0      3/3     Running   0      
 
 ### 재발 방지
 
-**배포 순서를 문서화**했습니다. 3개 레포에 걸친 변경은 반드시 아래 순서를 지켜야 합니다:
+**배포 순서를 문서화**했습니다. 3개 레포에 걸친 변경은 반드시 아래 순서를 지켜야 합니다
 
-```
 1. Terraform apply (SSM 파라미터 생성)
 2. Goti-k8s 배포 (ExternalSecret → Secret 생성)
 3. Goti-monitoring 배포 (Alertmanager config 적용)
-```
 
 이 순서가 중요한 이유는 **각 단계의 출력이 다음 단계의 입력**이기 때문입니다.
 

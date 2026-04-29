@@ -425,15 +425,13 @@ spec:
 
 ### 환경변수 관리
 
-```
-개발 단계:
-ConfigMap (평문) → Secret (Base64) → Helm (템플릿화) → Vault (암호화)
+개발 단계는 `ConfigMap (평문) → Secret (Base64) → Helm (템플릿화) → Vault (암호화)` 순서로 진화합니다.
 
-실무 추천:
-- 로컬 개발: ConfigMap
-- 스테이징: Secret
-- 프로덕션: 외부 저장소 (AWS Secrets Manager, Vault)
-```
+실무 추천 매핑은 다음과 같습니다
+
+- **로컬 개발**: ConfigMap
+- **스테이징**: Secret
+- **프로덕션**: 외부 저장소 (AWS Secrets Manager, Vault)
 
 ## 정리
 

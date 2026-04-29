@@ -151,17 +151,12 @@ sudo -u postgres psql -c "ALTER SYSTEM SET max_connections = 200;"
 sudo systemctl restart postgresql
 ```
 
-**max_connections=200 산정 근거**는 다음과 같습니다.
+**max_connections=200 산정 근거**는 다음과 같습니다
 
-```text
-서비스 5개 × replica 2 = 10 Pod
-HikariCP maximumPoolSize 기본값 = 10 (Pod당)
-→ 최대 100 연결
-
-rolling update 시 일시적 2배 여유 = 200
-→ max_connections = 200
-  (superuser 예약 3개 제외 시 197개 사용 가능)
-```
+1. 서비스 5개 × replica 2 = **10 Pod**
+2. HikariCP `maximumPoolSize` 기본값 = 10 (Pod당) → **최대 100 연결**
+3. rolling update 시 일시적 2배 여유 → **200**
+4. `max_connections = 200` (superuser 예약 3개 제외 시 197개 사용 가능)
 
 ### 수정 후 검증
 

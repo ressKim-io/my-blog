@@ -37,13 +37,10 @@ date: "2026-02-23"
 
 PromQL에서는 Grafana가 multi-value 변수를 pipe-separated 형태(`val1|val2|val3`)로 변환해서 `=~` regex에 넣어주는데, **TraceQL에서는 이 변환이 지원되지 않습니다**.
 
-```
-# PromQL — Grafana가 변환해줌 ✅
-{__name__=~"val1|val2|val3"}
-
-# TraceQL — Grafana 변환 미지원 ❌
-{span.http.route=~"val1|val2|val3"}  → 400 Bad Request
-```
+| 쿼리 언어 | 예시 | Grafana 변환 |
+|---|---|---|
+| PromQL | `{__name__=~"val1\|val2\|val3"}` | 변환됨 |
+| TraceQL | `{span.http.route=~"val1\|val2\|val3"}` | 미지원 → 400 Bad Request |
 
 PromQL과 TraceQL의 `=~` 연산자가 같은 것처럼 보이지만, Grafana datasource plugin의 변수 치환 방식이 다릅니다.
 

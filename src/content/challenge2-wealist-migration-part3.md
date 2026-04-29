@@ -269,11 +269,11 @@ my-app (namespace)
 관련 서비스를 같은 네임스페이스에 두고 간단하게 `service-name`으로 접근합니다.
 
 **Case 2: 공유 인프라 분리 (이 글 케이스 ⭐⭐ 30%)**
-```
-postgresql-prod (namespace) ← 여러 앱이 공유
-board-api-prod (namespace)
-user-api-prod (namespace)
-```
+
+- `postgresql-prod` 네임스페이스 — 여러 앱이 공유하는 DB
+- `board-api-prod` 네임스페이스 — 앱 1
+- `user-api-prod` 네임스페이스 — 앱 2
+
 DB를 독립 네임스페이스로 분리하고, FQDN으로 접근합니다. 주로 인프라 팀이 DB를 중앙 관리할 때 씁니다.
 
 **Case 3: 외부 관리형 DB (중요!! 실무 가장 많음 ⭐⭐⭐ 95%)**

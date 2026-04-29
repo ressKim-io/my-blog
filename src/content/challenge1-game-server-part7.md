@@ -67,14 +67,12 @@ Ingress를 쓰면 LoadBalancer 하나만 있으면 됩니다.
 
 ### 경로 기반 라우팅
 
-Ingress는 URL 경로를 보고 Service를 선택합니다.
+Ingress는 URL 경로를 보고 Service를 선택합니다
 
-```
-http://localhost/lobby  → game-lobby Service
-http://localhost/room   → game-room Service
-http://localhost/chat   → game-chat Service
-http://localhost/ranking → game-ranking Service
-```
+- `http://localhost/lobby` → `game-lobby` Service
+- `http://localhost/room` → `game-room` Service
+- `http://localhost/chat` → `game-chat` Service
+- `http://localhost/ranking` → `game-ranking` Service
 
 하나의 진입점으로 모든 서비스에 접근할 수 있습니다.
 
@@ -196,15 +194,10 @@ annotations:
 
 이게 없으면 Service에 `/lobby` 경로 그대로 전달됩니다. 하지만 대부분 애플리케이션은 `/` 경로에서 시작합니다.
 
-```
-# rewrite-target 없으면
-요청: http://localhost/lobby
-전달: http://game-lobby/lobby  ← 404 에러
-
-# rewrite-target 있으면
-요청: http://localhost/lobby
-전달: http://game-lobby/  ← 정상
-```
+| `rewrite-target` 설정 | 요청 | 백엔드 전달 | 결과 |
+|---|---|---|---|
+| 없음 | `http://localhost/lobby` | `http://game-lobby/lobby` | 404 에러 |
+| 있음 | `http://localhost/lobby` | `http://game-lobby/` | 정상 |
 
 경로를 `/`로 재작성해줍니다.
 
@@ -237,12 +230,10 @@ spec:
               number: 80
 ```
 
-이렇게 하면 서브도메인별로 다른 Service에 연결됩니다.
+이렇게 하면 서브도메인별로 다른 Service에 연결됩니다
 
-```
-lobby.game.example.com → game-lobby
-chat.game.example.com  → game-chat
-```
+- `lobby.game.example.com` → `game-lobby`
+- `chat.game.example.com` → `game-chat`
 
 ## ⚠️ 주의사항
 
