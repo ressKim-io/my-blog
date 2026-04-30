@@ -1,59 +1,83 @@
 @import "tailwindcss";
 
-/* Dark Mode (default) */
-:root {
-  --bg-primary:     #09090b;
-  --bg-secondary:   #111113;
-  --bg-tertiary:    #1a1a1d;
-  --bg-elevated:    #222225;
-  --text-primary:   #ededef;
-  --text-secondary: #8b8b8e;
-  --text-muted:     #5c5c5f;
-  --accent:         #60a5fa;
-  --accent-hover:   #93bbfd;
-  --accent-muted:   rgba(96, 165, 250, 0.12);
-  --border:         #1e1e21;
-  --border-hover:   #2e2e32;
-}
+/* === Design System v2 — Light only ===
+ * IA: Essays / Logs / Projects 3-track
+ * Color: Off-white base + Electric Violet accent + 3-track sub-colors
+ * Trend: 2026 dopamine + paper-like base
+ */
 
-/* Light Mode */
-[data-theme="light"] {
-  --bg-primary:     #fafafa;
-  --bg-secondary:   #ffffff;
-  --bg-tertiary:    #f0f0f1;
-  --bg-elevated:    #ffffff;
-  --text-primary:   #1a1a1a;
-  --text-secondary: #6b6b6e;
-  --text-muted:     #9a9a9d;
-  --accent:         #3b82f6;
-  --accent-hover:   #2563eb;
-  --accent-muted:   rgba(59, 130, 246, 0.08);
-  --border:         #e8e8ea;
-  --border-hover:   #d0d0d3;
+:root {
+  /* Surfaces */
+  --bg:             #FAFAFA;
+  --surface:        #F5F5F5;
+  --elevated:       #FFFFFF;
+
+  /* Text */
+  --text:           #0A0A0A;
+  --text-secondary: #27272A;
+  --muted:          #52525B;
+  --muted-soft:     #71717A;
+
+  /* Border */
+  --border:         #E4E4E7;
+  --border-strong:  #D4D4D8;
+
+  /* Accent (메인 — 링크·CTA·페이지네이션) */
+  --accent:         #7C3AED;
+  --accent-hover:   #6D28D9;
+  --accent-soft:    #F5F3FF;
+
+  /* Track colors */
+  --essays:         #0A0A0A;
+  --logs:           #78716C;
+  --logs-soft:      #F5F5F4;
+  --projects:       #10B981;
+  --projects-soft:  #ECFDF5;
+
+  /* Code (글 본문 코드블록) */
+  --code-bg:        #18181B;
+  --code-fg:        #FAFAFA;
+
+  /* Legacy aliases (점진 마이그레이션용 — 새 코드는 위 토큰 사용) */
+  --bg-primary:     var(--bg);
+  --bg-secondary:   var(--surface);
+  --bg-tertiary:    var(--surface);
+  --bg-elevated:    var(--elevated);
+  --text-primary:   var(--text);
+  --text-muted:     var(--muted);
+  --accent-muted:   var(--accent-soft);
+  --border-hover:   var(--border-strong);
 }
 
 @theme inline {
-  --color-background: var(--bg-primary);
-  --color-foreground: var(--text-primary);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
 }
 
 @layer base {
+  html {
+    background: var(--bg);
+  }
+
   body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   code, pre {
-    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-family: "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
     font-variant-ligatures: none;
+    font-feature-settings: "ss01", "ss02", "ss03", "cv01", "cv02";
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -61,8 +85,17 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--border-hover);
-    border-radius: 3px;
+    background: var(--border-strong);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--accent);
   }
 
   a {
@@ -75,45 +108,47 @@
     color: var(--accent-hover);
   }
 
-  /* Prose — Article content */
+  /* === Article body (.prose) ===
+   * Verified in /preview: 17px / lh 1.8 with Pretendard
+   */
   .prose {
-    max-width: 780px;
+    max-width: 720px;
     font-size: 17px;
-    line-height: 1.75;
+    line-height: 1.8;
+    color: var(--text-secondary);
   }
 
   .prose h1, .prose h2, .prose h3, .prose h4 {
-    color: var(--text-primary);
+    color: var(--text);
     font-weight: 700;
-    scroll-margin-top: 72px;
-    letter-spacing: -0.01em;
+    scroll-margin-top: 80px;
+    letter-spacing: -0.015em;
   }
 
   .prose h2 {
-    font-size: 1.5rem;
-    margin-top: 2.5rem;
+    font-size: 1.625rem;
+    margin-top: 2.75rem;
     margin-bottom: 1rem;
+    line-height: 1.3;
   }
 
   .prose h3 {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     margin-top: 2rem;
     margin-bottom: 0.75rem;
-    color: var(--text-primary);
+    line-height: 1.4;
   }
 
   .prose p {
-    color: var(--text-secondary);
     margin-bottom: 1.25rem;
   }
 
   .prose strong {
-    color: var(--text-primary);
+    color: var(--text);
     font-weight: 600;
   }
 
   .prose ul, .prose ol {
-    color: var(--text-secondary);
     margin-bottom: 1.25rem;
     padding-left: 1.5rem;
   }
@@ -123,46 +158,64 @@
   }
 
   .prose code:not(pre code) {
-    background: var(--bg-tertiary);
+    background: var(--surface);
+    color: var(--accent);
     padding: 0.15rem 0.4rem;
     border-radius: 4px;
-    font-size: 0.85em;
+    font-size: 0.9em;
+    border: 1px solid var(--border);
   }
 
   .prose pre {
-    background: var(--bg-secondary) !important;
-    border: 1px solid var(--border);
+    background: var(--code-bg) !important;
+    color: var(--code-fg);
+    border: 1px solid var(--code-bg);
     border-radius: 8px;
-    padding: 1rem;
+    padding: 1.125rem 1.375rem;
     overflow-x: auto;
-    margin: 1.5rem 0;
+    margin: 1.75rem 0;
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .prose pre code {
+    background: transparent;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font-size: inherit;
   }
 
   .prose blockquote {
-    border-left: 2px solid var(--border-hover);
-    padding-left: 1rem;
-    color: var(--text-muted);
-    font-style: italic;
-    margin: 1.5rem 0;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 0.75rem 1.125rem;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    margin: 1.75rem 0;
+  }
+
+  .prose blockquote p {
+    margin: 0;
   }
 
   .prose table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.5rem 0;
+    margin: 1.75rem 0;
     font-size: 0.95em;
   }
 
   .prose th, .prose td {
     border: 1px solid var(--border);
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1rem;
     text-align: left;
   }
 
   .prose th {
-    background: var(--bg-secondary);
+    background: var(--surface);
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text);
   }
 
   .prose td {
@@ -172,13 +225,41 @@
   .prose hr {
     border: none;
     border-top: 1px solid var(--border);
-    margin: 2rem 0;
+    margin: 2.5rem 0;
+  }
+
+  .prose a {
+    border-bottom: 1px solid var(--accent);
+    transition: opacity 0.15s;
+  }
+
+  .prose a:hover {
+    opacity: 0.7;
+  }
+
+  .prose img {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
   }
 }
 
-/* Light mode card surface */
-[data-theme="light"] .surface-card {
-  background: #ffffff;
+/* Card surface (legacy compat — used by old pages) */
+.surface-card {
+  background: var(--elevated);
   border: 1px solid var(--border);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* Track utility classes */
+.track-essays {
+  --track-color: var(--essays);
+  --track-soft: var(--surface);
+}
+.track-logs {
+  --track-color: var(--logs);
+  --track-soft: var(--logs-soft);
+}
+.track-projects {
+  --track-color: var(--projects);
+  --track-soft: var(--projects-soft);
 }

@@ -12,10 +12,15 @@ interface SearchItem {
   category: string;
   tags?: string[];
   date: string;
+  track?: 'essays' | 'logs';
 }
 
 interface SearchProps {
   posts: SearchItem[];
+}
+
+function hrefFor(item: SearchItem) {
+  return item.track ? `/${item.track}/${item.slug}` : `/blog/${item.slug}`;
 }
 
 export default function Search({ posts }: SearchProps) {
@@ -80,14 +85,14 @@ export default function Search({ posts }: SearchProps) {
       e.preventDefault();
       setSelectedIndex(i => Math.max(i - 1, 0));
     } else if (e.key === 'Enter' && results[selectedIndex]) {
-      router.push(`/blog/${results[selectedIndex].slug}`);
+      router.push(hrefFor(results[selectedIndex]));
       setIsOpen(false);
       setQuery('');
     }
   }, [results, selectedIndex, router]);
 
-  const handleSelect = (slug: string) => {
-    router.push(`/blog/${slug}`);
+  const handleSelect = (item: SearchItem) => {
+    router.push(hrefFor(item));
     setIsOpen(false);
     setQuery('');
   };
@@ -138,7 +143,7 @@ export default function Search({ posts }: SearchProps) {
             {results.map((result, index) => (
               <button
                 key={result.slug}
-                onClick={() => handleSelect(result.slug)}
+                onClick={() => handleSelect(result)}
                 className={`w-full px-4 py-3 text-left flex items-start gap-3 transition-colors ${
                   index === selectedIndex ? 'bg-[var(--bg-tertiary)]' : 'hover:bg-[var(--bg-tertiary)]'
                 }`}

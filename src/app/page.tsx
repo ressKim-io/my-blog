@@ -1,244 +1,160 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
-import { getAllPosts } from '@/lib/posts';
+import Footer from '@/components/Footer';
+import PostCard from '@/components/PostCard';
+import { getAllPosts, getEssays } from '@/lib/posts';
+import { getActiveProjects, getProjectPosts } from '@/lib/projects';
 
 export const metadata: Metadata = {
-  alternates: {
-    canonical: '/',
-  },
+  alternates: { canonical: '/' },
+};
+
+const statusBadge: Record<string, { label: string; mark: string; color: string }> = {
+  active: { label: '진행 중', mark: '●', color: 'var(--projects)' },
+  upcoming: { label: '예정', mark: '○', color: 'var(--muted)' },
+  paused: { label: '일시 중지', mark: '◐', color: 'var(--muted)' },
+  done: { label: '완료', mark: '✓', color: 'var(--muted)' },
 };
 
 export default function Home() {
   const allPosts = getAllPosts();
-
-  // Category grouping
-  const postsByCategory = allPosts.reduce((acc, post) => {
-    const category = post.category || 'etc';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(post);
-    return acc;
-  }, {} as Record<string, typeof allPosts>);
-
-  const categoryLabels: Record<string, string> = {
-    istio: 'Istio',
-    kubernetes: 'Kubernetes',
-    challenge: 'Challenge',
-    argocd: 'ArgoCD',
-    monitoring: 'Monitoring',
-    cicd: 'CI/CD',
-  };
-
-  const categoryOrder = ['istio', 'kubernetes', 'challenge', 'argocd', 'monitoring', 'cicd'];
-  const sortedCategories = categoryOrder.filter((cat) => postsByCategory[cat]);
-
-  // Tag counts (top 10)
-  const tagCounts = new Map<string, number>();
-  allPosts.forEach((p) => p.tags?.forEach((t) => tagCounts.set(t, (tagCounts.get(t) || 0) + 1)));
-  const topTags = Array.from(tagCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10);
-
-  // Featured (latest) + Recent (next 4)
-  const featuredPost = allPosts[0];
-  const recentPosts = allPosts.slice(1, 5);
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
+  const latestEssays = getEssays().slice(0, 3);
+  const activeProjects = getActiveProjects();
 
   return (
     <>
       <Header posts={allPosts} />
-
-      <main className="pt-24 pb-16">
-        <div className="max-w-5xl mx-auto px-4">
-          {/* Hero */}
-          <section className="mb-16">
-            <h1 className="text-3xl font-bold tracking-tight mb-3">ress 의 기술블로그</h1>
-            <p className="text-[var(--text-secondary)] text-lg max-w-xl leading-relaxed">
-              DevOps, Kubernetes, Service Mesh.
-              <br />
-              Learning by doing, documenting the journey.
+      <main>
+        <section className="pt-24 pb-20 border-b border-[var(--border)]">
+          <div className="max-w-[1100px] mx-auto px-5">
+            <p className="text-[12px] font-semibold text-[var(--accent)] uppercase tracking-[0.14em] mb-5">
+              Ress Blog
             </p>
-            <div className="flex gap-3 mt-6">
+            <h1 className="text-[44px] md:text-[60px] leading-[1.1] font-bold tracking-tight text-[var(--text)] max-w-[820px]">
+              Learning by doing,
+              <br />
+              <span className="text-[var(--muted)]">documenting the journey</span>
+            </h1>
+            <p className="mt-6 text-[16px] md:text-[17px] text-[var(--muted)] max-w-[560px] leading-relaxed">
+              DevOps · Kubernetes · Istio · Observability — 학습한 내용과 부딪힌 문제를 솔직하게 기록합니다.
+            </p>
+            <div className="flex flex-wrap gap-3 mt-8">
               <Link
-                href="/blog"
-                className="px-4 py-2 text-sm font-medium rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 transition-opacity"
+                href="/essays"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--accent)] text-white text-[14.5px] font-semibold hover:bg-[var(--accent-hover)] transition-colors"
               >
-                All Posts
+                Read Essays
+                <span className="opacity-80">→</span>
               </Link>
-              <a
-                href="https://github.com/resskim-io"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-sm font-medium rounded-lg text-[var(--text-secondary)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
-              >
-                GitHub
-              </a>
-            </div>
-
-            {/* About + Stats */}
-            <h2 className="mt-10 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">About</h2>
-            <div className="flex flex-col md:flex-row gap-5">
-              {/* About Card */}
-              <div className="flex-1 min-w-0 p-6 bg-[var(--bg-secondary)] rounded-xl surface-card flex flex-col justify-center">
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-3">
-                  DevOps와 Platform Engineering에 관심이 많은 엔지니어입니다.
-                  <span className="text-[var(--text-primary)] font-medium"> Kubernetes </span>
-                  위에서 서비스를 운영하고,
-                  <span className="text-[var(--text-primary)] font-medium"> Istio </span>
-                  로 Service Mesh를 구성하며,
-                  <span className="text-[var(--text-primary)] font-medium"> Terraform </span>
-                  으로 인프라를 코드로 관리하는 것에 대해 공부하고 있습니다.
-                </p>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                  개발자 경험(DX)을 개선하는 것에도 깊은 관심을 갖고 있습니다.
-                  CI/CD 파이프라인 최적화, GitOps 워크플로우 설계,
-                  Observability 구축까지 — 팀이 더 빠르고 안정적으로 배포할 수 있도록 고민하는 것을 좋아합니다.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {['Kubernetes', 'Istio', 'Terraform', 'ArgoCD', 'Prometheus', 'AWS', 'Docker', 'CI/CD'].map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-2.5 py-1 rounded-md text-xs bg-[var(--bg-tertiary)] text-[var(--text-secondary)]"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Stats Card */}
-              <div className="md:w-52 shrink-0 p-6 bg-[var(--bg-secondary)] rounded-xl surface-card flex flex-row md:flex-col justify-around md:justify-center gap-4 md:gap-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-[var(--text-primary)]">{allPosts.length}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">Posts</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-[var(--text-primary)]">{sortedCategories.length}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">Categories</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-[var(--text-primary)]">{tagCounts.size}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">Tags</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Featured Post — large card */}
-          {featuredPost && (
-            <section className="mb-12">
-              <h2 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Latest</h2>
               <Link
-                href={`/blog/${featuredPost.slug}`}
-                className="group block p-8 bg-[var(--bg-secondary)] rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors surface-card"
+                href="/projects"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[var(--border-strong)] text-[var(--text)] text-[14.5px] font-semibold hover:bg-[var(--surface)] transition-colors"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs text-[var(--text-muted)]">{featuredPost.category}</span>
-                  <span className="text-xs text-[var(--text-muted)]">{formatDate(featuredPost.date)}</span>
-                </div>
-                <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-3 group-hover:text-[var(--accent)] transition-colors leading-snug">
-                  {featuredPost.title}
-                </h3>
-                {featuredPost.excerpt && (
-                  <p className="text-[var(--text-secondary)] leading-relaxed max-w-2xl">
-                    {featuredPost.excerpt}
-                  </p>
-                )}
-                <span className="inline-block mt-5 text-sm text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
-                  Read more →
-                </span>
+                See Projects
+                <span className="text-[var(--muted)]">→</span>
               </Link>
-            </section>
-          )}
+            </div>
+          </div>
+        </section>
 
-          {/* Recent Posts — 2 col */}
-          <section className="mb-16">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Recent</h2>
-              <Link href="/blog" className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+        <section className="py-16">
+          <div className="max-w-[1100px] mx-auto px-5">
+            <div className="flex items-baseline justify-between mb-8">
+              <h2 className="text-[12px] font-semibold text-[var(--muted)] uppercase tracking-wider">
+                Latest Essays
+              </h2>
+              <Link
+                href="/essays"
+                className="text-[13px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
+              >
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {recentPosts.map((post) => (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  className="group p-6 bg-[var(--bg-secondary)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors surface-card"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-[var(--text-muted)]">{post.category}</span>
-                    <span className="text-xs text-[var(--text-muted)]">{formatDate(post.date)}</span>
-                  </div>
-                  <h3 className="font-medium text-[var(--text-primary)] mb-3 group-hover:text-[var(--accent)] transition-colors leading-snug">
-                    {post.title}
-                  </h3>
-                  {post.excerpt && (
-                    <p className="text-sm text-[var(--text-muted)] line-clamp-3 leading-relaxed">
-                      {post.excerpt}
-                    </p>
-                  )}
-                </Link>
+            <div className="max-w-[760px]">
+              {latestEssays.map((post) => (
+                <PostCard key={post.slug} post={post} track="essays" />
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Categories — larger cards with description */}
-          <section className="mb-16">
-            <h2 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Categories</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {sortedCategories.map((category) => {
-                const posts = postsByCategory[category];
-                const count = posts.length;
-                const latest = posts[0];
+        <section className="py-16 bg-[var(--surface)] border-y border-[var(--border)]">
+          <div className="max-w-[1100px] mx-auto px-5">
+            <div className="flex items-baseline justify-between mb-8">
+              <h2 className="text-[12px] font-semibold text-[var(--muted)] uppercase tracking-wider">
+                Active Projects
+              </h2>
+              <Link
+                href="/projects"
+                className="text-[13px] text-[var(--muted)] hover:text-[var(--projects)] transition-colors"
+              >
+                View all →
+              </Link>
+            </div>
+            <div className="grid md:grid-cols-2 gap-5">
+              {activeProjects.map((proj) => {
+                const badge = statusBadge[proj.status];
+                const posts = getProjectPosts(proj.slug);
+                const seriesCount = new Set(
+                  posts.map((p) => p.series?.name).filter(Boolean),
+                ).size;
                 return (
                   <Link
-                    key={category}
-                    href={`/blog?category=${category}`}
-                    className="group p-5 bg-[var(--bg-secondary)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors surface-card"
+                    key={proj.slug}
+                    href={`/projects/${proj.slug}`}
+                    className="group block p-6 rounded-xl bg-[var(--elevated)] border border-[var(--border)] hover:border-[var(--projects)] transition-colors"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
-                        {categoryLabels[category] || category}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span style={{ color: badge.color }} className="text-[14px]">
+                        {badge.mark}
+                      </span>
+                      <h3 className="text-[20px] font-bold text-[var(--text)] group-hover:text-[var(--projects)] transition-colors">
+                        {proj.title}
                       </h3>
-                      <span className="text-xs text-[var(--text-muted)]">{count}</span>
                     </div>
-                    {latest && (
-                      <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">
-                        {latest.title}
-                      </p>
+                    <p className="text-[14px] text-[var(--muted)] leading-relaxed mb-4">
+                      {proj.tagline}
+                    </p>
+                    {posts.length > 0 ? (
+                      <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
+                        <span>{posts.length}편</span>
+                        {seriesCount > 0 && (
+                          <>
+                            <span className="text-[var(--border-strong)]">·</span>
+                            <span>{seriesCount} 시리즈</span>
+                          </>
+                        )}
+                        {proj.startedAt && (
+                          <>
+                            <span className="text-[var(--border-strong)]">·</span>
+                            <span>since {proj.startedAt}</span>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[12px] text-[var(--muted)]">{badge.label}</span>
                     )}
                   </Link>
                 );
               })}
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Popular Tags */}
-          <section className="mb-16">
-            <h2 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Popular Tags</h2>
-            <div className="flex flex-wrap gap-2">
-              {topTags.map(([tag, count]) => (
-                <Link
-                  key={tag}
-                  href={`/blog?tag=${tag}`}
-                  className="px-3 py-1.5 rounded-lg text-sm bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                  {tag} <span className="text-[var(--text-muted)]">{count}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        </div>
+        <section className="py-12">
+          <div className="max-w-[1100px] mx-auto px-5 text-[13px] text-[var(--muted)]">
+            <span className="text-[var(--text)] font-semibold">{allPosts.length} posts</span>
+            <span className="mx-2 text-[var(--border-strong)]">·</span>
+            <span>since 2025-10</span>
+            <span className="mx-2 text-[var(--border-strong)]">·</span>
+            <Link href="/about" className="hover:text-[var(--accent)] transition-colors">
+              About →
+            </Link>
+          </div>
+        </section>
       </main>
-
-      {/* Footer */}
-      <footer className="py-8 border-t border-[var(--border)]">
-        <div className="max-w-5xl mx-auto px-4 text-center text-[var(--text-muted)] text-xs">
-          <p>© 2026 Ress</p>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }
