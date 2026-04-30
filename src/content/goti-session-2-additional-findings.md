@@ -1,6 +1,7 @@
 ---
 title: "Session 2 추가 발견 사항 — smoke 중 드러난 미기록 이슈 정리"
 excerpt: "Java→Go cutover smoke 트러블슈팅 중 즉시 수정하지 않고 메모만 했던 계약 불일치, 인프라 미해결 이슈, Redis/PG drift, 예매 플로우 미구현 항목을 범주별로 정리합니다."
+type: troubleshooting
 category: challenge
 tags:
   - go-ti

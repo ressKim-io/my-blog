@@ -1,6 +1,7 @@
 ---
 title: "Tempo v2 scoped tag 400 에러 — TraceQL과 Grafana 변수의 불일치"
 excerpt: "TraceQL의 =~ 연산자가 Grafana multi-value 변수와 호환되지 않고, Tempo v2 API는 scoped tag name을 요구하는데 Grafana 문서는 unscoped를 안내하는 두 가지 함정"
+type: troubleshooting
 category: monitoring
 tags:
   - go-ti

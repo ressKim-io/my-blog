@@ -1,6 +1,7 @@
 ---
 title: "Discord 알림 구축기: 아키텍처 결정부터 배포 3연속 장애까지"
 excerpt: "Alertmanager receiver가 null인 상태에서 Discord 알림을 구축하면서 만난 Secret 미존재, ESO 캐시, ArgoCD 리소스 이중 관리 3연속 장애"
+type: troubleshooting
 category: monitoring
 tags:
   - go-ti

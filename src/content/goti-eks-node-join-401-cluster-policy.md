@@ -230,7 +230,7 @@ access_entries = {
 # (team_member access entries: no changes — drift 해소 확인)
 ```
 
-`terraform apply` 후 ASG 복원 → 노드 정상 조인이 확인되었습니다.
+`terraform apply` 후 ASG 복원 → 노드 정상 조인이 확인했습니다.
 
 ---
 

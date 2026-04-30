@@ -1,6 +1,7 @@
 ---
 title: "PgBouncer 도입 + 1차 3000 VU — 쓰러지고 나서야 보인 것들"
 excerpt: "PgBouncer session 모드를 실제 배포하면서 마주친 ConfigMap 문법 오류·ArgoCD 캐시 교착·prepared statement 4단 시행착오, 그리고 3000 VU 부하테스트에서 ticket_success 15.6%가 나온 진짜 원인을 기록합니다"
+type: troubleshooting
 category: challenge
 tags:
   - go-ti

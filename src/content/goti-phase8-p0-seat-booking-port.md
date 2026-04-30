@@ -139,7 +139,7 @@ HoldSeat 내부의 `GetOrCreate(ctx, userID, gameID)` 호출부는 `forceNew=fal
 
 - **P0#5 — queue admit 가드(queueAccessReader)**: smoke 진행 우선 원칙에 따라 P1으로 이연. smoke가 통과한 뒤 도입합니다
 - **P0#6 — seed 검증**: 고아 stadium 5건 삭제로 `future_games = games_with_inventory = 605` 달성 (별도 cleanup 기록)
-- **주문/결제/취소 플로우 계약 감사**: Phase 9 별건
+- **주문/결제/취소 플로우 계약 검토**: Phase 9 별건
 
 ---
 
@@ -195,7 +195,7 @@ smoke 통과 후 처리할 항목입니다.
 
 **P2 — 부하 테스트 전 필요:**
 - Java OpenAPI → Go DTO diff CI job
-- 필드명 전수 감사 (`homeTeamDisplayName` 등)
+- 필드명 전수 점검 (`homeTeamDisplayName` 등)
 - queueAccessReader 도입
 - 인증 미들웨어 전수 재검토
 

@@ -78,7 +78,7 @@ date: "2026-04-15"
 
 > "keda나 karpenter 설정 다듬을 필요 있지 않아? 부하 들어올 때 터지고 나서 늘어나는 경향"
 
-감사 결과 충격적이었습니다
+분석 결과 충격적이었습니다
 
 - **Karpenter NodePool 파일 전체 주석 상태 → 미작동**
 - KEDA `pollingInterval` 30s + Prometheus `[1m]` → **~90s 지연**
@@ -196,6 +196,6 @@ psql -c "\i migrations/003_pricing_performance_indexes.sql"   # CONCURRENTLY, no
 
 ### 일반 교훈
 
-- **"부하 오니까 터지고 나서 늘어남"이라는 체감 호소는 감사 트리거로 삼습니다** 실제로 파보니 KEDA polling + Prometheus window로 90s 지연 + Karpenter NodePool 주석 상태 같은 문제가 묻혀 있었습니다
+- **"부하 오니까 터지고 나서 늘어남"이라는 느낀 호소는 점검 트리거로 삼습니다** 실제로 파보니 KEDA polling + Prometheus window로 90s 지연 + Karpenter NodePool 주석 상태 같은 문제가 묻혀 있었습니다
 - **설계 문서(SDD)를 하루에 4개 쓰는 게 가능한 이유**는 각 SDD가 서로 다른 축을 다루기 때문입니다 Hot Path(코드), Redis SoT(데이터), NodePool(인프라), Scaling 튜닝(정책) 각각이 독립적 병목을 책임집니다
 - **리뷰 후 수정은 같은 PR에 추가 commit이 효율적입니다** 별도 PR로 분리하면 리뷰 맥락이 끊기고 머지 단계만 늘어납니다

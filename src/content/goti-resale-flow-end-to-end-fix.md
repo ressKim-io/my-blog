@@ -28,7 +28,7 @@ date: "2026-04-19"
 | 4 | 만료 listing UI 노출 + 조작된 PATCH 허용 | `resale_listings`에 경기 시작 시각 없어 서버측 만료 판정 불가 | `d980221` |
 | 5 | `LISTING_NOT_FOUND` — stale listing 취소 시 404 | FE `mergeResaleListings`가 localStorage stale을 BE 응답과 merge | FE `1594722` |
 
-이 글의 선행 조사는 `2026-04-19-resale-listings-400-investigation.md`(해결 미정 기록)와 `2026-04-19-resale-fe-be-contract-audit.md`(FE↔BE 계약 감사)에서 확보됐습니다.
+이 글의 선행 조사는 `2026-04-19-resale-listings-400-investigation.md`(해결 미정 기록)와 `2026-04-19-resale-fe-be-contract-audit.md`(FE↔BE 계약 검토)에서 확보됐습니다.
 
 ---
 

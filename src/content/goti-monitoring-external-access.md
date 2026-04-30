@@ -1,6 +1,7 @@
 ---
 title: "5겹 장애: Kind 클러스터 모니터링 외부 접속 트러블슈팅"
 excerpt: "CloudFront Origin 오설정부터 Istio Gateway selector 불일치, VirtualService host 오류, CLI 플랜 해제 사고까지 5가지 원인을 추적한 기록"
+type: troubleshooting
 category: cicd
 tags:
   - go-ti

@@ -1,6 +1,7 @@
 ---
 title: "Phase B pglogical 시험 + 정리 — spot taint 연쇄와 RDS outbound 차단"
 excerpt: "GCP pg-primary → AWS RDS pglogical subscription을 구성하는 과정에서 Spot taint 연쇄 장애, Istio webhook label 누락, RDS subnet outbound 차단, 평문 DSN 노출까지 11개의 장애물을 하나씩 풀어낸 Phase B 실 실행 기록입니다."
+type: troubleshooting
 category: challenge
 tags:
   - go-ti

@@ -1,6 +1,7 @@
 ---
 title: "Loki OTLP Native 전환 — exporter.loki에서 벗어나기"
 excerpt: "otelcol.exporter.loki의 hint 버그로 label 승격이 안 되는 문제를 발견하고, Loki 3.x native OTLP 엔드포인트로 전환한 과정"
+type: troubleshooting
 category: monitoring
 tags:
   - go-ti

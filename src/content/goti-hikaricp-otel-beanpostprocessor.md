@@ -1,6 +1,7 @@
 ---
 title: "HikariCP OTel 메트릭이 안 나온다: BeanPostProcessor 초기화 순서 함정"
 excerpt: "Spring Boot에서 순수 OTel 계측 전환 후 HikariCP 메트릭이 사라진 원인 — static 팩토리, ObjectProvider, postProcessBeforeInitialization 세 가지로 해결"
+type: troubleshooting
 category: monitoring
 tags:
   - go-ti

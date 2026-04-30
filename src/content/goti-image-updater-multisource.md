@@ -1,6 +1,7 @@
 ---
 title: "argocd-image-updater가 이미지를 무시한다: multi-source의 함정"
 excerpt: "argocd-image-updater가 multi-source Application에서 이미지를 감지하지 못하는 문제와 ExternalSecret 이름/키 불일치까지 연쇄 트러블슈팅"
+type: troubleshooting
 category: argocd
 tags:
   - go-ti

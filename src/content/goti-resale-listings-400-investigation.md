@@ -36,7 +36,7 @@ CORS 헤더(`access-control-allow-origin: https://go-ti.shop`, `credentials=true
 
 ### 직전 배포와의 관계
 
-증상 발견 직전, Resale FE↔BE 계약 감사 결과를 반영한 커밋이 GCP prod에 배포되었습니다.
+증상 발견 직전, Resale FE↔BE 계약 분석 결과를 반영한 커밋이 GCP prod에 배포되었습니다.
 
 - **Goti-go**: `3369476, 8bcc803, 10a0976` (image `gcp-15-10a0976`)
 - **Goti-front**: `1e3b9fb, c307062, f2b7f0a`

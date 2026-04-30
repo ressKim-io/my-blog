@@ -1,6 +1,7 @@
 ---
 title: "Istio Retry가 결제를 3번 시도했다: 비멱등 API의 함정"
 excerpt: "VirtualService retryOn: 5xx 설정이 POST 결제 API에 적용되면서 발생한 중복 결제 시도와 @Transactional 롤백 불일치 문제"
+type: troubleshooting
 category: kubernetes
 tags:
   - go-ti
