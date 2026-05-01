@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 560" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 600px;">
+  <title id="t1">Discord 알림 파이프라인</title>
+  <desc id="d1">AWS SSM Parameter Store에서 ExternalSecret(ESO), K8s Secret, Alertmanager를 거쳐 Discord 두 채널(alerts-high, alerts-low)로 알림이 전달되는 5단계 흐름</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arr-label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Step 1: AWS SSM Parameter Store (cloud / amber) -->
+  <rect x="180" y="24" width="240" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="300" y="48" text-anchor="middle" class="label" fill="#B45309">AWS SSM Parameter Store</text>
+  <text x="300" y="70" text-anchor="middle" class="meta">DISCORD_WEBHOOK_URL_HIGH/LOW</text>
+
+  <!-- arrow 1->2 -->
+  <line x1="300" y1="88" x2="300" y2="128" class="arrow"/>
+  <text x="312" y="112" class="arr-label">polls</text>
+
+  <!-- Step 2: ExternalSecret (backend / emerald) -->
+  <rect x="180" y="128" width="240" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="300" y="152" text-anchor="middle" class="label" fill="#047857">ExternalSecret (ESO)</text>
+  <text x="300" y="174" text-anchor="middle" class="meta">refreshInterval: 1h</text>
+
+  <!-- arrow 2->3 -->
+  <line x1="300" y1="192" x2="300" y2="232" class="arrow"/>
+  <text x="312" y="216" class="arr-label">creates</text>
+
+  <!-- Step 3: K8s Secret (security / rose) -->
+  <rect x="180" y="232" width="240" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="300" y="256" text-anchor="middle" class="label" fill="#BE123C">K8s Secret</text>
+  <text x="300" y="278" text-anchor="middle" class="meta">url-high / url-low</text>
+
+  <!-- arrow 3->4 -->
+  <line x1="300" y1="296" x2="300" y2="336" class="arrow"/>
+  <text x="312" y="320" class="arr-label">mounts</text>
+
+  <!-- Step 4: Alertmanager (backend / emerald) -->
+  <rect x="180" y="336" width="240" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="300" y="360" text-anchor="middle" class="label" fill="#047857">Alertmanager</text>
+  <text x="300" y="382" text-anchor="middle" class="meta">api_url_file: /etc/alertmanager/secrets/...</text>
+
+  <!-- branch trunk -->
+  <line x1="300" y1="400" x2="300" y2="424" stroke="#0A0A0A" stroke-width="1.5"/>
+
+  <!-- left branch (critical) -->
+  <path d="M 300 424 H 180 V 464" class="arrow"/>
+  <text x="232" y="420" text-anchor="middle" class="arr-label">critical</text>
+
+  <!-- right branch (warning) -->
+  <path d="M 300 424 H 420 V 464" class="arrow"/>
+  <text x="368" y="420" text-anchor="middle" class="arr-label">warning</text>
+
+  <!-- Step 5a: Discord #alerts-high (external / slate) -->
+  <rect x="80" y="464" width="200" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="180" y="488" text-anchor="middle" class="label" fill="#334155">Discord #alerts-high</text>
+  <text x="180" y="510" text-anchor="middle" class="meta">critical</text>
+
+  <!-- Step 5b: Discord #alerts-low -->
+  <rect x="320" y="464" width="200" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="420" y="488" text-anchor="middle" class="label" fill="#334155">Discord #alerts-low</text>
+  <text x="420" y="510" text-anchor="middle" class="meta">warning</text>
+</svg>

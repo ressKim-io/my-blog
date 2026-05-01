@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 220" role="img" aria-labelledby="t3 d3" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t3">3단계 배포 순서</title>
+  <desc id="d3">Terraform으로 SSM 파라미터 생성, Goti-k8s로 ExternalSecret 배포, Goti-monitoring으로 Alertmanager config 적용 순서로 진행하는 3단계 배포</desc>
+
+  <defs>
+    <marker id="arr3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .num { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 28px; font-weight: 700; }
+    .title { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; fill: #0A0A0A; font-weight: 600; }
+    .desc  { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; fill: #27272A; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: #BE123C; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr3); }
+  ]]></style>
+
+  <!-- Step 1: Terraform (cloud / amber) -->
+  <rect x="20" y="40" width="220" height="140" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="40" y="78" class="num" fill="#B45309">1</text>
+  <text x="80" y="76" class="title">Terraform</text>
+  <text x="40" y="112" class="desc">SSM 파라미터 생성</text>
+  <text x="40" y="130" class="desc">DISCORD_WEBHOOK_URL_HIGH</text>
+  <text x="40" y="146" class="desc">DISCORD_WEBHOOK_URL_LOW</text>
+  <text x="40" y="170" class="meta">+ force-sync annotation</text>
+
+  <!-- arrow 1->2 -->
+  <line x1="240" y1="110" x2="280" y2="110" class="arrow"/>
+
+  <!-- Step 2: Goti-k8s (backend / emerald) -->
+  <rect x="280" y="40" width="220" height="140" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="300" y="78" class="num" fill="#047857">2</text>
+  <text x="340" y="76" class="title">Goti-k8s</text>
+  <text x="300" y="112" class="desc">ExternalSecret 배포</text>
+  <text x="300" y="130" class="desc">→ K8s Secret 생성</text>
+
+  <!-- arrow 2->3 -->
+  <line x1="500" y1="110" x2="540" y2="110" class="arrow"/>
+
+  <!-- Step 3: Goti-monitoring (backend / emerald) -->
+  <rect x="540" y="40" width="220" height="140" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="560" y="78" class="num" fill="#047857">3</text>
+  <text x="600" y="76" class="title">Goti-monitoring</text>
+  <text x="560" y="112" class="desc">Alertmanager config</text>
+  <text x="560" y="130" class="desc">Secret 마운트 + sync</text>
+</svg>

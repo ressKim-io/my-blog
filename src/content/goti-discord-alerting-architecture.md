@@ -110,40 +110,7 @@ plain text라는 제약이 있지만, 알림 목적에서는 **"뭐가 터졌는
 
 Discord 알림을 동작시키려면 **SSM → ExternalSecret → Secret → Alertmanager → Discord** 전체 파이프라인을 구축해야 합니다.
 
-{/* TODO: Draw.io로 교체 (public/images/monitoring/discord-alerting-pipeline.svg) */}
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    Discord Alerting Pipeline                             │
-│                                                                         │
-│  ┌──────────────┐    ┌──────────────────┐    ┌───────────────────┐      │
-│  │ AWS SSM      │    │ ExternalSecret   │    │ K8s Secret        │      │
-│  │ Parameter    │───▶│ (ESO)            │───▶│                   │      │
-│  │ Store        │    │                  │    │ url-high          │      │
-│  │              │    │ alertmanager-    │    │ url-low           │      │
-│  │ DISCORD_     │    │ discord-webhook  │    │                   │      │
-│  │ WEBHOOK_     │    │                  │    └────────┬──────────┘      │
-│  │ URL_HIGH     │    └──────────────────┘             │                 │
-│  │ URL_LOW      │                                     │                 │
-│  └──────────────┘                          ┌──────────▼──────────┐     │
-│                                            │ Alertmanager        │     │
-│                                            │                     │     │
-│                                            │ api_url_file:       │     │
-│                                            │   /etc/alertmanager │     │
-│                                            │   /secrets/url-high │     │
-│                                            │   /etc/alertmanager │     │
-│                                            │   /secrets/url-low  │     │
-│                                            └──────────┬──────────┘     │
-│                                                       │                │
-│                                          ┌────────────┴────────────┐   │
-│                                          │                         │   │
-│                                          ▼                         ▼   │
-│                                  ┌──────────────┐        ┌────────────┐│
-│                                  │ Discord      │        │ Discord    ││
-│                                  │ #alerts-high │        │ #alerts-low││
-│                                  │ (critical)   │        │ (warning)  ││
-│                                  └──────────────┘        └────────────┘│
-└─────────────────────────────────────────────────────────────────────────┘
-```
+![Discord 알림 파이프라인](/diagrams/goti-discord-alerting-architecture-1.svg)
 
 이 파이프라인을 구축하려면 **3개 레포를 동시에 수정**해야 합니다.
 
@@ -424,31 +391,7 @@ $ kubectl get externalsecret grafana-admin-secret -n monitoring \
 
 `tracking-id`가 `external-secrets-config` Application을 가리키고 있었습니다. 그런데 `monitoring-custom` 차트에도 `grafana-admin-externalsecret.yaml` 템플릿이 있어서, **동일한 리소스를 두 곳에서 배포**하고 있었던 것입니다.
 
-{/* TODO: Draw.io로 교체 (public/images/monitoring/argocd-resource-conflict.svg) */}
-```
-┌──────────────────────────────────────────────────────────────┐
-│                   ArgoCD Resource Conflict                     │
-│                                                               │
-│  ┌─────────────────────┐    ┌──────────────────────────┐     │
-│  │ monitoring-custom    │    │ external-secrets-config   │     │
-│  │ Application          │    │ Application               │     │
-│  │                      │    │                           │     │
-│  │ charts/              │    │ infrastructure/prod/      │     │
-│  │  goti-monitoring/    │    │  external-secrets/        │     │
-│  │   templates/         │    │   config/                 │     │
-│  │    grafana-admin-    │    │    grafana-admin-         │     │
-│  │    externalsecret    │    │    externalsecret         │     │
-│  │    .yaml             │    │    .yaml                  │     │
-│  └──────────┬───────────┘    └─────────────┬────────────┘     │
-│             │                               │                 │
-│             │    ┌─────────────────────┐    │                 │
-│             └───▶│ ExternalSecret/     │◀───┘                 │
-│                  │ grafana-admin-secret│                      │
-│                  │ (namespace:         │                      │
-│                  │  monitoring)        │  ← 소유권 충돌!       │
-│                  └─────────────────────┘                      │
-└──────────────────────────────────────────────────────────────┘
-```
+![ArgoCD 리소스 소유권 충돌](/diagrams/goti-discord-alerting-architecture-2.svg)
 
 두 Application이 같은 ExternalSecret을 배포하려고 하니 ArgoCD가 **"이 리소스 누구 거야?"**라고 거부한 겁니다. 이건 Discord 알림과 직접 관련은 없지만, monitoring-custom sync가 막혀있어서 Alertmanager config 변경사항도 반영이 안 되는 상황이었습니다.
 
@@ -523,17 +466,7 @@ Discord 양쪽 채널에서 알림 수신을 확인했습니다.
 
 이번 경험으로 3개 레포에 걸친 변경의 **올바른 배포 순서**를 확립했습니다.
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────────┐
-│ 1. Terraform    │────▶│ 2. Goti-k8s     │────▶│ 3. Goti-monitoring  │
-│                 │     │                 │     │                     │
-│ SSM 파라미터    │     │ ExternalSecret  │     │ Alertmanager config │
-│ 생성            │     │ → Secret 생성   │     │ Secret 마운트       │
-│                 │     │                 │     │                     │
-│ + force-sync    │     │                 │     │                     │
-│   annotation    │     │                 │     │                     │
-└─────────────────┘     └─────────────────┘     └─────────────────────┘
-```
+![3단계 배포 순서](/diagrams/goti-discord-alerting-architecture-3.svg)
 
 각 단계가 완료된 것을 확인한 후 다음 단계로 넘어가야 합니다. 특히 1단계 완료 후 `force-sync` annotation을 빼먹지 않는 것이 중요합니다.
 
