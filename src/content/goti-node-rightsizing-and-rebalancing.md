@@ -1,6 +1,7 @@
 ---
 title: "Go cutover 후 노드 Rightsizing — Descheduler가 알려준 축소 한계"
 excerpt: "Go cutover 후 EKS 12노드(core 5 + spot 7) 실사용률이 낮아 축소했더니 CPU request 100% 포화로 Descheduler가 무력화됐습니다. 스케줄러는 actual이 아닌 requests로 판단한다는 교훈, Istio sidecar + DaemonSet 과소평가, 버퍼 1대의 필요성을 정리했습니다"
+type: troubleshooting
 category: kubernetes
 tags:
   - go-ti

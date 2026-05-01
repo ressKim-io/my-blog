@@ -1,6 +1,7 @@
 ---
 title: "Redis SoT D2~D4 롤아웃 — Lua 원자화와 PG 쓰기 경로 제거"
 excerpt: "1주 시연 범위가 D0+D1에서 D0~D7 전체로 격상된 상황에서, seat_holds·inventory reconcile·orders의 SoT 전환을 하루 만에 순차 commit한 롤아웃 기록입니다"
+type: troubleshooting
 category: challenge
 tags:
   - go-ti

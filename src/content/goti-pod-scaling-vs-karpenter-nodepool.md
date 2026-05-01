@@ -1,6 +1,7 @@
 ---
 title: "Pod 리소스 상향 vs Karpenter NodePool 분리 — 측정 선행으로 결정"
 excerpt: "4차 부하(3000 VU, ticket_success 7.8%, p99 10s)에서 CPU 117% 포화를 보고 Karpenter 전용 CPU-heavy spot 노드 분리를 고민했지만, CPU 117%는 증상이고 FindPrice N+1·distLock WaitTimeout 등 코드 병목이 진짜 원인이라 판단해 NodePool 초안만 준비하고 측정 선행 전략을 채택했습니다"
+type: troubleshooting
 category: kubernetes
 tags:
   - go-ti

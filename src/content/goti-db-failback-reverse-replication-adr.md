@@ -1,6 +1,7 @@
 ---
 title: "Failback을 위한 역방향 복제 — 원복하지 않고 그대로 운영하기 (ADR)"
 excerpt: "AWS가 승격된 뒤 GCP가 복구되면 다시 원복할지, 역방향 복제로 그대로 둘지가 쟁점이었습니다. 두 번째 다운타임을 피하기 위해 역방향 유지를 공식 채택한 의사결정 기록입니다"
+type: troubleshooting
 category: kubernetes
 tags:
   - go-ti

@@ -1,6 +1,7 @@
 ---
 title: "JWT issuer의 Source of Truth를 K8s IaC로 일원화 (ADR)"
 excerpt: "prod-gcp /queue 전수 401 장애의 근본 원인은, 같은 개념인 JWT issuer가 Goti-go와 Goti-k8s 양쪽에 하드코딩되어 drift된 것이었습니다. K8s values의 env를 유일한 SoT로 승격하고, Go 서비스는 env가 주입되지 않으면 fail-fast하는 구조로 바꿨습니다"
+type: troubleshooting
 category: istio
 tags:
   - go-ti
