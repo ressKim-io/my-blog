@@ -1,6 +1,6 @@
 ---
 title: "Multi-Cloud ReadOnly 스모크 테스트 — CF Worker로 AWS·GCP 양쪽 트래픽 증명"
-excerpt: "Cloudflare Worker가 AWS EKS와 GCP GKE 양쪽으로 트래픽을 분배하는지 2분짜리 read-only k6 스모크로 검증합니다. Grafana 대시보드에서 두 클라우드의 선이 동시에 뜨는 순간이 Active-Active Read 증명입니다."
+excerpt: "Cloudflare Worker가 AWS EKS와 GCP GKE 양쪽으로 트래픽을 분배하는지 2분짜리 read-only k6 스모크로 검증합니다. Grafana 대시보드에서 두 클라우드의 선이 동시에 뜨는 순간이 곧 Active-Active Read의 증명입니다"
 category: monitoring
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-18"
 
 ## 한 줄 요약
 
-> Cloudflare Worker → AWS EKS + GCP GKE 양쪽에 2분간 read-only 트래픽을 흘려보내며 Grafana에서 cloud 별 p95/RPS/CPU를 비교했습니다. 에러 0으로 끝나면 **Multi-Cloud Active-Active Read**가 실증된 것입니다.
+> Cloudflare Worker → AWS EKS + GCP GKE 양쪽에 2분간 read-only 트래픽을 흘려보내며 Grafana에서 cloud 별 p95·RPS·CPU를 비교했습니다. 에러 0으로 끝나면 **Multi-Cloud Active-Active Read**가 실증된 것입니다
 
 ---
 

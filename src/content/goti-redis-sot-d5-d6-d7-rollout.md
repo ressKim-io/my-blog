@@ -1,6 +1,6 @@
 ---
 title: "Redis SoT 롤아웃 D5~D7 마무리 — 결제 확정 Lua와 tickets ZSET 전환"
-excerpt: "outbox-worker 신규 서비스 투입, payment_confirm.lua로 결제 확정을 원자화, /tickets/myinfo를 ZCARD O(1)로 전환한 마지막 롤아웃 단계입니다."
+excerpt: "outbox-worker 신규 서비스를 투입하고, payment_confirm.lua로 결제 확정을 원자화하고, /tickets/myinfo를 ZCARD O(1)로 전환한 마지막 롤아웃 단계입니다"
 category: challenge
 tags:
   - go-ti
@@ -20,7 +20,7 @@ date: "2026-04-18"
 
 ## 한 줄 요약
 
-> D5~D7 단계에서 `goti-outbox-worker`를 신규 서비스로 띄우고, 결제 확정 경로를 `payment_confirm.lua` 하나로 원자화했으며, 티켓 수 조회를 Redis ZSET ZCARD로 전환했습니다. 이것으로 Redis SoT 롤아웃 D0~D7이 마무리됐습니다.
+> D5~D7 단계에서 `goti-outbox-worker`를 신규 서비스로 띄우고, 결제 확정 경로를 `payment_confirm.lua` 하나로 원자화했고, 티켓 수 조회를 Redis ZSET ZCARD로 전환했습니다. 이로써 Redis SoT 롤아웃 D0~D7이 마무리됐습니다
 
 ## Impact
 

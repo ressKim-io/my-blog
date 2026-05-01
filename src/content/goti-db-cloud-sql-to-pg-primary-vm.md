@@ -1,6 +1,6 @@
 ---
 title: "Cloud SQL → pg-primary VM 전환 — pglogical을 쓰기 위해 GCE로 내려간 이유"
-excerpt: "Cloud SQL은 pglogical extension을 지원하지 않습니다. Multi-Cloud DB 복제의 publisher 역할을 맡기기 위해 Cloud SQL을 해지하고 GCE VM 단일 인스턴스로 PostgreSQL 16을 직접 운영하는 단계까지의 2.5시간 기록입니다."
+excerpt: "Cloud SQL은 pglogical extension을 지원하지 않습니다. Multi-Cloud DB 복제의 publisher 역할을 맡기려고 Cloud SQL을 해지하고 GCE VM 단일 인스턴스로 PostgreSQL 16을 직접 운영하기까지의 2.5시간 기록입니다"
 category: kubernetes
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-18"
 
 ## 한 줄 요약
 
-> Multi-Cloud DB 복제의 publisher로 Cloud SQL을 쓸 수 없어서, GCE VM에 PostgreSQL 16 + pglogical 2.4.6을 직접 올리고 Cloud SQL을 해지했습니다. 단일 VM, pd-balanced 20GB, 공개 IP + TLS + allowlist 조합으로 1주 시연 범위에 맞춰 범위를 최소화했습니다.
+> Multi-Cloud DB 복제의 publisher로 Cloud SQL을 쓸 수 없어서, GCE VM에 PostgreSQL 16 + pglogical 2.4.6을 직접 올리고 Cloud SQL을 해지했습니다. 단일 VM, pd-balanced 20GB, 공개 IP + TLS + allowlist 조합으로 1주 시연 범위에 맞춰 구성을 최소화했습니다
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Multi-Cloud DB 복제 기술 선정 — GCE VM + pglogical 2.x를 택한 이유"
-excerpt: "Cloud SQL은 pglogical extension을 허용하지 않고, Patroni/AlloyDB는 1주 시연 대비 과투자였습니다. GCE VM PostgreSQL 16 + pglogical 2.x로 cross-cloud 복제를 구성한 결정 과정입니다."
+excerpt: "Cloud SQL은 pglogical extension을 허용하지 않고, Patroni·AlloyDB는 1주 시연에 비해 과투자였습니다. GCE VM PostgreSQL 16 + pglogical 2.x로 cross-cloud 복제를 구성한 결정 과정입니다"
 category: kubernetes
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-18"
 
 ## 한 줄 요약
 
-> GCP Primary + AWS Subscriber 구조의 Multi-Cloud DB 복제를 구성해야 했습니다. Cloud SQL은 pglogical을 허용하지 않고, Patroni/AlloyDB는 1주 시연 대비 과투자였습니다. GCE VM PostgreSQL 16 + pglogical 2.x로 시퀀스·DDL까지 복제 가능한 경로를 선택했습니다.
+> GCP Primary + AWS Subscriber 구조의 Multi-Cloud DB 복제를 구성해야 했습니다. Cloud SQL은 pglogical을 허용하지 않고, Patroni·AlloyDB는 1주 시연에 비해 과투자였습니다. GCE VM PostgreSQL 16 + pglogical 2.x로 시퀀스·DDL까지 복제 가능한 경로를 선택했습니다
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Failback을 위한 역방향 복제 — 원복하지 않고 그대로 운영하기 (ADR)"
-excerpt: "AWS가 승격된 뒤 GCP가 복구되면 다시 원복할 것인가, 역방향 복제로 그대로 둘 것인가. 두 번째 다운타임을 피하기 위해 역방향 유지를 공식 채택한 의사결정 기록입니다."
+excerpt: "AWS가 승격된 뒤 GCP가 복구되면 다시 원복할지, 역방향 복제로 그대로 둘지가 쟁점이었습니다. 두 번째 다운타임을 피하기 위해 역방향 유지를 공식 채택한 의사결정 기록입니다"
 category: kubernetes
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-18"
 
 ## 한 줄 요약
 
-> GCP primary → AWS subscriber 구조에서 AWS가 승격된 뒤 GCP가 복구되면 다시 GCP로 원복하지 않고, AWS를 publisher로 유지한 채 GCP를 subscriber로 역전환합니다. 두 번째 다운타임을 제거하기 위한 결정입니다.
+> GCP primary → AWS subscriber 구조에서 AWS가 승격된 뒤 GCP가 복구되면, 다시 GCP로 원복하지 않고 AWS를 publisher로 유지한 채 GCP를 subscriber로 역전환합니다. 두 번째 다운타임을 제거하기 위한 결정입니다
 
 ---
 

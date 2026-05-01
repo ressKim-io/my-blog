@@ -1,6 +1,6 @@
 ---
 title: "AWS 전량 Destroy + GCP-Only 지연 최적화 — 900ms에서 60ms로"
-excerpt: "멀티클라우드 failover 계획을 접고 시연 1주일 전 AWS 전체를 destroy한 뒤, GCP-only 구조에서 DB 권한·누락 테이블·CPU limits 세 가지 병목을 제거해 p95를 785ms에서 144ms로 줄인 기록입니다."
+excerpt: "멀티클라우드 failover 계획을 접고 시연 1주일 전에 AWS 전체를 destroy했습니다. GCP-only 구조에서 DB 권한·누락 테이블·CPU limits 세 가지 병목을 제거해 p95를 785ms에서 144ms로 줄인 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-19"
 
 ## 한 줄 요약
 
-> 시연 1주일 전, 멀티클라우드 failover 계획을 접고 AWS 인프라를 전량 destroy했습니다. GCP-only로 단순화한 뒤 브라우저 실측 500~900ms의 지연을 추적해 DB 권한, 누락 테이블, CPU limits 세 가지 병목을 제거하니 p95가 785ms에서 144ms로 떨어졌습니다.
+> 시연 1주일 전, 멀티클라우드 failover 계획을 접고 AWS 인프라를 전량 destroy했습니다. GCP-only로 단순화한 뒤 브라우저 실측 500~900ms 지연을 추적해 DB 권한, 누락 테이블, CPU limits 세 가지 병목을 제거하니 p95가 785ms에서 144ms로 떨어졌습니다
 
 ---
 
@@ -227,20 +227,20 @@ AWS는 전량 destroy로 월 비용 $0을 달성했습니다.
 
 ### 1. `_ro` naming과 실제 권한은 일치하지 않을 수 있습니다
 
-"read-only" 접미사만 보고 실제 앱 동작 확인을 건너뛰었습니다. naming 규약과 실제 권한 매트릭스를 자동 검증하는 스크립트가 필요합니다.
+"read-only" 접미사만 보고 실제 앱 동작 확인을 건너뛰었습니다. naming 규약과 실제 권한 매트릭스를 자동 검증하는 스크립트가 필요합니다
 
 ### 2. `pg_dump --exclude-table`은 위험합니다
 
-"고아 테이블"이라 판단하기 전에 코드베이스 grep이 필수입니다. **0 rows는 참조 없음과 다릅니다**. 사용 흔적이 데이터가 아니라 코드에 있을 수 있습니다.
+"고아 테이블"이라 판단하기 전에 코드베이스 grep이 필수입니다. **0 rows는 참조 없음과 다릅니다**. 사용 흔적이 데이터가 아니라 코드에 남아 있을 수 있습니다
 
 ### 3. Go Pod CPU limits 하한은 1 core 이상이 안전합니다
 
-한 자리 퍼센트 사용률이어도 limits가 낮으면 CFS throttling으로 p95가 폭발합니다. Go 런타임은 `GOMAXPROCS`가 CPU limits에 연동되기 때문에, 200m 같은 값은 사실상 싱글 스레드 강제와 같은 효과를 냅니다. GKE core 노드 캐패시티 재설계가 따라옵니다.
+한 자리 퍼센트 사용률이어도 limits가 낮으면 CFS throttling으로 p95가 폭발합니다. Go 런타임은 `GOMAXPROCS`가 CPU limits에 연동되기 때문에, 200m 같은 값은 사실상 싱글 스레드와 같은 효과를 냅니다. 결과적으로 GKE core 노드 캐패시티 재설계가 따라붙습니다
 
 ### 4. Cloudflare DNS Only가 한국 latency의 정답일 수 있습니다
 
-LAX Edge 라우팅 이슈는 Smart Placement로도 완전히 해결되지 않습니다. CF 보호를 포기하고 origin 직통으로 전환하면 급격한 개선이 나옵니다(900ms → 60ms). 시연 구간에서는 보호보다 지연이 우선이었습니다.
+LAX Edge 라우팅 이슈는 Smart Placement로도 완전히 해결되지 않습니다. CF 보호를 포기하고 origin 직통으로 전환하면 즉시 큰 개선이 나옵니다(900ms → 60ms). 시연 구간에서는 보호보다 지연이 우선이었습니다
 
 ### 5. Worker 코드 복잡도는 latency에 선형으로 영향을 주지 않습니다
 
-Worker 실행 위치(PoP)가 훨씬 지배적입니다. 296줄 → 31줄 자체의 절감은 50~100ms 수준이었습니다. 큰 지연은 로직이 아니라 경로에서 나옵니다.
+Worker 실행 위치(PoP)가 훨씬 지배적입니다. 296줄 → 31줄으로 줄여 얻은 절감은 50~100ms 수준이었습니다. 큰 지연은 로직이 아니라 경로에서 나옵니다

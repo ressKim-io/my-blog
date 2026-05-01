@@ -1,6 +1,6 @@
 ---
 title: "AWS 재기동에서 Harbor 폐기 — ECR로 이미지 레지스트리 갈아끼우기"
-excerpt: "AWS 전체 재기동 중 Harbor PVC가 빈 볼륨으로 복구된 것을 발견하고, 재빌드 대신 ECR로 완전 전환했습니다. Terraform state import, SSM lifecycle, JWT 키 보존까지 2.5시간의 기록입니다."
+excerpt: "AWS 전체 재기동 도중 Harbor PVC가 빈 볼륨으로 복구된 것을 발견했습니다. 재빌드 대신 ECR로 완전 전환했고, Terraform state import, SSM lifecycle, JWT 키 보존까지 2.5시간 동안 정리한 기록입니다"
 category: kubernetes
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-19"
 
 ## 한 줄 요약
 
-> AWS 측 인프라를 전체 재기동하던 중 Harbor PVC가 빈 볼륨으로 복구되어 이미지가 전부 사라졌습니다. 재빌드 대신 **ECR로 영구 전환**을 선택했고, 그 과정에서 Terraform state import, SSM 파라미터 lifecycle, JWT 키 보존까지 한꺼번에 정리했습니다.
+> AWS 측 인프라를 전체 재기동하던 중 Harbor PVC가 빈 볼륨으로 복구되어 이미지가 전부 사라졌습니다. 재빌드 대신 **ECR로 영구 전환**을 선택했고, 그 과정에서 Terraform state import, SSM 파라미터 lifecycle, JWT 키 보존까지 한꺼번에 정리했습니다
 
 ## Impact
 

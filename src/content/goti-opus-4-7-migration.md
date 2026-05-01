@@ -1,6 +1,6 @@
 ---
 title: "Claude Opus 4.7 마이그레이션 — token-budget rule + skill 추가, AI skills 4.7 대응"
-excerpt: "Opus 4.7 GA 이후 Claude Code 기본 모델이 4.6 → 4.7로 바뀌면서 Literal instruction following, Subagent 덜 spawn, Tokenizer 변경 등 7가지 behavioral/API 변경을 정리해 rules/skills에 반영했습니다."
+excerpt: "Opus 4.7 GA 이후 Claude Code 기본 모델이 4.6 → 4.7로 바뀌었습니다. Literal instruction following, Subagent 덜 spawn, Tokenizer 변경 등 7가지 동작·API 변경을 정리해 rules·skills에 반영했습니다"
 category: challenge
 tags:
   - go-ti
@@ -25,8 +25,7 @@ date: "2026-04-19"
 
 ## 🔥 문제: 4.7 behavioral change가 기존 프롬프트와 충돌했다
 
-기존 레포(`ress-claude-agents`)에 4.7 변경 사항이 미반영 상태였습니다
-공식 문서(What's new in Claude Opus 4.7, Migration guide, Task budgets, Effort parameter, Prompt caching, Best Practices for Claude Code, Best practices with Opus 4.7 in Claude Code)를 조회해 다음 충돌 포인트를 확인했습니다
+기존 레포(`ress-claude-agents`)는 4.7 변경 사항을 아직 반영하지 못한 상태였습니다. 공식 문서(What's new in Claude Opus 4.7, Migration guide, Task budgets, Effort parameter, Prompt caching, Best Practices for Claude Code, Best practices with Opus 4.7 in Claude Code)를 조회해 다음 충돌 포인트를 확인했습니다
 
 1. **Literal instruction following** — 4.7은 느슨한 해석을 하지 않습니다. 한 항목에 대한 지시를 다른 항목에 자동 일반화하지 않습니다
 2. **Subagent 덜 spawn** — 기본적으로 delegation을 줄입니다. 병렬 fan-out이 필요하면 **명시 지시**가 필요합니다
@@ -38,8 +37,7 @@ date: "2026-04-19"
 
 ### 추가 마찰: 운영 원칙이 문서화되어 있지 않았다
 
-**토큰·컨텍스트·effort 운영 원칙**이 레포 rules에 명문화되어 있지 않아, 매 대화에서 같은 가이드를 반복 설명하는 마찰이 있었습니다
-기존 `skills/dx/token-efficiency.md`는 Claude Code 세션 내 도구 사용 효율에 특화되어 있었고, Opus 4.7 API 측면(effort, task budget, prompt caching)은 별도 문서화가 필요했습니다
+**토큰·컨텍스트·effort 운영 원칙**이 레포 rules에 명문화되어 있지 않아, 매 대화에서 같은 가이드를 반복해서 설명해야 하는 부담이 있었습니다. 기존 `skills/dx/token-efficiency.md`는 Claude Code 세션 안에서 도구 사용 효율에 특화되어 있었고, Opus 4.7 API 측면(effort, task budget, prompt caching)은 별도 문서가 필요했습니다
 
 ---
 
@@ -53,7 +51,7 @@ Opus 4.7 관련 가이드는 두 축으로 나뉘었습니다
 `clean-code.md` (75줄 rule) + `/clean-code` (474줄 skill) 분리 선례를 그대로 적용했습니다
 Rules는 매 대화 자동 로딩되므로 짧게 유지하고, 상세는 on-demand skill에서 호출하는 구조입니다
 
-Rules 적절한 길이 기준은 레포 실측으로 도출했습니다
+Rules의 적절한 길이 기준은 레포 실측으로 도출했습니다
 
 - 기존 13개 rules 평균 **128줄**
 - Sweet spot **100~150줄**
@@ -130,8 +128,8 @@ Opus 4.7 scaffolding과 무관한 레거시 도메인 용어로 확인되어 수
 
 ## 📚 배운 점
 
-- **모델 업그레이드는 "rule 1건 + skill 1건 + AI skills 수정 2~3건"이 기본 패턴입니다.** 핵심 원칙은 rule, 상세 API 코드는 skill, 기존 AI skills는 behavioral change 섹션 추가로 대응합니다
-- **Rules는 레포 실측으로 길이 기준을 정합니다.** "평균 128줄, sweet spot 100~150줄, hard limit 200줄"처럼 레포 실제 분포로 결정한 기준이 다른 팀원/세션에도 설득력을 가집니다
-- **`clean-code.md` + `/clean-code` 같은 rule/skill 분리 선례를 재사용합니다.** 일관성 있는 구조가 유지보수를 쉽게 합니다
-- **Phase C 검증은 false positive를 걸러냅니다.** grep 패턴 매칭 후 바로 수정에 들어가지 말고 **전수 검토**로 도메인 용어와 scaffolding을 구분해야 의미 없는 수정이 커밋되지 않습니다
-- **공식 문서 URL 목록을 저장합니다.** 이번 작업처럼 7개 공식 문서를 한 번에 참조한 기록이 남아 있어야, 다음 마이너 업데이트(4.7.x)에서도 같은 체크리스트로 재점검 가능합니다
+- **모델 업그레이드는 "rule 1건 + skill 1건 + AI skills 수정 2~3건"이 기본 패턴입니다** — 핵심 원칙은 rule, 상세 API 코드는 skill, 기존 AI skills는 동작 변경 섹션 추가로 대응합니다
+- **Rules는 레포 실측으로 길이 기준을 정합니다** — "평균 128줄, sweet spot 100~150줄, hard limit 200줄"처럼 레포 실제 분포에서 끌어낸 기준이라야 다른 팀원·세션에도 설득력을 갖습니다
+- **`clean-code.md` + `/clean-code` 같은 rule/skill 분리 선례를 재사용합니다** — 일관된 구조는 유지보수 비용을 낮춥니다
+- **Phase C 검증으로 false positive를 걸러냅니다** — grep 패턴이 매칭되었다고 곧바로 수정에 들어가지 말고 **전수 검토**로 도메인 용어와 scaffolding을 구분해야, 의미 없는 수정이 커밋에 섞이지 않습니다
+- **공식 문서 URL 목록을 저장합니다** — 이번 작업처럼 7개 공식 문서를 한 번에 참조한 기록이 남아 있어야 다음 마이너 업데이트(4.7.x)에서도 같은 체크리스트로 재점검할 수 있습니다
