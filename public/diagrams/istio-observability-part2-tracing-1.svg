@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t1">Jaeger UI 검색 화면과 Trace 결과 목록</title>
+  <desc id="d1">Service·Operation·Lookback 필터로 검색한 Trace 결과 3건을 시간 길이와 Span 수로 비교. abc123 350ms 3 spans, def456 150ms 2 spans, ghi789 1.2초 4 spans로 ghi789가 가장 느린 후보</desc>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .head  { font-family: 'Pretendard', sans-serif; font-size: 12px; font-weight: 600; fill: #475569; }
+  ]]></style>
+
+  <!-- UI frame -->
+  <rect x="32" y="32" width="696" height="296" rx="8" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1.5"/>
+  <text x="48" y="60" class="meta" fill="#475569">Jaeger UI — Service: frontend / Lookback: Last Hour</text>
+
+  <!-- Result list header -->
+  <rect x="56" y="84" width="648" height="32" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="72" y="105" class="head">Trace ID</text>
+  <text x="200" y="105" class="head">Path</text>
+  <text x="540" y="105" class="head">Duration</text>
+  <text x="660" y="105" class="head" text-anchor="end">Spans</text>
+
+  <!-- Row 1: abc123 -->
+  <rect x="56" y="116" width="648" height="48" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="72" y="146" class="meta">abc123</text>
+  <text x="200" y="146" class="meta">frontend → api → payment</text>
+  <text x="540" y="146" class="meta">350 ms</text>
+  <text x="660" y="146" class="meta" text-anchor="end">3</text>
+
+  <!-- Row 2: def456 -->
+  <rect x="56" y="164" width="648" height="48" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="72" y="194" class="meta">def456</text>
+  <text x="200" y="194" class="meta">frontend → api</text>
+  <text x="540" y="194" class="meta">150 ms</text>
+  <text x="660" y="194" class="meta" text-anchor="end">2</text>
+
+  <!-- Row 3: ghi789 (slow - rose) -->
+  <rect x="56" y="212" width="648" height="64" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="72" y="240" class="meta" fill="#BE123C">ghi789</text>
+  <text x="200" y="240" class="meta" fill="#BE123C">frontend → api → payment → bank-api</text>
+  <text x="540" y="240" class="meta" fill="#BE123C">1.2 s</text>
+  <text x="660" y="240" class="meta" text-anchor="end" fill="#BE123C">4</text>
+  <text x="72" y="262" class="meta" fill="#BE123C">→ 가장 느림 — bank-api 호출 추가됨, 우선 분석 후보</text>
+
+  <text x="380" y="306" text-anchor="middle" class="meta">결과 목록에서 같은 path끼리 비교 → 시간 차이가 큰 trace를 클릭해 워터폴 분석</text>
+</svg>

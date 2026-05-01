@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t2">Shadow Testing 대시보드 — v1 vs v2 비교</title>
+  <desc id="d2">v1 에러율 0.1% 대비 v2 0.3%로 3배 높고, P99 응답시간도 v1 45ms 대비 v2 120ms로 2.7배 느림. 요청량은 둘 다 1000 req/s로 미러링이 100% 적용되어 같음. v2 배포 전 검토가 필요한 신호</desc>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .head  { font-family: 'Pretendard', sans-serif; font-size: 12px; font-weight: 600; fill: #475569; }
+  ]]></style>
+
+  <!-- Frame -->
+  <rect x="32" y="32" width="696" height="356" rx="8" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1.5"/>
+  <text x="48" y="60" class="head">Shadow Testing Dashboard</text>
+
+  <!-- Panel: Error Rate -->
+  <rect x="56" y="84" width="648" height="80" rx="6" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="72" y="106" class="label" fill="#0A0A0A">Error Rate</text>
+  <text x="72" y="132" class="meta" fill="#047857">v1</text>
+  <rect x="120" y="120" width="40" height="14" rx="2" fill="#059669"/>
+  <text x="688" y="131" text-anchor="end" class="meta" fill="#047857">0.1%</text>
+  <text x="72" y="156" class="meta" fill="#BE123C">v2</text>
+  <rect x="120" y="144" width="120" height="14" rx="2" fill="#E11D48"/>
+  <text x="688" y="155" text-anchor="end" class="meta" fill="#BE123C">0.3% ⚠</text>
+
+  <!-- Panel: P99 Latency -->
+  <rect x="56" y="180" width="648" height="80" rx="6" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="72" y="202" class="label" fill="#0A0A0A">P99 Latency</text>
+  <text x="72" y="228" class="meta" fill="#047857">v1</text>
+  <rect x="120" y="216" width="160" height="14" rx="2" fill="#059669"/>
+  <text x="688" y="227" text-anchor="end" class="meta" fill="#047857">45 ms</text>
+  <text x="72" y="252" class="meta" fill="#BE123C">v2</text>
+  <rect x="120" y="240" width="420" height="14" rx="2" fill="#E11D48"/>
+  <text x="688" y="251" text-anchor="end" class="meta" fill="#BE123C">120 ms ⚠</text>
+
+  <!-- Panel: Request Rate -->
+  <rect x="56" y="276" width="648" height="80" rx="6" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="72" y="298" class="label" fill="#0A0A0A">Request Rate</text>
+  <text x="72" y="324" class="meta" fill="#475569">v1</text>
+  <rect x="120" y="312" width="540" height="14" rx="2" fill="#0891B2"/>
+  <text x="688" y="323" text-anchor="end" class="meta" fill="#475569">1000 req/s</text>
+  <text x="72" y="348" class="meta" fill="#475569">v2</text>
+  <rect x="120" y="336" width="540" height="14" rx="2" fill="#0891B2"/>
+  <text x="688" y="347" text-anchor="end" class="meta" fill="#475569">1000 req/s · mirror 100%</text>
+</svg>

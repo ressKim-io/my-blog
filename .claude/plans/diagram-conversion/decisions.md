@@ -68,3 +68,29 @@
 - 트리블록은 디렉토리든 의존성 체인이든 ASCII 정책상 `\`text\`` 명시로 보존 — best-practices.md 1.1 갱신 시 명문화 후보
 
 **검증**: `npm run build` 통과 (459 static pages 생성, 26개 SVG 자산 누적)
+
+### G4. `series:istio-observability` (2026-05-01 완료)
+
+- 2편 / 5블록 / 127줄
+  - SVG 변환: 3블록 → SVG 3개
+  - markdown 평탄화: 2블록 (체크리스트 박스 — 굵은 글씨 + `- [ ]` 리스트)
+- 처리 글:
+  - `istio-observability-part1-metrics.md` (1 SVG + 1 평탄화) — Service Dashboard 4패널 / 메트릭 체크리스트
+  - `istio-observability-part2-tracing.md` (2 SVG + 1 평탄화) — Jaeger 검색 결과 / Trace 워터폴 / 트레이싱 체크리스트
+
+**적용 패턴(추가)**:
+- UI 모킹 → SVG 차트 — Grafana/Jaeger 모킹은 단순 박스가 아니라 "값(150 req/s, 45ms)·바차트·워터폴"을 살려서 정보 가치를 유지
+- 워터폴 다이어그램 — 시간축 라벨 + 가로 바 길이로 비례 표현, 병목 단계만 rose 색으로 강조
+- 체크리스트 박스 → markdown — 의미상 정렬 정보가 적은 체크리스트는 SVG 비용 대비 가치가 낮아 굵은 헤더 + bullet 평탄화
+
+### G5. `series:istio-traffic` (2026-05-01 완료)
+
+- 3편 / 5블록 / 112줄
+  - SVG 변환: 2블록 → SVG 2개
+  - markdown 평탄화: 3블록 (체크리스트 3종)
+- 처리 글:
+  - `istio-traffic-part5-mirroring.md` (2 SVG + 1 평탄화) — Fire-and-Forget 흐름 / Shadow Testing 대시보드 / Mirroring 체크리스트
+  - `istio-traffic-part3-circuit-breaker.md` (1 평탄화) — Circuit Breaker 체크리스트
+  - `istio-traffic-part4-retry-timeout.md` (1 평탄화) — Retry/Timeout 체크리스트
+
+**검증**: `npm run build` 통과 (459 static pages 생성, 31개 SVG 자산 누적)

@@ -469,33 +469,27 @@ http:
 
 ## 📚 정리
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│              Retry & Timeout 체크리스트                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   ✅ Timeout 설정                                               │
-│      □ 모든 서비스에 timeout 설정                               │
-│      □ 경로별 적절한 값 (빠른 API vs 느린 API)                  │
-│      □ 외부 서비스는 여유있게                                   │
-│                                                                 │
-│   ✅ Retry 설정                                                 │
-│      □ 멱등성 확인 (GET vs POST)                                │
-│      □ retryOn 조건 세밀하게                                    │
-│      □ perTryTimeout × attempts ≤ timeout 확인                  │
-│                                                                 │
-│   ✅ Retry Storm 방지                                           │
-│      □ Circuit Breaker와 함께 사용                              │
-│      □ DestinationRule의 maxRetries 설정                        │
-│      □ 비멱등 요청은 재시도 제한                                │
-│                                                                 │
-│   ✅ 모니터링                                                   │
-│      □ upstream_rq_retry 메트릭 확인                            │
-│      □ 504 Timeout 에러 추적                                    │
-│      □ 재시도 성공률 확인                                       │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+### Retry & Timeout 체크리스트
+
+**Timeout 설정**
+- [ ] 모든 서비스에 timeout 설정
+- [ ] 경로별 적절한 값 (빠른 API vs 느린 API)
+- [ ] 외부 서비스는 여유있게
+
+**Retry 설정**
+- [ ] 멱등성 확인 (GET vs POST)
+- [ ] `retryOn` 조건 세밀하게
+- [ ] `perTryTimeout × attempts ≤ timeout` 확인
+
+**Retry Storm 방지**
+- [ ] Circuit Breaker와 함께 사용
+- [ ] DestinationRule의 `maxRetries` 설정
+- [ ] 비멱등 요청은 재시도 제한
+
+**모니터링**
+- [ ] `upstream_rq_retry` 메트릭 확인
+- [ ] 504 Timeout 에러 추적
+- [ ] 재시도 성공률 확인
 
 ---
 

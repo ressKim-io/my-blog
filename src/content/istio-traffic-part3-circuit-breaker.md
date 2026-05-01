@@ -441,29 +441,23 @@ trafficPolicy:
 
 ## 📚 정리
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│               Circuit Breaker 설정 체크리스트                   │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   ✅ Connection Pool                                            │
-│      □ maxConnections: 서비스 처리량에 맞게                     │
-│      □ http2MaxRequests: 동시 요청 수 고려                      │
-│      □ http1MaxPendingRequests: 대기열 크기                     │
-│                                                                 │
-│   ✅ Outlier Detection                                          │
-│      □ consecutive5xxErrors: 3~7 사이 권장                      │
-│      □ interval: 10~30s 사이 권장                               │
-│      □ baseEjectionTime: 30s~60s 권장                           │
-│      □ maxEjectionPercent: Pod 수 고려                          │
-│                                                                 │
-│   ✅ 모니터링                                                   │
-│      □ upstream_rq_pending_overflow 메트릭 확인                 │
-│      □ Kiali에서 Circuit Breaker 상태 확인                      │
-│      □ 5xx 에러율 대시보드 구성                                 │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+### Circuit Breaker 설정 체크리스트
+
+**Connection Pool**
+- [ ] `maxConnections`: 서비스 처리량에 맞게
+- [ ] `http2MaxRequests`: 동시 요청 수 고려
+- [ ] `http1MaxPendingRequests`: 대기열 크기
+
+**Outlier Detection**
+- [ ] `consecutive5xxErrors`: 3~7 사이 권장
+- [ ] `interval`: 10~30s 사이 권장
+- [ ] `baseEjectionTime`: 30s~60s 권장
+- [ ] `maxEjectionPercent`: Pod 수 고려
+
+**모니터링**
+- [ ] `upstream_rq_pending_overflow` 메트릭 확인
+- [ ] Kiali에서 Circuit Breaker 상태 확인
+- [ ] 5xx 에러율 대시보드 구성
 
 ---
 
