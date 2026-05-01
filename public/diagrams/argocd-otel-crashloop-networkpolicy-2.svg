@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t2">OTel Collector Back의 Loki Retry 증폭 사이클</title>
+  <desc id="d2">Kafka에서 소비한 약 2MB 배치를 Loki로 전송하면 429 응답이 돌아오고, retry 큐에 재적재된 이전 배치와 새로 들어온 배치가 동시 전송되며 메모리가 누적되어 OOM 또는 연속 실패로 crash, restart 후 사이클 반복</desc>
+
+  <defs>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr2r" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#BE123C"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr2); }
+    .restart { stroke: #BE123C; stroke-width: 1.5; fill: none; stroke-dasharray: 4 2; marker-end: url(#arr2r); }
+  ]]></style>
+
+  <!-- Step 1: Kafka 배치 소비 (database / violet) -->
+  <rect x="56" y="40" width="220" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="166" y="68" text-anchor="middle" class="label" fill="#6D28D9">1. Kafka 배치 소비</text>
+  <text x="166" y="90" text-anchor="middle" class="meta">~2MB / 1,212 lines</text>
+
+  <!-- arrow 1 -> 2 -->
+  <line x1="276" y1="76" x2="404" y2="76" class="arrow"/>
+  <text x="340" y="68" text-anchor="middle" class="arrlbl">OTLP HTTP</text>
+
+  <!-- Step 2: Loki 전송 (backend / emerald) -->
+  <rect x="404" y="40" width="220" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="514" y="68" text-anchor="middle" class="label" fill="#047857">2. Loki 전송</text>
+  <text x="514" y="90" text-anchor="middle" class="meta">limit: 4MB/sec</text>
+
+  <!-- arrow 2 -> 3 (down) -->
+  <path d="M 514 112 V 168" class="arrow"/>
+  <text x="528" y="144" class="arrlbl">429 응답</text>
+
+  <!-- Step 3: retry 큐 재적재 (security / rose) -->
+  <rect x="404" y="168" width="220" height="72" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="514" y="196" text-anchor="middle" class="label" fill="#BE123C">3. retry 큐 재적재</text>
+  <text x="514" y="218" text-anchor="middle" class="meta">이전 배치 보존</text>
+
+  <!-- arrow 3 -> 4 (down) -->
+  <line x1="514" y1="240" x2="514" y2="296" class="arrow"/>
+
+  <!-- Step 4: 메모리 누적 (security / rose) -->
+  <rect x="404" y="296" width="220" height="72" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="514" y="324" text-anchor="middle" class="label" fill="#BE123C">4. 메모리 누적</text>
+  <text x="514" y="346" text-anchor="middle" class="meta">이전 retry + 새 배치</text>
+
+  <!-- arrow 4 -> 5 (left) -->
+  <line x1="404" y1="332" x2="276" y2="332" class="arrow"/>
+  <text x="340" y="324" text-anchor="middle" class="arrlbl">동시 전송</text>
+
+  <!-- Step 5: OOM / 연속 429 crash (security / rose) -->
+  <rect x="56" y="296" width="220" height="72" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="166" y="324" text-anchor="middle" class="label" fill="#BE123C">5. OOM 또는 연속 429</text>
+  <text x="166" y="346" text-anchor="middle" class="meta">crash → CrashLoopBackOff</text>
+
+  <!-- arrow 5 -> 1 (restart, dashed) -->
+  <path d="M 166 296 V 168 V 112" class="restart"/>
+  <text x="78" y="200" class="arrlbl" fill="#BE123C">restart</text>
+
+  <!-- Note bottom -->
+  <text x="340" y="436" text-anchor="middle" class="meta" fill="#27272A">Kafka가 unbounded buffer 역할이라 새 배치는 계속 들어옴 — retry 누적 차단 안 됨</text>
+</svg>

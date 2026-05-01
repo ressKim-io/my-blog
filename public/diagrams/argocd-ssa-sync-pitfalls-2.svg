@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 720" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t2">Force Sync 에러 루프</title>
+  <desc id="d2">사용자가 Force Sync를 한 번 실행하면 Application의 .operation.syncStrategy.apply.force가 true로 잔류하고, kubectl이 --force와 --server-side를 동시 사용 거부하여 ExternalSecret syncWave -1이 실패, 후속 Deployment가 skip되며, retry 5회 소진 후 selfHeal이 동일 force 플래그를 전파하여 루프가 반복</desc>
+
+  <defs>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr2r" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#BE123C"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr2); }
+    .loop  { stroke: #BE123C; stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; marker-end: url(#arr2r); }
+  ]]></style>
+
+  <!-- Step 1: 사용자 (external / slate) -->
+  <rect x="60" y="40" width="200" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="160" y="66" text-anchor="middle" class="label" fill="#334155">사용자</text>
+  <text x="160" y="86" text-anchor="middle" class="meta">"왜 안 되지?" Force Sync</text>
+
+  <!-- arrow 1 -> 2 -->
+  <line x1="260" y1="72" x2="332" y2="72" class="arrow"/>
+
+  <!-- Step 2: Application.operation (cloud / amber) -->
+  <rect x="332" y="32" width="408" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="536" y="58" text-anchor="middle" class="label" fill="#B45309">Application.operation</text>
+  <text x="536" y="80" text-anchor="middle" class="meta">syncStrategy.apply.force: true</text>
+  <text x="536" y="100" text-anchor="middle" class="meta" fill="#BE123C">→ 한 번 설정되면 잔류, selfHeal에도 전파</text>
+
+  <!-- arrow 2 -> 3 -->
+  <line x1="536" y1="112" x2="536" y2="152" class="arrow"/>
+
+  <!-- Step 3: kubectl apply 충돌 (security / rose) -->
+  <rect x="332" y="152" width="408" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="536" y="178" text-anchor="middle" class="label" fill="#BE123C">kubectl apply --server-side --force</text>
+  <text x="536" y="200" text-anchor="middle" class="meta">두 플래그 동시 사용 거부</text>
+  <text x="536" y="220" text-anchor="middle" class="meta">"--force cannot be used with --server-side"</text>
+
+  <!-- arrow 3 -> 4 -->
+  <line x1="536" y1="232" x2="536" y2="272" class="arrow"/>
+
+  <!-- Step 4: ExternalSecret 실패 (security / rose) -->
+  <rect x="332" y="272" width="408" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="536" y="298" text-anchor="middle" class="label" fill="#BE123C">ExternalSecret syncWave -1 실패</text>
+  <text x="536" y="320" text-anchor="middle" class="meta">syncWave -1이 막혀서 후속 wave 진입 불가</text>
+  <text x="536" y="340" text-anchor="middle" class="meta">→ Deployment 등 Wave 0 이상 전부 skip</text>
+
+  <!-- arrow 4 -> 5 -->
+  <line x1="536" y1="352" x2="536" y2="392" class="arrow"/>
+
+  <!-- Step 5: retry 5회 소진 (security / rose) -->
+  <rect x="332" y="392" width="408" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="536" y="418" text-anchor="middle" class="label" fill="#BE123C">retry 5회 소진</text>
+  <text x="536" y="440" text-anchor="middle" class="meta">동일 force 에러로 5회 모두 실패</text>
+  <text x="536" y="460" text-anchor="middle" class="meta">→ selfHeal이 재시도해도 동일 force 전파</text>
+
+  <!-- loop arrow back to step 2 -->
+  <path d="M 332 432 H 280 V 72 H 332" class="loop"/>
+  <text x="266" y="252" text-anchor="end" class="arrlbl" fill="#BE123C">루프 — force 잔류</text>
+
+  <!-- Bottom: Resolution (backend / emerald) -->
+  <rect x="120" y="528" width="560" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="556" text-anchor="middle" class="label" fill="#047857">탈출 — Application JSON에서 force 플래그 제거</text>
+  <text x="400" y="582" text-anchor="middle" class="meta">kubectl get application -o json &gt; backup.json</text>
+  <text x="400" y="602" text-anchor="middle" class="meta">→ .operation.syncStrategy.apply.force 삭제</text>
+  <text x="400" y="622" text-anchor="middle" class="meta">→ kubectl replace + clean sync 트리거</text>
+</svg>

@@ -117,7 +117,7 @@ kubectl annotate app wealist-apps-prod -n argocd \
 ### 영구 해결: 디렉토리 분리
 
 **Before (문제 구조):**
-```
+```text
 k8s/argocd/apps/prod/
 ├── root-app.yaml          # 문제! 자기 자신도 감시 대상
 ├── auth-service.yaml
@@ -126,7 +126,7 @@ k8s/argocd/apps/prod/
 ```
 
 **After (올바른 구조):**
-```
+```text
 k8s/argocd/
 ├── root-apps/              # 새 디렉토리 (별도 관리)
 │   ├── prod.yaml           # root app 정의
@@ -305,7 +305,7 @@ kubectl get pods -n argocd | grep -E "server|dex"
 
 ### App of Apps 패턴 권장 구조
 
-```
+```text
 k8s/argocd/
 ├── root-apps/              # Root Applications (Terraform 또는 kubectl로 직접 apply)
 │   ├── prod.yaml

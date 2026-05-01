@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">ArgoCD Sync Pipeline의 Diff/Apply 불일치</title>
+  <desc id="d1">Git Repo의 desired 상태가 client-side diff에서는 차이로 잡혀 OutOfSync 판정되지만, server-side apply에서는 managedFields 소유권 기반으로 변경 불필요로 skip되어 영구 OutOfSync 루프 발생</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Step 1: Git Repo (cloud / amber) -->
+  <rect x="32" y="120" width="200" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="132" y="148" text-anchor="middle" class="label" fill="#B45309">Git Repo</text>
+  <text x="132" y="170" text-anchor="middle" class="meta">desired state</text>
+  <text x="132" y="188" text-anchor="middle" class="meta">Helm 렌더링</text>
+
+  <!-- arrow 1 -> 2 -->
+  <line x1="232" y1="160" x2="288" y2="160" class="arrow"/>
+
+  <!-- Step 2: Diff (security / rose - client-side 불일치 원인) -->
+  <rect x="288" y="120" width="220" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="398" y="148" text-anchor="middle" class="label" fill="#BE123C">Diff 비교 (client-side)</text>
+  <text x="398" y="170" text-anchor="middle" class="meta">desired vs live 직접 비교</text>
+  <text x="398" y="188" text-anchor="middle" class="meta" fill="#BE123C">→ "차이 있음" OutOfSync</text>
+
+  <!-- arrow 2 -> 3 -->
+  <line x1="508" y1="160" x2="564" y2="160" class="arrow"/>
+
+  <!-- Step 3: Apply (backend / emerald - server-side, skip) -->
+  <rect x="564" y="120" width="220" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="674" y="148" text-anchor="middle" class="label" fill="#047857">Apply (server-side)</text>
+  <text x="674" y="170" text-anchor="middle" class="meta">managedFields 소유권 확인</text>
+  <text x="674" y="188" text-anchor="middle" class="meta" fill="#047857">→ "변경 불필요" skip</text>
+
+  <!-- Result box -->
+  <rect x="200" y="280" width="400" height="80" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="400" y="306" text-anchor="middle" class="label" fill="#334155">결과: 영구 OutOfSync 루프</text>
+  <text x="400" y="328" text-anchor="middle" class="meta">diff는 매번 차이를 감지 → apply는 항상 skip</text>
+  <text x="400" y="346" text-anchor="middle" class="meta">selfHeal로도 풀리지 않음</text>
+
+  <!-- arrows funneling to result -->
+  <path d="M 398 200 V 240 H 320 V 280" class="arrow"/>
+  <path d="M 674 200 V 240 H 480 V 280" class="arrow"/>
+
+  <!-- top labels -->
+  <text x="132" y="100" text-anchor="middle" class="meta">Source</text>
+  <text x="398" y="100" text-anchor="middle" class="meta">판정 단계</text>
+  <text x="674" y="100" text-anchor="middle" class="meta">실행 단계</text>
+</svg>

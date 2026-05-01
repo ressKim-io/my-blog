@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 640" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t1">ArgoCD Sync 권한 검증 흐름과 Probe CRD 누락</title>
+  <desc id="d1">Git Repo에서 렌더링한 리소스 목록이 monitoring-custom Application을 거쳐 monitoring AppProject의 namespaceResourceWhitelist 검증을 받는 과정. Prometheus·PrometheusRule 등 7개 CRD는 허용되어 있지만 Probe만 누락되어 SyncFailed</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .ok    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #047857; }
+    .bad   { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #BE123C; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Step 1: Git Repo (cloud / amber) -->
+  <rect x="240" y="32" width="280" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="380" y="58" text-anchor="middle" class="label" fill="#B45309">Git Repo</text>
+  <text x="380" y="78" text-anchor="middle" class="meta">Goti-monitoring · Helm 렌더링</text>
+
+  <!-- arrow 1 -> 2 -->
+  <line x1="380" y1="96" x2="380" y2="128" class="arrow"/>
+  <text x="392" y="118" class="arrlbl">배포할 리소스 목록</text>
+
+  <!-- Step 2: Application (backend / emerald) -->
+  <rect x="200" y="128" width="360" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="380" y="156" text-anchor="middle" class="label" fill="#047857">Application: monitoring-custom</text>
+  <text x="380" y="178" text-anchor="middle" class="meta">spec.project: monitoring</text>
+
+  <!-- arrow 2 -> 3 -->
+  <line x1="380" y1="200" x2="380" y2="232" class="arrow"/>
+
+  <!-- Step 3: AppProject whitelist (database / violet) -->
+  <rect x="120" y="232" width="520" height="248" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="380" y="258" text-anchor="middle" class="label" fill="#6D28D9">AppProject: monitoring</text>
+  <text x="380" y="278" text-anchor="middle" class="meta">namespaceResourceWhitelist (monitoring.coreos.com)</text>
+
+  <text x="160" y="306" class="ok">✓ Prometheus</text>
+  <text x="160" y="326" class="ok">✓ PrometheusRule</text>
+  <text x="160" y="346" class="ok">✓ ServiceMonitor</text>
+  <text x="160" y="366" class="ok">✓ PodMonitor</text>
+
+  <text x="400" y="306" class="ok">✓ Alertmanager</text>
+  <text x="400" y="326" class="ok">✓ AlertmanagerConfig</text>
+  <text x="400" y="346" class="ok">✓ ScrapeConfig</text>
+  <text x="400" y="366" class="bad">✗ Probe — 누락!</text>
+
+  <line x1="160" y1="396" x2="600" y2="396" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="380" y="420" text-anchor="middle" class="meta">whitelist에 없는 CRD가 발견되면 sync 거부</text>
+  <text x="380" y="442" text-anchor="middle" class="meta" fill="#BE123C">"resource monitoring.coreos.com:Probe is not permitted in project monitoring"</text>
+  <text x="380" y="462" text-anchor="middle" class="meta">→ SyncFailed</text>
+</svg>

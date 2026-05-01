@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">OTel Collector 2-Tier 파이프라인 아키텍처</title>
+  <desc id="d1">App Pods와 kubelet에서 발생한 로그를 DaemonSet으로 배포된 OTel Collector Front가 수집해 Kafka 버퍼로 전송하고, Deployment로 배포된 Back이 Kafka에서 소비해 Loki와 Tempo로 분기 전송</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Source 1: App Pods (backend / emerald) -->
+  <rect x="80" y="32" width="240" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="200" y="58" text-anchor="middle" class="label" fill="#047857">App Pods</text>
+  <text x="200" y="78" text-anchor="middle" class="meta">OTLP SDK</text>
+
+  <!-- Source 2: kubelet (cloud / amber) -->
+  <rect x="480" y="32" width="240" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="58" text-anchor="middle" class="label" fill="#B45309">kubelet</text>
+  <text x="600" y="78" text-anchor="middle" class="meta">node log</text>
+
+  <!-- arrows: sources -> Front -->
+  <path d="M 200 96 V 152 H 360" class="arrow"/>
+  <path d="M 600 96 V 152 H 440" class="arrow"/>
+
+  <!-- Front Collector (backend / emerald) -->
+  <rect x="240" y="152" width="320" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="180" text-anchor="middle" class="label" fill="#047857">OTel Collector Front</text>
+  <text x="400" y="202" text-anchor="middle" class="meta">DaemonSet — 수집/전처리</text>
+
+  <!-- arrow Front -> Kafka -->
+  <line x1="400" y1="224" x2="400" y2="264" class="arrow"/>
+
+  <!-- Kafka (database / violet) -->
+  <rect x="240" y="264" width="320" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="290" text-anchor="middle" class="label" fill="#6D28D9">Kafka</text>
+  <text x="400" y="310" text-anchor="middle" class="meta">Buffer</text>
+
+  <!-- arrow Kafka -> Back -->
+  <line x1="400" y1="328" x2="400" y2="368" class="arrow"/>
+
+  <!-- Back Collector (backend / emerald) -->
+  <rect x="240" y="368" width="320" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="396" text-anchor="middle" class="label" fill="#047857">OTel Collector Back</text>
+  <text x="400" y="418" text-anchor="middle" class="meta">Deployment — Kafka 소비 → 백엔드 전송</text>
+
+  <!-- arrows Back -> Loki / Tempo -->
+  <path d="M 400 440 V 472 H 200 V 488" class="arrow"/>
+  <path d="M 400 440 V 472 H 600 V 488" class="arrow"/>
+
+  <!-- Loki (database / violet) -->
+  <rect x="80" y="488" width="240" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="200" y="514" text-anchor="middle" class="label" fill="#6D28D9">Loki</text>
+  <text x="200" y="532" text-anchor="middle" class="meta">로그 저장</text>
+
+  <!-- Tempo (database / violet) -->
+  <rect x="480" y="488" width="240" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="514" text-anchor="middle" class="label" fill="#6D28D9">Tempo</text>
+  <text x="600" y="532" text-anchor="middle" class="meta">트레이스 저장</text>
+</svg>

@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 640" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t2">ArgoCD Auto Sync Retry 5회 소진과 새 리비전 재시작</title>
+  <desc id="d2">동일 리비전 abc123에 대해 5초·10초·20초·40초 exponential backoff로 5회 sync 시도가 모두 실패하면 retry 소진 상태가 되어 selfHeal로도 재시도하지 않음. Goti-monitoring 레포에 새 리비전 def456이 들어오면 retry 카운트가 초기화되어 sync 재개</desc>
+
+  <defs>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr2g" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#047857"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr2); }
+    .arrowGood { stroke: #047857; stroke-width: 2; fill: none; marker-end: url(#arr2g); }
+  ]]></style>
+
+  <!-- Header: Git Push (cloud / amber) -->
+  <rect x="248" y="24" width="264" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="380" y="48" text-anchor="middle" class="label" fill="#B45309">Git Push</text>
+  <text x="380" y="68" text-anchor="middle" class="meta">revision: abc123</text>
+
+  <!-- arrow header -> sync 1 -->
+  <line x1="380" y1="80" x2="380" y2="104" class="arrow"/>
+
+  <!-- Sync attempts 1..5 (security / rose for failures) -->
+  <!-- Layout: rows -->
+  <!-- Row 1 -->
+  <rect x="220" y="104" width="320" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="240" y="132" class="label" fill="#BE123C">Sync 시도 1</text>
+  <text x="520" y="132" text-anchor="end" class="meta">실패 → backoff 5s</text>
+
+  <line x1="380" y1="152" x2="380" y2="172" class="arrow"/>
+
+  <rect x="220" y="172" width="320" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="240" y="200" class="label" fill="#BE123C">Sync 시도 2</text>
+  <text x="520" y="200" text-anchor="end" class="meta">실패 → backoff 10s</text>
+
+  <line x1="380" y1="220" x2="380" y2="240" class="arrow"/>
+
+  <rect x="220" y="240" width="320" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="240" y="268" class="label" fill="#BE123C">Sync 시도 3</text>
+  <text x="520" y="268" text-anchor="end" class="meta">실패 → backoff 20s</text>
+
+  <line x1="380" y1="288" x2="380" y2="308" class="arrow"/>
+
+  <rect x="220" y="308" width="320" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="240" y="336" class="label" fill="#BE123C">Sync 시도 4</text>
+  <text x="520" y="336" text-anchor="end" class="meta">실패 → backoff 40s</text>
+
+  <line x1="380" y1="356" x2="380" y2="376" class="arrow"/>
+
+  <rect x="220" y="376" width="320" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="240" y="404" class="label" fill="#BE123C">Sync 시도 5</text>
+  <text x="520" y="404" text-anchor="end" class="meta">실패 → RETRY 소진</text>
+
+  <line x1="380" y1="424" x2="380" y2="448" class="arrow"/>
+
+  <!-- Locked state -->
+  <rect x="180" y="448" width="400" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="380" y="474" text-anchor="middle" class="label" fill="#334155">"retried 5 times"</text>
+  <text x="380" y="494" text-anchor="middle" class="meta">동일 리비전 abc123은 더 이상 시도 안 함 (selfHeal로도 미재개)</text>
+
+  <!-- New revision triggers reset -->
+  <line x1="380" y1="512" x2="380" y2="544" class="arrowGood"/>
+  <text x="392" y="534" class="arrlbl" fill="#047857">새 리비전 push → retry 카운트 초기화</text>
+
+  <rect x="200" y="544" width="360" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="380" y="570" text-anchor="middle" class="label" fill="#047857">새 리비전 def456 → 새 sync 시작</text>
+  <text x="380" y="590" text-anchor="middle" class="meta">git commit --allow-empty</text>
+</svg>
