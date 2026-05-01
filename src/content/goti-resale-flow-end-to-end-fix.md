@@ -1,6 +1,6 @@
 ---
 title: "리셀 플로우 E2E 버그 5연쇄 수정 — game_date placeholder부터 FE stale merge까지"
-excerpt: "리셀 등록/취소 시나리오에서 발견된 5단계 연쇄 버그의 원인과 수정 전 과정입니다. tickets.game_date placeholder, DTO 직렬화 불일치, user-wide rate limit 오설계, 서버측 만료 검증 부재, FE localStorage stale merge까지 각 버그를 추적했습니다."
+excerpt: "리셀 등록·취소 시나리오에서 5단계 연쇄로 터진 버그의 원인과 수정 과정입니다. tickets.game_date placeholder, DTO 직렬화 불일치, user-wide rate limit 오설계, 서버 만료 검증 부재, FE localStorage stale merge까지 각 버그를 따로따로 추적했습니다"
 category: challenge
 tags:
   - go-ti
@@ -16,7 +16,7 @@ date: "2026-04-19"
 
 ## 한 줄 요약
 
-> 리셀 등록/취소 시나리오에서 `LISTING_ALREADY_CLOSED`, `undefined` 필드 오류, `RE_LISTING_LIMIT_EXCEEDED`, 만료 listing 노출, `LISTING_NOT_FOUND` 5개 버그가 연쇄 발생했습니다. 각 버그는 독립적인 원인을 가졌고, 커밋 4개(BE) + 커밋 1개(FE) + K8s Job 3개로 순차 수정했습니다.
+> 리셀 등록·취소 시나리오에서 `LISTING_ALREADY_CLOSED`, `undefined` 필드 오류, `RE_LISTING_LIMIT_EXCEEDED`, 만료 listing 노출, `LISTING_NOT_FOUND` 5개 버그가 연쇄로 터졌습니다. 각 버그는 독립된 원인에서 비롯됐고, BE 커밋 4개·FE 커밋 1개·K8s Job 3개로 순차 수정했습니다
 
 ## 개요
 
@@ -28,7 +28,7 @@ date: "2026-04-19"
 | 4 | 만료 listing UI 노출 + 조작된 PATCH 허용 | `resale_listings`에 경기 시작 시각 없어 서버측 만료 판정 불가 | `d980221` |
 | 5 | `LISTING_NOT_FOUND` — stale listing 취소 시 404 | FE `mergeResaleListings`가 localStorage stale을 BE 응답과 merge | FE `1594722` |
 
-이 글의 선행 조사는 `2026-04-19-resale-listings-400-investigation.md`(해결 미정 기록)와 `2026-04-19-resale-fe-be-contract-audit.md`(FE↔BE 계약 검토)에서 확보됐습니다.
+이 글의 선행 조사는 `2026-04-19-resale-listings-400-investigation.md`(해결 미정 기록)와 `2026-04-19-resale-fe-be-contract-audit.md`(FE↔BE 계약 검토)에 정리되어 있습니다
 
 ---
 
@@ -36,7 +36,7 @@ date: "2026-04-19"
 
 ### 증상
 
-4/22 경기 티켓을 대상으로 `POST /api/v1/resales/listings`를 호출하면 400 `{"code":"LISTING_ALREADY_CLOSED"}`가 반환됐습니다. 경기가 3일 이상 남았음에도 발동했습니다.
+4/22 경기 티켓으로 `POST /api/v1/resales/listings`를 호출하면 400 `{"code":"LISTING_ALREADY_CLOSED"}`가 돌아옵니다. 경기까지 3일 이상 남았는데도 게이팅이 걸렸습니다
 
 ### 🤔 원인
 
@@ -64,7 +64,7 @@ func (r *TicketRepository) EnrichForTicket(...) (*TicketEnrichment, error) {
 }
 ```
 
-코드 주석에 "game_date는 placeholder (Redis ticket:\{id\}에서 UI 조회)"라고 명시되어 있었습니다. 그러나 **리셀 서비스가 이 컬럼을 실제 게이팅에 사용**하고 있었습니다. 선행 커밋에서 cross-schema 권한 문제를 피하려 `EnrichForTicket`을 축소했던 것이 이 부작용을 만들었습니다.
+코드 주석에 "game_date는 placeholder (Redis ticket:\{id\}에서 UI 조회)"라고 명시되어 있었습니다. 문제는 **리셀 서비스가 이 컬럼을 실제 게이팅에 쓰고 있었다는 점**입니다. 선행 커밋에서 cross-schema 권한 문제를 피하려고 `EnrichForTicket`을 축소했던 결정이 이 부작용을 남겼습니다
 
 결과적으로 `game_date = 0001-01-01`인 모든 티켓이 `time.Until(0001-01-01) < time.Hour` 조건을 충족해 리셀 게이팅이 전량 발동했습니다.
 
@@ -86,7 +86,7 @@ LIMIT 1
 
 ### 배포 함정
 
-detect-changes가 `internal/ticketing/` 변경 시 `ticketing` 서비스만 빌드합니다. outbox-worker도 `ticket_repo`를 호출하지만 `internal/outbox/` 하위 변경이 아니라 빌드 대상에서 누락됐습니다. `workflow_dispatch`로 추가 실행이 필요했으며, `pkg/` 외의 공유 모듈 변경 시 detect-changes 로직 재검토가 필요합니다.
+detect-changes가 `internal/ticketing/` 변경 시 `ticketing` 서비스만 빌드합니다. outbox-worker도 `ticket_repo`를 호출하지만 `internal/outbox/` 하위 변경이 아니라서 빌드 대상에 빠져 있었습니다. `workflow_dispatch`로 추가 실행해야 했으며, `pkg/` 외 공유 모듈 변경을 놓치지 않으려면 detect-changes 로직을 재검토해야 합니다
 
 ---
 
@@ -127,7 +127,7 @@ for _, o := range orders {
 response.Page(c, summaries, total, totalPages)
 ```
 
-entity를 외부 응답에 직접 노출하면 JSON 태그 부재·필드명 변경이 즉시 계약 불일치로 이어집니다. 모든 핸들러에서 DTO 변환을 거치는지 audit이 필요합니다.
+entity를 외부 응답에 직접 노출하면 JSON 태그 부재·필드명 변경이 즉시 계약 불일치로 이어집니다. 모든 핸들러에서 DTO 변환을 거치는지 한 번 점검할 필요가 있습니다
 
 ---
 
