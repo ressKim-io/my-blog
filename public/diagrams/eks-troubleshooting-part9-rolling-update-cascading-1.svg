@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 480" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t1">VPC CNI Prefix Delegation과 Kubelet max-pods 불일치</title>
+  <desc id="d1">VPC CNI가 ENABLE_PREFIX_DELEGATION true로 /28 prefix를 할당해 노드당 최대 110개 IP를 확보 가능하지만, Bottlerocket 기본값 max-pods 35로 인해 35개 초과 Pod 스케줄이 거부되어 IP는 남는데 Pod은 못 올리고 rollout 시 IP가 2배 점유되어 /24 서브넷 IP가 소진</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Step 1: VPC CNI Layer (cloud / amber) -->
+  <rect x="80" y="40" width="600" height="96" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="380" y="68" text-anchor="middle" class="label" fill="#B45309">VPC CNI Layer</text>
+  <text x="380" y="92" text-anchor="middle" class="meta">ENABLE_PREFIX_DELEGATION=true</text>
+  <text x="380" y="114" text-anchor="middle" class="meta">/28 prefix 할당 → 노드당 최대 110 IP 확보 가능</text>
+
+  <line x1="380" y1="136" x2="380" y2="168" class="arrow"/>
+  <text x="392" y="158" class="arrlbl">IP는 충분</text>
+
+  <!-- Step 2: Kubelet Layer (security / rose - bottleneck) -->
+  <rect x="80" y="168" width="600" height="96" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="380" y="196" text-anchor="middle" class="label" fill="#BE123C">Kubelet Layer</text>
+  <text x="380" y="220" text-anchor="middle" class="meta">max-pods=35 (Bottlerocket 기본값 — secondary IP 모드)</text>
+  <text x="380" y="242" text-anchor="middle" class="meta">→ 35개 초과 Pod 스케줄 거부</text>
+
+  <line x1="380" y1="264" x2="380" y2="296" class="arrow"/>
+
+  <!-- Step 3: 결과 (security / rose) -->
+  <rect x="80" y="296" width="600" height="120" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="380" y="324" text-anchor="middle" class="label" fill="#BE123C">결과 — IP 낭비 + Rolling Update IP 폭발</text>
+  <text x="380" y="350" text-anchor="middle" class="meta">• IP는 남는데 Pod이 더 올라가지 않음 (warm pool 점유)</text>
+  <text x="380" y="372" text-anchor="middle" class="meta">• rollout restart 시 기존+새 Pod 동시 존재 → IP 2배 점유</text>
+  <text x="380" y="394" text-anchor="middle" class="meta">• 결국 /24 서브넷 254개 IP 소진</text>
+</svg>

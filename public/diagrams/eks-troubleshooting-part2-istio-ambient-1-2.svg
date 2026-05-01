@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t2">Prometheus가 Mesh 외부일 때 STRICT mTLS와 충돌</title>
+  <desc id="d2">user/board/auth-service는 Istio Ambient Mesh 내부에서 STRICT mTLS를 요구하지만, Prometheus는 dataplane-mode none 라벨로 mesh 외부에 있어 plain HTTP로 메트릭을 긁으면 ztunnel이 mTLS 요구로 connection reset by peer를 반환</desc>
+
+  <defs>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#BE123C"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; }
+    .blocked { stroke: #BE123C; stroke-width: 1.5; stroke-dasharray: 6 3; fill: none; marker-end: url(#arr2); }
+  ]]></style>
+
+  <!-- Mesh boundary (database / violet) -->
+  <rect x="32" y="32" width="736" height="240" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="48" y="60" class="meta" fill="#6D28D9">Istio Ambient Mesh — STRICT mTLS</text>
+
+  <!-- 3 services (security / rose - mTLS 요구) -->
+  <rect x="80" y="96" width="200" height="120" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="180" y="124" text-anchor="middle" class="label" fill="#BE123C">user-service</text>
+  <text x="180" y="148" text-anchor="middle" class="meta">port 8081 / metrics</text>
+  <text x="180" y="170" text-anchor="middle" class="meta">mesh 내부</text>
+  <text x="180" y="192" text-anchor="middle" class="meta">STRICT mTLS</text>
+
+  <rect x="300" y="96" width="200" height="120" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="124" text-anchor="middle" class="label" fill="#BE123C">board-service</text>
+  <text x="400" y="148" text-anchor="middle" class="meta">port 8000 / metrics</text>
+  <text x="400" y="170" text-anchor="middle" class="meta">mesh 내부</text>
+  <text x="400" y="192" text-anchor="middle" class="meta">STRICT mTLS</text>
+
+  <rect x="520" y="96" width="200" height="120" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="620" y="124" text-anchor="middle" class="label" fill="#BE123C">auth-service</text>
+  <text x="620" y="148" text-anchor="middle" class="meta">8080/actuator/prometheus</text>
+  <text x="620" y="170" text-anchor="middle" class="meta">mesh 내부</text>
+  <text x="620" y="192" text-anchor="middle" class="meta">STRICT mTLS</text>
+
+  <!-- Prometheus outside mesh (external / slate) -->
+  <rect x="280" y="328" width="240" height="100" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="400" y="358" text-anchor="middle" class="label" fill="#334155">Prometheus</text>
+  <text x="400" y="380" text-anchor="middle" class="meta">istio.io/dataplane-mode: none</text>
+  <text x="400" y="402" text-anchor="middle" class="meta">mesh 외부</text>
+  <text x="400" y="420" text-anchor="middle" class="meta">plain HTTP scrape</text>
+
+  <!-- 3 blocked arrows from Prometheus to services -->
+  <path d="M 360 328 V 290 H 180 V 216" class="blocked"/>
+  <line x1="400" y1="328" x2="400" y2="216" class="blocked"/>
+  <path d="M 440 328 V 290 H 620 V 216" class="blocked"/>
+
+  <!-- failure label -->
+  <rect x="290" y="276" width="220" height="32" rx="4" fill="#FAFAFA" stroke="#BE123C" stroke-width="1"/>
+  <text x="400" y="297" text-anchor="middle" class="arrlbl" fill="#BE123C">connection reset by peer (ztunnel mTLS 요구)</text>
+</svg>

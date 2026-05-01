@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t1">Istio Sidecar 모드와 Ambient 모드 구성 차이</title>
+  <desc id="d1">Sidecar 모드는 istio-ingressgateway·istiod·Pod별 Envoy sidecar가 기본 구성으로 포함되지만, Ambient 모드는 istiod·노드별 ztunnel·istio-cni만 기본 포함되고 Ingress Gateway는 별도 설치가 필요</desc>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 12px; fill: #27272A; }
+    .ok    { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 12px; fill: #047857; }
+    .bad   { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 12px; fill: #BE123C; }
+  ]]></style>
+
+  <!-- Sidecar 모드 (backend / emerald) -->
+  <rect x="32" y="40" width="340" height="280" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="202" y="74" text-anchor="middle" class="label" fill="#047857">Sidecar 모드</text>
+  <line x1="48" y1="92" x2="356" y2="92" stroke="#059669" stroke-width="1"/>
+  <text x="56" y="124" class="ok">✓ istio-ingressgateway (기본 포함)</text>
+  <text x="56" y="156" class="ok">✓ istiod</text>
+  <text x="56" y="188" class="ok">✓ 각 Pod에 Envoy sidecar</text>
+  <text x="56" y="232" class="meta">Pod 수만큼 Envoy 인스턴스</text>
+  <text x="56" y="252" class="meta">리소스 비용: Pod당 CPU 10~50m</text>
+  <text x="56" y="272" class="meta">istio/gateway Helm chart 자동 설치</text>
+
+  <!-- Ambient 모드 (security / rose - 별도 설치 강조) -->
+  <rect x="388" y="40" width="340" height="280" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="558" y="74" text-anchor="middle" class="label" fill="#BE123C">Ambient 모드</text>
+  <line x1="404" y1="92" x2="712" y2="92" stroke="#E11D48" stroke-width="1"/>
+  <text x="412" y="124" class="ok">✓ istiod</text>
+  <text x="412" y="156" class="ok">✓ ztunnel (노드당 1개)</text>
+  <text x="412" y="188" class="ok">✓ istio-cni</text>
+  <text x="412" y="220" class="bad">✗ ingress gateway — 별도 설치 필요</text>
+  <text x="412" y="252" class="meta">Pod 수와 무관, 노드 단위 리소스</text>
+  <text x="412" y="272" class="meta">istio/gateway 별도 helm_release 필요</text>
+</svg>

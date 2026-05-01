@@ -31,28 +31,7 @@ date: '2025-12-31'
 
 우리 프로젝트의 Go 마이크로서비스들:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Go Microservices                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐             │
-│  │user-service│  │board-service│  │chat-service│             │
-│  │   (Go)     │  │    (Go)     │  │   (Go)     │             │
-│  └────────────┘  └────────────┘  └────────────┘             │
-│                                                              │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐             │
-│  │noti-service│  │storage-svc │  │video-service│            │
-│  │   (Go)     │  │    (Go)    │  │    (Go)     │            │
-│  └────────────┘  └────────────┘  └────────────┘             │
-│                                                              │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │              auth-service (Java/Spring)                 │ │
-│  │                   OAuth2 + Redis                        │ │
-│  └────────────────────────────────────────────────────────┘ │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+![wealist-prod 마이크로서비스 구성](/diagrams/eks-troubleshooting-part7-go-service-1.svg)
 
 ---
 
@@ -209,7 +188,7 @@ $ go mod graph | grep genproto
 gopter → goconvey → gopherjs → cobra → viper → crypt → etcd → grpc-gateway v1 → genproto (구버전)
 ```
 
-```
+```text
 board-service
   └── gopter (property-based testing)
         └── goconvey

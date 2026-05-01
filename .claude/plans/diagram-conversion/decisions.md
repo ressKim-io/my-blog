@@ -47,3 +47,24 @@
 - tree 블록 정책 — best-practices.md "ASCII 다이어그램 정책" 표(디렉토리 트리 허용 + lang=text 명시)와 정합. SVG 변환 비용 대비 시각화 가치 작아 보존이 합리적
 
 **검증**: `npm run build` 통과 (459 static pages 생성, 17개 SVG 자산 누적)
+
+### G3. `series:eks-troubleshooting` (2026-05-01 완료)
+
+- 6편 / 10블록 / 230줄
+  - SVG 변환: 9블록 → SVG 9개 (`public/diagrams/`)
+  - tree 보존: 1블록 → ` ```text` lang 명시 (의존성 체인 트리 — best-practices §ASCII 정책)
+- 처리 글 목록:
+  - `eks-troubleshooting-part2-istio-ambient-1.md` (3 SVG) — Sidecar/Ambient 구성 차이, Prometheus mesh 외부 mTLS 충돌, wealist-prod Ambient Mesh 최종 아키텍처
+  - `eks-troubleshooting-part3-istio-ambient-2.md` (1 SVG) — api.wealist.co.kr HTTPS 트래픽 (Internet→Route53→NLB(ACM)→Gateway→HTTPRoute→Services)
+  - `eks-troubleshooting-part5-monitoring-1.md` (1 SVG) — 초기 Monitoring Stack (Prometheus/Grafana/Loki + PVC + Promtail/Exporters)
+  - `eks-troubleshooting-part6-monitoring-2.md` (1 SVG) — 개선 Monitoring Stack (PVC 단기 + S3 장기 + Pod Identity)
+  - `eks-troubleshooting-part7-go-service.md` (1 SVG + 1 tree) — 6 Go + 1 Java/Spring 마이크로서비스 구성 / 의존성 체인 lang=text
+  - `eks-troubleshooting-part9-rolling-update-cascading.md` (2 SVG) — VPC CNI/Kubelet max-pods 불일치, 서브넷 IP 소진 데드락(양방향 점선)
+
+**적용 패턴(추가)**:
+- 영역 컨테이너 + 점선 보더 — Istio Mesh, Monitoring Stack, namespace 같은 논리 경계는 dashed `#7C3AED`/`#D4D4D8`로 구분 (배경 `#F5F3FF`/`#FAFAFA`)
+- 데드락/순환 — 두 박스 사이 양방향 점선 화살표 + `#BE123C`로 "막힘" 시각화
+- 서비스 묶음(6개+) — 3열 × 2행 그리드 + 같은 색(emerald) 반복, 색이 다른 1개(rose)로 도메인 구분(Go vs Java)
+- 트리블록은 디렉토리든 의존성 체인이든 ASCII 정책상 `\`text\`` 명시로 보존 — best-practices.md 1.1 갱신 시 명문화 후보
+
+**검증**: `npm run build` 통과 (459 static pages 생성, 26개 SVG 자산 누적)

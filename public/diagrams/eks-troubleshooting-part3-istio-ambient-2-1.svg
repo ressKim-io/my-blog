@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 720" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t1">api.wealist.co.kr HTTPS 트래픽 최종 아키텍처</title>
+  <desc id="d1">Internet에서 Route53 DNS api.wealist.co.kr를 거쳐 AWS NLB의 ACM TLS Termination(443→80)으로 진입하고, Kubernetes Gateway(wealist-gateway, HTTP)와 HTTPRoute(/svc/user, /svc/board)를 통해 백엔드 Services로 라우팅</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Internet (external / slate) -->
+  <rect x="240" y="32" width="280" height="56" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="380" y="56" text-anchor="middle" class="label" fill="#334155">Internet</text>
+  <text x="380" y="76" text-anchor="middle" class="meta">HTTPS (443)</text>
+
+  <line x1="380" y1="88" x2="380" y2="120" class="arrow"/>
+
+  <!-- Route53 (cloud / amber) -->
+  <rect x="240" y="120" width="280" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="380" y="144" text-anchor="middle" class="label" fill="#B45309">Route53</text>
+  <text x="380" y="164" text-anchor="middle" class="meta">api.wealist.co.kr</text>
+
+  <line x1="380" y1="176" x2="380" y2="208" class="arrow"/>
+
+  <!-- AWS NLB (cloud / amber) -->
+  <rect x="160" y="208" width="440" height="96" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="380" y="234" text-anchor="middle" class="label" fill="#B45309">AWS NLB</text>
+  <text x="380" y="258" text-anchor="middle" class="meta">TLS Termination (ACM Certificate)</text>
+  <text x="380" y="280" text-anchor="middle" class="meta">443 (HTTPS) → 80 (HTTP)</text>
+
+  <line x1="380" y1="304" x2="380" y2="336" class="arrow"/>
+
+  <!-- Kubernetes Gateway (database / violet) -->
+  <rect x="200" y="336" width="360" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="380" y="362" text-anchor="middle" class="label" fill="#6D28D9">Kubernetes Gateway</text>
+  <text x="380" y="384" text-anchor="middle" class="meta">name: wealist-gateway</text>
+  <text x="380" y="404" text-anchor="middle" class="meta">protocol: HTTP</text>
+
+  <line x1="380" y1="416" x2="380" y2="448" class="arrow"/>
+
+  <!-- HTTPRoute (database / violet) -->
+  <rect x="200" y="448" width="360" height="96" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="380" y="474" text-anchor="middle" class="label" fill="#6D28D9">HTTPRoute</text>
+  <text x="380" y="498" text-anchor="middle" class="meta">/svc/user → user-service</text>
+  <text x="380" y="520" text-anchor="middle" class="meta">/svc/board → board-service</text>
+
+  <line x1="380" y1="544" x2="380" y2="576" class="arrow"/>
+
+  <!-- Services (backend / emerald) -->
+  <rect x="240" y="576" width="280" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="380" y="602" text-anchor="middle" class="label" fill="#047857">Services</text>
+  <text x="380" y="622" text-anchor="middle" class="meta">user-service / board-service / ...</text>
+</svg>

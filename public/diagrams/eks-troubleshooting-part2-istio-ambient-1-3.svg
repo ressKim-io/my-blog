@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="t3 d3" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t3">wealist-prod의 Istio Ambient Mesh 최종 아키텍처</title>
+  <desc id="d3">노드별 ztunnel이 user/board/auth-service의 mTLS를 자동 처리하고, Prometheus는 라벨 제거 후 mesh에 포함되어 ztunnel을 통해 메트릭 수집. 외부 트래픽은 별도 설치한 Istio Ingress Gateway LoadBalancer를 통해 mesh로 진입</desc>
+
+  <defs>
+    <marker id="arr3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr3); }
+  ]]></style>
+
+  <!-- Mesh boundary -->
+  <rect x="40" y="80" width="720" height="320" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="56" y="108" class="meta" fill="#6D28D9">Istio Ambient Mesh (wealist-prod)</text>
+
+  <!-- ztunnels (node-level) - frontend / cyan -->
+  <rect x="72" y="136" width="184" height="56" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="164" y="160" text-anchor="middle" class="label" fill="#0E7490">ztunnel</text>
+  <text x="164" y="180" text-anchor="middle" class="meta">node 1</text>
+
+  <rect x="308" y="136" width="184" height="56" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="160" text-anchor="middle" class="label" fill="#0E7490">ztunnel</text>
+  <text x="400" y="180" text-anchor="middle" class="meta">node 2</text>
+
+  <rect x="544" y="136" width="184" height="56" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="636" y="160" text-anchor="middle" class="label" fill="#0E7490">ztunnel</text>
+  <text x="636" y="180" text-anchor="middle" class="meta">node 3</text>
+
+  <!-- arrows ztunnel -> service -->
+  <line x1="164" y1="192" x2="164" y2="220" class="arrow"/>
+  <line x1="400" y1="192" x2="400" y2="220" class="arrow"/>
+  <line x1="636" y1="192" x2="636" y2="220" class="arrow"/>
+
+  <!-- 3 services (backend / emerald) -->
+  <rect x="72" y="220" width="184" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="164" y="244" text-anchor="middle" class="label" fill="#047857">user-service</text>
+  <text x="164" y="264" text-anchor="middle" class="meta">mesh 내부 / mTLS</text>
+
+  <rect x="308" y="220" width="184" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="244" text-anchor="middle" class="label" fill="#047857">board-service</text>
+  <text x="400" y="264" text-anchor="middle" class="meta">mesh 내부 / mTLS</text>
+
+  <rect x="544" y="220" width="184" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="636" y="244" text-anchor="middle" class="label" fill="#047857">auth-service</text>
+  <text x="636" y="264" text-anchor="middle" class="meta">mesh 내부 / mTLS</text>
+
+  <!-- Prometheus inside mesh (database / violet) -->
+  <rect x="280" y="320" width="240" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="344" text-anchor="middle" class="label" fill="#6D28D9">Prometheus</text>
+  <text x="400" y="364" text-anchor="middle" class="meta">mesh 내부 (라벨 제거 후) / ztunnel mTLS 처리</text>
+
+  <!-- arrows: prometheus -> services (through ztunnel mesh) -->
+  <path d="M 360 320 V 296 H 164 V 276" class="arrow"/>
+  <line x1="400" y1="320" x2="400" y2="276" class="arrow"/>
+  <path d="M 440 320 V 296 H 636 V 276" class="arrow"/>
+
+  <!-- Ingress Gateway 별도 (cloud / amber) -->
+  <rect x="220" y="440" width="360" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="466" text-anchor="middle" class="label" fill="#B45309">Istio Ingress Gateway</text>
+  <text x="400" y="488" text-anchor="middle" class="meta">LoadBalancer (NLB) — 별도 helm_release 설치</text>
+
+  <!-- arrow gateway -> mesh -->
+  <line x1="400" y1="440" x2="400" y2="400" class="arrow"/>
+  <text x="412" y="424" class="arrlbl">mesh 진입</text>
+
+  <!-- External user (external / slate) -->
+  <rect x="280" y="540" width="240" height="48" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="400" y="568" text-anchor="middle" class="label" fill="#334155">외부 트래픽</text>
+  <line x1="400" y1="540" x2="400" y2="504" class="arrow"/>
+</svg>

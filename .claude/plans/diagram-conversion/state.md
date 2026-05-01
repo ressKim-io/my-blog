@@ -9,11 +9,11 @@
   - `public/diagrams/goti-discord-alerting-architecture-{1,2,3}.svg`
 - [x] best-practices.md 디자인 토큰 검증 — 색상 매핑·박스 크기·접근성 메타 그대로 적용
 
-## Phase 2 — 핵심 그룹 G1~G5 (진행 중, 11편/20블록/469줄 남음)
+## Phase 2 — 핵심 그룹 G1~G5 (진행 중, 5편/10블록/239줄 남음)
 
 - [x] **G1.** `cat:kubernetes` — 7편 / 13블록 / 295줄 (2026-05-01 완료)
 - [x] **G2.** `series:argocd-troubleshooting` — 4편 / 10블록 / 242줄 (2026-05-01 완료)
-- [ ] **G3.** `series:eks-troubleshooting` — 6편 / 10블록 / 230줄
+- [x] **G3.** `series:eks-troubleshooting` — 6편 / 10블록 / 230줄 (2026-05-01 완료)
 - [ ] **G4.** `series:istio-observability` — 2편 / 5블록 / 127줄 (Part1, Part2 / Part3, Part4 별도 처리)
 - [ ] **G5.** `series:istio-traffic` — 3편 / 5블록 / 112줄
 
