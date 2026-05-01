@@ -1,6 +1,6 @@
 ---
 title: "Kafka 도입 아키텍처 결정 — Strimzi + KRaft로 선택한 이유"
-excerpt: "50만 동시 접속, p99 200ms 이하를 목표로 한 티켓팅 플랫폼에서 Kafka를 핵심 이벤트 파이프라인으로 채택하고, 배포 방식으로 Strimzi Operator, 합의 프로토콜로 KRaft를 선택한 아키텍처 결정 과정"
+excerpt: "50만 동시 접속·p99 200ms 이하를 목표로 한 티켓팅 플랫폼에서 Kafka를 핵심 이벤트 파이프라인으로 채택했습니다. 배포 방식은 Strimzi Operator, 합의 프로토콜은 KRaft를 선택한 아키텍처 결정 과정입니다"
 category: challenge
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-03-25"
 
 ## 한 줄 요약
 
-> 50만 동시 접속·p99 200ms 이하를 목표로 한 go-ti 티켓팅 플랫폼에서, 순서 보장·내구성·재처리가 모두 필수인 이벤트 파이프라인에 Kafka를 채택했습니다. 배포는 Strimzi Operator(CNCF, ArgoCD GitOps 통합), 합의 프로토콜은 KRaft(ZooKeeper 완전 제거)를 선택했습니다. 아키텍처 결정은 완료됐으나, 백엔드 팀 일정 이슈로 실제 구현은 Planned 상태입니다.
+> 50만 동시 접속·p99 200ms 이하를 목표로 한 go-ti 티켓팅 플랫폼에서, 순서 보장·내구성·재처리가 모두 필수인 이벤트 파이프라인에 Kafka를 채택했습니다. 배포는 Strimzi Operator(CNCF, ArgoCD GitOps 통합), 합의 프로토콜은 KRaft(ZooKeeper 완전 제거)를 선택했습니다. 아키텍처 결정은 완료됐지만 백엔드 팀 일정 이슈로 실제 구현은 Planned 상태입니다
 
 ---
 

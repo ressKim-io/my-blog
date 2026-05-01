@@ -1,6 +1,6 @@
 ---
 title: "모니터링 E2E 연쇄 트러블 — CloudFront 404부터 Mimir·Tempo OOM까지"
-excerpt: "한 세션에서 발견한 4건의 트러블을 시간 순으로 기록합니다. CloudFront Custom Error Response가 API 404를 HTML로 덮는 문제부터 Mimir distributor/Tempo OOM의 연쇄 장애까지 풀어갑니다."
+excerpt: "한 세션에서 발견한 4건의 트러블을 시간 순으로 기록합니다. CloudFront Custom Error Response가 API 404를 HTML로 덮는 문제부터 Mimir distributor·Tempo OOM의 연쇄 장애까지 풀어갑니다"
 category: monitoring
 tags:
   - go-ti

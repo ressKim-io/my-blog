@@ -1,6 +1,6 @@
 ---
 title: "Error Tracking 대시보드 — 파싱 에러 3건 수정 후에도 전 패널 No data였던 이유"
-excerpt: "신규 Error Tracking 대시보드를 올리자 LogQL/TraceQL 파싱 에러 3건이 먼저 터졌고, 쿼리를 고치고 나서야 진짜 문제인 native OTLP에서 `| json`이 plain text 로그를 전량 drop하는 상황이 드러났습니다. 같은 날 두 차례에 걸쳐 6개 문제를 순차적으로 해결한 기록입니다."
+excerpt: "신규 Error Tracking 대시보드를 올리자 LogQL·TraceQL 파싱 에러 3건이 먼저 터졌습니다. 쿼리를 고친 뒤에야 진짜 문제인 native OTLP에서 `| json`이 plain text 로그를 전량 drop하는 상황이 드러났습니다. 같은 날 두 차례에 걸쳐 6개 문제를 순차적으로 해결한 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -19,7 +19,7 @@ date: "2026-03-23"
 
 ## 한 줄 요약
 
-> 신규 Error Tracking 대시보드에서 같은 날 두 차례 문제가 터졌습니다. 1차로 LogQL `count_over_time` 그루핑 파싱 + Loki empty-compatible matcher 거절 + Tempo `traceqlSearch` 400 에러 3건을 잡고 나자, 패널은 로드되지만 **전 패널 No data**로 바뀌었습니다. 2차 원인은 native OTLP에서 `| json`이 plain text 로그를 전량 drop한 것, 애초에 존재하지 않는 `error_class` 필드를 참조한 것, 그리고 `traceqlSearch` queryType 자체가 Grafana 12.x에서 무효한 것이었습니다.
+> 신규 Error Tracking 대시보드에서 같은 날 두 차례 문제가 터졌습니다. 1차로 LogQL `count_over_time` 그루핑 파싱 + Loki empty-compatible matcher 거절 + Tempo `traceqlSearch` 400 에러 3건을 잡고 나자, 패널은 로드되지만 **전 패널 No data**로 바뀌었습니다. 2차 원인은 native OTLP에서 `| json`이 plain text 로그를 전량 drop한 점, 애초에 존재하지 않는 `error_class` 필드를 참조한 점, 그리고 `traceqlSearch` queryType 자체가 Grafana 12.x에서 무효라는 점이었습니다
 
 ## Impact
 

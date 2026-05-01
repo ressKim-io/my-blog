@@ -19,7 +19,7 @@ date: "2026-03-23"
 
 ## 한 줄 요약
 
-> Envoy PodMonitor에 metricRelabelings가 없어 수백 개 메트릭이 전부 Mimir로 유입 → Ingester OOMKilled. 복구하려니 rollout-operator webhook이 모든 StatefulSet 변경을 blocking하는 교착까지 발생했습니다.
+> Envoy PodMonitor에 metricRelabelings가 없어 수백 개 메트릭이 전부 Mimir로 유입 → Ingester OOMKilled. 복구하려는데 rollout-operator webhook이 모든 StatefulSet 변경을 blocking하는 교착까지 발생했습니다
 
 ## Impact
 

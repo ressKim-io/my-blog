@@ -1,6 +1,6 @@
 ---
 title: "메트릭 파이프라인 E2E 개통 — AuthorizationPolicy부터 DB 스키마까지"
-excerpt: "Go 메트릭 수집기를 배포했는데 Grafana에 아무것도 안 뜬다. Istio L7, NetworkPolicy L3/L4, DB search_path까지 3중 방어 레이어를 하나씩 뚫은 트러블슈팅"
+excerpt: "Go 메트릭 수집기를 배포했는데 Grafana에 아무것도 뜨지 않았습니다. Istio L7, NetworkPolicy L3·L4, DB search_path까지 3중 방어 레이어를 하나씩 뚫은 트러블슈팅 기록입니다"
 type: troubleshooting
 category: monitoring
 tags:

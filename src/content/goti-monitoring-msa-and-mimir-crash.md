@@ -1,6 +1,6 @@
 ---
 title: "MSA 전환 후 모니터링 스택 종합 수정 — Mimir/Pyroscope CrashLoop + Loki 캐시 최적화"
-excerpt: "단일 서비스에서 6개 MSA 서비스로 분리된 직후 Mimir·Pyroscope·Loki·Recording Rules·대시보드가 연쇄적으로 깨진 사례를 한 번에 복구한 기록입니다."
+excerpt: "단일 서비스에서 6개 MSA 서비스로 분리된 직후 Mimir·Pyroscope·Loki·Recording Rules·대시보드가 연쇄로 깨진 사례를 한 번에 복구한 기록입니다"
 category: monitoring
 tags:
   - go-ti

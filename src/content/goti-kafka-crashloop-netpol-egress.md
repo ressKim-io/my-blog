@@ -16,7 +16,7 @@ date: "2026-03-25"
 
 ## 한 줄 요약
 
-> Kafka 브로커 NetworkPolicy에 K8s API 서버 egress 규칙이 빠져 있어, 브로커 시작 시 Secret 조회가 2분 타임아웃 후 실패 → CrashLoopBackOff 277회가 3일간 지속됐습니다.
+> Kafka 브로커 NetworkPolicy에 K8s API 서버 egress 규칙이 빠져 있어, 브로커 시작 시 Secret 조회가 2분 타임아웃 후 실패 → CrashLoopBackOff 277회가 3일간 지속됐습니다
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "컨테이너 이미지 자동 업데이트 — Renovate vs ArgoCD Image Updater"
-excerpt: "ArgoCD Image Updater의 ApplicationSet 호환 이슈와 Kind 의존성을 피하기 위해 Renovate(self-hosted) 기반 PR 워크플로우를 선택한 아키텍처 결정 과정입니다."
+excerpt: "ArgoCD Image Updater의 ApplicationSet 호환 이슈와 Kind 의존성을 피하려고 Renovate(self-hosted) 기반 PR 워크플로우를 선택한 아키텍처 결정 과정입니다"
 category: argocd
 tags:
   - go-ti
@@ -13,7 +13,7 @@ date: "2026-03-16"
 
 ## 한 줄 요약
 
-> ArgoCD Image Updater가 ApplicationSet과 충돌하고 Kind 클러스터 상태에 종속되는 문제를 확인했습니다. 대안으로 Renovate(self-hosted, GitHub Actions)를 검토해 PR 기반 이미지 자동 업데이트 전략을 수립했습니다.
+> ArgoCD Image Updater가 ApplicationSet과 충돌하고 Kind 클러스터 상태에 종속되는 문제를 확인했습니다. 대안으로 Renovate(self-hosted, GitHub Actions)를 검토해 PR 기반 이미지 자동 업데이트 전략을 수립했습니다
 
 이 글은 **결정 시점의 기록**입니다. 실제 도입은 이후 Renovate 설정 복잡도와 일정 제약으로 보류되었고, 현재 이미지 업데이트는 수동으로 운영 중입니다. 의사결정 구조 자체는 동일한 제약을 마주한 팀이 참고할 만해 글로 남깁니다.
 

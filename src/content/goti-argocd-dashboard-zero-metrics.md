@@ -1,6 +1,6 @@
 ---
 title: "ArgoCD 대시보드 전체 수치 0 — bootstrap Application source path 불일치"
-excerpt: "ArgoCD 대시보드의 모든 stat 패널이 0으로 표시된 원인은 values-dev.yaml 설정 오류가 아니라, bootstrap Application이 존재하지 않는 Git 경로를 바라보고 있어 sync 자체가 되지 않았기 때문이었습니다."
+excerpt: "ArgoCD 대시보드의 모든 stat 패널이 0으로 표시된 원인은 values-dev.yaml 설정 오류가 아니었습니다. bootstrap Application이 존재하지 않는 Git 경로를 바라보고 있어 sync 자체가 되지 않은 것이 진짜 원인이었습니다"
 category: argocd
 tags:
   - go-ti

@@ -1,6 +1,6 @@
 ---
 title: "Tempo OOM 85회 — Kafka 버퍼와 tail sampling으로 해결하기"
-excerpt: "5,000 VU 부하테스트에서 Tempo가 OOMKilled로 85회 재시작됐다. 100% 샘플링을 10%로 줄이고, Kafka 버퍼를 도입해서 트레이스 파이프라인을 안정화한 과정"
+excerpt: "5,000 VU 부하테스트에서 Tempo가 OOMKilled로 85회 재시작됐습니다. 100% 샘플링을 10%로 줄이고 Kafka 버퍼를 도입해서 트레이스 파이프라인을 안정화한 과정입니다"
 category: monitoring
 tags:
   - go-ti

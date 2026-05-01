@@ -1,6 +1,6 @@
 ---
 title: "모니터링 Pitfalls 체계 구축 — AI가 문법을 틀리지 않도록"
-excerpt: "OTel + LGTM 스택의 자주 틀리는 문법을 문서화·규칙화·자동화로 엮어 AI가 생성하는 모니터링 코드 품질을 끌어올린 기록입니다."
+excerpt: "OTel + LGTM 스택의 자주 틀리는 문법을 문서화·규칙화·자동화로 엮어 AI가 생성하는 모니터링 코드 품질을 끌어올린 기록입니다"
 category: monitoring
 tags:
   - go-ti

@@ -1,6 +1,6 @@
 ---
 title: "부하테스트 정확도를 높이는 DB 시드 전략 — 2025 KBO 스케줄 기반 360만 행 생성"
-excerpt: "75K rows 환경에서 5000 VU 부하테스트가 너무 빠른 이유는 인덱스가 전부 메모리에 올라가 있었기 때문입니다. 2025 KBO 시즌 실제 경기 데이터를 기반으로 seat_statuses 360만 행을 시드해 쿼리 병목을 prod 수준으로 재현했습니다."
+excerpt: "75K rows 환경에서 5000 VU 부하테스트가 너무 빠르게 끝난 이유는 인덱스가 전부 메모리에 올라가 있었기 때문입니다. 2025 KBO 시즌 실제 경기 데이터를 기반으로 seat_statuses 360만 행을 시드해 쿼리 병목을 prod 수준으로 재현했습니다"
 category: challenge
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-03-25"
 
 ## 한 줄 요약
 
-> 소량 데이터 환경에서는 PostgreSQL EXPLAIN plan이 prod과 전혀 다릅니다. 2025 KBO 시즌 720경기 실제 스케줄을 기반으로 seat_statuses 3.6M 행, users 578K 행을 시드해 쿼리 병목을 현실적으로 재현했습니다.
+> 소량 데이터 환경에서는 PostgreSQL EXPLAIN plan이 prod과 전혀 다릅니다. 2025 KBO 시즌 720경기 실제 스케줄을 기반으로 seat_statuses 3.6M 행, users 578K 행을 시드해 쿼리 병목을 현실적으로 재현했습니다
 
 ---
 

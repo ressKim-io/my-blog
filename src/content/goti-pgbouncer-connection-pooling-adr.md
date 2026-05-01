@@ -1,6 +1,6 @@
 ---
 title: "PgBouncer 도입 결정 — pool_mode와 배포 방식을 고른 이유"
-excerpt: "3000 VU 부하테스트에서 DB 연결 폭증이 주 병목으로 지목됐습니다. PgBouncer를 K8s StatefulSet으로 배포하고 session 모드를 채택한 결정 과정을 정리합니다."
+excerpt: "3000 VU 부하테스트에서 DB 연결 폭증이 주 병목으로 지목됐습니다. PgBouncer를 K8s StatefulSet으로 배포하고 session 모드를 채택한 결정 과정을 정리합니다"
 category: challenge
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-03-15"
 
 ## 한 줄 요약
 
-> 3000 VU 부하테스트에서 `ticket_success 15.6%`, `order_creation p95 60s timeout`이 나왔습니다. DB 연결 폭증이 주 병목 후보로 지목됐고, PgBouncer를 K8s StatefulSet으로 배포해 connection multiplexing을 적용하기로 결정했습니다.
+> 3000 VU 부하테스트에서 `ticket_success 15.6%`, `order_creation p95 60s timeout`이 나왔습니다. DB 연결 폭증이 주 병목 후보로 지목됐고, PgBouncer를 K8s StatefulSet으로 배포해 connection multiplexing을 적용하기로 결정했습니다
 
 ---
 

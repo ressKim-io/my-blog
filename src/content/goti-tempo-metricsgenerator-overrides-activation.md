@@ -1,6 +1,6 @@
 ---
 title: "Tempo metricsGenerator 활성화 삽질 — legacyConfig vs standardOverrides 혼동"
-excerpt: "Tempo chart v1.x에서 metrics_generator processors를 활성화하려다 두 가지 overrides 경로의 타입 차이로 CrashLoop에 빠진 사건입니다. overrides.defaults와 per_tenant_overrides가 서로 다른 struct로 파싱된다는 사실을 파악한 기록입니다."
+excerpt: "Tempo chart v1.x에서 metrics_generator processors를 활성화하려다 두 가지 overrides 경로의 타입 차이로 CrashLoop에 빠진 사건입니다. overrides.defaults와 per_tenant_overrides가 서로 다른 struct로 파싱된다는 사실을 알아낸 기록입니다"
 type: troubleshooting
 category: monitoring
 tags:

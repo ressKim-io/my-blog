@@ -17,7 +17,7 @@ date: "2026-03-20"
 
 ## 한 줄 요약
 
-> goti namespace의 `istio-injection=enabled` 라벨이 NetworkPolicy 디버깅 도중 유실되어 신규 Pod 전체에 sidecar가 미주입됐고, 동시에 replica 증가 과정에서 PG max_connections=100을 초과했습니다. 두 문제를 독립적으로 진단하여 각각 복구했습니다.
+> goti namespace의 `istio-injection=enabled` 라벨이 NetworkPolicy 디버깅 도중 유실되어 신규 Pod 전체에 sidecar가 주입되지 않았고, 동시에 replica 증가 과정에서 PG max_connections=100을 초과했습니다. 두 문제를 독립적으로 진단해 각각 복구했습니다
 
 ---
 

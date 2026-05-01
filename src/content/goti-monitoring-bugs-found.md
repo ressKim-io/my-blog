@@ -1,6 +1,6 @@
 ---
 title: "대시보드 고도화 중 쏟아진 모니터링 버그 6건 — OTel + LGTM 문법 변천사"
-excerpt: "TraceQL 변수 비호환, Tempo v2 scoped tag, Loki detected_level 등 OTel + LGTM 스택 문법 변화에서 비롯된 6개 버그를 한 번에 정리합니다."
+excerpt: "TraceQL 변수 비호환, Tempo v2 scoped tag, Loki detected_level 등 OTel + LGTM 스택 문법 변화에서 비롯된 6개 버그를 한 번에 정리합니다"
 category: monitoring
 tags:
   - go-ti

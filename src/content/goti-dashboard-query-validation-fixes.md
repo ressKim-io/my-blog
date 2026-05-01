@@ -1,6 +1,6 @@
 ---
 title: "대시보드 쿼리 검증 — 40개 대시보드 674개 쿼리 전수 점검"
-excerpt: "Kind dev 환경에서 Mimir/Loki/Tempo API로 674개 쿼리를 실제 실행해 검증하고, 실패 원인을 카테고리별로 분류해 29건을 수정한 과정을 정리합니다."
+excerpt: "Kind dev 환경에서 Mimir·Loki·Tempo API로 674개 쿼리를 실제 실행해 검증하고, 실패 원인을 카테고리별로 분류해 29건을 수정한 과정을 정리합니다"
 category: monitoring
 tags:
   - go-ti

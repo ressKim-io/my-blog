@@ -1,6 +1,6 @@
 ---
 title: "Tempo overrides.defaults 파싱 에러 — per_tenant_overrides로 우회"
-excerpt: "Tempo chart v1.24.4에서 overrides.defaults를 값으로 주자 legacyConfig 파서가 거부해 CrashLoopBackOff에 빠졌습니다. per_tenant_overrides로 overrides.yaml을 분리해 회피한 과정을 정리합니다."
+excerpt: "Tempo chart v1.24.4에서 overrides.defaults에 값을 넣자 legacyConfig 파서가 거부해 CrashLoopBackOff에 빠졌습니다. per_tenant_overrides로 overrides.yaml을 분리해 우회한 과정을 정리합니다"
 category: monitoring
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-03-24"
 
 ## 한 줄 요약
 
-> Tempo monolithic OOM 안정화 작업 중, 트레이스 폭주 방어를 위해 `tempo.overrides.defaults`에 제한값을 넣자 `legacyConfig` 파서가 `field defaults not found` 에러로 거부했습니다. 같은 제한값을 `tempo.per_tenant_overrides`로 옮겨 별도 `overrides.yaml` ConfigMap에 렌더링되도록 하자 정상 기동했습니다.
+> Tempo monolithic OOM 안정화 작업 중, 트레이스 폭주 방어를 위해 `tempo.overrides.defaults`에 제한값을 넣자 `legacyConfig` 파서가 `field defaults not found` 에러로 거부했습니다. 같은 제한값을 `tempo.per_tenant_overrides`로 옮겨 별도 `overrides.yaml` ConfigMap에 렌더링되도록 했더니 정상 기동했습니다
 
 ## Impact
 
