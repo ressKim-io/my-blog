@@ -82,20 +82,20 @@ const escapeXml = (s) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-// === sitemap.xml — 새 트랙 URL ===
+// === sitemap.xml — logs 트랙은 격리 정책에 따라 제외 ===
 function generateSitemap(posts) {
   const staticPages = [
     '/',
     '/essays/',
-    '/logs/',
     '/projects/',
     '/about/',
     '/projects/go-ti/',
     '/projects/ai-improvement/',
   ];
+  const visiblePosts = posts.filter((p) => p.track !== 'logs');
   const urls = [
     ...staticPages.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`),
-    ...posts.map(
+    ...visiblePosts.map(
       (p) => `  <url><loc>${SITE_URL}/${p.track}/${p.slug}/</loc><lastmod>${p.date}</lastmod></url>`,
     ),
   ];
@@ -132,9 +132,10 @@ Sitemap: ${SITE_URL}/sitemap.xml
 `;
 }
 
-// === feed.xml — 새 트랙 URL ===
+// === feed.xml — logs 트랙은 격리 정책에 따라 제외 ===
 function generateFeed(posts) {
-  const recentPosts = posts.slice(0, 20);
+  const visiblePosts = posts.filter((p) => p.track !== 'logs');
+  const recentPosts = visiblePosts.slice(0, 20);
   const items = recentPosts.map((p) => {
     const link = `${SITE_URL}/${p.track}/${p.slug}/`;
     const pubDate = new Date(p.date).toUTCString();
@@ -161,10 +162,9 @@ ${items.join('\n')}
 </rss>`;
 }
 
-// === llms.txt — AI/LLM-friendly 사이트 인덱스 (Markdown) ===
+// === llms.txt — AI/LLM-friendly 사이트 인덱스 (Markdown). logs 트랙은 격리 정책에 따라 제외 ===
 function generateLLMs(posts) {
   const essays = posts.filter((p) => p.track === 'essays');
-  const logs = posts.filter((p) => p.track === 'logs');
 
   const fmtPost = (p) =>
     `- [${p.title}](${SITE_URL}/${p.track}/${p.slug}/)${p.excerpt ? `: ${p.excerpt}` : ''}`;
@@ -173,14 +173,13 @@ function generateLLMs(posts) {
 
 > Learning by doing, documenting the journey
 
-DevOps · Kubernetes · Istio · Observability 학습 과정과 트러블슈팅을 솔직하게 기록합니다.
+DevOps · Kubernetes · Istio · Observability 학습 과정을 정리한 기록입니다.
 모든 글은 한국어로 작성됩니다.
 
 ## Site Structure
 
 - **/essays/** — 다듬은 글 (개념·ADR·회고). 한 번 정리한 뒤 거의 고치지 않는 형태.
-- **/logs/** — 현장 기록 (트러블슈팅). 작업 중 부딪힌 문제와 해결 과정의 노트.
-- **/projects/** — 장기 프로젝트의 의사결정과 트러블슈팅 모음.
+- **/projects/** — 장기 프로젝트의 의사결정과 회고 모음.
 
 ## Projects
 
@@ -190,10 +189,6 @@ DevOps · Kubernetes · Istio · Observability 학습 과정과 트러블슈팅�
 ## Essays (${essays.length})
 
 ${essays.map(fmtPost).join('\n')}
-
-## Logs (${logs.length})
-
-${logs.map(fmtPost).join('\n')}
 
 ## Optional
 
@@ -211,9 +206,10 @@ fs.writeFileSync(path.join(OUT_DIR, 'robots.txt'), generateRobots());
 fs.writeFileSync(path.join(OUT_DIR, 'feed.xml'), generateFeed(posts));
 fs.writeFileSync(path.join(OUT_DIR, 'llms.txt'), generateLLMs(posts));
 
-console.log(`✓ sitemap.xml (${posts.length} posts)`);
+const essaysCount = posts.filter((p) => p.track === 'essays').length;
+const logsCount = posts.filter((p) => p.track === 'logs').length;
+
+console.log(`✓ sitemap.xml (${essaysCount} posts, logs ${logsCount}편 격리 제외)`);
 console.log(`✓ robots.txt`);
-console.log(`✓ feed.xml (${Math.min(posts.length, 20)} items)`);
-console.log(
-  `✓ llms.txt (essays: ${posts.filter((p) => p.track === 'essays').length}, logs: ${posts.filter((p) => p.track === 'logs').length})`,
-);
+console.log(`✓ feed.xml (essays only, ${Math.min(essaysCount, 20)} items)`);
+console.log(`✓ llms.txt (essays only: ${essaysCount}편, logs ${logsCount}편 격리 제외)`);

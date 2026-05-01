@@ -59,6 +59,20 @@ npm run lint       # ESLint
 - 정적 export라 클릭 시 RSC payload fetch가 충분히 빠르므로 prefetch 비용 거의 없음
 - 특정 위치에서 prefetch가 필요하면 `<Link prefetch={true}>`로 명시적 opt-in
 
+### logs 트랙 격리 정책
+
+logs 트랙(트러블슈팅 거친 노트)은 **URL을 직접 알아야만 접근 가능한 상태**로 운영합니다. 거친 작업 노트라 일반 방문자에게 노출 의도가 낮기 때문입니다.
+
+- **헤더 메뉴 제외**: `src/components/Header.tsx`의 `navItems`에 `/logs` 없음. 메뉴에서 진입 불가
+- **검색 제외**: `Header`에서 Search에 넘기기 전에 `track !== 'logs'` 필터링
+- **sitemap.xml 제외**: `scripts/postbuild.mjs`의 `generateSitemap`이 logs 트랙을 빼고 정적 페이지에서도 `/logs/` 제거
+- **RSS 제외**: `feed.xml`은 essays만 포함
+- **llms.txt 제외**: AI/LLM 인덱스에서도 essays만 노출, "## Logs" 섹션 자체 제거
+- **URL은 살아있음**: `/logs/`, `/logs/{slug}/` 페이지는 빌드되어 직접 입력하면 정상 표시
+- **자동 분류**: `track`은 `scripts/postbuild.mjs`의 `inferType`이 자동 추론(troubleshooting → logs). 신규 글이 트러블슈팅으로 분류되면 자동 격리됨
+
+격리 강화가 더 필요하면 logs 페이지에 `robots: { index: false }` 추가(검색엔진 차단)도 고려 가능합니다.
+
 <!-- STATS:START -->
 <!-- 자동 생성: scripts/update-stats.mjs (prebuild 훅), 수동 편집 금지 -->
 ## Blog Content Stats (2026-05-01 기준, 자동 생성)

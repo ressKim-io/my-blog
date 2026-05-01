@@ -12,6 +12,7 @@ interface Post {
   category: string;
   tags?: string[];
   date: string;
+  track?: 'essays' | 'logs';
 }
 
 interface HeaderProps {
@@ -20,7 +21,6 @@ interface HeaderProps {
 
 const navItems = [
   { href: '/essays', label: 'Essays', match: '/essays', color: 'var(--essays)' },
-  { href: '/logs', label: 'Logs', match: '/logs', color: 'var(--logs)' },
   { href: '/projects', label: 'Projects', match: '/projects', color: 'var(--projects)' },
   { href: '/about', label: 'About', match: '/about', color: 'var(--text)' },
 ];
@@ -28,6 +28,8 @@ const navItems = [
 export default function Header({ posts = [] }: HeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  // logs 트랙은 검색에 노출하지 않습니다 (전면 격리 정책)
+  const searchablePosts = posts.filter((p) => p.track !== 'logs');
 
   const isActive = (match: string) =>
     match === '/about' ? pathname === '/about' : pathname?.startsWith(match);
@@ -74,7 +76,7 @@ export default function Header({ posts = [] }: HeaderProps) {
           </nav>
 
           <div className="flex items-center gap-1.5">
-            <Search posts={posts} />
+            <Search posts={searchablePosts} />
             <a
               href="/feed.xml"
               target="_blank"
