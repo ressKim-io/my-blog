@@ -1,6 +1,6 @@
 ---
 title: "Alloy → OTel Collector 전환 직후 CrashLoop — NetworkPolicy egress 누락 + Loki rate limit 초과"
-excerpt: "좋은 결정으로 수집기를 교체했는데, 전환 직후 argocd-server와 otel-collector-back이 동시에 무너졌습니다. 5단계 가설 검증 끝에 두 문제의 근본 원인을 각각 잡아냈습니다."
+excerpt: "수집기를 좋은 의도로 교체했지만, 전환 직후 argocd-server와 otel-collector-back이 동시에 무너졌습니다. 5단계 가설 검증 끝에 두 문제의 근본 원인을 따로따로 찾아냈습니다"
 category: argocd
 tags:
   - go-ti

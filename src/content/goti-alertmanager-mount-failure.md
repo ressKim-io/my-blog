@@ -1,6 +1,6 @@
 ---
 title: "Alertmanager Pod FailedMount — 3개 레포의 배포 순서 의존성"
-excerpt: "Alertmanager Pod가 Pending 상태로 멈춘 이유는 참조하는 Secret이 아직 없어서였습니다. Terraform → ExternalSecret → Alertmanager config 3개 레포의 배포 순서가 역전된 결과였습니다."
+excerpt: "Alertmanager Pod가 Pending 상태로 멈춘 이유는 참조하는 Secret이 아직 없어서였습니다. Terraform → ExternalSecret → Alertmanager config 3개 레포의 배포 순서가 역전된 결과였습니다"
 category: monitoring
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-03-31"
 
 ## 한 줄 요약
 
-> Alertmanager Pod가 `Pending` 상태로 멈춰 있었습니다. 참조하는 Secret이 아직 생성되지 않은 상태에서 Alertmanager config가 먼저 배포된 것이 원인이었습니다. 3개 레포의 배포 순서 역전이 이 장애의 본질이었습니다.
+> Alertmanager Pod가 `Pending` 상태로 멈춰 있었습니다. 참조하는 Secret이 아직 생성되지 않은 상태에서 Alertmanager config가 먼저 배포된 것이 원인이었습니다. 3개 레포의 배포 순서 역전이 이 장애의 본질이었습니다
 
 ---
 

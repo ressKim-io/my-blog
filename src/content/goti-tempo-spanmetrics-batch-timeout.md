@@ -1,6 +1,6 @@
 ---
 title: "Tempo spanmetrics 전량 폐기 — batch timeout과 ingestion slack의 함정"
-excerpt: "140만 span이 수신됐지만 전량 폐기됐다. Alloy Kafka consumer의 batch timeout이 Tempo의 ingestion slack을 초과해서 모든 spanmetrics가 생성되지 않은 문제"
+excerpt: "140만 span이 수신됐지만 전량 폐기됐습니다. Alloy Kafka consumer의 batch timeout이 Tempo의 ingestion slack을 초과해서 모든 spanmetrics가 생성되지 않은 문제입니다"
 category: monitoring
 tags:
   - go-ti

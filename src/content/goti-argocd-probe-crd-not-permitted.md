@@ -1,6 +1,6 @@
 ---
 title: "ArgoCD Sync 실패 — Probe CRD 미등록 + retry 소진 블로킹"
-excerpt: "AppProject whitelist에 Probe CRD가 없어 sync가 거부됐고, 5회 retry 소진 후 ArgoCD가 동일 리비전을 더 이상 시도하지 않는 블로킹 상태가 함께 발생했습니다."
+excerpt: "AppProject whitelist에 Probe CRD가 없어 sync가 거부됐고, 5회 retry 소진 후 ArgoCD가 동일 리비전을 더 이상 시도하지 않는 블로킹 상태가 겹쳤습니다"
 category: argocd
 tags:
   - go-ti

@@ -1,6 +1,6 @@
 ---
 title: "POC B(Kafka) 포화 테스트 결과 — 응답은 최고, 회전은 최저"
-excerpt: "Redis ZSET + Kafka 이벤트 기반 승격 방식의 포화 테스트 결과입니다. 300/1000/3000 VU 모두 에러 0%, 응답 p95 최고 성능을 보였지만 iteration 회전은 가장 느렸습니다."
+excerpt: "Redis ZSET + Kafka 이벤트 기반 승격 방식의 포화 테스트 결과입니다. 300·1000·3000 VU 모두 에러 0%, 응답 p95에서 최고 성능을 보였지만 iteration 회전은 가장 느렸습니다"
 category: challenge
 tags:
   - go-ti

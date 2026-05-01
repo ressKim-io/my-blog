@@ -1,6 +1,6 @@
 ---
 title: "POC C(CDN 캐싱) 포화 테스트 상세 — 단일 pod 처리 한계를 찾아서"
-excerpt: "K6로 300 / 1000 / 3000 VU 단계별 부하를 걸어 CDN POC 대기열의 saturation point를 측정했습니다. iterations/s가 12~13 TPS에서 평탄해지는 지점을 단일 pod 처리 한계로 확인했습니다."
+excerpt: "K6로 300·1000·3000 VU 단계별 부하를 걸어 CDN POC 대기열의 saturation point를 측정했습니다. iterations/s가 12~13 TPS에서 평탄해지는 지점을 단일 pod 처리 한계로 확인했습니다"
 category: challenge
 tags:
   - go-ti

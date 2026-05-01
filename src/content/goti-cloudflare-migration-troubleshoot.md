@@ -19,7 +19,7 @@ date: "2026-03-27"
 
 ## 한 줄 요약
 
-> Cloudflare 전환 과정에서 5가지 라우팅 장애를 만났습니다. CloudFront Custom Error Response, SSL 이중 종단, Pages/Workers 우선순위, Workers Host 헤더 제한 — 하나를 풀면 다음 문제가 나타나는 연쇄 디버깅이었습니다.
+> Cloudflare 전환 과정에서 5가지 라우팅 장애를 만났습니다. CloudFront Custom Error Response, SSL 이중 종단, Pages·Workers 우선순위, Workers Host 헤더 제한 — 하나를 풀면 다음 문제가 나타나는 연쇄 디버깅이었습니다
 
 ## Impact
 

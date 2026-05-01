@@ -1,6 +1,6 @@
 ---
 title: "POC 환경 401 티켓팅 격리 — A/B 비교는 의존성까지 분리해야 한다"
-excerpt: "POC A 대기열 구현체 부하테스트에서 401이 떨어졌습니다. Spring Security 컴포넌트 스캔 누락부터 공유 ticketing pod에 침투한 POC C 로직까지, 의존성 체인 전체를 격리한 기록입니다."
+excerpt: "POC A 대기열 구현체 부하테스트에서 401이 떨어졌습니다. Spring Security 컴포넌트 스캔 누락부터 공유 ticketing pod에 침투한 POC C 로직까지, 의존성 체인 전체를 격리한 기록입니다"
 category: challenge
 tags:
   - go-ti

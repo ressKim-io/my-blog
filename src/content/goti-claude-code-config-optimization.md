@@ -1,6 +1,6 @@
 ---
 title: "Claude Code 설정 최적화 — 시작 시 컨텍스트 토큰 48% 절감"
-excerpt: "Rules 2,501줄 자동 로드, MEMORY.md 200줄 초과 잘림, CLAUDE.md 중복 인벤토리 문제를 path-scoping + 토픽 분리 + skill 분리로 정리했습니다."
+excerpt: "Rules 2,501줄 자동 로드, MEMORY.md 200줄 초과 잘림, CLAUDE.md 중복 인벤토리 문제를 path-scoping + 토픽 분리 + skill 분리로 정리했습니다"
 category: challenge
 tags:
   - go-ti

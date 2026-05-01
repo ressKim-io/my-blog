@@ -18,7 +18,7 @@ date: '2026-03-30'
 
 ## 한 줄 요약
 
-> Alloy에서 OTel Collector로 마이그레이션한 직후, OTel Collector Back과 ArgoCD Server가 동시에 CrashLoopBackOff. 원인은 Loki rate limit 초과와 NetworkPolicy egress 누락이었다.
+> Alloy에서 OTel Collector로 마이그레이션한 직후, OTel Collector Back과 ArgoCD Server가 동시에 CrashLoopBackOff에 빠졌습니다. 원인은 Loki rate limit 초과와 NetworkPolicy egress 누락이었습니다
 
 ## 📊 Impact
 

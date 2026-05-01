@@ -20,7 +20,7 @@ date: "2026-03-27"
 
 ## 한 줄 요약
 
-> CloudFront Custom Error Response가 API 404까지 HTML로 덮어쓰는 구조적 한계를 발견했습니다. Cloudflare Pages + Workers로 전환하면서 API/SPA 라우팅을 완전히 분리하고, 비용도 0원으로 줄였습니다.
+> CloudFront Custom Error Response가 API 404까지 HTML로 덮어쓰는 구조적 한계를 발견했습니다. Cloudflare Pages + Workers로 전환하면서 API·SPA 라우팅을 완전히 분리했고, 비용도 0원으로 줄였습니다
 
 ---
 

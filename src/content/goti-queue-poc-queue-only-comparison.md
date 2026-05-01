@@ -1,6 +1,6 @@
 ---
 title: "순수 큐 성능만 비교 — Redis vs Kafka vs CDN"
-excerpt: "대기열 자체 성능만 놓고 3개 POC를 비교합니다. API 레이턴시·통과율·대기 시간·처리량·서버 부하·스케일링 내성까지 9개 카테고리로 정리했습니다."
+excerpt: "대기열 자체 성능만 놓고 3개 POC를 비교합니다. API 레이턴시·통과율·대기 시간·처리량·서버 부하·스케일링 내성까지 9개 카테고리로 정리했습니다"
 category: challenge
 tags:
   - go-ti

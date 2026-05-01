@@ -1,6 +1,6 @@
 ---
 title: "SSA + Force Sync 충돌로 Deployment 미반영 — ArgoCD sync stuck 복구"
-excerpt: "ServerSideApply=true 앱에서 Force Sync를 한 번 실행했을 때, .operation 필드에 잔류한 force 플래그가 매 auto-sync마다 --force --server-side 오류를 유발해 Deployment 변경이 전혀 반영되지 않았습니다."
+excerpt: "ServerSideApply=true 앱에서 Force Sync를 한 번 실행하면, .operation 필드에 잔류한 force 플래그가 매 auto-sync마다 --force --server-side 오류를 유발합니다. 그 결과 Deployment 변경이 전혀 반영되지 않은 사례입니다"
 category: argocd
 tags:
   - go-ti

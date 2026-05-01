@@ -1,6 +1,6 @@
 ---
 title: "POC C(CDN 캐싱) 포화 테스트 결과 — 처리량 최강, 그러나 pod 1개의 한계"
-excerpt: "CDN POC를 1000 VU와 3000 VU로 포화시키는 동안 Lua ARGV 직렬화 불일치, putAll race condition, 직렬화 혼용 JsonParseException 세 가지 버그를 잡았습니다. 동적 publishedRank 계산 방식은 POC A 대비 3000 VU에서 8.6배 높은 iterations를 기록했습니다."
+excerpt: "CDN POC를 1000 VU와 3000 VU로 포화시키는 동안 Lua ARGV 직렬화 불일치·putAll race condition·직렬화 혼용 JsonParseException 세 가지 버그를 잡았습니다. 동적 publishedRank 계산 방식은 POC A 대비 3000 VU에서 8.6배 높은 iterations를 기록했습니다"
 category: challenge
 tags:
   - go-ti

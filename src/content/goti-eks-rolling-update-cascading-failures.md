@@ -19,7 +19,7 @@ date: "2026-04-01"
 
 ## 한 줄 요약
 
-> EKS 노드당 max-pods를 35→110으로 올리는 rolling update 하나가 RDS/ElastiCache SG 삭제·서브넷 IP 소진 데드락·RDS 접속 불가·Prometheus OOM 순으로 연쇄 장애를 일으켰습니다. 15개 서비스가 모두 Init stuck / CrashLoopBackOff에 빠진 프로덕션 사고였습니다.
+> EKS 노드당 max-pods를 35→110으로 올리는 rolling update 하나가 RDS·ElastiCache SG 삭제, 서브넷 IP 소진 데드락, RDS 접속 불가, Prometheus OOM 순으로 연쇄 장애를 일으켰습니다. 15개 서비스가 모두 Init stuck·CrashLoopBackOff에 빠진 프로덕션 사고였습니다
 
 ---
 

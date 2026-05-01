@@ -1,6 +1,6 @@
 ---
 title: "POC A(Redis 폴링) 포화 테스트 — 300/1000/3000 VU 결과"
-excerpt: "Redis 폴링 기반 대기열 POC를 K6로 300/1000/3000 VU까지 포화시켜 슬롯 회전, 대기 시간, 레이턴시 추이를 측정했습니다."
+excerpt: "Redis 폴링 기반 대기열 POC를 K6로 300·1000·3000 VU까지 포화시켜 슬롯 회전·대기 시간·레이턴시 추이를 측정했습니다"
 category: challenge
 tags:
   - go-ti

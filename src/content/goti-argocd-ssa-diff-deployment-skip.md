@@ -1,6 +1,6 @@
 ---
 title: "SSA sync 시 Deployment가 skip되는 영구 OutOfSync — ServerSideDiff=true로 해결"
-excerpt: "ArgoCD SSA 환경에서 Deployment가 OutOfSync로 표시되지만 sync 결과에는 아예 포함되지 않는 현상을 겪었습니다. client-side diff와 server-side apply의 불일치가 원인이었고, ServerSideDiff=true로 전체 ApplicationSet에 영구 적용해 해결했습니다."
+excerpt: "ArgoCD SSA 환경에서 Deployment가 OutOfSync로 표시되지만 sync 결과에는 아예 포함되지 않는 현상을 겪었습니다. client-side diff와 server-side apply의 불일치가 원인이었고, ServerSideDiff=true를 전체 ApplicationSet에 영구 적용해 해결했습니다"
 category: argocd
 tags:
   - go-ti
