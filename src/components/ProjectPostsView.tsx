@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
+import Link from './Link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import type { PostData } from '@/lib/posts';
 import type { SeriesGroup } from '@/lib/projects';

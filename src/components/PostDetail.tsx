@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from './Link';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import { mdxComponents } from './MDXComponents';

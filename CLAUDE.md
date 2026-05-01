@@ -50,6 +50,15 @@ npm run lint       # ESLint
 - `next.config.ts`: `output: 'export'` for GitHub Pages
 - Production uses `/my-blog` base path; development uses root
 
+### Link 컴포넌트 정책
+
+**`next/link`를 직접 import하지 말고 `@/components/Link` 래퍼를 사용합니다.**
+
+- 위치: `src/components/Link.tsx`
+- 정책: prefetch 기본값을 `false`로 뒤집음 (Next.js 16의 `'auto'` 기본값은 viewport에 들어오는 모든 Link의 RSC payload를 동시 prefetch해서 글 카드 200+ 목록에서 동시 연결 한계 초과 → `__next._tree.txt` (pending) 폭주 → 사이트 멈춤)
+- 정적 export라 클릭 시 RSC payload fetch가 충분히 빠르므로 prefetch 비용 거의 없음
+- 특정 위치에서 prefetch가 필요하면 `<Link prefetch={true}>`로 명시적 opt-in
+
 <!-- STATS:START -->
 <!-- 자동 생성: scripts/update-stats.mjs (prebuild 훅), 수동 편집 금지 -->
 ## Blog Content Stats (2026-05-01 기준, 자동 생성)

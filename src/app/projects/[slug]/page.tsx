@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Header from '@/components/Header';
 import PageHeader from '@/components/PageHeader';
 import Footer from '@/components/Footer';

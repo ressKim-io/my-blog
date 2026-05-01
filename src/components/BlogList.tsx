@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import Link from './Link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import CategoryNav from './CategoryNav';
 import Pagination from './Pagination';

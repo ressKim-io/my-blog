@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
+import Link from './Link';
 import { useRouter } from 'next/navigation';
 
 export default function RedirectClient({ href, label }: { href: string; label?: string }) {
