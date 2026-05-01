@@ -1,6 +1,6 @@
 ---
 title: "Discord 알림 구축기: 아키텍처 결정부터 배포 3연속 장애까지"
-excerpt: "Alertmanager receiver가 null인 상태에서 Discord 알림을 구축하면서 만난 Secret 미존재, ESO 캐시, ArgoCD 리소스 이중 관리 3연속 장애"
+excerpt: "Alertmanager receiver가 null인 상태에서 Discord 알림을 구축하면서 만난 Secret 미존재·ESO 캐시·ArgoCD 리소스 이중 관리 3연속 장애를 정리합니다"
 type: troubleshooting
 category: monitoring
 tags:
@@ -17,7 +17,7 @@ date: "2026-02-13"
 
 ## 🎯 한 줄 요약
 
-> Alertmanager receiver가 전부 "null"인 상태에서 Discord 알림을 구축했습니다. 3개 레포를 동시에 수정하면서 Secret 미존재, ESO 캐시, ArgoCD 리소스 이중 관리까지 3연속 장애를 만났습니다.
+> Alertmanager receiver가 전부 "null"인 상태에서 Discord 알림을 구축했습니다. 3개 레포를 동시에 수정하면서 Secret 미존재·ESO 캐시·ArgoCD 리소스 이중 관리까지 3연속 장애를 만났습니다
 
 ## 📊 Impact
 

@@ -1,6 +1,6 @@
 ---
 title: "리뷰 PR 갭 학습 — Gemini가 잡고 Claude가 놓친 5건에서 12개 체크를 도출하기"
-excerpt: "PR #11~#14 멀티 관점 리뷰에서 누적된 5건의 Gemini vs Claude 갭을 분석해, /review-pr 커맨드의 3개 에이전트 프롬프트에 학습된 체크 12개를 추가했습니다."
+excerpt: "PR #11~#14 멀티 관점 리뷰에서 누적된 5건의 Gemini vs Claude 갭을 분석해, /review-pr 커맨드의 3개 에이전트 프롬프트에 학습된 체크 12개를 추가했습니다"
 category: challenge
 tags:
   - go-ti

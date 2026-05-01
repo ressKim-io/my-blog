@@ -1,6 +1,6 @@
 ---
 title: "kubectl create secret에서 $ 문자가 사라진다: ECR 연쇄 장애"
-excerpt: "쉘 변수 치환으로 Secret 값이 잘려 ECR 토큰 갱신과 ExternalSecret 동기화가 전면 실패한 트러블슈팅 기록"
+excerpt: "쉘 변수 치환으로 Secret 값이 잘려 ECR 토큰 갱신과 ExternalSecret 동기화가 전면 실패한 트러블슈팅 기록입니다"
 type: troubleshooting
 category: argocd
 tags:
@@ -19,7 +19,7 @@ date: '2026-02-10'
 
 ## 한 줄 요약
 
-> `kubectl create secret --from-literal`에서 큰따옴표를 썼더니 `$` 이후 값이 사라졌습니다. Secret 하나가 비어 ECR 토큰 갱신, ExternalSecret 동기화가 전면 실패.
+> `kubectl create secret --from-literal`에서 큰따옴표를 썼더니 `$` 이후 값이 사라졌습니다. Secret 하나가 비어 ECR 토큰 갱신과 ExternalSecret 동기화가 전면 실패했습니다
 
 ## Impact
 

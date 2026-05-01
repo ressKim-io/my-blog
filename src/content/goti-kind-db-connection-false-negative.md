@@ -1,6 +1,6 @@
 ---
 title: "sh /dev/tcp 함정 — 잘못된 진단 도구가 만든 1.5시간 삽질"
-excerpt: "보안 설정 후 DB 연결이 실패한다고 판단했지만, 진단 도구 자체가 잘못됐다. sh에서 /dev/tcp는 지원되지 않아 항상 false negative를 반환하고 있었다"
+excerpt: "보안 설정 후 DB 연결이 실패한다고 판단했지만, 진단 도구 자체가 잘못된 상태였습니다. sh에서 /dev/tcp는 지원되지 않아 항상 false negative를 반환하고 있었습니다"
 category: kubernetes
 tags:
   - go-ti
@@ -15,7 +15,7 @@ date: "2026-02-20"
 
 ## 한 줄 요약
 
-> 7개 가설을 검증하며 1.5시간을 썼는데, 진단 도구가 잘못됐다. `sh -c '/dev/tcp'`는 bash 전용 기능이라 항상 실패를 반환했고, Pod가 죽은 실제 원인은 DB가 아니라 OOMKilled였다.
+> 7개 가설을 검증하며 1.5시간을 썼는데 진단 도구가 잘못된 상태였습니다. `sh -c '/dev/tcp'`는 bash 전용 기능이라 항상 실패를 반환했고, Pod가 죽은 실제 원인은 DB가 아니라 OOMKilled였습니다
 
 ## Impact
 

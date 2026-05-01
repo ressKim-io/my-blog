@@ -1,6 +1,6 @@
 ---
 title: "로깅 컨벤션 ADR — logfmt를 앱 로그 표준으로 채택한 이유"
-excerpt: "자유형식 한국어, JSON body, logfmt 세 가지 로그 포맷을 비교하고 logfmt를 채택한 결정 기록입니다. Loki 자동 파싱과 사람 가독성의 균형이 핵심이었습니다."
+excerpt: "자유형식 한국어·JSON body·logfmt 세 가지 로그 포맷을 비교하고 logfmt를 채택한 결정 기록입니다. Loki 자동 파싱과 사람 가독성의 균형이 핵심이었습니다"
 category: monitoring
 tags:
   - go-ti
@@ -13,7 +13,7 @@ date: "2026-02-09"
 
 ## 한 줄 요약
 
-> goti-server 모듈마다 제각각이던 로그 포맷을 **logfmt(key=value)**로 통일했습니다. Loki `| logfmt` 자동 파싱과 SLF4J placeholder 호환, 그리고 사람 가독성까지 한 번에 확보하기 위한 결정입니다.
+> goti-server 모듈마다 제각각이던 로그 포맷을 **logfmt(key=value)**로 통일했습니다. Loki `| logfmt` 자동 파싱과 SLF4J placeholder 호환, 사람 가독성까지 한 번에 확보하기 위한 결정입니다
 
 ---
 

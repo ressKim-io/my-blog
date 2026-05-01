@@ -1,6 +1,6 @@
 ---
 title: "RDS 인증 실패 — observer 전용 읽기 전용 DB 유저 생성"
-excerpt: "goti-load-observer가 잘못된 비밀번호로 RDS 접속에 실패했고, 근본적으로 master 유저를 공유하는 구조가 문제였습니다. observer 전용 읽기 전용 유저를 만들고 PII 테이블을 REVOKE해 최소 권한 원칙을 적용했습니다."
+excerpt: "goti-load-observer가 잘못된 비밀번호로 RDS 접속에 실패했고, 근본적으로 master 유저를 공유하는 구조가 문제였습니다. observer 전용 읽기 전용 유저를 만들고 PII 테이블을 REVOKE해 최소 권한 원칙을 적용했습니다"
 category: kubernetes
 tags:
   - go-ti
@@ -13,7 +13,7 @@ date: "2026-02-14"
 
 ## 한 줄 요약
 
-> goti-load-observer가 RDS poll 쿼리에서 SQLSTATE 28P01로 전부 실패. SSM에 저장된 DSN의 비밀번호가 잘못됐고 그나마도 master 유저를 공유하고 있었습니다. observer 전용 읽기 전용 유저를 만들고 PII 테이블을 REVOKE한 뒤 Terraform으로 SSM 파라미터를 관리하도록 정리했습니다.
+> goti-load-observer가 RDS poll 쿼리에서 SQLSTATE 28P01로 전부 실패했습니다. SSM에 저장된 DSN의 비밀번호가 잘못된 데다가 master 유저를 공유하고 있었습니다. observer 전용 읽기 전용 유저를 만들고 PII 테이블을 REVOKE한 뒤 Terraform으로 SSM 파라미터를 관리하도록 정리했습니다
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Redis 우선 티켓팅 — SoT 전환을 결정한 배경"
-excerpt: "3000 VU 부하테스트에서 RDS read/lock 경합으로 ticket_success가 13~16%까지 떨어졌습니다. 티켓팅 핵심 path를 Redis-first로 전환하고 RDS는 영속 저장소로만 사용하는 아키텍처 결정 과정을 기록합니다."
+excerpt: "3000 VU 부하테스트에서 RDS read·lock 경합으로 ticket_success가 13~16%까지 떨어졌습니다. 티켓팅 핵심 path를 Redis-first로 전환하고 RDS는 영속 저장소로만 사용하는 아키텍처 결정 과정을 기록합니다"
 category: challenge
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-02-22"
 
 ## 한 줄 요약
 
-> 3000 VU 부하테스트에서 티켓 성공률이 13~16%까지 떨어지는 것을 확인했습니다. 병목은 RDS의 read 부하와 UNIQUE 제약 경합이었습니다. 티켓팅 핵심 path를 Redis-first로 전환하고 정합성은 dirty set + sync worker + reconciliation job으로 보장하기로 결정했습니다.
+> 3000 VU 부하테스트에서 티켓 성공률이 13~16%까지 떨어지는 것을 확인했습니다. 병목은 RDS의 read 부하와 UNIQUE 제약 경합이었습니다. 티켓팅 핵심 path를 Redis-first로 전환하고 정합성은 dirty set + sync worker + reconciliation job으로 보장하기로 결정했습니다
 
 ---
 

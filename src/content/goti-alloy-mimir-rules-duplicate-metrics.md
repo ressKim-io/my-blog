@@ -1,6 +1,6 @@
 ---
 title: "Alloy mimir.rules.kubernetes duplicate metrics — 전체 파이프라인이 멈춘 이유"
-excerpt: "Alloy의 mimir.rules.kubernetes 컴포넌트가 duplicate metrics collector 에러로 config initial load를 실패시키면서 OTLP 수신, remote_write, scraping이 모두 중단됐고, mimirtool CI/CD 전환으로 돌파한 기록입니다."
+excerpt: "Alloy의 mimir.rules.kubernetes 컴포넌트가 duplicate metrics collector 에러로 config initial load를 실패시키면서 OTLP 수신·remote_write·scraping이 모두 중단됐고, mimirtool CI/CD 전환으로 돌파한 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-02-07"
 
 ## 한 줄 요약
 
-> Alloy config의 `mimir.rules.kubernetes` 블록 하나가 duplicate metrics collector 에러를 내면서 config initial load 자체가 실패했고, 그 결과 OTLP 수신·Mimir remote_write·ServiceMonitor scraping이 전부 중단됐습니다. 해당 블록을 제거하고 PrometheusRule 동기화를 `mimirtool` CI/CD로 옮겨 해결했습니다.
+> Alloy config의 `mimir.rules.kubernetes` 블록 하나가 duplicate metrics collector 에러를 내면서 config initial load 자체가 실패했습니다. 그 결과 OTLP 수신·Mimir remote_write·ServiceMonitor scraping이 전부 중단됐고, 해당 블록을 제거한 뒤 PrometheusRule 동기화를 `mimirtool` CI/CD로 옮겨 해결했습니다
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Redis Exporter 배포 결정 — Kind 내 Deployment + 호스트 IP 직접 지정"
-excerpt: "Kind 외부 호스트에 설치된 Redis를 스크래핑하기 위한 세 가지 배치안을 저울질하고, GitOps 일관성을 우선한 Kind 내 Deployment를 선택한 기록입니다."
+excerpt: "Kind 외부 호스트에 설치된 Redis를 스크래핑하기 위한 세 가지 배치안을 저울질하고, GitOps 일관성을 우선해 Kind 내 Deployment를 선택한 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -14,7 +14,7 @@ date: "2026-02-15"
 
 ## 한 줄 요약
 
-> redis-deep-dive와 war-room 대시보드의 `redis_*` 메트릭 17건이 전부 비어 있었습니다. Kind 외부 호스트에 설치된 Redis를 스크래핑하기 위해 세 가지 배치안을 비교한 뒤, GitOps 일관성을 우선해 **Kind 내 Deployment + 호스트 IP 직접 지정**을 채택했습니다.
+> redis-deep-dive와 war-room 대시보드의 `redis_*` 메트릭 17건이 전부 비어 있었습니다. Kind 외부 호스트에 설치된 Redis를 스크래핑하기 위해 세 가지 배치안을 비교한 뒤, GitOps 일관성을 우선해 **Kind 내 Deployment + 호스트 IP 직접 지정**을 채택했습니다
 
 ## 배경
 

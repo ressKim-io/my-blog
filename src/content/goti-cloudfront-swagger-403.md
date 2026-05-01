@@ -17,7 +17,7 @@ date: '2026-02-05'
 
 ## 한 줄 요약
 
-> `dev.go-ti.shop/swagger-ui/index.html` 접근 시 403 AccessDenied. CloudFront에 `/swagger-ui/*` behavior가 없어서 S3로 폴백된 것이 원인입니다.
+> `dev.go-ti.shop/swagger-ui/index.html` 접근 시 403 AccessDenied가 발생했습니다. CloudFront에 `/swagger-ui/*` behavior가 없어 요청이 S3로 폴백된 것이 원인이었습니다
 
 ## Impact
 

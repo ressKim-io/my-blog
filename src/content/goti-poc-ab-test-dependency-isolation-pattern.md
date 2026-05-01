@@ -1,6 +1,6 @@
 ---
 title: "POC A/B 테스트 의존성 격리 패턴 — Uber/DoorDash/Netflix는 어떻게 푸는가"
-excerpt: "대기열 구현체만 교체하면 공정 비교가 될 것이라는 가정이 POC 현장에서 깨졌습니다. 공유 ticketing에 특정 구현체 로직이 침투해 있었고, 이를 업계의 Request-Level Routing/Multi-Tenancy/Mirroring 패턴과 비교해 분리 전략을 정리한 기록입니다."
+excerpt: "대기열 구현체만 교체하면 공정 비교가 될 것이라는 가정이 POC 현장에서 깨졌습니다. 공유 ticketing에 특정 구현체 로직이 침투해 있었고, 이를 업계의 Request-Level Routing·Multi-Tenancy·Mirroring 패턴과 비교해 분리 전략을 정리한 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -14,7 +14,7 @@ date: "2026-02-24"
 
 ## 한 줄 요약
 
-> POC A/B/C 대기열 구현체를 Kind + Istio 위에서 동시에 부하테스트하면서, 공유 ticketing pod에 특정 구현체 고유 로직이 침투해 다른 POC 트래픽을 차단하는 문제를 겪었습니다. Uber SLATE, DoorDash Multi-Tenancy, Netflix Shadow, Lyft Staging Overrides 같은 업계 패턴과 비교해 "의존성 체인 전체를 격리해야 한다"는 원칙을 확인하고, 구현체별 ticketing pod 분리 + Istio path rewrite로 해결했습니다.
+> POC A·B·C 대기열 구현체를 Kind + Istio 위에서 동시에 부하테스트하면서, 공유 ticketing pod에 특정 구현체 고유 로직이 침투해 다른 POC 트래픽을 차단하는 문제를 겪었습니다. Uber SLATE, DoorDash Multi-Tenancy, Netflix Shadow, Lyft Staging Overrides 같은 업계 패턴과 비교해 "의존성 체인 전체를 격리해야 한다"는 원칙을 확인하고, 구현체별 ticketing pod 분리 + Istio path rewrite로 해결했습니다
 
 ---
 

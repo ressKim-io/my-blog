@@ -1,6 +1,6 @@
 ---
 title: "ServiceMonitor release 라벨 누락 — Prometheus가 scrape를 안 하는 이유"
-excerpt: "Alloy, Loki, Tempo Pod는 정상인데 Prometheus가 scrape하지 않는다. kube-prometheus-stack의 serviceMonitorSelector가 요구하는 release 라벨이 외부 chart의 ServiceMonitor에 없었다"
+excerpt: "Alloy·Loki·Tempo Pod는 정상인데 Prometheus가 scrape하지 않았습니다. kube-prometheus-stack의 serviceMonitorSelector가 요구하는 release 라벨이 외부 chart의 ServiceMonitor에 없었기 때문입니다"
 category: monitoring
 tags:
   - go-ti
@@ -14,7 +14,7 @@ date: "2026-02-17"
 
 ## 한 줄 요약
 
-> kube-prometheus-stack의 Prometheus가 `release: kube-prometheus-stack-dev` 라벨이 있는 ServiceMonitor만 인식합니다. Alloy/Loki/Tempo는 별도 chart라 이 라벨이 없어서 scrape 대상에 등록되지 않았습니다.
+> kube-prometheus-stack의 Prometheus가 `release: kube-prometheus-stack-dev` 라벨이 있는 ServiceMonitor만 인식합니다. Alloy·Loki·Tempo는 별도 chart라 이 라벨이 없어서 scrape 대상에 등록되지 않았습니다
 
 ## Impact
 

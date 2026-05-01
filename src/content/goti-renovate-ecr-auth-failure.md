@@ -1,6 +1,6 @@
 ---
 title: "Renovate + ECR Private Registry 인증 실패 — 8회 시도 후 경로를 바꾼 이유"
-excerpt: "custom.regex manager + ECR 조합에서 Docker v2 인증이 풀리지 않아 Renovate 경유를 포기하고, CD에서 values.yaml을 직접 업데이트하는 방식으로 전환한 기록입니다."
+excerpt: "custom.regex manager + ECR 조합에서 Docker v2 인증이 풀리지 않아 Renovate 경유를 포기하고, CD에서 values.yaml을 직접 업데이트하는 방식으로 전환한 기록입니다"
 category: cicd
 tags:
   - go-ti
@@ -13,7 +13,7 @@ date: "2026-02-12"
 
 ## 한 줄 요약
 
-> Renovate `custom.regex` manager가 ECR private registry를 조회할 때 **403 Forbidden**이 반복됐습니다. 8회에 걸쳐 원인을 좁혔지만 끝내 인증 flow를 통과시키지 못했고, Renovate를 중간 단계에서 제거하고 **CD에서 values.yaml을 직접 업데이트**하는 방식으로 전환했습니다.
+> Renovate `custom.regex` manager가 ECR private registry를 조회할 때 **403 Forbidden**이 반복됐습니다. 8회에 걸쳐 원인을 좁혔지만 끝내 인증 flow를 통과시키지 못했고, Renovate를 중간 단계에서 제거하고 **CD에서 values.yaml을 직접 업데이트**하는 방식으로 전환했습니다
 
 ---
 

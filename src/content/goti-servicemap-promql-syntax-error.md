@@ -1,6 +1,6 @@
 ---
 title: "Grafana serviceMap 쿼리 PromQL 파싱 에러 — TraceQL 문법을 PromQL 레이블 매처로 수정"
-excerpt: "Grafana nodeGraph 패널의 serviceMapQuery에 TraceQL 문법을 썼다가 PromQL 파서가 거부한 사건. 점이 포함된 레이블명이 원인이었고, client/server 양방향 매처 배열로 전환해 해결했습니다."
+excerpt: "Grafana nodeGraph 패널의 serviceMapQuery에 TraceQL 문법을 썼다가 PromQL 파서가 거부한 사건입니다. 점이 포함된 레이블명이 원인이었고, client·server 양방향 매처 배열로 전환해 해결했습니다"
 category: monitoring
 tags:
   - go-ti
@@ -13,7 +13,7 @@ date: "2026-02-26"
 
 ## 한 줄 요약
 
-> Grafana 분산 추적 대시보드의 `nodeGraph` 패널이 `serviceMapQuery`에 TraceQL 문법을 써서 PromQL 파싱 에러를 내고 있었습니다. 원인은 이 필드가 PromQL 레이블 매처로 그대로 이어붙는다는 점이었고, `{client="$svc"}`와 `{server="$svc"}` 배열로 바꿔 해결했습니다.
+> Grafana 분산 추적 대시보드의 `nodeGraph` 패널이 `serviceMapQuery`에 TraceQL 문법을 써서 PromQL 파싱 에러를 내고 있었습니다. 원인은 이 필드가 PromQL 레이블 매처로 그대로 이어붙는다는 점이었고, `{client="$svc"}`와 `{server="$svc"}` 배열로 바꿔 해결했습니다
 
 ---
 

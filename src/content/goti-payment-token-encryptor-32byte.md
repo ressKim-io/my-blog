@@ -1,6 +1,6 @@
 ---
 title: "AES-256 Secret Key 31바이트 — 눈에 띄지 않는 1바이트 버그"
-excerpt: "EKS 롤링 업데이트 후 payment POC Pod만 CrashLoopBackOff가 지속된 원인은 SSM Parameter에 수동 등록된 31바이트 Secret Key였습니다. 32바이트 정확히 맞추는 1바이트 차이가 Spring Boot 기동을 막았습니다."
+excerpt: "EKS 롤링 업데이트 후 payment POC Pod만 CrashLoopBackOff가 지속된 원인은 SSM Parameter에 수동 등록된 31바이트 Secret Key였습니다. 32바이트에서 1바이트 부족한 차이가 Spring Boot 기동을 막았습니다"
 type: troubleshooting
 category: kubernetes
 tags:
@@ -14,7 +14,7 @@ date: "2026-02-16"
 
 ## 한 줄 요약
 
-> EKS 롤링 업데이트 후 payment POC Pod만 CrashLoopBackOff가 지속되었고, 원인은 SSM Parameter Store에 수동 등록된 `QUEUE_TOKEN_SECRET_KEY`가 32바이트가 아니라 31바이트였다는 것이었습니다.
+> EKS 롤링 업데이트 후 payment POC Pod만 CrashLoopBackOff가 지속됐습니다. 원인은 SSM Parameter Store에 수동 등록된 `QUEUE_TOKEN_SECRET_KEY`가 32바이트가 아니라 31바이트였다는 점이었습니다
 
 ---
 

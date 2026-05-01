@@ -1,6 +1,6 @@
 ---
 title: "GCP Terraform 코드 리뷰: CRITICAL 보안 이슈부터 Cross-Cloud 호환성까지"
-excerpt: "팀원의 GCP Terraform PR을 리뷰하며 발견한 GKE Master API 전체 개방, PGPASSWORD 버그, 그리고 K8s manifest AWS 하드코딩 문제"
+excerpt: "팀원의 GCP Terraform PR을 리뷰하며 발견한 GKE Master API 전체 개방, PGPASSWORD 버그, K8s manifest AWS 하드코딩 문제를 정리합니다"
 category: kubernetes
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-02-06"
 
 ## 🎯 한 줄 요약
 
-> GCP Terraform PR에서 **GKE Master API 전체 개방**, **PGPASSWORD 인증 버그**, **비밀번호 평문 노출** 등 CRITICAL 3건을 포함해 총 9건을 수정했고, K8s manifest가 AWS 전용으로 하드코딩되어 있어 GCP 배포에는 추가 작업이 필요합니다.
+> GCP Terraform PR에서 **GKE Master API 전체 개방**, **PGPASSWORD 인증 버그**, **비밀번호 평문 노출** 등 CRITICAL 3건을 포함해 총 9건을 수정했습니다. K8s manifest가 AWS 전용으로 하드코딩되어 있어 GCP 배포에는 추가 작업이 필요합니다
 
 ---
 

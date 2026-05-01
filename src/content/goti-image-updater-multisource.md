@@ -1,6 +1,6 @@
 ---
 title: "argocd-image-updater가 이미지를 무시한다: multi-source의 함정"
-excerpt: "argocd-image-updater가 multi-source Application에서 이미지를 감지하지 못하는 문제와 ExternalSecret 이름/키 불일치까지 연쇄 트러블슈팅"
+excerpt: "argocd-image-updater가 multi-source Application에서 이미지를 감지하지 못하는 문제와 ExternalSecret 이름·키 불일치까지 이어진 연쇄 트러블슈팅 기록입니다"
 type: troubleshooting
 category: argocd
 tags:
@@ -19,7 +19,7 @@ date: '2026-02-11'
 
 ## 한 줄 요약
 
-> argocd-image-updater가 `images_skipped=1`을 출력하며 이미지를 무시했습니다. v0.16.0은 multi-source Application을 지원하지 않습니다. single-source로 전환하고, ExternalSecret 이름 불일치와 key prefix 문제까지 연쇄로 해결했습니다.
+> argocd-image-updater가 `images_skipped=1`을 출력하며 이미지를 무시했습니다. v0.16.0은 multi-source Application을 지원하지 않습니다. single-source로 전환하고, ExternalSecret 이름 불일치와 key prefix 문제까지 연쇄로 해결했습니다
 
 ## Impact
 

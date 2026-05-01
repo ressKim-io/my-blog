@@ -1,6 +1,6 @@
 ---
 title: "kubectl patch가 만든 GitOps drift — 전 서비스 ImagePullBackOff"
-excerpt: "kubectl로 toleration을 직접 추가했더니 GitOps drift가 발생하고, ECR credential 만료 타이밍과 겹쳐 5개 서비스가 4시간 동안 ImagePullBackOff에 빠졌다"
+excerpt: "kubectl로 toleration을 직접 추가했더니 GitOps drift가 발생했고, ECR credential 만료 타이밍과 겹쳐 5개 서비스가 4시간 동안 ImagePullBackOff에 빠졌습니다"
 category: kubernetes
 tags:
   - go-ti
@@ -15,7 +15,7 @@ date: "2026-02-25"
 
 ## 한 줄 요약
 
-> prod용 spot toleration을 dev에도 kubectl로 직접 추가했더니, rolling update가 트리거되면서 ECR credential 만료 타이밍에 걸렸다. 5개 서비스가 4시간 동안 ImagePullBackOff.
+> prod용 spot toleration을 dev에도 kubectl로 직접 추가했더니 rolling update가 트리거되면서 ECR credential 만료 타이밍에 걸렸습니다. 5개 서비스가 4시간 동안 ImagePullBackOff에 빠졌습니다
 
 ## Impact
 
