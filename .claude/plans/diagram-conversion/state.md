@@ -47,12 +47,12 @@
 - [x] **E4.** `goti-observability-stack-selection.md` / 1블록 (2026-05-01 완료) — 관측성 스택 아키텍처 SVG 변환
 - [x] **E5.** `istio-observability-part4-kiali.md` / 9블록 (2026-05-01 완료) — 9개 UI 모킹을 markdown 표·리스트로 전부 평탄화 (PNG 2개 유지)
 
-## Phase 6 — 마무리 (대기)
+## Phase 6 — 마무리 (완료, 2026-05-01)
 
-- [ ] `decisions.md` 작성 (Phase별 처리 로그 누적)
-- [ ] `npm run build` 최종 검증
-- [ ] `best-practices.md` 1.1 버전 갱신 (실작업 패턴 반영)
-- [ ] 메모리 reference 메모 추가 (`reference_diagram_conversion_workspace.md`)
+- [x] `decisions.md` 작성 (Phase 1~5 처리 로그 누적)
+- [x] `npm run build` 최종 검증 (459 static pages 통과)
+- [x] `best-practices.md` 1.1 버전 갱신 (§11 실작업 패턴 9종 추가)
+- [x] 메모리 reference 메모 갱신 (`reference_diagram_conversion_workspace.md` — 전체 완료 상태 반영)
 
 ## 작업 절차
 
