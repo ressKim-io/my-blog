@@ -106,7 +106,7 @@ Sliding Window는 고정된 구간이 아니라, 요청 시점을 기준으로 "
 
 ### 프로젝트 구조
 
-```
+```text
 packages/wealist-advanced-go-pkg/
 └── ratelimit/
     ├── config.go         # 설정

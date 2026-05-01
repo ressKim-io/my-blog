@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t2">3가지 축 적용 후 악순환 차단</title>
+  <desc id="d2">재시작 후 Kafka backlog가 있어도 축1 Consumer Throttling(fetch_max 5-10MB, processing_time 1s)이 점진적 소비를 강제. 축2 sending_queue 500 batch 버퍼가 백엔드 일시 장애 시 back pressure를 전달. 축3 백엔드 튜닝(청크/블록 빠른 flush, GOMEMLIMIT GC 개입)으로 메모리가 limit에 도달하지 않음. 결과적으로 Loki ~800Mi/2Gi, Tempo ~1.2Gi/2Gi 안정 유지</desc>
+
+  <defs>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr2); }
+  ]]></style>
+
+  <!-- Step 0: Kafka backlog (database / violet) -->
+  <rect x="240" y="40" width="320" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="64" text-anchor="middle" class="label" fill="#6D28D9">Kafka backlog</text>
+  <text x="400" y="84" text-anchor="middle" class="meta">재시작 후 누적된 데이터</text>
+
+  <line x1="400" y1="104" x2="400" y2="148" class="arrow"/>
+
+  <!-- Axis 1: Consumer Throttling (frontend / cyan) -->
+  <rect x="160" y="148" width="480" height="80" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="172" text-anchor="middle" class="label" fill="#0E7490">축 1 — Consumer Throttling</text>
+  <text x="400" y="192" text-anchor="middle" class="meta">fetch_max 5-10MB · max_processing_time 1s</text>
+  <text x="400" y="212" text-anchor="middle" class="meta">backlog 점진적 소비 (한 번에 가져오는 양 제한)</text>
+
+  <line x1="400" y1="228" x2="400" y2="272" class="arrow"/>
+  <text x="412" y="252" class="arrlbl">점진적 소비</text>
+
+  <!-- Axis 2: sending_queue (backend / emerald) -->
+  <rect x="160" y="272" width="480" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="296" text-anchor="middle" class="label" fill="#047857">축 2 — sending_queue + retry</text>
+  <text x="400" y="316" text-anchor="middle" class="meta">queue_size 500 batch · retry max_elapsed_time 300s</text>
+  <text x="400" y="336" text-anchor="middle" class="meta">백엔드 일시 장애 → back pressure 전달, 데이터 보호</text>
+
+  <line x1="400" y1="352" x2="400" y2="396" class="arrow"/>
+  <text x="412" y="376" class="arrlbl">안정적 전송</text>
+
+  <!-- Axis 3: 백엔드 튜닝 (cloud / amber) -->
+  <rect x="160" y="396" width="480" height="100" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="420" text-anchor="middle" class="label" fill="#B45309">축 3 — 백엔드 튜닝 (Loki/Tempo)</text>
+  <text x="400" y="440" text-anchor="middle" class="meta">chunk_idle_period 30m → 5m / max_chunk_age 2h → 30m</text>
+  <text x="400" y="458" text-anchor="middle" class="meta">max_block_duration 30m → 5m / GOMEMLIMIT 90% / parallelism 128 → 8</text>
+  <text x="400" y="478" text-anchor="middle" class="meta">청크·블록 빠른 flush + Go GC 적극 개입</text>
+
+  <line x1="400" y1="496" x2="400" y2="540" class="arrow"/>
+
+  <!-- 결과 (backend / emerald) -->
+  <rect x="120" y="540" width="560" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="564" text-anchor="middle" class="label" fill="#047857">메모리 안정 — OOM 사이클 차단</text>
+  <text x="400" y="586" text-anchor="middle" class="meta">Loki ~800Mi / 2Gi 안정 · Tempo ~1.2Gi / 2Gi 안정</text>
+  <text x="400" y="606" text-anchor="middle" class="meta">backlog가 있어도 점진적으로 소화 → OOM 없이 복구</text>
+</svg>

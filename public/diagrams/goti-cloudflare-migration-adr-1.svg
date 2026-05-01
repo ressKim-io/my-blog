@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">Cloudflare Pages + Workers 기반 dev 환경 최종 아키텍처</title>
+  <desc id="d1">dev.go-ti.shop 진입 시 정적 파일은 Cloudflare Pages가 SPA fallback으로 직접 서빙, /api/*와 /grafana/*는 Workers fetch()로 dev-api.go-ti.shop(Cloudflare Proxy ON, SSL Flexible)을 거쳐 resshome.iptime.org:31080의 Kind PC Istio Gateway로 전달. Gateway가 dev.go-ti.shop·dev-api.go-ti.shop·grafana.go-ti.shop 3개 호스트를 받아 VirtualService로 K8s Services에 분기</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- dev.go-ti.shop entry (frontend / cyan) -->
+  <rect x="160" y="32" width="480" height="120" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="60" text-anchor="middle" class="label" fill="#0E7490">dev.go-ti.shop</text>
+  <text x="400" y="84" text-anchor="middle" class="meta">정적 파일 → Cloudflare Pages (SPA fallback)</text>
+  <text x="400" y="106" text-anchor="middle" class="meta">/api/* → Workers</text>
+  <text x="400" y="126" text-anchor="middle" class="meta">/grafana/* → Workers</text>
+
+  <line x1="400" y1="152" x2="400" y2="184" class="arrow"/>
+  <text x="412" y="172" class="arrlbl">Workers fetch()</text>
+
+  <!-- dev-api.go-ti.shop (cloud / amber) -->
+  <rect x="160" y="184" width="480" height="100" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="212" text-anchor="middle" class="label" fill="#B45309">dev-api.go-ti.shop</text>
+  <text x="400" y="234" text-anchor="middle" class="meta">Cloudflare Proxy ON · SSL Flexible</text>
+  <text x="400" y="254" text-anchor="middle" class="meta">Origin: resshome.iptime.org:31080</text>
+  <text x="400" y="274" text-anchor="middle" class="meta">Host: dev-api.go-ti.shop (자동 주입)</text>
+
+  <line x1="400" y1="284" x2="400" y2="316" class="arrow"/>
+
+  <!-- Kind PC (database / violet) -->
+  <rect x="40" y="316" width="720" height="180" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="344" text-anchor="middle" class="label" fill="#6D28D9">Kind PC — Istio Gateway</text>
+  <text x="400" y="368" text-anchor="middle" class="meta">hosts: dev.go-ti.shop · dev-api.go-ti.shop · grafana.go-ti.shop</text>
+  <text x="400" y="392" text-anchor="middle" class="meta">VirtualService → K8s Services</text>
+
+  <rect x="80" y="412" width="200" height="64" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="180" y="438" text-anchor="middle" class="meta">dev.go-ti.shop</text>
+  <text x="180" y="458" text-anchor="middle" class="meta">→ frontend Service</text>
+
+  <rect x="300" y="412" width="200" height="64" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="400" y="438" text-anchor="middle" class="meta">dev-api.go-ti.shop</text>
+  <text x="400" y="458" text-anchor="middle" class="meta">→ backend Service</text>
+
+  <rect x="520" y="412" width="200" height="64" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="620" y="438" text-anchor="middle" class="meta">grafana.go-ti.shop</text>
+  <text x="620" y="458" text-anchor="middle" class="meta">→ Grafana Service</text>
+</svg>

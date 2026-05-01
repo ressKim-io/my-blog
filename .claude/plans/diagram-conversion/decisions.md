@@ -135,3 +135,26 @@
   - `eks-security-jwt-rsa-mismatch.md` (2 SVG) — Pod별 RSA 키 불일치 / Secrets Manager 공유 해결
 
 **검증**: `npm run build` 통과 (459 static pages 생성, 44개 SVG 자산 누적)
+
+## Phase 4 — 소규모 그룹 (G13, G19, G20, 2026-05-01 완료)
+
+- 1개 SVG + 3개 트리/짧은 흐름 lang=text
+- 처리 글:
+  - `goti-cloudflare-migration-adr.md` (1 SVG) — Cloudflare Pages + Workers + 전용 중간 도메인 dev 환경 아키텍처
+  - `goti-cloudflare-migration-troubleshoot.md` (1 tree text) — 브라우저 진입 트리
+  - `goti-harbor-imagepull-403-cloudflare-waf.md` (1 tree text) — 장애 원인 요약 트리
+  - `istio-ambient-part6-rate-limiting.md` (1 tree text) — 프로젝트 디렉토리 구조
+
+## Phase 5 — 엣지 케이스 (2026-05-01 완료)
+
+- 3개 SVG + 6개 평탄화 + 2개 ASCII 박스 삭제
+- 처리 글:
+  - `istio-observability-part3-access-log.md` (markdown 평탄화) — Response Flag 5박스를 5행 표로 통합, tree 3개 lang=text, 체크리스트 평탄화
+  - `argocd-bootstrap-circular-dependency.md` (ASCII 삭제) — 동일 내용 PNG 인접해 ASCII 박스 2개 삭제, Bootstrap 순서는 번호 리스트로 평탄화
+  - `goti-adr-loki-tempo-stability-tuning.md` (2 SVG) — OOM 악순환 사이클(루프 점선) + 3축 적용 후 차단 흐름
+  - `goti-observability-stack-selection.md` (1 SVG) — Grafana LGTM + Alloy Agent/Gateway + Kafka 버퍼 통합 아키텍처
+  - `istio-observability-part4-kiali.md` (markdown 평탄화) — Kiali UI 모킹 9개를 markdown 표·리스트로 통합 (PNG 2개는 그대로 유지)
+
+**평탄화 정책 정정**: inventory.json의 "PNG 인접" / "UI 모킹" 분류는 일부 부정확. E1/E5처럼 PNG 없이 UI 박스만 있는 경우는 표로 평탄화, E3처럼 사이클/흐름 다이어그램은 SVG 가치가 충분해 변환. 본문 직접 확인이 필수.
+
+**검증**: `npm run build` 통과 (459 static pages 생성, 49개 SVG 자산 누적)

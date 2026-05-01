@@ -295,7 +295,7 @@ goti-queue-gate-prod-6d8fb989b6-z2fb4   2/2     Running
 
 ### 장애 원인 요약
 
-```
+```text
 EKS containerd가 harbor.go-ti.shop 이미지 pull 시도
   │
   ├─ [원인 1] Route53 Private Hosted Zone

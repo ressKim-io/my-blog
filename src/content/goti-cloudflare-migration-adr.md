@@ -165,33 +165,7 @@ Client → Cloudflare 구간은 Edge 인증서로 HTTPS가 보장되니까, dev 
 
 ### 최종 아키텍처
 
-```
-                     ┌─ dev.go-ti.shop ──────────────────┐
-                     │                                    │
-                     │  정적 파일 → Cloudflare Pages      │
-                     │  /api/*    → Workers               │
-                     │  /grafana/* → Workers              │
-                     │                                    │
-                     └────────────┬───────────────────────┘
-                                  │ Workers fetch()
-                                  ▼
-                     ┌─ dev-api.go-ti.shop ──────────────┐
-                     │  Cloudflare Proxy ON               │
-                     │  SSL: Flexible                     │
-                     │  Origin: resshome.iptime.org:31080 │
-                     │  Host: dev-api.go-ti.shop (자동)   │
-                     └────────────┬───────────────────────┘
-                                  │
-                                  ▼
-                     ┌─ Kind PC ─────────────────────────┐
-                     │  Istio Gateway                     │
-                     │  hosts:                            │
-                     │    - dev.go-ti.shop                │
-                     │    - dev-api.go-ti.shop            │
-                     │    - grafana.go-ti.shop            │
-                     │  VirtualService → K8s Services     │
-                     └────────────────────────────────────┘
-```
+![Cloudflare Pages + Workers 기반 dev 환경 최종 아키텍처](/diagrams/goti-cloudflare-migration-adr-1.svg)
 
 아키텍처를 위에서부터 따라가보겠습니다.
 

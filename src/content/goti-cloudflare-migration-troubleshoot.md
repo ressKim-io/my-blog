@@ -269,7 +269,7 @@ export default {
 
 ## 🔍 최종 아키텍처
 
-```
+```text
 브라우저
   ├─ dev.go-ti.shop (정적 파일)
   │   → Cloudflare Pages (*.pages.dev)

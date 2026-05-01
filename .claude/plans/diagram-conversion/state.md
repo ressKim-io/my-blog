@@ -27,25 +27,25 @@
 - [x] **G11.** `series:queue-poc-loadtest` — 2편 / 2블록 / 38줄 (2026-05-01 완료)
 - [x] **G12.** `series:eks-security` — 1편 / 2블록 / 37줄 (2026-05-01 완료)
 
-## Phase 4 — 소규모 그룹 G13~G21 (대기, 11편/12블록/155줄)
+## Phase 4 — 소규모 그룹 G13~G21 (완료)
 
-- [ ] **G13.** `series:goti-cloudflare-migration` — 2편 / 2블록 / 37줄
-- [ ] **G14.** `series:goti-loadtest` — 1편 / 2블록 / 27줄
-- [ ] **G15.** `series:observability` — 1편 / 1블록 / 23줄
-- [ ] **G16.** `series:goti-pgbouncer` — 1편 / 1블록 / 17줄
-- [ ] **G17.** `series:goti-kafka` — 1편 / 1블록 / 15줄
-- [ ] **G18.** `series:challenge-2-wealist-migration` — 2편 / 2블록 / 15줄
-- [ ] **G19.** `series:goti-multicloud` — 1편 / 1블록 / 9줄
-- [ ] **G20.** `series:istio-ambient` — 1편 / 1블록 / 6줄
-- [ ] **G21.** `series:goti-metrics-collector` — 1편 / 1블록 / 6줄
+- [x] **G13.** `series:goti-cloudflare-migration` — 2편 / 2블록 / 37줄 (2026-05-01 완료)
+- [x] **G14.** `series:goti-loadtest` — Phase 3에서 글 단위 처리 완료
+- [x] **G15.** `series:observability` — Phase 3에서 글 단위 처리 완료
+- [x] **G16.** `series:goti-pgbouncer` — Phase 3에서 글 단위 처리 완료
+- [x] **G17.** `series:goti-kafka` — Phase 3에서 글 단위 처리 완료
+- [x] **G18.** `series:challenge-2-wealist-migration` — Phase 3에서 글 단위 처리 완료
+- [x] **G19.** `series:goti-multicloud` — 1편 / 1블록 / 9줄 (2026-05-01 완료, lang=text)
+- [x] **G20.** `series:istio-ambient` — 1편 / 1블록 / 6줄 (2026-05-01 완료, lang=text)
+- [x] **G21.** `series:goti-metrics-collector` — Phase 3에서 글 단위 처리 완료
 
-## Phase 5 — 엣지 케이스 (대기, 5편/23블록)
+## Phase 5 — 엣지 케이스 (완료)
 
-- [ ] **E1.** PNG 인접 ASCII 삭제 — `istio-observability-part3-access-log.md` / 9블록
-- [ ] **E2.** PNG 인접 ASCII 삭제 — `argocd-bootstrap-circular-dependency.md` / 2블록
-- [ ] **E3.** UI 모킹 평탄화 — `goti-adr-loki-tempo-stability-tuning.md` / 2블록
-- [ ] **E4.** UI 모킹 평탄화 — `goti-observability-stack-selection.md` / 1블록
-- [ ] **E5.** kiali 처리 (PNG 유지 + UI 모킹 ASCII 삭제) — `istio-observability-part4-kiali.md` / 9블록
+- [x] **E1.** `istio-observability-part3-access-log.md` / 9블록 (2026-05-01 완료) — Response Flag 5박스를 markdown 표로 평탄화 + tree 3개 lang=text + 체크리스트 markdown
+- [x] **E2.** `argocd-bootstrap-circular-dependency.md` / 2블록 (2026-05-01 완료) — PNG 인접 ASCII 박스 2개 삭제 (PNG 유지)
+- [x] **E3.** `goti-adr-loki-tempo-stability-tuning.md` / 2블록 (2026-05-01 완료) — 사이클/흐름 다이어그램이라 SVG 2개로 변환 (inventory 분류 정정)
+- [x] **E4.** `goti-observability-stack-selection.md` / 1블록 (2026-05-01 완료) — 관측성 스택 아키텍처 SVG 변환
+- [x] **E5.** `istio-observability-part4-kiali.md` / 9블록 (2026-05-01 완료) — 9개 UI 모킹을 markdown 표·리스트로 전부 평탄화 (PNG 2개 유지)
 
 ## Phase 6 — 마무리 (대기)
 
