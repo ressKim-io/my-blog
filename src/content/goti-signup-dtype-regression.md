@@ -1,6 +1,6 @@
 ---
 title: "Signup 500 재발 — JPA JOINED + @DiscriminatorColumn 부재의 dtype 가정 오류"
-excerpt: "선행 수정(JPA JOINED 포팅)에서 dtype 컬럼을 가정했지만 실제 prod DB에는 해당 컬럼이 없었습니다. JPA @Inheritance(JOINED)는 @DiscriminatorColumn 명시가 없으면 discriminator 컬럼을 생성하지 않는다는 Hibernate 사양을 놓친 것이 원인이었습니다."
+excerpt: "선행 수정(JPA JOINED 포팅)에서 dtype 컬럼이 있다고 가정했지만 실제 prod DB에는 그 컬럼이 없었습니다. JPA @Inheritance(JOINED)는 @DiscriminatorColumn 선언이 없으면 discriminator 컬럼을 만들지 않는다는 Hibernate 사양을 놓친 것이 원인이었습니다"
 category: challenge
 tags:
   - go-ti

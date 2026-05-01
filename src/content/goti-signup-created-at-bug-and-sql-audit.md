@@ -1,6 +1,6 @@
 ---
 title: "Signup 500 (created_at NULL) — 같은 패턴 6건 전수 스캔 + 점검 스크립트 저장"
-excerpt: "팀원 회원가입 시 30초 지연 후 CF 504. Go INSERT에 created_at·updated_at 누락이 원인이었고, 같은 패턴을 Python regex로 internal/ 전수 스캔해 6개 파일을 일괄 수정한 뒤 재사용 가능한 점검 스크립트로 저장했습니다."
+excerpt: "팀원 회원가입 시 30초 지연 후 CF 504가 발생했습니다. Go INSERT에 created_at·updated_at이 빠진 것이 원인이었고, 같은 패턴을 Python regex로 internal 전수 스캔해 6개 파일을 일괄 수정한 뒤 재사용 가능한 점검 스크립트로 저장했습니다"
 category: challenge
 tags:
   - go-ti

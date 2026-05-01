@@ -18,7 +18,7 @@ date: "2026-04-17"
 
 ## 한 줄 요약
 
-> 수동 삭제된 GCP Memorystore Redis를 Terraform으로 재생성하면서 발견한 `REDIS_URL` drift를 import 패턴으로 흡수했습니다. 이어서 AWS와 GCP의 JWT 공개키가 다른 문제를 AWS SSM을 Single Source of Truth로 삼는 방식으로 통일하여 멀티클라우드 세션 연속성을 확보했습니다.
+> 수동 삭제된 GCP Memorystore Redis를 Terraform으로 재생성하다 발견한 `REDIS_URL` drift를 import 패턴으로 흡수했습니다. 이어서 AWS와 GCP의 JWT 공개키가 다르던 문제를 AWS SSM을 Single Source of Truth로 삼아 통일해, 멀티클라우드 세션 연속성을 확보했습니다
 
 ## Impact
 

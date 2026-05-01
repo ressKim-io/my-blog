@@ -1,6 +1,6 @@
 ---
 title: "GCP bring-up 트러블 체인 — 8단계 연쇄 장애 해소 기록"
-excerpt: "AWS → GCP 마이그레이션 당일 마주친 8개 독립 이슈의 복합 장애. arm64 이미지부터 Istio default-deny, pg_restore FK 제약까지 6시간의 실전 트러블 체인"
+excerpt: "AWS → GCP 마이그레이션 당일 마주친 8개 독립 이슈의 복합 장애를 정리한 글입니다. arm64 이미지부터 Istio default-deny, pg_restore FK 제약까지 6시간 동안 풀어낸 실전 트러블 체인입니다"
 category: kubernetes
 tags:
   - go-ti
@@ -16,7 +16,7 @@ date: "2026-04-14"
 
 ## 한 줄 요약
 
-> GCP prod-gcp bring-up 당일 **8개 독립 이슈가 복합**으로 발생했습니다. arm64/amd64 미스매치, viper defaults 누락, GCP quota, Istio gatewayRef/host 오기재, `goti-istio-policy` 누락, pg_restore FK 제약까지 — 6시간 만에 공개 API 200까지 복원한 연쇄 트러블슈팅 기록입니다.
+> GCP prod-gcp bring-up 당일 **8개 독립 이슈가 복합**으로 발생했습니다. arm64·amd64 미스매치, viper defaults 누락, GCP quota, Istio gatewayRef·host 오기재, `goti-istio-policy` 누락, pg_restore FK 제약까지 — 6시간 만에 공개 API 200까지 복원한 연쇄 트러블슈팅 기록입니다
 
 ## Impact
 

@@ -1,6 +1,6 @@
 ---
 title: "Active-Passive + Read Split 설계 — 쓰기 위치에 읽기 엔드포인트를 대칭 배치한 이유"
-excerpt: "GCP에 쓰기가 있으니 GCP에 읽기도 있어야 한다는 요구를 출발점으로, PgBouncer를 RW/RO 두 Deployment로 쪼개 Multi-Cloud DB 경로를 설계했습니다. AWS RDS는 subscriber로서 강제 read-only, GCP는 primary + standby 구조입니다."
+excerpt: "GCP에 쓰기가 있으니 GCP에 읽기도 있어야 한다는 요구에서 출발해, PgBouncer를 RW/RO 두 Deployment로 쪼개 Multi-Cloud DB 경로를 설계했습니다. AWS RDS는 subscriber로 강제 read-only, GCP는 primary + standby 구조입니다"
 category: kubernetes
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-18"
 
 ## 한 줄 요약
 
-> pglogical 기반 복제 토폴로지를 확정한 뒤, 각 CSP 내부에서 쓰기와 읽기가 어떻게 배치될지 결정해야 했습니다. PgBouncer를 RW/RO 두 Deployment로 분리하고, AWS RDS는 파라미터 그룹 수준에서 read-only를 강제하는 Active-Passive 구조를 채택했습니다.
+> pglogical 기반 복제 토폴로지를 확정한 뒤, 각 CSP 내부에서 쓰기와 읽기를 어떻게 배치할지 결정해야 했습니다. PgBouncer를 RW/RO 두 Deployment로 분리하고, AWS RDS는 파라미터 그룹 수준에서 read-only를 강제하는 Active-Passive 구조를 채택했습니다
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Multi-Cloud Failover 관측 파이프라인 bring-up — Worker fanout으로 양쪽 Grafana 통일"
-excerpt: "Cloudflare Worker가 직접 emit하는 라우팅 메트릭을 AWS/GCP 양쪽 cluster로 fanout해, 어느 쪽 Grafana에서 봐도 동일한 failover 대시보드를 띄운 과정입니다."
+excerpt: "Cloudflare Worker가 직접 emit하는 라우팅 메트릭을 AWS와 GCP 양쪽 cluster로 fanout해, 어느 쪽 Grafana에서 보더라도 동일한 failover 대시보드가 뜨도록 만든 과정입니다"
 category: monitoring
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-17"
 
 ## 한 줄 요약
 
-> Cloudflare Worker `multicloud-router`의 라우팅 결정을 직접 메트릭으로 뽑아, AWS/GCP 양쪽 cluster의 `goti-load-observer`로 fanout했습니다. GCP 쪽 파이프라인이 end-to-end로 동작하는 것을 확인했고, AWS 쪽은 ASG=0 대기 상태로 남겨뒀습니다.
+> Cloudflare Worker `multicloud-router`의 라우팅 결정을 직접 메트릭으로 뽑아, AWS·GCP 양쪽 cluster의 `goti-load-observer`로 fanout했습니다. GCP 쪽 파이프라인이 end-to-end로 동작하는 것까지 확인했고, AWS 쪽은 ASG=0 대기 상태로 남겨뒀습니다
 
 ## Impact
 

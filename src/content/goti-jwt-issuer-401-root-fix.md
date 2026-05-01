@@ -1,6 +1,6 @@
 ---
 title: "prod-gcp /queue 전수 401 — JWT issuer drift 근본 원인 제거"
-excerpt: "go-ti.shop /queue 진입이 전부 401을 반환했습니다. 원인은 JWT iss=\"goti\"가 Istio RequestAuthentication issuer=\"goti-user-service\"와 불일치. viper 우선순위가 K8s env를 configs 하드코딩으로 덮어쓰고 있었고, K8s values를 단일 SoT로 승격해 해결했습니다."
+excerpt: "go-ti.shop /queue 진입이 전부 401을 반환했습니다. 원인은 JWT iss=\"goti\"가 Istio RequestAuthentication issuer=\"goti-user-service\"와 불일치였습니다. viper 우선순위가 K8s env를 configs 하드코딩으로 덮어쓰고 있어, K8s values를 단일 SoT로 승격해 근본 원인을 제거했습니다"
 category: istio
 tags:
   - go-ti

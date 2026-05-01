@@ -1,6 +1,6 @@
 ---
 title: "Multi-Cloud 서킷브레이커 + HPA 설계 — AWS Cost Freeze 중에도 GCP로 흡수하기"
-excerpt: "AWS ASG가 0으로 내려간 상태에서 매 요청 10초 지연과 GCP Pod 부족이 드러났습니다. Cloudflare Worker Circuit Breaker + GCP HPA로 수동 개입 없이 자동 복귀하는 Multi-Cloud 라우팅을 설계했습니다."
+excerpt: "AWS ASG가 0으로 내려간 상태에서 매 요청 10초 지연과 GCP Pod 부족이 동시에 드러났습니다. Cloudflare Worker Circuit Breaker + GCP HPA로 수동 개입 없이 자동 복귀하는 Multi-Cloud 라우팅을 설계했습니다"
 category: kubernetes
 tags:
   - go-ti
@@ -20,7 +20,7 @@ date: "2026-04-17"
 
 ## 한 줄 요약
 
-> Cloudflare Worker가 AWS로 먼저 fetch를 보내고 TCP timeout까지 10초를 기다리는 구조적 지연을 발견했습니다. primary 1.5초 타임아웃 + Circuit Breaker + GCP HPA 조합으로 AWS Cost Freeze 기간에도 사용자 체감 지연이 거의 없도록 설계했습니다.
+> Cloudflare Worker가 AWS로 먼저 fetch를 보내고 TCP timeout까지 10초를 기다리는 구조적 지연을 발견했습니다. primary 1.5초 타임아웃 + Circuit Breaker + GCP HPA 조합으로 AWS Cost Freeze 기간에도 사용자 체감 지연이 거의 없도록 설계했습니다
 
 ---
 

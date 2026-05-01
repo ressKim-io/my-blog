@@ -1,6 +1,6 @@
 ---
 title: "Redis SoT D2~D4 롤아웃 — Lua 원자화와 PG 쓰기 경로 제거"
-excerpt: "1주 시연 범위가 D0+D1에서 D0~D7 전체로 격상된 상황에서 seat_holds, inventory reconcile, orders의 SoT 전환을 하루 만에 순차 commit한 롤아웃 기록입니다."
+excerpt: "1주 시연 범위가 D0+D1에서 D0~D7 전체로 격상된 상황에서, seat_holds·inventory reconcile·orders의 SoT 전환을 하루 만에 순차 commit한 롤아웃 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -19,7 +19,7 @@ date: "2026-04-17"
 
 ## 한 줄 요약
 
-> 1주 시연의 부하 목표가 50만 VU까지 올라가면서 D0+D1만으로는 PG 쓰기 경로를 감당할 수 없게 됐습니다. 하루 동안 D2(seat_holds), D3(inventory reconcile), D4(orders)를 순차 commit해 PG INSERT/UPDATE QPS를 0으로 만들고, D5a outbox worker 착수로 연결했습니다.
+> 1주 시연의 부하 목표가 50만 VU까지 올라가면서 D0+D1만으로는 PG 쓰기 경로를 감당할 수 없게 됐습니다. 하루 동안 D2(seat_holds), D3(inventory reconcile), D4(orders)를 순차 commit해 PG INSERT/UPDATE QPS를 0으로 만들고, D5a outbox worker 착수로 이어갔습니다
 
 ## Impact
 

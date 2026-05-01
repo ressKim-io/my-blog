@@ -1,6 +1,6 @@
 ---
 title: "Redis를 SoT로 채택한 이유 — SDD-0005 전면 승격 (ADR)"
-excerpt: "ADR-0014 Phase A cache-aside의 한계를 넘어, seat/hold/inventory/order 전 hot path를 Redis Source of Truth로 전환한 아키텍처 결정과 D0~D7 로드맵입니다."
+excerpt: "ADR-0014 Phase A cache-aside의 한계를 넘어, seat·hold·inventory·order의 전 hot path를 Redis Source of Truth로 전환한 아키텍처 결정과 D0~D7 로드맵입니다"
 category: challenge
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-17"
 
 ## 한 줄 요약
 
-> 설계 의도는 Redis SoT였지만 실제 운영은 RDS 직격이었습니다. wiring / feature flag / 인프라 세 축이 전부 어긋나 있었고, 이를 바로잡기 위해 SDD-0005를 공식 ADR로 승격해 D0~D7 로드맵을 고정했습니다.
+> 설계 의도는 Redis SoT였지만 실제 운영은 RDS 직격이었습니다. wiring·feature flag·인프라 세 축이 전부 어긋나 있었고, 이를 바로잡기 위해 SDD-0005를 공식 ADR로 승격해 D0~D7 로드맵을 고정했습니다
 
 ---
 

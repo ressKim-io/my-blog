@@ -1,6 +1,6 @@
 ---
 title: "Prometheus Agent Mode 전환 — 모니터링 스택 연쇄 장애 복구기"
-excerpt: "core 노드 CPU 포화로 monitoring pod 5개가 Pending 상태에 빠진 상황에서, OTel 라벨 수정 → Agent mode 전환 → operator 데드락 → OOMKill → Grafana 변수 parse error까지 이어진 연쇄 트러블을 복구한 기록입니다."
+excerpt: "core 노드 CPU 포화로 monitoring pod 5개가 Pending 상태에 빠진 상황에서 OTel 라벨 수정 → Agent mode 전환 → operator 데드락 → OOMKill → Grafana 변수 parse error까지 연쇄로 터진 트러블을 복구한 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -19,7 +19,7 @@ date: "2026-04-14"
 
 ## 한 줄 요약
 
-> 부하테스트 직전 모니터링 스택이 노드 CPU 포화로 마비됐고, Prometheus Agent mode 전환을 기회 삼아 복구하는 과정에서 NetworkPolicy whitelist, operator 데드락, OOMKill, Grafana 변수 parse error까지 연쇄적으로 드러났습니다. 최종적으로 Prometheus 메모리 사용량을 82% 줄이고 Pending pod 5개를 모두 해소했습니다.
+> 부하테스트 직전 모니터링 스택이 노드 CPU 포화로 마비됐습니다. Prometheus Agent mode 전환을 기회 삼아 복구하는 과정에서 NetworkPolicy whitelist, operator 데드락, OOMKill, Grafana 변수 parse error까지 연쇄로 드러났습니다. 최종적으로 Prometheus 메모리 사용량을 82% 줄이고 Pending pod 5개를 모두 해소했습니다
 
 ---
 

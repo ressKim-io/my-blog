@@ -18,7 +18,7 @@ date: "2026-04-17"
 
 ## 한 줄 요약
 
-> Redis SoT 배포 후에도 `/seat-statuses` 레이턴시가 900ms+를 유지했습니다. 백엔드 실측은 20ms였고, `cf-ray` 헤더에서 Cloudflare Worker가 LAX PoP에서 실행되어 Seoul origin과 태평양을 왕복하는 경로 이슈를 발견했습니다. Smart Placement 활성화로 해결했습니다.
+> Redis SoT 배포 후에도 `/seat-statuses` 레이턴시가 900ms+를 유지했습니다. 백엔드 실측은 20ms였습니다. `cf-ray` 헤더에서 Cloudflare Worker가 LAX PoP에서 실행되어 Seoul origin과 태평양을 왕복하는 경로 이슈를 발견했고, Smart Placement 활성화로 해결했습니다
 
 ---
 

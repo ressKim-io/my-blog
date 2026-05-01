@@ -1,6 +1,6 @@
 ---
 title: "Read Replica 분리 결정 — RDS 수직 확장의 벽을 피하는 수평 확장 경로"
-excerpt: "3000 VU 부하테스트에서 단일 RDS의 커넥션 풀 경합이 드러났습니다. AWS RDS Read Replica + 애플리케이션 레벨 read/write 분리를 택해 읽기 70%를 replica로 흡수하도록 설계했습니다."
+excerpt: "3000 VU 부하테스트에서 단일 RDS의 커넥션 풀 경합이 드러났습니다. AWS RDS Read Replica와 애플리케이션 레벨 read/write 분리를 택해, 읽기 70%를 replica로 흡수하도록 설계했습니다"
 category: kubernetes
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-14"
 
 ## 한 줄 요약
 
-> 단일 RDS에 6개 Go 서비스가 몰려 `begin tx: context canceled`가 30분 동안 210건씩 발생했습니다. RDS Read Replica + 앱 레벨 read/write 분리로 읽기 70%를 replica로 옮기고, GCP CloudSQL에도 동일 패턴을 이식할 수 있는 수평 확장 경로를 확보했습니다.
+> 단일 RDS에 6개 Go 서비스가 몰려 `begin tx: context canceled`가 30분 동안 210건씩 발생했습니다. RDS Read Replica + 앱 레벨 read/write 분리로 읽기 70%를 replica로 옮겨, GCP CloudSQL에도 동일 패턴을 이식할 수 있는 수평 확장 경로를 확보했습니다
 
 ---
 

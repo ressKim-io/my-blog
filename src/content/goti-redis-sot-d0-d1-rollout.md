@@ -1,6 +1,6 @@
 ---
 title: "Redis SoT D0~D1 프로덕션 롤아웃 — 558ms를 32ms로"
-excerpt: "Memorystore noeviction 교체와 seat-statuses SoT wiring 단 두 단계로 좌석 조회 응답을 900ms에서 32ms로 줄인 1주 시연용 롤아웃 기록입니다."
+excerpt: "Memorystore noeviction 교체와 seat-statuses SoT wiring 단 두 단계로 좌석 조회 응답을 900ms에서 32ms로 줄인 1주 시연용 롤아웃 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -19,7 +19,7 @@ date: "2026-04-17"
 
 ## 한 줄 요약
 
-> SDD-0005 D0~D7 로드맵 중 **D0 (Memorystore `noeviction` 교체) + D1 (seat-statuses SoT wiring)** 두 단계만 1주 시연 범위로 축소 실행했습니다. 서버 측 응답이 558~967ms에서 32ms 수준으로 개선됐습니다.
+> SDD-0005 D0~D7 로드맵 중 **D0 (Memorystore `noeviction` 교체) + D1 (seat-statuses SoT wiring)** 두 단계만 1주 시연 범위로 축소해 실행했습니다. 서버 측 응답이 558~967ms에서 32ms 수준으로 개선됐습니다
 
 ## Impact
 

@@ -1,6 +1,6 @@
 ---
 title: "Cloudflare Worker + cert-manager로 Multi-Cloud 트래픽 분배 구성하기"
-excerpt: "팀코드 기반 AWS/GCP 라우팅을 Cloudflare Worker로 구현하고, cert-manager + Let's Encrypt wildcard로 GCP Full(strict) TLS 종단을 설정한 실전 기록입니다."
+excerpt: "팀코드 기반 AWS·GCP 라우팅을 Cloudflare Worker로 구현하고, cert-manager + Let's Encrypt wildcard로 GCP Full(strict) TLS 종단을 설정한 실전 기록입니다"
 category: kubernetes
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-15"
 
 ## 한 줄 요약
 
-> Cloudflare Worker에서 팀코드 기반 라우팅으로 AWS/GCP를 동시에 서빙하고, GCP 쪽 TLS 종단을 cert-manager + Let's Encrypt wildcard로 올려 Full(strict) 모드를 완성했습니다. 병행 작업으로 prod-gcp Terraform drift도 함께 정리했습니다.
+> Cloudflare Worker에서 팀코드 기반 라우팅으로 AWS·GCP를 동시에 서빙하고, GCP 쪽 TLS 종단을 cert-manager + Let's Encrypt wildcard로 올려 Full(strict) 모드를 완성했습니다. 병행 작업으로 prod-gcp Terraform drift도 함께 정리했습니다
 
 ## Impact
 

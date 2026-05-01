@@ -19,7 +19,7 @@ date: "2026-04-15"
 
 ## 한 줄 요약
 
-> SDD-0005에서 결정한 Redis SoT 풀 구현을 시도했습니다. 시간 제약과 안전성 trade-off로 D0~D2(인프라, seat_statuses, seat_holds)까지 dual-write 모드로 완성하고, D3 이후는 follow-up으로 분리했습니다.
+> SDD-0005에서 결정한 Redis SoT 풀 구현을 시도했습니다. 시간 제약과 안전성 trade-off로 D0~D2(인프라, seat_statuses, seat_holds)까지 dual-write 모드로 완성하고, D3 이후는 follow-up으로 분리했습니다
 
 ---
 
