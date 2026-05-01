@@ -18,7 +18,7 @@ date: "2026-03-02"
 
 ## 한 줄 요약
 
-> docker-compose 네트워크를 `external: true`에서 `name: + driver:`로 바꾸면 라벨 충돌이 발생하고, `wget --spider`는 HEAD 요청을 보내는데 Loki `/ready`가 HEAD를 지원하지 않아 healthcheck가 실패했습니다.
+> docker-compose 네트워크를 `external: true`에서 `name: + driver:`로 바꾸면 라벨 충돌이 일어나고, `wget --spider`는 HEAD 요청을 보내는데 Loki `/ready`가 HEAD를 지원하지 않아 healthcheck가 실패했습니다
 
 ---
 

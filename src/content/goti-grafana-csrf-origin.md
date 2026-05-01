@@ -19,7 +19,7 @@ date: "2026-03-02"
 
 ## 한 줄 요약
 
-> ALB가 HTTPS → HTTP로 변환하면서 브라우저의 Origin 헤더(`https://`)와 Grafana 내부 프로토콜(`http://`)이 불일치. CSRF 검증 실패로 모든 대시보드 패널이 데이터를 표시하지 못했습니다.
+> ALB가 HTTPS → HTTP로 변환하면서 브라우저의 Origin 헤더(`https://`)와 Grafana 내부 프로토콜(`http://`)이 어긋났습니다. CSRF 검증이 실패해 모든 대시보드 패널이 데이터를 표시하지 못했습니다
 
 ---
 

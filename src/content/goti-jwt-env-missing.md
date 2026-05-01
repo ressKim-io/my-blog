@@ -17,7 +17,7 @@ date: "2026-03-06"
 
 ## 한 줄 요약
 
-> `JWT_SOCIAL_VERIFY_TIME` 환경변수에만 기본값이 없어서, `.env` 파일 없이 Docker 기동 시 Spring Boot가 Duration 파싱에 실패했습니다.
+> `JWT_SOCIAL_VERIFY_TIME` 환경변수에만 기본값이 빠져 있어, `.env` 파일 없이 Docker를 기동하면 Spring Boot가 Duration 파싱에 실패했습니다
 
 ---
 

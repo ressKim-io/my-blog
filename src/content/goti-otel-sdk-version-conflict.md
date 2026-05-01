@@ -17,7 +17,7 @@ date: "2026-02-28"
 
 ## 🎯 한 줄 요약
 
-> Spring Boot의 `io.spring.dependency-management` 플러그인이 OTel SDK 버전을 강제 다운그레이드해서 `ClassNotFoundException`이 발생했습니다. `platform()` 대신 `dependencyManagement` 블록을 써야 합니다.
+> Spring Boot의 `io.spring.dependency-management` 플러그인이 OTel SDK 버전을 강제 다운그레이드해서 `ClassNotFoundException`이 발생했습니다. `platform()` 대신 `dependencyManagement` 블록을 써야 합니다
 
 ## 📊 Impact
 

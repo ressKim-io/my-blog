@@ -1,6 +1,6 @@
 ---
 title: "Kafka 버퍼드 OTel 파이프라인 — MSA 전환에 대비한 텔레메트리 버퍼 설계"
-excerpt: "Alloy 직접 전송 구조의 백엔드 의존성을 줄이기 위해 Kafka를 텔레메트리 버퍼로 도입할지 검토했습니다. Logs와 Traces만 선택적으로 버퍼링하는 Option C를 최종 선택했습니다."
+excerpt: "Alloy 직접 전송 구조의 백엔드 의존성을 줄이기 위해 Kafka를 텔레메트리 버퍼로 도입할지 검토했습니다. Logs와 Traces만 선택적으로 버퍼링하는 Option C를 최종 선택했습니다"
 category: monitoring
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-03-14"
 
 ## 한 줄 요약
 
-> MSA 전환 후 폭증할 텔레메트리에 대비해 Kafka를 OTel 파이프라인의 버퍼로 사용할지 검토했습니다. Metrics는 실시간성 때문에 직접 전송을 유지하고, 볼륨이 큰 Logs와 Traces만 Kafka로 버퍼링하는 **시그널 선택적 버퍼링(Option C)**을 선택했습니다.
+> MSA 전환 후 폭증할 텔레메트리에 대비해 Kafka를 OTel 파이프라인의 버퍼로 사용할지 검토했습니다. Metrics는 실시간성 때문에 직접 전송을 유지하고, 볼륨이 큰 Logs와 Traces만 Kafka로 버퍼링하는 **시그널 선택적 버퍼링(Option C)**을 선택했습니다
 
 ---
 

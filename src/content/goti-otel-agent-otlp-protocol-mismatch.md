@@ -1,6 +1,6 @@
 ---
 title: "OTel Java Agent 2.25.0 OTLP 프로토콜 불일치 — gRPC와 http/protobuf의 포트 함정"
-excerpt: "에이전트를 2.25.0으로 올렸더니 기본 OTLP 프로토콜이 http/protobuf로 바뀌었는데 엔드포인트는 4317(gRPC)이라서, WARN 한 줄만 남기고 JVM 대시보드 전체가 40분 뒤 끊긴 사건입니다."
+excerpt: "에이전트를 2.25.0으로 올렸더니 기본 OTLP 프로토콜이 http/protobuf로 바뀌었는데 엔드포인트는 4317(gRPC)이라서, WARN 한 줄만 남기고 JVM 대시보드 전체가 40분 뒤 끊긴 사건입니다"
 category: monitoring
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-03-14"
 
 ## 🎯 한 줄 요약
 
-> OTel Java agent 2.25.0에서 기본 OTLP 프로토콜이 `grpc`에서 `http/protobuf`로 변경되었습니다. 엔드포인트를 4317(gRPC)에 그대로 둔 채로 업그레이드하니 exporter가 포트에 HTTP를 쏘아대며 전송에 실패했고, Grafana JVM Deep Dive 대시보드가 약 40분 뒤 조용히 끊겼습니다.
+> OTel Java agent 2.25.0에서 기본 OTLP 프로토콜이 `grpc`에서 `http/protobuf`로 바뀌었습니다. 엔드포인트를 4317(gRPC)에 그대로 둔 채 업그레이드하니 exporter가 그 포트로 HTTP를 쏘아대며 전송에 실패했고, Grafana JVM Deep Dive 대시보드가 약 40분 뒤 조용히 끊겼습니다
 
 ## 📊 Impact
 

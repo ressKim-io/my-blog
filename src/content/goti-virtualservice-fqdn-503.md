@@ -1,6 +1,6 @@
 ---
 title: "Istio VirtualService 503 에러: .svc와 .svc.cluster.local의 차이"
-excerpt: "VirtualService destination host를 .svc로 끝냈더니 503 에러 — Istio Gateway는 DNS search domain이 없다"
+excerpt: "VirtualService destination host를 .svc로 끝냈더니 503 에러가 발생했습니다 — Istio Gateway는 sidecar와 달리 DNS search domain이 없습니다"
 category: kubernetes
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-03-13"
 
 ## 🎯 한 줄 요약
 
-> VirtualService destination host를 `.svc`로 끝냈더니 503 에러. Istio Gateway는 sidecar와 달리 DNS search domain이 없어서, 반드시 `.svc.cluster.local` FQDN을 사용해야 합니다.
+> VirtualService destination host를 `.svc`로 끝냈더니 503 에러가 떨어졌습니다. Istio Gateway는 sidecar와 달리 DNS search domain이 없어서, 반드시 `.svc.cluster.local` FQDN을 사용해야 합니다
 
 ## 📊 Impact
 

@@ -18,7 +18,7 @@ date: "2026-02-28"
 
 ## 한 줄 요약
 
-> PostgreSQL healthcheck에서 컨테이너 내부에 없는 환경변수를 참조해서 `pg_isready -U ""`로 실행됨. unhealthy 상태가 되면서 app 서비스가 시작되지 않았습니다.
+> PostgreSQL healthcheck에서 컨테이너 내부에 없는 환경변수를 참조해 `pg_isready -U ""`로 실행됐습니다. unhealthy 상태가 되면서 app 서비스가 시작되지 않았습니다
 
 ---
 

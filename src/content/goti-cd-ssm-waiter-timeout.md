@@ -18,7 +18,7 @@ date: "2026-03-01"
 
 ## 한 줄 요약
 
-> `aws ssm wait command-executed`의 기본 대기 시간이 100초(5초 × 20회)인데, 실제 배포는 150~400초 걸려서 waiter가 먼저 포기했습니다.
+> `aws ssm wait command-executed`의 기본 대기 시간은 100초(5초 × 20회)인데, 실제 배포는 150~400초가 걸려서 waiter가 먼저 포기했습니다
 
 ---
 

@@ -17,7 +17,7 @@ date: "2026-03-06"
 
 ## 🎯 한 줄 요약
 
-> OTel의 `service.name` 리소스 속성은 Prometheus에서 `service_name`이 아니라 `job` 레이블로 변환됩니다. OTel-Prometheus 호환성 스펙의 표준 동작입니다.
+> OTel의 `service.name` 리소스 속성은 Prometheus에서 `service_name`이 아니라 `job` 레이블로 변환됩니다. OTel-Prometheus 호환성 스펙에 명시된 표준 동작입니다
 
 ## 📊 Impact
 

@@ -19,7 +19,7 @@ date: '2026-03-12'
 
 ## 한 줄 요약
 
-> `kind.go-ti.shop/grafana/` 접속 불가. CloudFront Origin이 S3를 가리킴, Istio Gateway selector 불일치, VirtualService host 오류, CloudFront CLI로 플랜 해제 사고까지. 5개 원인을 하나씩 잡아냈습니다.
+> `kind.go-ti.shop/grafana/` 접속이 막혔습니다. CloudFront Origin이 S3를 가리킴, Istio Gateway selector 불일치, VirtualService host 오류, CloudFront CLI로 플랜 해제 사고까지 — 5개 원인을 하나씩 잡아냈습니다
 
 ## Impact
 

@@ -1,6 +1,6 @@
 ---
 title: "Tempo securityContext 스키마 에러: Pod-level vs Container-level 혼동"
-excerpt: "ArgoCD sync가 Unknown 상태 — allowPrivilegeEscalation을 Pod-level securityContext에 넣으면 structured merge diff 스키마 에러가 발생한다"
+excerpt: "ArgoCD sync가 Unknown 상태였습니다 — allowPrivilegeEscalation을 Pod-level securityContext에 넣으면 structured merge diff 스키마 에러가 발생합니다"
 category: kubernetes
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-03-13"
 
 ## 🎯 한 줄 요약
 
-> Tempo의 securityContext에 `allowPrivilegeEscalation`을 넣었더니 ArgoCD sync가 Unknown. Pod-level과 container-level securityContext는 허용하는 필드가 다르다.
+> Tempo의 securityContext에 `allowPrivilegeEscalation`을 넣었더니 ArgoCD sync가 Unknown 상태로 빠졌습니다. Pod-level과 container-level securityContext는 허용하는 필드가 다르기 때문입니다
 
 ## 📊 Impact
 

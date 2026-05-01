@@ -1,6 +1,6 @@
 ---
 title: "Developer 대시보드 실무 고도화 — 어디 API에서 에러가 났는지 찾을 수 있게"
-excerpt: "Trace ID 중심 탐색에서 API 엔드포인트 중심 탐색으로. 4개 40패널 대시보드를 6개 90패널로 재설계한 기록입니다."
+excerpt: "Trace ID 중심 탐색에서 API 엔드포인트 중심 탐색으로 옮겼습니다. 4개 40패널 대시보드를 6개 90패널로 재설계한 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -19,7 +19,7 @@ date: "2026-03-15"
 
 ## 한 줄 요약
 
-> Developer 대시보드 4개가 "어디 API에서 에러가 났는지" 찾기 힘들어 실무 디버깅에 부적합했습니다. API 엔드포인트 중심으로 재설계하고 DB Dependencies, Continuous Profiling 2개를 신설해 6개 90패널 구성으로 고도화했습니다.
+> Developer 대시보드 4개가 "어디 API에서 에러가 났는지" 찾기 힘들어 실무 디버깅에 부적합했습니다. API 엔드포인트 중심으로 재설계하고 DB Dependencies·Continuous Profiling 2개를 신설해 6개 90패널 구성으로 고도화했습니다
 
 ---
 

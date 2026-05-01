@@ -1,6 +1,6 @@
 ---
 title: "Alloy/Tempo remote_write 404: Prometheus routePrefix 함정"
-excerpt: "Prometheus에 routePrefix를 설정하면 remote_write 엔드포인트 경로도 바뀐다 — Alloy와 Tempo에서 404가 발생한 원인과 해결"
+excerpt: "Prometheus에 routePrefix를 설정하면 remote_write 엔드포인트 경로도 함께 바뀝니다 — Alloy와 Tempo에서 404가 발생한 원인과 해결을 정리합니다"
 category: monitoring
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-03-13"
 
 ## 한 줄 요약
 
-> Prometheus `routePrefix: "/prometheus"` 설정 시 remote_write 엔드포인트가 `/prometheus/api/v1/write`로 바뀐다. Alloy와 Tempo가 `/api/v1/write`로 보내서 404 발생.
+> Prometheus `routePrefix: "/prometheus"` 설정 시 remote_write 엔드포인트가 `/prometheus/api/v1/write`로 바뀝니다. Alloy와 Tempo가 `/api/v1/write`로 보내서 404가 발생했습니다
 
 ## Impact
 

@@ -1,6 +1,6 @@
 ---
 title: "Kind 모니터링 스택 일괄 정상화: Helm suffix부터 OTLP 포트까지 8개 이슈 해결"
-excerpt: "Kind 클러스터에 ArgoCD로 배포한 모니터링 스택에서 발생한 8가지 문제를 해결한 기록 — Helm release suffix, values 키 불일치, Helm 이스케이프까지"
+excerpt: "Kind 클러스터에 ArgoCD로 배포한 모니터링 스택에서 발생한 8가지 문제를 해결한 기록입니다 — Helm release suffix·values 키 불일치·Helm 이스케이프까지"
 category: kubernetes
 tags:
   - go-ti
@@ -21,7 +21,7 @@ date: "2026-03-12"
 
 ## 🎯 한 줄 요약
 
-> Kind 클러스터에 모니터링 스택을 ArgoCD로 배포했더니 거의 모든 Pod가 CrashLoopBackOff. 근본 원인은 Helm release 이름의 `-dev` suffix였고, 총 8개 이슈를 한 번에 해결했습니다.
+> Kind 클러스터에 모니터링 스택을 ArgoCD로 배포했더니 거의 모든 Pod가 CrashLoopBackOff에 빠졌습니다. 근본 원인은 Helm release 이름의 `-dev` suffix였고, 총 8개 이슈를 한 번에 해결했습니다
 
 ## 📊 Impact
 

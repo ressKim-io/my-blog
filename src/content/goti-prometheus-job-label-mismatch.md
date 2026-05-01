@@ -17,7 +17,7 @@ date: "2026-03-09"
 
 ## 🎯 한 줄 요약
 
-> OTel에 `service.namespace`를 설정하면 Prometheus `job` 레이블이 `<namespace>/<service.name>` 형태로 바뀝니다. 기존 rules와 대시보드가 모두 깨집니다.
+> OTel에 `service.namespace`를 설정하면 Prometheus `job` 레이블이 `<namespace>/<service.name>` 형태로 바뀝니다. 그 결과 기존 rules와 대시보드가 모두 깨집니다
 
 ## 📊 Impact
 

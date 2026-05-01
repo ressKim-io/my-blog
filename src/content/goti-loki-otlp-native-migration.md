@@ -19,7 +19,7 @@ date: "2026-03-13"
 
 ## 한 줄 요약
 
-> Alloy의 `otelcol.exporter.loki`에서 hint attribute가 silent fail하면서 label 승격이 안 됐습니다. Loki 3.x native OTLP 엔드포인트로 전환하고, 서버 측 `otlp_config`로 label을 제어하는 방식으로 해결했습니다.
+> Alloy의 `otelcol.exporter.loki`에서 hint attribute가 silent fail하면서 label 승격이 안 됐습니다. Loki 3.x native OTLP 엔드포인트로 전환하고, 서버 측 `otlp_config`로 label을 제어하는 방식으로 해결했습니다
 
 ## Impact
 

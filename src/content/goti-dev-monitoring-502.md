@@ -18,7 +18,7 @@ date: '2026-03-09'
 
 ## 한 줄 요약
 
-> 모니터링 스택 개선 배포 후 Grafana(502)와 API(502) 동시 장애. Grafana는 Docker 포트가 localhost 전용으로 바뀐 것, API는 ALB 헬스체크 경로가 인증이 필요한 `/`로 설정된 것이 원인입니다.
+> 모니터링 스택 개선 배포 후 Grafana(502)와 API(502)가 동시에 장애를 일으켰습니다. Grafana는 Docker 포트가 localhost 전용으로 바뀐 것, API는 ALB 헬스체크 경로가 인증이 필요한 `/`로 설정된 것이 원인이었습니다
 
 ## Impact
 
