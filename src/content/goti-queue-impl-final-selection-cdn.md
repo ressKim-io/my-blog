@@ -1,6 +1,6 @@
 ---
 title: "대기열 구현체 최종 선정 — CDN 캐싱을 선택한 이유"
-excerpt: "3개 POC 구현체를 3000 VU까지 부하테스트한 결과, CDN 캐싱 기반 구현체(POC C)를 최종 채택했습니다. status avg 4.2배 개선, 처리량 2.1배 증가가 결정 근거입니다."
+excerpt: "3개 POC 구현체를 3000 VU까지 부하테스트한 결과, CDN 캐싱 기반 구현체(POC C)를 최종 채택했습니다. status avg 4.2배 개선과 처리량 2.1배 증가가 결정 근거입니다"
 category: challenge
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-04"
 
 ## 한 줄 요약
 
-> 3개 POC 구현체(Redis Polling / Redis ZSET+Heartbeat / JWE+분산 Lock+CDN)를 3000 VU까지 비교한 결과, **CDN 캐싱 기반 구현체**를 최종 선정했습니다. CDN이 polling 트래픽을 엣지에서 흡수하면서 origin Redis 부하가 구조적으로 제한됩니다.
+> 3개 POC 구현체(Redis Polling / Redis ZSET+Heartbeat / JWE+분산 Lock+CDN)를 3000 VU까지 비교한 결과, **CDN 캐싱 기반 구현체**를 최종 선정했습니다. CDN이 polling 트래픽을 엣지에서 흡수하면서 origin Redis 부하가 구조적으로 제한됩니다
 
 ---
 

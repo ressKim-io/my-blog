@@ -17,7 +17,7 @@ date: "2026-04-10"
 
 ## 한 줄 요약
 
-> Java에서 Go로 포팅한 Ticketing 서비스의 OrderConfirmService를 3-Phase 배치 구조로 리팩터링해 DB 호출을 87% 감소시켰고, 동시성 분석에서 P0 3건을 발견했습니다. P0-1(deadlock)은 즉시 수정, P0-2/3는 Phase 2(Redis Inventory 전환)로 해결 계획을 수립했습니다
+> Java에서 Go로 포팅한 Ticketing 서비스의 OrderConfirmService를 3-Phase 배치 구조로 리팩터링해 DB 호출을 87% 줄였고, 동시성 분석에서 P0 3건을 찾아냈습니다. P0-1(deadlock)은 즉시 수정했고, P0-2·P0-3은 Phase 2(Redis Inventory 전환)로 해결 계획을 세웠습니다
 
 ---
 

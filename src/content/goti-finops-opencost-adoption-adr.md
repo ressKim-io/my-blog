@@ -1,6 +1,6 @@
 ---
 title: "FinOps 도구 선택 — OpenCost를 채택한 이유"
-excerpt: "Multi-Cloud(EKS+GKE) 환경에서 K8s 워크로드별 비용 가시성이 필요했습니다. Kubecost v3과 클라우드 네이티브 도구를 저울질한 끝에, 기존 Prometheus/Mimir/Grafana 스택을 그대로 재활용할 수 있는 OpenCost를 선택한 결정 과정입니다."
+excerpt: "Multi-Cloud(EKS+GKE) 환경에서 K8s 워크로드별 비용 가시성이 필요했습니다. Kubecost v3과 클라우드 네이티브 도구를 저울질한 끝에, 기존 Prometheus·Mimir·Grafana 스택을 그대로 재활용할 수 있는 OpenCost를 선택한 결정 과정입니다"
 category: monitoring
 tags:
   - go-ti
@@ -13,7 +13,7 @@ date: "2026-04-02"
 
 ## 한 줄 요약
 
-> Multi-Cloud 전환 중 인프라 비용 가시성이 부재했습니다. Kubecost v3은 IBM 인수 후 가격이 상승했고 클라우드 네이티브 도구는 K8s 수준 분해가 불가능했습니다. CNCF Incubating 프로젝트인 OpenCost를 선택해 기존 Prometheus/Mimir/Grafana 스택 위에서 비용을 관측하기로 결정했습니다.
+> Multi-Cloud 전환 중 인프라 비용 가시성이 부재했습니다. Kubecost v3은 IBM 인수 후 가격이 상승했고 클라우드 네이티브 도구는 K8s 수준 분해가 불가능했습니다. CNCF Incubating 프로젝트인 OpenCost를 선택해 기존 Prometheus·Mimir·Grafana 스택 위에서 비용을 관측하기로 결정했습니다
 
 ---
 

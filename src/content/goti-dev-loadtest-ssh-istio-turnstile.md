@@ -1,6 +1,6 @@
 ---
 title: "dev 부하테스트 연결 3단 트러블 — SSH 터널·Istio 정책·Turnstile"
-excerpt: "로컬 맥에서 Kind 클러스터로 K6 트래픽을 보내는 과정에서 mTLS RBAC 403, JWT 예외 누락, Turnstile 봇 탐지 세 가지 이슈가 연쇄 발생했고 SSH 터널과 GitOps 수정으로 두 가지를 해결한 기록입니다."
+excerpt: "로컬 맥에서 Kind 클러스터로 K6 트래픽을 보내는 과정에서 mTLS RBAC 403, JWT 예외 누락, Turnstile 봇 탐지 세 가지 이슈가 연쇄로 터졌습니다. SSH 터널과 GitOps 수정으로 두 가지를 해결한 기록입니다"
 category: istio
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-08"
 
 ## 한 줄 요약
 
-> 맥 로컬에서 Kind dev 클러스터로 K6 부하테스트 경로를 확보하는 과정에서 mTLS 403, JWT 경로 누락 403, Turnstile 봇 탐지 403이 순차 발생했습니다. SSH 터널 NodePort 경유와 GitOps 정책 수정으로 첫 두 이슈를 해결했고, Turnstile은 서버 코드 수정이 필요한 TODO로 남겼습니다.
+> 맥 로컬에서 Kind dev 클러스터로 K6 부하테스트 경로를 확보하는 과정에서 mTLS 403, JWT 경로 누락 403, Turnstile 봇 탐지 403이 순차로 터졌습니다. SSH 터널 NodePort 경유와 GitOps 정책 수정으로 첫 두 이슈를 해결했고, Turnstile은 서버 코드 수정이 필요한 TODO로 남겼습니다
 
 ---
 

@@ -19,7 +19,7 @@ date: "2026-04-04"
 
 ## 🎯 한 줄 요약
 
-> CDN 경유 테스트에서 모든 인증 API가 401. Istio RequestAuthentication에 하드코딩된 JWKS의 RSA public key가 실제 User 서비스 키와 달랐습니다. 19개 서비스 전부 오래된 키를 사용 중이었고, jwksUri 동적 조회도 STRICT mTLS에서 불가능했습니다.
+> CDN 경유 테스트에서 모든 인증 API가 401을 반환했습니다. Istio RequestAuthentication에 하드코딩된 JWKS의 RSA public key가 실제 User 서비스 키와 달랐기 때문입니다. 19개 서비스 전부 오래된 키를 사용 중이었고, jwksUri 동적 조회도 STRICT mTLS에서 불가능했습니다
 
 ## 📊 Impact
 

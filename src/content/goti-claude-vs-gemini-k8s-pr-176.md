@@ -1,6 +1,6 @@
 ---
 title: "Claude vs Gemini 리뷰 비교 — go-ti K8s PR #176 (9건 vs 4건)"
-excerpt: "queue-gate K8s 배포 + values 계층화 PR에서 Claude 3관점 병렬 리뷰는 9건(Blocker 2·Critical 2·Major 3·Minor 2)을, Gemini는 4건을 발견했습니다. Claude만 발견한 5건이 전부 아키텍처 일관성과 Multi-Cloud 맥락 이슈였습니다."
+excerpt: "queue-gate K8s 배포 + values 계층화 PR에서 Claude 3관점 병렬 리뷰는 9건(Blocker 2·Critical 2·Major 3·Minor 2)을, Gemini는 4건을 찾았습니다. Claude만 발견한 5건이 전부 아키텍처 일관성과 Multi-Cloud 맥락 이슈였습니다"
 category: challenge
 tags:
   - go-ti

@@ -1,6 +1,6 @@
 ---
 title: "OpenCost CrashLoopBackOff — Mimir의 /prometheus 경로 누락"
-excerpt: "Mimir는 Prometheus 호환 API를 /prometheus/api/v1/... 경로에 노출합니다. OpenCost가 이 prefix 없이 쿼리해 404로 반복 재시작한 사례."
+excerpt: "Mimir는 Prometheus 호환 API를 /prometheus/api/v1/... 경로에 노출합니다. OpenCost가 이 prefix 없이 쿼리해 404로 반복 재시작한 사례입니다"
 category: monitoring
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-06"
 
 ## 한 줄 요약
 
-> OpenCost가 Mimir query-frontend에 `PROMETHEUS_SERVER_ENDPOINT`를 붙여 쿼리하는데, Mimir는 `/prometheus` prefix 아래에 Prometheus 호환 API를 노출합니다. 이 prefix가 누락되어 404 FATAL로 CrashLoopBackOff가 약 150분간 지속됐습니다.
+> OpenCost가 Mimir query-frontend에 `PROMETHEUS_SERVER_ENDPOINT`를 붙여 쿼리하는데, Mimir는 `/prometheus` prefix 아래에 Prometheus 호환 API를 노출합니다. 이 prefix가 빠져 404 FATAL로 떨어지면서 CrashLoopBackOff가 약 150분간 이어졌습니다
 
 ## Impact
 

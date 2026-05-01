@@ -15,7 +15,7 @@ date: "2026-04-01"
 
 ## 🎯 한 줄 요약
 
-> Redis에 저장한 객체가 `LinkedHashMap`으로 돌아오고, 그걸 고치려다 ObjectMapper Bean을 오염시켜 API 응답까지 깨뜨린 Redis 직렬화 삽질 2부작.
+> Redis에 저장한 객체가 `LinkedHashMap`으로 돌아오는 문제를 고치려다 ObjectMapper Bean을 오염시켜 API 응답까지 깨뜨린 Redis 직렬화 삽질 2부작입니다
 
 ## 📊 Impact
 

@@ -16,7 +16,7 @@ date: "2026-04-03"
 
 ## 🎯 한 줄 요약
 
-> Queue POC smoke 테스트에서 티켓팅 성공률 0%. 대기열은 100% 통과했지만, Istio VirtualService의 `retryOn: 5xx` 설정이 POST 결제 API를 3번 호출하면서 모든 결제가 실패했습니다.
+> Queue POC smoke 테스트에서 티켓팅 성공률이 0%로 떨어졌습니다. 대기열은 100% 통과했지만, Istio VirtualService의 `retryOn: 5xx` 설정이 POST 결제 API를 3번 호출하면서 모든 결제가 실패했습니다
 
 ## 📊 Impact
 

@@ -1,6 +1,6 @@
 ---
 title: "PeerAuthentication selector 누락이 Prometheus scrape를 멈춘 경위 — 503→403 복합 트러블"
-excerpt: "Istio STRICT mTLS Phase 1 적용 중 PeerAuthentication portLevelMtls에 selector를 빠뜨려 Prometheus scrape가 503이 되었고, 수정 후에는 AuthorizationPolicy source identity 불일치로 403이 추가 발생한 복합 트러블슈팅 기록입니다."
+excerpt: "Istio STRICT mTLS Phase 1 적용 중 PeerAuthentication portLevelMtls에 selector를 빠뜨려 Prometheus scrape가 503이 됐습니다. 수정 후에는 AuthorizationPolicy source identity 불일치로 403이 추가로 떴던 복합 트러블슈팅 기록입니다"
 category: istio
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-08"
 
 ## 한 줄 요약
 
-> PeerAuthentication `portLevelMtls` 사용 시 `selector` 누락 → ArgoCD OutOfSync → Prometheus 503, 수정 후 sidecar 없는 Prometheus의 mTLS identity 부재로 AuthorizationPolicy가 403을 추가 반환한 2단계 트러블입니다.
+> PeerAuthentication `portLevelMtls` 사용 시 `selector` 누락 → ArgoCD OutOfSync → Prometheus 503. 수정 후에는 sidecar 없는 Prometheus의 mTLS identity 부재로 AuthorizationPolicy가 403을 추가 반환한 2단계 트러블입니다
 
 ---
 

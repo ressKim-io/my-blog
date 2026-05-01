@@ -1,6 +1,6 @@
 ---
 title: "VPC CNI IP 소진 — /24 서브넷과 max-pods=35 고정의 충돌"
-excerpt: "프로덕션 EKS에서 prefix delegation을 활성화했음에도 kubelet max-pods=35 고정으로 IP 할당이 실패했습니다. Bottlerocket TOML로 max-pods=110을 주입해 해결한 과정을 기록합니다."
+excerpt: "프로덕션 EKS에서 prefix delegation을 활성화했음에도 kubelet max-pods=35 고정 때문에 IP 할당이 실패했습니다. Bottlerocket TOML로 max-pods=110을 주입해 해결한 과정을 기록합니다"
 category: "kubernetes"
 tags:
   - go-ti

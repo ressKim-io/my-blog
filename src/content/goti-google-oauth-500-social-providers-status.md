@@ -1,6 +1,6 @@
 ---
 title: "Google OAuth 500 — social_providers.status 컬럼 누락 (prod RDS)"
-excerpt: "prod 환경 Google 소셜 로그인에서 500 에러. 원인은 Entity에 추가된 status 컬럼을 Hibernate ddl-auto가 추가하려 했지만 앱 유저가 테이블 owner가 아니라 ALTER 권한이 없었던 것. owner 계정으로 직접 DDL 실행해 해결했습니다."
+excerpt: "prod 환경 Google 소셜 로그인에서 500 에러가 발생했습니다. 원인은 Entity에 추가된 status 컬럼을 Hibernate ddl-auto가 추가하려 했지만 앱 유저가 테이블 owner가 아니라 ALTER 권한이 없었다는 점이었고, owner 계정으로 직접 DDL을 실행해 해결했습니다"
 category: challenge
 tags:
   - go-ti

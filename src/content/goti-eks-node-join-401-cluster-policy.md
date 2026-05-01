@@ -1,6 +1,6 @@
 ---
 title: "EKS 노드 조인 401 Unauthorized — AmazonEKSClusterPolicy 누락이 진짜 원인이었습니다"
-excerpt: "ASG 스케일다운 복원 후 10개 노드 전체가 클러스터에 조인하지 못한 장애. 네트워크·IAM 가설을 순서대로 배제하며 EKS authenticator 로그에서 AmazonEKSClusterPolicy 누락을 확정했습니다."
+excerpt: "ASG 스케일다운 복원 후 10개 노드 전체가 클러스터에 조인하지 못한 장애입니다. 네트워크·IAM 가설을 순서대로 배제하며 EKS authenticator 로그에서 AmazonEKSClusterPolicy 누락을 확정했습니다"
 category: "kubernetes"
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-07"
 
 ## 한 줄 요약
 
-> ASG를 0으로 스케일다운한 후 복원하자 신규 노드 10개가 모두 401 Unauthorized로 조인 실패. 원인은 EKS 클러스터 역할에서 `AmazonEKSClusterPolicy`가 Terraform state 누락으로 빠진 것이었습니다.
+> ASG를 0으로 스케일다운한 후 복원하자 신규 노드 10개가 모두 401 Unauthorized로 조인에 실패했습니다. 원인은 EKS 클러스터 역할에서 `AmazonEKSClusterPolicy`가 Terraform state 누락으로 빠진 것이었습니다
 
 ---
 

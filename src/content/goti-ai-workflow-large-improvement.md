@@ -1,6 +1,6 @@
 ---
 title: "AI 워크플로우 대규모 개선 — 89개 트러블슈팅 + 25개 리뷰 갭 분석"
-excerpt: "2개월간 축적된 89개 트러블슈팅 로그와 25개 Gemini vs Claude 리뷰 갭을 체계 분석해 Rules 3 신규 + 2 수정, Skills 5 신규 + 27 미사용 삭제, Agents 3 수정 + 5 DX/Platform 연결, Commands 2 신규를 수행했습니다."
+excerpt: "2개월간 축적된 89개 트러블슈팅 로그와 25개 Gemini vs Claude 리뷰 갭을 체계적으로 분석했습니다. Rules 3 신규 + 2 수정, Skills 5 신규 + 27 미사용 삭제, Agents 3 수정 + 5 DX·Platform 연결, Commands 2 신규를 수행한 기록입니다"
 category: challenge
 tags:
   - go-ti

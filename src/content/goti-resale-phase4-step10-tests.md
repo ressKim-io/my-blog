@@ -1,6 +1,6 @@
 ---
 title: "Resale Phase 4 Step 10 — 82건 테스트 작성과 코드 리뷰 피드백 반영"
-excerpt: "Goti-go Resale 마이그레이션의 마지막 단계로 단위·통합 테스트 82건을 작성했습니다. 코드 리뷰에서 매직넘버 불일치, CI 누락 가능 패턴, 경계값 오류, .gitignore 버그 4건을 발견하고 수정했습니다."
+excerpt: "Goti-go Resale 마이그레이션의 마지막 단계로 단위·통합 테스트 82건을 작성했습니다. 코드 리뷰에서 매직넘버 불일치·CI 누락 가능 패턴·경계값 오류·.gitignore 버그 4건을 찾아 수정했습니다"
 category: challenge
 tags:
   - go-ti
@@ -16,7 +16,7 @@ date: "2026-04-10"
 
 ## 한 줄 요약
 
-> Resale Phase 4의 마지막 Step(10)으로 단위 + 통합 테스트 4개 파일 82건을 완성했습니다. 코드 리뷰 Critical 1건·Major 2건·Minor 1건을 반영했고, `.gitignore` 패턴 오류로 서비스 디렉토리 전체가 git에서 무시될 뻔한 버그도 함께 수정했습니다.
+> Resale Phase 4의 마지막 Step(10)으로 단위·통합 테스트 4개 파일 82건을 완성했습니다. 코드 리뷰 Critical 1건·Major 2건·Minor 1건을 반영했고, `.gitignore` 패턴 오류로 서비스 디렉토리 전체가 git에서 무시될 뻔한 버그도 함께 잡아냈습니다
 
 ---
 

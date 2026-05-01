@@ -1,6 +1,6 @@
 ---
 title: "Phase 6 Ticketing 구현 — 58 Go 파일, N+1 제거, Redis Lua 재고 스크립트"
-excerpt: "Java Ticketing 서비스를 Go로 전면 재작성한 Phase 6 포팅 기록입니다. 33개 API, 18 DB 테이블, Redis 분산 락, 스케줄러 2개를 56파일·17커밋으로 구현하고 P0 5건·P1 7건을 즉시 수정했습니다."
+excerpt: "Java Ticketing 서비스를 Go로 전면 재작성한 Phase 6 포팅 기록입니다. 33개 API·18 DB 테이블·Redis 분산 락·스케줄러 2개를 56파일·17커밋으로 구현하고 P0 5건·P1 7건을 즉시 수정했습니다"
 category: challenge
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-10"
 
 ## 한 줄 요약
 
-> Java Ticketing 서비스를 Go로 완전 재작성했습니다. `game_seat_inventories` 집계 테이블 활용으로 잔여석 조회 대상을 30만 행에서 900행으로 줄이고, N+1 쿼리 5곳을 배치 조회로 전환했습니다.
+> Java Ticketing 서비스를 Go로 완전 재작성했습니다. `game_seat_inventories` 집계 테이블을 활용해 잔여석 조회 대상을 30만 행에서 900행으로 줄였고, N+1 쿼리 5곳을 배치 조회로 전환했습니다
 
 ---
 

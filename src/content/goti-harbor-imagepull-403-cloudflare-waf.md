@@ -1,6 +1,6 @@
 ---
 title: "Harbor ImagePull 403 — Cloudflare WAF가 containerd의 bottlerocket을 'bot'으로 차단"
-excerpt: "EKS에서 Harbor 이미지 pull 시 403 Forbidden. Cloudflare WAF가 User-Agent의 bottlerocket을 봇으로 오탐했고, Route53 Private Hosted Zone이 Cloudflare를 우회하게 만들고 있었습니다."
+excerpt: "EKS에서 Harbor 이미지 pull 시 403 Forbidden이 발생했습니다. Cloudflare WAF가 User-Agent의 bottlerocket을 봇으로 오탐했고, Route53 Private Hosted Zone이 Cloudflare를 우회하게 만들고 있었습니다"
 category: kubernetes
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-06"
 
 ## 한 줄 요약
 
-> EKS에서 Harbor 이미지 pull 시 403 Forbidden이 발생했습니다. 원인은 두 가지였습니다. Cloudflare WAF가 `containerd/2.1.6+bottlerocket` User-Agent의 `bot` 문자열을 봇으로 오탐해 차단했고, Route53 Private Hosted Zone이 `harbor.go-ti.shop`을 Cloudflare가 아닌 EC2 origin IP로 resolve하고 있었습니다.
+> EKS에서 Harbor 이미지 pull 시 403 Forbidden이 발생했습니다. 원인은 두 가지였습니다. Cloudflare WAF가 `containerd/2.1.6+bottlerocket` User-Agent의 `bot` 문자열을 봇으로 오탐해 차단했고, Route53 Private Hosted Zone이 `harbor.go-ti.shop`을 Cloudflare가 아닌 EC2 origin IP로 resolve하고 있었습니다
 
 ## Impact
 
