@@ -1,6 +1,6 @@
 ---
 title: "Phase 7 Go Readiness Audit — SDD 형태·게이트 수·컷오버 범위 결정 기록"
-excerpt: "컷오버를 앞두고 Java→Go 검증 단계(Phase 7)의 문서 형태, 8게이트 구조, prod 컷오버 범위를 두 차례 코드 리뷰를 거쳐 확정한 ADR입니다."
+excerpt: "컷오버를 앞두고 Java→Go 검증 단계(Phase 7)의 문서 형태·8게이트 구조·prod 컷오버 범위를 두 차례 코드 리뷰를 거쳐 확정한 ADR입니다"
 category: challenge
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-12"
 
 ## 한 줄 요약
 
-> SDD-lite(검증 중심 축소형) + Acceptance Gate 8개 + Audit-only 범위(prod 10% 드라이런까지)로 Phase 7 Go Readiness Audit 설계를 확정했습니다. 1차·2차 코드 리뷰에서 제기된 P0/P1 지적을 모두 반영한 결과입니다.
+> SDD-lite(검증 중심 축소형) + Acceptance Gate 8개 + Audit-only 범위(prod 10% 드라이런까지)로 Phase 7 Go Readiness Audit 설계를 확정했습니다. 1차·2차 코드 리뷰에서 제기된 P0·P1 지적을 모두 반영한 결과입니다
 
 ---
 

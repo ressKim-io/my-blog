@@ -1,6 +1,6 @@
 ---
 title: "Java→Go Cutover 잔존 이슈 4건 — DB 컬럼 불일치·쿠키 계약 위반"
-excerpt: "Phase 8 P0 배포 직후 smoke 중 발견된 4건 추가 트러블. DB 컬럼명·DTO 필드·refresh cookie 속성이 Java 계약과 어긋나 런타임에서야 표면화됐습니다."
+excerpt: "Phase 8 P0 배포 직후 smoke 중 발견된 4건 추가 트러블입니다. DB 컬럼명·DTO 필드·refresh cookie 속성이 Java 계약과 어긋나 런타임에서야 드러났습니다"
 category: challenge
 tags:
   - go-ti
@@ -16,7 +16,7 @@ date: "2026-04-13"
 
 ## 한 줄 요약
 
-> Phase 8 P0 배포(prod-13) 직후 smoke 재시도 중 4건의 추가 트러블이 발생했습니다. 모두 Java→Go 포팅 시 누락된 계약(DB 컬럼명, DTO 필드, cookie 속성)이 원인이었고, 런타임 호출 전에는 모두 silent한 유형이었습니다.
+> Phase 8 P0 배포(prod-13) 직후 smoke 재시도 중 4건의 추가 트러블이 발생했습니다. 모두 Java→Go 포팅 시 누락된 계약(DB 컬럼명·DTO 필드·cookie 속성)이 원인이었고, 런타임 호출 전에는 모두 silent했습니다
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Java → Go cutover 첫 스모크 — 46분 안에 만난 5가지 블로커"
-excerpt: "6서비스 전체 Go 전환 후 첫 cutover 스모크에서 OAuth 누락·PG DATE 타입 오류·viper 침묵·JSON 필드명 불일치·JWT issuer 불일치가 연쇄 발생했습니다. 모두 계약·설정 누락에서 비롯된 문제였습니다."
+excerpt: "6서비스 전체 Go 전환 후 첫 cutover 스모크에서 OAuth 누락·PG DATE 타입 오류·viper 침묵·JSON 필드명 불일치·JWT issuer 불일치가 연쇄로 터졌습니다. 모두 계약·설정 누락에서 비롯된 문제였습니다"
 category: challenge
 tags:
   - go-ti

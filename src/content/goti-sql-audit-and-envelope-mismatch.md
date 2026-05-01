@@ -1,6 +1,6 @@
 ---
 title: "SQL 전수 audit + 응답 envelope 불일치 — cutover 후속 5건"
-excerpt: "Java→Go cutover 후 마이페이지 500 다발 — SQL 컬럼/테이블/JOIN/envelope 5건을 잡고 29개 repository 전수 audit을 돌려 근본 개선 우선순위를 재정리했습니다."
+excerpt: "Java→Go cutover 후 마이페이지 500이 다발했습니다. SQL 컬럼·테이블·JOIN·envelope 5건을 잡고 29개 repository를 전수 audit해서 근본 개선 우선순위를 재정리했습니다"
 category: challenge
 tags:
   - go-ti
@@ -15,7 +15,7 @@ date: "2026-04-13"
 
 ## 한 줄 요약
 
-> Java→Go cutover 이후 마이페이지 진입 시 500이 다발했고, SQL 컬럼명·JOIN alias·응답 envelope 불일치 5건과 누락 테이블 2건을 수정한 뒤 29개 repository 파일을 전수 audit했습니다.
+> Java→Go cutover 이후 마이페이지 진입 시 500이 다발했습니다. SQL 컬럼명·JOIN alias·응답 envelope 불일치 5건과 누락 테이블 2건을 수정한 뒤 29개 repository 파일을 전수 audit했습니다
 
 ---
 

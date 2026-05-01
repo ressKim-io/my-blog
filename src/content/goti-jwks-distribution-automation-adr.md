@@ -1,6 +1,6 @@
 ---
 title: "JWKS 배포 자동화 (ADR) — Istio STRICT mTLS가 jwksUri를 막은 이유"
-excerpt: "각 Helm values에 inline 하드코딩된 JWKS를 자동화하려 했습니다. Istio STRICT mTLS 제약으로 jwksUri 옵션이 구조적으로 불가능해 GitHub Actions 자동화 PR(Option E)을 채택한 과정과 근거를 정리했습니다."
+excerpt: "각 Helm values에 inline 하드코딩된 JWKS를 자동화하려 했습니다. Istio STRICT mTLS 제약으로 jwksUri 옵션이 구조적으로 불가능해 GitHub Actions 자동화 PR(Option E)을 채택한 과정과 근거를 정리했습니다"
 category: istio
 tags:
   - go-ti

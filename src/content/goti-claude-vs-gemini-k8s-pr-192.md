@@ -1,6 +1,6 @@
 ---
 title: "Claude vs Gemini 리뷰 비교 — go-ti K8s PR #192 (11건 vs 5건, 반대 방향 1건 포함)"
-excerpt: "Phase 6.5 prod helm values PR에서 Claude 3관점 병렬 리뷰는 11건, Gemini Code Assist는 5건을 발견했습니다. 양쪽이 같은 라인을 지적했지만 방향이 반대인 케이스(FQDN 일관성) 2건이 나와 머지 전 사람이 최종 결정해야 했습니다."
+excerpt: "Phase 6.5 prod helm values PR에서 Claude 3관점 병렬 리뷰는 11건, Gemini Code Assist는 5건을 찾았습니다. 양쪽이 같은 라인을 짚었는데 방향이 반대인 케이스(FQDN 일관성) 2건이 나와 머지 전에 사람이 최종 결정을 내려야 했습니다"
 category: challenge
 tags:
   - go-ti

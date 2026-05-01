@@ -1,6 +1,6 @@
 ---
 title: "Phase6 Redis 재고 모델 설계 — Hot Path에서 DB UPDATE를 들어내다"
-excerpt: "grade당 1 row에 수백 명이 동시에 UPDATE를 쏟아붓는 구조를 Redis HINCRBY + Lua script로 옮기고, OrderCreate의 N+1 INSERT까지 BatchSave로 정리한 Phase 6-2 설계 기록입니다."
+excerpt: "grade당 1 row에 수백 명이 동시에 UPDATE를 쏟아붓는 구조를 Redis HINCRBY + Lua script로 옮기고, OrderCreate의 N+1 INSERT까지 BatchSave로 정리한 Phase 6-2 설계 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -19,7 +19,7 @@ date: "2026-04-11"
 
 ## 한 줄 요약
 
-> Hot path의 DB inventory UPDATE를 Redis HINCRBY로 옮기고, OrderCreate의 N+1 INSERT를 BatchSave로 정리했습니다. 좌석 정합성은 여전히 `seat_statuses`의 UNIQUE 제약이 담당하고, `game_seat_inventories`는 5초 주기로 Redis에서 DB로 비동기 동기화하는 파생 집계로 재정의했습니다.
+> Hot path의 DB inventory UPDATE를 Redis HINCRBY로 옮기고, OrderCreate의 N+1 INSERT를 BatchSave로 정리했습니다. 좌석 정합성은 여전히 `seat_statuses`의 UNIQUE 제약이 담당하고, `game_seat_inventories`는 5초 주기로 Redis에서 DB로 비동기 동기화하는 파생 집계로 재정의했습니다
 
 ---
 

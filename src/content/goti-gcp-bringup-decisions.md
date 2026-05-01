@@ -1,6 +1,6 @@
 ---
 title: "GCP prod-gcp bring-up 5가지 의사결정 — 안전 경로가 이긴 하루"
-excerpt: "AWS에서 GCP로 넘어가는 bring-up 작업 중 마주친 DNS, SSL, DB 마이그레이션, 모니터링, Quota 5가지 선택 지점. 각 결정의 트레이드오프와 실제로 고른 길을 정리했습니다."
+excerpt: "AWS에서 GCP로 넘어가는 bring-up 작업 중 마주친 DNS·SSL·DB 마이그레이션·모니터링·Quota 5가지 선택 지점입니다. 각 결정의 트레이드오프와 실제로 고른 길을 정리했습니다"
 category: challenge
 tags:
   - go-ti
@@ -20,7 +20,7 @@ date: "2026-04-14"
 
 ## 한 줄 요약
 
-> AWS → GCP 마이그레이션 bring-up 중 5개의 독립된 선택 지점에서 트레이드오프 판단이 필요했습니다. DNS 분리·SSL Flexible 유지·FK drop/recreate·모니터링 전체 off·Quota 48시간 대기를 선택한 이유와 그 근거를 기록했습니다.
+> AWS → GCP 마이그레이션 bring-up 중 5개의 독립된 선택 지점에서 트레이드오프 판단이 필요했습니다. DNS 분리·SSL Flexible 유지·FK drop/recreate·모니터링 전체 off·Quota 48시간 대기를 선택한 이유와 그 근거를 기록했습니다
 
 ---
 

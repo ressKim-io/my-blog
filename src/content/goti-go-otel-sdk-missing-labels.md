@@ -1,6 +1,6 @@
 ---
 title: "Go 전환 후 Grafana/Tempo/Mimir에서 OTel 라벨이 사라진 이유 — SDK 미초기화"
-excerpt: "Java 시절 OTel Operator가 자동 주입하던 리소스 라벨이 Go 전환 후 누락됐습니다. pkg/observability/가 비어있어 SDK 자체가 초기화되지 않은 것이 원인이었습니다."
+excerpt: "Java 시절 OTel Operator가 자동 주입하던 리소스 라벨이 Go 전환 후 누락됐습니다. pkg/observability/가 비어있어 SDK 자체가 초기화되지 않은 것이 원인이었습니다"
 category: monitoring
 tags:
   - go-ti

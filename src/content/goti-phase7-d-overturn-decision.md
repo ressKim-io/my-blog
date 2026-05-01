@@ -1,6 +1,6 @@
 ---
 title: "Phase 7 D 옵션 번복 — Phase 6.5 신설로 Go prod 인프라 갭을 해소하다"
-excerpt: "당일 오전에 채택한 Phase 7 D(audit 보여주기용 마감)를 오후에 번복하고, values가 Java 기준이라 Go pod 하나도 prod에 없다는 갭을 먼저 해소하기 위해 Phase 6.5를 신설한 결정 기록입니다."
+excerpt: "당일 오전에 채택한 Phase 7 D(audit 보여주기용 마감)를 오후에 번복했습니다. values가 Java 기준이라 Go pod 하나도 prod에 없다는 갭을 먼저 해소하려고 Phase 6.5를 신설한 결정 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-12"
 
 ## 한 줄 요약
 
-> 오전에 Phase 7 D 옵션(audit 설계 + ticketing-go PoC로 마감)을 채택했으나, helm values가 전부 Java 기준이어서 Go pod 하나도 prod에 존재하지 않는다는 사실을 인지한 뒤 같은 날 오후에 번복했습니다. Phase 6.5(Go 5서비스 prod 인프라 신설)를 먼저 완료해야 Phase 7 풀세트를 재개할 수 있습니다.
+> 오전에 Phase 7 D 옵션(audit 설계 + ticketing-go PoC로 마감)을 채택했지만, helm values가 전부 Java 기준이어서 Go pod 하나도 prod에 존재하지 않는다는 사실을 확인한 뒤 같은 날 오후에 번복했습니다. Phase 6.5(Go 5서비스 prod 인프라 신설)를 먼저 완료해야 Phase 7 풀세트를 재개할 수 있습니다
 
 ---
 

@@ -18,7 +18,7 @@ date: "2026-04-13"
 
 ## 한 줄 요약
 
-> Go cutover 직후 AWS EKS prod에 12노드(core 5 + spot 7)가 기동 중이었지만 실사용률이 매우 낮아 축소를 시도했습니다 과정에서 **CPU request 포화**와 **monitoring stack pod 편중**이라는 구조적 문제가 드러났고, Descheduler 로그가 "underutilized 노드가 없으면 evict 거부" 동작을 그대로 보여주며 오판을 교정해 줬습니다
+> Go cutover 직후 AWS EKS prod에 12노드(core 5 + spot 7)가 기동 중이었지만 실사용률이 매우 낮아 축소를 시도했습니다. 그 과정에서 **CPU request 포화**와 **monitoring stack pod 편중**이라는 구조적 문제가 드러났고, Descheduler 로그가 "underutilized 노드가 없으면 evict 거부" 동작을 그대로 보여주며 오판을 교정해 줬습니다
 
 ---
 

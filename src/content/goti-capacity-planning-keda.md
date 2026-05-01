@@ -18,7 +18,7 @@ date: "2026-04-12"
 
 ## 한 줄 요약
 
-> KEDA + Karpenter 적용 전에 pod 단위 처리 한계를 측정해 `targetAverageValue`를 산정하려 했습니다 실제 3000 VU / ticketing pod=2 부하에서 드러난 것은 ticketing 자체가 아닌 **Stadium 조회 API의 cascade 장애**였고(p95 6.8s, 5xx 10.88%), KEDA threshold 확정을 유보한 채 Stadium Go 전환을 P0로 돌렸습니다
+> KEDA + Karpenter 적용 전에 pod 단위 처리 한계를 측정해 `targetAverageValue`를 산정하려 했습니다. 실제 3000 VU / ticketing pod=2 부하에서 드러난 것은 ticketing 자체가 아닌 **Stadium 조회 API의 cascade 장애**였고(p95 6.8s, 5xx 10.88%), KEDA threshold 확정을 유보한 채 Stadium Go 전환을 P0로 돌렸습니다
 
 ---
 

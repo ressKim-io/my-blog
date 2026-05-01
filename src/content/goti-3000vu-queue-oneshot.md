@@ -1,6 +1,6 @@
 ---
 title: "3000VU Oneshot 부하테스트 — 대기열은 통과, 결제가 무너졌다"
-excerpt: "3000VU Oneshot 시나리오에서 대기열 통과율 100%였지만 실제 결제 성공률은 15.6%에 그쳤습니다. 병목이 큐가 아니라 결제 path에 있다는 사실이 드러난 검증 결과입니다."
+excerpt: "3000VU Oneshot 시나리오에서 대기열 통과율은 100%였지만 결제 성공률은 15.6%에 그쳤습니다. 병목이 큐가 아니라 결제 path에 있었음이 드러난 검증 결과입니다"
 category: challenge
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-04-14"
 
 ## 한 줄 요약
 
-> 3000VU Oneshot 부하테스트에서 `queue_pass_rate`는 100%를 기록했지만 `goti_ticket_success_rate`는 15.60%(468/3000)에 머물렀습니다. 병목은 대기열이 아니라 결제 path에 있었고, order create가 60초 timeout에 걸리면서 hold 만료 → 좌석 탈취 race가 연쇄적으로 발생했습니다.
+> 3000VU Oneshot 부하테스트에서 `queue_pass_rate`는 100%를 기록했지만 `goti_ticket_success_rate`는 15.60%(468/3000)에 머물렀습니다. 병목은 대기열이 아니라 결제 path에 있었고, order create가 60초 timeout에 걸리면서 hold 만료 → 좌석 탈취 race가 연쇄로 발생했습니다
 
 ## Impact
 

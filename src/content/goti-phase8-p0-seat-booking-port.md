@@ -1,6 +1,6 @@
 ---
 title: "Phase 8 P0 — Java 계약에 맞춰 좌석 예매 플로우를 Go로 포팅하다"
-excerpt: "Phase 7이 PAUSED 상태에서도 좌석 예매 8개 API의 계약 불일치를 먼저 해소해야 했습니다. 세션 forceNew, Redis key 통일, 좌석 등급 응답 envelope 신설 등 3커밋 6파일 변경의 구현 기록입니다."
+excerpt: "Phase 7이 PAUSED 상태에서도 좌석 예매 8개 API의 계약 불일치를 먼저 해소해야 했습니다. 세션 forceNew, Redis key 통일, 좌석 등급 응답 envelope 신설 등 3커밋 6파일 변경의 구현 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-13"
 
 ## 한 줄 요약
 
-> Phase 8은 cutover 후에만 진입하는 Java deprecation 단계지만, Phase 7이 PAUSED된 상황에서 좌석 예매 hotpath의 API 계약 불일치가 smoke를 막고 있었습니다. P0 6개 항목 중 구현 가능한 것부터 3커밋으로 먼저 해소했습니다.
+> Phase 8은 cutover 후에만 진입하는 Java deprecation 단계지만, Phase 7이 PAUSED된 상황에서 좌석 예매 hotpath의 API 계약 불일치가 smoke를 막고 있었습니다. P0 6개 항목 중 구현 가능한 것부터 3커밋으로 먼저 해소했습니다
 
 ---
 

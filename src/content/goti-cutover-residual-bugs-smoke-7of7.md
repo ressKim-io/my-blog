@@ -1,6 +1,6 @@
 ---
 title: "Java→Go Cutover 잔존 버그 4건 해결 — Smoke 7/7 완결편"
-excerpt: "Cutover 직후 33% 통과에서 출발해 TestUser 포팅, ArgoCD duplicate env, pgx interval 인코딩, smoke 경로 오정렬을 순서대로 잡아 100% 통과에 도달한 과정을 정리합니다."
+excerpt: "Cutover 직후 33% 통과에서 출발해 TestUser 포팅, ArgoCD duplicate env, pgx interval 인코딩, smoke 경로 오정렬을 순서대로 잡아 100% 통과에 도달한 과정을 정리합니다"
 category: challenge
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-04-14"
 
 ## 한 줄 요약
 
-> Cutover 다음 날, smoke 33% 통과 상태에서 4건의 잔존 버그를 순서대로 해결하고 7/7 전 항목 통과를 달성했습니다. 다만 이 완결편을 기록하는 시점(04-21)에도 Java→Go cutover는 미완료 상태로 프로젝트가 종료됐습니다.
+> Cutover 다음 날, smoke 33% 통과 상태에서 4건의 잔존 버그를 순서대로 해결하고 7/7 전 항목 통과를 달성했습니다. 다만 이 완결편을 기록하는 시점(04-21)에도 Java→Go cutover는 미완료 상태로 프로젝트가 종료됐습니다
 
 ---
 

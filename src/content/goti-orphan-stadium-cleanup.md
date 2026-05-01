@@ -1,6 +1,6 @@
 ---
 title: "고아 Stadium 경기 5건 정리 — inventory seed 갭 추적"
-excerpt: "Phase 8 P0 검증 중 future_games 610 vs inventory 605 갭을 발견해, 좌석 구조가 없는 고아 stadium 1건과 그 경기 5건을 트랜잭션 CTE 체인으로 정리한 기록입니다."
+excerpt: "Phase 8 P0 검증 중 future_games 610 vs inventory 605 갭을 발견했습니다. 좌석 구조가 없는 고아 stadium 1건과 그 경기 5건을 트랜잭션 CTE 체인으로 정리한 기록입니다"
 category: challenge
 tags:
   - go-ti
@@ -13,7 +13,7 @@ date: "2026-04-13"
 
 ## 한 줄 요약
 
-> `game_seat_inventories` seed 검증 중 future_games=610 vs games_with_inventory=605로 5건 불일치를 발견했고, 좌석 구조가 0인 고아 stadium 1건이 원인이었습니다. FK 자식 테이블 정리 후 단일 트랜잭션 CTE 체인으로 삭제해 605/605 무결성을 회복했습니다.
+> `game_seat_inventories` seed 검증 중 future_games=610 vs games_with_inventory=605로 5건 불일치를 발견했고, 좌석 구조가 0인 고아 stadium 1건이 원인이었습니다. FK 자식 테이블 정리 후 단일 트랜잭션 CTE 체인으로 삭제해 605/605 무결성을 회복했습니다
 
 ---
 
