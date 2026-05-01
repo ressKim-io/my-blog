@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 580" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 920px;">
+  <title id="t1">Sidecar vs Ambient 워터폴 트레이스 뷰 비교</title>
+  <desc id="d1">Sidecar 모드는 goti-gateway, user-service, ticketing-service 등 워크로드 이름이 워터폴 뷰에 정확히 표시되지만, Ambient 모드에서는 waypoint-proxy 이름이 자리를 차지하고 실제 워크로드 이름이 불완전하게 표시</desc>
+
+  <style><![CDATA[
+    .label   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 700; }
+    .span    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; fill: #0A0A0A; }
+    .meta    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .ok      { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #047857; }
+    .err     { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #BE123C; }
+  ]]></style>
+
+  <!-- ===== Sidecar 모드 ===== -->
+  <text x="40" y="32" class="label" fill="#047857">Sidecar 모드 워터폴 뷰 (정상)</text>
+
+  <!-- root span: goti-gateway -->
+  <rect x="40" y="48" width="840" height="200" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="60" y="72" class="span">┌─ goti-gateway</text>
+
+  <!-- user-service span -->
+  <rect x="80" y="84" width="380" height="76" rx="4" fill="#FAFAFA" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="100" y="108" class="span" fill="#0E7490">user-service</text>
+
+  <!-- nested PostgreSQL -->
+  <rect x="120" y="116" width="220" height="32" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="140" y="138" class="span" fill="#6D28D9">PostgreSQL query</text>
+
+  <!-- ticketing-service span -->
+  <rect x="80" y="172" width="780" height="68" rx="4" fill="#FAFAFA" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="100" y="192" class="span" fill="#0E7490">ticketing-service</text>
+
+  <!-- nested redis lock + pg -->
+  <rect x="120" y="200" width="240" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="140" y="220" class="span" fill="#BE123C">Redis distributed lock</text>
+
+  <rect x="380" y="200" width="320" height="28" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="220" class="span" fill="#6D28D9">PostgreSQL query</text>
+
+  <text x="880" y="68" text-anchor="end" class="ok">워크로드 이름 명확 ✓</text>
+
+  <!-- ===== Ambient 모드 ===== -->
+  <text x="40" y="304" class="label" fill="#BE123C">Ambient 모드 워터폴 뷰 (문제)</text>
+
+  <rect x="40" y="320" width="840" height="200" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="60" y="344" class="span">┌─ waypoint-proxy-xxxxx</text>
+
+  <rect x="80" y="356" width="380" height="76" rx="4" fill="#FAFAFA" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="100" y="380" class="span" fill="#BE123C">??? (workload name 불완전)</text>
+
+  <rect x="120" y="388" width="220" height="32" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="140" y="410" class="span" fill="#6D28D9">PostgreSQL query</text>
+
+  <rect x="80" y="444" width="780" height="68" rx="4" fill="#FAFAFA" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="100" y="464" class="span" fill="#BE123C">waypoint-proxy-yyyyy</text>
+
+  <rect x="120" y="472" width="220" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="140" y="492" class="span" fill="#BE123C">???</text>
+
+  <text x="880" y="340" text-anchor="end" class="err">workload name 불완전 ✗</text>
+</svg>

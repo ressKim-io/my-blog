@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t1">Overlay·ApplicationSet 기반 해결 구조</title>
+  <desc id="d1">Goti-k8s와 Goti-monitoring 두 레포에 environments(공통/AWS/GCP)와 overlays(AWS/GCP) 디렉터리를 두고, ArgoCD ApplicationSet의 cloud 파라미터로 클라우드별 values를 자동 선택하는 구조</desc>
+
+  <style><![CDATA[
+    .label   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .layer   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 13px; font-weight: 700; fill: #0A0A0A; }
+    .item    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; fill: #0A0A0A; }
+    .meta    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .note    { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; fill: #27272A; }
+  ]]></style>
+
+  <!-- Goti-k8s repo -->
+  <rect x="24" y="24" width="340" height="288" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="194" y="50" text-anchor="middle" class="label" fill="#047857">Goti-k8s/</text>
+
+  <text x="44" y="84" class="item">environments/</text>
+  <text x="64" y="106" class="item">├── prod/</text>
+  <text x="220" y="106" class="meta">(공통)</text>
+  <text x="64" y="128" class="item">├── prod-aws/</text>
+  <text x="220" y="128" class="meta">(AWS)</text>
+  <text x="64" y="150" class="item">└── prod-gcp/</text>
+  <text x="220" y="150" class="meta">(GCP)</text>
+
+  <text x="44" y="186" class="item">infrastructure/</text>
+  <text x="64" y="208" class="item">└── overlays/</text>
+  <text x="84" y="230" class="item">├── prod-aws/</text>
+  <text x="84" y="252" class="item">└── prod-gcp/</text>
+
+  <!-- Goti-monitoring repo -->
+  <rect x="396" y="24" width="340" height="288" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="566" y="50" text-anchor="middle" class="label" fill="#047857">Goti-monitoring/</text>
+
+  <text x="416" y="84" class="item">values-stacks/</text>
+  <text x="436" y="106" class="item">├── prod/</text>
+  <text x="592" y="106" class="meta">(공통)</text>
+  <text x="436" y="128" class="item">├── prod-aws/</text>
+  <text x="592" y="128" class="meta">(AWS)</text>
+  <text x="436" y="150" class="item">└── prod-gcp/</text>
+  <text x="592" y="150" class="meta">(GCP)</text>
+
+  <!-- ApplicationSet -->
+  <rect x="80" y="344" width="600" height="92" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="380" y="370" text-anchor="middle" class="label" fill="#6D28D9">ApplicationSet</text>
+  <text x="100" y="396" class="item">generator: cloud = [aws, gcp]</text>
+  <text x="100" y="418" class="item">template:  values-stacks/prod-{{cloud}}/</text>
+</svg>

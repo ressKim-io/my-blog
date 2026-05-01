@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">istiod JWKS fetch가 STRICT mTLS에 막히는 흐름</title>
+  <desc id="d1">istiod가 plain HTTP로 User Service의 JWKS 엔드포인트를 호출하는데, User Pod의 Envoy Sidecar가 STRICT mTLS를 요구하므로 connection reset이 발생해 User Service까지 도달하지 못함</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-x" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arr-l   { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .err     { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #BE123C; }
+    .note    { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; fill: #27272A; }
+    .arrow     { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+    .arrow-x   { stroke: #E11D48; stroke-width: 1.5; fill: none; stroke-dasharray: 4 3; marker-end: url(#arr-x); }
+  ]]></style>
+
+  <!-- istiod (cloud / amber) -->
+  <rect x="40" y="80" width="160" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="120" y="116" text-anchor="middle" class="label" fill="#B45309">istiod</text>
+  <text x="120" y="138" text-anchor="middle" class="meta">control plane</text>
+
+  <!-- arrow istiod -> Envoy -->
+  <line x1="200" y1="120" x2="320" y2="120" class="arrow"/>
+  <text x="260" y="108" text-anchor="middle" class="arr-l">plain HTTP</text>
+
+  <!-- Envoy Sidecar (security / rose) — STRICT mTLS -->
+  <rect x="320" y="56" width="240" height="160" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="440" y="84" text-anchor="middle" class="label" fill="#BE123C">Envoy Sidecar</text>
+  <text x="440" y="106" text-anchor="middle" class="meta">on User Pod</text>
+  <text x="340" y="138" class="err">STRICT mTLS 요구</text>
+  <text x="340" y="160" class="note">→ plain HTTP 거부</text>
+  <text x="340" y="180" class="err">connection reset</text>
+
+  <!-- arrow Envoy -> User Service (blocked) -->
+  <line x1="560" y1="136" x2="640" y2="136" class="arrow-x"/>
+  <text x="600" y="124" text-anchor="middle" class="err">차단</text>
+
+  <!-- User Service (backend / emerald) -->
+  <rect x="640" y="80" width="144" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="712" y="116" text-anchor="middle" class="label" fill="#047857">User Service</text>
+  <text x="712" y="138" text-anchor="middle" class="meta">JWKS 제공</text>
+
+  <text x="400" y="276" text-anchor="middle" class="note">istiod는 JWKS fetch 시 일반 HTTP 클라이언트로 동작 — mesh mTLS 인증서를 사용하지 않습니다</text>
+</svg>

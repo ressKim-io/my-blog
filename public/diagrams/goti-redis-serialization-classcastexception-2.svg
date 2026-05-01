@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">ObjectMapper Bean 충돌로 인한 HTTP 직렬화 실패</title>
+  <desc id="d1">Spring IoC 컨테이너에 jacksonObjectMapper(자동 설정)와 redisObjectMapper(@Bean) 두 개가 공존하면, @Primary와 @Qualifier가 없을 때 Spring MVC가 redisObjectMapper를 골라 HTTP 응답 직렬화에 사용해 ApiSuccessResponse 직렬화가 실패하는 흐름</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-r" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 700; }
+    .bean    { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 13px; font-weight: 600; }
+    .item    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; fill: #0A0A0A; }
+    .meta    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .err     { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #BE123C; }
+    .note    { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; fill: #27272A; }
+    .arrow   { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+    .arrow-r { stroke: #E11D48; stroke-width: 1.5; fill: none; marker-end: url(#arr-r); }
+  ]]></style>
+
+  <!-- IoC Container outer -->
+  <rect x="24" y="24" width="752" height="296" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="400" y="52" text-anchor="middle" class="label" fill="#6D28D9">Spring IoC Container — ObjectMapper Beans</text>
+
+  <!-- Bean 1: jacksonObjectMapper -->
+  <rect x="56" y="84" width="328" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="220" y="108" text-anchor="middle" class="bean" fill="#047857">jacksonObjectMapper (auto)</text>
+  <text x="76" y="136" class="note">Spring Boot 자동 설정</text>
+  <text x="76" y="160" class="item">- HTTP 요청/응답 직렬화</text>
+  <text x="76" y="180" class="item">- @RequestBody, @Response</text>
+
+  <!-- Bean 2: redisObjectMapper -->
+  <rect x="416" y="84" width="328" height="120" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="580" y="108" text-anchor="middle" class="bean" fill="#B45309">redisObjectMapper (@Bean)</text>
+  <text x="436" y="136" class="note">우리가 추가한 Bean</text>
+  <text x="436" y="160" class="item">- Redis 전용 설정</text>
+  <text x="436" y="180" class="item">- JavaTimeModule만 등록</text>
+
+  <!-- Note inside container -->
+  <text x="56" y="244" class="note">Spring MVC가 ObjectMapper 주입 시 — @Primary 없음 / @Qualifier 없음</text>
+  <text x="56" y="268" class="note">→ Bean 이름 매칭 또는 등록 순서로 결정</text>
+  <text x="56" y="292" class="err">→ redisObjectMapper가 선택될 수 있음</text>
+
+  <!-- arrow down to result -->
+  <line x1="400" y1="320" x2="400" y2="356" class="arrow-r"/>
+
+  <!-- Result -->
+  <rect x="80" y="368" width="640" height="180" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="396" text-anchor="middle" class="label" fill="#BE123C">결과 — HTTP 응답 직렬화에 redisObjectMapper 사용</text>
+
+  <text x="100" y="432" class="item">1. Spring MVC가 redisObjectMapper로 응답 객체 직렬화</text>
+  <line x1="400" y1="444" x2="400" y2="464" class="arrow-r"/>
+
+  <text x="100" y="484" class="item">2. ApiSuccessResponse 직렬화 실패 — 필요한 모듈 누락</text>
+  <line x1="400" y1="496" x2="400" y2="516" class="arrow-r"/>
+
+  <text x="100" y="536" class="err">3. 전체 API 500 에러</text>
+</svg>

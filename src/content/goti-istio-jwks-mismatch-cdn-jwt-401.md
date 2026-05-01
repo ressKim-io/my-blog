@@ -184,25 +184,7 @@ prod-gcp 5개도 마찬가지였습니다.
 
 ### 인증 흐름 전체 그림
 
-{/* TODO: Draw.io로 교체 */}
-
-```
-┌──────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐    ┌──────────┐
-│   K6     │───▶│ Cloudflare  │───▶│     ALB      │───▶│ Istio       │───▶│ App Pod  │
-│ (Client) │    │   CDN       │    │              │    │ Ingress GW  │    │          │
-└──────────┘    └─────────────┘    └──────────────┘    └──────┬──────┘    └──────────┘
-                                                              │
-                                                              ▼
-                                                     ┌──────────────┐
-                                                     │   Envoy      │
-                                                     │   Sidecar    │
-                                                     │              │
-                                                     │ ① JWT 파싱   │
-                                                     │ ② JWKS로     │
-                                                     │   서명 검증  │ ← 여기서 실패!
-                                                     │ ③ 401 반환   │   (오래된 public key)
-                                                     └──────────────┘
-```
+![JWT 인증 흐름 — JWKS 검증 실패 위치](/diagrams/goti-istio-jwks-mismatch-cdn-jwt-401-1.svg)
 
 Envoy sidecar가 JWT를 파싱하고, RequestAuthentication에 설정된 JWKS로 서명을 검증합니다.
 이때 JWKS의 public key가 실제 signing key와 다르면, 서명 검증이 실패하고 요청이 앱까지 도달하지 못합니다.
@@ -309,20 +291,7 @@ spec:
 이 설정이 문제를 만듭니다.
 istiod가 JWKS를 가져오는 흐름을 살펴보겠습니다.
 
-{/* TODO: Draw.io로 교체 */}
-
-```
-┌──────────┐    plain HTTP     ┌──────────────┐    ┌──────────────┐
-│  istiod  │──────────────────▶│ Envoy        │───▶│ User Service │
-│          │                   │ Sidecar      │    │ (JWKS 제공)  │
-└──────────┘                   │              │    └──────────────┘
-                               │ STRICT mTLS  │
-                               │ 요구!        │
-                               │              │
-                               │ → connection │
-                               │   reset      │
-                               └──────────────┘
-```
+![istiod JWKS fetch가 STRICT mTLS에 막히는 흐름](/diagrams/goti-istio-jwks-mismatch-cdn-jwt-401-2.svg)
 
 1. istiod가 User 서비스의 `/.well-known/jwks.json`에 **plain HTTP** 요청을 보냄
 2. User Pod의 Envoy sidecar가 이 요청을 가로챔

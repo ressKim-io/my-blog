@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 280" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 640px;">
+  <title id="t1">@Transactional 롤백 범위와 외부 호출의 한계</title>
+  <desc id="d1">Spring @Transactional은 로컬 payment DB 작업만 롤백할 수 있고, ticketing/order 같은 외부 서비스로의 HTTP 호출은 롤백 대상이 아니므로 외부 상태 변경이 그대로 남는다</desc>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .item  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; fill: #0A0A0A; }
+    .ok    { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #047857; }
+    .err   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #BE123C; }
+  ]]></style>
+
+  <!-- Outer scope box -->
+  <rect x="40" y="48" width="560" height="200" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="320" y="32" text-anchor="middle" class="label" fill="#047857">@Transactional 범위</text>
+
+  <!-- Row 1: payment DB -->
+  <rect x="64" y="72" width="240" height="48" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="80" y="102" class="item" fill="#6D28D9">payment DB 작업</text>
+  <text x="500" y="102" text-anchor="end" class="ok">롤백 가능 ✓</text>
+
+  <!-- Row 2: ticketing HTTP -->
+  <rect x="64" y="136" width="240" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="80" y="166" class="item" fill="#BE123C">ticketing HTTP 호출</text>
+  <text x="500" y="166" text-anchor="end" class="err">롤백 불가 ✗</text>
+
+  <!-- Row 3: order HTTP -->
+  <rect x="64" y="200" width="240" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="80" y="230" class="item" fill="#BE123C">order HTTP 호출</text>
+  <text x="500" y="230" text-anchor="end" class="err">롤백 불가 ✗</text>
+</svg>

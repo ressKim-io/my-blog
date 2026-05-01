@@ -120,23 +120,7 @@ Istio의 `attempts` 필드는 직관적이지 않습니다.
 
 #### 정상 흐름 (retry 없이)
 
-```
-Client → payment.initPayment() @Transactional
-           │
-           ├─ 1. ticketingOrderClient.confirmPayment()
-           │     → ticketing 서비스: 주문 상태를 PAID로 변경
-           │     → 200 OK
-           │
-           ├─ 2. orderClient.orderDetail()
-           │     → 주문 상세 정보 조회
-           │     → 200 OK
-           │
-           ├─ 3. 결제 정보 DB 저장
-           │
-           └─ commit → 200 OK
-```
-
-{/* TODO: Draw.io로 교체 */}
+![결제 정상 흐름 — retry 없이 4단계 commit](/diagrams/goti-istio-retry-duplicate-payment-1.svg)
 
 이 흐름에서 핵심은 **1번 단계에서 ticketing 서비스의 주문 상태가 PAID로 변경**된다는 점입니다.
 이 호출은 payment 서비스의 `@Transactional` 범위 안에 있지만, ticketing은 별도 서비스입니다.
@@ -144,46 +128,7 @@ HTTP를 통해 외부 서비스의 상태를 변경하는 것입니다.
 
 #### 장애 흐름 (retry 발생)
 
-```
-Client → Istio Sidecar → payment.initPayment() @Transactional
-                            │
-                            ├─ 1. ticketingOrderClient.confirmPayment()
-                            │     → ticketing: 주문 상태 PENDING → PAID ✅
-                            │     → 200 OK (외부 상태 이미 변경됨!)
-                            │
-                            ├─ 2. orderClient.orderDetail()
-                            │     → 실패 or 타임아웃 ❌
-                            │
-                            └─ @Transactional 롤백
-                               → payment DB: 롤백됨 ✅
-                               → ticketing: PAID 상태 유지 ⚠️ (롤백 안 됨!)
-                               → payment 500 반환
-
-         Istio: "500이네? retry하자"
-
-         Istio Sidecar → payment.initPayment() @Transactional  [Retry 1]
-                            │
-                            ├─ 1. ticketingOrderClient.confirmPayment()
-                            │     → ticketing: 이미 PAID 상태
-                            │     → 400 "결제 가능한 주문 상태가 아닙니다" ❌
-                            │
-                            └─ 예외 발생 → 500 반환
-
-         Istio: "또 500? 한 번 더"
-
-         Istio Sidecar → payment.initPayment() @Transactional  [Retry 2]
-                            │
-                            ├─ 1. ticketingOrderClient.confirmPayment()
-                            │     → ticketing: 여전히 PAID 상태
-                            │     → 400 "결제 가능한 주문 상태가 아닙니다" ❌
-                            │
-                            └─ 예외 발생 → 500 반환
-
-         Istio: "3번 다 실패. 포기."
-         Client ← 500 Internal Server Error
-```
-
-{/* TODO: Draw.io로 교체 */}
+![Istio retry로 인한 결제 중복 시도 흐름](/diagrams/goti-istio-retry-duplicate-payment-2.svg)
 
 이 다이어그램이 이 글의 핵심입니다. 하나씩 풀어보겠습니다.
 
@@ -224,16 +169,7 @@ Istio는 모든 retry를 소진하고 클라이언트에 500을 반환합니다.
 `@Transactional`은 로컬 데이터베이스에 대해서만 롤백을 보장합니다.
 HTTP로 호출한 외부 서비스의 상태 변경까지 롤백해주지 않습니다.
 
-```
-@Transactional 범위:
-  ┌──────────────────────────────────────┐
-  │  payment DB 작업     → 롤백 가능 ✅   │
-  │  ticketing HTTP 호출 → 롤백 불가 ❌   │
-  │  order HTTP 호출     → 롤백 불가 ❌   │
-  └──────────────────────────────────────┘
-```
-
-{/* TODO: Draw.io로 교체 */}
+![@Transactional 롤백 범위와 외부 호출의 한계](/diagrams/goti-istio-retry-duplicate-payment-3.svg)
 
 payment의 `@Transactional`이 롤백되면:
 - **payment DB**: 저장한 결제 정보가 롤백됩니다. 문제없습니다.

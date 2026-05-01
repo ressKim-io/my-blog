@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 580" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 720px;">
+  <title id="t1">Terraform·K8s manifest 레이어 호환성 격차</title>
+  <desc id="d1">Terraform IaC 레이어는 AWS/GCP가 각각 독립 구성되어 있지만, 그 위에서 동작하는 K8s manifest 레이어는 AWS 전용으로 하드코딩되어 GCP overlay가 없는 상태</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .layer   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 13px; font-weight: 700; fill: #0A0A0A; }
+    .meta    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .item    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; fill: #0A0A0A; }
+    .ok      { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 11px; fill: #047857; }
+    .warn    { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #B45309; }
+    .err     { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #BE123C; }
+    .arrow   { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Outer: Terraform layer -->
+  <rect x="24" y="24" width="672" height="200" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="40" y="48" class="layer" fill="#B45309">Terraform (IaC) 레이어</text>
+
+  <!-- prod-aws -->
+  <rect x="80" y="72" width="240" height="128" rx="6" fill="#FAFAFA" stroke="#475569" stroke-width="1.5"/>
+  <text x="200" y="96" text-anchor="middle" class="label" fill="#334155">prod-aws/</text>
+  <text x="200" y="118" text-anchor="middle" class="ok">✓ 독립 구성</text>
+  <text x="100" y="148" class="item">EKS</text>
+  <text x="100" y="168" class="item">RDS</text>
+  <text x="100" y="188" class="item">ElastiCache</text>
+
+  <!-- prod-gcp -->
+  <rect x="400" y="72" width="240" height="128" rx="6" fill="#FAFAFA" stroke="#475569" stroke-width="1.5"/>
+  <text x="520" y="96" text-anchor="middle" class="label" fill="#334155">prod-gcp/</text>
+  <text x="520" y="118" text-anchor="middle" class="ok">✓ 독립 구성</text>
+  <text x="420" y="148" class="item">GKE</text>
+  <text x="420" y="168" class="item">CloudSQL</text>
+  <text x="420" y="188" class="item">Memorystore</text>
+
+  <!-- arrows down to K8s layer -->
+  <line x1="200" y1="224" x2="200" y2="256" class="arrow"/>
+  <line x1="520" y1="224" x2="520" y2="256" class="arrow"/>
+
+  <!-- K8s Manifest Layer (problem zone) -->
+  <rect x="24" y="256" width="672" height="296" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="40" y="280" class="layer" fill="#BE123C">K8s Manifest 레이어</text>
+
+  <rect x="80" y="296" width="560" height="200" rx="6" fill="#FAFAFA" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="360" y="320" text-anchor="middle" class="warn">⚠ AWS 하드코딩</text>
+
+  <text x="100" y="356" class="item">StorageClass:  ebs.csi.aws.com</text>
+  <text x="100" y="380" class="item">Registry:      ECR (707925...)</text>
+  <text x="100" y="404" class="item">SecretStore:   aws-ssm</text>
+  <text x="100" y="428" class="item">Storage:       S3 backend</text>
+  <text x="100" y="452" class="item">SA Annotation: eks.amazonaws.com/role-arn</text>
+  <text x="100" y="476" class="item">OTel:          awss3 exporter</text>
+
+  <text x="360" y="528" text-anchor="middle" class="err">✗ GCP overlay 없음 — 한 벌의 manifest가 AWS 전용</text>
+</svg>

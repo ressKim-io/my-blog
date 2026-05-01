@@ -95,43 +95,7 @@ public class RedisConfig {
 
 이 설정의 유무가 Redis에 저장되는 JSON 구조를 완전히 바꿉니다.
 
-```
-{/* TODO: Draw.io로 교체 */}
-
-┌─────────────────────────────────────────────────────────┐
-│              activateDefaultTyping 미설정                 │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  [직렬화] ReservationSessionCache                        │
-│      ↓                                                  │
-│  Redis 저장: {"sessionId":"abc","seatId":42}             │
-│      ↓  (타입 정보 없음!)                                 │
-│  [역직렬화] 대상 타입을 모름                               │
-│      ↓                                                  │
-│  LinkedHashMap {sessionId=abc, seatId=42}                │
-│      ↓                                                  │
-│  clazz.cast() → ClassCastException 💥                   │
-│                                                         │
-├─────────────────────────────────────────────────────────┤
-│              activateDefaultTyping 설정                   │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  [직렬화] ReservationSessionCache                        │
-│      ↓                                                  │
-│  Redis 저장: {                                           │
-│    "@class": "com.goti...ReservationSessionCache",       │
-│    "sessionId": "abc",                                   │
-│    "seatId": 42                                          │
-│  }                                                      │
-│      ↓  (@class 타입 힌트 포함!)                          │
-│  [역직렬화] @class로 대상 타입 결정                        │
-│      ↓                                                  │
-│  ReservationSessionCache {sessionId=abc, seatId=42}      │
-│      ↓                                                  │
-│  clazz.cast() → 성공 ✅                                  │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+![activateDefaultTyping 유무에 따른 Redis 역직렬화 결과](/diagrams/goti-redis-serialization-classcastexception-1.svg)
 
 `GenericJackson2JsonRedisSerializer`는 이름에 "Generic"이 붙어있습니다.
 **모든 타입을 JSON으로 직렬화**할 수 있다는 뜻입니다.
@@ -264,39 +228,7 @@ public class RedisConfig {
 
 `@Bean ObjectMapper redisObjectMapper()`을 선언한 순간, Spring IoC 컨테이너에 ObjectMapper Bean이 **2개**가 됩니다.
 
-```
-{/* TODO: Draw.io로 교체 */}
-
-┌─────────────────────────────────────────────────────────┐
-│                 Spring IoC Container                     │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ObjectMapper Beans:                                    │
-│                                                         │
-│  ┌─────────────────────────────┐                        │
-│  │ jacksonObjectMapper (auto)  │ ← Spring Boot 자동 설정 │
-│  │ - HTTP 요청/응답 직렬화      │                        │
-│  │ - @RequestBody, @Response   │                        │
-│  └─────────────────────────────┘                        │
-│                                                         │
-│  ┌─────────────────────────────┐                        │
-│  │ redisObjectMapper (@Bean)   │ ← 우리가 추가한 Bean    │
-│  │ - Redis 전용 설정            │                        │
-│  │ - JavaTimeModule만 등록      │                        │
-│  └─────────────────────────────┘                        │
-│                                                         │
-│  Spring MVC가 ObjectMapper 주입 시:                      │
-│  → @Primary도 없고, @Qualifier도 없으면?                  │
-│  → Bean 이름 매칭 or 등록 순서에 따라 결정                 │
-│  → redisObjectMapper가 선택될 수 있음! 💥                 │
-│                                                         │
-│  결과:                                                   │
-│  HTTP 응답 직렬화에 redisObjectMapper 사용                │
-│  → ApiSuccessResponse 직렬화 실패                        │
-│  → 전체 API 500 에러                                     │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+![ObjectMapper Bean 충돌로 인한 HTTP 직렬화 실패](/diagrams/goti-redis-serialization-classcastexception-2.svg)
 
 Spring Boot는 `JacksonAutoConfiguration`으로 기본 ObjectMapper를 자동 설정합니다.
 여기에 우리가 `@Bean ObjectMapper`를 하나 더 등록하면 **충돌**이 발생합니다.

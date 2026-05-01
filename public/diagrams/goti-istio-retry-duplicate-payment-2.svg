@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 940" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 920px;">
+  <title id="t1">Istio retry로 인한 결제 중복 시도 흐름</title>
+  <desc id="d1">최초 호출에서 ticketing은 PAID로 바뀌었지만 orderDetail이 실패해 @Transactional 롤백이 발생. 그러나 ticketing 외부 상태는 PAID로 남아 두 번의 retry 모두 ticketing이 400을 반환하고 최종적으로 클라이언트는 500을 받음</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-r" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .item    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; fill: #0A0A0A; }
+    .ok      { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 11px; font-weight: 600; fill: #047857; }
+    .err     { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 11px; font-weight: 600; fill: #BE123C; }
+    .quote   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; font-style: italic; fill: #B45309; }
+    .stage   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 13px; font-weight: 700; fill: #0A0A0A; }
+    .arrow   { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+    .arrow-r { stroke: #E11D48; stroke-width: 1.5; fill: none; marker-end: url(#arr-r); }
+  ]]></style>
+
+  <!-- Stage 1: Initial (failure) -->
+  <text x="24" y="32" class="stage">① 최초 호출 — 실패로 종료</text>
+  <rect x="40" y="48" width="840" height="156" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="60" y="72" class="meta">Client → Istio Sidecar → payment.initPayment() @Transactional</text>
+  <text x="60" y="100" class="item">1. ticketingOrderClient.confirmPayment() → ticketing: PENDING → PAID</text>
+  <text x="640" y="100" class="ok">200 OK</text>
+  <text x="60" y="124" class="item">2. orderClient.orderDetail() → 실패 / 타임아웃</text>
+  <text x="640" y="124" class="err">실패</text>
+  <text x="60" y="148" class="item">@Transactional 롤백 → payment DB 롤백</text>
+  <text x="640" y="148" class="ok">payment DB ✓</text>
+  <text x="60" y="172" class="item">    하지만 ticketing 외부 상태는 PAID 유지</text>
+  <text x="640" y="172" class="err">ticketing ✗ 롤백 불가</text>
+  <text x="60" y="196" class="err">→ payment가 500 반환</text>
+
+  <!-- Istio decision -->
+  <text x="460" y="234" text-anchor="middle" class="quote">Istio: "500이네? retry 하자"</text>
+  <line x1="460" y1="244" x2="460" y2="268" class="arrow-r"/>
+
+  <!-- Stage 2: Retry 1 -->
+  <text x="24" y="288" class="stage">② Retry 1 — ticketing 이미 PAID, 400</text>
+  <rect x="40" y="304" width="840" height="124" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="60" y="328" class="meta">Istio Sidecar → payment.initPayment() @Transactional [Retry 1]</text>
+  <text x="60" y="356" class="item">1. ticketingOrderClient.confirmPayment() → ticketing: 이미 PAID</text>
+  <text x="60" y="380" class="err">→ 400 "결제 가능한 주문 상태가 아닙니다"</text>
+  <text x="60" y="408" class="err">→ 예외 발생 / 500 반환</text>
+
+  <text x="460" y="458" text-anchor="middle" class="quote">Istio: "또 500? 한 번 더"</text>
+  <line x1="460" y1="468" x2="460" y2="492" class="arrow-r"/>
+
+  <!-- Stage 3: Retry 2 -->
+  <text x="24" y="512" class="stage">③ Retry 2 — 결과 동일</text>
+  <rect x="40" y="528" width="840" height="124" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="60" y="552" class="meta">Istio Sidecar → payment.initPayment() @Transactional [Retry 2]</text>
+  <text x="60" y="580" class="item">1. ticketingOrderClient.confirmPayment() → ticketing: 여전히 PAID</text>
+  <text x="60" y="604" class="err">→ 400 "결제 가능한 주문 상태가 아닙니다"</text>
+  <text x="60" y="632" class="err">→ 예외 발생 / 500 반환</text>
+
+  <text x="460" y="682" text-anchor="middle" class="quote">Istio: "3번 다 실패. 포기."</text>
+  <line x1="460" y1="692" x2="460" y2="716" class="arrow-r"/>
+
+  <!-- Final result -->
+  <rect x="40" y="724" width="840" height="76" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="460" y="752" text-anchor="middle" class="label" fill="#6D28D9">결과</text>
+  <text x="460" y="780" text-anchor="middle" class="err">Client ← 500 Internal Server Error / 하나의 요청이 3번 실패로 기록</text>
+</svg>

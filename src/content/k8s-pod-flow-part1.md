@@ -251,21 +251,7 @@ real    0m2.145s  # ← 2초! (이미지 캐시 사용)
 
 ### [단계 5] 컨테이너 실행 (1초)
 
-```
-Container Runtime (containerd):
-1. 컨테이너 생성 (0.5초)
-   └─ 네임스페이스, Cgroup 설정
-   
-2. 네트워크 설정 (0.3초)
-   └─ CNI 플러그인 호출
-   └─ IP 할당 (예: 10.244.1.5)
-   
-3. 볼륨 마운트 (0.2초)
-   └─ ConfigMap, Secret 등
-   
-4. ENTRYPOINT 실행 (0.1초)
-   └─ nginx 프로세스 시작
-```
+![Container Runtime 컨테이너 실행 4단계](/diagrams/k8s-pod-flow-part1-1.svg)
 
 **Kubelet이 API Server에 상태 보고:**
 

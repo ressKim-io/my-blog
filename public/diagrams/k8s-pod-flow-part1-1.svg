@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 560" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 640px;">
+  <title id="t1">Container Runtime 컨테이너 실행 4단계</title>
+  <desc id="d1">containerd가 컨테이너를 만들고 실행하는 과정. 컨테이너 생성, 네트워크 설정, 볼륨 마운트, ENTRYPOINT 실행 4단계가 순차적으로 진행되며 총 1.1초가 소요</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .sub   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Header: Container Runtime (cloud/amber) -->
+  <rect x="120" y="24" width="400" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="320" y="48" text-anchor="middle" class="label" fill="#B45309">Container Runtime</text>
+  <text x="320" y="68" text-anchor="middle" class="meta">containerd</text>
+
+  <!-- arrow header -> step1 -->
+  <line x1="320" y1="80" x2="320" y2="112" class="arrow"/>
+
+  <!-- Step 1: 컨테이너 생성 (backend / emerald) -->
+  <rect x="80" y="112" width="480" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="100" y="138" class="label" fill="#047857">1. 컨테이너 생성</text>
+  <text x="540" y="138" text-anchor="end" class="meta">0.5초</text>
+  <text x="100" y="164" class="sub">└─ 네임스페이스, Cgroup 설정</text>
+
+  <!-- arrow 1 -> 2 -->
+  <line x1="320" y1="192" x2="320" y2="216" class="arrow"/>
+
+  <!-- Step 2: 네트워크 설정 (frontend / cyan) -->
+  <rect x="80" y="216" width="480" height="96" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="100" y="242" class="label" fill="#0E7490">2. 네트워크 설정</text>
+  <text x="540" y="242" text-anchor="end" class="meta">0.3초</text>
+  <text x="100" y="268" class="sub">└─ CNI 플러그인 호출</text>
+  <text x="100" y="288" class="sub">└─ IP 할당 (예: 10.244.1.5)</text>
+
+  <!-- arrow 2 -> 3 -->
+  <line x1="320" y1="312" x2="320" y2="336" class="arrow"/>
+
+  <!-- Step 3: 볼륨 마운트 (database / violet) -->
+  <rect x="80" y="336" width="480" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="100" y="362" class="label" fill="#6D28D9">3. 볼륨 마운트</text>
+  <text x="540" y="362" text-anchor="end" class="meta">0.2초</text>
+  <text x="100" y="388" class="sub">└─ ConfigMap, Secret 등</text>
+
+  <!-- arrow 3 -> 4 -->
+  <line x1="320" y1="416" x2="320" y2="440" class="arrow"/>
+
+  <!-- Step 4: ENTRYPOINT 실행 (backend / emerald) -->
+  <rect x="80" y="440" width="480" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="100" y="466" class="label" fill="#047857">4. ENTRYPOINT 실행</text>
+  <text x="540" y="466" text-anchor="end" class="meta">0.1초</text>
+  <text x="100" y="492" class="sub">└─ nginx 프로세스 시작</text>
+</svg>

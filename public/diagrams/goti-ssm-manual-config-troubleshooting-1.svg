@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 720px;">
+  <title id="t1">DB 접근 구조 수정 전후 비교</title>
+  <desc id="d1">수정 전에는 모든 서비스가 master 유저 goti로 RDS에 접근해 PII 테이블까지 무제한 노출되던 구조에서, 수정 후 서비스별 전용 유저(goti_payment_svc, goti_observer 등)로 분리해 observer는 SELECT만 허용하고 PII 5개 테이블 접근을 차단</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label   { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 14px; font-weight: 600; }
+    .meta    { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arr-l   { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .note    { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; fill: #27272A; }
+    .section { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 13px; font-weight: 700; fill: #0A0A0A; }
+    .arrow   { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- ===== Before ===== -->
+  <text x="24" y="24" class="section">수정 전 — 모든 서비스가 master 유저 공유</text>
+
+  <!-- payment-prod -->
+  <rect x="40" y="40" width="200" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="68" text-anchor="middle" class="label" fill="#047857">payment-prod</text>
+
+  <!-- observer -->
+  <rect x="40" y="104" width="200" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="132" text-anchor="middle" class="label" fill="#047857">observer</text>
+
+  <!-- 다른 서비스들 -->
+  <rect x="40" y="168" width="200" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="196" text-anchor="middle" class="label" fill="#047857">다른 서비스들</text>
+
+  <!-- arrows to RDS -->
+  <line x1="240" y1="64"  x2="488" y2="120" class="arrow"/>
+  <text x="364" y="56"  text-anchor="middle" class="arr-l">user=goti (master)</text>
+  <line x1="240" y1="128" x2="488" y2="128" class="arrow"/>
+  <text x="364" y="120" text-anchor="middle" class="arr-l">user=goti (master)</text>
+  <line x1="240" y1="192" x2="488" y2="136" class="arrow"/>
+  <text x="364" y="208" text-anchor="middle" class="arr-l">user=goti (master)</text>
+
+  <!-- RDS -->
+  <rect x="488" y="88" width="184" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="580" y="120" text-anchor="middle" class="label" fill="#6D28D9">RDS</text>
+  <text x="580" y="142" text-anchor="middle" class="meta">database: goti</text>
+
+  <!-- danger notes -->
+  <text x="40"  y="244" class="note" fill="#BE123C">▲ observer도 INSERT/DELETE 가능 — PII 테이블 무제한 접근</text>
+
+  <!-- divider -->
+  <line x1="24" y1="280" x2="696" y2="280" stroke="#D4D4D8" stroke-width="1"/>
+
+  <!-- ===== After ===== -->
+  <text x="24" y="312" class="section">수정 후 — 서비스별 전용 유저로 분리</text>
+
+  <!-- payment-prod -->
+  <rect x="40" y="328" width="200" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="356" text-anchor="middle" class="label" fill="#047857">payment-prod</text>
+
+  <!-- observer (SELECT only) -->
+  <rect x="40" y="392" width="200" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="416" text-anchor="middle" class="label" fill="#047857">observer</text>
+  <text x="140" y="438" text-anchor="middle" class="meta">SELECT only</text>
+
+  <!-- 다른 서비스들 -->
+  <rect x="40" y="472" width="200" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="500" text-anchor="middle" class="label" fill="#047857">다른 서비스들</text>
+
+  <!-- arrows to RDS -->
+  <line x1="240" y1="352" x2="488" y2="412" class="arrow"/>
+  <text x="364" y="344" text-anchor="middle" class="arr-l">user=goti_payment_svc</text>
+  <line x1="240" y1="424" x2="488" y2="424" class="arrow"/>
+  <text x="364" y="412" text-anchor="middle" class="arr-l">user=goti_observer (SELECT, PII 차단)</text>
+  <line x1="240" y1="496" x2="488" y2="436" class="arrow"/>
+  <text x="364" y="512" text-anchor="middle" class="arr-l">user=goti_*_svc</text>
+
+  <!-- RDS -->
+  <rect x="488" y="392" width="184" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="580" y="424" text-anchor="middle" class="label" fill="#6D28D9">RDS</text>
+  <text x="580" y="446" text-anchor="middle" class="meta">database: goti</text>
+
+  <!-- success notes -->
+  <text x="40" y="552" class="note" fill="#047857">✓ observer는 읽기만 가능 — PII 5개 테이블 접근 차단</text>
+</svg>
