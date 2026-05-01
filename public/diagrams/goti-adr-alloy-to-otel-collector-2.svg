@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 720" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t2">OTel Collector + Kafka 전면 버퍼링 (After)</title>
+  <desc id="d2">Spring Boot OTLP가 OTel Collector Front로 들어와 Metrics는 Mimir로 직접, Logs와 Traces는 각각 Kafka topic(observability.logs.v1, observability.traces.v1)에 적재. OTel Collector Back이 Kafka에서 소비해 tail sampling과 PII masking 후 Loki·Tempo로 전송. K8s 메트릭은 ServiceMonitor → Prometheus(kps) → remoteWrite → Mimir 별도 경로</desc>
+
+  <defs>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr2); }
+  ]]></style>
+
+  <!-- Spring Boot -->
+  <rect x="280" y="32" width="240" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="56" text-anchor="middle" class="label" fill="#047857">Spring Boot (OTel SDK)</text>
+  <text x="400" y="78" text-anchor="middle" class="meta">OTLP 4317 / 4318</text>
+
+  <line x1="400" y1="96" x2="400" y2="128" class="arrow"/>
+
+  <!-- OTel Collector Front (cloud / amber) -->
+  <rect x="120" y="128" width="560" height="100" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="156" text-anchor="middle" class="label" fill="#B45309">OTel Collector Front (Deployment, 1-2 replicas)</text>
+  <text x="200" y="184" text-anchor="middle" class="meta">Metrics</text>
+  <text x="400" y="184" text-anchor="middle" class="meta">Logs</text>
+  <text x="600" y="184" text-anchor="middle" class="meta">Traces</text>
+  <text x="400" y="208" text-anchor="middle" class="meta">표준 YAML 파이프라인 — 공식 contrib 자료 풍부</text>
+
+  <line x1="200" y1="228" x2="200" y2="276" class="arrow"/>
+  <line x1="400" y1="228" x2="400" y2="276" class="arrow"/>
+  <line x1="600" y1="228" x2="600" y2="276" class="arrow"/>
+
+  <!-- Mimir 직접 (database / violet) -->
+  <rect x="100" y="276" width="200" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="200" y="300" text-anchor="middle" class="label" fill="#6D28D9">Mimir (분산)</text>
+  <text x="200" y="322" text-anchor="middle" class="meta">prometheusremotewrite</text>
+  <text x="200" y="342" text-anchor="middle" class="meta">실시간 — Kafka 거치지 않음</text>
+
+  <!-- Kafka logs (database / violet) -->
+  <rect x="300" y="276" width="200" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="300" text-anchor="middle" class="label" fill="#6D28D9">Kafka topic</text>
+  <text x="400" y="322" text-anchor="middle" class="meta">observability.logs.v1</text>
+  <text x="400" y="342" text-anchor="middle" class="meta">디스크 버퍼 — 추가됨</text>
+
+  <!-- Kafka traces (database / violet) -->
+  <rect x="500" y="276" width="200" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="300" text-anchor="middle" class="label" fill="#6D28D9">Kafka topic</text>
+  <text x="600" y="322" text-anchor="middle" class="meta">observability.traces.v1</text>
+  <text x="600" y="342" text-anchor="middle" class="meta">디스크 버퍼 — 기존</text>
+
+  <!-- arrows down to Back -->
+  <path d="M 400 356 V 392 H 400" class="arrow"/>
+  <path d="M 600 356 V 380 H 400" class="arrow"/>
+
+  <!-- OTel Collector Back (cloud / amber) -->
+  <rect x="120" y="392" width="560" height="100" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="420" text-anchor="middle" class="label" fill="#B45309">OTel Collector Back (1-2 replicas)</text>
+  <text x="400" y="444" text-anchor="middle" class="meta">tail sampling · PII masking · 후처리</text>
+  <text x="400" y="468" text-anchor="middle" class="meta">Kafka 소비 → 백엔드 전송</text>
+
+  <line x1="320" y1="492" x2="320" y2="528" class="arrow"/>
+  <line x1="480" y1="492" x2="480" y2="528" class="arrow"/>
+
+  <!-- Loki (database / violet) -->
+  <rect x="220" y="528" width="200" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="320" y="552" text-anchor="middle" class="label" fill="#6D28D9">Loki (OTLP)</text>
+  <text x="320" y="572" text-anchor="middle" class="meta">로그 저장</text>
+
+  <!-- Tempo (database / violet) -->
+  <rect x="380" y="528" width="200" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="480" y="552" text-anchor="middle" class="label" fill="#6D28D9">Tempo</text>
+  <text x="480" y="572" text-anchor="middle" class="meta">트레이스 저장</text>
+
+  <!-- K8s metrics 별도 경로 (slate) -->
+  <rect x="40" y="624" width="720" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="400" y="648" text-anchor="middle" class="label" fill="#334155">K8s 메트릭 별도 경로</text>
+  <text x="400" y="670" text-anchor="middle" class="meta">ServiceMonitor / PodMonitor → Prometheus(kps) → remoteWrite → Mimir</text>
+</svg>

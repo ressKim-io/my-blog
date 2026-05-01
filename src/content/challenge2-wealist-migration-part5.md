@@ -343,7 +343,7 @@ replicas: 1
 
 ## 📚 Helm 기본 구조
 
-```
+```text
 wealist-chart/
 ├── Chart.yaml           # 차트 메타데이터
 ├── values.yaml          # 기본 설정값

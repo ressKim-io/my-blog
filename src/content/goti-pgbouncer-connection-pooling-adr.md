@@ -134,25 +134,7 @@ Phase 2 조건부 도입 트리거:
 
 ### 목표 아키텍처
 
-```text
-┌──────────┐   ┌──────────┐   ┌──────────┐
-│ ticketing│   │ stadium  │   │  user    │   (Go services)
-└─────┬────┘   └─────┬────┘   └─────┬────┘
-      │              │              │
-      └──────────────┼──────────────┘
-                     ▼
-            ┌─────────────────┐
-            │  PgBouncer      │  StatefulSet 2 replicas
-            │  session mode   │  default_pool_size = 25
-            │                 │  max_client_conn = 2000
-            └───┬─────────┬───┘
-         writes │         │ reads
-                ▼         ▼
-        ┌──────────┐  ┌──────────┐
-        │ Primary  │  │ Replica  │
-        │ RDS      │  │ RDS      │
-        └──────────┘  └──────────┘
-```
+![PgBouncer 도입 후 목표 연결 풀 아키텍처](/diagrams/goti-pgbouncer-connection-pooling-adr-1.svg)
 
 모든 Go 서비스가 단일 PgBouncer endpoint로 연결하면, PgBouncer가 내부적으로 write/read 트래픽을 Primary와 Replica로 각각 분산합니다.
 

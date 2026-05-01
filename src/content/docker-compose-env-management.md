@@ -22,7 +22,7 @@ date: '2025-11-15'
 
 ### 초기 구조
 
-```bash
+```text
 project-root/
 ├── user-service/
 │   ├── .env
@@ -76,7 +76,7 @@ project-root/
 
 ### 🏗️ 최종 구조
 
-```
+```text
 project-root/
 ├── docker/
 │   ├── compose/
@@ -260,52 +260,7 @@ $ ./docker/scripts/dev.sh up
 
 ### Before vs After 다이어그램
 
-**Before (환경변수 분산):**
-
-```
-┌─────────────────────────────────────────────┐
-│             Git Repository                   │
-├──────────────┬──────────────┬───────────────┤
-│ user-service │board-service │   frontend    │
-│   .env ❌    │   .env ❌    │   .env ❌     │
-│   .env.ex    │   .env.ex    │   .env.ex     │
-└──────────────┴──────────────┴───────────────┘
-         │              │              │
-         └──────────────┼──────────────┘
-                        │ 충돌!
-                        ▼
-              ┌─────────────────┐
-              │ docker-compose  │
-              │   어느 값?? 🤷  │
-              └─────────────────┘
-```
-
-**After (중앙 집중화):**
-
-```
-┌─────────────────────────────────────────────┐
-│             Git Repository                   │
-├──────────────┬──────────────┬───────────────┤
-│ user-service │board-service │   frontend    │
-│   (no .env)  │   (no .env)  │   (no .env)   │
-└──────────────┴──────────────┴───────────────┘
-                        │
-                        ▼
-              ┌─────────────────┐
-              │   docker/env/   │
-              │  .env.dev ✅    │
-              │  .env.ec2 ✅    │
-              │  .env.prod ✅   │
-              └────────┬────────┘
-                       │
-                       ▼
-              ┌─────────────────┐
-              │    scripts/     │
-              │   dev.sh        │
-              │   ec2-dev.sh    │
-              │   prod.sh       │
-              └─────────────────┘
-```
+![환경변수 관리 — 분산 구조와 중앙 집중화 비교](/diagrams/docker-compose-env-management-1.svg)
 
 ---
 

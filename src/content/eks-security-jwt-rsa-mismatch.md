@@ -114,23 +114,7 @@ public KeyPair rsaKeyPair() throws Exception {
 7. Pod B가 **Public Key B**로 검증을 시도합니다
 8. **서명 불일치로 검증 실패!**
 
-```
-┌──────────────────┐     JWT 발급 (Private Key A로 서명)
-│  auth-service    │─────────────────────────────────────────┐
-│  Pod A           │  KeyPair A (시작 시 생성)                │
-│  (Private Key A) │                                         │
-└──────────────────┘                                         │
-                                                             ▼
-                                                    사용자 브라우저
-                                                    (JWT 저장)
-                                                             │
-                                                             ▼
-┌──────────────────┐     API 요청 with JWT
-│  auth-service    │◀────────────────────────────────────────┘
-│  Pod B           │
-│  (Private Key B) │  ❌ Public Key B로 검증 → 실패!
-└──────────────────┘     (Public Key A가 아님)
-```
+![JWT RSA 키 Pod별 불일치로 검증 실패](/diagrams/eks-security-jwt-rsa-mismatch-1.svg)
 
 50% 확률로 실패하는 이유가 여기 있었습니다. 같은 Pod으로 요청이 가면 성공, 다른 Pod으로 가면 실패.
 
@@ -152,30 +136,7 @@ public KeyPair rsaKeyPair() throws Exception {
 
 모든 Pod이 동일한 RSA 키를 사용하도록 변경했습니다:
 
-```
-┌───────────────────────┐
-│  AWS Secrets Manager  │
-│  wealist/prod/app/    │
-│  jwt-rsa-keys         │──────────────────────┐
-│  {                    │                      │
-│    public_key: "...", │                      │
-│    private_key: "..." │                      │
-│  }                    │                      │
-└───────────────────────┘                      │
-                                               ▼
-                                  ┌────────────────────────┐
-                                  │   ExternalSecret       │
-                                  │   wealist-shared-secret│
-                                  └────────────────────────┘
-                                               │
-                          ┌────────────────────┼────────────────────┐
-                          ▼                    ▼                    ▼
-                 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-                 │  auth-service   │  │  auth-service   │  │  auth-service   │
-                 │  Pod A          │  │  Pod B          │  │  Pod C          │
-                 │  동일 키 사용 ✅ │  │  동일 키 사용 ✅ │  │  동일 키 사용 ✅ │
-                 └─────────────────┘  └─────────────────┘  └─────────────────┘
-```
+![RSA 키를 AWS Secrets Manager로 공유하는 해결 구조](/diagrams/eks-security-jwt-rsa-mismatch-2.svg)
 
 ### Step 1: RSA 키 쌍 생성
 

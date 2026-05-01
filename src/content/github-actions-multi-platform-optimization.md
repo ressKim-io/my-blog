@@ -58,7 +58,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ...
 
 ### 빌드 플로우
 
-```
+```text
 GitHub Actions
 ├── amd64 러너 (ubuntu-latest)
 │   └── GOARCH=amd64 빌드 → 네이티브 → 빠름 ✅

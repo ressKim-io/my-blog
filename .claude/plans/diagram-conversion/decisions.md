@@ -94,3 +94,44 @@
   - `istio-traffic-part4-retry-timeout.md` (1 평탄화) — Retry/Timeout 체크리스트
 
 **검증**: `npm run build` 통과 (459 static pages 생성, 31개 SVG 자산 누적)
+
+## Phase 3 — 중규모 그룹
+
+### G6+G7+G8 (challenge/cicd/monitoring 카테고리, 2026-05-01 완료)
+
+카테고리별 처리하되 `series:goti-pgbouncer`, `series:goti-kafka`, `series:challenge-2-wealist-migration`, `series:goti-observability-ops`, `series:goti-loadtest`, `series:observability`, `series:goti-metrics-collector`(G16~G18, G9, G14, G15, G21)의 글이 카테고리 그룹에 모두 포함되어 글 단위로 한 번 처리하면 시리즈 그룹도 함께 완료. Phase 1에서 이미 처리한 `goti-discord-alerting-architecture.md`는 제외.
+
+- 8개 SVG 추가 + 8개 트리/짧은 흐름 lang=text 명시
+- 처리 글:
+  - `docker-compose-env-management.md` (1 SVG + 2 tree text) — Before/After 환경변수 분산·중앙집중 비교
+  - `go-dependency-genproto-conflict.md` (1 tree text)
+  - `goti-pgbouncer-connection-pooling-adr.md` (1 SVG) — PgBouncer RW/RO 분리 + Primary/Replica 분기
+  - `goti-kafka-adoption-decision-adr.md` (이미 lang=text)
+  - `challenge2-wealist-migration-part5.md` (1 tree text)
+  - `challenge2-wealist-migration-part3.md` (1 tree text)
+  - `multi-repo-cicd-strategy.md` (1 SVG + 4 tree text + 1 markdown 표 평탄화) — K8s GitOps 레포 구조
+  - `github-actions-multi-platform-optimization.md` (1 tree text)
+  - `goti-adr-alloy-to-otel-collector.md` (2 SVG) — Before(Alloy)와 After(OTel + Kafka 전면 버퍼링)
+  - `goti-otel-agent-otlp-protocol-mismatch.md` (1 SVG) — goti namespace 4 데이터소스 파이프라인
+  - `otel-monitoring-v3.md` (1 SVG) — OTel Collector Gateway 패턴 (Receivers/Connectors/Exporters)
+  - `goti-synthetic-traffic.md` (1 SVG + 1 tree text) — CronJob synthetic-traffic + sidecar mTLS
+  - `goti-kafka-buffered-otel-pipeline.md` (이미 lang=text)
+  - `goti-metrics-collector-go-sidecar.md` (1 짧은 흐름 lang=text)
+
+**적용 패턴(추가)**:
+- 카테고리 vs 시리즈 중복 — inventory.json은 같은 글을 카테고리·시리즈 모두에 등록하므로 글 단위로 처리해 그룹별 commit 충돌 회피
+- 짧은 인라인 흐름(6~8줄) — SVG 가치보다 lang=text 명시가 비용 효율적
+- ADR Before/After 다이어그램 — 같은 슬롯에 두 SVG를 만들고 한쪽은 "위 다이어그램 참조"로 텍스트 안내해 중복 시각화 회피
+
+### G10+G11+G12 (multicloud-db/queue-poc/eks-security, 2026-05-01 완료)
+
+- 5개 SVG 추가 + 2개 트리 lang=text 유지
+- 처리 글:
+  - `goti-db-active-passive-with-read-split-adr.md` (1 SVG) — GCP primary + AWS subscriber 다중 클라우드 토폴로지
+  - `goti-db-failback-reverse-replication-adr.md` (이미 lang=text)
+  - `goti-multicloud-db-replication-technology-adr.md` (이미 lang=text)
+  - `queue-poc-loadtest-part1-design.md` (1 SVG) — 공유 ticketing pod 충돌 (A/C 세션 검증 불일치)
+  - `queue-poc-loadtest-part3-selection.md` (1 SVG) — B vs A 확장 부하 곡선 비교
+  - `eks-security-jwt-rsa-mismatch.md` (2 SVG) — Pod별 RSA 키 불일치 / Secrets Manager 공유 해결
+
+**검증**: `npm run build` 통과 (459 static pages 생성, 44개 SVG 자산 누적)

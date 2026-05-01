@@ -56,7 +56,7 @@ ambiguous import: found package google.golang.org/genproto/googleapis/api/httpbo
 
 ### board-service 의존성 체인 분석
 
-```
+```text
 gopter v0.2.11 (property-based testing)
   └── goconvey v1.8.1
       └── gopherjs v1.17.2

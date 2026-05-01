@@ -17,15 +17,15 @@
 - [x] **G4.** `series:istio-observability` — 2편 / 5블록 / 127줄 (2026-05-01 완료)
 - [x] **G5.** `series:istio-traffic` — 3편 / 5블록 / 112줄 (2026-05-01 완료)
 
-## Phase 3 — 중규모 그룹 G6~G12 (대기, 13편/24블록/420줄)
+## Phase 3 — 중규모 그룹 G6~G12 (완료)
 
-- [ ] **G6.** `cat:challenge` — 2편 / 5블록 / 85줄
-- [ ] **G7.** `cat:cicd` — 2편 / 7블록 / 73줄
-- [ ] **G8.** `cat:monitoring` — 1편 / 3블록 / 71줄
-- [ ] **G9.** `series:goti-observability-ops` — 2편 / 2블록 / 60줄
-- [ ] **G10.** `series:goti-multicloud-db` — 3편 / 3블록 / 56줄
-- [ ] **G11.** `series:queue-poc-loadtest` — 2편 / 2블록 / 38줄
-- [ ] **G12.** `series:eks-security` — 1편 / 2블록 / 37줄
+- [x] **G6.** `cat:challenge` — 2편 / 5블록 / 85줄 (2026-05-01 완료, 시리즈 중복 글 G16/G17/G18 통합 처리)
+- [x] **G7.** `cat:cicd` — 2편 / 7블록 / 73줄 (2026-05-01 완료)
+- [x] **G8.** `cat:monitoring` — 1편 / 3블록 / 71줄 (2026-05-01 완료, G9/G14/G15/G21 통합 처리)
+- [x] **G9.** `series:goti-observability-ops` — 2편 / 2블록 / 60줄 (G8 통합 완료)
+- [x] **G10.** `series:goti-multicloud-db` — 3편 / 3블록 / 56줄 (2026-05-01 완료)
+- [x] **G11.** `series:queue-poc-loadtest` — 2편 / 2블록 / 38줄 (2026-05-01 완료)
+- [x] **G12.** `series:eks-security` — 1편 / 2블록 / 37줄 (2026-05-01 완료)
 
 ## Phase 4 — 소규모 그룹 G13~G21 (대기, 11편/12블록/155줄)
 

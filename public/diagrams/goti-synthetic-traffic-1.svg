@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">합성 트래픽 CronJob 아키텍처와 mTLS 호출 흐름</title>
+  <desc id="d1">CronJob synthetic-traffic은 매 5분 4분 duration으로 실행되며, 같은 Pod 내 K6 VU 컨테이너와 istio-proxy sidecar가 함께 동작. K6의 모든 요청이 sidecar를 통해 mTLS로 암호화되어 goti-ticketing/goti-user/goti-stadium 3개 서비스에 도달. STRICT mTLS 환경이라 sidecar 없이는 연결 차단</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- CronJob container (cloud / amber) -->
+  <rect x="160" y="40" width="480" height="160" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="68" text-anchor="middle" class="label" fill="#B45309">CronJob: synthetic-traffic</text>
+  <text x="400" y="88" text-anchor="middle" class="meta">schedule: */5 * * * * · duration: 4분</text>
+
+  <!-- K6 inside -->
+  <rect x="200" y="112" width="180" height="72" rx="6" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="290" y="138" text-anchor="middle" class="meta" fill="#0A0A0A">K6 (VU)</text>
+  <text x="290" y="158" text-anchor="middle" class="meta">시나리오 실행</text>
+  <text x="290" y="174" text-anchor="middle" class="meta">JWT 발급 (setup)</text>
+
+  <line x1="380" y1="148" x2="420" y2="148" class="arrow"/>
+
+  <!-- istio-proxy sidecar (security / rose) -->
+  <rect x="420" y="112" width="180" height="72" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="510" y="138" text-anchor="middle" class="meta" fill="#BE123C">istio-proxy (sidecar)</text>
+  <text x="510" y="158" text-anchor="middle" class="meta">STRICT mTLS</text>
+  <text x="510" y="174" text-anchor="middle" class="meta">SA: k6-synthetic</text>
+
+  <!-- arrow from sidecar to goti namespace -->
+  <line x1="510" y1="200" x2="510" y2="232" class="arrow"/>
+  <text x="522" y="220" class="arrlbl">mTLS 암호화</text>
+
+  <!-- goti namespace -->
+  <rect x="40" y="232" width="720" height="200" rx="8" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="56" y="256" class="meta" fill="#475569">goti namespace · AuthorizationPolicy: allow-k6-synthetic</text>
+
+  <!-- arrows to 3 services -->
+  <path d="M 510 232 V 280 H 160 V 308" class="arrow"/>
+  <line x1="510" y1="232" x2="400" y2="280" class="arrow"/>
+  <path d="M 400 280 V 308" class="arrow"/>
+  <path d="M 510 232 V 280 H 640 V 308" class="arrow"/>
+
+  <!-- 3 backend services (backend / emerald) -->
+  <rect x="80" y="308" width="160" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="160" y="334" text-anchor="middle" class="label" fill="#047857">goti-ticketing</text>
+  <text x="160" y="356" text-anchor="middle" class="meta">port 8080</text>
+
+  <rect x="320" y="308" width="160" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="334" text-anchor="middle" class="label" fill="#047857">goti-user</text>
+  <text x="400" y="356" text-anchor="middle" class="meta">port 8080</text>
+
+  <rect x="560" y="308" width="160" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="640" y="334" text-anchor="middle" class="label" fill="#047857">goti-stadium</text>
+  <text x="640" y="356" text-anchor="middle" class="meta">port 8080</text>
+
+  <text x="400" y="412" text-anchor="middle" class="meta">sidecar 없으면 STRICT mTLS에 의해 연결 차단됨 — 반드시 inject 필요</text>
+</svg>

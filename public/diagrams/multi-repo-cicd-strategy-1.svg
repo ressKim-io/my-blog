@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">Kubernetes로 확장한 GitOps 레포지토리 구조</title>
+  <desc id="d1">user/board/chat 3개 서비스 레포가 각각 이미지를 빌드해 GHCR로 푸시하고, 별도 k8s-infra 매니페스트 레포는 ArgoCD가 watch하여 변경 사항을 Kubernetes 클러스터로 sync. 앱 레포와 인프라 레포의 역할이 분리되어 있어 도구만 EC2 → K8s로 바뀌고 패턴은 동일</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Top: Git Repositories container -->
+  <rect x="32" y="40" width="736" height="120" rx="8" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="48" y="64" class="meta" fill="#475569">Git Repositories</text>
+
+  <!-- 3 app repos (backend / emerald) -->
+  <rect x="56" y="80" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="104" text-anchor="middle" class="label" fill="#047857">user-service</text>
+  <text x="136" y="124" text-anchor="middle" class="meta">app repo</text>
+
+  <rect x="232" y="80" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="312" y="104" text-anchor="middle" class="label" fill="#047857">board-service</text>
+  <text x="312" y="124" text-anchor="middle" class="meta">app repo</text>
+
+  <rect x="408" y="80" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="488" y="104" text-anchor="middle" class="label" fill="#047857">chat-service</text>
+  <text x="488" y="124" text-anchor="middle" class="meta">app repo</text>
+
+  <!-- k8s-infra repo (database / violet) -->
+  <rect x="584" y="80" width="160" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="664" y="104" text-anchor="middle" class="label" fill="#6D28D9">k8s-infra</text>
+  <text x="664" y="124" text-anchor="middle" class="meta">manifests</text>
+
+  <!-- arrows: 3 app repos -> registry -->
+  <path d="M 136 144 V 200 H 280 V 248" class="arrow"/>
+  <path d="M 312 144 V 248" class="arrow"/>
+  <path d="M 488 144 V 200 H 280 V 248" class="arrow"/>
+  <text x="208" y="196" class="arrlbl">Build &amp; Push</text>
+
+  <!-- arrow: k8s-infra -> ArgoCD -->
+  <line x1="664" y1="144" x2="664" y2="248" class="arrow"/>
+  <text x="676" y="196" class="arrlbl">ArgoCD watches</text>
+
+  <!-- Container Registry (cloud / amber) -->
+  <rect x="56" y="248" width="448" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="280" y="272" text-anchor="middle" class="label" fill="#B45309">Container Registry (GHCR)</text>
+  <text x="280" y="294" text-anchor="middle" class="meta">user:v1.2.3 / board:v2.1.0 / chat:v1.0.5</text>
+  <text x="280" y="314" text-anchor="middle" class="meta">이미지 태그 단위로 버전 추적</text>
+
+  <!-- ArgoCD (cloud / amber) -->
+  <rect x="544" y="248" width="240" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="664" y="272" text-anchor="middle" class="label" fill="#B45309">ArgoCD</text>
+  <text x="664" y="294" text-anchor="middle" class="meta">3분마다 sync</text>
+  <text x="664" y="314" text-anchor="middle" class="meta">변경 자동 감지 → 적용</text>
+
+  <!-- arrows -> Kubernetes -->
+  <path d="M 280 328 V 372 H 400 V 408" class="arrow"/>
+  <path d="M 664 328 V 372 H 400 V 408" class="arrow"/>
+
+  <!-- Kubernetes -->
+  <rect x="240" y="408" width="320" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="432" text-anchor="middle" class="label" fill="#6D28D9">Kubernetes Cluster</text>
+  <text x="400" y="452" text-anchor="middle" class="meta">Rolling Update — 무중단 배포</text>
+</svg>

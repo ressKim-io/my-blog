@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">OTel Collector Gateway 패턴 — Receivers·Connectors·Exporters 구성</title>
+  <desc id="d1">Go Services가 OTLP Exporter로 OTel Collector v0.114.0에 트레이스 전송. Collector 내부에서 otlp receiver가 받고 spanmetrics·servicegraph connector로 메트릭/그래프 생성, otlp/tempo·prometheusremotewrite exporter로 분기 송신. 백엔드는 Tempo v2.9.0(트레이스), Prometheus v2.47+(메트릭), Grafana v10.x(시각화)</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Go Services (backend / emerald) -->
+  <rect x="32" y="160" width="160" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="112" y="188" text-anchor="middle" class="label" fill="#047857">Go Services</text>
+  <text x="112" y="210" text-anchor="middle" class="meta">OTLP Exporter</text>
+
+  <line x1="192" y1="200" x2="232" y2="200" class="arrow"/>
+
+  <!-- OTel Collector (cloud / amber) - 3 sub-boxes -->
+  <rect x="232" y="80" width="336" height="240" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="106" text-anchor="middle" class="label" fill="#B45309">OTel Collector v0.114.0</text>
+
+  <rect x="248" y="120" width="304" height="56" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="264" y="142" class="meta">Receivers</text>
+  <text x="264" y="160" class="meta">  - otlp</text>
+
+  <rect x="248" y="184" width="304" height="56" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="264" y="206" class="meta">Connectors</text>
+  <text x="264" y="224" class="meta">  - spanmetrics / servicegraph</text>
+
+  <rect x="248" y="248" width="304" height="56" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="264" y="270" class="meta">Exporters</text>
+  <text x="264" y="288" class="meta">  - otlp/tempo / prometheusremotewrite</text>
+
+  <!-- arrows out -->
+  <path d="M 568 200 H 600 V 380" class="arrow"/>
+  <path d="M 568 220 H 600" class="arrow"/>
+  <line x1="568" y1="276" x2="600" y2="276" class="arrow"/>
+
+  <!-- Tempo (database / violet) -->
+  <rect x="600" y="120" width="160" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="680" y="144" text-anchor="middle" class="label" fill="#6D28D9">Tempo v2.9.0</text>
+  <text x="680" y="166" text-anchor="middle" class="meta">Traces</text>
+
+  <!-- Prometheus (database / violet) -->
+  <rect x="600" y="244" width="160" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="680" y="268" text-anchor="middle" class="label" fill="#6D28D9">Prometheus v2.47+</text>
+  <text x="680" y="290" text-anchor="middle" class="meta">Metrics</text>
+
+  <!-- arrows down to Grafana -->
+  <path d="M 680 184 V 380 H 400 V 412" class="arrow"/>
+  <path d="M 680 308 V 380 H 400 V 412" class="arrow"/>
+
+  <!-- Grafana (frontend / cyan) -->
+  <rect x="280" y="412" width="240" height="56" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="436" text-anchor="middle" class="label" fill="#0E7490">Grafana v10.x</text>
+  <text x="400" y="456" text-anchor="middle" class="meta">Dashboard 시각화</text>
+</svg>

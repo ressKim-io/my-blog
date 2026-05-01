@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 480" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 760px;">
+  <title id="t1">PgBouncer 도입 후 목표 연결 풀 아키텍처</title>
+  <desc id="d1">ticketing/stadium/user 등 Go 서비스가 모두 PgBouncer StatefulSet 2 replicas로 연결하고 PgBouncer가 session mode·default_pool_size 25·max_client_conn 2000으로 다중화. 내부에서 write 트래픽은 Primary RDS로 read 트래픽은 Replica RDS로 분기</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Go services row (backend / emerald) -->
+  <rect x="64" y="40" width="180" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="154" y="64" text-anchor="middle" class="label" fill="#047857">ticketing</text>
+  <text x="154" y="84" text-anchor="middle" class="meta">Go service</text>
+
+  <rect x="290" y="40" width="180" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="380" y="64" text-anchor="middle" class="label" fill="#047857">stadium</text>
+  <text x="380" y="84" text-anchor="middle" class="meta">Go service</text>
+
+  <rect x="516" y="40" width="180" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="606" y="64" text-anchor="middle" class="label" fill="#047857">user</text>
+  <text x="606" y="84" text-anchor="middle" class="meta">Go service</text>
+
+  <!-- arrows down to PgBouncer -->
+  <path d="M 154 104 V 144 H 380" class="arrow"/>
+  <line x1="380" y1="104" x2="380" y2="184" class="arrow"/>
+  <path d="M 606 104 V 144 H 380" class="arrow"/>
+
+  <!-- PgBouncer (cloud / amber) -->
+  <rect x="200" y="184" width="360" height="120" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="380" y="212" text-anchor="middle" class="label" fill="#B45309">PgBouncer</text>
+  <text x="380" y="234" text-anchor="middle" class="meta">StatefulSet 2 replicas</text>
+  <text x="380" y="254" text-anchor="middle" class="meta">session mode · default_pool_size = 25</text>
+  <text x="380" y="274" text-anchor="middle" class="meta">max_client_conn = 2000</text>
+  <text x="380" y="294" text-anchor="middle" class="meta" fill="#B45309">논리 DB: goti_write / goti_read</text>
+
+  <!-- arrows split to Primary / Replica -->
+  <path d="M 280 304 V 348 H 200 V 388" class="arrow"/>
+  <text x="248" y="332" text-anchor="middle" class="arrlbl">writes</text>
+
+  <path d="M 480 304 V 348 H 560 V 388" class="arrow"/>
+  <text x="512" y="332" text-anchor="middle" class="arrlbl">reads</text>
+
+  <!-- Primary (database / violet) -->
+  <rect x="80" y="388" width="240" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="200" y="412" text-anchor="middle" class="label" fill="#6D28D9">Primary RDS</text>
+  <text x="200" y="432" text-anchor="middle" class="meta">writes</text>
+
+  <!-- Replica (database / violet) -->
+  <rect x="440" y="388" width="240" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="560" y="412" text-anchor="middle" class="label" fill="#6D28D9">Replica RDS</text>
+  <text x="560" y="432" text-anchor="middle" class="meta">reads (70%)</text>
+</svg>

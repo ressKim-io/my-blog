@@ -132,7 +132,7 @@ collector만 배포하면 되므로 메트릭 추가/변경이 분 단위로 가
 
 ### 아키텍처
 
-```
+```text
 PostgreSQL ──┐
              ├── goti-metrics-collector (Go) ──→ :9090/metrics
 Redis    ────┘         │

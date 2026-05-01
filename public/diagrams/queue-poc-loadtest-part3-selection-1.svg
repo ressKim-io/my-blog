@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">B 안과 A 안의 확장 부하 곡선 비교</title>
+  <desc id="d1">B 안은 모든 polling 요청이 ALB→Pod→Redis ZSET으로 직접 도달하므로 VU가 늘어나면 Redis 부하가 선형 증가. A 안은 Cloudflare Edge가 max-age 1초로 캐시 HIT를 흡수해 ALB와 Redis까지 도달하는 요청이 적어 VU가 증가해도 origin 부하가 거의 일정</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr1cut" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#BE123C"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .head  { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 700; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+    .cut { stroke: #BE123C; stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; marker-end: url(#arr1cut); }
+  ]]></style>
+
+  <!-- B (ALB 직접) -->
+  <text x="400" y="40" text-anchor="middle" class="head" fill="#0A0A0A">B (ALB 직접)</text>
+
+  <rect x="40" y="60" width="160" height="80" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="120" y="86" text-anchor="middle" class="label" fill="#334155">3000 VU</text>
+  <text x="120" y="106" text-anchor="middle" class="meta">polling 5초 간격</text>
+  <text x="120" y="126" text-anchor="middle" class="meta">사용자별 rank</text>
+
+  <line x1="200" y1="100" x2="288" y2="100" class="arrow"/>
+
+  <rect x="288" y="60" width="240" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="408" y="86" text-anchor="middle" class="label" fill="#B45309">ALB → Pod</text>
+  <text x="408" y="106" text-anchor="middle" class="meta">모든 polling이 origin에 도달</text>
+  <text x="408" y="126" text-anchor="middle" class="meta">Redis 조회 발생</text>
+
+  <line x1="528" y1="100" x2="616" y2="100" class="arrow"/>
+
+  <rect x="616" y="60" width="144" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="688" y="86" text-anchor="middle" class="label" fill="#BE123C">Redis ZSET</text>
+  <text x="688" y="106" text-anchor="middle" class="meta">900 ops/s</text>
+  <text x="688" y="126" text-anchor="middle" class="meta">VU↑ → 부하 선형↑</text>
+
+  <text x="400" y="180" text-anchor="middle" class="meta">VU 수가 3000 → 10,000 → 100,000으로 증가하면 Redis 부하도 선형으로 증가</text>
+
+  <!-- divider -->
+  <line x1="32" y1="220" x2="768" y2="220" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- A (CDN 캐싱) -->
+  <text x="400" y="252" text-anchor="middle" class="head" fill="#0A0A0A">A (CDN 캐싱)</text>
+
+  <rect x="40" y="280" width="160" height="80" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="120" y="306" text-anchor="middle" class="label" fill="#334155">3000 VU</text>
+  <text x="120" y="326" text-anchor="middle" class="meta">polling 2초 간격</text>
+  <text x="120" y="346" text-anchor="middle" class="meta">엣지 응답</text>
+
+  <line x1="200" y1="320" x2="232" y2="320" class="arrow"/>
+
+  <rect x="232" y="280" width="200" height="80" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="332" y="306" text-anchor="middle" class="label" fill="#0E7490">Cloudflare Edge</text>
+  <text x="332" y="326" text-anchor="middle" class="meta">max-age = 1s</text>
+  <text x="332" y="346" text-anchor="middle" class="meta">캐시 HIT 다수</text>
+
+  <line x1="432" y1="320" x2="464" y2="320" class="cut"/>
+  <text x="448" y="312" text-anchor="middle" class="arrlbl" fill="#BE123C">소수만 통과</text>
+
+  <rect x="464" y="280" width="160" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="544" y="306" text-anchor="middle" class="label" fill="#B45309">ALB → Pod</text>
+  <text x="544" y="326" text-anchor="middle" class="meta">요청 소수</text>
+  <text x="544" y="346" text-anchor="middle" class="meta">캐시 미스만</text>
+
+  <line x1="624" y1="320" x2="656" y2="320" class="arrow"/>
+
+  <rect x="656" y="280" width="104" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="708" y="306" text-anchor="middle" class="label" fill="#047857">Redis</text>
+  <text x="708" y="326" text-anchor="middle" class="meta">부하</text>
+  <text x="708" y="346" text-anchor="middle" class="meta">일정</text>
+
+  <text x="400" y="412" text-anchor="middle" class="meta">VU↑ → CDN 캐시 히트율↑ → origin 부하 거의 일정 (대기열 상태 최대 1초 지연)</text>
+
+  <text x="400" y="500" text-anchor="middle" class="meta" fill="#047857">A 선택 근거 — 확장성 곡선의 형태가 다름 (B는 origin 종속, A는 엣지 흡수)</text>
+</svg>

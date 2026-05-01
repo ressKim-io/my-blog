@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 720" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">goti namespace 관측성 파이프라인 — Agent에서 Grafana까지</title>
+  <desc id="d1">goti-server Pod의 OTel Java Agent 2.25.0이 metrics/traces/logs를 gRPC :4317로 Alloy에 전송하고 별도로 Pyroscope SDK가 :4040 HTTP로 프로파일을 직접 전송. Alloy가 Mimir·Tempo·Loki 각각으로 분기하고 Grafana는 4개 데이터소스(Mimir·Tempo·Loki·Pyroscope)를 모두 조회</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrlbl { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- goti namespace boundary -->
+  <rect x="32" y="32" width="736" height="200" rx="8" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="48" y="56" class="meta" fill="#475569">goti namespace</text>
+
+  <!-- goti-server Pod (backend / emerald) -->
+  <rect x="200" y="80" width="400" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="106" text-anchor="middle" class="label" fill="#047857">goti-server Pod</text>
+
+  <rect x="220" y="124" width="240" height="56" rx="4" fill="#FAFAFA" stroke="#059669" stroke-width="1"/>
+  <text x="340" y="146" text-anchor="middle" class="meta">OTel Java Agent 2.25.0</text>
+  <text x="340" y="166" text-anchor="middle" class="meta">init container 주입</text>
+
+  <rect x="480" y="124" width="100" height="56" rx="4" fill="#FAFAFA" stroke="#059669" stroke-width="1"/>
+  <text x="530" y="146" text-anchor="middle" class="meta">Pyroscope</text>
+  <text x="530" y="166" text-anchor="middle" class="meta">SDK</text>
+
+  <!-- arrows from agent to Alloy -->
+  <path d="M 340 180 V 252 H 240 V 280" class="arrow"/>
+  <text x="200" y="220" class="arrlbl">metrics gRPC :4317</text>
+  <path d="M 340 180 V 244 H 360 V 280" class="arrow"/>
+  <text x="372" y="220" class="arrlbl">traces gRPC :4317</text>
+  <path d="M 340 180 V 252 H 480 V 280" class="arrow"/>
+  <text x="500" y="220" class="arrlbl">logs gRPC :4317</text>
+
+  <!-- arrow from Pyroscope SDK to Pyroscope -->
+  <path d="M 530 180 V 252 H 660 V 280" class="arrow"/>
+  <text x="678" y="248" class="arrlbl">profiles HTTP :4040</text>
+
+  <!-- Alloy (cloud / amber) -->
+  <rect x="120" y="280" width="440" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="340" y="306" text-anchor="middle" class="label" fill="#B45309">Alloy (OTLP Collector)</text>
+  <text x="340" y="328" text-anchor="middle" class="meta">3-way fan-out (metrics / traces / logs)</text>
+  <text x="340" y="348" text-anchor="middle" class="meta" fill="#BE123C">⚠ Agent → Alloy 구간 프로토콜 불일치 시 JVM 대시보드 전체 침묵</text>
+
+  <!-- Pyroscope (database / violet) -->
+  <rect x="600" y="280" width="160" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="680" y="306" text-anchor="middle" class="label" fill="#6D28D9">Pyroscope</text>
+  <text x="680" y="328" text-anchor="middle" class="meta">Continuous</text>
+  <text x="680" y="348" text-anchor="middle" class="meta">Profiling</text>
+
+  <!-- Alloy fanout to Mimir/Tempo/Loki -->
+  <path d="M 220 360 V 408 H 200 V 432" class="arrow"/>
+  <text x="180" y="396" text-anchor="end" class="arrlbl">remote_write :8080</text>
+  <line x1="340" y1="360" x2="340" y2="432" class="arrow"/>
+  <text x="352" y="400" class="arrlbl">gRPC :4317</text>
+  <path d="M 460 360 V 408 H 480 V 432" class="arrow"/>
+  <text x="492" y="400" class="arrlbl">OTLP HTTP :3100/otlp</text>
+
+  <!-- Mimir / Tempo / Loki (database / violet) -->
+  <rect x="80" y="432" width="200" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="180" y="456" text-anchor="middle" class="label" fill="#6D28D9">Mimir</text>
+  <text x="180" y="478" text-anchor="middle" class="meta">Metrics Storage</text>
+  <text x="180" y="496" text-anchor="middle" class="meta">PromQL</text>
+
+  <rect x="240" y="432" width="200" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="340" y="456" text-anchor="middle" class="label" fill="#6D28D9">Tempo</text>
+  <text x="340" y="478" text-anchor="middle" class="meta">Traces Storage</text>
+  <text x="340" y="496" text-anchor="middle" class="meta">TraceQL</text>
+
+  <rect x="400" y="432" width="200" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="500" y="456" text-anchor="middle" class="label" fill="#6D28D9">Loki</text>
+  <text x="500" y="478" text-anchor="middle" class="meta">Logs Storage</text>
+  <text x="500" y="496" text-anchor="middle" class="meta">LogQL</text>
+
+  <!-- arrows up to Grafana -->
+  <path d="M 180 504 V 552 H 400 V 580" class="arrow"/>
+  <path d="M 340 504 V 580" class="arrow"/>
+  <path d="M 500 504 V 552 H 400 V 580" class="arrow"/>
+  <path d="M 680 360 V 552 H 400 V 580" class="arrow"/>
+
+  <!-- Grafana (frontend / cyan) -->
+  <rect x="240" y="580" width="320" height="100" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="608" text-anchor="middle" class="label" fill="#0E7490">Grafana</text>
+  <text x="400" y="632" text-anchor="middle" class="meta">datasources: Mimir / Tempo / Loki / Pyroscope</text>
+  <text x="400" y="654" text-anchor="middle" class="meta">JVM 대시보드</text>
+</svg>

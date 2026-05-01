@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540" role="img" aria-labelledby="t1 d1" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t1">환경변수 관리 — 분산 구조와 중앙 집중화 비교</title>
+  <desc id="d1">Before는 user-service·board-service·frontend 각각에 .env가 흩어져 docker-compose가 어떤 값을 읽는지 예측 불가. After는 docker/env에 dev/ec2-dev/prod 파일을 모아두고 scripts에서 환경별로 실행하여 충돌과 디버깅 비용을 제거</desc>
+
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .head  { font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 700; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr1); }
+  ]]></style>
+
+  <!-- Before column -->
+  <text x="200" y="40" text-anchor="middle" class="head" fill="#BE123C">Before — 분산 (충돌)</text>
+
+  <rect x="40" y="60" width="320" height="148" rx="6" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="56" y="84" class="meta" fill="#475569">Git Repository</text>
+
+  <rect x="56" y="100" width="92" height="92" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="102" y="120" text-anchor="middle" class="meta" fill="#BE123C">user-service</text>
+  <text x="102" y="142" text-anchor="middle" class="meta">.env ✗</text>
+  <text x="102" y="160" text-anchor="middle" class="meta">.env.example</text>
+
+  <rect x="156" y="100" width="92" height="92" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="202" y="120" text-anchor="middle" class="meta" fill="#BE123C">board-service</text>
+  <text x="202" y="142" text-anchor="middle" class="meta">.env ✗</text>
+  <text x="202" y="160" text-anchor="middle" class="meta">.env.example</text>
+
+  <rect x="256" y="100" width="92" height="92" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="302" y="120" text-anchor="middle" class="meta" fill="#BE123C">frontend</text>
+  <text x="302" y="142" text-anchor="middle" class="meta">.env ✗</text>
+  <text x="302" y="160" text-anchor="middle" class="meta">.env.example</text>
+
+  <!-- conflict arrow -->
+  <path d="M 102 192 V 232 H 200 V 264" class="arrow"/>
+  <path d="M 202 192 V 264" class="arrow"/>
+  <path d="M 302 192 V 232 H 200 V 264" class="arrow"/>
+
+  <rect x="80" y="264" width="240" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="288" text-anchor="middle" class="label" fill="#BE123C">docker-compose</text>
+  <text x="200" y="310" text-anchor="middle" class="meta">어느 값을 읽는지 예측 불가</text>
+
+  <text x="200" y="368" text-anchor="middle" class="meta" fill="#BE123C">"제 컴퓨터에선 잘 되는데요?"</text>
+
+  <!-- After column -->
+  <text x="600" y="40" text-anchor="middle" class="head" fill="#047857">After — 중앙 집중 (예측 가능)</text>
+
+  <rect x="440" y="60" width="320" height="148" rx="6" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="456" y="84" class="meta" fill="#475569">Git Repository</text>
+
+  <rect x="456" y="100" width="92" height="92" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="502" y="124" text-anchor="middle" class="meta" fill="#047857">user-service</text>
+  <text x="502" y="148" text-anchor="middle" class="meta">(no .env)</text>
+
+  <rect x="556" y="100" width="92" height="92" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="602" y="124" text-anchor="middle" class="meta" fill="#047857">board-service</text>
+  <text x="602" y="148" text-anchor="middle" class="meta">(no .env)</text>
+
+  <rect x="656" y="100" width="92" height="92" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="702" y="124" text-anchor="middle" class="meta" fill="#047857">frontend</text>
+  <text x="702" y="148" text-anchor="middle" class="meta">(no .env)</text>
+
+  <line x1="600" y1="208" x2="600" y2="240" class="arrow"/>
+
+  <rect x="480" y="240" width="240" height="92" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="264" text-anchor="middle" class="label" fill="#6D28D9">docker/env/</text>
+  <text x="600" y="286" text-anchor="middle" class="meta">.env.dev ✓ / .env.ec2-dev ✓</text>
+  <text x="600" y="306" text-anchor="middle" class="meta">.env.prod ✓ — git ignored</text>
+
+  <line x1="600" y1="332" x2="600" y2="364" class="arrow"/>
+
+  <rect x="480" y="364" width="240" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="600" y="388" text-anchor="middle" class="label" fill="#047857">docker/scripts/</text>
+  <text x="600" y="408" text-anchor="middle" class="meta">dev.sh / ec2-dev.sh / prod.sh</text>
+  <text x="600" y="428" text-anchor="middle" class="meta">팀원 모두 동일 명령어</text>
+
+  <text x="600" y="478" text-anchor="middle" class="meta" fill="#047857">"환경 설정 어떻게 해요?" → 3단계 5분 안내</text>
+</svg>

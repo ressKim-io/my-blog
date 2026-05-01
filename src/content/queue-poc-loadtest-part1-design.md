@@ -183,26 +183,7 @@ GET /api/v1/stadium-seats/.../seat-sections?gameId=... → 400
 
 A의 PR #329가 develop에 머지된 상태였기 때문입니다.
 
-```
-{/* TODO: Draw.io로 교체 */}
-
-┌──────────────┐     ┌──────────────────────────────────┐
-│  C Queue   │     │    goti-ticketing-dev (공유)      │
-│  Pod          │     │                                  │
-│  Redis DB 1   │────▶│  ReservationSession 검증 (A)  │
-│  QueueToken   │     │  → A 세션 없으면 403          │
-│               │     │  → A 세션 만료 시 400         │
-└──────────────┘     └──────────────────────────────────┘
-        │                          ▲
-        │     ┌──────────────┐     │
-        │     │  A Queue   │     │
-        │     │  Pod          │─────┘ ✅ A 세션 발급 → 통과
-        │     │  Redis DB 0   │
-        │     └──────────────┘
-        │
-        └──────── ❌ C은 다른 세션 방식 (QueueInterceptor + X-Queue-Token)
-                    → A의 ReservationSession 검증 통과 불가
-```
+![공유 ticketing pod 충돌 — A 세션 검증과 C 세션 방식 불일치](/diagrams/queue-poc-loadtest-part1-design-1.svg)
 
 이것이 **"구현체만 교체하면 공정 비교가 된다"는 가정이 깨진 순간**입니다.
 

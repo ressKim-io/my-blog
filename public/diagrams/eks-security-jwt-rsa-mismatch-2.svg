@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="t2 d2" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" style="max-width: 800px;">
+  <title id="t2">RSA 키를 AWS Secrets Manager로 공유하는 해결 구조</title>
+  <desc id="d2">AWS Secrets Manager의 wealist/prod/app/jwt-rsa-keys에 public_key·private_key 한 쌍을 저장하고, ExternalSecret(wealist-shared-secret)이 이를 동기화. auth-service Pod A·B·C 3개가 모두 같은 ExternalSecret을 마운트하여 동일 키 쌍으로 서명·검증하므로 LB 라우팅과 무관하게 검증 성공</desc>
+
+  <defs>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+
+  <style><![CDATA[
+    .label { font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; }
+    .meta  { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; fill: #27272A; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arr2); }
+  ]]></style>
+
+  <!-- AWS Secrets Manager (cloud / amber) -->
+  <rect x="240" y="32" width="320" height="100" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="60" text-anchor="middle" class="label" fill="#B45309">AWS Secrets Manager</text>
+  <text x="400" y="84" text-anchor="middle" class="meta">wealist/prod/app/jwt-rsa-keys</text>
+  <text x="400" y="104" text-anchor="middle" class="meta">{ public_key, private_key }</text>
+
+  <line x1="400" y1="132" x2="400" y2="172" class="arrow"/>
+
+  <!-- ExternalSecret (security / rose) -->
+  <rect x="240" y="172" width="320" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="198" text-anchor="middle" class="label" fill="#BE123C">ExternalSecret</text>
+  <text x="400" y="220" text-anchor="middle" class="meta">wealist-shared-secret</text>
+  <text x="400" y="240" text-anchor="middle" class="meta">동기화 → K8s Secret 생성</text>
+
+  <!-- arrows down to 3 pods -->
+  <path d="M 400 252 V 296 H 160 V 332" class="arrow"/>
+  <line x1="400" y1="252" x2="400" y2="332" class="arrow"/>
+  <path d="M 400 252 V 296 H 640 V 332" class="arrow"/>
+
+  <!-- 3 Pods (backend / emerald) -->
+  <rect x="40" y="332" width="240" height="100" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="160" y="358" text-anchor="middle" class="label" fill="#047857">auth-service Pod A</text>
+  <text x="160" y="380" text-anchor="middle" class="meta">동일 RSA 키 쌍 ✓</text>
+
+  <rect x="280" y="332" width="240" height="100" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="358" text-anchor="middle" class="label" fill="#047857">auth-service Pod B</text>
+  <text x="400" y="380" text-anchor="middle" class="meta">동일 RSA 키 쌍 ✓</text>
+
+  <rect x="520" y="332" width="240" height="100" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="640" y="358" text-anchor="middle" class="label" fill="#047857">auth-service Pod C</text>
+  <text x="640" y="380" text-anchor="middle" class="meta">동일 RSA 키 쌍 ✓</text>
+</svg>

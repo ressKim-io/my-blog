@@ -36,7 +36,7 @@ date: '2025-10-26'
 
 ### 옵션 A: Mono-repo (단일 레포에 모든 서비스)
 
-```
+```text
 team-project/
 ├── user-service/
 ├── board-service/
@@ -136,7 +136,7 @@ deploy-config/     ← compose/env/nginx 관리, 실제 배포 담당
 
 ### deploy-config 구조
 
-```
+```text
 deploy-config/
 ├── docker-compose.yml
 ├── .env.example
@@ -219,34 +219,14 @@ on:
 
 ### 레포지토리 구조 (K8s 버전)
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                    Git Repositories                       │
-├────────────┬────────────┬────────────┬────────────────────┤
-│   user     │   board    │   chat     │   k8s-infra       │
-│  service   │  service   │  service   │  (manifests)      │
-└─────┬──────┴─────┬──────┴─────┬──────┴──────┬────────────┘
-      │            │            │              │
-      │ Build      │ Build      │ Build        │ ArgoCD
-      │ & Push     │ & Push     │ & Push       │ watches
-      ▼            ▼            ▼              ▼
-┌─────────────────────────────────┐  ┌──────────────────┐
-│    Container Registry (GHCR)    │  │     ArgoCD       │
-│  - user:v1.2.3                  │  │      Sync        │
-│  - board:v2.1.0                 │  └──────┬───────────┘
-│  - chat:v1.0.5                  │         │
-└─────────────────────────────────┘         ▼
-                                   ┌──────────────────┐
-                                   │   Kubernetes     │
-                                   └──────────────────┘
-```
+![Kubernetes로 확장한 GitOps 레포지토리 구조](/diagrams/multi-repo-cicd-strategy-1.svg)
 
 `deploy-config`가 `k8s-infra`로 이름만 바뀌었고, `docker-compose.yml`이 Kustomize/Helm manifest로 바뀌었을 뿐입니다
 "인프라 레포"라는 역할은 동일합니다
 
 ### k8s-infra 레포 구조
 
-```
+```text
 k8s-infra/
 ├── argocd/
 │   └── applications/
@@ -334,19 +314,13 @@ images:
 
 ### Docker Compose vs Kubernetes
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                    GitOps Pattern                         │
-├────────────────────────┬─────────────────────────────────┤
-│   Docker Compose 버전   │      Kubernetes 버전           │
-├────────────────────────┼─────────────────────────────────┤
-│                        │                                 │
-│  App Repos → Build →   │   App Repos → Build →          │
-│  → Update deploy-repo  │   → Update k8s-infra repo      │
-│  → docker-compose up   │   → ArgoCD syncs to K8s        │
-│                        │                                 │
-└────────────────────────┴─────────────────────────────────┘
-```
+| 단계 | Docker Compose 버전 | Kubernetes 버전 |
+|---|---|---|
+| 1 | App Repos → Build & Push | App Repos → Build & Push |
+| 2 | → Update deploy-repo | → Update k8s-infra repo |
+| 3 | → docker-compose up | → ArgoCD syncs to K8s |
+
+같은 GitOps 패턴, 다른 도구입니다.
 
 **공통점:**
 - 🎯 인프라 설정과 앱 코드 분리
@@ -407,7 +381,7 @@ deploy 브랜치를 분리하니까 세 가지 효과가 있었습니다
 
 ### 1. 학습시 프로젝트 배포 전략
 
-```
+```text
 초기: Docker Compose + 중앙 배포 레포
   └─ 개념 이해하기 쉬움
   └─ 빠른 피드백
