@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import PageHeader from '@/components/PageHeader';
 import Footer from '@/components/Footer';
+import Link from '@/components/Link';
 import { getAllPosts, getEssays, getLogs } from '@/lib/posts';
 import { projects } from '@/lib/projects';
 
@@ -45,9 +46,9 @@ export default function AboutPage() {
             </p>
             <p>
               이 블로그는 학습 과정과 트러블슈팅을 솔직하게 기록하는 공간입니다. 다듬은 글은
-              <a href="/essays/"> Essays</a>에, 작업 중 부딪힌 문제는
-              <a href="/logs/"> Logs</a>에, 장기 프로젝트의 의사결정은
-              <a href="/projects/"> Projects</a>에서 볼 수 있습니다.
+              <Link href="/essays/"> Essays</Link>에, 장기 프로젝트의 의사결정은
+              <Link href="/projects/"> Projects</Link>에서 볼 수 있습니다. 작업 중 부딪힌 문제를 기록한
+              <span className="text-[var(--text-secondary)]">Logs</span>는 URL을 직접 알아야 접근하는 거친 작업 노트입니다.
             </p>
           </div>
 
