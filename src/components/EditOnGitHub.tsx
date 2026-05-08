@@ -1,9 +1,19 @@
+import type { Track } from '@/lib/posts';
+
 const REPO_BASE = 'https://github.com/ressKim-io/my-blog/edit/main/src/content';
 
-export default function EditOnGitHub({ slug }: { slug: string }) {
+export default function EditOnGitHub({
+  slug,
+  track,
+  category,
+}: {
+  slug: string;
+  track: Track;
+  category: string;
+}) {
   return (
     <a
-      href={`${REPO_BASE}/${slug}.md`}
+      href={`${REPO_BASE}/${track}/${category}/${slug}.md`}
       target="_blank"
       rel="noopener noreferrer"
       className="inline-flex items-center gap-2 text-[13px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors"

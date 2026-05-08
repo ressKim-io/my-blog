@@ -175,7 +175,7 @@ export default function PostDetail({ post, allPosts, seriesPosts }: PostDetailPr
               </div>
 
               <div className="mt-12 pt-6 border-t border-[var(--border)] flex items-center justify-between gap-3">
-                <EditOnGitHub slug={post.slug} />
+                <EditOnGitHub slug={post.slug} track={post.track} category={post.category} />
               </div>
 
               {(prevInSeries || nextInSeries) && post.series && (

@@ -3,6 +3,7 @@ title: "Loki/Tempo OOM과의 전쟁: Kafka Consumer Throttling과 GOMEMLIMIT"
 excerpt: "재시작 시 Kafka backlog 폭주로 반복 OOM이 발생하는 악순환을 3가지 축으로 끊은 기록"
 category: monitoring
 tags:
+  - go-ti
   - Loki
   - Tempo
   - OOM

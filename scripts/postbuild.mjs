@@ -6,71 +6,29 @@ const SITE_URL = 'https://resskim-io.github.io/my-blog';
 const OUT_DIR = path.join(process.cwd(), 'out');
 const CONTENT_DIR = path.join(process.cwd(), 'src/content');
 
-// === 트랙/타입 추론 — lib/posts.ts의 inferType/inferTrack과 동기화 유지 필요 ===
-const TYPE_TAGS = ['troubleshooting', 'adr', 'concept', 'retrospective'];
-
-const TROUBLESHOOT_SLUG_PATTERNS = [
-  /troubleshoot/i,
-  /crashloop/i,
-  /-fix(-|$)/i,
-  /-bug(-|$)/i,
-  /-debug(-|$)/i,
-  /(^|-)error(-|$)/i,
-  /-?exception(-|$)/i,
-  /-?failure(-|$)/i,
-  /-?timeout(-|$)/i,
-  /-?missing(-|$)/i,
-  /-?investigation(-|$)/i,
-  /-?audit(-|$)/i,
-  /-?recovery(-|$)/i,
-  /-?regression(-|$)/i,
-  /-?incident(-|$)/i,
-  /-?outage(-|$)/i,
-  /-?broken(-|$)/i,
-  /(^|-)oom(-|$)/i,
-  /-?deadlock(-|$)/i,
-  /-?mismatch(-|$)/i,
-  /-?conflict(-|$)/i,
-  /-?nodata(-|$)/i,
-  /-?imagepullbackoff(-|$)/i,
-  /-?(40[0-9]|50[0-9])(-|$)/,
-  /syntax-error/i,
-  /parsing-error/i,
-  /not-found/i,
-  /false-negative/i,
-];
-
-function looksLikeTroubleshooting(slug, seriesName) {
-  return TROUBLESHOOT_SLUG_PATTERNS.some(
-    (re) => re.test(slug) || (seriesName !== undefined && re.test(seriesName)),
-  );
-}
-
-function inferType(data, slug) {
-  if (typeof data.type === 'string' && TYPE_TAGS.includes(data.type)) return data.type;
-  if (Array.isArray(data.tags)) {
-    const lowerTags = data.tags.map((tag) => String(tag).toLowerCase());
-    for (const t of TYPE_TAGS) if (lowerTags.includes(t)) return t;
-  }
-  if (/-adr(-|$)/i.test(slug)) return 'adr';
-  if (looksLikeTroubleshooting(slug, data.series?.name)) return 'troubleshooting';
-  return undefined;
-}
-
-function inferTrack(type) {
-  return type === 'troubleshooting' ? 'logs' : 'essays';
-}
-
 // === posts ===
+// 디렉토리 위치(essays/{cat}/ vs logs/{cat}/)가 track의 1순위 SSOT.
+// sitemap/feed/llms.txt 어디서도 글의 type 메타는 사용하지 않으므로 추론 로직 없음.
 function getAllPosts() {
-  const files = fs.readdirSync(CONTENT_DIR).filter((f) => f.endsWith('.md'));
-  const posts = files.map((file) => {
-    const slug = file.replace(/\.md$/, '');
-    const raw = fs.readFileSync(path.join(CONTENT_DIR, file), 'utf8');
+  const relativePaths = fs
+    .readdirSync(CONTENT_DIR, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile() && e.name.endsWith('.md'))
+    .map((e) => path.relative(CONTENT_DIR, path.join(e.parentPath, e.name)));
+
+  const posts = relativePaths.map((rel) => {
+    const slug = path.basename(rel, '.md');
+    const segments = rel.split(path.sep);
+    const track = segments[0] === 'logs' ? 'logs' : 'essays';
+    const categoryFromDir = segments.length >= 3 ? segments[1] : undefined;
+    const raw = fs.readFileSync(path.join(CONTENT_DIR, rel), 'utf8');
     const { data, content } = matter(raw);
-    const type = inferType(data, slug);
-    const track = inferTrack(type);
-    return { slug, content, type, track, ...data };
+    return {
+      slug,
+      content,
+      track,
+      ...data,
+      category: data.category ?? categoryFromDir,
+    };
   });
   return posts.sort((a, b) => (a.date < b.date ? 1 : -1));
 }

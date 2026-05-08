@@ -26,47 +26,12 @@ export interface PostData {
 
 const TYPE_TAGS: PostType[] = ['troubleshooting', 'adr', 'concept', 'retrospective'];
 
-// 슬러그/시리즈 이름에 강하게 트러블슈팅을 시사하는 영문 키워드
-const TROUBLESHOOT_SLUG_PATTERNS = [
-  /troubleshoot/i,
-  /crashloop/i,
-  /-fix(-|$)/i,
-  /-bug(-|$)/i,
-  /-debug(-|$)/i,
-  /(^|-)error(-|$)/i,
-  /-?exception(-|$)/i,
-  /-?failure(-|$)/i,
-  /-?timeout(-|$)/i,
-  /-?missing(-|$)/i,
-  /-?investigation(-|$)/i,
-  /-?audit(-|$)/i,
-  /-?recovery(-|$)/i,
-  /-?regression(-|$)/i,
-  /-?incident(-|$)/i,
-  /-?outage(-|$)/i,
-  /-?broken(-|$)/i,
-  /(^|-)oom(-|$)/i,
-  /-?deadlock(-|$)/i,
-  /-?mismatch(-|$)/i,
-  /-?conflict(-|$)/i,
-  /-?nodata(-|$)/i,
-  /-?imagepullbackoff(-|$)/i,
-  /-?(40[0-9]|50[0-9])(-|$)/, // HTTP 4xx/5xx
-  /syntax-error/i,
-  /parsing-error/i,
-  /not-found/i,
-  /false-negative/i,
-];
-
-function looksLikeTroubleshooting(slug: string, seriesName: string | undefined): boolean {
-  return TROUBLESHOOT_SLUG_PATTERNS.some(
-    (re) => re.test(slug) || (seriesName !== undefined && re.test(seriesName)),
-  );
-}
-
+// 글의 본질을 표시 메타로 라벨링한다 (PostCard·PostDetail의 typeLabels에서 사용).
+// 트랙 격리는 디렉토리 위치(SSOT)가 결정하므로 슬러그 패턴 추론은 두지 않는다.
+// frontmatter에 type 또는 메타 태그(troubleshooting/adr/concept/retrospective)가
+// 명시되어 있을 때만 라벨이 붙고, 그 외는 라벨 없이 카테고리·제목만 노출한다.
 function inferType(
   data: matter.GrayMatterFile<string>['data'],
-  slug: string,
 ): PostType | undefined {
   if (typeof data.type === 'string' && (TYPE_TAGS as string[]).includes(data.type)) {
     return data.type as PostType;
@@ -77,58 +42,70 @@ function inferType(
       if (lowerTags.includes(t)) return t;
     }
   }
-  // 슬러그에 -adr 명시적이면 adr로
-  if (/-adr(-|$)/i.test(slug)) return 'adr';
-  // 슬러그/시리즈에 트러블슈팅 영문 키워드
-  if (looksLikeTroubleshooting(slug, data.series?.name)) return 'troubleshooting';
   return undefined;
 }
 
-function inferTrack(type: PostType | undefined): Track {
-  if (type === 'troubleshooting') return 'logs';
-  return 'essays';
-}
+// 디렉토리 위치(essays/{cat}/ vs logs/{cat}/)가 track·category의 1순위 SSOT.
+// inferType은 글의 본질 표시 메타로만 사용 — track 결정에는 더 이상 영향 없음.
 
-function readPost(fileName: string): PostData {
-  const slug = fileName.replace(/\.md$/, '');
-  const fullPath = path.join(postsDirectory, fileName);
+function readPost(relativePath: string): PostData {
+  const slug = path.basename(relativePath, '.md');
+  const fullPath = path.join(postsDirectory, relativePath);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const parsed = matter(fileContents);
   const { data, content } = parsed;
-  const type = inferType(data, slug);
-  const track = inferTrack(type);
+
+  const segments = relativePath.split(path.sep);
+  const trackFromDir: Track = segments[0] === 'logs' ? 'logs' : 'essays';
+  const categoryFromDir = segments.length >= 3 ? segments[1] : undefined;
+
+  const type = inferType(data);
 
   return {
     slug,
     title: data.title,
     excerpt: data.excerpt,
-    category: data.category,
+    category: data.category ?? categoryFromDir,
     tags: data.tags,
     series: data.series,
     date: data.date,
     content,
     type,
-    track,
+    track: trackFromDir,
     readingTime: estimateReadingTime(content),
   };
 }
 
 let cachedPosts: PostData[] | null = null;
+let slugIndex: Map<string, string> | null = null;
+
+function listMarkdownFiles(): string[] {
+  return fs
+    .readdirSync(postsDirectory, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile() && e.name.endsWith('.md'))
+    .map((e) => path.relative(postsDirectory, path.join(e.parentPath, e.name)));
+}
 
 export function getAllPosts(): PostData[] {
   if (cachedPosts) return cachedPosts;
   if (!fs.existsSync(postsDirectory)) return [];
 
-  const fileNames = fs.readdirSync(postsDirectory).filter((f) => f.endsWith('.md'));
-  const posts = fileNames.map(readPost).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const relativePaths = listMarkdownFiles();
+  slugIndex = new Map(
+    relativePaths.map((rel) => [path.basename(rel, '.md'), rel]),
+  );
+  const posts = relativePaths
+    .map(readPost)
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
   cachedPosts = posts;
   return posts;
 }
 
 export function getPostBySlug(slug: string): PostData | null {
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
-  if (!fs.existsSync(fullPath)) return null;
-  return readPost(`${slug}.md`);
+  if (!slugIndex) getAllPosts();
+  const relativePath = slugIndex?.get(slug);
+  if (!relativePath) return null;
+  return readPost(relativePath);
 }
 
 export function getSeriesPosts(seriesName: string): PostData[] {

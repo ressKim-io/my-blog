@@ -3,6 +3,7 @@ title: "Alloy에서 OTel Collector로 전환한 이유"
 excerpt: "River 문법의 한계와 Kafka 버퍼링 확장을 위해 CNCF 표준 수집기로 전환한 결정"
 category: monitoring
 tags:
+  - go-ti
   - OTel-Collector
   - Grafana-Alloy
   - Architecture-Decision

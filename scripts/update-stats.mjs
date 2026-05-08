@@ -24,13 +24,20 @@ const CATEGORY_DESC = {
 const META_TAGS = ['troubleshooting', 'adr', 'concept', 'retrospective'];
 
 function loadPosts() {
-  const files = fs
-    .readdirSync(CONTENT_DIR)
-    .filter((f) => f.endsWith('.md') && f !== '_index.md');
-  return files.map((file) => {
-    const raw = fs.readFileSync(path.join(CONTENT_DIR, file), 'utf8');
+  const relativePaths = fs
+    .readdirSync(CONTENT_DIR, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile() && e.name.endsWith('.md') && e.name !== '_index.md')
+    .map((e) => path.relative(CONTENT_DIR, path.join(e.parentPath, e.name)));
+  return relativePaths.map((rel) => {
+    const segments = rel.split(path.sep);
+    const categoryFromDir = segments.length >= 3 ? segments[1] : undefined;
+    const raw = fs.readFileSync(path.join(CONTENT_DIR, rel), 'utf8');
     const { data } = matter(raw);
-    return { file, ...data };
+    return {
+      file: rel,
+      ...data,
+      category: data.category ?? categoryFromDir,
+    };
   });
 }
 

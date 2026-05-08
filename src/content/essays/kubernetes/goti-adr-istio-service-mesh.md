@@ -3,6 +3,7 @@ title: "왜 Istio를 선택했나: Service Mesh 도입 아키텍처 결정"
 excerpt: "Linkerd, Cilium, Spring Cloud Gateway를 두고 Istio Sidecar를 선택한 이유와 Ambient Mesh를 포기한 근거"
 category: kubernetes
 tags:
+  - go-ti
   - Istio
   - Service-Mesh
   - Architecture-Decision
