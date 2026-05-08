@@ -1,20 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 interface ShareButtonProps {
   title: string;
 }
 
+const subscribeUrl = (cb: () => void) => {
+  window.addEventListener('popstate', cb);
+  return () => window.removeEventListener('popstate', cb);
+};
+const getUrlSnapshot = () => window.location.href;
+const getUrlServerSnapshot = () => '';
+
 export default function ShareButton({ title }: ShareButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [url, setUrl] = useState('');
+  const url = useSyncExternalStore(subscribeUrl, getUrlSnapshot, getUrlServerSnapshot);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setUrl(window.location.href);
-  }, []);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {

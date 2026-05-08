@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 작업용 스크립트 (블로그 빌드와 무관)
+    ".claude/**",
   ]),
 ]);
 

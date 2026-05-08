@@ -39,6 +39,14 @@ export default function LinkPreview({
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
 
+  useEffect(
+    () => () => {
+      if (showTimer.current) clearTimeout(showTimer.current);
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    },
+    [],
+  );
+
   // 미리보기 데이터가 없으면 일반 a로
   if (!meta) {
     return (
@@ -84,8 +92,6 @@ export default function LinkPreview({
     cancelTimers();
     hideTimer.current = setTimeout(() => setOpen(false), HIDE_DELAY);
   };
-
-  useEffect(() => () => cancelTimers(), []);
 
   return (
     <>
