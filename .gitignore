@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# codex 사용자 환경 (MCP server PATH가 nvm 절대경로 의존)
+.codex/config.toml
