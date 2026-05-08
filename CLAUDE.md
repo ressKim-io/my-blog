@@ -101,26 +101,26 @@ tags:
 
 <!-- STATS:START -->
 <!-- 자동 생성: scripts/update-stats.mjs (prebuild 훅), 수동 편집 금지 -->
-## Blog Content Stats (2026-05-01 기준, 자동 생성)
+## Blog Content Stats (2026-05-07 기준, 자동 생성)
 
-- **총 글 수**: 224개 (go-ti 프로젝트 실전 기록 132편 포함)
+- **총 글 수**: 244개 (go-ti 프로젝트 실전 기록 152편 포함)
 - **카테고리 (6개)**:
-  - `challenge` (73): 게임서버/POC/부하테스트/AI 워크플로우 경험 시리즈
+  - `challenge` (86): 게임서버/POC/부하테스트/AI 워크플로우 경험 시리즈
+  - `monitoring` (51): Prometheus, OpenTelemetry, Grafana, Loki, Tempo, Mimir
   - `kubernetes` (46): K8s 기본, EKS, Helm, KEDA, Karpenter, 스케일링
-  - `monitoring` (46): Prometheus, OpenTelemetry, Grafana, Loki, Tempo, Mimir
-  - `istio` (34): Service Mesh, Traffic/Security/Observability/Ambient, JWT
+  - `istio` (35): Service Mesh, Traffic/Security/Observability/Ambient, JWT
   - `argocd` (14): ArgoCD, SSA, ApplicationSet
-  - `cicd` (11): CI/CD, ArgoCD GitOps, EC2 CD 파이프라인
-- **유형 메타 태그**: `troubleshooting` (95) / `adr` (33) / `concept` (23) / `retrospective` (9)
+  - `cicd` (12): CI/CD, ArgoCD GitOps, EC2 CD 파이프라인
+- **유형 메타 태그**: `troubleshooting` (110) / `adr` (40) / `concept` (25) / `retrospective` (11)
   - `/blog?tag=adr` — 의사결정 서사 글만 모아보기
   - `/blog?tag=troubleshooting` — 단순 트러블슈팅 모아보기
   - `/blog?tag=concept` — 개념·학습 글
   - `/blog?tag=retrospective` — 메타 회고
-- **태그**: 고유 태그 419개 (유형 메타 태그 4종 포함)
+- **태그**: 고유 태그 454개 (유형 메타 태그 4종 포함)
 - **주요 시리즈** (편수 순):
-  - go-ti 프로젝트 (27개 시리즈): goti-observability-ops (15), goti-multicloud (11), goti-queue-poc (11), goti-auth (7), goti-multicloud-db (7), goti-redis-sot (7), goti-java-to-go (6), goti-argocd (5), goti-ec2-deploy (5), goti-meta (5), goti-observability-stack (5), goti-resale (5), goti-ticketing-phase (5), goti-otel-prometheus (4), goti-scaling (4), goti-cloudfront-alb (3), goti-eks (3), goti-istio-ops (3), goti-kafka (3), goti-kind-monitoring (3), goti-loadtest (3), goti-ai-review-comparison (2), goti-argocd-gitops (2), goti-cloudflare-migration (2), goti-metrics-collector (2), goti-pgbouncer (2), goti-spring-otel (2)
+  - go-ti 프로젝트 (30개 시리즈): goti-multicloud (15), goti-observability-ops (15), goti-queue-poc (12), goti-java-to-go (8), goti-auth (7), goti-multicloud-db (7), goti-redis-sot (7), goti-argocd (5), goti-ec2-deploy (5), goti-meta (5), goti-observability-stack (5), goti-portfolio-meta (5), goti-resale (5), goti-ticketing-phase (5), goti-kind-dev-bootstrap (4), goti-loadtest (4), goti-otel-prometheus (4), goti-scaling (4), goti-cloudfront-alb (3), goti-eks (3), goti-istio-ops (3), goti-kafka (3), goti-kind-monitoring (3), goti-otel-instrumentation (3), goti-ai-review-comparison (2), goti-argocd-gitops (2), goti-cloudflare-migration (2), goti-metrics-collector (2), goti-pgbouncer (2), goti-spring-otel (2)
   - 기존 시리즈 (13개): eks-troubleshooting (9), game-server (7), istio-ambient (7), argocd-troubleshooting (5), challenge-2-wealist-migration (5), istio-traffic (5), istio-observability (4), istio-security (4), istio-intro (3), queue-poc-loadtest (3), eks-security (2), observability (2), eks-infra (1)
-- **월별 분포**: 2025-10: 15 / 2025-11: 1 / 2025-12: 33 / 2026-01: 9 / 2026-02: 29 / 2026-03: 59 / 2026-04: 78
+- **월별 분포**: 2025-10: 15 / 2025-11: 1 / 2025-12: 33 / 2026-01: 9 / 2026-02: 28 / 2026-03: 60 / 2026-04: 98
 - **go-ti 태그 필터**: 모든 goti 글은 `tags[0] == "go-ti"`로 `/blog?tag=go-ti` 한 번에 조회 가능
 <!-- STATS:END -->
 

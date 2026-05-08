@@ -322,3 +322,60 @@
 - **PgBouncer + 부하테스트** (`2026-04-14-pgbouncer-rollout-*`, load-test/3000vu 2편)
 - **JWT / Auth 이슈 연쇄** (`2026-04-17-jwt-issuer-*`, `-gcp-redis-recovery-and-jwt-unification`, `0015 JWT issuer SoT`)
 - **2026-04-19 리셀 플로우 end-to-end** (5건 연쇄 수정 포스트모템)
+
+---
+
+## 신규 동기화 2026-05-07 — 27편 (2026-05-08 변환 완료)
+
+마지막 동기화(2026-04-19) 이후 controller/docs에 추가된 27편을 일괄 복사. 27편 모두 변환 완료. 6편은 기존 변환된 글과 매핑 충돌(같은 사건 다른 멤버 이름)로 기존 글 유지, 1편(payment 32byte)은 기존 충실 변환본 유지, 20편 신규 변환.
+
+### 새 ADR — 4편
+
+| 상태 | 파일 | 변환 결과 |
+|------|------|-----------|
+| ✅ | `0022-queue-implementation-cdn-caching.md` | `goti-queue-implementation-cdn-caching-adr.md` (essays, goti-queue-poc#12) |
+| ✅ | `0023-java-to-go-migration.md` | `goti-java-to-go-migration-adr.md` (essays, goti-java-to-go#7) |
+| ✅ | `0024-load-testing-methodology.md` | `goti-load-testing-methodology-adr.md` (essays, goti-loadtest#4) |
+| ✅ | `0025-multicloud-high-level-architecture.md` | `goti-multicloud-high-level-architecture-adr.md` (essays, goti-multicloud#12) |
+
+### 새 Load-test — 1편
+
+| 상태 | 파일 | 변환 결과 |
+|------|------|-----------|
+| ✅ (중복) | `2026-03-29-queue-member-a-saturation.md` | 기존 `goti-queue-poc-c-saturation.md` (member-a=POC C 매핑) |
+
+### 새 Dev-logs — 22편
+
+| 상태 | 파일 | 변환 결과 |
+|------|------|-----------|
+| ✅ (중복) | `2026-03-29-poc-queue-member-b-401-ticketing-isolation.md` | 기존 `goti-poc-queue-a-401-ticketing-isolation.md` |
+| ✅ (중복) | `2026-03-30-queue-member-a-saturation-results.md` | 기존 `goti-queue-poc-c-cdn-saturation-results.md` |
+| ✅ (중복) | `2026-03-30-queue-member-b-saturation-results.md` | 기존 `goti-queue-poc-a-redis-saturation.md` |
+| ✅ (중복) | `2026-03-30-queue-member-c-saturation-results.md` | 기존 `goti-queue-poc-b-kafka-saturation.md` |
+| ✅ (기존 유지) | `2026-04-01-payment-member-c-token-encryptor-32byte.md` | 기존 `goti-payment-token-encryptor-32byte.md` (이미 충실 변환됨) |
+| ✅ (중복) | `2026-04-04-queue-impl-final-selection-member-a-cdn.md` | 기존 `goti-queue-impl-final-selection-cdn.md` |
+| ✅ | `2026-04-19-decision-upstage-api-opt-out.md` | `goti-upstage-api-opt-out-adr.md` (essays, goti-multicloud#13) |
+| ✅ | `2026-04-19-trouble-pat-plaintext-hook-block.md` | `goti-pat-plaintext-hook-block.md` (logs, 단독) |
+| ✅ | `2026-04-21-decision-cross-cloud-db-promote-automation.md` | `goti-cross-cloud-db-promote-automation-adr.md` (essays, goti-multicloud#14) |
+| ✅ | `2026-04-21-trouble-gcp-destroy-vpc-peering-stuck.md` | `goti-gcp-destroy-vpc-peering-stuck.md` (logs, goti-multicloud#15) |
+| ✅ | `2026-04-24-kind-dev-bootstrap.md` | `goti-kind-dev-bootstrap.md` (logs, goti-kind-dev-bootstrap#1) |
+| ✅ | `2026-04-25-istio-gateway-rbac-triage.md` | `goti-istio-gateway-rbac-triage.md` (logs, goti-kind-dev-bootstrap#3) |
+| ✅ | `2026-04-25-kind-dev-bootstrap-ingress-loki-pending.md` | `goti-kind-dev-bootstrap-ingress-loki-pending.md` (logs, goti-kind-dev-bootstrap#2) |
+| ✅ | `2026-04-25-monitoring-pipeline-fixes.md` | `goti-monitoring-pipeline-fixes.md` (logs, goti-otel-instrumentation#1) |
+| ✅ | `2026-04-25-otel-client-instrumentation-complete.md` | `goti-otel-client-instrumentation-complete.md` (logs, goti-otel-instrumentation#2) |
+| ✅ | `2026-04-25-otel-spec-compliance-fixes.md` | `goti-otel-spec-compliance-fixes.md` (logs, goti-otel-instrumentation#3) |
+| ✅ | `2026-04-25-synthetic-traffic-and-dashboard-validation.md` | `goti-synthetic-traffic-dashboard-validation.md` (logs, goti-kind-dev-bootstrap#4) |
+| ✅ | `2026-04-27-portfolio-refinement-and-ai-platform-eval.md` | `goti-portfolio-refinement-ai-platform-eval.md` (logs, goti-portfolio-meta#1) |
+| ✅ | `2026-04-28-portfolio-consulting-round2.md` | `goti-portfolio-consulting-round2.md` (logs, goti-portfolio-meta#2) |
+| ✅ | `2026-04-28-portfolio-korean-copy-principles.md` | `goti-portfolio-korean-copy-principles.md` (logs, goti-portfolio-meta#3) |
+| ✅ | `2026-04-29-agentic-control-plane-evolution.md` | `goti-agentic-control-plane-evolution.md` (logs, goti-portfolio-meta#4) |
+| ✅ | `2026-04-29-devlog-tier-policy.md` | `goti-devlog-tier-policy.md` (logs, goti-portfolio-meta#5) |
+
+### 변환 결과 요약 (essays/logs 완전 분리)
+
+- **essays (기술블로그) 6편**: ADR 0022/0023/0024/0025 + decision-upstage + cross-cloud-promote
+- **logs (트러블슈팅 격리) 14편**: 트러블 9 + portfolio·메타 5
+- **신규 시리즈 3개**: `goti-kind-dev-bootstrap` (4) / `goti-otel-instrumentation` (3) / `goti-portfolio-meta` (5)
+- **분류 정책**: 사용자가 "트러블슈팅과 기술블로그 두 개로 완전 분리"를 명시. logs 트랙은 URL 직접 입력 시에만 접근 가능 (Header 메뉴/Search/sitemap/RSS/llms.txt 모두 제외)
+- **익명화 매핑**: ADR 0022 기준(member-a=POC C CDN, member-b=POC A Redis 1s, member-c=POC B 5s+heartbeat). 메모리에 저장된 매핑(junsang→A, sungjeon→B, suyeon→C)과 다름 — draft 본문 매핑이 우선
+- **빌드 검증**: `npm run build` 통과 (499 페이지, essays 73 / logs 171)
