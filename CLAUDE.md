@@ -61,7 +61,7 @@ npm run lint       # ESLint
   소개문. `getAllSeries`/`getSeriesById`/`pickFeatured`로 집계
 - `/series` 인덱스, `/series/[id]` 상세 라우트. 컴포넌트: `SeriesCard`·`SeriesFeaturedCard`·
   `SeriesShowcase`·`SeriesRailMobile`(모바일 가로 레일)·`HomeCategoryFeed`(클라이언트 탭 피드)
-- 시리즈 `id` 7개는 `scripts/postbuild.mjs`의 sitemap `seriesIds` 상수와 동기화할 것
+- 시리즈 `id`는 `series.name`에서 `goti-deepdive-` 접두사를 뗀 값 — sitemap `/series/{id}/`는 `postbuild.mjs`가 콘텐츠에서 자동 도출
 
 ### RSC 페이로드 — content 경량화
 

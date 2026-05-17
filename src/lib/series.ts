@@ -5,8 +5,6 @@ import { getSeriesPosts, type PostData } from './posts';
  *
  * - `id`   : URL 슬러그 (`/series/{id}/`)
  * - `seriesName` : frontmatter `series.name` 과 1:1 매칭되는 키
- *
- * ★ `id` 목록은 `scripts/postbuild.mjs` 의 sitemap `seriesIds` 상수와 동기화할 것.
  */
 export interface SeriesMeta {
   id: string;

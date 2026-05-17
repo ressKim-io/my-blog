@@ -42,8 +42,20 @@ const escapeXml = (s) =>
 
 // === sitemap.xml — logs 트랙은 격리 정책에 따라 제외 ===
 function generateSitemap(posts) {
-  // ★ src/lib/series.ts 의 seriesList id 목록과 동기화할 것
-  const seriesIds = ['redis', 'observability', 'database', 'platform', 'runtime', 'edge', 'istio'];
+  // deepdive 시리즈 id 를 콘텐츠에서 자동 도출 — series.ts 와 별도 동기화 불필요
+  // (id = series.name 에서 'goti-deepdive-' 접두사를 뗀 값)
+  const seriesIds = [
+    ...new Set(
+      posts
+        .filter(
+          (p) =>
+            p.track === 'essays' &&
+            typeof p.series?.name === 'string' &&
+            p.series.name.startsWith('goti-deepdive-'),
+        )
+        .map((p) => p.series.name.slice('goti-deepdive-'.length)),
+    ),
+  ];
   const staticPages = [
     '/',
     '/essays/',
