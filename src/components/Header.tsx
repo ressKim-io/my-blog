@@ -4,23 +4,15 @@ import { useState } from 'react';
 import Link from './Link';
 import { usePathname } from 'next/navigation';
 import Search from './Search';
-
-interface Post {
-  slug: string;
-  title: string;
-  excerpt?: string;
-  category: string;
-  tags?: string[];
-  date: string;
-  track?: 'essays' | 'logs';
-}
+import type { SearchPost } from '@/lib/posts';
 
 interface HeaderProps {
-  posts?: Post[];
+  posts?: SearchPost[];
 }
 
 const navItems = [
   { href: '/essays', label: 'Essays', match: '/essays', color: 'var(--essays)' },
+  { href: '/series', label: 'Series', match: '/series', color: 'var(--accent)' },
   { href: '/projects', label: 'Projects', match: '/projects', color: 'var(--projects)' },
   { href: '/about', label: 'About', match: '/about', color: 'var(--text)' },
 ];

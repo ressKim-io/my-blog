@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import RedirectClient from '@/components/RedirectClient';
-import { getAllPosts, getEssays, getPostBySlug } from '@/lib/posts';
+import { getEssays, getPostBySlug, getSearchIndex } from '@/lib/posts';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -33,7 +33,7 @@ export default async function BlogPostRedirect({ params }: Props) {
 
   return (
     <>
-      <Header posts={getAllPosts()} />
+      <Header posts={getSearchIndex()} />
       <RedirectClient href={`/essays/${slug}`} label={`${post.title}로 이동`} />
       <Footer />
     </>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import RedirectClient from '@/components/RedirectClient';
-import { getAllPosts } from '@/lib/posts';
+import { getSearchIndex } from '@/lib/posts';
 
 export const metadata: Metadata = {
   title: 'Posts',
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function BlogIndex() {
   return (
     <>
-      <Header posts={getAllPosts()} />
+      <Header posts={getSearchIndex()} />
       <RedirectClient href="/essays" label="Essays로 이동" />
       <Footer />
     </>

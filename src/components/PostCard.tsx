@@ -1,8 +1,8 @@
 import Link from './Link';
-import type { PostData, Track } from '@/lib/posts';
+import type { PostListItem, Track } from '@/lib/posts';
 
 interface PostCardProps {
-  post: PostData;
+  post: PostListItem;
   track: Track;
   variant?: 'card' | 'line';
   showExcerpt?: boolean;
@@ -33,7 +33,7 @@ function formatDateShort(date: string) {
 }
 
 export default function PostCard({ post, track, variant = 'card', showExcerpt = true }: PostCardProps) {
-  const href = `/${track}/${post.slug}`;
+  const href = `/${track}/${post.slug}/`;
   const categoryLabel = categoryLabels[post.category] ?? post.category;
   const typeLabel = post.type ? typeLabels[post.type] : null;
 

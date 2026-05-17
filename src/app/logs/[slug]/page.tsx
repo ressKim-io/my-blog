@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PostDetail from '@/components/PostDetail';
-import { getAllPosts, getPostBySlug, getLogs, getSeriesPosts } from '@/lib/posts';
+import { getAllPosts, getPostBySlug, getLogs, getSeriesPosts, getSearchIndex } from '@/lib/posts';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -43,7 +43,7 @@ export default async function LogPostPage({ params }: Props) {
 
   return (
     <>
-      <Header posts={allPosts} />
+      <Header posts={getSearchIndex()} />
       <PostDetail post={post} allPosts={allPosts} seriesPosts={seriesPosts} />
       <Footer />
     </>

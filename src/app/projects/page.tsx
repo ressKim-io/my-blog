@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import PageHeader from '@/components/PageHeader';
 import Footer from '@/components/Footer';
 import { projects, getProjectPosts } from '@/lib/projects';
-import { getAllPosts } from '@/lib/posts';
+import { getSearchIndex } from '@/lib/posts';
 
 export const metadata: Metadata = {
   title: 'Projects',
@@ -20,11 +20,9 @@ const statusBadge: Record<string, { label: string; mark: string }> = {
 };
 
 export default function ProjectsPage() {
-  const allPosts = getAllPosts();
-
   return (
     <>
-      <Header posts={allPosts} />
+      <Header posts={getSearchIndex()} />
       <main className="pt-12 pb-16">
         <div className="max-w-[860px] mx-auto px-5">
           <PageHeader

@@ -42,3 +42,12 @@ next-env.d.ts
 
 # codex 사용자 환경 (MCP server PATH가 nvm 절대경로 의존)
 .codex/config.toml
+
+# claude design 와이어프레임 프로토타입 (블로그 소스 아님)
+/tmp-design/
+
+# Claude Code 런타임 파일
+.claude/scheduled_tasks.lock
+
+# npm 산출물 (이 저장소는 pnpm 사용)
+/package-lock.json

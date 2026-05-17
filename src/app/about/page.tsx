@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import PageHeader from '@/components/PageHeader';
 import Footer from '@/components/Footer';
 import Link from '@/components/Link';
-import { getAllPosts, getEssays, getLogs } from '@/lib/posts';
+import { getEssays, getLogs, getSearchIndex } from '@/lib/posts';
 import { projects } from '@/lib/projects';
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 const techStack = ['Kubernetes', 'Istio', 'Terraform', 'ArgoCD', 'Prometheus', 'AWS', 'Docker', 'CI/CD'];
 
 export default function AboutPage() {
-  const allPosts = getAllPosts();
+  const allPosts = getSearchIndex();
   const essays = getEssays();
   const logs = getLogs();
 

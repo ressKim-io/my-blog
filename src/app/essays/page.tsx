@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import PageHeader from '@/components/PageHeader';
 import Footer from '@/components/Footer';
 import PostListClient from '@/components/PostListClient';
-import { getEssays, getAllPosts } from '@/lib/posts';
+import { getEssaysList, getSearchIndex } from '@/lib/posts';
 
 export const metadata: Metadata = {
   title: 'Essays',
@@ -22,7 +22,7 @@ const categoryLabelMap: Record<string, string> = {
 };
 
 export default function EssaysPage() {
-  const allEssays = getEssays();
+  const allEssays = getEssaysList();
 
   const counts = new Map<string, number>();
   allEssays.forEach((p) => counts.set(p.category, (counts.get(p.category) ?? 0) + 1));
@@ -32,7 +32,7 @@ export default function EssaysPage() {
 
   return (
     <>
-      <Header posts={getAllPosts()} />
+      <Header posts={getSearchIndex()} />
       <main className="pt-12 pb-16">
         <div className="max-w-[860px] mx-auto px-5">
           <PageHeader

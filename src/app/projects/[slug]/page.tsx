@@ -7,7 +7,7 @@ import PageHeader from '@/components/PageHeader';
 import Footer from '@/components/Footer';
 import ProjectPostsView from '@/components/ProjectPostsView';
 import { projects, getProject, getProjectSeries } from '@/lib/projects';
-import { getAllPosts } from '@/lib/posts';
+import { getSearchIndex } from '@/lib/posts';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -45,12 +45,11 @@ export default async function ProjectDetailPage({ params }: Props) {
   const project = getProject(slug);
   if (!project) notFound();
 
-  const allPosts = getAllPosts();
   const { series, standalone } = getProjectSeries(slug);
 
   return (
     <>
-      <Header posts={allPosts} />
+      <Header posts={getSearchIndex()} />
       <main className="pt-12 pb-16">
         <div className="max-w-[900px] mx-auto px-5">
           <Link

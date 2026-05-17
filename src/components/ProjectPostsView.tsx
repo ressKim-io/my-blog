@@ -3,12 +3,12 @@
 import { useMemo } from 'react';
 import Link from './Link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import type { PostData } from '@/lib/posts';
+import type { PostListItem } from '@/lib/posts';
 import type { SeriesGroup } from '@/lib/projects';
 
 interface ProjectPostsViewProps {
   series: SeriesGroup[];
-  standalone: PostData[];
+  standalone: PostListItem[];
 }
 
 const categoryLabels: Record<string, string> = {
@@ -77,7 +77,7 @@ export default function ProjectPostsView({ series, standalone }: ProjectPostsVie
   );
 }
 
-function SeriesView({ series, standalone }: { series: SeriesGroup[]; standalone: PostData[] }) {
+function SeriesView({ series, standalone }: { series: SeriesGroup[]; standalone: PostListItem[] }) {
   return (
     <>
       {series.length > 0 && (
@@ -108,7 +108,7 @@ function SeriesView({ series, standalone }: { series: SeriesGroup[]; standalone:
                   {s.posts.map((p) => (
                     <li key={p.slug}>
                       <Link
-                        href={`/${p.track}/${p.slug}`}
+                        href={`/${p.track}/${p.slug}/`}
                         className="group/item flex items-baseline gap-3 py-2 px-2 -mx-2 rounded hover:bg-[var(--bg)] transition-colors"
                       >
                         <span className="text-[13px] text-[var(--muted)] tabular-nums shrink-0 w-6">
@@ -153,10 +153,10 @@ function SeriesView({ series, standalone }: { series: SeriesGroup[]; standalone:
   );
 }
 
-function TimelineView({ posts }: { posts: PostData[] }) {
+function TimelineView({ posts }: { posts: PostListItem[] }) {
   // 월별 그룹
   const grouped = useMemo(() => {
-    const map = new Map<string, PostData[]>();
+    const map = new Map<string, PostListItem[]>();
     posts.forEach((p) => {
       const month = p.date.slice(0, 7);
       const arr = map.get(month) ?? [];
@@ -186,10 +186,10 @@ function TimelineView({ posts }: { posts: PostData[] }) {
   );
 }
 
-function PostLine({ post, showSeries = false }: { post: PostData; showSeries?: boolean }) {
+function PostLine({ post, showSeries = false }: { post: PostListItem; showSeries?: boolean }) {
   return (
     <Link
-      href={`/${post.track}/${post.slug}`}
+      href={`/${post.track}/${post.slug}/`}
       className="group flex items-baseline gap-3 py-3.5 hover:bg-[var(--surface)] -mx-3 px-3 rounded transition-colors"
     >
       <time className="text-[13px] text-[var(--muted-soft)] tabular-nums shrink-0 w-[92px]">

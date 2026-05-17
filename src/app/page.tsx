@@ -2,12 +2,23 @@ import type { Metadata } from 'next';
 import Link from '@/components/Link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import PostCard from '@/components/PostCard';
-import { getAllPosts, getEssays } from '@/lib/posts';
+import SeriesShowcase from '@/components/SeriesShowcase';
+import HomeCategoryFeed from '@/components/HomeCategoryFeed';
+import { getEssays, getSearchIndex } from '@/lib/posts';
+import { getAllSeries, pickFeatured } from '@/lib/series';
 import { getActiveProjects, getProjectPosts } from '@/lib/projects';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
+};
+
+const categoryLabelMap: Record<string, string> = {
+  istio: 'Istio',
+  kubernetes: 'Kubernetes',
+  challenge: 'Challenge',
+  argocd: 'ArgoCD',
+  monitoring: 'Monitoring',
+  cicd: 'CI/CD',
 };
 
 const statusBadge: Record<string, { label: string; mark: string; color: string }> = {
@@ -18,20 +29,37 @@ const statusBadge: Record<string, { label: string; mark: string; color: string }
 };
 
 export default function Home() {
-  const allPosts = getAllPosts();
-  const latestEssays = getEssays().slice(0, 3);
+  const allSeries = getAllSeries();
+  const featured = pickFeatured(allSeries);
+  const rest = allSeries.filter((s) => s.id !== featured.id);
+  const seriesTotal = allSeries.reduce((n, s) => n + s.count, 0);
+
+  const essays = getEssays();
+  const feedPosts = essays.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    category: p.category,
+    date: p.date,
+  }));
+  const counts = new Map<string, number>();
+  essays.forEach((p) => counts.set(p.category, (counts.get(p.category) ?? 0) + 1));
+  const categories = Object.entries(categoryLabelMap)
+    .filter(([name]) => counts.has(name))
+    .map(([name, label]) => ({ name, label, count: counts.get(name) ?? 0 }));
+
   const activeProjects = getActiveProjects();
 
   return (
     <>
-      <Header posts={allPosts} />
+      <Header posts={getSearchIndex()} />
       <main>
-        <section className="pt-24 pb-20 border-b border-[var(--border)]">
+        {/* Identity */}
+        <section className="pt-20 pb-14 border-b border-[var(--border)]">
           <div className="max-w-[1100px] mx-auto px-5">
             <p className="text-[12px] font-semibold text-[var(--accent)] uppercase tracking-[0.14em] mb-5">
               Ress Blog
             </p>
-            <h1 className="text-[44px] md:text-[60px] leading-[1.1] font-bold tracking-tight text-[var(--text)] max-w-[820px]">
+            <h1 className="text-[40px] md:text-[56px] leading-[1.1] font-bold tracking-tight text-[var(--text)] max-w-[820px]">
               Learning by doing,
               <br />
               <span className="text-[var(--muted)]">documenting the journey</span>
@@ -39,57 +67,64 @@ export default function Home() {
             <p className="mt-6 text-[16px] md:text-[17px] text-[var(--muted)] max-w-[560px] leading-relaxed">
               DevOps · Kubernetes · Istio · Observability — 학습한 내용과 부딪힌 문제를 솔직하게 기록합니다.
             </p>
-            <div className="flex flex-wrap gap-3 mt-8">
-              <Link
-                href="/essays"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--accent)] text-white text-[14.5px] font-semibold hover:bg-[var(--accent-hover)] transition-colors"
-              >
-                Read Essays
-                <span className="opacity-80">→</span>
-              </Link>
-              <Link
-                href="/projects"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[var(--border-strong)] text-[var(--text)] text-[14.5px] font-semibold hover:bg-[var(--surface)] transition-colors"
-              >
-                See Projects
-                <span className="text-[var(--muted)]">→</span>
-              </Link>
-            </div>
           </div>
         </section>
 
+        {/* Series showcase */}
         <section className="py-16">
           <div className="max-w-[1100px] mx-auto px-5">
-            <div className="flex items-baseline justify-between mb-8">
-              <h2 className="text-[12px] font-semibold text-[var(--muted)] uppercase tracking-wider">
-                Latest Essays
-              </h2>
+            <div className="flex items-end justify-between gap-4 mb-8">
+              <div>
+                <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--muted-soft)] mb-2">
+                  기술 해설 — {allSeries.length}개 시리즈 · {seriesTotal}편
+                </div>
+                <h2 className="text-[24px] font-bold tracking-tight text-[var(--text)]">
+                  시리즈로 깊게 읽기
+                </h2>
+              </div>
               <Link
-                href="/essays"
-                className="text-[13px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
+                href="/series/"
+                className="shrink-0 text-[13px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
               >
-                View all →
+                전체 시리즈 →
               </Link>
             </div>
-            <div className="max-w-[760px]">
-              {latestEssays.map((post) => (
-                <PostCard key={post.slug} post={post} track="essays" />
-              ))}
-            </div>
+            <SeriesShowcase featured={featured} rest={rest} all={allSeries} />
           </div>
         </section>
 
-        <section className="py-16 bg-[var(--surface)] border-y border-[var(--border)]">
+        {/* Category feed */}
+        <section className="py-16 border-t border-[var(--border)]">
           <div className="max-w-[1100px] mx-auto px-5">
-            <div className="flex items-baseline justify-between mb-8">
-              <h2 className="text-[12px] font-semibold text-[var(--muted)] uppercase tracking-wider">
-                Active Projects
+            <div className="mb-8">
+              <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--muted-soft)] mb-2">
+                essays · {essays.length}편
+              </div>
+              <h2 className="text-[24px] font-bold tracking-tight text-[var(--text)]">
+                카테고리로 둘러보기
               </h2>
+            </div>
+            <HomeCategoryFeed posts={feedPosts} categories={categories} />
+          </div>
+        </section>
+
+        {/* Projects */}
+        <section className="py-16 bg-[var(--surface)] border-t border-[var(--border)]">
+          <div className="max-w-[1100px] mx-auto px-5">
+            <div className="flex items-end justify-between gap-4 mb-8">
+              <div>
+                <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--muted-soft)] mb-2">
+                  projects
+                </div>
+                <h2 className="text-[24px] font-bold tracking-tight text-[var(--text)]">
+                  진행 중인 작업
+                </h2>
+              </div>
               <Link
-                href="/projects"
-                className="text-[13px] text-[var(--muted)] hover:text-[var(--projects)] transition-colors"
+                href="/projects/"
+                className="shrink-0 text-[13px] text-[var(--muted)] hover:text-[var(--projects)] transition-colors"
               >
-                View all →
+                모든 프로젝트 →
               </Link>
             </div>
             <div className="grid md:grid-cols-2 gap-5">
@@ -102,7 +137,7 @@ export default function Home() {
                 return (
                   <Link
                     key={proj.slug}
-                    href={`/projects/${proj.slug}`}
+                    href={`/projects/${proj.slug}/`}
                     className="group block p-6 rounded-xl bg-[var(--elevated)] border border-[var(--border)] hover:border-[var(--projects)] transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-3">
@@ -139,18 +174,6 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
-        </section>
-
-        <section className="py-12">
-          <div className="max-w-[1100px] mx-auto px-5 text-[13px] text-[var(--muted)]">
-            <span className="text-[var(--text)] font-semibold">{allPosts.length} posts</span>
-            <span className="mx-2 text-[var(--border-strong)]">·</span>
-            <span>since 2025-10</span>
-            <span className="mx-2 text-[var(--border-strong)]">·</span>
-            <Link href="/about" className="hover:text-[var(--accent)] transition-colors">
-              About →
-            </Link>
           </div>
         </section>
       </main>

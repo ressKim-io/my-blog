@@ -1,4 +1,4 @@
-import { getAllPosts, type PostData } from './posts';
+import { getAllPosts, toListItem, type PostData, type PostListItem } from './posts';
 
 export type ProjectStatus = 'active' | 'upcoming' | 'paused' | 'done';
 
@@ -79,21 +79,21 @@ export function getProject(slug: string): ProjectMeta | undefined {
   return projects.find((p) => p.slug === slug);
 }
 
-export function getProjectPosts(slug: string): PostData[] {
+export function getProjectPosts(slug: string): PostListItem[] {
   const project = getProject(slug);
   if (!project) return [];
-  return getAllPosts().filter(project.postFilter);
+  return getAllPosts().filter(project.postFilter).map(toListItem);
 }
 
 export interface SeriesGroup {
   name: string;
-  posts: PostData[];
+  posts: PostListItem[];
 }
 
-export function getProjectSeries(slug: string): { series: SeriesGroup[]; standalone: PostData[] } {
+export function getProjectSeries(slug: string): { series: SeriesGroup[]; standalone: PostListItem[] } {
   const posts = getProjectPosts(slug);
-  const seriesMap = new Map<string, PostData[]>();
-  const standalone: PostData[] = [];
+  const seriesMap = new Map<string, PostListItem[]>();
+  const standalone: PostListItem[] = [];
 
   posts.forEach((post) => {
     if (post.series?.name) {

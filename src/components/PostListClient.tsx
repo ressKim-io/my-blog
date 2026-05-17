@@ -5,10 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import PostCard from './PostCard';
 import CategoryFilter from './CategoryFilter';
 import PaginationLinks from './PaginationLinks';
-import type { PostData, Track } from '@/lib/posts';
+import type { PostListItem, Track } from '@/lib/posts';
 
 interface PostListClientProps {
-  posts: PostData[];
+  posts: PostListItem[];
   track: Track;
   categories: { name: string; label: string; count: number }[];
   variant?: 'card' | 'line';

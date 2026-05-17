@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // 작업용 스크립트 (블로그 빌드와 무관)
     ".claude/**",
+    // claude design 와이어프레임 프로토타입 (블로그 소스 아님)
+    "tmp-design/**",
   ]),
 ]);
 

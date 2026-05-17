@@ -127,6 +127,61 @@ export function getPostsByTrack(track: Track): PostData[] {
 }
 
 /**
+ * 헤더 검색(Search)용 경량 글 메타.
+ * 본문(content)을 제외해, 클라이언트 컴포넌트(Header→Search)로 직렬화되는
+ * RSC 페이로드를 줄인다. Fuse.js 검색에 필요한 필드만 포함한다.
+ * logs 트랙은 격리 정책상 검색 대상이 아니므로 essays만 포함한다.
+ */
+export interface SearchPost {
+  slug: string;
+  title: string;
+  excerpt?: string;
+  category: string;
+  tags?: string[];
+  date: string;
+  track: Track;
+}
+
+export function getSearchIndex(): SearchPost[] {
+  return getEssays().map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    excerpt: p.excerpt,
+    category: p.category,
+    tags: p.tags,
+    date: p.date,
+    track: p.track,
+  }));
+}
+
+/**
+ * 글 목록(PostListClient·PostCard)용 글 메타 — 본문(content)만 제외.
+ * 클라이언트 컴포넌트로 직렬화되는 RSC 페이로드를 줄인다.
+ * 카드 렌더·카테고리/태그 필터에 필요한 메타는 모두 유지한다.
+ */
+export type PostListItem = Omit<PostData, 'content'>;
+
+/** PostData에서 본문(content)을 제거한 목록용 메타로 변환 */
+export function toListItem(p: PostData): PostListItem {
+  return {
+    slug: p.slug,
+    title: p.title,
+    excerpt: p.excerpt,
+    category: p.category,
+    tags: p.tags,
+    series: p.series,
+    date: p.date,
+    type: p.type,
+    track: p.track,
+    readingTime: p.readingTime,
+  };
+}
+
+export function getEssaysList(): PostListItem[] {
+  return getEssays().map(toListItem);
+}
+
+/**
  * 한국어 250자/분, 영문 200단어/분 가중 평균.
  * 코드블록은 본문보다 천천히 읽힌다고 가정해 0.5x 가중.
  */
