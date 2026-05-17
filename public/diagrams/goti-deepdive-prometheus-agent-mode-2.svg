@@ -1,0 +1,104 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-2">Prometheus Agent Mode — WAL 기반 메모리 절감 메커니즘</title>
+  <desc id="desc-2">Agent Mode에서 WAL이 재시도 버퍼 역할만 하며, remote_write 성공 시 WAL 세그먼트를 즉시 트런케이트해 메모리와 디스크를 최소화하는 동작 흐름을 보여줍니다</desc>
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title-label { font-size: 14px; font-weight: 600; }
+    .body-label { font-size: 12px; }
+    .sub-label { font-size: 11px; fill: #374151; }
+    .step-label { font-size: 11px; font-weight: 600; fill: #7C3AED; }
+  </style>
+  <defs>
+    <marker id="arrow-dark2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" style="font-size:16px; font-weight:700; fill:#0A0A0A;">Agent Mode — WAL 경량 버퍼 동작 흐름</text>
+
+  <!-- ① Scrape -->
+  <rect x="40" y="72" width="160" height="56" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="120" y="97" text-anchor="middle" class="title-label" fill="#0E7490">① 스크레이프</text>
+  <text x="120" y="115" text-anchor="middle" class="sub-label">ServiceMonitor 기반</text>
+  <text x="120" y="128" text-anchor="middle" class="sub-label">100K~300K series</text>
+
+  <!-- 화살표 1→2 -->
+  <line x1="200" y1="100" x2="268" y2="100" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark2)"/>
+  <text x="234" y="94" text-anchor="middle" class="step-label">샘플 수신</text>
+
+  <!-- ② WAL 기록 -->
+  <rect x="272" y="72" width="160" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="352" y="97" text-anchor="middle" class="title-label" fill="#047857">② WAL 기록</text>
+  <text x="352" y="115" text-anchor="middle" class="sub-label">타임스탬프·값·레이블</text>
+  <text x="352" y="128" text-anchor="middle" class="sub-label">순차 append</text>
+
+  <!-- 화살표 2→3 -->
+  <line x1="432" y1="100" x2="500" y2="100" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark2)"/>
+  <text x="466" y="94" text-anchor="middle" class="step-label">즉시 전송</text>
+
+  <!-- ③ remote_write -->
+  <rect x="504" y="72" width="160" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="584" y="97" text-anchor="middle" class="title-label" fill="#6D28D9">③ remote_write</text>
+  <text x="584" y="115" text-anchor="middle" class="sub-label">Snappy 압축 → HTTP</text>
+  <text x="584" y="128" text-anchor="middle" class="sub-label">Mimir Distributor 전송</text>
+
+  <!-- 화살표 3→Mimir -->
+  <line x1="664" y1="100" x2="716" y2="100" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow-violet)"/>
+
+  <!-- Mimir -->
+  <rect x="720" y="72" width="60" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="750" y="97" text-anchor="middle" class="body-label" fill="#B45309">Mimir</text>
+  <text x="750" y="113" text-anchor="middle" class="sub-label">수신</text>
+
+  <!-- ─── 성공 경로 ─── -->
+  <text x="400" y="172" text-anchor="middle" style="font-size:13px; font-weight:700; fill:#059669;">remote_write 성공 시</text>
+
+  <!-- 성공 화살표: Mimir → 트런케이트 -->
+  <path d="M 750 128 Q 750 188 584 188" stroke="#059669" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#arrow-green)"/>
+  <text x="690" y="176" text-anchor="middle" class="sub-label" fill="#059669">200 OK</text>
+
+  <!-- 트런케이트 박스 -->
+  <rect x="272" y="200" width="624" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="584" y="222" text-anchor="middle" class="title-label" fill="#047857">WAL Truncate — 전송 완료된 세그먼트 즉시 제거</text>
+  <text x="584" y="240" text-anchor="middle" class="sub-label">Server Mode: 2시간치 보관 → Agent Mode: 전송 후 즉시 삭제 → 디스크·메모리 최소화</text>
+
+  <!-- ─── 실패 경로 ─── -->
+  <text x="400" y="294" text-anchor="middle" style="font-size:13px; font-weight:700; fill:#E11D48;">remote_write 실패 시 (Mimir 일시 장애)</text>
+
+  <!-- 실패 화살표 -->
+  <path d="M 750 128 Q 780 300 584 308" stroke="#E11D48" stroke-width="1.5" fill="none" stroke-dasharray="4 2" marker-end="url(#arrow-red)"/>
+  <text x="758" y="252" text-anchor="middle" class="sub-label" fill="#E11D48">5xx / timeout</text>
+
+  <!-- 재시도 대기 박스 -->
+  <rect x="272" y="316" width="624" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="584" y="338" text-anchor="middle" class="title-label" fill="#BE123C">WAL 재시도 버퍼 — WAL에 보관 후 지수 백오프 재전송</text>
+  <text x="584" y="356" text-anchor="middle" class="sub-label">WAL 세그먼트 보관 → 회복되면 재전송 → 성공 후 트런케이트</text>
+
+  <!-- ─── Server Mode 비교 ─── -->
+  <rect x="40" y="400" width="720" height="100" rx="8" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="426" text-anchor="middle" style="font-size:13px; font-weight:700; fill:#0A0A0A;">Server Mode vs Agent Mode — 메모리 사용 비교</text>
+
+  <!-- 비교 항목들 -->
+  <text x="80" y="452" class="body-label" fill="#BE123C">Server Mode 메모리 압박 원인:</text>
+  <text x="80" y="470" class="sub-label">① WAL 재생 피크 (71개 세그먼트) — 재시작 시 전체 재생</text>
+  <text x="80" y="486" class="sub-label">② TSDB Compaction 피크 — 블록 병합 중 메모리 스파이크</text>
+  <text x="80" y="490" class="sub-label" fill="#E11D48">   → 실측 3,981 Mi (제한 4Gi 근접)</text>
+
+  <text x="480" y="452" class="body-label" fill="#047857">Agent Mode 절감 효과:</text>
+  <text x="480" y="470" class="sub-label">① WAL = 재시도 버퍼만 → 최소 세그먼트 유지</text>
+  <text x="480" y="486" class="sub-label">② Compaction 없음 → 피크 스파이크 소멸</text>
+  <text x="480" y="490" class="sub-label" fill="#059669">   → 예상 ~1.2 Gi (약 70% 절감)</text>
+</svg>

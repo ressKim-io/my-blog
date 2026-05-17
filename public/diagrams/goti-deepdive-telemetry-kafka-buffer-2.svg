@@ -1,0 +1,151 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 600" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-2">버퍼 없음 vs Kafka 버퍼 — 버스트 상황 비교</title>
+  <desc id="desc-2">왼쪽은 버퍼 없이 Collector가 Loki/Tempo로 직접 전송할 때 버스트 트래픽이 백엔드를 OOMKilled시키는 흐름, 오른쪽은 Kafka 버퍼가 스파이크를 디스크에 흡수하고 Collector Back이 천천히 소비해 백엔드를 보호하는 흐름</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title { font-size: 14px; font-weight: 600; fill: #0A0A0A; }
+    .label { font-size: 13px; fill: #0A0A0A; }
+    .sublabel { font-size: 11px; fill: #27272A; }
+    .arrow-label { font-size: 11px; fill: #27272A; }
+    .section-title { font-size: 14px; font-weight: 700; }
+  </style>
+
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0A0A0A" />
+    </marker>
+    <marker id="arr-rose" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E11D48" />
+    </marker>
+    <marker id="arr-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669" />
+    </marker>
+    <marker id="arr-violet" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#7C3AED" />
+    </marker>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="800" height="600" fill="#FAFAFA" />
+
+  <!-- 전체 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15px" font-weight="600" fill="#0A0A0A">버스트 시 버퍼 유무 비교</text>
+
+  <!-- 구분선 -->
+  <line x1="400" y1="48" x2="400" y2="572" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 3" />
+
+  <!-- ===== 왼쪽: 버퍼 없음 ===== -->
+  <text x="200" y="64" text-anchor="middle" class="section-title" fill="#E11D48">버퍼 없음 (버스트 시)</text>
+
+  <!-- 버스트 트래픽 -->
+  <rect x="64" y="80" width="272" height="56" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" />
+  <text x="200" y="108" text-anchor="middle" class="label" font-weight="600">버스트 트래픽</text>
+  <text x="200" y="126" text-anchor="middle" class="sublabel">5,000 VU — 대량 logs·traces</text>
+
+  <!-- 버스트 → Collector Front -->
+  <line x1="200" y1="136" x2="200" y2="172" stroke="#E11D48" stroke-width="2" marker-end="url(#arr-rose)" />
+
+  <!-- Collector Front (버퍼 없음) -->
+  <rect x="64" y="176" width="272" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" />
+  <text x="200" y="204" text-anchor="middle" class="label" font-weight="600">OTel Collector</text>
+  <text x="200" y="222" text-anchor="middle" class="sublabel">직접 전송 (버퍼 없음)</text>
+
+  <!-- Collector → 직접 Loki/Tempo -->
+  <line x1="152" y1="232" x2="120" y2="276" stroke="#E11D48" stroke-width="2" marker-end="url(#arr-rose)" />
+  <line x1="248" y1="232" x2="280" y2="276" stroke="#E11D48" stroke-width="2" marker-end="url(#arr-rose)" />
+
+  <!-- 직접 전송 라벨 -->
+  <rect x="24" y="248" width="80" height="16" fill="#FAFAFA" />
+  <text x="64" y="260" text-anchor="middle" class="arrow-label" fill="#E11D48">폭주 유입</text>
+  <rect x="288" y="248" width="80" height="16" fill="#FAFAFA" />
+  <text x="328" y="260" text-anchor="middle" class="arrow-label" fill="#E11D48">폭주 유입</text>
+
+  <!-- Loki OOM -->
+  <rect x="48" y="280" width="144" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2" />
+  <text x="120" y="308" text-anchor="middle" class="label" font-weight="600" fill="#BE123C">Loki</text>
+  <text x="120" y="328" text-anchor="middle" class="sublabel" fill="#BE123C">메모리 폭증</text>
+
+  <!-- Tempo OOM -->
+  <rect x="208" y="280" width="144" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2" />
+  <text x="280" y="308" text-anchor="middle" class="label" font-weight="600" fill="#BE123C">Tempo</text>
+  <text x="280" y="328" text-anchor="middle" class="sublabel" fill="#BE123C">메모리 폭증</text>
+
+  <!-- OOMKilled 표시 -->
+  <line x1="120" y1="344" x2="120" y2="380" stroke="#E11D48" stroke-width="2" marker-end="url(#arr-rose)" />
+  <line x1="280" y1="344" x2="280" y2="380" stroke="#E11D48" stroke-width="2" marker-end="url(#arr-rose)" />
+
+  <rect x="48" y="380" width="144" height="40" rx="4" fill="#E11D48" />
+  <text x="120" y="398" text-anchor="middle" font-size="12px" font-weight="700" fill="#FAFAFA">OOMKilled</text>
+  <text x="120" y="412" text-anchor="middle" font-size="10px" fill="#FAFAFA">Pod 재시작 · 데이터 유실</text>
+
+  <rect x="208" y="380" width="144" height="40" rx="4" fill="#E11D48" />
+  <text x="280" y="398" text-anchor="middle" font-size="12px" font-weight="700" fill="#FAFAFA">OOMKilled</text>
+  <text x="280" y="412" text-anchor="middle" font-size="10px" fill="#FAFAFA">Pod 재시작 · 데이터 유실</text>
+
+  <!-- 결과 설명 (버퍼 없음) -->
+  <rect x="40" y="440" width="320" height="56" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1" />
+  <text x="200" y="460" text-anchor="middle" class="sublabel" fill="#BE123C">Loki/Tempo가 버스트를 메모리에서 처리하려다</text>
+  <text x="200" y="476" text-anchor="middle" class="sublabel" fill="#BE123C">힙이 한도를 초과 → OOMKilled → 재시작</text>
+  <text x="200" y="492" text-anchor="middle" class="sublabel" fill="#BE123C">재시작 중 수신된 데이터는 유실</text>
+
+  <!-- ===== 오른쪽: Kafka 버퍼 ===== -->
+  <text x="600" y="64" text-anchor="middle" class="section-title" fill="#059669">Kafka 버퍼 있음 (버스트 시)</text>
+
+  <!-- 버스트 트래픽 (오른쪽) -->
+  <rect x="464" y="80" width="272" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" />
+  <text x="600" y="108" text-anchor="middle" class="label" font-weight="600">버스트 트래픽</text>
+  <text x="600" y="126" text-anchor="middle" class="sublabel">5,000 VU — 대량 logs·traces</text>
+
+  <!-- 버스트 → Collector Front (오른쪽) -->
+  <line x1="600" y1="136" x2="600" y2="172" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)" />
+
+  <!-- Collector Front (오른쪽) -->
+  <rect x="464" y="176" width="272" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" />
+  <text x="600" y="204" text-anchor="middle" class="label" font-weight="600">OTel Collector (Front)</text>
+  <text x="600" y="222" text-anchor="middle" class="sublabel">Kafka exporter로 publish</text>
+
+  <!-- Collector → Kafka -->
+  <line x1="600" y1="232" x2="600" y2="272" stroke="#7C3AED" stroke-width="2" marker-end="url(#arr-violet)" />
+  <rect x="524" y="244" width="152" height="16" fill="#FAFAFA" />
+  <text x="600" y="256" text-anchor="middle" class="arrow-label" fill="#7C3AED">빠르게 적재 (디스크)</text>
+
+  <!-- Kafka 박스 -->
+  <rect x="480" y="276" width="240" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2" />
+  <text x="600" y="304" text-anchor="middle" class="label" font-weight="600" fill="#6D28D9">Kafka 토픽</text>
+  <text x="600" y="322" text-anchor="middle" class="sublabel" fill="#6D28D9">otlp_logs · otlp_spans</text>
+
+  <!-- 디스크 버퍼 표시 -->
+  <rect x="480" y="348" width="240" height="24" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1" stroke-dasharray="3 2" />
+  <text x="600" y="364" text-anchor="middle" font-size="11px" fill="#6D28D9">디스크 기반 버퍼 — OOM 없음</text>
+
+  <!-- Kafka → Collector Back (천천히 소비) -->
+  <line x1="600" y1="372" x2="600" y2="408" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-green)" />
+  <rect x="500" y="380" width="200" height="16" fill="#FAFAFA" />
+  <text x="600" y="392" text-anchor="middle" class="arrow-label" fill="#059669">천천히 소비 (백프레셔 없음)</text>
+
+  <!-- Collector Back -->
+  <rect x="464" y="412" width="272" height="48" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" />
+  <text x="600" y="436" text-anchor="middle" class="label" font-weight="600">OTel Collector (Back)</text>
+  <text x="600" y="452" text-anchor="middle" class="sublabel">batch export — 안정적 처리량</text>
+
+  <!-- Back → Loki/Tempo -->
+  <line x1="552" y1="460" x2="520" y2="496" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arr-violet)" />
+  <line x1="648" y1="460" x2="680" y2="496" stroke="#D97706" stroke-width="1.5" marker-end="url(#arr-amber)" />
+
+  <defs>
+    <marker id="arr-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#D97706" />
+    </marker>
+  </defs>
+
+  <!-- Loki 정상 -->
+  <rect x="456" y="500" width="120" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" />
+  <text x="516" y="520" text-anchor="middle" class="sublabel" font-weight="600" fill="#047857">Loki</text>
+  <text x="516" y="534" text-anchor="middle" font-size="10px" fill="#047857">정상 처리</text>
+
+  <!-- Tempo 정상 -->
+  <rect x="624" y="500" width="120" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" />
+  <text x="684" y="520" text-anchor="middle" class="sublabel" font-weight="600" fill="#047857">Tempo</text>
+  <text x="684" y="534" text-anchor="middle" font-size="10px" fill="#047857">정상 처리</text>
+</svg>

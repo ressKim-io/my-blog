@@ -1,0 +1,139 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 560" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">istiod 제어 평면과 xDS로 연결된 데이터 평면 전체 구조</title>
+  <desc id="desc-2">istiod가 xDS 프로토콜(LDS·RDS·CDS·EDS)을 통해 클러스터 전체 Envoy sidecar에 설정을 push하고, Kubernetes CRD(VirtualService·DestinationRule)를 읽어 변환하는 흐름을 보여줍니다</desc>
+
+  <style>
+    .label { font-size: 13px; fill: #0A0A0A; }
+    .sublabel { font-size: 11px; fill: #27272A; }
+    .title-text { font-size: 14px; font-weight: 600; fill: #0A0A0A; }
+    .caption { font-size: 11px; fill: #475569; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arrow-dark2); }
+    .arrow-accent { stroke: #7C3AED; stroke-width: 2; fill: none; marker-end: url(#arrow-accent2); }
+    .arrow-blue { stroke: #0891B2; stroke-width: 1.5; fill: none; marker-end: url(#arrow-blue2); }
+    .arrow-green { stroke: #059669; stroke-width: 1.5; fill: none; marker-end: url(#arrow-green2); }
+  </style>
+
+  <defs>
+    <marker id="arrow-dark2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-accent2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-blue2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="arrow-green2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- 제어 평면 영역 -->
+  <rect x="40" y="32" width="720" height="136" rx="10" ry="10"
+    fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="56" y="56" class="sublabel" fill="#0E7490">제어 평면 (Control Plane)</text>
+
+  <!-- istiod 박스 -->
+  <rect x="72" y="64" width="200" height="88" rx="8" ry="8"
+    fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="172" y="92" text-anchor="middle" class="title-text" fill="#0E7490">istiod</text>
+  <text x="172" y="112" text-anchor="middle" class="sublabel" fill="#0E7490">Pilot · Citadel · Galley 통합</text>
+  <text x="172" y="128" text-anchor="middle" class="sublabel" fill="#475569">xDS gRPC 서버 (포트 15010)</text>
+
+  <!-- Kubernetes API / CRD 박스 -->
+  <rect x="312" y="64" width="200" height="88" rx="8" ry="8"
+    fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="412" y="92" text-anchor="middle" class="title-text" fill="#B45309">Kubernetes API</text>
+  <text x="412" y="112" text-anchor="middle" class="sublabel" fill="#B45309">CRD 저장소</text>
+  <text x="412" y="128" text-anchor="middle" class="sublabel" fill="#475569">VirtualService · DestinationRule</text>
+  <text x="412" y="144" text-anchor="middle" class="sublabel" fill="#475569">RequestAuthentication · AuthorizationPolicy</text>
+
+  <!-- Citadel (인증서 CA) 박스 -->
+  <rect x="552" y="64" width="192" height="88" rx="8" ry="8"
+    fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="648" y="92" text-anchor="middle" class="title-text" fill="#BE123C">인증서 CA</text>
+  <text x="648" y="112" text-anchor="middle" class="sublabel" fill="#BE123C">(istiod 내 Citadel)</text>
+  <text x="648" y="128" text-anchor="middle" class="sublabel" fill="#475569">SPIFFE x.509 인증서 발급</text>
+  <text x="648" y="144" text-anchor="middle" class="sublabel" fill="#475569">자동 rotation (24h)</text>
+
+  <!-- istiod → Kubernetes API (watch) -->
+  <path d="M272,100 L312,100" class="arrow-blue"/>
+  <text x="292" y="92" text-anchor="middle" class="caption" fill="#0E7490">watch</text>
+
+  <!-- istiod → Citadel (통합) -->
+  <path d="M552,100 L744,100" class="arrow" stroke="#D97706" marker-end="url(#arrow-dark2)"/>
+  <text x="648" y="56" text-anchor="middle" class="caption" fill="#B45309">포함 (단일 바이너리)</text>
+
+  <!-- 데이터 평면 영역 -->
+  <rect x="40" y="200" width="720" height="312" rx="10" ry="10"
+    fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="56" y="224" class="sublabel" fill="#334155">데이터 평면 (Data Plane) — Envoy sidecar 집합</text>
+
+  <!-- Pod A -->
+  <rect x="72" y="240" width="200" height="248" rx="8" ry="8"
+    fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="172" y="264" text-anchor="middle" class="title-text" fill="#047857">Pod A</text>
+  <rect x="88" y="272" width="168" height="56" rx="6" ry="6"
+    fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="172" y="296" text-anchor="middle" class="sublabel">앱 컨테이너</text>
+  <text x="172" y="312" text-anchor="middle" class="sublabel" fill="#475569">goti-ticket-service</text>
+  <rect x="88" y="344" width="168" height="120" rx="6" ry="6"
+    fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="172" y="368" text-anchor="middle" class="sublabel" fill="#6D28D9">Envoy sidecar</text>
+  <text x="172" y="388" text-anchor="middle" class="sublabel" fill="#475569">LDS: 포트 리스너</text>
+  <text x="172" y="404" text-anchor="middle" class="sublabel" fill="#475569">RDS: 라우팅 규칙</text>
+  <text x="172" y="420" text-anchor="middle" class="sublabel" fill="#475569">CDS: 업스트림 클러스터</text>
+  <text x="172" y="436" text-anchor="middle" class="sublabel" fill="#475569">EDS: 엔드포인트 IP</text>
+  <text x="172" y="456" text-anchor="middle" class="sublabel" fill="#475569">mTLS 인증서 보유</text>
+
+  <!-- Pod B -->
+  <rect x="312" y="240" width="200" height="248" rx="8" ry="8"
+    fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="412" y="264" text-anchor="middle" class="title-text" fill="#047857">Pod B</text>
+  <rect x="328" y="272" width="168" height="56" rx="6" ry="6"
+    fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="412" y="296" text-anchor="middle" class="sublabel">앱 컨테이너</text>
+  <text x="412" y="312" text-anchor="middle" class="sublabel" fill="#475569">goti-user-service</text>
+  <rect x="328" y="344" width="168" height="120" rx="6" ry="6"
+    fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="412" y="368" text-anchor="middle" class="sublabel" fill="#6D28D9">Envoy sidecar</text>
+  <text x="412" y="388" text-anchor="middle" class="sublabel" fill="#475569">LDS / RDS / CDS / EDS</text>
+  <text x="412" y="408" text-anchor="middle" class="sublabel" fill="#475569">mTLS 인증서 보유</text>
+  <text x="412" y="432" text-anchor="middle" class="sublabel" fill="#475569">트래픽: mTLS 수신</text>
+  <text x="412" y="452" text-anchor="middle" class="sublabel" fill="#475569">Prometheus 메트릭 노출</text>
+
+  <!-- Pod C -->
+  <rect x="552" y="240" width="192" height="248" rx="8" ry="8"
+    fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="648" y="264" text-anchor="middle" class="title-text" fill="#047857">Pod C</text>
+  <rect x="568" y="272" width="160" height="56" rx="6" ry="6"
+    fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="648" y="296" text-anchor="middle" class="sublabel">앱 컨테이너</text>
+  <text x="648" y="312" text-anchor="middle" class="sublabel" fill="#475569">goti-gateway</text>
+  <rect x="568" y="344" width="160" height="120" rx="6" ry="6"
+    fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="648" y="368" text-anchor="middle" class="sublabel" fill="#6D28D9">Envoy sidecar</text>
+  <text x="648" y="388" text-anchor="middle" class="sublabel" fill="#475569">LDS / RDS / CDS / EDS</text>
+  <text x="648" y="408" text-anchor="middle" class="sublabel" fill="#475569">mTLS 인증서 보유</text>
+  <text x="648" y="432" text-anchor="middle" class="sublabel" fill="#475569">JWT 검증 필터</text>
+  <text x="648" y="452" text-anchor="middle" class="sublabel" fill="#475569">Rate Limit 필터</text>
+
+  <!-- istiod → 각 Envoy (xDS push) — 제어 평면에서 데이터 평면으로 -->
+  <path d="M172,152 L172,344" class="arrow-accent" stroke-dasharray="4 2"/>
+  <path d="M172,152 L412,344" class="arrow-accent" stroke-dasharray="4 2"/>
+  <path d="M172,152 L648,344" class="arrow-accent" stroke-dasharray="4 2"/>
+
+  <!-- xDS 라벨 -->
+  <rect x="176" y="228" width="96" height="20" rx="3" fill="#F5F3FF"/>
+  <text x="224" y="242" text-anchor="middle" class="caption" fill="#6D28D9">xDS push (gRPC)</text>
+
+  <!-- Pod A → Pod B 트래픽 (mTLS) -->
+  <path d="M272,404 L312,404" class="arrow-green"/>
+  <text x="292" y="396" text-anchor="middle" class="caption" fill="#047857">mTLS</text>
+
+  <!-- 하단 캡션 -->
+  <text x="400" y="532" text-anchor="middle" class="sublabel" fill="#475569">
+    istiod가 CRD 변경을 감지해 xDS로 전 sidecar에 즉시 반영 — 앱 재시작 불필요
+  </text>
+</svg>

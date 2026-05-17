@@ -1,0 +1,136 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-1">OTel Collector 파이프라인 구조도 — receiver, processor 체인, exporter 3단 흐름</title>
+  <desc id="desc-1">애플리케이션(OTel SDK)에서 OTLP로 전송된 텔레메트리가 Receiver → Processor 체인(memory_limiter, batch) → Exporter 순서로 처리되고, 시그널(metrics/logs/traces)별로 독립 파이프라인으로 분기되는 구조를 보여줍니다</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">OTel Collector 파이프라인 — receiver / processor 체인 / exporter</text>
+
+  <!-- ===== 소스 영역 ===== -->
+  <!-- App 박스 -->
+  <rect x="40" y="80" width="140" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="110" y="107" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Spring Boot</text>
+  <text x="110" y="124" text-anchor="middle" font-size="11" fill="#27272A">OTel SDK</text>
+
+  <!-- OTLP 화살표 -->
+  <line x1="180" y1="112" x2="230" y2="112" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <text x="205" y="104" text-anchor="middle" font-size="10" fill="#27272A">OTLP</text>
+  <text x="205" y="124" text-anchor="middle" font-size="10" fill="#27272A">4317 / 4318</text>
+
+  <!-- ===== Collector 외곽 박스 ===== -->
+  <rect x="230" y="56" width="480" height="384" rx="8" fill="none" stroke="#D4D4D8" stroke-width="2" stroke-dasharray="6 3"/>
+  <text x="470" y="76" text-anchor="middle" font-size="12" fill="#27272A" font-weight="600">OTel Collector</text>
+
+  <!-- ===== Receiver 영역 ===== -->
+  <rect x="254" y="88" width="136" height="320" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="322" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Receiver</text>
+
+  <!-- OTLP receiver 박스 -->
+  <rect x="270" y="120" width="104" height="52" rx="4" fill="#FAFAFA" stroke="#0891B2" stroke-width="1"/>
+  <text x="322" y="143" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">otlpreceiver</text>
+  <text x="322" y="159" text-anchor="middle" font-size="10" fill="#27272A">gRPC / HTTP</text>
+
+  <!-- metrics 수신 -->
+  <rect x="270" y="188" width="104" height="36" rx="4" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="322" y="210" text-anchor="middle" font-size="11" fill="#27272A">metrics</text>
+
+  <!-- logs 수신 -->
+  <rect x="270" y="236" width="104" height="36" rx="4" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="322" y="258" text-anchor="middle" font-size="11" fill="#27272A">logs</text>
+
+  <!-- traces 수신 -->
+  <rect x="270" y="284" width="104" height="36" rx="4" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="322" y="306" text-anchor="middle" font-size="11" fill="#27272A">traces</text>
+
+  <!-- ===== Processor 영역 ===== -->
+  <rect x="406" y="88" width="136" height="320" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="474" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">Processor</text>
+
+  <!-- memory_limiter -->
+  <rect x="422" y="120" width="104" height="52" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="474" y="143" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">memory_limiter</text>
+  <text x="474" y="159" text-anchor="middle" font-size="10" fill="#27272A">OOM 방지 (1순위)</text>
+
+  <!-- 아래 화살표 -->
+  <line x1="474" y1="172" x2="474" y2="186" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow-violet)"/>
+
+  <!-- batch -->
+  <rect x="422" y="188" width="104" height="52" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="474" y="211" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">batch</text>
+  <text x="474" y="227" text-anchor="middle" font-size="10" fill="#27272A">묶어서 전송</text>
+
+  <!-- 체인 설명 -->
+  <text x="474" y="268" text-anchor="middle" font-size="10" fill="#6D28D9">↓ 순서 고정 필수</text>
+  <text x="474" y="282" text-anchor="middle" font-size="10" fill="#27272A">memory_limiter 먼저</text>
+  <text x="474" y="296" text-anchor="middle" font-size="10" fill="#27272A">→ batch 나중</text>
+
+  <!-- ===== Exporter 영역 ===== -->
+  <rect x="558" y="88" width="136" height="320" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="626" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Exporter</text>
+
+  <!-- metrics exporter -->
+  <rect x="574" y="120" width="104" height="52" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="626" y="139" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">prometheusremote</text>
+  <text x="626" y="153" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">write</text>
+  <text x="626" y="167" text-anchor="middle" font-size="10" fill="#27272A">→ Mimir</text>
+
+  <!-- logs exporter -->
+  <rect x="574" y="188" width="104" height="52" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="626" y="207" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">kafkaexporter</text>
+  <text x="626" y="223" text-anchor="middle" font-size="10" fill="#27272A">→ Kafka (logs)</text>
+
+  <!-- traces exporter -->
+  <rect x="574" y="256" width="104" height="52" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="626" y="275" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">kafkaexporter</text>
+  <text x="626" y="291" text-anchor="middle" font-size="10" fill="#27272A">→ Kafka (traces)</text>
+
+  <!-- ===== Receiver → Processor 화살표 ===== -->
+  <!-- metrics -->
+  <line x1="374" y1="206" x2="422" y2="206" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <!-- logs -->
+  <line x1="374" y1="254" x2="422" y2="254" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <!-- traces -->
+  <line x1="374" y1="302" x2="422" y2="302" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- ===== Processor → Exporter 화살표 ===== -->
+  <!-- metrics → prometheusremotewrite -->
+  <line x1="526" y1="210" x2="574" y2="150" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-green)"/>
+  <!-- logs → kafka logs -->
+  <line x1="526" y1="214" x2="574" y2="214" stroke="#D97706" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-amber)"/>
+  <!-- traces → kafka traces -->
+  <line x1="526" y1="282" x2="574" y2="282" stroke="#D97706" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-amber)"/>
+
+  <!-- ===== 파이프라인 분기 레이블 ===== -->
+  <text x="322" y="360" text-anchor="middle" font-size="10" fill="#0E7490" font-weight="600">3 signals</text>
+  <text x="322" y="374" text-anchor="middle" font-size="10" fill="#0E7490">분리 수신</text>
+
+  <text x="474" y="330" text-anchor="middle" font-size="10" fill="#6D28D9" font-weight="600">파이프라인별</text>
+  <text x="474" y="344" text-anchor="middle" font-size="10" fill="#6D28D9">독립 체인</text>
+
+  <text x="626" y="340" text-anchor="middle" font-size="10" fill="#B45309" font-weight="600">시그널별</text>
+  <text x="626" y="354" text-anchor="middle" font-size="10" fill="#B45309">분기 전송</text>
+
+  <!-- ===== 하단 — ocb 경량 빌드 설명 ===== -->
+  <rect x="40" y="480" width="720" height="60" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="500" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">ocb (OpenTelemetry Collector Builder) — 경량 커스텀 빌드</text>
+  <text x="400" y="518" text-anchor="middle" font-size="11" fill="#334155">필요한 receiver / processor / exporter만 포함 — 바이너리 크기 절감, 불필요한 컴포넌트 공격 표면 제거</text>
+  <text x="400" y="533" text-anchor="middle" font-size="11" fill="#334155">builder-config.yaml 에 components: 목록 명시 → ocb --config builder-config.yaml 한 줄로 빌드</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-black" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+</svg>

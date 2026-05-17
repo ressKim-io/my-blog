@@ -1,0 +1,131 @@
+<svg
+  role="img"
+  aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 480"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-2">대칭 구조 — T0 정상 vs T4 역방향 복제 비교</title>
+  <desc id="desc-2">T0 정상 상태(GCP publisher, AWS subscriber)와 T4 역방향 복제 상태(AWS publisher, GCP subscriber)를 나란히 비교합니다. 두 구조가 publisher·subscriber 역할과 read_only 플래그만 바뀌고 나머지 인프라는 완전히 동일함을 보여줍니다</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">구조 비교 — T0 정상 vs T4 역방향 복제</text>
+
+  <!-- ===================== 왼쪽: T0 정상 ===================== -->
+  <text x="190" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#059669">T0 — 정상 (GCP publisher)</text>
+
+  <!-- PgBouncer-RW (GCP) -->
+  <rect x="40" y="88" width="130" height="50" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="105" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">PgBouncer-RW</text>
+  <text x="105" y="125" text-anchor="middle" font-size="11" fill="#0E7490">GCP 쓰기 경로</text>
+
+  <!-- GCP pg-primary -->
+  <rect x="40" y="168" width="130" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="105" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">GCP pg-primary</text>
+  <text x="105" y="207" text-anchor="middle" font-size="11" fill="#047857">publisher</text>
+  <text x="105" y="220" text-anchor="middle" font-size="11" fill="#047857">read_only = off</text>
+
+  <!-- 화살표 RW → GCP primary -->
+  <line x1="105" y1="138" x2="105" y2="168" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-blue-l)"/>
+
+  <!-- 복제 화살표 GCP→AWS (T0) -->
+  <line x1="170" y1="196" x2="240" y2="196" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green-l)"/>
+  <text x="205" y="188" text-anchor="middle" font-size="11" fill="#047857">복제 →</text>
+
+  <!-- AWS RDS (T0 subscriber) -->
+  <rect x="240" y="168" width="130" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="305" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#B45309">AWS RDS</text>
+  <text x="305" y="207" text-anchor="middle" font-size="11" fill="#B45309">subscriber</text>
+  <text x="305" y="220" text-anchor="middle" font-size="11" fill="#B45309">read_only = on</text>
+
+  <!-- PgBouncer-RO AWS -->
+  <rect x="240" y="88" width="130" height="50" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="305" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">PgBouncer-RO</text>
+  <text x="305" y="125" text-anchor="middle" font-size="11" fill="#0E7490">AWS 읽기 경로</text>
+
+  <!-- 화살표 RO → AWS RDS -->
+  <line x1="305" y1="138" x2="305" y2="168" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-blue-l)"/>
+
+  <!-- T0 변경 불가 항목 -->
+  <rect x="40" y="256" width="330" height="68" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="55" y="276" font-size="11" font-weight="700" fill="#6D28D9">변경 없는 공통 구성</text>
+  <text x="55" y="294" font-size="11" fill="#6D28D9">· PostgreSQL 16 + pglogical 2.x (양쪽 동일)</text>
+  <text x="55" y="310" font-size="11" fill="#6D28D9">· 스키마 · 사용자 계정 · TLS sslmode=verify-full</text>
+
+  <!-- ===================== 오른쪽: T4 역방향 ===================== -->
+  <text x="610" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#059669">T4 — Failback (AWS publisher)</text>
+
+  <!-- PgBouncer-RW (AWS) -->
+  <rect x="460" y="88" width="130" height="50" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="525" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">PgBouncer-RW</text>
+  <text x="525" y="125" text-anchor="middle" font-size="11" fill="#0E7490">AWS 쓰기 경로</text>
+
+  <!-- AWS RDS (T4 publisher) -->
+  <rect x="460" y="168" width="130" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="525" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">AWS RDS</text>
+  <text x="525" y="207" text-anchor="middle" font-size="11" fill="#047857">publisher</text>
+  <text x="525" y="220" text-anchor="middle" font-size="11" fill="#047857">read_only = off</text>
+
+  <!-- 화살표 RW → AWS RDS -->
+  <line x1="525" y1="138" x2="525" y2="168" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-blue-r)"/>
+
+  <!-- 복제 화살표 AWS→GCP (역방향) -->
+  <line x1="460" y1="196" x2="390" y2="196" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green-r)"/>
+  <text x="425" y="188" text-anchor="middle" font-size="11" fill="#047857">← 역복제</text>
+
+  <!-- GCP pg-primary (T4 subscriber) -->
+  <rect x="260" y="168" width="130" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="325" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#B45309">GCP pg-primary</text>
+  <text x="325" y="207" text-anchor="middle" font-size="11" fill="#B45309">subscriber</text>
+  <text x="325" y="220" text-anchor="middle" font-size="11" fill="#B45309">read_only = on</text>
+
+  <!-- PgBouncer-RO GCP -->
+  <rect x="260" y="88" width="130" height="50" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="325" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">PgBouncer-RO</text>
+  <text x="325" y="125" text-anchor="middle" font-size="11" fill="#0E7490">GCP 읽기 경로</text>
+
+  <!-- 화살표 RO → GCP primary -->
+  <line x1="325" y1="138" x2="325" y2="168" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-blue-r)"/>
+
+  <!-- T4 변경 불가 항목 -->
+  <rect x="260" y="256" width="330" height="68" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="275" y="276" font-size="11" font-weight="700" fill="#6D28D9">변경 없는 공통 구성</text>
+  <text x="275" y="294" font-size="11" fill="#6D28D9">· PostgreSQL 16 + pglogical 2.x (양쪽 동일)</text>
+  <text x="275" y="310" font-size="11" fill="#6D28D9">· 스키마 · 사용자 계정 · TLS sslmode=verify-full</text>
+
+  <!-- 중앙 분리선 -->
+  <line x1="400" y1="60" x2="400" y2="350" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- 아래쪽 요약 -->
+  <rect x="80" y="360" width="640" height="96" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="384" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">대칭 설계 불변식 — 바뀌는 것 vs 바뀌지 않는 것</text>
+  <text x="136" y="410" font-size="12" font-weight="700" fill="#047857">바뀌는 것 (토글)</text>
+  <text x="136" y="428" font-size="11" fill="#047857">· publisher / subscriber 역할</text>
+  <text x="136" y="444" font-size="11" fill="#047857">· read_only 플래그 (on ↔ off)</text>
+  <text x="136" y="460" font-size="11" fill="#047857">· PgBouncer-RW 지향 엔드포인트</text>
+  <text x="500" y="410" font-size="12" font-weight="700" fill="#059669">바뀌지 않는 것 (인프라 그대로)</text>
+  <text x="500" y="428" font-size="11" fill="#047857">· PG 엔진 버전 · pglogical 버전</text>
+  <text x="500" y="444" font-size="11" fill="#047857">· 스키마 · 사용자 계정 · TLS 설정</text>
+  <text x="500" y="460" font-size="11" fill="#047857">· VM / RDS 인스턴스 (추가 인프라 없음)</text>
+
+  <!-- arrowhead 정의 -->
+  <defs>
+    <marker id="arrow-green-l" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-green-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-blue-l" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="arrow-blue-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+  </defs>
+</svg>

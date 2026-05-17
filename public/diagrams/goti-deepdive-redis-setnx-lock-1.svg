@@ -1,0 +1,144 @@
+<svg
+  role="img"
+  aria-labelledby="title-setnx-1 desc-setnx-1"
+  viewBox="0 0 800 560"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-setnx-1">SETNX 동시 요청 시퀀스 — 두 사용자 중 하나만 락 획득</title>
+  <desc id="desc-setnx-1">사용자 A와 사용자 B가 동시에 같은 좌석에 SETNX 명령을 보낼 때, 먼저 처리된 A만 1(성공)을 받고 B는 0(실패)을 받아 하나의 요청만 좌석을 점유하는 시퀀스 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="560" fill="#FAFAFA" />
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">시퀀스 — 동시 SETNX 요청, 하나만 성공</text>
+
+  <!-- 참여자 레인 헤더 -->
+  <!-- 사용자 A (Frontend / Client) -->
+  <rect x="40" y="52" width="130" height="44" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="105" y="71" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">사용자 A</text>
+  <text x="105" y="87" text-anchor="middle" font-size="11" fill="#27272A">좌석 3A 선택</text>
+
+  <!-- 사용자 B (Frontend / Client) -->
+  <rect x="200" y="52" width="130" height="44" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="265" y="71" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">사용자 B</text>
+  <text x="265" y="87" text-anchor="middle" font-size="11" fill="#27272A">좌석 3A 선택</text>
+
+  <!-- 서버 (Backend API) -->
+  <rect x="360" y="52" width="140" height="44" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="430" y="71" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">API 서버</text>
+  <text x="430" y="87" text-anchor="middle" font-size="11" fill="#27272A">HoldSeat 핸들러</text>
+
+  <!-- Redis -->
+  <rect x="540" y="52" width="140" height="44" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="610" y="71" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Redis</text>
+  <text x="610" y="87" text-anchor="middle" font-size="11" fill="#27272A">단일 스레드 처리</text>
+
+  <!-- 수직 라이프라인 -->
+  <line x1="105" y1="96" x2="105" y2="540" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="265" y1="96" x2="265" y2="540" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="430" y1="96" x2="430" y2="540" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="610" y1="96" x2="610" y2="540" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- ===== 타임라인 이벤트 ===== -->
+
+  <!-- T1: A 요청 -->
+  <text x="16" y="130" font-size="11" fill="#475569" font-weight="600">T1</text>
+  <line x1="105" y1="126" x2="425" y2="126" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <rect x="170" y="112" width="140" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="240" y="124" text-anchor="middle" font-size="11" fill="#0A0A0A">좌석 hold 요청</text>
+
+  <!-- T2: B 요청 (거의 동시) -->
+  <text x="16" y="158" font-size="11" fill="#475569" font-weight="600">T2</text>
+  <line x1="265" y1="154" x2="425" y2="154" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <rect x="295" y="140" width="100" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="345" y="152" text-anchor="middle" font-size="11" fill="#0A0A0A">좌석 hold 요청</text>
+
+  <!-- 동시 요청 브레이스 표시 -->
+  <rect x="68" y="144" width="24" height="24" rx="3" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="80" y="160" text-anchor="middle" font-size="10" fill="#B45309" font-weight="700">∥</text>
+  <text x="46" y="172" font-size="10" fill="#B45309">동시</text>
+
+  <!-- T3: A → Redis SETNX (A 먼저 처리됨) -->
+  <text x="16" y="198" font-size="11" fill="#475569" font-weight="600">T3</text>
+  <line x1="430" y1="194" x2="605" y2="194" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow-violet)"/>
+  <rect x="450" y="180" width="140" height="18" rx="3" fill="#F5F3FF"/>
+  <text x="520" y="192" text-anchor="middle" font-size="11" fill="#6D28D9">SET seat:held:1:3A userA_id</text>
+
+  <!-- 코드 표시 박스 -->
+  <rect x="440" y="200" width="250" height="30" rx="4" fill="#18181B"/>
+  <text x="565" y="212" text-anchor="middle" font-size="10" font-family="'Geist Mono', monospace" fill="#A5F3FC">NX EX 600</text>
+  <text x="565" y="226" text-anchor="middle" font-size="10" font-family="'Geist Mono', monospace" fill="#6EE7B7">← set if not exists, TTL 600s</text>
+
+  <!-- T4: Redis → A 성공 응답 -->
+  <text x="16" y="248" font-size="11" fill="#475569" font-weight="600">T4</text>
+  <line x1="605" y1="244" x2="435" y2="244" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#arrow-green)"/>
+  <rect x="480" y="230" width="90" height="18" rx="3" fill="#ECFDF5"/>
+  <text x="525" y="242" text-anchor="middle" font-size="11" fill="#047857" font-weight="600">1 (성공)</text>
+
+  <!-- 성공 배지 -->
+  <rect x="630" y="234" width="72" height="22" rx="11" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="666" y="249" text-anchor="middle" font-size="11" fill="#047857" font-weight="700">락 획득</text>
+
+  <!-- T4: A에 성공 전달 -->
+  <line x1="430" y1="268" x2="110" y2="268" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#arrow-green)"/>
+  <rect x="200" y="254" width="120" height="18" rx="3" fill="#ECFDF5"/>
+  <text x="260" y="266" text-anchor="middle" font-size="11" fill="#047857">hold 성공 응답</text>
+
+  <!-- ===== Redis SETNX 내부 상태 표시 ===== -->
+  <rect x="540" y="286" width="240" height="44" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="660" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">Redis 키 상태</text>
+  <text x="660" y="320" text-anchor="middle" font-size="11" font-family="'Geist Mono', monospace" fill="#0A0A0A">seat:held:1:3A = "userA_id"</text>
+  <text x="660" y="334" text-anchor="middle" font-size="10" fill="#475569">TTL: 600s | 소유자 식별자 저장됨</text>
+
+  <!-- T5: B → Redis SETNX (키 이미 존재) -->
+  <text x="16" y="358" font-size="11" fill="#475569" font-weight="600">T5</text>
+  <line x1="430" y1="354" x2="605" y2="354" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow-violet)"/>
+  <rect x="450" y="340" width="140" height="18" rx="3" fill="#F5F3FF"/>
+  <text x="520" y="352" text-anchor="middle" font-size="11" fill="#6D28D9">SET seat:held:1:3A userB_id</text>
+
+  <!-- 코드 표시 박스 (B 요청) -->
+  <rect x="440" y="360" width="250" height="30" rx="4" fill="#18181B"/>
+  <text x="565" y="372" text-anchor="middle" font-size="10" font-family="'Geist Mono', monospace" fill="#A5F3FC">NX EX 600</text>
+  <text x="565" y="386" text-anchor="middle" font-size="10" font-family="'Geist Mono', monospace" fill="#FCA5A5">← 키 이미 존재 → 쓰기 거부</text>
+
+  <!-- T6: Redis → B 실패 응답 -->
+  <text x="16" y="410" font-size="11" fill="#475569" font-weight="600">T6</text>
+  <line x1="605" y1="406" x2="435" y2="406" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#arrow-rose)"/>
+  <rect x="480" y="392" width="90" height="18" rx="3" fill="#FFF1F2"/>
+  <text x="525" y="404" text-anchor="middle" font-size="11" fill="#BE123C" font-weight="600">nil (실패)</text>
+
+  <!-- 실패 배지 -->
+  <rect x="630" y="396" width="72" height="22" rx="11" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="666" y="411" text-anchor="middle" font-size="11" fill="#BE123C" font-weight="700">락 거부</text>
+
+  <!-- T6: B에 실패 전달 -->
+  <line x1="430" y1="430" x2="270" y2="430" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 2" marker-end="url(#arrow-rose)"/>
+  <rect x="295" y="416" width="120" height="18" rx="3" fill="#FFF1F2"/>
+  <text x="355" y="428" text-anchor="middle" font-size="11" fill="#BE123C">이미 점유된 좌석</text>
+
+  <!-- 결과 요약 박스 -->
+  <rect x="40" y="460" width="720" height="68" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="480" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">결과 요약</text>
+  <text x="400" y="500" text-anchor="middle" font-size="12" fill="#0A0A0A">사용자 A: seat:held:1:3A = "userA_id" (TTL 600s) — 락 보유, 결제 진행 가능</text>
+  <text x="400" y="518" text-anchor="middle" font-size="12" fill="#0A0A0A">사용자 B: SETNX 반환값 nil — 좌석 점유 불가, 다른 좌석 안내</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-dark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+</svg>

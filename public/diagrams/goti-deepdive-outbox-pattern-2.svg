@@ -1,0 +1,188 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 680" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-2">go-ti Outbox 방향 대비 — RDS→Redis(0014) vs Redis→RDS(0017)</title>
+  <desc id="desc-2">ADR 0014의 RDS 쓰기 후 outbox 테이블을 통해 poller가 Redis를 동기화하는 흐름과, ADR 0017의 Redis SoT에서 XADD outbox stream으로 이벤트를 발행하고 worker가 RDS를 UPSERT하는 흐름을 위아래로 대비합니다</desc>
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .box-label { font-size: 13px; fill: #0A0A0A; }
+    .sub-label { font-size: 11px; fill: #27272A; }
+    .arrow-label { font-size: 11px; fill: #27272A; }
+    .section-title { font-size: 14px; font-weight: 700; }
+    .step-label { font-size: 11px; font-weight: 600; }
+  </style>
+
+  <rect x="0" y="0" width="800" height="680" fill="#FAFAFA"/>
+
+  <!-- ===== 상단: ADR 0014 — RDS → Outbox → Poller → Redis ===== -->
+  <text x="400" y="28" text-anchor="middle" class="section-title" fill="#7C3AED">ADR 0014 — RDS가 SoT, Outbox → Poller가 Redis 동기화</text>
+  <text x="400" y="46" text-anchor="middle" font-size="11px" fill="#27272A">order/payment 이벤트 발생 시 RDS에 쓰고, outbox 행 삽입, poller가 Redis 캐시에 반영</text>
+
+  <!-- 1. App -->
+  <rect x="40" y="64" width="112" height="44" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="96" y="83" text-anchor="middle" class="box-label" font-weight="600">Application</text>
+  <text x="96" y="99" text-anchor="middle" class="sub-label">서비스 레이어</text>
+
+  <!-- 트랜잭션 경계 -->
+  <rect x="168" y="56" width="260" height="60" rx="8" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="298" y="72" text-anchor="middle" font-size="11px" fill="#7C3AED" font-weight="700">단일 RDS 트랜잭션</text>
+
+  <!-- 2. RDS 비즈니스 -->
+  <rect x="176" y="80" width="100" height="28" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="226" y="99" text-anchor="middle" class="box-label" font-size="12px" font-weight="600">RDS (비즈니스)</text>
+
+  <!-- 3. Outbox 테이블 -->
+  <rect x="320" y="80" width="100" height="28" rx="5" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="370" y="99" text-anchor="middle" class="box-label" font-size="12px" font-weight="600">outbox 테이블</text>
+
+  <!-- 화살표: App → RDS 트랜잭션 -->
+  <line x1="152" y1="86" x2="168" y2="86" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-black-2)"/>
+  <text x="155" y="80" class="step-label" fill="#059669">①</text>
+
+  <!-- 화살표: RDS → Outbox (트랜잭션 내) -->
+  <line x1="276" y1="94" x2="320" y2="94" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#a-violet-2)"/>
+  <text x="289" y="88" class="step-label" fill="#7C3AED">②</text>
+
+  <!-- 4. Poller -->
+  <rect x="448" y="72" width="112" height="44" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="504" y="91" text-anchor="middle" class="box-label" font-weight="600">Outbox Poller</text>
+  <text x="504" y="107" text-anchor="middle" class="sub-label">미처리 행 주기 폴링</text>
+
+  <!-- 화살표: Outbox → Poller -->
+  <line x1="420" y1="94" x2="448" y2="94" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-black-2)"/>
+  <text x="427" y="88" class="step-label" fill="#D97706">③</text>
+
+  <!-- 5. Redis 동기화 -->
+  <rect x="624" y="72" width="112" height="44" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="680" y="91" text-anchor="middle" class="box-label" font-weight="600">Redis</text>
+  <text x="680" y="107" text-anchor="middle" class="sub-label">캐시 동기화</text>
+
+  <!-- 화살표: Poller → Redis -->
+  <line x1="560" y1="94" x2="624" y2="94" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-black-2)"/>
+  <text x="573" y="88" class="step-label" fill="#059669">④</text>
+
+  <!-- 완료 표시 -->
+  <rect x="448" y="128" width="288" height="32" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="592" y="149" text-anchor="middle" font-size="11px" fill="#047857">outbox 행 processed=true 마킹 → 재시도 안전</text>
+
+  <!-- 구분선 -->
+  <line x1="32" y1="184" x2="768" y2="184" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <text x="400" y="178" text-anchor="middle" font-size="10px" fill="#94A3B8">— ADR 0014 / ADR 0017 경계 —</text>
+
+  <!-- ===== 하단: ADR 0017 — Redis SoT, XADD Stream → Worker → RDS UPSERT ===== -->
+  <text x="400" y="210" text-anchor="middle" class="section-title" fill="#059669">ADR 0017 — Redis가 SoT, Stream Outbox → Worker가 RDS 영속</text>
+  <text x="400" y="228" text-anchor="middle" font-size="11px" fill="#27272A">Lua script atomic 실행 후 XADD outbox:stream, goti-outbox-worker가 XREADGROUP → RDS idempotent UPSERT</text>
+
+  <!-- 1. App (0017) -->
+  <rect x="40" y="248" width="112" height="44" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="96" y="267" text-anchor="middle" class="box-label" font-weight="600">Application</text>
+  <text x="96" y="283" text-anchor="middle" class="sub-label">서비스 레이어</text>
+
+  <!-- Lua 원자적 경계 -->
+  <rect x="168" y="240" width="260" height="60" rx="8" fill="none" stroke="#0891B2" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="298" y="257" text-anchor="middle" font-size="11px" fill="#0891B2" font-weight="700">Lua EVALSHA (Redis 원자적 실행)</text>
+
+  <!-- 2. Redis 비즈니스 -->
+  <rect x="176" y="264" width="100" height="28" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="226" y="283" text-anchor="middle" class="box-label" font-size="12px" font-weight="600">Redis (SoT)</text>
+
+  <!-- 3. outbox:stream -->
+  <rect x="320" y="264" width="100" height="28" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="370" y="278" text-anchor="middle" class="box-label" font-size="12px" font-weight="600">outbox:stream</text>
+  <text x="370" y="291" text-anchor="middle" class="sub-label">XADD</text>
+
+  <!-- 화살표: App → Lua 경계 -->
+  <line x1="152" y1="270" x2="168" y2="270" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-black-2)"/>
+  <text x="155" y="264" class="step-label" fill="#059669">①</text>
+
+  <!-- 화살표: Redis → outbox:stream (Lua 내) -->
+  <line x1="276" y1="278" x2="320" y2="278" stroke="#0891B2" stroke-width="1.5" marker-end="url(#a-cyan-2)"/>
+  <text x="285" y="272" class="step-label" fill="#0891B2">②</text>
+
+  <!-- 4. goti-outbox-worker -->
+  <rect x="448" y="256" width="136" height="44" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="516" y="275" text-anchor="middle" class="box-label" font-weight="600">goti-outbox-worker</text>
+  <text x="516" y="291" text-anchor="middle" class="sub-label">XREADGROUP 소비</text>
+
+  <!-- 화살표: stream → worker -->
+  <line x1="420" y1="278" x2="448" y2="278" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-black-2)"/>
+  <text x="427" y="272" class="step-label" fill="#0891B2">③</text>
+
+  <!-- 5. RDS UPSERT -->
+  <rect x="640" y="256" width="112" height="44" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="696" y="275" text-anchor="middle" class="box-label" font-weight="600">RDS</text>
+  <text x="696" y="291" text-anchor="middle" class="sub-label">idempotent UPSERT</text>
+
+  <!-- 화살표: worker → RDS -->
+  <line x1="584" y1="278" x2="640" y2="278" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-black-2)"/>
+  <text x="591" y="272" class="step-label" fill="#059669">④</text>
+
+  <!-- ACK 표시 -->
+  <rect x="448" y="312" width="304" height="32" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="333" text-anchor="middle" font-size="11px" fill="#047857">XACK → Consumer Group 완료 마킹. 재시작 후 미처리 행 자동 재전달</text>
+
+  <!-- ===== 하단 대비 요약표 ===== -->
+  <rect x="40" y="368" width="720" height="288" rx="8" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="392" text-anchor="middle" font-size="13px" font-weight="700" fill="#0A0A0A">두 방향 Outbox 핵심 차이</text>
+
+  <!-- 표 헤더 -->
+  <rect x="48" y="400" width="704" height="32" rx="4" fill="#E4E4E7"/>
+  <text x="192" y="421" text-anchor="middle" font-size="12px" font-weight="700" fill="#27272A">항목</text>
+  <text x="440" y="421" text-anchor="middle" font-size="12px" font-weight="700" fill="#7C3AED">ADR 0014 (RDS → Redis)</text>
+  <text x="672" y="421" text-anchor="middle" font-size="12px" font-weight="700" fill="#059669">ADR 0017 (Redis → RDS)</text>
+  <line x1="336" y1="400" x2="336" y2="648" stroke="#D4D4D8" stroke-width="1"/>
+  <line x1="560" y1="400" x2="560" y2="648" stroke="#D4D4D8" stroke-width="1"/>
+
+  <!-- 행 1 -->
+  <line x1="48" y1="432" x2="752" y2="432" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="192" y="450" text-anchor="middle" font-size="12px" fill="#27272A">진실의 원천(SoT)</text>
+  <text x="440" y="450" text-anchor="middle" font-size="12px" fill="#27272A">RDS</text>
+  <text x="672" y="450" text-anchor="middle" font-size="12px" fill="#27272A">Redis</text>
+
+  <!-- 행 2 -->
+  <line x1="48" y1="464" x2="752" y2="464" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="192" y="482" text-anchor="middle" font-size="12px" fill="#27272A">outbox 저장소</text>
+  <text x="440" y="482" text-anchor="middle" font-size="12px" fill="#27272A">RDS outbox 테이블</text>
+  <text x="672" y="482" text-anchor="middle" font-size="12px" fill="#27272A">Redis Stream (XADD)</text>
+
+  <!-- 행 3 -->
+  <line x1="48" y1="496" x2="752" y2="496" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="192" y="514" text-anchor="middle" font-size="12px" fill="#27272A">소비자(consumer)</text>
+  <text x="440" y="514" text-anchor="middle" font-size="12px" fill="#27272A">Outbox Poller</text>
+  <text x="672" y="514" text-anchor="middle" font-size="12px" fill="#27272A">goti-outbox-worker</text>
+
+  <!-- 행 4 -->
+  <line x1="48" y1="528" x2="752" y2="528" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="192" y="546" text-anchor="middle" font-size="12px" fill="#27272A">동기화 방향</text>
+  <text x="440" y="546" text-anchor="middle" font-size="12px" fill="#27272A">RDS → Redis 캐시</text>
+  <text x="672" y="546" text-anchor="middle" font-size="12px" fill="#27272A">Redis → RDS 영속</text>
+
+  <!-- 행 5 -->
+  <line x1="48" y1="560" x2="752" y2="560" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="192" y="578" text-anchor="middle" font-size="12px" fill="#27272A">원자성 보장</text>
+  <text x="440" y="578" text-anchor="middle" font-size="12px" fill="#27272A">RDS 트랜잭션</text>
+  <text x="672" y="578" text-anchor="middle" font-size="12px" fill="#27272A">Lua EVALSHA</text>
+
+  <!-- 행 6 -->
+  <line x1="48" y1="592" x2="752" y2="592" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="192" y="614" text-anchor="middle" font-size="12px" fill="#27272A">재시도 안전성</text>
+  <text x="440" y="614" text-anchor="middle" font-size="12px" fill="#27272A">processed 마킹 후 재폴링</text>
+  <text x="672" y="614" text-anchor="middle" font-size="12px" fill="#27272A">XACK + Consumer Group</text>
+
+  <!-- 행 7 -->
+  <line x1="48" y1="628" x2="752" y2="628" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="192" y="646" text-anchor="middle" font-size="12px" fill="#27272A">RDS 역할</text>
+  <text x="440" y="646" text-anchor="middle" font-size="12px" fill="#27272A">영속 SoT + audit</text>
+  <text x="672" y="646" text-anchor="middle" font-size="12px" fill="#27272A">감사 로그 + 영속 snapshot</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="a-black-2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="a-violet-2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="a-cyan-2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+  </defs>
+</svg>

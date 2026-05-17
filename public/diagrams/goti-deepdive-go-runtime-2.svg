@@ -1,0 +1,118 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto">
+  <title id="title-2">부하 중 GC pause 발생 비교 — JVM G1/ZGC vs Go 동시 GC</title>
+  <desc id="desc-2">부하가 높은 상황에서 JVM G1GC와 ZGC, 그리고 Go의 동시 GC가 각각 어떻게 STW pause를 발생시키는지 비교합니다. JVM G1GC는 수십~수백ms STW가 발생하고, ZGC는 STW를 줄이지만 heap이 여전히 크며, Go는 대부분의 GC 작업을 동시에 수행하여 STW가 1ms 미만입니다</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title { font-size: 15px; font-weight: 600; fill: #0A0A0A; }
+    .label { font-size: 12px; fill: #0A0A0A; }
+    .label-sm { font-size: 11px; fill: #27272A; }
+    .section-title { font-size: 13px; font-weight: 600; fill: #0A0A0A; }
+    .time-axis { font-size: 11px; fill: #475569; }
+  </style>
+
+  <!-- 제목 -->
+  <text x="400" y="28" text-anchor="middle" class="title">부하 중 GC pause 비교</text>
+  <text x="400" y="46" text-anchor="middle" class="label-sm">요청 처리 스레드 관점 — STW 구간에서 모든 스레드가 멈춤</text>
+
+  <!-- ===== JVM G1GC ===== -->
+  <text x="60" y="80" class="section-title">JVM G1GC (기본)</text>
+
+  <!-- 요청 흐름 바 -->
+  <rect x="60" y="88" width="680" height="22" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="70" y="103" class="label-sm" fill="#047857">요청 처리 중</text>
+
+  <!-- STW pause 1 -->
+  <rect x="200" y="86" width="60" height="26" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="230" y="101" text-anchor="middle" class="label-sm" fill="#BE123C">STW</text>
+  <text x="230" y="114" text-anchor="middle" class="label-sm" fill="#BE123C">50~200ms</text>
+
+  <!-- STW pause 2 -->
+  <rect x="420" y="86" width="60" height="26" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="450" y="101" text-anchor="middle" class="label-sm" fill="#BE123C">STW</text>
+  <text x="450" y="114" text-anchor="middle" class="label-sm" fill="#BE123C">50~200ms</text>
+
+  <!-- STW pause 3 -->
+  <rect x="610" y="86" width="60" height="26" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="640" y="101" text-anchor="middle" class="label-sm" fill="#BE123C">STW</text>
+  <text x="640" y="114" text-anchor="middle" class="label-sm" fill="#BE123C">50~200ms</text>
+
+  <text x="400" y="130" text-anchor="middle" class="label-sm" fill="#BE123C">p99 꼬리 지연 폭증 — 부하 중 수십~수백ms pause 재현됨</text>
+
+  <!-- ===== JVM ZGC ===== -->
+  <text x="60" y="165" class="section-title">JVM ZGC (개선)</text>
+  <text x="60" y="180" class="label-sm" fill="#27272A">STW를 짧게 줄이지만 heap 1Gi·warmup 30초는 그대로</text>
+
+  <!-- 요청 흐름 바 -->
+  <rect x="60" y="186" width="680" height="22" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="70" y="201" class="label-sm" fill="#047857">요청 처리 중</text>
+
+  <!-- ZGC STW (짧음) -->
+  <rect x="190" y="184" width="14" height="26" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <rect x="350" y="184" width="14" height="26" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <rect x="510" y="184" width="14" height="26" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <rect x="670" y="184" width="14" height="26" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+
+  <!-- ZGC 동시 GC 표시 -->
+  <line x1="60" y1="220" x2="740" y2="220" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="190" y="222" width="160" height="16" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="270" y="234" text-anchor="middle" class="label-sm" fill="#B45309">동시 GC 작업 (CPU 사용)</text>
+  <rect x="510" y="222" width="160" height="16" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="590" y="234" text-anchor="middle" class="label-sm" fill="#B45309">동시 GC 작업 (CPU 사용)</text>
+
+  <text x="400" y="252" text-anchor="middle" class="label-sm" fill="#B45309">STW &lt; 1ms 수준으로 개선 — 그러나 heap 1Gi, warmup 30초 문제는 남음</text>
+
+  <!-- ===== Go 동시 GC ===== -->
+  <text x="60" y="280" class="section-title">Go 동시 GC (채택)</text>
+  <text x="60" y="295" class="label-sm" fill="#27272A">Tri-color 마킹을 애플리케이션과 동시에 실행 — STW는 루트 마킹·sweep 시작 단 2단계</text>
+
+  <!-- 요청 흐름 바 -->
+  <rect x="60" y="301" width="680" height="22" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="70" y="316" class="label-sm" fill="#047857">요청 처리 중 (대부분 구간에서 멈추지 않음)</text>
+
+  <!-- Go GC 동시 마킹 -->
+  <rect x="200" y="301" width="120" height="22" rx="0" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="260" y="316" text-anchor="middle" class="label-sm" fill="#6D28D9">동시 마킹</text>
+
+  <rect x="420" y="301" width="120" height="22" rx="0" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="480" y="316" text-anchor="middle" class="label-sm" fill="#6D28D9">동시 마킹</text>
+
+  <rect x="620" y="301" width="120" height="22" rx="0" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="680" y="316" text-anchor="middle" class="label-sm" fill="#6D28D9">동시 마킹</text>
+
+  <!-- Go STW (극히 짧음) -->
+  <rect x="196" y="299" width="6" height="26" rx="1" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="316" y="299" width="6" height="26" rx="1" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="416" y="299" width="6" height="26" rx="1" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="536" y="299" width="6" height="26" rx="1" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="616" y="299" width="6" height="26" rx="1" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="736" y="299" width="6" height="26" rx="1" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+
+  <text x="400" y="345" text-anchor="middle" class="label-sm" fill="#6D28D9">STW &lt; 1ms (루트 마킹·sweep 시작 2회) — 꼬리 지연 폭증 없음</text>
+
+  <!-- Go GC 단계 설명 -->
+  <rect x="60" y="360" width="680" height="80" rx="5" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="378" text-anchor="middle" class="section-title">Go 동시 GC 3단계</text>
+
+  <text x="160" y="398" text-anchor="middle" class="label-sm" font-weight="600">① Mark setup (STW)</text>
+  <text x="160" y="412" text-anchor="middle" class="label-sm">루트 포인터 스캔 시작</text>
+  <text x="160" y="424" text-anchor="middle" class="label-sm">write barrier 활성화</text>
+
+  <text x="400" y="398" text-anchor="middle" class="label-sm" font-weight="600">② Concurrent marking</text>
+  <text x="400" y="412" text-anchor="middle" class="label-sm">앱과 동시에 heap 마킹</text>
+  <text x="400" y="424" text-anchor="middle" class="label-sm">Tri-color 알고리즘</text>
+
+  <text x="630" y="398" text-anchor="middle" class="label-sm" font-weight="600">③ Mark termination (STW)</text>
+  <text x="630" y="412" text-anchor="middle" class="label-sm">write barrier 해제</text>
+  <text x="630" y="424" text-anchor="middle" class="label-sm">→ Concurrent sweep</text>
+
+  <!-- 범례 -->
+  <rect x="60" y="450" width="12" height="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="78" y="461" class="label-sm">JVM STW pause (수십~수백ms)</text>
+  <rect x="260" y="450" width="12" height="12" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="278" y="461" class="label-sm">ZGC STW (&lt;1ms) + 동시 작업</text>
+  <rect x="470" y="450" width="12" height="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="488" y="461" class="label-sm">Go STW (&lt;1ms, 단 2단계)</text>
+  <rect x="650" y="450" width="12" height="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="668" y="461" class="label-sm">요청 처리 중</text>
+</svg>

@@ -306,3 +306,11 @@ goti-server 측 파이프라인은 기존 그대로 두고, goti-k8s에 Renovate
 - [Harbor robot account `$` sign — Discussion #32194](https://github.com/renovatebot/renovate/discussions/32194)
 - [ECR 환경변수 미전달 — Discussion #18755](https://github.com/renovatebot/renovate/discussions/18755)
 - [Helm bumpVersion 충돌 — Issue #8919](https://github.com/renovatebot/renovate/issues/8919)
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [GitOps 이미지 자동 업데이트 — Renovate·Image Updater·CI Push 동작 원리](/essays/goti-deepdive-gitops-image-update)

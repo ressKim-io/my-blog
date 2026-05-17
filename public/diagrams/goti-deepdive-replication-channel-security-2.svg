@@ -1,0 +1,92 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-2">복제 연결 3계층 보안 모델</title>
+  <desc id="desc-2">복제 연결 보안을 Transport(TLS), Authentication(인증 방식), Authorization(최소 권한) 3계층으로 분리한 구조도입니다. 각 계층이 독립적으로 방어선을 형성합니다.</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">복제 연결 3계층 보안 모델</text>
+  <text x="400" y="55" text-anchor="middle" font-size="11" fill="#27272A">Transport · Authentication · Authorization</text>
+
+  <!-- ===== 계층 1: Transport (TLS) ===== -->
+  <rect x="40" y="76" width="720" height="112" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="64" y="100" font-size="13" font-weight="700" fill="#6D28D9">계층 1 — Transport (TLS 암호화)</text>
+
+  <!-- require 박스 -->
+  <rect x="64" y="112" width="280" height="60" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="204" y="133" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">sslmode=require</text>
+  <text x="204" y="150" text-anchor="middle" font-size="11" fill="#BE123C">채널 암호화 O  /  서버 신원 검증 X</text>
+  <text x="204" y="165" text-anchor="middle" font-size="11" fill="#BE123C">자가서명 인증서 허용 → MITM 취약</text>
+
+  <!-- verify-full 박스 -->
+  <rect x="456" y="112" width="280" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="596" y="133" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">sslmode=verify-full</text>
+  <text x="596" y="150" text-anchor="middle" font-size="11" fill="#047857">채널 암호화 O  /  CA 체인 + hostname 검증 O</text>
+  <text x="596" y="165" text-anchor="middle" font-size="11" fill="#047857">신뢰 CA 서명 인증서만 허용 → MITM 차단</text>
+
+  <!-- 화살표: require → verify-full (개선 방향) -->
+  <line x1="344" y1="142" x2="456" y2="142" stroke="#D97706" stroke-width="1.5" marker-end="url(#arrow-amber)" stroke-dasharray="4 2"/>
+  <rect x="366" y="128" width="56" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="394" y="140" text-anchor="middle" font-size="10" fill="#B45309">개선 방향</text>
+
+  <!-- ===== 계층 2: Authentication (인증) ===== -->
+  <rect x="40" y="212" width="720" height="128" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="64" y="236" font-size="13" font-weight="700" fill="#B45309">계층 2 — Authentication (접속 인증)</text>
+
+  <!-- plaintext password 박스 -->
+  <rect x="64" y="248" width="280" height="76" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="204" y="269" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">plaintext password (DSN)</text>
+  <text x="204" y="286" text-anchor="middle" font-size="11" fill="#BE123C">DSN 문자열에 비밀번호 평문 포함</text>
+  <text x="204" y="301" text-anchor="middle" font-size="11" fill="#BE123C">로그 노출·환경변수 유출 위험</text>
+  <text x="204" y="316" text-anchor="middle" font-size="11" fill="#BE123C">go-ti: 로그 노출 이력 → rotation 완료</text>
+
+  <!-- cert 인증 박스 -->
+  <rect x="456" y="248" width="280" height="76" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="596" y="269" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">cert 인증 (clientcert=verify-full)</text>
+  <text x="596" y="286" text-anchor="middle" font-size="11" fill="#047857">클라이언트 인증서로 신원 증명</text>
+  <text x="596" y="301" text-anchor="middle" font-size="11" fill="#047857">pg_hba.conf: hostssl ... cert</text>
+  <text x="596" y="316" text-anchor="middle" font-size="11" fill="#047857">비밀번호 DSN에서 제거 가능</text>
+
+  <!-- 화살표 -->
+  <line x1="344" y1="286" x2="456" y2="286" stroke="#D97706" stroke-width="1.5" marker-end="url(#arrow-amber)" stroke-dasharray="4 2"/>
+  <rect x="366" y="272" width="56" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="394" y="284" text-anchor="middle" font-size="10" fill="#B45309">개선 방향</text>
+
+  <!-- ===== 계층 3: Authorization (권한) ===== -->
+  <rect x="40" y="364" width="720" height="120" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="64" y="388" font-size="13" font-weight="700" fill="#0E7490">계층 3 — Authorization (최소 권한)</text>
+
+  <!-- 현재 상태 박스 -->
+  <rect x="64" y="400" width="280" height="68" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="204" y="420" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">pg_read_all_data (넓은 권한)</text>
+  <text x="204" y="437" text-anchor="middle" font-size="11" fill="#BE123C">모든 테이블 SELECT 가능</text>
+  <text x="204" y="454" text-anchor="middle" font-size="11" fill="#BE123C">복제에 불필요한 테이블까지 포함</text>
+
+  <!-- 개선 박스 -->
+  <rect x="456" y="400" width="280" height="68" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="596" y="420" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">replication set 단위 권한</text>
+  <text x="596" y="437" text-anchor="middle" font-size="11" fill="#047857">복제 대상 테이블만 GRANT SELECT</text>
+  <text x="596" y="454" text-anchor="middle" font-size="11" fill="#047857">REPLICATION role + 필요 최소 스키마만</text>
+
+  <!-- 화살표 -->
+  <line x1="344" y1="434" x2="456" y2="434" stroke="#D97706" stroke-width="1.5" marker-end="url(#arrow-amber)" stroke-dasharray="4 2"/>
+  <rect x="366" y="420" width="56" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="394" y="432" text-anchor="middle" font-size="10" fill="#B45309">개선 방향</text>
+
+  <!-- 범례 -->
+  <rect x="40" y="500" width="200" height="16" rx="3" fill="none"/>
+  <rect x="40" y="503" width="12" height="10" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="58" y="513" font-size="10" fill="#27272A">현재 상태 (취약/한계)</text>
+  <rect x="160" y="503" width="12" height="10" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="178" y="513" font-size="10" fill="#27272A">개선 목표</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#D97706"/>
+    </marker>
+  </defs>
+</svg>

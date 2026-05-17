@@ -1,0 +1,116 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-1">split-brain 발생 시퀀스 다이어그램</title>
+  <desc id="desc-1">네트워크 분단으로 인해 GCP Publisher와 AWS Subscriber가 각자 독립적으로 쓰기를 받게 되는 과정과, 재합류 시 충돌이 발생하는 흐름을 4단계로 표현</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">흐름도 — split-brain 발생 시퀀스</text>
+
+  <!-- 단계 구분선 -->
+  <!-- Phase 1: 정상 복제 -->
+  <rect x="20" y="50" width="760" height="90" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="36" y="72" font-size="11" fill="#047857" font-weight="600">① 정상 상태 — 단방향 복제 (GCP → AWS)</text>
+
+  <!-- GCP box -->
+  <rect x="80" y="86" width="140" height="44" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="150" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">GCP VM</text>
+  <text x="150" y="120" text-anchor="middle" font-size="11" fill="#047857">Publisher (읽기·쓰기)</text>
+
+  <!-- 화살표 복제 -->
+  <line x1="220" y1="108" x2="520" y2="108" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <rect x="310" y="96" width="100" height="18" fill="#FAFAFA"/>
+  <text x="360" y="109" text-anchor="middle" font-size="11" fill="#27272A">논리 복제 스트림</text>
+
+  <!-- AWS box -->
+  <rect x="520" y="86" width="140" height="44" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="590" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">AWS RDS</text>
+  <text x="590" y="120" text-anchor="middle" font-size="11" fill="#B45309">Subscriber (읽기 전용)</text>
+
+  <!-- Phase 2: 네트워크 분단 -->
+  <rect x="20" y="152" width="760" height="110" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="36" y="174" font-size="11" fill="#BE123C" font-weight="600">② 네트워크 분단 발생</text>
+
+  <!-- GCP box 2 -->
+  <rect x="80" y="188" width="140" height="56" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="150" y="208" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">GCP VM</text>
+  <text x="150" y="223" text-anchor="middle" font-size="11" fill="#047857">Publisher</text>
+  <text x="150" y="236" text-anchor="middle" font-size="10" fill="#047857">쓰기 계속 수신</text>
+
+  <!-- 분단 표시 -->
+  <line x1="220" y1="216" x2="330" y2="216" stroke="#E11D48" stroke-width="2" stroke-dasharray="6 3"/>
+  <text x="360" y="210" text-anchor="middle" font-size="20" fill="#E11D48">✕</text>
+  <text x="360" y="230" text-anchor="middle" font-size="11" fill="#BE123C">연결 끊김</text>
+  <line x1="390" y1="216" x2="520" y2="216" stroke="#E11D48" stroke-width="2" stroke-dasharray="6 3"/>
+
+  <!-- AWS box 2 — read_only 해제 경고 -->
+  <rect x="520" y="188" width="160" height="56" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="600" y="208" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">AWS RDS</text>
+  <text x="600" y="223" text-anchor="middle" font-size="11" fill="#BE123C">read_only 수동 해제</text>
+  <text x="600" y="236" text-anchor="middle" font-size="10" fill="#BE123C">→ 쓰기 수신 시작</text>
+
+  <!-- Phase 3: 양쪽 독립 쓰기 -->
+  <rect x="20" y="274" width="760" height="110" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="36" y="296" font-size="11" fill="#BE123C" font-weight="600">③ split-brain — 양쪽 독립 쓰기</text>
+
+  <!-- GCP writes -->
+  <rect x="80" y="308" width="140" height="56" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="150" y="328" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">GCP VM</text>
+  <text x="150" y="343" text-anchor="middle" font-size="11" fill="#047857">INSERT order #501</text>
+  <text x="150" y="356" text-anchor="middle" font-size="10" fill="#047857">(GCP LSN 기준 기록)</text>
+
+  <!-- AWS writes -->
+  <rect x="520" y="308" width="160" height="56" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="600" y="328" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">AWS RDS</text>
+  <text x="600" y="343" text-anchor="middle" font-size="11" fill="#BE123C">INSERT order #501</text>
+  <text x="600" y="356" text-anchor="middle" font-size="10" fill="#BE123C">(AWS 독립 기록)</text>
+
+  <!-- 양쪽 화살표 표시 (충돌) -->
+  <text x="390" y="325" text-anchor="middle" font-size="28" fill="#E11D48">⚡</text>
+  <text x="390" y="352" text-anchor="middle" font-size="10" fill="#BE123C">동일 PK 충돌</text>
+
+  <!-- Phase 4: 재합류 -->
+  <rect x="20" y="396" width="760" height="104" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1"/>
+  <text x="36" y="418" font-size="11" fill="#0E7490" font-weight="600">④ 재합류 — 충돌 감지 및 해소 시도</text>
+
+  <!-- GCP 재합류 -->
+  <rect x="80" y="430" width="140" height="56" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="150" y="450" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">GCP VM</text>
+  <text x="150" y="465" text-anchor="middle" font-size="11" fill="#047857">복제 스트림 재전송</text>
+  <text x="150" y="478" text-anchor="middle" font-size="10" fill="#047857">order #501 INSERT</text>
+
+  <!-- 화살표 재연결 -->
+  <line x1="220" y1="458" x2="395" y2="458" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- conflict resolution box -->
+  <rect x="295" y="436" width="150" height="44" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="370" y="455" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">충돌 해소 정책</text>
+  <text x="370" y="470" text-anchor="middle" font-size="10" fill="#0E7490">skip / last_update_wins</text>
+
+  <line x1="445" y1="458" x2="520" y2="458" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- AWS 재합류 -->
+  <rect x="520" y="430" width="160" height="56" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="450" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">AWS RDS</text>
+  <text x="600" y="465" text-anchor="middle" font-size="11" fill="#B45309">충돌 행 처리</text>
+  <text x="600" y="478" text-anchor="middle" font-size="10" fill="#B45309">(skip 또는 덮어쓰기)</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-black" viewBox="0 0 10 10" refX="9" refY="5"
+      markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5"
+      markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5"
+      markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0891B2"/>
+    </marker>
+  </defs>
+</svg>

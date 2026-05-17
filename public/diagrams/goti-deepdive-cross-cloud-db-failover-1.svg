@@ -1,0 +1,107 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 560" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">Cross-Cloud DB 페일오버 자동화 — 감지·결정·실행 책임 분리</title>
+  <desc id="desc-1">Cloudflare Worker(감지), AWS Lambda Controller(결정), Step Functions(실행) 세 주체가 분리된 책임을 가지고 순서대로 동작하는 시퀀스 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="30" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">
+    Cross-Cloud DB 페일오버 자동화 — 감지·결정·실행 책임 분리
+  </text>
+
+  <!-- 컬럼 헤더 박스 -->
+  <!-- CF Worker (감지) -->
+  <rect x="40" y="50" width="160" height="52" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="120" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">Cloudflare Worker</text>
+  <text x="120" y="90" text-anchor="middle" font-size="11" fill="#27272A">감지 (Trigger)</text>
+
+  <!-- Lambda Controller (결정) -->
+  <rect x="300" y="50" width="200" height="52" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">AWS Lambda Controller</text>
+  <text x="400" y="90" text-anchor="middle" font-size="11" fill="#27272A">결정 (Decision)</text>
+
+  <!-- Step Functions (실행) -->
+  <rect x="580" y="50" width="180" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="670" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Step Functions</text>
+  <text x="670" y="90" text-anchor="middle" font-size="11" fill="#27272A">실행 (Actuator)</text>
+
+  <!-- 수직 라이프라인 -->
+  <line x1="120" y1="102" x2="120" y2="530" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="400" y1="102" x2="400" y2="530" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="670" y1="102" x2="670" y2="530" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <!-- 단계 라벨 배경 -->
+  <!-- Step 1: circuit open 감지 -->
+  <rect x="0" y="118" width="800" height="22" fill="#F5F3FF" opacity="0.5"/>
+  <text x="10" y="133" font-size="11" fill="#6D28D9" font-weight="600">① circuit open 5분 이상 지속</text>
+
+  <!-- CF Worker 내부 동작 박스 -->
+  <rect x="48" y="143" width="144" height="36" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1"/>
+  <text x="120" y="159" text-anchor="middle" font-size="11" fill="#0E7490">origin fetch 실패 감지</text>
+  <text x="120" y="173" text-anchor="middle" font-size="11" fill="#0E7490">KV promote:requested 기록</text>
+
+  <!-- Step 2: HMAC 웹훅 -->
+  <rect x="0" y="188" width="800" height="22" fill="#F5F3FF" opacity="0.5"/>
+  <text x="10" y="203" font-size="11" fill="#6D28D9" font-weight="600">② HMAC 서명 웹훅 발송 (1회)</text>
+
+  <!-- 화살표: CF → Lambda -->
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrowhead-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#D97706"/>
+    </marker>
+    <marker id="arrowhead-emerald" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+    <marker id="arrowhead-rose" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E11D48"/>
+    </marker>
+  </defs>
+
+  <line x1="128" y1="218" x2="388" y2="218" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <rect x="200" y="207" width="120" height="16" fill="#FAFAFA"/>
+  <text x="260" y="219" text-anchor="middle" font-size="11" fill="#27272A">POST /promote-trigger</text>
+
+  <!-- Step 3: HMAC 검증 -->
+  <rect x="0" y="232" width="800" height="22" fill="#F5F3FF" opacity="0.5"/>
+  <text x="10" y="247" font-size="11" fill="#6D28D9" font-weight="600">③ HMAC 서명 검증 + AWS→GCP direct ping</text>
+
+  <rect x="308" y="257" width="184" height="48" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="400" y="272" text-anchor="middle" font-size="11" fill="#B45309">HMAC secret 검증</text>
+  <text x="400" y="286" text-anchor="middle" font-size="11" fill="#B45309">AWS→GCP direct ping</text>
+  <text x="400" y="300" text-anchor="middle" font-size="11" fill="#B45309">edge 실패 vs 실제 장애 구분</text>
+
+  <!-- Step 4: pre-flight -->
+  <rect x="0" y="314" width="800" height="22" fill="#F5F3FF" opacity="0.5"/>
+  <text x="10" y="329" font-size="11" fill="#6D28D9" font-weight="600">④ Pre-flight 검증</text>
+
+  <rect x="308" y="339" width="184" height="60" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="400" y="354" text-anchor="middle" font-size="11" fill="#B45309">pglogical lag &lt; 30s 확인</text>
+  <text x="400" y="368" text-anchor="middle" font-size="11" fill="#B45309">subscription_status 확인</text>
+  <text x="400" y="382" text-anchor="middle" font-size="11" fill="#B45309">RDS standby healthy 확인</text>
+
+  <!-- Step 5: Slack 승인 -->
+  <rect x="0" y="408" width="800" height="22" fill="#F5F3FF" opacity="0.5"/>
+  <text x="10" y="423" font-size="11" fill="#6D28D9" font-weight="600">⑤ Slack 승인 요청 (split-brain 최후 방어)</text>
+
+  <rect x="308" y="433" width="184" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="400" y="451" text-anchor="middle" font-size="11" fill="#BE123C">Slack 사람 승인 (sanity check)</text>
+
+  <!-- Step 6: Step Functions 실행 위임 -->
+  <rect x="0" y="470" width="800" height="22" fill="#F5F3FF" opacity="0.5"/>
+  <text x="10" y="485" font-size="11" fill="#6D28D9" font-weight="600">⑥ Step Functions 오케스트레이션 시작</text>
+
+  <!-- 화살표: Lambda → Step Functions -->
+  <line x1="408" y1="498" x2="658" y2="498" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"/>
+  <rect x="480" y="487" width="110" height="16" fill="#FAFAFA"/>
+  <text x="535" y="499" text-anchor="middle" font-size="11" fill="#047857">StartExecution</text>
+
+  <!-- Step Functions 실행 박스 -->
+  <rect x="588" y="510" width="164" height="36" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="670" y="526" text-anchor="middle" font-size="11" fill="#047857">5단계 state machine</text>
+  <text x="670" y="540" text-anchor="middle" font-size="11" fill="#047857">Disable → Promote → Route</text>
+</svg>

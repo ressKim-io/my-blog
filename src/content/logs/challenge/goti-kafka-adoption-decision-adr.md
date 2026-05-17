@@ -426,3 +426,13 @@ charts/
 - [KIP-896: Remove old client protocol API versions](https://cwiki.apache.org/confluence/display/KAFKA/KIP-896)
 - [Spring Kafka Reference](https://docs.spring.io/spring-kafka/reference/)
 - [CNCF Strimzi](https://www.cncf.io/projects/strimzi/)
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다
+
+- [메시징 시스템 비교 — Kafka · RabbitMQ · Redis Streams의 동작 원리](/essays/goti-deepdive-messaging-system-comparison)
+- [Kafka KRaft — ZooKeeper를 제거한 자체 합의 메커니즘](/essays/goti-deepdive-kafka-kraft)
+- [Strimzi Operator — CRD로 Kafka를 선언적으로 운영하는 방법](/essays/goti-deepdive-strimzi-operator)

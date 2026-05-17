@@ -1,0 +1,134 @@
+<svg
+  role="img"
+  aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 520"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-2">fetch.max.bytes 적용 — backlog 점진 소화 흐름</title>
+  <desc id="desc-2">fetch.max.bytes로 fetch 단위를 제한하면 재시작 후 backlog를 여러 번 나눠 소화하여 백엔드 메모리가 안정 범위 내에서 유지됩니다</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA" rx="8"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">fetch.max.bytes 적용 후 — backlog 점진 소화</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arrow-black2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-emerald" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#047857"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#6D28D9"/>
+    </marker>
+  </defs>
+
+  <!-- 시간 축 레이블 (위) -->
+  <text x="40" y="72" font-size="12" fill="#27272A">t=0 재시작</text>
+  <text x="240" y="72" text-anchor="middle" font-size="12" fill="#27272A">t+1 fetch #1</text>
+  <text x="440" y="72" text-anchor="middle" font-size="12" fill="#27272A">t+2 fetch #2</text>
+  <text x="640" y="72" text-anchor="middle" font-size="12" fill="#27272A">t+N 소화 완료</text>
+
+  <!-- 시간 축 선 -->
+  <line x1="40" y1="80" x2="760" y2="80" stroke="#E4E4E7" stroke-width="1"/>
+  <!-- 눈금 -->
+  <line x1="40" y1="76" x2="40" y2="84" stroke="#D4D4D8" stroke-width="1.5"/>
+  <line x1="240" y1="76" x2="240" y2="84" stroke="#D4D4D8" stroke-width="1.5"/>
+  <line x1="440" y1="76" x2="440" y2="84" stroke="#D4D4D8" stroke-width="1.5"/>
+  <line x1="640" y1="76" x2="640" y2="84" stroke="#D4D4D8" stroke-width="1.5"/>
+
+  <!-- ── Kafka 토픽 (backlog 시각화) ── -->
+  <text x="40" y="116" font-size="12" font-weight="600" fill="#B45309">Kafka 토픽 backlog</text>
+
+  <!-- backlog 전체 바 -->
+  <rect x="40" y="124" width="720" height="32" rx="4" fill="#FEF3C7" stroke="#D97706" stroke-width="1"/>
+  <text x="400" y="145" text-anchor="middle" font-size="11" fill="#B45309">retention 내 전체 backlog (예: 2시간치 로그)</text>
+
+  <!-- fetch #1 범위 표시 -->
+  <rect x="40" y="168" width="168" height="24" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="124" y="184" text-anchor="middle" font-size="11" fill="#B45309">fetch #1 (5 MB)</text>
+
+  <!-- fetch #2 범위 표시 -->
+  <rect x="216" y="168" width="168" height="24" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="300" y="184" text-anchor="middle" font-size="11" fill="#B45309">fetch #2 (5 MB)</text>
+
+  <!-- 생략 표시 -->
+  <text x="440" y="184" text-anchor="middle" font-size="14" fill="#D4D4D8">· · ·</text>
+
+  <!-- ── fetch.max.bytes 설정 박스 ── -->
+  <rect x="40" y="216" width="720" height="64" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">fetch.max.bytes = 5 MB (traces) / 10 MB (logs)</text>
+  <text x="400" y="260" text-anchor="middle" font-size="12" fill="#6D28D9">한 번의 fetch 요청에서 가져오는 최대 바이트를 제한</text>
+  <text x="400" y="276" text-anchor="middle" font-size="11" fill="#6D28D9">→ 처리 후 다음 fetch 요청 → 점진 소화</text>
+
+  <!-- ── 소화 흐름 (3단계) ── -->
+
+  <!-- 단계 1 -->
+  <rect x="40" y="304" width="176" height="80" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="128" y="328" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">fetch #1 처리</text>
+  <text x="128" y="345" text-anchor="middle" font-size="11" fill="#047857">5 MB 수신</text>
+  <text x="128" y="361" text-anchor="middle" font-size="11" fill="#047857">Tempo/Loki 전송</text>
+  <text x="128" y="375" text-anchor="middle" font-size="11" fill="#047857">메모리 안정</text>
+
+  <!-- 화살표 1→2 -->
+  <line x1="216" y1="344" x2="296" y2="344" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
+  <text x="256" y="336" text-anchor="middle" font-size="11" fill="#047857">완료 후</text>
+  <text x="256" y="350" text-anchor="middle" font-size="11" fill="#047857">다음 fetch</text>
+
+  <!-- 단계 2 -->
+  <rect x="296" y="304" width="176" height="80" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="384" y="328" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">fetch #2 처리</text>
+  <text x="384" y="345" text-anchor="middle" font-size="11" fill="#047857">5 MB 수신</text>
+  <text x="384" y="361" text-anchor="middle" font-size="11" fill="#047857">Tempo/Loki 전송</text>
+  <text x="384" y="375" text-anchor="middle" font-size="11" fill="#047857">메모리 안정</text>
+
+  <!-- 화살표 2→생략 -->
+  <line x1="472" y1="344" x2="536" y2="344" stroke="#E4E4E7" stroke-width="1.5"/>
+  <text x="504" y="336" text-anchor="middle" font-size="14" fill="#D4D4D8">· · ·</text>
+
+  <!-- 단계 N (소화 완료) -->
+  <rect x="552" y="304" width="208" height="80" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="656" y="325" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">backlog 소화 완료</text>
+  <text x="656" y="342" text-anchor="middle" font-size="11" fill="#047857">retention 내 전량 처리</text>
+  <text x="656" y="359" text-anchor="middle" font-size="11" fill="#047857">데이터 유실 없음</text>
+  <text x="656" y="375" text-anchor="middle" font-size="11" fill="#047857">메모리 피크 없음</text>
+
+  <!-- ── 메모리 추이 비교 ── -->
+  <line x1="40" y1="408" x2="760" y2="408" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <text x="40" y="432" font-size="12" font-weight="600" fill="#0A0A0A">백엔드 메모리 추이 비교</text>
+
+  <!-- Before (빨간) -->
+  <text x="40" y="456" font-size="11" fill="#BE123C">before</text>
+  <line x1="88" y1="452" x2="168" y2="452" stroke="#BE123C" stroke-width="1.5"/>
+  <line x1="168" y1="452" x2="200" y2="436" stroke="#BE123C" stroke-width="1.5"/>
+  <line x1="200" y1="436" x2="232" y2="480" stroke="#BE123C" stroke-width="2" stroke-dasharray="3 2"/>
+  <text x="240" y="483" font-size="11" fill="#BE123C">OOM</text>
+
+  <!-- After (초록) -->
+  <text x="360" y="456" font-size="11" fill="#047857">after</text>
+  <line x1="400" y1="452" x2="480" y2="452" stroke="#059669" stroke-width="1.5"/>
+  <line x1="480" y1="452" x2="512" y2="444" stroke="#059669" stroke-width="1.5"/>
+  <line x1="512" y1="444" x2="560" y2="448" stroke="#059669" stroke-width="1.5"/>
+  <line x1="560" y1="448" x2="608" y2="444" stroke="#059669" stroke-width="1.5"/>
+  <line x1="608" y1="444" x2="656" y2="448" stroke="#059669" stroke-width="1.5"/>
+  <line x1="656" y1="448" x2="720" y2="452" stroke="#059669" stroke-width="1.5"/>
+  <text x="726" y="456" font-size="11" fill="#047857">안정</text>
+
+  <!-- 한계선 표시 -->
+  <line x1="88" y1="440" x2="320" y2="440" stroke="#E11D48" stroke-width="1" stroke-dasharray="2 2"/>
+  <text x="326" y="444" font-size="10" fill="#E11D48">OOM limit</text>
+
+  <!-- 범례 -->
+  <rect x="40" y="496" width="400" height="16" rx="4" fill="none"/>
+  <line x1="48" y1="504" x2="88" y2="504" stroke="#059669" stroke-width="1.5"/>
+  <text x="96" y="508" font-size="11" fill="#27272A">fetch.max.bytes 적용 후 — 안정적 소화</text>
+  <line x1="280" y1="504" x2="320" y2="504" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="328" y="508" font-size="11" fill="#27272A">미적용 — OOM 발생</text>
+</svg>

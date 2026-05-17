@@ -295,3 +295,12 @@ ADR Decision에는 없었으나 실제 실행에서 필요했던 작업입니다
 - Subscriber Job은 Kyverno/Istio webhook 통과를 위해 `sidecar.istio.io/inject: "false"` **라벨**(annotation 아님) 필수.
 
 상세 트러블슈팅 기록은 `docs/dev-logs/2026-04-18-phase-b-pglogical-trial-and-cleanup.md` §3 (11개 장애물)에 정리되어 있습니다.
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [pglogical — WAL 논리 디코딩부터 시퀀스 복제까지](/essays/goti-deepdive-pglogical-logical-replication)
+- [PostgreSQL 물리 복제 vs 논리 복제 — WAL 스트리밍과 선택 기준](/essays/goti-deepdive-physical-vs-logical-replication)

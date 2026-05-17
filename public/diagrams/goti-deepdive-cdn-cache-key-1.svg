@@ -1,0 +1,134 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 560" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">CDN Cache Key 분리 실패 vs 성공 비교</title>
+  <desc id="desc-1">URL만으로 캐시 키를 구성할 때 사용자 A의 응답이 사용자 B에게 노출되는 오류 흐름과, 사용자 식별자를 포함해 각 사용자 응답이 분리되는 정상 흐름을 나란히 비교합니다</desc>
+
+  <!-- 배경 구분선 -->
+  <rect x="0" y="0" width="396" height="560" fill="#FFF1F2" rx="0"/>
+  <rect x="404" y="0" width="396" height="560" fill="#ECFDF5" rx="0"/>
+
+  <!-- 섹션 타이틀 -->
+  <text x="198" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">❌ URL만으로 캐시 (키 분리 실패)</text>
+  <text x="602" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">✅ URL + 식별자로 캐시 (키 분리 성공)</text>
+
+  <!-- ───── 왼쪽: 실패 케이스 ───── -->
+
+  <!-- 사용자 A -->
+  <rect x="24" y="56" width="140" height="52" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="94" y="79" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">사용자 A</text>
+  <text x="94" y="97" text-anchor="middle" font-size="11" fill="#BE123C">GET /queue/status</text>
+
+  <!-- 사용자 B -->
+  <rect x="232" y="56" width="140" height="52" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="302" y="79" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">사용자 B</text>
+  <text x="302" y="97" text-anchor="middle" font-size="11" fill="#BE123C">GET /queue/status</text>
+
+  <!-- 화살표: A → CDN -->
+  <line x1="94" y1="108" x2="94" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <!-- 화살표: B → CDN -->
+  <line x1="302" y1="108" x2="302" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+
+  <!-- CDN 박스 (좌) -->
+  <rect x="24" y="174" width="348" height="80" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="198" y="199" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Cloudflare Edge (CDN)</text>
+  <text x="198" y="218" text-anchor="middle" font-size="11" fill="#B45309">Cache Key = /queue/status</text>
+  <text x="198" y="234" text-anchor="middle" font-size="11" fill="#BE123C" font-weight="600">A 응답 캐시 → B 요청에 HIT</text>
+
+  <!-- 충돌 표시 -->
+  <rect x="80" y="270" width="236" height="36" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="198" y="285" text-anchor="middle" font-size="12" font-weight="700" fill="#BE123C">⚠ 사용자 A의 순번이 B에게 노출</text>
+  <text x="198" y="300" text-anchor="middle" font-size="11" fill="#BE123C">Cache Key 충돌 — 데이터 누출</text>
+
+  <!-- 화살표: CDN → 충돌 박스 -->
+  <line x1="198" y1="254" x2="198" y2="270" stroke="#E11D48" stroke-width="2" marker-end="url(#arrow-rose)"/>
+
+  <!-- Origin (좌) -->
+  <rect x="80" y="326" width="236" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="198" y="351" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Origin (goti-queue)</text>
+  <text x="198" y="367" text-anchor="middle" font-size="11" fill="#475569">사용자 A 1회 요청 처리</text>
+
+  <!-- 화살표: Cache MISS (점선) -->
+  <line x1="198" y1="306" x2="198" y2="326" stroke="#475569" stroke-dasharray="4 2" stroke-width="1.5" marker-end="url(#arrow-slate)"/>
+  <rect x="152" y="310" width="92" height="16" fill="#FFF1F2"/>
+  <text x="198" y="322" text-anchor="middle" font-size="10" fill="#475569">최초 1회만 MISS</text>
+
+  <!-- 경고 설명 -->
+  <rect x="24" y="396" width="348" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="198" y="416" text-anchor="middle" font-size="11" fill="#BE123C">캐시된 응답에 "순번 = 3위" (A의 데이터)</text>
+  <text x="198" y="432" text-anchor="middle" font-size="11" fill="#BE123C">B는 자신의 순번(7위)을 볼 수 없음</text>
+  <text x="198" y="448" text-anchor="middle" font-size="12" font-weight="700" fill="#BE123C">→ 심각한 보안·무결성 오류</text>
+
+  <!-- ───── 오른쪽: 성공 케이스 ───── -->
+
+  <!-- 사용자 A (우) -->
+  <rect x="424" y="56" width="148" height="52" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="498" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">사용자 A</text>
+  <text x="498" y="91" text-anchor="middle" font-size="10" fill="#047857">GET /queue/status</text>
+  <text x="498" y="104" text-anchor="middle" font-size="10" fill="#047857">Authorization: JWE(sub=user-a)</text>
+
+  <!-- 사용자 B (우) -->
+  <rect x="588" y="56" width="180" height="52" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="678" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">사용자 B</text>
+  <text x="678" y="91" text-anchor="middle" font-size="10" fill="#047857">GET /queue/status</text>
+  <text x="678" y="104" text-anchor="middle" font-size="10" fill="#047857">Authorization: JWE(sub=user-b)</text>
+
+  <!-- 화살표: A → CDN 우 -->
+  <line x1="498" y1="108" x2="530" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <!-- 화살표: B → CDN 우 -->
+  <line x1="678" y1="108" x2="648" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+
+  <!-- CDN 박스 (우) -->
+  <rect x="424" y="174" width="348" height="96" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="598" y="199" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Cloudflare Edge (CDN)</text>
+  <text x="598" y="218" text-anchor="middle" font-size="11" fill="#B45309">Cache Key A = /queue/status + user-a</text>
+  <text x="598" y="234" text-anchor="middle" font-size="11" fill="#B45309">Cache Key B = /queue/status + user-b</text>
+  <text x="598" y="252" text-anchor="middle" font-size="11" fill="#047857" font-weight="600">각 키가 독립 캐시 엔트리 유지</text>
+
+  <!-- 화살표: CDN → 분리 결과 -->
+  <line x1="516" y1="270" x2="488" y2="310" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
+  <line x1="680" y1="270" x2="708" y2="310" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
+
+  <!-- A 응답 박스 -->
+  <rect x="424" y="310" width="148" height="52" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="498" y="333" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">A 응답</text>
+  <text x="498" y="351" text-anchor="middle" font-size="11" fill="#047857">순번: 3위 (A만 수신)</text>
+
+  <!-- B 응답 박스 -->
+  <rect x="588" y="310" width="184" height="52" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="680" y="333" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">B 응답</text>
+  <text x="680" y="351" text-anchor="middle" font-size="11" fill="#047857">순번: 7위 (B만 수신)</text>
+
+  <!-- Origin (우) -->
+  <rect x="492" y="388" width="212" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="598" y="411" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Origin (goti-queue)</text>
+  <text x="598" y="427" text-anchor="middle" font-size="11" fill="#475569">Cache MISS 시에만 호출</text>
+
+  <!-- 화살표: A → Origin (점선) -->
+  <line x1="498" y1="362" x2="540" y2="388" stroke="#475569" stroke-dasharray="4 2" stroke-width="1.5" marker-end="url(#arrow-slate)"/>
+  <!-- 화살표: B → Origin (점선) -->
+  <line x1="680" y1="362" x2="658" y2="388" stroke="#475569" stroke-dasharray="4 2" stroke-width="1.5" marker-end="url(#arrow-slate)"/>
+
+  <!-- 성공 설명 -->
+  <rect x="424" y="456" width="348" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="598" y="476" text-anchor="middle" font-size="11" fill="#047857">사용자마다 독립 Cache Entry</text>
+  <text x="598" y="492" text-anchor="middle" font-size="11" fill="#047857">TTL 내 polling → origin 요청 0</text>
+  <text x="598" y="508" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">→ 데이터 격리 + origin 부하 감소</text>
+
+  <!-- 구분선 -->
+  <line x1="400" y1="40" x2="400" y2="530" stroke="#D4D4D8" stroke-width="2" stroke-dasharray="6 3"/>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-emerald" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

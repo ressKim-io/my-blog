@@ -124,3 +124,11 @@ Goti-go `977130c` revert + Goti-k8s `f41b5ba` revert로 원복 가능합니다
 - **viper 우선순위를 기억합니다.** `Set > Flag > Env > Config > Default`. configs 파일에 값이 있으면 env 주입은 무시됩니다. env로 주입하고 싶다면 configs에서 반드시 필드를 제거해야 합니다
 - **hotfix와 근본 해결을 구분합니다.** Option A(K8s values 전부 `"goti"`로 변경)는 5분이면 끝나지만 drift 구조는 그대로 남습니다. 근본 해결을 위해서는 "어디가 SoT인가"를 먼저 결정하는 것이 필요합니다
 - **fail-fast는 drift를 원천 차단합니다.** env가 비어 있을 때 silent fallback으로 default를 쓰면 같은 드리프트가 재발합니다. startup 자체를 거부하면 배포 단계에서 바로 drift가 드러나 prod까지 가지 못합니다
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [JWT issuer 검증 — iss 클레임 매칭과 viper 설정 우선순위 체인](/essays/goti-deepdive-jwt-issuer-config-precedence)

@@ -1,0 +1,115 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+
+  <title id="title-2">Failover 직후 시퀀스 드리프트와 PK 중복 위험 타임라인</title>
+  <desc id="desc-2">정상 운영 구간에서는 publisher 시퀀스 last_value가 subscriber에 주기적으로 전파됩니다. Failover 직후 subscriber가 새 primary로 승격되면 last_value 기준으로 nextval이 시작되어 Failover 직전 gap 구간의 값과 중복될 수 있습니다. ALTER SEQUENCE RESTART로 안전 마진을 확보해야 합니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">타임라인 — Failover 직후 시퀀스 드리프트</text>
+
+  <!-- ── 시간축 ── -->
+  <line x1="60" y1="80" x2="740" y2="80" stroke="#D4D4D8" stroke-width="1.5"/>
+  <text x="60" y="74" text-anchor="middle" font-size="11" fill="#27272A">T0</text>
+  <text x="220" y="74" text-anchor="middle" font-size="11" fill="#27272A">T1</text>
+  <text x="400" y="74" text-anchor="middle" font-size="11" fill="#E11D48" font-weight="700">T2 Failover</text>
+  <text x="560" y="74" text-anchor="middle" font-size="11" fill="#27272A">T3</text>
+  <text x="720" y="74" text-anchor="middle" font-size="11" fill="#27272A">T4</text>
+
+  <!-- 시간축 틱 -->
+  <line x1="60" y1="76" x2="60" y2="86" stroke="#D4D4D8" stroke-width="1.5"/>
+  <line x1="220" y1="76" x2="220" y2="86" stroke="#D4D4D8" stroke-width="1.5"/>
+  <line x1="400" y1="72" x2="400" y2="92" stroke="#E11D48" stroke-width="2"/>
+  <line x1="560" y1="76" x2="560" y2="86" stroke="#D4D4D8" stroke-width="1.5"/>
+  <line x1="720" y1="76" x2="720" y2="86" stroke="#D4D4D8" stroke-width="1.5"/>
+
+  <!-- ── 구간 레이블 ── -->
+  <!-- 정상 구간 배경 -->
+  <rect x="60" y="90" width="340" height="16" rx="3" fill="#ECFDF5" opacity="0.7"/>
+  <text x="230" y="102" text-anchor="middle" font-size="11" fill="#047857" font-weight="600">정상 운영 (GCP primary 활성)</text>
+  <!-- Failover 후 구간 배경 -->
+  <rect x="400" y="90" width="340" height="16" rx="3" fill="#FFF1F2" opacity="0.7"/>
+  <text x="580" y="102" text-anchor="middle" font-size="11" fill="#BE123C" font-weight="600">Failover 후 (AWS subscriber → new primary)</text>
+
+  <!-- ── Publisher 레인 ── -->
+  <rect x="40" y="120" width="100" height="32" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="90" y="141" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">Publisher</text>
+
+  <!-- Publisher 시퀀스 바 (정상) -->
+  <rect x="60" y="122" width="340" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="80" y="140" font-size="11" fill="#047857">last_value=1000</text>
+  <text x="230" y="140" text-anchor="middle" font-size="11" fill="#047857">→ 복제 전파 (주기적 동기)</text>
+  <text x="370" y="140" text-anchor="end" font-size="11" fill="#047857">last_value=1850</text>
+
+  <!-- Failover 수직선 -->
+  <line x1="400" y1="110" x2="400" y2="460" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+  <!-- Publisher 비활성 (T2 이후) -->
+  <rect x="400" y="122" width="340" height="28" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="570" y="140" text-anchor="middle" font-size="11" fill="#94A3B8">Publisher 다운 (복제 중단)</text>
+
+  <!-- ── last_value 복제 화살표 (T1 시점) ── -->
+  <line x1="220" y1="150" x2="220" y2="200" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-sync)"/>
+  <rect x="126" y="156" width="188" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="220" y="169" text-anchor="middle" font-size="10" fill="#6D28D9">setval(last_value=1600) 전파</text>
+
+  <!-- ── Subscriber 레인 ── -->
+  <rect x="40" y="200" width="100" height="32" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="90" y="221" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">Subscriber</text>
+
+  <!-- Subscriber 읽기 전용 바 (정상) -->
+  <rect x="60" y="202" width="340" height="28" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1.5"/>
+  <text x="80" y="220" font-size="11" fill="#475569">last_value=1600 (동기됨)</text>
+  <text x="360" y="220" text-anchor="end" font-size="11" fill="#475569">last_value=1600</text>
+  <text x="220" y="220" text-anchor="middle" font-size="11" fill="#94A3B8">read_only=on, nextval 없음</text>
+
+  <!-- ── Gap 시각화 (T2~T3) ── -->
+  <!-- Subscriber new primary 바 -->
+  <rect x="400" y="202" width="340" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="420" y="220" font-size="11" fill="#047857">새 primary 승격</text>
+  <text x="570" y="220" text-anchor="middle" font-size="11" fill="#047857">nextval 재시작 → 1601~</text>
+
+  <!-- ── Gap 박스 ── -->
+  <rect x="60" y="252" width="680" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="276" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">위험: last_value 드리프트 구간</text>
+  <text x="400" y="296" text-anchor="middle" font-size="12" fill="#0A0A0A">Publisher last_value=1850 (T2 직전 미전파)</text>
+  <text x="400" y="314" text-anchor="middle" font-size="12" fill="#0A0A0A">Subscriber last_value=1600 → nextval 1601, 1602 … 1850 → PK 중복 충돌</text>
+
+  <!-- ── 보정 박스 ── -->
+  <rect x="60" y="352" width="680" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="376" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">보정: Failover runbook — ALTER SEQUENCE RESTART</text>
+  <text x="400" y="396" text-anchor="middle" font-size="11" fill="#0A0A0A">pg_sequence_last_value() 로 publisher 최종값 확인</text>
+  <text x="400" y="412" text-anchor="middle" font-size="11" fill="#0A0A0A">ALTER SEQUENCE orders_id_seq RESTART WITH (최종값 + 1000) → 안전 마진 확보</text>
+
+  <!-- ── 화살표: 보정 흐름 ── -->
+  <line x1="400" y1="332" x2="400" y2="352" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-green2)"/>
+
+  <!-- ── 범례 ── -->
+  <rect x="40" y="442" width="720" height="60" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="56" y="460" font-size="12" font-weight="600" fill="#0A0A0A">범례</text>
+  <rect x="56" y="466" width="12" height="8" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="74" y="475" font-size="11" fill="#334155">정상 복제 활성 구간</text>
+  <rect x="220" y="466" width="12" height="8" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="238" y="475" font-size="11" fill="#334155">비활성 / 읽기 전용</text>
+  <rect x="380" y="466" width="12" height="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="398" y="475" font-size="11" fill="#334155">PK 충돌 위험 구간</text>
+  <line x1="56" y1="490" x2="68" y2="490" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="74" y="494" font-size="11" fill="#334155">setval() 전파 (점선: 비동기)</text>
+  <line x1="280" y1="490" x2="292" y2="490" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="298" y="494" font-size="11" fill="#334155">Failover 시점</text>
+
+  <!-- 마커 정의 -->
+  <defs>
+    <marker id="arr-sync" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#7C3AED"/>
+    </marker>
+    <marker id="arr-green2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+  </defs>
+
+</svg>

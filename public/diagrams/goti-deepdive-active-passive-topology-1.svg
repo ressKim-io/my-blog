@@ -1,0 +1,152 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">Active-Passive 비대칭 복제 구조도</title>
+  <desc id="desc-1">GCP Active 노드에서 쓰기와 읽기가 모두 처리되고, pglogical 복제를 통해 AWS Passive 노드로 변경이 전달되며, Passive는 읽기 전용으로 운영되는 구조</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">구조도 — Active-Passive 비대칭 복제</text>
+
+  <!-- ===== GCP 영역 ===== -->
+  <rect x="32" y="56" width="340" height="420" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="202" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">GCP (asia-northeast3) — Active</text>
+
+  <!-- 앱 서비스 박스 -->
+  <rect x="64" y="96" width="276" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="202" y="119" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">goti-* Go 서비스</text>
+  <text x="202" y="137" text-anchor="middle" font-size="11" fill="#27272A">EKS / GKE Pod</text>
+
+  <!-- PgBouncer RW -->
+  <rect x="64" y="184" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="124" y="206" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">PgBouncer-RW</text>
+  <text x="124" y="222" text-anchor="middle" font-size="11" fill="#27272A">쓰기 + 읽기</text>
+
+  <!-- PgBouncer RO -->
+  <rect x="220" y="184" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="280" y="206" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">PgBouncer-RO</text>
+  <text x="280" y="222" text-anchor="middle" font-size="11" fill="#27272A">읽기 전용 경로</text>
+
+  <!-- Primary DB -->
+  <rect x="64" y="272" width="120" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="124" y="296" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">pg-primary</text>
+  <text x="124" y="312" text-anchor="middle" font-size="11" fill="#6D28D9">GCE VM, PG 16</text>
+  <text x="124" y="326" text-anchor="middle" font-size="10" fill="#6D28D9">쓰기 허용</text>
+
+  <!-- Standby DB -->
+  <rect x="220" y="272" width="120" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="280" y="296" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">pg-standby</text>
+  <text x="280" y="312" text-anchor="middle" font-size="11" fill="#6D28D9">streaming replica</text>
+  <text x="280" y="326" text-anchor="middle" font-size="10" fill="#6D28D9">Phase B</text>
+
+  <!-- publication 라벨 박스 -->
+  <rect x="80" y="368" width="240" height="36" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="200" y="382" text-anchor="middle" font-size="11" fill="#B45309" font-weight="600">pglogical publication</text>
+  <text x="200" y="396" text-anchor="middle" font-size="10" fill="#B45309">default replication set → 복제 스트림 발행</text>
+
+  <!-- ===== AWS 영역 ===== -->
+  <rect x="428" y="56" width="340" height="420" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="598" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">AWS (ap-northeast-2) — Passive</text>
+
+  <!-- 앱 서비스 박스 (AWS) -->
+  <rect x="460" y="96" width="276" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="598" y="119" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">goti-* Go 서비스</text>
+  <text x="598" y="137" text-anchor="middle" font-size="11" fill="#27272A">EKS (Phase B 시연일)</text>
+
+  <!-- PgBouncer RO only (AWS) -->
+  <rect x="516" y="184" width="160" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="596" y="206" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">PgBouncer-RO only</text>
+  <text x="596" y="222" text-anchor="middle" font-size="11" fill="#27272A">쓰기 경로 없음</text>
+
+  <!-- AWS RDS Subscriber -->
+  <rect x="476" y="272" width="240" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="596" y="299" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">AWS RDS</text>
+  <text x="596" y="317" text-anchor="middle" font-size="11" fill="#BE123C">pglogical subscriber</text>
+  <text x="596" y="333" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">default_transaction_read_only=on</text>
+  <text x="596" y="347" text-anchor="middle" font-size="10" fill="#BE123C">쓰기 시도 → 즉시 오류</text>
+
+  <!-- subscription 라벨 박스 -->
+  <rect x="476" y="376" width="240" height="36" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="596" y="390" text-anchor="middle" font-size="11" fill="#BE123C" font-weight="600">sub_from_gcp_primary</text>
+  <text x="596" y="404" text-anchor="middle" font-size="10" fill="#BE123C">구독 · LSN ACK 반환</text>
+
+  <!-- ===== 화살표 ===== -->
+  <!-- 앱 → PgBouncer RW -->
+  <line x1="152" y1="152" x2="152" y2="184" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <!-- 앱 → PgBouncer RO -->
+  <line x1="252" y1="152" x2="268" y2="184" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- PgBouncer RW → Primary -->
+  <line x1="124" y1="236" x2="124" y2="272" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrow-violet)"/>
+  <!-- 쓰기 라벨 -->
+  <rect x="86" y="247" width="36" height="14" fill="#FAFAFA"/>
+  <text x="104" y="258" text-anchor="middle" font-size="10" fill="#6D28D9">쓰기</text>
+
+  <!-- PgBouncer RO → Primary (읽기) -->
+  <line x1="260" y1="236" x2="155" y2="272" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-green)"/>
+  <rect x="188" y="247" width="36" height="14" fill="#FAFAFA"/>
+  <text x="206" y="258" text-anchor="middle" font-size="10" fill="#047857">읽기</text>
+
+  <!-- PgBouncer RO → Standby -->
+  <line x1="280" y1="236" x2="280" y2="272" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-green)"/>
+
+  <!-- Primary → publication -->
+  <line x1="148" y1="336" x2="180" y2="368" stroke="#D97706" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+
+  <!-- Cross-cloud 복제 화살표 -->
+  <line x1="320" y1="390" x2="476" y2="390" stroke="#0891B2" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+  <rect x="355" y="376" width="86" height="16" fill="#FAFAFA"/>
+  <text x="398" y="387" text-anchor="middle" font-size="10" font-weight="600" fill="#0E7490">TLS verify-full</text>
+  <text x="398" y="397" text-anchor="middle" font-size="9" fill="#0E7490">public IP + allowlist</text>
+
+  <!-- AWS 앱 → PgBouncer RO -->
+  <line x1="598" y1="152" x2="598" y2="184" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-green)"/>
+
+  <!-- AWS PgBouncer RO → RDS -->
+  <line x1="596" y1="236" x2="596" y2="272" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arrow-rose)"/>
+  <rect x="558" y="247" width="36" height="14" fill="#FAFAFA"/>
+  <text x="576" y="258" text-anchor="middle" font-size="10" fill="#BE123C">읽기만</text>
+
+  <!-- RDS → subscription 라벨 -->
+  <line x1="596" y1="352" x2="596" y2="376" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arrow-rose)"/>
+
+  <!-- ACK 화살표 (점선, 역방향) -->
+  <line x1="476" y1="408" x2="320" y2="408" stroke="#475569" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arrow-slate)"/>
+  <rect x="355" y="408" width="60" height="14" fill="#FAFAFA"/>
+  <text x="385" y="419" text-anchor="middle" font-size="9" fill="#334155">LSN ACK</text>
+
+  <!-- ===== 화살표 마커 정의 ===== -->
+  <defs>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="arrow-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- 범례 -->
+  <rect x="32" y="490" width="736" height="22" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="44" y="498" width="10" height="10" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="59" y="508" font-size="10" fill="#334155">Primary (쓰기 허용)</text>
+  <rect x="170" y="498" width="10" height="10" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="185" y="508" font-size="10" fill="#334155">Passive subscriber (읽기 전용)</text>
+  <line x1="356" y1="503" x2="376" y2="503" stroke="#0891B2" stroke-width="2"/>
+  <text x="381" y="508" font-size="10" fill="#334155">pglogical 복제 스트림</text>
+  <line x1="500" y1="503" x2="520" y2="503" stroke="#475569" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="525" y="508" font-size="10" fill="#334155">LSN ACK (역방향)</text>
+  <line x1="634" y1="503" x2="654" y2="503" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="659" y="508" font-size="10" fill="#334155">읽기 전용 경로</text>
+</svg>

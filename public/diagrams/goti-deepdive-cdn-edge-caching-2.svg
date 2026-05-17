@@ -1,0 +1,116 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+
+  <title id="title-2">Cache-Control 지시자별 CDN edge 동작</title>
+  <desc id="desc-2">origin 응답의 Cache-Control 지시자(public·s-maxage·private·no-store)에 따라 CDN edge가 캐시를 저장하는지, 우선 순위는 어떻게 되는지를 결정 흐름으로 나타낸 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="34" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">Cache-Control 지시자별 edge 캐싱 결정 흐름</text>
+
+  <!-- origin 응답 시작 -->
+  <rect x="300" y="54" width="200" height="44" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="400" y="74" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Origin HTTP 응답</text>
+  <text x="400" y="90" text-anchor="middle" font-size="11" fill="#475569">Cache-Control 헤더 포함</text>
+
+  <!-- 화살표: 응답 → 첫 분기 -->
+  <line x1="400" y1="98" x2="400" y2="128" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark2)"/>
+
+  <!-- 분기 1: no-store? -->
+  <rect x="280" y="130" width="240" height="40" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">no-store 포함?</text>
+  <text x="400" y="163" text-anchor="middle" font-size="11" fill="#BE123C">Cache-Control: no-store</text>
+
+  <!-- YES → 캐싱 금지 -->
+  <line x1="280" y1="150" x2="180" y2="150" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arrow-rose2)"/>
+  <text x="228" y="143" text-anchor="middle" font-size="11" fill="#BE123C">YES</text>
+  <rect x="40" y="130" width="136" height="40" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.2"/>
+  <text x="108" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">캐싱 금지</text>
+  <text x="108" y="163" text-anchor="middle" font-size="11" fill="#BE123C">BYPASS / DYNAMIC</text>
+
+  <!-- NO → 다음 분기 -->
+  <line x1="400" y1="170" x2="400" y2="200" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark2)"/>
+  <text x="415" y="192" font-size="11" fill="#27272A">NO</text>
+
+  <!-- 분기 2: private? -->
+  <rect x="280" y="202" width="240" height="40" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.2"/>
+  <text x="400" y="220" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">private 포함?</text>
+  <text x="400" y="235" text-anchor="middle" font-size="11" fill="#BE123C">Cache-Control: private</text>
+
+  <!-- YES → 브라우저만 -->
+  <line x1="280" y1="222" x2="180" y2="222" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arrow-rose2)"/>
+  <text x="228" y="215" text-anchor="middle" font-size="11" fill="#BE123C">YES</text>
+  <rect x="40" y="202" width="136" height="44" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.2"/>
+  <text x="108" y="220" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">CDN 저장 불가</text>
+  <text x="108" y="235" text-anchor="middle" font-size="11" fill="#BE123C">브라우저 캐시만</text>
+  <text x="108" y="248" text-anchor="middle" font-size="10" fill="#BE123C">enter/leave/admit 경로</text>
+
+  <!-- NO → 다음 분기 -->
+  <line x1="400" y1="242" x2="400" y2="272" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark2)"/>
+  <text x="415" y="264" font-size="11" fill="#27272A">NO</text>
+
+  <!-- 분기 3: public? -->
+  <rect x="280" y="274" width="240" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="292" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">public 포함?</text>
+  <text x="400" y="307" text-anchor="middle" font-size="11" fill="#047857">Cache-Control: public</text>
+
+  <!-- NO → 조건부 -->
+  <line x1="520" y1="294" x2="600" y2="294" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark2)"/>
+  <text x="558" y="287" text-anchor="middle" font-size="11" fill="#27272A">NO</text>
+  <rect x="600" y="272" width="164" height="44" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.2"/>
+  <text x="682" y="290" text-anchor="middle" font-size="11" fill="#B45309" font-weight="600">CDN 재량 캐싱</text>
+  <text x="682" y="305" text-anchor="middle" font-size="10" fill="#B45309">heuristic TTL 적용 가능</text>
+  <text x="682" y="318" text-anchor="middle" font-size="10" fill="#B45309">(CDN 정책에 따라 다름)</text>
+
+  <!-- YES → TTL 결정 -->
+  <line x1="400" y1="314" x2="400" y2="350" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green2)"/>
+  <text x="415" y="342" font-size="11" fill="#047857">YES</text>
+
+  <!-- TTL 결정 -->
+  <rect x="250" y="352" width="300" height="64" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="373" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">edge TTL 결정</text>
+  <text x="400" y="390" text-anchor="middle" font-size="11" fill="#047857">s-maxage 있음 → s-maxage 우선</text>
+  <text x="400" y="406" text-anchor="middle" font-size="11" fill="#047857">s-maxage 없음 → max-age 사용</text>
+
+  <!-- 화살표: TTL → 저장 -->
+  <line x1="400" y1="416" x2="400" y2="448" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green2)"/>
+
+  <!-- 저장 박스 -->
+  <rect x="250" y="450" width="300" height="52" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="472" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">edge 캐시 저장 완료</text>
+  <text x="400" y="490" text-anchor="middle" font-size="11" fill="#047857">TTL 내 동일 캐시 키 → HIT 처리</text>
+
+  <!-- 우측 요약표 -->
+  <rect x="40" y="310" width="220" height="170" rx="8" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1.2"/>
+  <text x="150" y="330" text-anchor="middle" font-size="12" font-weight="600" fill="#0A0A0A">지시자 요약</text>
+  <line x1="50" y1="336" x2="250" y2="336" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="55" y="352" font-size="11" font-weight="600" fill="#047857">public</text>
+  <text x="130" y="352" font-size="11" fill="#334155">CDN 공유 캐시 허용</text>
+  <text x="55" y="370" font-size="11" font-weight="600" fill="#047857">s-maxage=N</text>
+  <text x="130" y="370" font-size="11" fill="#334155">공유 캐시 TTL (초)</text>
+  <text x="55" y="388" font-size="11" font-weight="600" fill="#047857">max-age=N</text>
+  <text x="130" y="388" font-size="11" fill="#334155">브라우저+공유 TTL</text>
+  <text x="55" y="406" font-size="11" font-weight="600" fill="#BE123C">private</text>
+  <text x="130" y="406" font-size="11" fill="#334155">브라우저만 캐싱</text>
+  <text x="55" y="424" font-size="11" font-weight="600" fill="#BE123C">no-store</text>
+  <text x="130" y="424" font-size="11" fill="#334155">캐싱 전면 금지</text>
+  <text x="55" y="444" font-size="10" fill="#475569">go-ti: status → public,s-maxage</text>
+  <text x="55" y="458" font-size="10" fill="#475569">enter/admit → private,no-store</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-dark2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-rose2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+</svg>

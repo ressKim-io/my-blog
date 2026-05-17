@@ -1,0 +1,103 @@
+<svg role="img" aria-labelledby="title-rel3 desc-rel3"
+  viewBox="0 0 800 360" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-rel3">Patroni 클러스터 최소 구성 — VM 3대 + etcd 3노드 + HAProxy</title>
+  <desc id="desc-rel3">Primary VM과 Standby VM 2대가 각각 patroni 프로세스를 실행하며 etcd 3노드 쿼럼에 연결됩니다. HAProxy가 VIP를 통해 현재 Primary로 요청을 포워딩합니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="360" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="28" font-size="14" font-weight="700" fill="#0A0A0A" text-anchor="middle">Patroni 클러스터 최소 구성</text>
+
+  <!-- ===== 화살표 먼저 ===== -->
+
+  <!-- HAProxy → Primary (VIP 포워딩) -->
+  <line x1="136" y1="152" x2="224" y2="152" stroke="#059669" stroke-width="2" marker-end="url(#arr-g)"/>
+  <rect x="138" y="138" width="84" height="16" rx="2" fill="#FAFAFA"/>
+  <text x="180" y="149" font-size="10" fill="#047857" text-anchor="middle">VIP 포워딩</text>
+
+  <!-- Primary patroni → etcd -->
+  <line x1="368" y1="152" x2="488" y2="152" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-a)"/>
+  <rect x="390" y="138" width="76" height="16" rx="2" fill="#FAFAFA"/>
+  <text x="428" y="149" font-size="10" fill="#B45309" text-anchor="middle">리스 갱신</text>
+
+  <!-- Standby1 patroni → etcd -->
+  <line x1="368" y1="228" x2="496" y2="184" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-a)"/>
+
+  <!-- Standby2 patroni → etcd -->
+  <line x1="368" y1="288" x2="496" y2="208" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-a)"/>
+
+  <!-- Primary → Standby1 (WAL 스트리밍) -->
+  <line x1="296" y1="176" x2="296" y2="216" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="302" y="200" font-size="10" fill="#27272A">WAL</text>
+
+  <!-- Primary → Standby2 (WAL 스트리밍) -->
+  <line x1="296" y1="176" x2="296" y2="276" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b)"/>
+
+  <!-- ===== 박스 ===== -->
+
+  <!-- HAProxy -->
+  <rect x="32" y="128" width="104" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="84" y="150" font-size="13" font-weight="600" fill="#047857" text-anchor="middle">HAProxy</text>
+  <text x="84" y="166" font-size="10" fill="#047857" text-anchor="middle">VIP 엔드포인트</text>
+
+  <!-- Primary VM -->
+  <rect x="224" y="128" width="144" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="296" y="148" font-size="13" font-weight="600" fill="#047857" text-anchor="middle">Primary VM</text>
+  <text x="296" y="165" font-size="10" fill="#047857" text-anchor="middle">patroni + PostgreSQL</text>
+
+  <!-- Standby VM 1 -->
+  <rect x="224" y="208" width="144" height="40" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="296" y="224" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">Standby VM 1</text>
+  <text x="296" y="240" font-size="10" fill="#334155" text-anchor="middle">patroni + PostgreSQL</text>
+
+  <!-- Standby VM 2 -->
+  <rect x="224" y="268" width="144" height="40" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="296" y="284" font-size="12" font-weight="600" fill="#334155" text-anchor="middle">Standby VM 2</text>
+  <text x="296" y="300" font-size="10" fill="#334155" text-anchor="middle">patroni + PostgreSQL</text>
+
+  <!-- etcd 클러스터 (3-node quorum) -->
+  <rect x="488" y="112" width="256" height="152" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="616" y="136" font-size="12" font-weight="700" fill="#B45309" text-anchor="middle">etcd (3-node quorum)</text>
+
+  <rect x="504" y="148" width="72" height="36" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="540" y="170" font-size="11" fill="#B45309" text-anchor="middle">etcd-1</text>
+
+  <rect x="580" y="148" width="72" height="36" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="616" y="170" font-size="11" fill="#B45309" text-anchor="middle">etcd-2</text>
+
+  <rect x="656" y="148" width="72" height="36" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="692" y="170" font-size="11" fill="#B45309" text-anchor="middle">etcd-3</text>
+
+  <!-- etcd 내부 연결선 -->
+  <line x1="576" y1="166" x2="580" y2="166" stroke="#D97706" stroke-width="1"/>
+  <line x1="652" y1="166" x2="656" y2="166" stroke="#D97706" stroke-width="1"/>
+
+  <!-- etcd 설명 텍스트 -->
+  <text x="616" y="208" font-size="10" fill="#B45309" text-anchor="middle">리더십 리스 관리</text>
+  <text x="616" y="222" font-size="10" fill="#B45309" text-anchor="middle">Primary 선출 합의</text>
+  <text x="616" y="236" font-size="10" fill="#B45309" text-anchor="middle">과반(2/3) 동의 필요</text>
+  <text x="616" y="250" font-size="10" fill="#B45309" text-anchor="middle">리스 만료 → failover 트리거</text>
+
+  <!-- 범례 -->
+  <rect x="32" y="328" width="380" height="24" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="48" y1="340" x2="72" y2="340" stroke="#059669" stroke-width="2"/>
+  <text x="78" y="344" font-size="10" fill="#334155">실선 = 쓰기 경로 / WAL 스트리밍</text>
+  <line x1="188" y1="340" x2="212" y2="340" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="218" y="344" font-size="10" fill="#334155">점선 = patroni 리스 갱신 (etcd)</text>
+
+  <!-- 마커 정의 -->
+  <defs>
+    <marker id="arr-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arr-a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+    <marker id="arr-b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>

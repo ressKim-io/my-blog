@@ -1,0 +1,131 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+     viewBox="0 0 800 480" width="100%" height="auto"
+     xmlns="http://www.w3.org/2000/svg"
+     style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-1">read-your-write 일관성 깨짐 시나리오</title>
+  <desc id="desc-1">애플리케이션이 Primary에 INSERT하고 Replica에서 즉시 SELECT하면 복제 지연으로 인해 방금 쓴 값이 보이지 않는 문제와, Primary에서 읽어 이를 회피하는 방법을 비교하는 타임라인 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">타임라인 — read-your-write 일관성 문제와 회피</text>
+
+  <!-- ── 열 헤더 ── -->
+  <!-- App -->
+  <rect x="40" y="56" width="120" height="36" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="100" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">애플리케이션</text>
+  <!-- Primary -->
+  <rect x="240" y="56" width="120" height="36" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="300" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Primary</text>
+  <!-- Replica -->
+  <rect x="440" y="56" width="120" height="36" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <text x="500" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">Replica</text>
+
+  <!-- 수직 점선 (타임라인 축) -->
+  <line x1="100" y1="92" x2="100" y2="460" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="300" y1="92" x2="300" y2="460" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="500" y1="92" x2="500" y2="460" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- ═══ 문제 시나리오 (왼쪽 절반) ═══ -->
+  <rect x="32" y="100" width="380" height="24" rx="4" fill="#FFF1F2" stroke="none"/>
+  <text x="222" y="116" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">문제 — Replica에서 즉시 읽기</text>
+
+  <!-- t1: App → Primary INSERT -->
+  <line x1="100" y1="150" x2="300" y2="150" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arr-red1)"/>
+  <rect x="128" y="136" width="108" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="182" y="148" text-anchor="middle" font-size="10" fill="#BE123C">① INSERT orders (쓰기)</text>
+
+  <!-- Primary 쓰기 완료 표시 -->
+  <circle cx="300" cy="150" r="5" fill="#7C3AED"/>
+  <text x="312" y="154" font-size="10" fill="#6D28D9">커밋 완료</text>
+
+  <!-- 복제 지연 구간 -->
+  <rect x="312" y="160" width="196" height="40" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="410" y="178" text-anchor="middle" font-size="10" fill="#B45309">비동기 복제 진행 중</text>
+  <text x="410" y="192" text-anchor="middle" font-size="10" fill="#B45309">(0 ~ 수초 지연)</text>
+
+  <!-- t2: App → Replica SELECT (즉시) -->
+  <line x1="100" y1="220" x2="500" y2="220" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arr-blue1)"/>
+  <rect x="260" y="206" width="100" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="310" y="218" text-anchor="middle" font-size="10" fill="#0E7490">② SELECT (즉시)</text>
+
+  <!-- Replica 응답 — 이전 값 -->
+  <line x1="500" y1="250" x2="100" y2="250" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-red1)"/>
+  <rect x="248" y="236" width="128" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="312" y="248" text-anchor="middle" font-size="10" fill="#BE123C">이전 값 반환 (복제 미완)</text>
+
+  <!-- 문제 표시 -->
+  <rect x="64" y="268" width="352" height="24" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="240" y="284" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">방금 저장한 주문이 마이페이지에 안 보임</text>
+
+  <!-- ═══ 해결 시나리오 (오른쪽) ═══ -->
+  <!-- 구분선 -->
+  <line x1="440" y1="100" x2="440" y2="460" stroke="#D4D4D8" stroke-width="1.2" stroke-dasharray="6 3"/>
+
+  <rect x="444" y="100" width="340" height="24" rx="4" fill="#ECFDF5" stroke="none"/>
+  <text x="614" y="116" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">해결 — 쓰기 후 즉시 읽기는 Primary에서</text>
+
+  <!-- 오른쪽 열 헤더 -->
+  <rect x="640" y="56" width="120" height="36" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="700" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Primary</text>
+  <line x1="700" y1="92" x2="700" y2="460" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- App 오른쪽 축 -->
+  <line x1="540" y1="92" x2="540" y2="460" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 3"/>
+  <rect x="480" y="56" width="120" height="36" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="540" y="79" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">애플리케이션</text>
+
+  <!-- t1: App → Primary INSERT (오른쪽) -->
+  <line x1="540" y1="150" x2="700" y2="150" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arr-red1)"/>
+  <rect x="570" y="136" width="100" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="620" y="148" text-anchor="middle" font-size="10" fill="#BE123C">① INSERT (쓰기)</text>
+
+  <!-- Primary 쓰기 완료 -->
+  <circle cx="700" cy="150" r="5" fill="#7C3AED"/>
+  <text x="710" y="154" font-size="10" fill="#6D28D9">커밋</text>
+
+  <!-- t2: App → Primary SELECT (즉시) — writePool 사용 -->
+  <line x1="540" y1="220" x2="700" y2="220" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arr-violet1)"/>
+  <rect x="556" y="206" width="128" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="620" y="218" text-anchor="middle" font-size="10" fill="#6D28D9">② SELECT (writePool)</text>
+
+  <!-- Primary 응답 — 최신 값 -->
+  <line x1="700" y1="250" x2="540" y2="250" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-green1)"/>
+  <rect x="568" y="236" width="100" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="618" y="248" text-anchor="middle" font-size="10" fill="#047857">최신 값 즉시 반환</text>
+
+  <!-- 해결 표시 -->
+  <rect x="452" y="268" width="332" height="24" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="618" y="284" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">방금 저장한 주문이 마이페이지에 바로 표시</text>
+
+  <!-- ── Go 코드 힌트 ── -->
+  <rect x="32" y="312" width="736" height="68" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="400" y="332" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Go 코드 — writePool vs readPool 선택</text>
+  <text x="56" y="352" font-size="11" fill="#0A0A0A" font-family="'Geist Mono', monospace">// 쓰기 직후 즉시 읽기 → writePool (Primary)</text>
+  <text x="56" y="368" font-size="11" fill="#0A0A0A" font-family="'Geist Mono', monospace">order, err := s.orderRepo.FindByID(ctx, s.pools.Write, orderID)</text>
+  <text x="56" y="384" font-size="11" fill="#0E7490" font-family="'Geist Mono', monospace">// 일반 조회 → readPool (Replica, 복제 지연 허용)</text>
+
+  <!-- 시간 흐름 화살표 -->
+  <line x1="16" y1="140" x2="16" y2="290" stroke="#475569" stroke-width="1.2" marker-end="url(#arr-slate1)"/>
+  <text x="14" y="220" text-anchor="middle" font-size="10" fill="#475569" transform="rotate(-90 14 220)">시간 흐름</text>
+
+  <!-- 마커 정의 -->
+  <defs>
+    <marker id="arr-red1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arr-blue1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="arr-violet1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arr-green1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arr-slate1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>

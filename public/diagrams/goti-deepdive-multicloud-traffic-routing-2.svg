@@ -1,0 +1,149 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 440" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">DNS Round Robin vs 엣지 라우팅 — failover 관측성 비교</title>
+  <desc id="desc-2">왼쪽 DNS Round Robin은 AWS 장애 시 클라이언트 캐시가 남아 실패 요청이 지속되는 구조이고, 오른쪽 엣지 라우팅은 Worker가 5xx를 감지하고 다음 요청부터 즉시 GCP로 전환하는 구조</desc>
+
+  <style>
+    .label-sm { font-size: 11px; fill: #27272A; }
+    .label-md { font-size: 13px; }
+    .label-lg { font-size: 14px; font-weight: 600; }
+    .section-title { font-size: 15px; font-weight: 700; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; }
+    .arrow-fail { stroke: #E11D48; stroke-width: 1.5; fill: none; stroke-dasharray: 5 3; }
+    .arrow-ok { stroke: #059669; stroke-width: 1.5; fill: none; }
+    .arrow-strong { stroke: #7C3AED; stroke-width: 2; fill: none; }
+  </style>
+
+  <!-- 배경 -->
+  <rect width="800" height="440" fill="#FAFAFA"/>
+
+  <!-- 구분선 -->
+  <line x1="400" y1="24" x2="400" y2="416" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="6 3"/>
+
+  <!-- 왼쪽 섹션 타이틀 -->
+  <text x="200" y="40" text-anchor="middle" class="section-title" fill="#B45309">DNS Round Robin</text>
+  <text x="200" y="58" text-anchor="middle" class="label-sm">장애 시: 캐시로 인한 실패 지속</text>
+
+  <!-- 오른쪽 섹션 타이틀 -->
+  <text x="600" y="40" text-anchor="middle" class="section-title" fill="#047857">엣지 라우팅 (Workers)</text>
+  <text x="600" y="58" text-anchor="middle" class="label-sm">장애 시: 즉시 failover + 헤더 관측</text>
+
+  <!-- ======= 왼쪽: DNS Round Robin ======= -->
+
+  <!-- 화살표들 (박스보다 먼저) -->
+  <!-- 클라이언트 → DNS Resolver -->
+  <line x1="100" y1="104" x2="100" y2="138" class="arrow"/>
+  <polygon points="96,138 100,148 104,138" fill="#0A0A0A"/>
+  <!-- DNS Resolver → 클라이언트 (응답, 오른쪽으로) -->
+  <line x1="168" y1="160" x2="116" y2="160" class="arrow"/>
+  <polygon points="116,156 106,160 116,164" fill="#0A0A0A"/>
+  <!-- 캐시 표시 -->
+  <line x1="100" y1="184" x2="100" y2="216" class="arrow"/>
+  <polygon points="96,216 100,226 104,216" fill="#0A0A0A"/>
+  <!-- 클라이언트 → AWS (실패, 빨간 점선) -->
+  <line x1="76" y1="256" x2="48" y2="306" class="arrow-fail"/>
+  <polygon points="45,305 44,316 55,310" fill="#E11D48"/>
+  <!-- 클라이언트 → GCP (성공) -->
+  <line x1="124" y1="256" x2="168" y2="306" class="arrow-ok"/>
+  <polygon points="165,305 176,310 165,316" fill="#059669"/>
+
+  <!-- 클라이언트 박스 (상단) -->
+  <rect x="48" y="80" width="104" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="100" y="100" text-anchor="middle" class="label-md" fill="#0E7490">클라이언트</text>
+  <text x="100" y="118" text-anchor="middle" class="label-sm">브라우저·OS</text>
+
+  <!-- DNS Resolver 박스 -->
+  <rect x="168" y="138" width="144" height="48" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="240" y="158" text-anchor="middle" class="label-md" fill="#B45309">DNS Resolver</text>
+  <text x="240" y="174" text-anchor="middle" class="label-sm">A: AWS IP, A: GCP IP</text>
+
+  <!-- DNS 응답 라벨 -->
+  <rect x="110" y="152" width="58" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="139" y="164" text-anchor="middle" class="label-sm">IP 응답</text>
+
+  <!-- 클라이언트 캐시 박스 -->
+  <rect x="48" y="216" width="104" height="40" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="100" y="234" text-anchor="middle" class="label-md" fill="#BE123C">클라이언트 캐시</text>
+  <text x="100" y="249" text-anchor="middle" class="label-sm">TTL 남음 → AWS IP 유지</text>
+
+  <!-- AWS 장애 박스 -->
+  <rect x="16" y="306" width="112" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="72" y="326" text-anchor="middle" class="label-md" fill="#BE123C">AWS</text>
+  <text x="72" y="342" text-anchor="middle" class="label-sm" fill="#E11D48">장애 발생</text>
+
+  <!-- GCP 정상 박스 -->
+  <rect x="144" y="306" width="104" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="196" y="326" text-anchor="middle" class="label-md" fill="#047857">GCP</text>
+  <text x="196" y="342" text-anchor="middle" class="label-sm">정상 운영 중</text>
+
+  <!-- 실패 라벨 -->
+  <rect x="26" y="276" width="64" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="58" y="288" text-anchor="middle" class="label-sm" fill="#E11D48">요청 실패</text>
+  <!-- 성공 라벨 -->
+  <rect x="130" y="276" width="64" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="162" y="288" text-anchor="middle" class="label-sm" fill="#059669">요청 성공</text>
+
+  <!-- 하단 설명 -->
+  <rect x="16" y="366" width="352" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="192" y="386" text-anchor="middle" class="label-sm" fill="#BE123C">TTL 만료 전까지 일부 클라이언트가</text>
+  <text x="192" y="402" text-anchor="middle" class="label-sm" fill="#BE123C">AWS로 계속 실패 요청 전송</text>
+
+  <!-- ======= 오른쪽: 엣지 라우팅 ======= -->
+
+  <!-- 화살표들 -->
+  <!-- 클라이언트 → CF Worker -->
+  <line x1="520" y1="104" x2="520" y2="138" class="arrow"/>
+  <polygon points="516,138 520,148 524,138" fill="#0A0A0A"/>
+  <!-- CF Worker → AWS (실패, 빨간 점선) -->
+  <line x1="492" y1="216" x2="468" y2="266" class="arrow-fail"/>
+  <polygon points="465,265 464,276 475,270" fill="#E11D48"/>
+  <!-- CF Worker → GCP (5xx 감지 후 전환, 보라) -->
+  <line x1="548" y1="216" x2="584" y2="266" class="arrow-strong"/>
+  <polygon points="581,265 592,270 581,276" fill="#7C3AED"/>
+
+  <!-- 클라이언트 박스 (상단) -->
+  <rect x="468" y="80" width="104" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="520" y="100" text-anchor="middle" class="label-md" fill="#0E7490">클라이언트</text>
+  <text x="520" y="118" text-anchor="middle" class="label-sm">브라우저·OS</text>
+
+  <!-- CF Worker 박스 -->
+  <rect x="432" y="138" width="176" height="78" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="520" y="162" text-anchor="middle" class="label-lg" fill="#B45309">Cloudflare Workers</text>
+  <text x="520" y="180" text-anchor="middle" class="label-sm">5xx 감지 → Circuit Breaker</text>
+  <text x="520" y="196" text-anchor="middle" class="label-sm">즉시 대안 클라우드로 전환</text>
+
+  <!-- AWS 장애 박스 -->
+  <rect x="424" y="266" width="104" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="476" y="286" text-anchor="middle" class="label-md" fill="#BE123C">AWS</text>
+  <text x="476" y="302" text-anchor="middle" class="label-sm" fill="#E11D48">장애 발생</text>
+
+  <!-- GCP 정상 박스 -->
+  <rect x="552" y="266" width="104" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="604" y="286" text-anchor="middle" class="label-md" fill="#047857">GCP</text>
+  <text x="604" y="302" text-anchor="middle" class="label-sm">즉시 전환됨</text>
+
+  <!-- 실패 라벨 -->
+  <rect x="432" y="232" width="72" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="468" y="244" text-anchor="middle" class="label-sm" fill="#E11D48">1회 시도</text>
+  <!-- 전환 라벨 -->
+  <rect x="538" y="232" width="80" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="578" y="244" text-anchor="middle" class="label-sm" fill="#7C3AED">즉시 failover</text>
+
+  <!-- 응답 헤더 관측 박스 -->
+  <rect x="424" y="330" width="352" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="350" text-anchor="middle" class="label-sm" fill="#047857">x-goti-route-circuit: open/aws</text>
+  <text x="600" y="366" text-anchor="middle" class="label-sm" fill="#047857">x-goti-route-failover: true</text>
+
+  <!-- 하단 설명 -->
+  <rect x="416" y="390" width="368" height="24" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="406" text-anchor="middle" class="label-sm" fill="#047857">다음 요청부터 즉시 GCP로 라우팅 · 헤더로 관측 가능</text>
+
+  <!-- 범례 -->
+  <rect x="16" y="418" width="768" height="18" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="28" y1="427" x2="48" y2="427" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="54" y="431" class="label-sm">장애·실패 경로</text>
+  <line x1="168" y1="427" x2="188" y2="427" stroke="#059669" stroke-width="1.5"/>
+  <text x="194" y="431" class="label-sm">정상 경로</text>
+  <line x1="280" y1="427" x2="300" y2="427" stroke="#7C3AED" stroke-width="2"/>
+  <text x="306" y="431" class="label-sm">즉시 failover 경로</text>
+  <text x="500" y="431" class="label-sm">⚡ 엣지 라우팅은 캐시 없이 요청 단위로 결정 — 장애 전파 지연 없음</text>
+</svg>

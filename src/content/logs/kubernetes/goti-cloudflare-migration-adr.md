@@ -268,3 +268,12 @@ API 요청이 Pages로 가면서 405 Method Not Allowed가 발생했습니다.
 
 이 글에서는 "왜 Cloudflare로 전환했는가"라는 의사결정을 다뤘습니다.
 다음 글에서는 **실제 전환 과정에서 만난 5가지 라우팅 문제**와 해결 과정을 자세히 다룹니다.
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [Cloudflare Pages + Workers — 정적·동적 분리 엣지 아키텍처](/essays/goti-deepdive-cloudflare-edge-architecture)
+- [Cloudflare Workers fetch() — Host 헤더 불변과 우회 원리](/essays/goti-deepdive-cloudflare-workers-host-header)

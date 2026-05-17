@@ -1,0 +1,110 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-2">Prometheus scrape 내부 흐름 — ServiceMonitor부터 up 메트릭까지</title>
+  <desc id="desc-2">ServiceMonitor CRD가 타깃을 발견하고, Prometheus가 /metrics를 scrape해 exposition format을 파싱한 뒤 TSDB에 저장하고 up 메트릭으로 타깃 헬스를 추적하는 전체 흐름</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">Prometheus scrape 내부 흐름</text>
+
+  <!-- ====== 1단계: ServiceMonitor ====== -->
+  <rect x="40" y="56" width="200" height="72" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="140" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">ServiceMonitor CRD</text>
+  <text x="140" y="100" text-anchor="middle" font-size="11" fill="#27272A">selector: 라벨로 Service 매칭</text>
+  <text x="140" y="116" text-anchor="middle" font-size="11" fill="#27272A">port: metrics / path: /metrics</text>
+
+  <!-- 1→2 화살표 -->
+  <line x1="240" y1="92" x2="296" y2="92" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-dark2)"/>
+  <rect x="240" y="80" width="60" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="270" y="92" text-anchor="middle" font-size="10" fill="#27272A">watches</text>
+
+  <!-- ====== 2단계: Prometheus Operator ====== -->
+  <rect x="296" y="56" width="200" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="396" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Prometheus Operator</text>
+  <text x="396" y="100" text-anchor="middle" font-size="11" fill="#27272A">scrape config 생성</text>
+  <text x="396" y="116" text-anchor="middle" font-size="11" fill="#27272A">타깃 목록 주입</text>
+
+  <!-- 2→3 화살표 -->
+  <line x1="496" y1="92" x2="552" y2="92" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-dark2)"/>
+  <rect x="494" y="80" width="60" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="524" y="92" text-anchor="middle" font-size="10" fill="#27272A">reload</text>
+
+  <!-- ====== 3단계: Prometheus 서버 ====== -->
+  <rect x="552" y="56" width="200" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="652" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Prometheus 서버</text>
+  <text x="652" y="100" text-anchor="middle" font-size="11" fill="#27272A">scrape interval 타이머</text>
+  <text x="652" y="116" text-anchor="middle" font-size="11" fill="#27272A">HTTP GET 스케줄링</text>
+
+  <!-- 3→ 아래 (타깃 scrape) -->
+  <line x1="652" y1="128" x2="652" y2="192" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-dark2)"/>
+  <rect x="612" y="148" width="80" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="652" y="161" text-anchor="middle" font-size="10" fill="#27272A">GET /metrics</text>
+
+  <!-- ====== 4단계: 타깃 /metrics ====== -->
+  <rect x="552" y="200" width="200" height="72" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="652" y="226" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">타깃 Pod</text>
+  <text x="652" y="244" text-anchor="middle" font-size="11" fill="#27272A">/metrics HTTP 엔드포인트</text>
+  <text x="652" y="261" text-anchor="middle" font-size="11" fill="#27272A">exposition format 텍스트 반환</text>
+
+  <!-- 4→ 왼쪽 (파싱) -->
+  <line x1="552" y1="240" x2="496" y2="240" stroke="#059669" stroke-width="1.5" marker-end="url(#a-green2)" stroke-dasharray="5 3"/>
+  <rect x="484" y="228" width="60" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="514" y="241" text-anchor="middle" font-size="10" fill="#047857">text/plain</text>
+
+  <!-- ====== 5단계: 파서 ====== -->
+  <rect x="296" y="200" width="200" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="396" y="226" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Exposition Format 파서</text>
+  <text x="396" y="244" text-anchor="middle" font-size="11" fill="#27272A">메트릭명 / 라벨 / 값 추출</text>
+  <text x="396" y="261" text-anchor="middle" font-size="11" fill="#27272A">타입 검증 (counter/gauge 등)</text>
+
+  <!-- 파서→ 아래 (TSDB) -->
+  <line x1="396" y1="272" x2="396" y2="336" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a-dark2)"/>
+  <rect x="344" y="292" width="104" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="396" y="305" text-anchor="middle" font-size="10" fill="#27272A">샘플 삽입</text>
+
+  <!-- ====== 6단계: TSDB ====== -->
+  <rect x="240" y="336" width="312" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="396" y="362" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">로컬 TSDB</text>
+  <text x="396" y="380" text-anchor="middle" font-size="11" fill="#27272A">Head chunk (인메모리) + WAL + Block (디스크)</text>
+  <text x="396" y="397" text-anchor="middle" font-size="11" fill="#27272A">compaction 주기(2h) 기준으로 블록 병합</text>
+
+  <!-- up 메트릭 박스 -->
+  <rect x="40" y="200" width="200" height="72" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="140" y="226" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">up 메트릭</text>
+  <text x="140" y="244" text-anchor="middle" font-size="11" fill="#27272A">scrape 성공 → up=1</text>
+  <text x="140" y="261" text-anchor="middle" font-size="11" fill="#27272A">scrape 실패 → up=0</text>
+
+  <!-- Prometheus → up 메트릭 -->
+  <line x1="552" y1="110" x2="240" y2="220" stroke="#E11D48" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#a-rose2)"/>
+  <rect x="320" y="148" width="80" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="360" y="161" text-anchor="middle" font-size="10" fill="#BE123C">up 기록</text>
+
+  <!-- up → TSDB -->
+  <line x1="140" y1="272" x2="280" y2="336" stroke="#E11D48" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#a-rose2)"/>
+
+  <!-- exposition format 예시 박스 -->
+  <rect x="40" y="336" width="176" height="120" rx="6" fill="#18181B" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="128" y="360" text-anchor="middle" font-size="11" font-weight="600" fill="#E4E4E7">exposition format 예시</text>
+  <text x="56" y="382" font-size="10" font-family="'Geist Mono', monospace" fill="#A3A3A3"># HELP goti_seats_remaining</text>
+  <text x="56" y="398" font-size="10" font-family="'Geist Mono', monospace" fill="#A3A3A3"># TYPE goti_seats_remaining gauge</text>
+  <text x="56" y="414" font-size="10" font-family="'Geist Mono', monospace" fill="#86EFAC">goti_seats_remaining{</text>
+  <text x="56" y="430" font-size="10" font-family="'Geist Mono', monospace" fill="#86EFAC">  section="A"} 142</text>
+  <text x="56" y="446" font-size="10" font-family="'Geist Mono', monospace" fill="#A3A3A3">goti_queue_length 3820</text>
+
+  <!-- 마커 정의 -->
+  <defs>
+    <marker id="a-dark2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="a-green2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="a-rose2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+</svg>

@@ -266,3 +266,11 @@ Split-brain 발생 시 데이터 정합성 복구 비용이 훨씬 크기 때문
 - **단일 신호 기반 자동화의 위험**: "fetch 실패"는 실제 장애 외에도 경로 장애, CPU 폭주 등 여러 원인이 있습니다. 자동화일수록 재확인 단계가 필요합니다
 - **Tier 분리 접근**: 전체 자동화를 한 번에 구현하지 않고 Tier 1(스크립트화) → Tier 2(웹훅+state machine) → Tier 3(quorum)으로 나누면 각 단계를 검증하며 올라갈 수 있습니다
 - **logical replication promote는 multi-step**: pglogical disable → RDS writable → Secret 교체 → rollout → health check 순서가 지켜져야 합니다. 한 단계라도 실패하면 이전 상태로 되돌아갈 수 있어야 합니다
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다
+
+- [Cross-Cloud DB 페일오버 자동화 — 감지·결정·실행을 분리하는 이유](/essays/goti-deepdive-cross-cloud-db-failover)

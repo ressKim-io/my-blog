@@ -1,0 +1,131 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 560" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+
+  <title id="title-1">CDN Edge 캐싱 — HIT vs MISS 흐름</title>
+  <desc id="desc-1">여러 사용자가 polling할 때 CDN edge에서 Cache HIT이 발생하면 origin에 요청이 도달하지 않고, TTL 만료 후 MISS가 발생한 경우에만 origin이 한 번 응답을 처리하는 흐름</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="34" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">흐름도 — CDN edge Cache HIT / MISS</text>
+
+  <!-- ===== 왼쪽 컬럼: HIT 시나리오 ===== -->
+  <text x="195" y="68" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Cache HIT — origin 요청 0회</text>
+
+  <!-- 사용자들 (HIT 측) -->
+  <rect x="40" y="86" width="120" height="44" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="100" y="106" text-anchor="middle" font-size="12" fill="#047857" font-weight="500">사용자 A</text>
+  <text x="100" y="121" text-anchor="middle" font-size="11" fill="#27272A">polling 1초마다</text>
+
+  <rect x="170" y="86" width="120" height="44" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="230" y="106" text-anchor="middle" font-size="12" fill="#047857" font-weight="500">사용자 B</text>
+  <text x="230" y="121" text-anchor="middle" font-size="11" fill="#27272A">polling 1초마다</text>
+
+  <!-- 화살표: 사용자 → edge (HIT) -->
+  <line x1="100" y1="130" x2="100" y2="168" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <line x1="230" y1="130" x2="230" y2="168" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <text x="100" y="158" text-anchor="middle" font-size="10" fill="#27272A">GET /queue/status</text>
+  <text x="230" y="158" text-anchor="middle" font-size="10" fill="#27272A">GET /queue/status</text>
+
+  <!-- CDN Edge PoP (HIT 측) -->
+  <rect x="40" y="172" width="300" height="90" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="190" y="194" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Cloudflare CDN Edge PoP</text>
+  <text x="190" y="212" text-anchor="middle" font-size="11" fill="#B45309">Cache-Control: public, max-age=N</text>
+  <!-- HIT 배지 -->
+  <rect x="70" y="222" width="70" height="26" rx="4" fill="#059669"/>
+  <text x="105" y="239" text-anchor="middle" font-size="12" font-weight="600" fill="#FAFAFA">HIT</text>
+  <rect x="200" y="222" width="100" height="26" rx="4" fill="#27272A"/>
+  <text x="250" y="239" text-anchor="middle" font-size="11" fill="#FAFAFA">캐시 유효 (TTL 내)</text>
+
+  <!-- 화살표: edge → 사용자 (HIT 응답) -->
+  <line x1="100" y1="262" x2="100" y2="308" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <line x1="230" y1="262" x2="230" y2="308" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- 응답 박스 (HIT) -->
+  <rect x="40" y="310" width="120" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="100" y="328" text-anchor="middle" font-size="11" fill="#047857">순번 응답 (캐시)</text>
+  <text x="100" y="343" text-anchor="middle" font-size="10" fill="#27272A">origin 요청 없음</text>
+
+  <rect x="170" y="310" width="120" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="230" y="328" text-anchor="middle" font-size="11" fill="#047857">순번 응답 (캐시)</text>
+  <text x="230" y="343" text-anchor="middle" font-size="10" fill="#27272A">origin 요청 없음</text>
+
+  <!-- X 표시: origin 차단 -->
+  <text x="190" y="400" text-anchor="middle" font-size="28" fill="#D97706" font-weight="700">↓ 차단됨</text>
+  <rect x="100" y="418" width="180" height="44" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.2" stroke-dasharray="5 3"/>
+  <text x="190" y="438" text-anchor="middle" font-size="12" fill="#475569">Origin (goti-queue)</text>
+  <text x="190" y="454" text-anchor="middle" font-size="11" fill="#475569">요청 도달 0회</text>
+
+  <!-- 구분선 -->
+  <line x1="390" y1="60" x2="390" y2="510" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="6 4"/>
+
+  <!-- ===== 오른쪽 컬럼: MISS 시나리오 ===== -->
+  <text x="600" y="68" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Cache MISS — TTL 만료 후 origin 1회</text>
+
+  <!-- 사용자 (MISS 측) -->
+  <rect x="490" y="86" width="220" height="44" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="106" text-anchor="middle" font-size="12" fill="#B45309" font-weight="500">사용자 A (TTL 만료 후 첫 polling)</text>
+  <text x="600" y="121" text-anchor="middle" font-size="11" fill="#27272A">GET /queue/status</text>
+
+  <!-- 화살표: 사용자 → edge (MISS) -->
+  <line x1="600" y1="130" x2="600" y2="168" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+
+  <!-- CDN Edge PoP (MISS 측) -->
+  <rect x="470" y="172" width="260" height="90" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="194" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Cloudflare CDN Edge PoP</text>
+  <text x="600" y="212" text-anchor="middle" font-size="11" fill="#B45309">TTL 만료 — 캐시 항목 없음</text>
+  <!-- MISS 배지 -->
+  <rect x="515" y="222" width="80" height="26" rx="4" fill="#D97706"/>
+  <text x="555" y="239" text-anchor="middle" font-size="12" font-weight="600" fill="#FAFAFA">MISS</text>
+  <rect x="615" y="222" width="90" height="26" rx="4" fill="#27272A"/>
+  <text x="660" y="239" text-anchor="middle" font-size="11" fill="#FAFAFA">origin으로 전달</text>
+
+  <!-- 화살표: edge → origin (MISS) -->
+  <line x1="600" y1="262" x2="600" y2="308" stroke="#D97706" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  <text x="648" y="290" text-anchor="middle" font-size="10" fill="#B45309">origin 요청 1회</text>
+
+  <!-- Origin 박스 (MISS 측) -->
+  <rect x="490" y="310" width="220" height="60" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="600" y="334" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Origin (goti-queue)</text>
+  <text x="600" y="352" text-anchor="middle" font-size="11" fill="#475569">Redis ZRANGE 조회 → 응답</text>
+
+  <!-- 화살표: origin → edge (응답 + 저장) -->
+  <line x1="600" y1="370" x2="600" y2="408" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <text x="658" y="398" text-anchor="middle" font-size="10" fill="#27272A">Cache-Control: max-age=N</text>
+
+  <!-- 저장 박스 -->
+  <rect x="490" y="412" width="220" height="44" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.2"/>
+  <text x="600" y="432" text-anchor="middle" font-size="11" fill="#B45309" font-weight="500">edge 캐시에 저장</text>
+  <text x="600" y="448" text-anchor="middle" font-size="10" fill="#B45309">이후 polling은 HIT 처리</text>
+
+  <!-- 화살표: 저장 → 사용자 -->
+  <line x1="600" y1="456" x2="600" y2="490" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <rect x="490" y="492" width="220" height="32" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="600" y="513" text-anchor="middle" font-size="11" fill="#047857">순번 응답 → 사용자에게 반환</text>
+
+  <!-- 범례 -->
+  <rect x="30" y="510" width="740" height="38" rx="6" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <rect x="46" y="523" width="14" height="10" fill="#059669" rx="2"/>
+  <text x="66" y="532" font-size="11" fill="#334155">HIT — edge 응답</text>
+  <rect x="180" y="523" width="14" height="10" fill="#D97706" rx="2"/>
+  <text x="200" y="532" font-size="11" fill="#334155">MISS — origin 경유</text>
+  <rect x="340" y="523" width="14" height="10" fill="#475569" rx="2" stroke-dasharray="3 2"/>
+  <text x="360" y="532" font-size="11" fill="#334155">origin 차단됨 (HIT 시)</text>
+  <text x="560" y="532" font-size="11" fill="#334155">TTL N초 경과 후 MISS → 다시 HIT 사이클</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+</svg>

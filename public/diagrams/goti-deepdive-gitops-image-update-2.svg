@@ -1,0 +1,125 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto">
+  <title id="title-2">Renovate 동작 원리 — datasource 스캔부터 ArgoCD sync까지</title>
+  <desc id="desc-2">Renovate가 컨테이너 레지스트리 datasource를 주기적으로 스캔하고, 새 태그 감지 시 GitOps 레포에 PR을 생성하며, automerge 후 ArgoCD가 클러스터에 반영하는 전체 흐름을 단계별로 보여줍니다</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .label-sm { font-size: 11px; fill: #27272A; }
+    .label-md { font-size: 13px; }
+    .label-lg { font-size: 14px; font-weight: 600; }
+    .step-num { font-size: 12px; font-weight: 700; }
+    .arrow-label { font-size: 11px; }
+  </style>
+
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="30" text-anchor="middle" class="label-lg" font-size="15" fill="#0A0A0A">Renovate 동작 원리 — datasource 스캔 → PR → ArgoCD sync</text>
+
+  <!-- ─── 행 1: GitHub Actions (Renovate 실행 환경) ─── -->
+  <rect x="40" y="52" width="720" height="64" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="60" y="72" class="label-md" fill="#0E7490">GitHub Actions (외부 실행 환경)</text>
+  <text x="60" y="90" class="label-sm">클러스터 상태와 무관하게 주기적(cron) 또는 webhook 트리거로 실행됩니다</text>
+  <text x="60" y="105" class="label-sm">OIDC 인증으로 AWS ECR / Harbor / GCP Artifact Registry에 접근합니다</text>
+
+  <!-- ─── 행 2: 핵심 컴포넌트 박스들 ─── -->
+
+  <!-- Renovate 엔진 -->
+  <rect x="40" y="144" width="160" height="72" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="120" y="165" text-anchor="middle" class="label-md" fill="#0E7490">Renovate 엔진</text>
+  <text x="120" y="181" text-anchor="middle" class="label-sm">renovate.json 설정 로드</text>
+  <text x="120" y="196" text-anchor="middle" class="label-sm">manager: helm-values</text>
+  <text x="120" y="209" text-anchor="middle" class="label-sm">datasource: docker</text>
+
+  <!-- 화살표 1: Renovate → 레지스트리 (점선, 스캔) -->
+  <line x1="200" y1="180" x2="268" y2="180" stroke="#0891B2" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-cyan2)"/>
+  <rect x="203" y="166" width="62" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="234" y="176" text-anchor="middle" class="label-sm" fill="#0891B2">① 태그 스캔</text>
+
+  <!-- 컨테이너 레지스트리 -->
+  <rect x="268" y="144" width="160" height="72" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="348" y="165" text-anchor="middle" class="label-md" fill="#B45309">컨테이너 레지스트리</text>
+  <text x="348" y="181" text-anchor="middle" class="label-sm">ECR: dev-{sha} 태그</text>
+  <text x="348" y="196" text-anchor="middle" class="label-sm">Docker v2 API</text>
+  <text x="348" y="209" text-anchor="middle" class="label-sm">hostRules로 인증</text>
+
+  <!-- 화살표 2: 레지스트리 → Renovate (새 태그 응답) -->
+  <line x1="348" y1="144" x2="348" y2="128" stroke="#D97706" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow-amber)"/>
+  <line x1="348" y1="128" x2="234" y2="128" stroke="#D97706" stroke-width="1.2" stroke-dasharray="3 2"/>
+  <line x1="234" y1="128" x2="234" y2="144" stroke="#D97706" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow-amber)"/>
+  <rect x="260" y="114" width="76" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="298" y="124" text-anchor="middle" class="label-sm" fill="#B45309">② 새 태그 응답</text>
+
+  <!-- 화살표 3: Renovate → GitOps Repo (PR 생성) -->
+  <line x1="428" y1="180" x2="496" y2="180" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green2)"/>
+  <rect x="430" y="166" width="62" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="461" y="176" text-anchor="middle" class="label-sm" fill="#047857">③ PR 생성</text>
+
+  <!-- GitOps 레포 -->
+  <rect x="496" y="144" width="160" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="576" y="165" text-anchor="middle" class="label-md" fill="#047857">GitOps 레포 (Goti-k8s)</text>
+  <text x="576" y="181" text-anchor="middle" class="label-sm">values.yaml</text>
+  <text x="576" y="196" text-anchor="middle" class="label-sm">image.tag: dev-abc123</text>
+  <text x="576" y="209" text-anchor="middle" class="label-sm">→ image.tag: dev-f1c1d61</text>
+
+  <!-- 화살표 4: GitOps → automerge -->
+  <line x1="656" y1="180" x2="724" y2="180" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green2)"/>
+  <rect x="658" y="166" width="62" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="689" y="176" text-anchor="middle" class="label-sm" fill="#047857">④ automerge</text>
+
+  <!-- automerge + main 브랜치 박스 -->
+  <rect x="724" y="144" width="56" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="752" y="172" text-anchor="middle" class="label-sm" fill="#047857">PR</text>
+  <text x="752" y="186" text-anchor="middle" class="label-sm" fill="#047857">merge</text>
+  <text x="752" y="200" text-anchor="middle" class="label-sm" fill="#047857">→ main</text>
+
+  <!-- ─── 행 3: ArgoCD sync ─── -->
+
+  <!-- 화살표 5: GitOps → ArgoCD (git pull, 점선) -->
+  <line x1="576" y1="216" x2="576" y2="284" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-violet)"/>
+  <rect x="530" y="244" width="90" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="575" y="254" text-anchor="middle" class="label-sm" fill="#6D28D9">⑤ ArgoCD 감지</text>
+
+  <!-- ArgoCD -->
+  <rect x="268" y="284" width="616" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="576" y="308" text-anchor="middle" class="label-md" fill="#6D28D9">ArgoCD — GitOps Operator</text>
+  <text x="576" y="326" text-anchor="middle" class="label-sm">Git 폴링(기본 3분) 또는 webhook 트리거로 변경 감지 → auto-sync</text>
+
+  <!-- 화살표 6: ArgoCD → 클러스터 -->
+  <line x1="576" y1="340" x2="576" y2="400" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrow-violet)"/>
+  <rect x="530" y="360" width="92" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="576" y="370" text-anchor="middle" class="label-sm" fill="#6D28D9">⑥ Deployment 갱신</text>
+
+  <!-- K8s 클러스터 -->
+  <rect x="268" y="400" width="616" height="52" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="576" y="422" text-anchor="middle" class="label-md" fill="#6D28D9">Kubernetes 클러스터</text>
+  <text x="576" y="438" text-anchor="middle" class="label-sm">새 이미지 태그로 Pod rolling update 완료</text>
+
+  <!-- renovate.json 참조 박스 (왼쪽 하단) -->
+  <rect x="40" y="284" width="200" height="168" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="140" y="304" text-anchor="middle" class="label-md" fill="#0A0A0A">renovate.json 핵심 설정</text>
+  <text x="56" y="324" class="label-sm">manager: helm-values</text>
+  <text x="56" y="340" class="label-sm">datasource: docker</text>
+  <text x="56" y="356" class="label-sm">hostRules: ECR 인증</text>
+  <text x="56" y="372" class="label-sm">automerge: true</text>
+  <text x="56" y="388" class="label-sm">schedule: 주기 실행</text>
+  <text x="56" y="408" class="label-sm" fill="#475569">클러스터 독립적 실행</text>
+  <text x="56" y="424" class="label-sm" fill="#475569">클러스터 다운 시에도 동작</text>
+  <text x="56" y="440" class="label-sm" fill="#475569">PR revert = 명확한 롤백</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrow-cyan2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+    <marker id="arrow-green2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+</svg>

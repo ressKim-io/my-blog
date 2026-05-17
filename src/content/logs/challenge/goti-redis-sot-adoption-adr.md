@@ -245,3 +245,17 @@ AWS 쪽은 prod 재기동 시점에 **현재는 동급 최소 구성**을 유지
 1. **SDD-0005 갱신**: Current Code Audit 섹션 추가, D0 인프라 Memorystore Cluster vs StatefulSet 비교·선택 확정, 각 D의 PR 체크리스트 / Exit criteria / Rollback trigger 정의.
 2. **D0 PR**: Goti-k8s — NetworkPolicy 및 Terraform 변경 사항 반영.
 3. **D1 PR**: Goti-go — 핸들러 재배선 + flag on + Phase A cache 제거.
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [Outbox 패턴 — 두 저장소를 가로지르는 쓰기의 정합성을 보장하는 원리](/essays/goti-deepdive-outbox-pattern)
+- [Redis 단일 스레드와 Lua 원자성 — 왜 Lock 없이 동시성 문제가 해결되는가](/essays/goti-deepdive-redis-single-thread-lua)
+- [Redis Streams — append-only log와 Consumer Group 소비 모델](/essays/goti-deepdive-redis-streams-consumer-group)
+- [도메인 모델을 Redis 자료구조로 사상하기 — HASH·STRING·LIST·ZSET·SET](/essays/goti-deepdive-redis-data-structure-modeling)
+- [Redis 영속화 — RDB 스냅샷과 AOF 로그의 동작 원리](/essays/goti-deepdive-redis-persistence)
+- [Redis maxmemory eviction — 메모리 한도 도달 시 키 축출 정책](/essays/goti-deepdive-redis-eviction-policy)
+- [Redis Cluster 해시 슬롯과 hash tag — 키 분산과 co-location 제어](/essays/goti-deepdive-redis-cluster-hash-slot)

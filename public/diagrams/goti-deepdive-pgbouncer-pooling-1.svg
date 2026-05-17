@@ -1,0 +1,105 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 480"
+  width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-1">PgBouncer 커넥션 멀티플렉싱 구조도</title>
+  <desc id="desc-1">앱 서비스 6개가 보내는 다수의 논리 연결이 PgBouncer를 통해 소수의 실제 DB 연결로 좁아지는 깔때기 구조를 보여주는 다이어그램</desc>
+
+  <!-- Background -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" font-size="14" font-weight="600" fill="#0A0A0A">구조도 — PgBouncer 커넥션 멀티플렉싱</text>
+
+  <!-- === App Services (left column) === -->
+  <!-- ticketing -->
+  <rect x="24" y="72" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="84" y="94" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">ticketing</text>
+  <text x="84" y="111" text-anchor="middle" font-size="11" fill="#27272A">[Go Service]</text>
+
+  <!-- stadium -->
+  <rect x="24" y="148" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="84" y="170" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">stadium</text>
+  <text x="84" y="187" text-anchor="middle" font-size="11" fill="#27272A">[Go Service]</text>
+
+  <!-- user -->
+  <rect x="24" y="224" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="84" y="246" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">user</text>
+  <text x="84" y="263" text-anchor="middle" font-size="11" fill="#27272A">[Go Service]</text>
+
+  <!-- payment -->
+  <rect x="24" y="300" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="84" y="322" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">payment</text>
+  <text x="84" y="339" text-anchor="middle" font-size="11" fill="#27272A">[Go Service]</text>
+
+  <!-- resale -->
+  <rect x="24" y="376" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="84" y="398" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">resale</text>
+  <text x="84" y="415" text-anchor="middle" font-size="11" fill="#27272A">[Go Service]</text>
+
+  <!-- queue -->
+  <rect x="24" y="452" width="120" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="84" y="470" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">queue</text>
+  <text x="84" y="465" text-anchor="middle" font-size="11" fill="#27272A">[Go Service]</text>
+
+  <!-- "논리 연결" label area -->
+  <text x="200" y="64" text-anchor="middle" font-size="11" fill="#27272A">논리 연결 (최대 250+)</text>
+
+  <!-- Arrows: app services → PgBouncer (fan-in lines) -->
+  <line x1="144" y1="98" x2="310" y2="200" stroke="#0A0A0A" stroke-width="1.2" marker-end="url(#arrow-dark)"/>
+  <line x1="144" y1="174" x2="310" y2="210" stroke="#0A0A0A" stroke-width="1.2" marker-end="url(#arrow-dark)"/>
+  <line x1="144" y1="250" x2="310" y2="220" stroke="#0A0A0A" stroke-width="1.2" marker-end="url(#arrow-dark)"/>
+  <line x1="144" y1="326" x2="310" y2="230" stroke="#0A0A0A" stroke-width="1.2" marker-end="url(#arrow-dark)"/>
+  <line x1="144" y1="390" x2="310" y2="240" stroke="#0A0A0A" stroke-width="1.2" marker-end="url(#arrow-dark)"/>
+  <line x1="144" y1="462" x2="310" y2="250" stroke="#0A0A0A" stroke-width="1.2" marker-end="url(#arrow-dark)"/>
+
+  <!-- PgBouncer box -->
+  <rect x="310" y="152" width="180" height="120" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="400" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">PgBouncer</text>
+  <text x="400" y="198" text-anchor="middle" font-size="11" fill="#27272A">[StatefulSet × 2]</text>
+  <text x="400" y="216" text-anchor="middle" font-size="11" fill="#27272A">pool_mode = transaction</text>
+  <text x="400" y="234" text-anchor="middle" font-size="11" fill="#27272A">max_client_conn = 2000</text>
+  <text x="400" y="252" text-anchor="middle" font-size="11" fill="#27272A">pool_size = 25 per (db, user)</text>
+
+  <!-- "실제 DB 연결" label -->
+  <text x="590" y="64" text-anchor="middle" font-size="11" fill="#27272A">실제 DB 연결 (약 30~50개)</text>
+
+  <!-- Arrows: PgBouncer → DBs -->
+  <!-- to Primary -->
+  <line x1="490" y1="196" x2="616" y2="152" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <text x="555" y="162" text-anchor="middle" font-size="11" fill="#0A0A0A" font-style="italic">쓰기</text>
+
+  <!-- to Replica -->
+  <line x1="490" y1="228" x2="616" y2="284" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <text x="555" y="270" text-anchor="middle" font-size="11" fill="#0A0A0A" font-style="italic">읽기</text>
+
+  <!-- Primary DB box -->
+  <rect x="616" y="104" width="152" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="692" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Primary RDS</text>
+  <text x="692" y="150" text-anchor="middle" font-size="11" fill="#27272A">goti_write</text>
+  <text x="692" y="165" text-anchor="middle" font-size="11" fill="#27272A">conn ~20</text>
+
+  <!-- Replica DB box -->
+  <rect x="616" y="248" width="152" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="692" y="276" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Replica RDS</text>
+  <text x="692" y="294" text-anchor="middle" font-size="11" fill="#27272A">goti_read</text>
+  <text x="692" y="309" text-anchor="middle" font-size="11" fill="#27272A">conn ~50</text>
+
+  <!-- Legend -->
+  <rect x="24" y="408" width="272" height="64" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="36" y="428" font-size="11" font-weight="600" fill="#0A0A0A">범례</text>
+  <rect x="36" y="436" width="12" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="54" y="447" font-size="11" fill="#27272A">Go 서비스</text>
+  <rect x="120" y="436" width="12" height="12" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="138" y="447" font-size="11" fill="#27272A">DB / PgBouncer</text>
+  <text x="36" y="464" font-size="11" fill="#27272A">실선 화살표 = 연결 요청 / 쿼리</text>
+
+  <!-- Arrow marker def -->
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>

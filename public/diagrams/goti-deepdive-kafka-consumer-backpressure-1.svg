@@ -1,0 +1,106 @@
+<svg
+  role="img"
+  aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 560"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-1">Kafka 컨슈머 무제한 fetch — OOM 악순환 사이클</title>
+  <desc id="desc-1">fetch.max.bytes 미설정 상태에서 Loki/Tempo가 OOM crash 후 재시작하면 Kafka backlog를 한꺼번에 빨아들여 다시 OOM이 발생하는 악순환 사이클 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA" rx="8"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">OOM 악순환 사이클 — fetch.max.bytes 미설정</text>
+
+  <!-- 화살표 마커 (정상 흐름) -->
+  <defs>
+    <marker id="arrow-black" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#BE123C"/>
+    </marker>
+  </defs>
+
+  <!-- ① Loki/Tempo 박스 — OOM crash -->
+  <rect x="296" y="72" width="208" height="72" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="101" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">Loki / Tempo</text>
+  <text x="400" y="121" text-anchor="middle" font-size="12" fill="#BE123C">메모리 한계 초과 → OOM crash</text>
+
+  <!-- ② Crash → 재시작 화살표 (오른쪽 내려감) -->
+  <line x1="504" y1="108" x2="616" y2="108" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-rose)"/>
+  <text x="560" y="100" text-anchor="middle" font-size="11" fill="#BE123C">crash</text>
+
+  <!-- ③ 재시작 박스 -->
+  <rect x="616" y="72" width="144" height="72" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="688" y="101" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">Pod 재시작</text>
+  <text x="688" y="121" text-anchor="middle" font-size="11" fill="#BE123C">컨슈머 재연결</text>
+
+  <!-- ④ 재시작 → backlog 폭주 (아래 방향) -->
+  <line x1="688" y1="144" x2="688" y2="264" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-rose)"/>
+  <text x="712" y="208" text-anchor="start" font-size="11" fill="#BE123C">재시작</text>
+
+  <!-- ⑤ Kafka 박스 -->
+  <rect x="296" y="264" width="208" height="72" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="293" text-anchor="middle" font-size="14" font-weight="600" fill="#B45309">Kafka 토픽</text>
+  <text x="400" y="313" text-anchor="middle" font-size="12" fill="#B45309">backlog 무제한 대기 중</text>
+
+  <!-- ⑥ Kafka → 재시작 Pod 연결선 (오른쪽) -->
+  <line x1="616" y1="300" x2="504" y2="300" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <text x="560" y="292" text-anchor="middle" font-size="11" fill="#0A0A0A">offset 이어 읽기</text>
+
+  <!-- ⑦ backlog 폭주 화살표 (Kafka → Loki/Tempo, 위 방향) -->
+  <line x1="400" y1="264" x2="400" y2="144" stroke="#BE123C" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrow-rose)"/>
+  <text x="350" y="208" text-anchor="middle" font-size="11" fill="#BE123C">backlog</text>
+  <text x="350" y="222" text-anchor="middle" font-size="11" fill="#BE123C">전량 폭주 유입</text>
+
+  <!-- 사이클 반복 라벨 -->
+  <rect x="152" y="176" width="112" height="36" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="208" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#BE123C">사이클 반복</text>
+  <text x="208" y="210" text-anchor="middle" font-size="11" fill="#BE123C">악순환 지속</text>
+
+  <!-- 왼쪽 닫힘 화살표 (Loki/Tempo → Kafka 왼쪽 통해) -->
+  <path d="M296,108 L240,108 L240,300 L296,300" fill="none" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-rose)"/>
+
+  <!-- 구분선 -->
+  <line x1="40" y1="380" x2="760" y2="380" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- 하단: 트래픽 증가 시 backlog 누적 박스 -->
+  <text x="400" y="412" text-anchor="middle" font-size="13" font-weight="600" fill="#0A0A0A">트래픽 버스트 시 Kafka backlog 누적 구조</text>
+
+  <!-- Producer (App + OTel Collector Front) -->
+  <rect x="40" y="432" width="160" height="64" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="120" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">OTel Collector</text>
+  <text x="120" y="475" text-anchor="middle" font-size="11" fill="#047857">(Front / Producer)</text>
+
+  <!-- 화살표 → Kafka -->
+  <line x1="200" y1="464" x2="296" y2="464" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <text x="248" y="456" text-anchor="middle" font-size="11" fill="#0A0A0A">produce</text>
+
+  <!-- Kafka 토픽 (하단) -->
+  <rect x="296" y="432" width="208" height="64" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Kafka 토픽</text>
+  <text x="400" y="475" text-anchor="middle" font-size="11" fill="#B45309">backlog 급증(무제한)</text>
+
+  <!-- 화살표 → Consumer (fetch 무제한) -->
+  <line x1="504" y1="464" x2="600" y2="464" stroke="#BE123C" stroke-width="2" marker-end="url(#arrow-rose)"/>
+  <text x="552" y="452" text-anchor="middle" font-size="11" fill="#BE123C">fetch</text>
+  <text x="552" y="466" text-anchor="middle" font-size="11" fill="#BE123C">(무제한)</text>
+
+  <!-- Consumer (OTel Collector Back) -->
+  <rect x="600" y="432" width="160" height="64" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="680" y="455" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">Loki / Tempo</text>
+  <text x="680" y="471" text-anchor="middle" font-size="11" fill="#BE123C">메모리 폭증</text>
+  <text x="680" y="487" text-anchor="middle" font-size="11" fill="#BE123C">→ OOM</text>
+
+  <!-- 범례 -->
+  <rect x="40" y="520" width="480" height="24" rx="4" fill="none"/>
+  <line x1="48" y1="532" x2="88" y2="532" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="96" y="536" font-size="11" fill="#27272A">비정상 반복(악순환)</text>
+  <line x1="200" y1="532" x2="240" y2="532" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="248" y="536" font-size="11" fill="#27272A">정상 흐름</text>
+</svg>

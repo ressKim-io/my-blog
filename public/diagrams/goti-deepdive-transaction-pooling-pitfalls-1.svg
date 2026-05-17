@@ -1,0 +1,151 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg">
+  <title id="title-1">session mode vs transaction mode — prepared statement 수명 비교</title>
+  <desc id="desc-1">session mode에서는 prepared statement가 연결 전체에 걸쳐 유지되고, transaction mode에서는 트랜잭션마다 연결이 교체되어 prepared statement 이름이 충돌한다</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title { font-size: 14px; font-weight: 600; fill: #0A0A0A; }
+    .label { font-size: 12px; fill: #0A0A0A; }
+    .sublabel { font-size: 11px; fill: #27272A; }
+    .code { font-family: 'Geist Mono', 'Courier New', monospace; font-size: 11px; fill: #27272A; }
+    .ok { fill: #ECFDF5; stroke: #059669; }
+    .warn { fill: #FFF7ED; stroke: #D97706; }
+    .error { fill: #FFF1F2; stroke: #E11D48; }
+    .neutral { fill: #F8FAFC; stroke: #475569; }
+    .db { fill: #F5F3FF; stroke: #7C3AED; }
+    .section-bg-ok { fill: #ECFDF5; }
+    .section-bg-warn { fill: #FFFBEB; }
+    .divider { stroke: #D4D4D8; stroke-width: 1; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+    .arrow-ok { stroke: #059669; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead-ok); }
+    .arrow-err { stroke: #E11D48; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead-err); stroke-dasharray: 4 2; }
+    .lifetime-ok { fill: #ECFDF5; stroke: #059669; stroke-width: 1.5; }
+    .lifetime-warn { fill: #FFFBEB; stroke: #D97706; stroke-width: 1.5; }
+    .badge-ok { fill: #059669; }
+    .badge-err { fill: #E11D48; }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrowhead-ok" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+    <marker id="arrowhead-err" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E11D48"/>
+    </marker>
+  </defs>
+
+  <!-- 제목 -->
+  <text x="400" y="28" text-anchor="middle" class="title">prepared statement 수명 — session mode vs transaction mode</text>
+
+  <!-- ── Section 1: session mode ── -->
+  <rect x="16" y="44" width="768" height="200" rx="6" class="section-bg-ok" stroke="#059669" stroke-width="1"/>
+  <text x="28" y="64" class="title" fill="#047857">session mode — 연결이 고정됨</text>
+
+  <!-- 참여자 헤더 -->
+  <rect x="48" y="74" width="100" height="28" rx="4" class="ok"/>
+  <text x="98" y="93" text-anchor="middle" class="label">앱 (Tx-A)</text>
+
+  <rect x="248" y="74" width="120" height="28" rx="4" class="neutral"/>
+  <text x="308" y="93" text-anchor="middle" class="label">PgBouncer</text>
+
+  <rect x="488" y="74" width="120" height="28" rx="4" class="db"/>
+  <text x="548" y="93" text-anchor="middle" class="label">PostgreSQL</text>
+  <text x="548" y="107" text-anchor="middle" class="sublabel">(conn-1 고정)</text>
+
+  <!-- 생명선 -->
+  <line x1="98" y1="102" x2="98" y2="236" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="308" y1="102" x2="308" y2="236" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="548" y1="110" x2="548" y2="236" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+
+  <!-- conn-1 수명 블록: session 전체 -->
+  <rect x="538" y="120" width="20" height="110" rx="2" class="lifetime-ok"/>
+
+  <!-- 메시지 흐름 -->
+  <!-- PREPARE stmt_1 -->
+  <line x1="98" y1="128" x2="302" y2="128" class="arrow-ok"/>
+  <line x1="308" y1="128" x2="542" y2="128" class="arrow-ok"/>
+  <text x="200" y="123" text-anchor="middle" class="code">PREPARE stmt_1 AS ...</text>
+
+  <!-- OK badge -->
+  <rect x="636" y="120" width="108" height="18" rx="3" class="badge-ok"/>
+  <text x="690" y="132" text-anchor="middle" class="sublabel" fill="white">conn-1에 등록됨</text>
+
+  <!-- Tx-B -->
+  <text x="98" y="162" text-anchor="middle" class="sublabel" fill="#047857">→ 같은 연결 재사용</text>
+
+  <!-- EXECUTE stmt_1 -->
+  <line x1="98" y1="170" x2="302" y2="170" class="arrow-ok"/>
+  <line x1="308" y1="170" x2="542" y2="170" class="arrow-ok"/>
+  <text x="200" y="165" text-anchor="middle" class="code">EXECUTE stmt_1</text>
+
+  <!-- OK -->
+  <rect x="636" y="162" width="108" height="18" rx="3" class="badge-ok"/>
+  <text x="690" y="174" text-anchor="middle" class="sublabel" fill="white">conn-1에 stmt_1 존재</text>
+
+  <!-- 결과 -->
+  <line x1="542" y1="200" x2="114" y2="200" class="arrow-ok"/>
+  <text x="320" y="195" text-anchor="middle" class="code">결과 반환 ✓</text>
+
+  <text x="28" y="234" class="sublabel" fill="#047857">session mode: 연결이 바뀌지 않으므로 prepared statement가 세션 내내 유효합니다</text>
+
+  <!-- ── Section 2: transaction mode ── -->
+  <rect x="16" y="260" width="768" height="244" rx="6" class="section-bg-warn" stroke="#D97706" stroke-width="1"/>
+  <text x="28" y="280" class="title" fill="#B45309">transaction mode — 트랜잭션마다 다른 연결 할당</text>
+
+  <!-- 참여자 헤더 -->
+  <rect x="48" y="290" width="100" height="28" rx="4" class="ok"/>
+  <text x="98" y="309" text-anchor="middle" class="label">앱 (Tx-A)</text>
+
+  <rect x="248" y="290" width="120" height="28" rx="4" class="neutral"/>
+  <text x="308" y="309" text-anchor="middle" class="label">PgBouncer</text>
+
+  <rect x="448" y="290" width="100" height="28" rx="4" class="db"/>
+  <text x="498" y="309" text-anchor="middle" class="label">conn-1</text>
+
+  <rect x="608" y="290" width="100" height="28" rx="4" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="658" y="309" text-anchor="middle" class="label">conn-2</text>
+
+  <!-- 생명선 -->
+  <line x1="98" y1="318" x2="98" y2="496" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="308" y1="318" x2="308" y2="496" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="498" y1="318" x2="498" y2="496" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="658" y1="318" x2="658" y2="496" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+
+  <!-- Tx-A: conn-1 점유 블록 -->
+  <rect x="488" y="330" width="20" height="68" rx="2" class="lifetime-ok"/>
+  <!-- Tx-B: conn-2 점유 블록 -->
+  <rect x="648" y="414" width="20" height="68" rx="2" class="lifetime-warn"/>
+
+  <!-- Tx-A: PREPARE on conn-1 -->
+  <line x1="98" y1="338" x2="302" y2="338" class="arrow-ok"/>
+  <line x1="308" y1="338" x2="492" y2="338" class="arrow-ok"/>
+  <text x="200" y="333" text-anchor="middle" class="code">PREPARE stmt_1 AS ...</text>
+  <rect x="566" y="330" width="30" height="16" rx="3" class="badge-ok"/>
+  <text x="581" y="342" text-anchor="middle" class="sublabel" fill="white">OK</text>
+
+  <!-- Tx-A: COMMIT → conn-1 반환 -->
+  <line x1="98" y1="362" x2="302" y2="362" class="arrow"/>
+  <line x1="308" y1="362" x2="492" y2="362" class="arrow"/>
+  <text x="200" y="357" text-anchor="middle" class="code">COMMIT (conn-1 반환)</text>
+
+  <!-- DISCARD ALL -->
+  <text x="498" y="390" text-anchor="middle" class="code" fill="#E11D48">DISCARD ALL 실행</text>
+  <text x="498" y="404" text-anchor="middle" class="sublabel" fill="#E11D48">(stmt_1 삭제됨)</text>
+
+  <!-- Tx-B: conn-2 획득 + EXECUTE -->
+  <line x1="98" y1="422" x2="302" y2="422" class="arrow"/>
+  <line x1="308" y1="422" x2="652" y2="422" class="arrow"/>
+  <text x="200" y="417" text-anchor="middle" class="code">EXECUTE stmt_1</text>
+  <text x="483" y="417" text-anchor="middle" class="sublabel" fill="#B45309">(conn-2 배정)</text>
+
+  <!-- ERROR 반환 -->
+  <line x1="652" y1="450" x2="114" y2="450" class="arrow-err"/>
+  <text x="380" y="445" text-anchor="middle" class="code" fill="#E11D48">ERROR: prepared statement "stmt_1" does not exist</text>
+
+  <text x="28" y="495" class="sublabel" fill="#B45309">transaction mode: COMMIT 시 DISCARD ALL로 stmt_1이 지워지고, 다음 트랜잭션은 다른 연결을 받아 stmt_1을 찾지 못합니다</text>
+</svg>

@@ -1,0 +1,106 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 440" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-2">완전 분리 vs 단일+override — K8s 레포 구조 비교</title>
+  <desc id="desc-2">왼쪽은 prod-aws/와 prod-gcp/ 완전 분리 구조로 values 이중 관리 문제가 발생하고, 오른쪽은 prod/ 단일 + cluster-overrides/ 구조로 DRY하게 관리하는 비교 다이어그램</desc>
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title { font-size: 13px; font-weight: 600; }
+    .sub { font-size: 11px; }
+    .label { font-size: 11px; fill: #334155; }
+    .warn { font-size: 11px; fill: #BE123C; }
+    .good { font-size: 11px; fill: #047857; }
+  </style>
+
+  <defs>
+    <marker id="arrB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- ===== 제목 구분선 ===== -->
+  <rect x="24" y="16" width="352" height="32" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="37" text-anchor="middle" class="title" fill="#BE123C">Before — 완전 분리 구조 (기각)</text>
+
+  <rect x="424" y="16" width="352" height="32" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="600" y="37" text-anchor="middle" class="title" fill="#047857">After — 단일 + override (채택)</text>
+
+  <!-- 중앙 구분선 -->
+  <line x1="400" y1="16" x2="400" y2="424" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 3"/>
+
+  <!-- ===== BEFORE 영역 ===== -->
+
+  <!-- prod-aws/ 박스 -->
+  <rect x="40" y="72" width="144" height="120" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="112" y="93" text-anchor="middle" class="title" fill="#BE123C">environments/</text>
+  <text x="112" y="109" text-anchor="middle" class="title" fill="#BE123C">prod-aws/</text>
+  <text x="112" y="129" text-anchor="middle" class="sub" fill="#BE123C">values.yaml</text>
+  <text x="112" y="145" text-anchor="middle" class="sub" fill="#BE123C">service-a/values.yaml</text>
+  <text x="112" y="161" text-anchor="middle" class="sub" fill="#BE123C">service-b/values.yaml</text>
+  <text x="112" y="177" text-anchor="middle" class="sub" fill="#BE123C">…</text>
+
+  <!-- prod-gcp/ 박스 -->
+  <rect x="216" y="72" width="144" height="120" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="288" y="93" text-anchor="middle" class="title" fill="#BE123C">environments/</text>
+  <text x="288" y="109" text-anchor="middle" class="title" fill="#BE123C">prod-gcp/</text>
+  <text x="288" y="129" text-anchor="middle" class="sub" fill="#BE123C">values.yaml</text>
+  <text x="288" y="145" text-anchor="middle" class="sub" fill="#BE123C">service-a/values.yaml</text>
+  <text x="288" y="161" text-anchor="middle" class="sub" fill="#BE123C">service-b/values.yaml</text>
+  <text x="288" y="177" text-anchor="middle" class="sub" fill="#BE123C">…</text>
+
+  <!-- 동기화 문제 화살표 -->
+  <line x1="184" y1="130" x2="216" y2="130" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrR)"/>
+  <text x="200" y="122" text-anchor="middle" class="warn">수동 동기화</text>
+
+  <!-- 문제 설명 박스 -->
+  <rect x="40" y="216" width="320" height="112" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="200" y="236" text-anchor="middle" class="title" fill="#BE123C">문제점</text>
+  <text x="56" y="256" class="warn">• service-a replicas 변경 → 양쪽 파일 모두 수정 필요</text>
+  <text x="56" y="274" class="warn">• 한 쪽만 수정 → 동기화 누락 사고 반복 발생</text>
+  <text x="56" y="292" class="warn">• ArgoCD가 클러스터별 별개 Application을 관리</text>
+  <text x="56" y="310" class="warn">→ 선언 vs 실제 불일치를 눈치채기 어려움</text>
+
+  <!-- ===== AFTER 영역 ===== -->
+
+  <!-- prod/ 박스 (공통) -->
+  <rect x="440" y="72" width="144" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="512" y="93" text-anchor="middle" class="title" fill="#047857">environments/prod/</text>
+  <text x="512" y="113" text-anchor="middle" class="sub" fill="#047857">values.yaml</text>
+  <text x="512" y="129" text-anchor="middle" class="sub" fill="#047857">service-a/values.yaml</text>
+  <text x="512" y="145" text-anchor="middle" class="sub" fill="#047857">service-b/values.yaml</text>
+  <text x="512" y="163" text-anchor="middle" class="sub" fill="#047857">공통값 단일 관리</text>
+  <text x="512" y="179" text-anchor="middle" class="sub" fill="#047857">→ 양 클러스터 공유</text>
+
+  <!-- cluster-overrides/ 박스 -->
+  <rect x="600" y="72" width="168" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="684" y="93" text-anchor="middle" class="title" fill="#047857">cluster-overrides/</text>
+  <text x="684" y="113" text-anchor="middle" class="sub" fill="#047857">eks.yaml</text>
+  <text x="684" y="129" text-anchor="middle" class="sub" fill="#047857">→ AWS 전용 값</text>
+  <text x="684" y="149" text-anchor="middle" class="sub" fill="#047857">gke.yaml</text>
+  <text x="684" y="165" text-anchor="middle" class="sub" fill="#047857">→ GCP 전용 값</text>
+  <text x="684" y="181" text-anchor="middle" class="sub" fill="#047857">CSP 편차만 기술</text>
+
+  <!-- 병합 화살표 -->
+  <line x1="584" y1="132" x2="600" y2="132" stroke="#059669" stroke-width="1.5" marker-end="url(#arrG)"/>
+
+  <!-- ApplicationSet 화살표 (prod/ → AppSet) -->
+  <line x1="512" y1="192" x2="512" y2="216" stroke="#059669" stroke-width="1.5" marker-end="url(#arrG)"/>
+  <line x1="684" y1="192" x2="684" y2="216" stroke="#059669" stroke-width="1.5" marker-end="url(#arrG)"/>
+
+  <!-- ApplicationSet 박스 -->
+  <rect x="440" y="216" width="328" height="48" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="604" y="234" text-anchor="middle" class="title" fill="#6D28D9">ApplicationSet (clusterGenerator)</text>
+  <text x="604" y="252" text-anchor="middle" class="sub" fill="#6D28D9">클러스터별 Application 자동 생성 + base ⊕ override 병합</text>
+
+  <!-- 이점 설명 박스 -->
+  <rect x="440" y="288" width="328" height="112" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="604" y="308" text-anchor="middle" class="title" fill="#047857">이점</text>
+  <text x="456" y="328" class="good">• 공통값 수정 1회 → 양 클러스터 동시 반영</text>
+  <text x="456" y="348" class="good">• CSP 편차는 cluster-overrides/ 에만 존재</text>
+  <text x="456" y="368" class="good">• ArgoCD가 클러스터 목록을 자동 감지·순회</text>
+  <text x="456" y="388" class="good">• 동기화 누락 사고 구조적 차단</text>
+</svg>

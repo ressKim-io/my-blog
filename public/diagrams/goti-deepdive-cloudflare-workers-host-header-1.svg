@@ -1,0 +1,119 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-1">Cloudflare Workers Host 헤더 — 3가지 시도 비교</title>
+  <desc id="desc-1">직접 IP 접근(Error 1003 실패), Host 오버라이드 시도(무시됨 실패), 중간 도메인 경유(성공) 세 가지 경로를 비교한 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">Workers Host 헤더 — 3가지 시도 비교</text>
+
+  <!-- ───────── 시도 1: 직접 IP ───────── -->
+  <text x="133" y="64" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">시도 1 — 직접 IP 접근 (실패)</text>
+
+  <!-- Workers 박스 -->
+  <rect x="24" y="80" width="128" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="88" y="103" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Workers</text>
+  <text x="88" y="120" text-anchor="middle" font-size="11" fill="#27272A">fetch("118.38.x.x")</text>
+
+  <!-- 화살표 -->
+  <line x1="152" y1="108" x2="198" y2="108" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <text x="175" y="100" text-anchor="middle" font-size="10" fill="#27272A">Host:</text>
+  <text x="175" y="112" text-anchor="middle" font-size="10" fill="#27272A">118.38.x.x</text>
+
+  <!-- Cloudflare 차단 박스 -->
+  <rect x="200" y="80" width="136" height="56" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="268" y="101" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">Cloudflare</text>
+  <text x="268" y="118" text-anchor="middle" font-size="11" fill="#BE123C">Error 1003</text>
+  <text x="268" y="131" text-anchor="middle" font-size="10" fill="#BE123C">Direct IP Blocked</text>
+
+  <!-- X 표시 -->
+  <text x="388" y="114" text-anchor="middle" font-size="22" fill="#E11D48">✕</text>
+
+  <!-- ───────── 시도 2: Host 오버라이드 ───────── -->
+  <text x="133" y="184" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">시도 2 — Host 오버라이드 (실패)</text>
+
+  <!-- Workers 박스 -->
+  <rect x="24" y="200" width="128" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="88" y="222" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Workers</text>
+  <text x="88" y="238" text-anchor="middle" font-size="10" fill="#27272A">fetch("resshome.iptime.org"</text>
+  <text x="88" y="251" text-anchor="middle" font-size="10" fill="#27272A">{ Host: "dev-api.go-ti.shop" })</text>
+  <text x="88" y="264" text-anchor="middle" font-size="10" fill="#BE123C">의도: Host 오버라이드</text>
+
+  <!-- 화살표 1: Workers → Cloudflare -->
+  <line x1="152" y1="236" x2="198" y2="236" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- Cloudflare 무시 박스 -->
+  <rect x="200" y="200" width="136" height="72" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="268" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">Cloudflare Runtime</text>
+  <text x="268" y="241" text-anchor="middle" font-size="11" fill="#27272A">Host 오버라이드 무시</text>
+  <text x="268" y="257" text-anchor="middle" font-size="10" fill="#BE123C">Host: resshome.iptime.org</text>
+  <text x="268" y="270" text-anchor="middle" font-size="10" fill="#27272A">(URL hostname 강제)</text>
+
+  <!-- 화살표 2: Cloudflare → DDNS -->
+  <line x1="336" y1="236" x2="382" y2="236" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <text x="359" y="228" text-anchor="middle" font-size="10" fill="#27272A">Host:</text>
+  <text x="359" y="240" text-anchor="middle" font-size="10" fill="#BE123C">resshome.iptime.org</text>
+
+  <!-- DDNS/Istio 박스 -->
+  <rect x="384" y="200" width="136" height="72" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="452" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">Kind PC</text>
+  <text x="452" y="241" text-anchor="middle" font-size="11" fill="#27272A">Istio Gateway</text>
+  <text x="452" y="257" text-anchor="middle" font-size="10" fill="#BE123C">Host 매칭 실패</text>
+  <text x="452" y="270" text-anchor="middle" font-size="10" fill="#BE123C">→ 404</text>
+
+  <!-- X 표시 -->
+  <text x="540" y="242" text-anchor="middle" font-size="22" fill="#E11D48">✕</text>
+
+  <!-- ───────── 시도 3: 중간 도메인 ───────── -->
+  <text x="133" y="322" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">시도 3 — 중간 도메인 경유 (성공)</text>
+
+  <!-- Workers 박스 -->
+  <rect x="24" y="338" width="128" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="88" y="360" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Workers</text>
+  <text x="88" y="376" text-anchor="middle" font-size="10" fill="#27272A">fetch("dev-api.go-ti.shop")</text>
+  <text x="88" y="392" text-anchor="middle" font-size="10" fill="#047857">Host: dev-api.go-ti.shop</text>
+  <text x="88" y="405" text-anchor="middle" font-size="10" fill="#047857">(URL hostname 자동)</text>
+
+  <!-- 화살표 1 -->
+  <line x1="152" y1="374" x2="198" y2="374" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Cloudflare Proxy 박스 -->
+  <rect x="200" y="338" width="136" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="268" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Cloudflare Proxy</text>
+  <text x="268" y="377" text-anchor="middle" font-size="11" fill="#27272A">(Orange Cloud)</text>
+  <text x="268" y="393" text-anchor="middle" font-size="10" fill="#047857">Host: dev-api.go-ti.shop</text>
+  <text x="268" y="406" text-anchor="middle" font-size="10" fill="#047857">자동 설정 + DDNS 해석</text>
+
+  <!-- 화살표 2 -->
+  <line x1="336" y1="374" x2="382" y2="374" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="359" y="366" text-anchor="middle" font-size="10" fill="#047857">Host:</text>
+  <text x="359" y="378" text-anchor="middle" font-size="10" fill="#047857">dev-api.go-ti.shop</text>
+
+  <!-- Kind PC 박스 -->
+  <rect x="384" y="338" width="136" height="72" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="452" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">Kind PC</text>
+  <text x="452" y="377" text-anchor="middle" font-size="11" fill="#27272A">Istio Gateway</text>
+  <text x="452" y="393" text-anchor="middle" font-size="10" fill="#047857">Host 매칭 성공</text>
+  <text x="452" y="406" text-anchor="middle" font-size="10" fill="#047857">→ VirtualService 라우팅</text>
+
+  <!-- 체크 표시 -->
+  <text x="540" y="380" text-anchor="middle" font-size="22" fill="#059669">✓</text>
+
+  <!-- ───────── 범례 ───────── -->
+  <rect x="24" y="458" width="752" height="80" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="478" text-anchor="middle" font-size="12" font-weight="600" fill="#27272A">핵심 원칙</text>
+  <text x="400" y="496" text-anchor="middle" font-size="12" fill="#0A0A0A">Workers fetch()는 URL hostname을 Host 헤더로 강제합니다 — headers 객체에서 Host를 덮어써도 무시됩니다</text>
+  <text x="400" y="514" text-anchor="middle" font-size="12" fill="#0A0A0A">Cloudflare Proxy(Orange Cloud)를 경유하면 올바른 Host가 자동으로 설정되어 Istio Gateway 매칭에 성공합니다</text>
+  <text x="400" y="532" text-anchor="middle" font-size="11" fill="#475569">직접 IP 접근은 Cloudflare 보안 정책(Error 1003: Direct IP Access Not Allowed)으로 차단됩니다</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-black" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

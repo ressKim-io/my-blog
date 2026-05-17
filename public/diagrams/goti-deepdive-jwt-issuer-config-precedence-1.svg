@@ -1,0 +1,87 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 540" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">viper 설정 우선순위 스택 — jwt.issuer 값이 결정되는 경로</title>
+  <desc id="desc-1">viper의 5개 우선순위 레이어(Set·Flag·Env·Config·Default)가 위에서 아래로 쌓이며 상위 레이어가 하위 레이어를 덮어씁니다. Config 파일 하드코딩이 Env 주입을 가리는 drift 경로를 표시합니다</desc>
+
+  <defs>
+    <marker id="arr-dark" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-green" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="800" height="540" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="38" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">viper 설정 우선순위 스택 — jwt.issuer 값 결정 경로</text>
+
+  <!-- 우선순위 라벨 -->
+  <text x="56" y="90" text-anchor="middle" font-size="11" fill="#27272A">높음 ▲</text>
+  <text x="56" y="390" text-anchor="middle" font-size="11" fill="#27272A">낮음 ▼</text>
+
+  <!-- Layer 1: Set -->
+  <rect x="96" y="64" width="520" height="52" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1.5"/>
+  <text x="190" y="85" font-size="13" font-weight="600" fill="#334155">1. viper.Set()</text>
+  <text x="190" y="104" font-size="11" fill="#475569">코드에서 직접 강제 주입 — 런타임 오버라이드</text>
+  <text x="630" y="94" font-size="11" fill="#27272A">go-ti: 미사용</text>
+
+  <!-- 구분선 -->
+  <line x1="96" y1="116" x2="616" y2="116" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Layer 2: Flag -->
+  <rect x="96" y="124" width="520" height="52" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1.5"/>
+  <text x="190" y="145" font-size="13" font-weight="600" fill="#334155">2. Flag (cobra / pflag)</text>
+  <text x="190" y="164" font-size="11" fill="#475569">CLI 플래그 — 실행 시 전달</text>
+  <text x="630" y="154" font-size="11" fill="#27272A">go-ti: 미사용</text>
+
+  <!-- 구분선 -->
+  <line x1="96" y1="176" x2="616" y2="176" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Layer 3: Env — SoT (강조) -->
+  <rect x="96" y="184" width="520" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="190" y="206" font-size="13" font-weight="700" fill="#047857">3. 환경 변수 (Env)  ★ 결정된 SoT</text>
+  <text x="190" y="227" font-size="11" fill="#047857">K8s values.yaml → Pod env 주입 → viper.AutomaticEnv()</text>
+  <text x="190" y="241" font-size="11" fill="#047857">USER_JWT_ISSUER = "goti-user-service"</text>
+
+  <!-- 구분선 -->
+  <line x1="96" y1="244" x2="616" y2="244" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Layer 4: Config — 문제 지점 -->
+  <rect x="96" y="252" width="520" height="68" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="190" y="274" font-size="13" font-weight="600" fill="#BE123C">4. Config 파일 (configs/*.yaml)  ← 문제 지점</text>
+  <text x="190" y="294" font-size="11" fill="#BE123C">jwt.issuer: "goti"  — 하드코딩</text>
+  <text x="190" y="310" font-size="11" fill="#BE123C">viper.AutomaticEnv() 미설정 시 Config가 Env를 가림 → drift</text>
+
+  <!-- drift 주석 박스 -->
+  <rect x="632" y="260" width="144" height="52" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="704" y="280" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">Config가 Env를</text>
+  <text x="704" y="296" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">덮어씀 (drift)</text>
+  <text x="704" y="308" text-anchor="middle" font-size="10" fill="#BE123C">issuer → "goti"</text>
+
+  <!-- 구분선 -->
+  <line x1="96" y1="320" x2="616" y2="320" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Layer 5: Default -->
+  <rect x="96" y="328" width="520" height="60" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="190" y="350" font-size="13" font-weight="600" fill="#334155">5. Default (viper.SetDefault)</text>
+  <text x="190" y="370" font-size="11" fill="#475569">pkg/config/config.go — 코드 기본값</text>
+  <text x="190" y="384" font-size="11" fill="#475569">장애 후 조치: "" 로 변경 + 값 없으면 startup fatal</text>
+
+  <!-- 아래 화살표 -->
+  <line x1="400" y1="392" x2="400" y2="416" stroke="#059669" stroke-width="2" marker-end="url(#arr-green)"/>
+
+  <!-- 결과 박스 -->
+  <rect x="176" y="416" width="448" height="60" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="441" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">최종 결정: K8s values의 Env 단일 정의</text>
+  <text x="400" y="460" text-anchor="middle" font-size="11" fill="#047857">Config 파일 issuer 필드 제거 · Default "" 고정 · 미주입 시 fail-fast</text>
+
+  <!-- 범례 -->
+  <rect x="96" y="494" width="12" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="114" y="505" font-size="11" fill="#27272A">SoT (K8s env)</text>
+  <rect x="224" y="494" width="12" height="12" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="242" y="505" font-size="11" fill="#27272A">Drift / 충돌 지점</text>
+  <rect x="360" y="494" width="12" height="12" rx="2" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="378" y="505" font-size="11" fill="#27272A">미사용 / 제거 대상</text>
+</svg>

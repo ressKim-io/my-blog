@@ -230,3 +230,11 @@ logging:
 - [Log Format Standards: JSON, XML, Key-Value | Last9](https://last9.io/blog/log-format/)
 - [Structured Logging Guide | SigNoz](https://signoz.io/blog/structured-logs/)
 - 내부: `docs/conventions/logging-standard.md` (실전 가이드)
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [구조화 로깅 — logfmt·JSON 포맷과 Loki 파싱 원리](/essays/goti-deepdive-structured-logging-logfmt)

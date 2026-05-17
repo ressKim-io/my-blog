@@ -1,0 +1,95 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 480" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-1">sslmode=require vs verify-full 비교</title>
+  <desc id="desc-1">sslmode=require는 암호화만 보장하고 서버 인증서를 검증하지 않아 MITM 공격에 취약합니다. sslmode=verify-full은 CA 체인과 hostname 검증까지 수행하여 MITM을 차단합니다.</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">TLS sslmode 비교 — require vs verify-full</text>
+
+  <!-- ===== 왼쪽: sslmode=require ===== -->
+  <text x="200" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">sslmode=require</text>
+  <text x="200" y="90" text-anchor="middle" font-size="11" fill="#27272A">암호화 O / 서버 검증 X</text>
+
+  <!-- Subscriber 박스 (왼쪽) -->
+  <rect x="32" y="112" width="140" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="102" y="136" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Subscriber</text>
+  <text x="102" y="153" text-anchor="middle" font-size="11" fill="#047857">(AWS RDS)</text>
+
+  <!-- MITM 박스 -->
+  <rect x="168" y="232" width="64" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="200" y="253" text-anchor="middle" font-size="11" font-weight="700" fill="#BE123C">MITM</text>
+  <text x="200" y="268" text-anchor="middle" font-size="10" fill="#BE123C">공격자</text>
+
+  <!-- Publisher 박스 (왼쪽) -->
+  <rect x="32" y="336" width="140" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="102" y="360" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Publisher</text>
+  <text x="102" y="377" text-anchor="middle" font-size="11" fill="#6D28D9">(GCE VM)</text>
+
+  <!-- 화살표: Subscriber → MITM -->
+  <line x1="102" y1="168" x2="188" y2="232" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-red)"/>
+  <!-- 화살표: MITM → Publisher -->
+  <line x1="188" y1="280" x2="102" y2="336" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-red)"/>
+  <!-- 암호화 라벨 -->
+  <rect x="95" y="188" width="56" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="123" y="201" text-anchor="middle" font-size="10" fill="#E11D48">TLS 연결</text>
+  <rect x="95" y="300" width="72" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="131" y="313" text-anchor="middle" font-size="10" fill="#E11D48">위장 가능</text>
+
+  <!-- 경고 메시지 -->
+  <rect x="32" y="416" width="336" height="40" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="200" y="432" text-anchor="middle" font-size="11" font-weight="700" fill="#BE123C">서버 인증서를 검증하지 않아</text>
+  <text x="200" y="448" text-anchor="middle" font-size="11" fill="#BE123C">자가서명 인증서를 가진 공격자 접속 허용</text>
+
+  <!-- ===== 구분선 ===== -->
+  <line x1="400" y1="60" x2="400" y2="470" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 3"/>
+
+  <!-- ===== 오른쪽: sslmode=verify-full ===== -->
+  <text x="600" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">sslmode=verify-full</text>
+  <text x="600" y="90" text-anchor="middle" font-size="11" fill="#27272A">암호화 O / CA 체인 검증 O / hostname 검증 O</text>
+
+  <!-- Subscriber 박스 (오른쪽) -->
+  <rect x="432" y="112" width="140" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="502" y="136" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Subscriber</text>
+  <text x="502" y="153" text-anchor="middle" font-size="11" fill="#047857">(AWS RDS)</text>
+
+  <!-- CA 검증 단계 박스 -->
+  <rect x="440" y="220" width="320" height="72" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="241" text-anchor="middle" font-size="12" font-weight="700" fill="#B45309">TLS Handshake 검증 단계</text>
+  <text x="600" y="259" text-anchor="middle" font-size="11" fill="#B45309">① 서버 인증서 서명 → CA 루트까지 체인 검증</text>
+  <text x="600" y="275" text-anchor="middle" font-size="11" fill="#B45309">② 인증서 CN/SAN ↔ DSN hostname 일치 확인</text>
+
+  <!-- Publisher 박스 (오른쪽) -->
+  <rect x="432" y="336" width="140" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="502" y="360" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Publisher</text>
+  <text x="502" y="377" text-anchor="middle" font-size="11" fill="#6D28D9">(GCE VM)</text>
+
+  <!-- 화살표: Subscriber → 검증 박스 -->
+  <line x1="502" y1="168" x2="502" y2="220" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <!-- 화살표: 검증 박스 → Publisher (검증 통과 시) -->
+  <line x1="502" y1="292" x2="502" y2="336" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- 라벨 -->
+  <rect x="510" y="188" width="72" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="546" y="201" text-anchor="middle" font-size="10" fill="#059669">검증 요청</text>
+  <rect x="510" y="302" width="96" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="558" y="315" text-anchor="middle" font-size="10" fill="#059669">검증 통과 → 연결</text>
+
+  <!-- 성공 메시지 -->
+  <rect x="432" y="416" width="336" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="432" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">CA 루트를 신뢰하지 않는 인증서는 거부</text>
+  <text x="600" y="448" text-anchor="middle" font-size="11" fill="#047857">hostname 불일치 시에도 연결 차단</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

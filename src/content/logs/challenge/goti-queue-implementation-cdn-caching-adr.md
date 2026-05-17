@@ -255,3 +255,13 @@ POC C CDN 테스트에서 timeout 2,586건과 pass_rate 40.89%가 나왔을 때 
 | 2026-04-04 | CDN 경유 3000VU 실측 — status avg 220ms / p95 334ms / 1,044 req/s / 실패율 0.08% / `cf-cache-status: HIT` 확인 |
 | 2026-04-04 | POC C (CDN 캐싱) 최종 채택, 구현체 본류 병합 방향 결정 |
 | 2026-04-14 | 사후 검증 — CDN + PgBouncer + Redis 캐시 합산 환경 3000VU 원샷: `queue_status` p95 73ms, pass_rate 100%, 총 90,415 요청. 병목이 결제 path로 이동함을 확인 |
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [CDN Edge 캐싱 — Cache-Control로 origin을 우회하는 원리](/essays/goti-deepdive-cdn-edge-caching)
+- [JWE — 암호화 토큰이 서명 토큰보다 강한 이유](/essays/goti-deepdive-jwe-token)
+- [CDN Cache Key 설계 — 사용자별 응답 분리 원리](/essays/goti-deepdive-cdn-cache-key)

@@ -1,0 +1,139 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 440" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">Active-Passive vs Active-Active 쓰기 경로 비교</title>
+  <desc id="desc-2">Active-Passive는 한 노드만 쓰기를 받아 충돌이 원천 차단되는 반면, Active-Active는 양쪽 노드가 모두 쓰기를 받아 동시 쓰기 충돌 가능성이 생기는 구조 비교</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="440" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">비교 — Active-Passive vs Active-Active 쓰기 경로</text>
+
+  <!-- ===== 구분선 ===== -->
+  <line x1="400" y1="48" x2="400" y2="420" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="6 3"/>
+
+  <!-- ===== 왼쪽: Active-Passive ===== -->
+  <text x="200" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">Active-Passive</text>
+  <text x="200" y="76" text-anchor="middle" font-size="11" fill="#27272A">단일 쓰기 지점 — 충돌 원천 차단</text>
+
+  <!-- 클라이언트 -->
+  <rect x="136" y="96" width="128" height="40" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="200" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">클라이언트</text>
+
+  <!-- 쓰기 화살표 → Active -->
+  <line x1="200" y1="136" x2="136" y2="180" stroke="#7C3AED" stroke-width="2" marker-end="url(#ap-arrow-violet)"/>
+  <rect x="116" y="150" width="52" height="14" fill="#FAFAFA"/>
+  <text x="142" y="160" text-anchor="middle" font-size="10" font-weight="600" fill="#6D28D9">쓰기 허용</text>
+
+  <!-- 읽기 화살표 → Active -->
+  <line x1="200" y1="136" x2="264" y2="180" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#ap-arrow-green)"/>
+  <rect x="226" y="150" width="52" height="14" fill="#FAFAFA"/>
+  <text x="252" y="160" text-anchor="middle" font-size="10" fill="#047857">읽기 허용</text>
+
+  <!-- Active 노드 -->
+  <rect x="56" y="180" width="160" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="136" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">Active 노드</text>
+  <text x="136" y="222" text-anchor="middle" font-size="11" fill="#6D28D9">읽기 + 쓰기</text>
+  <text x="136" y="236" text-anchor="middle" font-size="10" fill="#6D28D9">단일 쓰기 지점</text>
+
+  <!-- Passive 노드 -->
+  <rect x="248" y="180" width="120" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="308" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">Passive 노드</text>
+  <text x="308" y="222" text-anchor="middle" font-size="11" fill="#BE123C">읽기 전용</text>
+  <text x="308" y="236" text-anchor="middle" font-size="10" fill="#BE123C">read_only=on</text>
+
+  <!-- Active → Passive 복제 -->
+  <line x1="216" y1="212" x2="248" y2="212" stroke="#0891B2" stroke-width="2" marker-end="url(#ap-arrow-cyan)"/>
+  <rect x="210" y="197" width="44" height="14" fill="#FAFAFA"/>
+  <text x="232" y="208" text-anchor="middle" font-size="9" fill="#0E7490">복제</text>
+
+  <!-- 충돌 없음 표시 -->
+  <rect x="56" y="268" width="312" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="212" y="284" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">쓰기 충돌 발생 불가</text>
+  <text x="212" y="295" text-anchor="middle" font-size="10" fill="#047857">Active만 쓰기 → 동시 수정 경쟁 없음</text>
+
+  <!-- Passive 쓰기 시도 차단 표시 -->
+  <line x1="308" y1="244" x2="308" y2="276" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <rect x="278" y="276" width="60" height="18" rx="3" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="308" y="289" text-anchor="middle" font-size="9" fill="#BE123C">쓰기 → 오류</text>
+
+  <!-- Failover 설명 -->
+  <rect x="56" y="322" width="312" height="52" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="212" y="340" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">Failover 시</text>
+  <text x="212" y="356" text-anchor="middle" font-size="10" fill="#B45309">Passive → Active 승격</text>
+  <text x="212" y="370" text-anchor="middle" font-size="10" fill="#B45309">read_only=off 전환 + 쓰기 수용</text>
+
+  <!-- ===== 오른쪽: Active-Active ===== -->
+  <text x="600" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#E11D48">Active-Active</text>
+  <text x="600" y="76" text-anchor="middle" font-size="11" fill="#27272A">양쪽 쓰기 — 충돌 해소 로직 필요</text>
+
+  <!-- 클라이언트 L -->
+  <rect x="432" y="96" width="120" height="40" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="492" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">클라이언트 A</text>
+
+  <!-- 클라이언트 R -->
+  <rect x="648" y="96" width="120" height="40" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="708" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">클라이언트 B</text>
+
+  <!-- 쓰기 A → 노드 L -->
+  <line x1="492" y1="136" x2="492" y2="180" stroke="#E11D48" stroke-width="2" marker-end="url(#ap-arrow-rose)"/>
+  <rect x="462" y="150" width="52" height="14" fill="#FAFAFA"/>
+  <text x="488" y="160" text-anchor="middle" font-size="10" font-weight="600" fill="#BE123C">쓰기</text>
+
+  <!-- 쓰기 B → 노드 R -->
+  <line x1="708" y1="136" x2="708" y2="180" stroke="#E11D48" stroke-width="2" marker-end="url(#ap-arrow-rose)"/>
+  <rect x="678" y="150" width="52" height="14" fill="#FAFAFA"/>
+  <text x="704" y="160" text-anchor="middle" font-size="10" font-weight="600" fill="#BE123C">쓰기</text>
+
+  <!-- 노드 L -->
+  <rect x="432" y="180" width="120" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="492" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">노드 A</text>
+  <text x="492" y="222" text-anchor="middle" font-size="11" fill="#BE123C">읽기 + 쓰기</text>
+  <text x="492" y="236" text-anchor="middle" font-size="10" fill="#BE123C">쓰기 허용</text>
+
+  <!-- 노드 R -->
+  <rect x="648" y="180" width="120" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="708" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">노드 B</text>
+  <text x="708" y="222" text-anchor="middle" font-size="11" fill="#BE123C">읽기 + 쓰기</text>
+  <text x="708" y="236" text-anchor="middle" font-size="10" fill="#BE123C">쓰기 허용</text>
+
+  <!-- 양방향 복제 화살표 -->
+  <line x1="552" y1="210" x2="648" y2="210" stroke="#0891B2" stroke-width="1.5" marker-end="url(#ap-arrow-cyan)"/>
+  <line x1="648" y1="224" x2="552" y2="224" stroke="#0891B2" stroke-width="1.5" marker-end="url(#ap-arrow-cyan-left)"/>
+  <rect x="572" y="208" width="56" height="24" fill="#FAFAFA"/>
+  <text x="600" y="219" text-anchor="middle" font-size="9" fill="#0E7490">양방향 복제</text>
+  <text x="600" y="229" text-anchor="middle" font-size="9" fill="#0E7490">충돌 가능</text>
+
+  <!-- 충돌 위험 표시 -->
+  <rect x="432" y="268" width="336" height="52" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="600" y="287" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">동시 쓰기 충돌 가능성 존재</text>
+  <text x="600" y="303" text-anchor="middle" font-size="10" fill="#BE123C">동일 행을 A·B가 동시에 수정 →</text>
+  <text x="600" y="315" text-anchor="middle" font-size="10" fill="#BE123C">충돌 해소 정책(last-write-wins 등) 필요</text>
+
+  <!-- 복잡도 표시 -->
+  <rect x="432" y="338" width="336" height="36" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="600" y="356" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">구현·운영 복잡도 증가</text>
+  <text x="600" y="370" text-anchor="middle" font-size="10" fill="#B45309">벡터 클럭 / 충돌 감지 / CRDT 등 별도 메커니즘 필요</text>
+
+  <!-- ===== 하단 요약 ===== -->
+  <rect x="32" y="410" width="736" height="22" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="425" text-anchor="middle" font-size="10" fill="#334155">Active-Passive: 쓰기 충돌 0 · 단순 운영 · Failover 시 역할 전환 필요 | Active-Active: 무중단 쓰기 · 충돌 해소 복잡도 · 대역폭 2배</text>
+
+  <!-- ===== 마커 정의 ===== -->
+  <defs>
+    <marker id="ap-arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="ap-arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="ap-arrow-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="ap-arrow-cyan-left" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto">
+      <path d="M8,0 L8,6 L0,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="ap-arrow-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,128 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto">
+  <title id="title-1">Pod 생성→Ready 타임라인 비교 — JVM vs Go</title>
+  <desc id="desc-1">JVM(Spring Boot)과 Go의 Pod 생성부터 Ready 상태까지의 타임라인을 비교합니다. JVM은 클래스 로딩·JIT 컴파일·warmup 구간이 30~60초인 반면, Go는 정적 바이너리를 바로 실행하여 1~3초 안에 Ready 상태에 도달합니다</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title { font-size: 15px; font-weight: 600; fill: #0A0A0A; }
+    .label { font-size: 12px; fill: #0A0A0A; }
+    .label-sm { font-size: 11px; fill: #27272A; }
+    .label-white { font-size: 11px; fill: #FAFAFA; }
+    .section-title { font-size: 13px; font-weight: 600; fill: #0A0A0A; }
+    .time-label { font-size: 11px; fill: #475569; }
+    .axis-label { font-size: 11px; fill: #27272A; }
+  </style>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" class="title">Pod 생성→Ready 타임라인 비교</text>
+
+  <!-- 시간축 배경 -->
+  <rect x="60" y="50" width="700" height="1" fill="#D4D4D8"/>
+
+  <!-- 시간 눈금 라벨 -->
+  <text x="60" y="65" text-anchor="middle" class="time-label">0s</text>
+  <text x="177" y="65" text-anchor="middle" class="time-label">10s</text>
+  <text x="294" y="65" text-anchor="middle" class="time-label">20s</text>
+  <text x="411" y="65" text-anchor="middle" class="time-label">30s</text>
+  <text x="528" y="65" text-anchor="middle" class="time-label">40s</text>
+  <text x="645" y="65" text-anchor="middle" class="time-label">50s</text>
+  <text x="760" y="65" text-anchor="middle" class="time-label">60s</text>
+
+  <!-- 눈금선 -->
+  <line x1="177" y1="50" x2="177" y2="440" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="294" y1="50" x2="294" y2="440" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="411" y1="50" x2="411" y2="440" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="528" y1="50" x2="528" y2="440" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="645" y1="50" x2="645" y2="440" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- ───── JVM 섹션 ───── -->
+  <text x="60" y="100" class="section-title">JVM (Spring Boot)</text>
+  <text x="60" y="118" class="label-sm">콜드스타트: 30~60초</text>
+
+  <!-- Pod 생성 (공통 구간) -->
+  <rect x="60" y="128" width="58" height="28" rx="3" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="89" y="146" text-anchor="middle" class="label-sm">Pod 생성</text>
+
+  <!-- 이미지 Pull -->
+  <rect x="120" y="128" width="82" height="28" rx="3" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="161" y="146" text-anchor="middle" class="label-sm">이미지 Pull (~280MB)</text>
+
+  <!-- JVM 프로세스 시작 -->
+  <rect x="204" y="128" width="58" height="28" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="233" y="146" text-anchor="middle" class="label-sm">JVM 시작</text>
+
+  <!-- 클래스 로딩 구간 -->
+  <rect x="264" y="128" width="147" height="28" rx="3" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="337" y="143" text-anchor="middle" class="label-sm" fill="#BE123C">클래스 로딩</text>
+  <text x="337" y="157" text-anchor="middle" class="label-sm" fill="#BE123C">(~7,000개)</text>
+
+  <!-- JIT 컴파일 구간 -->
+  <rect x="413" y="128" width="117" height="28" rx="3" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="471" y="143" text-anchor="middle" class="label-sm" fill="#BE123C">JIT 컴파일</text>
+  <text x="471" y="157" text-anchor="middle" class="label-sm" fill="#BE123C">warmup</text>
+
+  <!-- Ready 마커 (JVM) -->
+  <line x1="530" y1="115" x2="530" y2="170" stroke="#E11D48" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="534" y="113" class="label-sm" fill="#BE123C">Ready (30~60s)</text>
+
+  <!-- JVM Slow zone 화살표 -->
+  <text x="337" y="178" text-anchor="middle" class="label-sm" fill="#BE123C">HPA 반응해도 트래픽 처리 불가 구간</text>
+
+  <!-- ───── JVM readinessProbe 대기 ───── -->
+  <!-- initialDelaySeconds 표시 -->
+  <rect x="264" y="190" width="264" height="18" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="396" y="203" text-anchor="middle" class="label-sm" fill="#BE123C">initialDelaySeconds: 30~60s (warmup 대기)</text>
+
+  <!-- ───── Go 섹션 ───── -->
+  <text x="60" y="248" class="section-title">Go (정적 바이너리)</text>
+  <text x="60" y="266" class="label-sm">콜드스타트: 1~3초</text>
+
+  <!-- Pod 생성 -->
+  <rect x="60" y="276" width="58" height="28" rx="3" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="89" y="294" text-anchor="middle" class="label-sm">Pod 생성</text>
+
+  <!-- 이미지 Pull (Go, 작음) -->
+  <rect x="120" y="276" width="23" height="28" rx="3" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="131" y="294" text-anchor="middle" class="label-sm">Pull</text>
+  <!-- Pull 크기 주석 -->
+  <text x="147" y="272" class="label-sm" fill="#B45309">~40MB</text>
+
+  <!-- Go 바이너리 실행 -->
+  <rect x="145" y="276" width="58" height="28" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="174" y="291" text-anchor="middle" class="label-sm" fill="#047857">바이너리</text>
+  <text x="174" y="305" text-anchor="middle" class="label-sm" fill="#047857">실행</text>
+
+  <!-- Ready 마커 (Go) -->
+  <line x1="205" y1="263" x2="205" y2="318" stroke="#059669" stroke-width="2.5"/>
+  <text x="209" y="262" class="label-sm" fill="#047857">Ready (1~3s)</text>
+
+  <!-- initialDelaySeconds Go -->
+  <rect x="145" y="318" width="58" height="18" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="174" y="331" text-anchor="middle" class="label-sm" fill="#047857">initialDelay: 3s</text>
+
+  <!-- 비교 요약 표 -->
+  <rect x="60" y="370" width="700" height="130" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="392" text-anchor="middle" class="section-title">런타임 특성 비교</text>
+
+  <!-- 표 헤더 -->
+  <text x="160" y="412" text-anchor="middle" class="axis-label" font-weight="600">항목</text>
+  <text x="400" y="412" text-anchor="middle" class="axis-label" font-weight="600">JVM (Spring Boot)</text>
+  <text x="630" y="412" text-anchor="middle" class="axis-label" font-weight="600">Go (정적 바이너리)</text>
+  <line x1="68" y1="416" x2="752" y2="416" stroke="#D4D4D8" stroke-width="1"/>
+
+  <text x="160" y="432" text-anchor="middle" class="axis-label">콜드스타트</text>
+  <text x="400" y="432" text-anchor="middle" class="axis-label" fill="#BE123C">30~60초</text>
+  <text x="630" y="432" text-anchor="middle" class="axis-label" fill="#047857">1~3초</text>
+
+  <text x="160" y="450" text-anchor="middle" class="axis-label">이미지 크기</text>
+  <text x="400" y="450" text-anchor="middle" class="axis-label" fill="#BE123C">~280MB (JRE 포함)</text>
+  <text x="630" y="450" text-anchor="middle" class="axis-label" fill="#047857">~40MB (distroless)</text>
+
+  <text x="160" y="468" text-anchor="middle" class="axis-label">메모리 (합산)</text>
+  <text x="400" y="468" text-anchor="middle" class="axis-label" fill="#BE123C">~2,300Mi (6서비스)</text>
+  <text x="630" y="468" text-anchor="middle" class="axis-label" fill="#047857">~384Mi (6서비스)</text>
+
+  <text x="160" y="486" text-anchor="middle" class="axis-label">KEDA pre-scale</text>
+  <text x="400" y="486" text-anchor="middle" class="axis-label" fill="#BE123C">필수</text>
+  <text x="630" y="486" text-anchor="middle" class="axis-label" fill="#047857">불필요</text>
+</svg>

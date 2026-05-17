@@ -1,0 +1,90 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 580" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">JWT issuer 두 레포 정의 → drift와 RequestAuthentication 매칭 실패</title>
+  <desc id="desc-2">Goti-go configs에 issuer "goti"가 하드코딩되고 Goti-k8s RequestAuthentication에는 "goti-user-service"가 정의되어 두 값이 불일치하는 drift 구조를 보여줍니다. 발급 토큰의 iss 클레임과 RequestAuthentication.issuer가 다르면 Envoy가 401을 반환합니다</desc>
+
+  <defs>
+    <marker id="arr2-rose" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arr2-green" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arr2-slate" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="800" height="580" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">issuer 값 두 레포 정의 → drift 및 RequestAuthentication 매칭 실패</text>
+
+  <!-- ===== 좌측: Goti-go 레포 ===== -->
+  <rect x="24" y="56" width="344" height="228" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="196" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Goti-go 레포</text>
+
+  <rect x="44" y="90" width="304" height="52" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="196" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">pkg/config/config.go</text>
+  <text x="196" y="129" text-anchor="middle" font-size="11" fill="#BE123C">SetDefault("jwt.issuer", "goti")</text>
+
+  <rect x="44" y="154" width="304" height="52" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="196" y="174" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">configs/user.yaml</text>
+  <text x="196" y="192" text-anchor="middle" font-size="11" fill="#BE123C">jwt.issuer: "goti"  ← Config 레이어</text>
+
+  <!-- 발급 토큰 -->
+  <rect x="44" y="218" width="304" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="196" y="238" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">발급 토큰</text>
+  <text x="196" y="255" text-anchor="middle" font-size="11" fill="#047857">&#123; "iss": "goti", "sub": "123" &#125;</text>
+
+  <!-- ===== 우측: Goti-k8s 레포 ===== -->
+  <rect x="432" y="56" width="344" height="228" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="604" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Goti-k8s 레포</text>
+
+  <rect x="452" y="90" width="304" height="52" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="604" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">environments/prod*/values.yaml</text>
+  <text x="604" y="129" text-anchor="middle" font-size="11" fill="#047857">USER_JWT_ISSUER: "goti-user-service"</text>
+
+  <rect x="452" y="154" width="304" height="52" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="604" y="174" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">RequestAuthentication</text>
+  <text x="604" y="192" text-anchor="middle" font-size="11" fill="#047857">issuer: "goti-user-service"  ← 12개 파일</text>
+
+  <!-- 기대 토큰 -->
+  <rect x="452" y="218" width="304" height="44" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="604" y="238" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">기대 iss 클레임</text>
+  <text x="604" y="255" text-anchor="middle" font-size="11" fill="#334155">&#123; "iss": "goti-user-service" &#125;</text>
+
+  <!-- drift 화살표 (두 레포 사이) -->
+  <line x1="348" y1="185" x2="450" y2="185" stroke="#E11D48" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arr2-rose)"/>
+  <rect x="370" y="172" width="60" height="20" rx="3" fill="#FFF1F2"/>
+  <text x="400" y="186" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">drift !</text>
+
+  <!-- 발급 토큰 → Envoy 화살표 -->
+  <line x1="196" y1="262" x2="196" y2="314" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arr2-rose)"/>
+  <!-- RequestAuthentication → Envoy 화살표 -->
+  <line x1="604" y1="262" x2="604" y2="314" stroke="#059669" stroke-width="2" marker-end="url(#arr2-green)"/>
+
+  <!-- Envoy 박스 -->
+  <rect x="240" y="314" width="320" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="400" y="340" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">Envoy sidecar</text>
+  <text x="400" y="358" text-anchor="middle" font-size="11" fill="#334155">iss 클레임 vs RequestAuthentication.issuer 비교</text>
+
+  <!-- 매칭 실패 화살표 -->
+  <line x1="400" y1="370" x2="400" y2="402" stroke="#E11D48" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arr2-rose)"/>
+
+  <!-- 충돌 결과 박스 -->
+  <rect x="96" y="402" width="608" height="72" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="400" y="426" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">issuer 불일치 → 401 Unauthorized</text>
+  <text x="240" y="448" text-anchor="middle" font-size="12" fill="#BE123C">토큰 iss: "goti"</text>
+  <text x="400" y="448" text-anchor="middle" font-size="14" font-weight="700" fill="#E11D48">≠</text>
+  <text x="564" y="448" text-anchor="middle" font-size="12" fill="#BE123C">RA issuer: "goti-user-service"</text>
+  <text x="400" y="464" text-anchor="middle" font-size="10" fill="#BE123C">Envoy: "Jwt issuer is not configured"  →  www-authenticate: Bearer error="invalid_token"</text>
+
+  <!-- 해결 화살표 -->
+  <line x1="400" y1="474" x2="400" y2="504" stroke="#059669" stroke-width="1.5" marker-end="url(#arr2-green)"/>
+
+  <!-- 해결 박스 -->
+  <rect x="136" y="504" width="528" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="526" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">해결: Config 파일 issuer 필드 제거 → Env 단일 SoT</text>
+  <text x="400" y="548" text-anchor="middle" font-size="11" fill="#047857">두 레포 issuer 값을 K8s values.yaml 한 곳에서만 정의</text>
+</svg>

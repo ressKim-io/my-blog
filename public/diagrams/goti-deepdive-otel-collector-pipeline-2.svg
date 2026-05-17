@@ -1,0 +1,101 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-2">OTel Collector 시그널별 파이프라인 분기 — metrics / logs / traces 독립 파이프라인</title>
+  <desc id="desc-2">metrics.pipeline, logs.pipeline, traces.pipeline 세 파이프라인이 각각 독립적으로 receiver/processor/exporter를 조합하고, logs와 traces는 Kafka exporter를 통해 Back Collector로 이어지는 흐름을 보여줍니다</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">시그널별 독립 파이프라인 분기</text>
+
+  <!-- ===== metrics pipeline ===== -->
+  <rect x="40" y="56" width="720" height="96" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="60" y="76" font-size="12" font-weight="700" fill="#047857">metrics.pipeline</text>
+
+  <!-- receiver -->
+  <rect x="80" y="84" width="120" height="48" rx="4" fill="#FAFAFA" stroke="#0891B2" stroke-width="1"/>
+  <text x="140" y="104" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">otlpreceiver</text>
+  <text x="140" y="120" text-anchor="middle" font-size="10" fill="#27272A">metrics</text>
+
+  <line x1="200" y1="108" x2="248" y2="108" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- processor -->
+  <rect x="248" y="84" width="200" height="48" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="348" y="104" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">memory_limiter → batch</text>
+  <text x="348" y="120" text-anchor="middle" font-size="10" fill="#27272A">k8sattributes (선택)</text>
+
+  <line x1="448" y1="108" x2="496" y2="108" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- exporter -->
+  <rect x="496" y="84" width="240" height="48" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="616" y="104" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">prometheusremotewrite</text>
+  <text x="616" y="120" text-anchor="middle" font-size="10" fill="#27272A">→ Mimir Distributor (:9009)</text>
+
+  <!-- ===== logs pipeline ===== -->
+  <rect x="40" y="176" width="720" height="96" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="60" y="196" font-size="12" font-weight="700" fill="#0E7490">logs.pipeline</text>
+
+  <!-- receiver -->
+  <rect x="80" y="204" width="120" height="48" rx="4" fill="#FAFAFA" stroke="#0891B2" stroke-width="1"/>
+  <text x="140" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">otlpreceiver</text>
+  <text x="140" y="240" text-anchor="middle" font-size="10" fill="#27272A">logs</text>
+
+  <line x1="200" y1="228" x2="248" y2="228" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- processor -->
+  <rect x="248" y="204" width="200" height="48" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="348" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">memory_limiter → batch</text>
+  <text x="348" y="240" text-anchor="middle" font-size="10" fill="#27272A">resource → attributes (log_type)</text>
+
+  <line x1="448" y1="228" x2="496" y2="228" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- exporter -->
+  <rect x="496" y="204" width="240" height="48" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="616" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">kafkaexporter</text>
+  <text x="616" y="240" text-anchor="middle" font-size="10" fill="#27272A">→ observability.logs.v1</text>
+
+  <!-- ===== traces pipeline ===== -->
+  <rect x="40" y="296" width="720" height="96" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="60" y="316" font-size="12" font-weight="700" fill="#B45309">traces.pipeline</text>
+
+  <!-- receiver -->
+  <rect x="80" y="324" width="120" height="48" rx="4" fill="#FAFAFA" stroke="#0891B2" stroke-width="1"/>
+  <text x="140" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">otlpreceiver</text>
+  <text x="140" y="360" text-anchor="middle" font-size="10" fill="#27272A">traces</text>
+
+  <line x1="200" y1="348" x2="248" y2="348" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- processor -->
+  <rect x="248" y="324" width="200" height="48" rx="4" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="348" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">memory_limiter → batch</text>
+  <text x="348" y="360" text-anchor="middle" font-size="10" fill="#27272A">tail_sampling (선택)</text>
+
+  <line x1="448" y1="348" x2="496" y2="348" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- exporter -->
+  <rect x="496" y="324" width="240" height="48" rx="4" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="616" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">kafkaexporter</text>
+  <text x="616" y="360" text-anchor="middle" font-size="10" fill="#27272A">→ observability.traces.v1</text>
+
+  <!-- ===== 범례 ===== -->
+  <rect x="40" y="416" width="720" height="48" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="64" y="432" width="14" height="14" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="84" y="443" font-size="11" fill="#047857">metrics</text>
+  <rect x="144" y="432" width="14" height="14" rx="2" fill="#ECFEFF" stroke="#0891B2" stroke-width="1"/>
+  <text x="164" y="443" font-size="11" fill="#0E7490">logs</text>
+  <rect x="216" y="432" width="14" height="14" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="236" y="443" font-size="11" fill="#B45309">traces</text>
+  <rect x="296" y="432" width="14" height="14" rx="2" fill="#FAFAFA" stroke="#0891B2" stroke-width="1"/>
+  <text x="316" y="443" font-size="11" fill="#0E7490">Receiver</text>
+  <rect x="400" y="432" width="14" height="14" rx="2" fill="#FAFAFA" stroke="#7C3AED" stroke-width="1"/>
+  <text x="420" y="443" font-size="11" fill="#6D28D9">Processor</text>
+  <rect x="510" y="432" width="14" height="14" rx="2" fill="#FAFAFA" stroke="#D97706" stroke-width="1"/>
+  <text x="530" y="443" font-size="11" fill="#B45309">Exporter</text>
+
+  <!-- 마커 정의 -->
+  <defs>
+    <marker id="arr-b2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>

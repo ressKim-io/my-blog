@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-1 desc-1"
+     viewBox="0 0 800 500" width="100%" height="auto"
+     style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-1">물리 복제 vs 논리 복제 — 복제 단위 비교</title>
+  <desc id="desc-1">왼쪽 물리 복제는 WAL의 블록 데이터를 그대로 복사하고, 오른쪽 논리 복제는 WAL을 행 이벤트로 변환하여 전달합니다</desc>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">복제 단위 비교 — Physical vs Logical</text>
+
+  <!-- ======== LEFT: Physical Replication ======== -->
+
+  <!-- Section label -->
+  <text x="200" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">물리 복제 (Streaming Replication)</text>
+
+  <!-- Primary DB box -->
+  <rect x="60" y="92" width="160" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="140" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Primary DB</text>
+  <text x="140" y="136" text-anchor="middle" font-size="11" fill="#B45309">PostgreSQL 16</text>
+  <text x="140" y="150" text-anchor="middle" font-size="11" fill="#B45309">GCE VM</text>
+
+  <!-- WAL segments box -->
+  <rect x="60" y="188" width="160" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="140" y="208" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">WAL Segment</text>
+  <!-- block rows -->
+  <rect x="76" y="216" width="128" height="14" rx="2" fill="#D97706" opacity="0.25"/>
+  <text x="140" y="227" text-anchor="middle" font-size="10" fill="#92400E">blkno 42  offset 128  (heap raw)</text>
+  <rect x="76" y="234" width="128" height="14" rx="2" fill="#D97706" opacity="0.25"/>
+  <text x="140" y="245" text-anchor="middle" font-size="10" fill="#92400E">blkno 43  offset 0    (heap raw)</text>
+  <text x="140" y="262" text-anchor="middle" font-size="10" fill="#B45309">WAL 블록 바이트 그대로</text>
+
+  <!-- Arrow WAL → walsender -->
+  <line x1="140" y1="156" x2="140" y2="186" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- walsender -->
+  <rect x="80" y="292" width="120" height="36" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="140" y="310" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">walsender</text>
+  <text x="140" y="322" text-anchor="middle" font-size="10" fill="#B45309">background process</text>
+
+  <!-- Arrow WAL → walsender -->
+  <line x1="140" y1="268" x2="140" y2="290" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- Arrow across -->
+  <line x1="200" y1="310" x2="244" y2="310" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <rect x="205" y="297" width="34" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="222" y="308" text-anchor="middle" font-size="10" fill="#047857">TLS</text>
+
+  <!-- walreceiver -->
+  <rect x="244" y="292" width="120" height="36" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="304" y="310" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">walreceiver</text>
+  <text x="304" y="322" text-anchor="middle" font-size="10" fill="#047857">background process</text>
+
+  <!-- Arrow walreceiver → Standby -->
+  <line x1="304" y1="328" x2="304" y2="370" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- Standby DB box -->
+  <rect x="224" y="370" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="304" y="396" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Standby DB</text>
+  <text x="304" y="412" text-anchor="middle" font-size="11" fill="#047857">동일 버전 / 동일 플랫폼</text>
+  <text x="304" y="426" text-anchor="middle" font-size="11" fill="#047857">Hot Standby (읽기 전용)</text>
+
+  <!-- constraint note -->
+  <rect x="60" y="452" width="320" height="28" rx="4" fill="#FEF3C7" stroke="#D97706" stroke-width="1"/>
+  <text x="220" y="465" text-anchor="middle" font-size="11" fill="#92400E">제약: 동일 PostgreSQL 버전 · 동일 OS 아키텍처 필수</text>
+  <text x="220" y="477" text-anchor="middle" font-size="11" fill="#92400E">블록 포맷이 달라지면 복제 불가</text>
+
+  <!-- ======== DIVIDER ======== -->
+  <line x1="400" y1="56" x2="400" y2="488" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="6 3"/>
+
+  <!-- ======== RIGHT: Logical Replication ======== -->
+
+  <!-- Section label -->
+  <text x="600" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">논리 복제 (pglogical)</text>
+
+  <!-- Primary DB box -->
+  <rect x="460" y="92" width="160" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="540" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Primary DB</text>
+  <text x="540" y="136" text-anchor="middle" font-size="11" fill="#B45309">PostgreSQL 16</text>
+  <text x="540" y="150" text-anchor="middle" font-size="11" fill="#B45309">GCE VM</text>
+
+  <!-- WAL + decode -->
+  <rect x="460" y="188" width="160" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="540" y="208" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">논리 디코딩</text>
+  <!-- event rows -->
+  <rect x="476" y="216" width="128" height="14" rx="2" fill="#7C3AED" opacity="0.2"/>
+  <text x="540" y="227" text-anchor="middle" font-size="10" fill="#4C1D95">INSERT orders (id=42, status='paid')</text>
+  <rect x="476" y="234" width="128" height="14" rx="2" fill="#7C3AED" opacity="0.2"/>
+  <text x="540" y="245" text-anchor="middle" font-size="10" fill="#4C1D95">UPDATE users SET name='...' WHERE id=7</text>
+  <text x="540" y="262" text-anchor="middle" font-size="10" fill="#6D28D9">행(row) 이벤트로 변환</text>
+
+  <!-- Arrow WAL → decode -->
+  <line x1="540" y1="156" x2="540" y2="186" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- replication slot -->
+  <rect x="480" y="292" width="120" height="36" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="540" y="310" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">replication slot</text>
+  <text x="540" y="322" text-anchor="middle" font-size="10" fill="#6D28D9">LSN 커서 / WAL 보존</text>
+
+  <!-- Arrow decode → slot -->
+  <line x1="540" y1="268" x2="540" y2="290" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- Arrow across to subscriber -->
+  <line x1="600" y1="310" x2="640" y2="310" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <rect x="604" y="297" width="32" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="620" y="308" text-anchor="middle" font-size="10" fill="#047857">TLS</text>
+
+  <!-- apply worker -->
+  <rect x="640" y="292" width="120" height="36" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="700" y="310" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">apply worker</text>
+  <text x="700" y="322" text-anchor="middle" font-size="10" fill="#047857">subscriber side</text>
+
+  <!-- Arrow apply → Subscriber DB -->
+  <line x1="700" y1="328" x2="700" y2="370" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- Subscriber DB box -->
+  <rect x="620" y="370" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="700" y="396" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Subscriber DB</text>
+  <text x="700" y="412" text-anchor="middle" font-size="11" fill="#047857">다른 버전 가능</text>
+  <text x="700" y="426" text-anchor="middle" font-size="11" fill="#047857">테이블 단위 선택 구독</text>
+
+  <!-- flexibility note -->
+  <rect x="460" y="452" width="320" height="28" rx="4" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="620" y="465" text-anchor="middle" font-size="11" fill="#4C1D95">유연성: 다른 PG 버전 · 다른 OS · 크로스 클라우드 가능</text>
+  <text x="620" y="477" text-anchor="middle" font-size="11" fill="#4C1D95">단, 논리 디코딩 오버헤드 + 시퀀스·DDL 수동 관리 필요</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrow-black" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

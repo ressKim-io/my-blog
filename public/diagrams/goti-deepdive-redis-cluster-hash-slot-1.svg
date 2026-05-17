@@ -1,0 +1,137 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 520"
+  width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+
+  <title id="title-1">Redis Cluster 키 분산 구조도 — CRC16과 16384 해시 슬롯</title>
+  <desc id="desc-1">여러 키가 CRC16 해시 함수를 거쳐 0~16383 범위의 슬롯 번호로 변환되고, 각 슬롯이 세 개의 노드 샤드에 분산 배치되는 구조</desc>
+
+  <!-- Background -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">구조도 — CRC16과 16384 해시 슬롯 분산</text>
+
+  <!-- ===== 키 박스 (왼쪽) ===== -->
+  <!-- seat:{game_1}:A1 -->
+  <rect x="40" y="72" width="200" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="94" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">seat:101:A1</text>
+  <text x="140" y="113" text-anchor="middle" font-size="11" fill="#27272A">seat_statuses HASH</text>
+
+  <!-- inv:{game_1}:{section} -->
+  <rect x="40" y="144" width="200" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="166" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">inv:101:S1</text>
+  <text x="140" y="185" text-anchor="middle" font-size="11" fill="#27272A">inventory HASH</text>
+
+  <!-- hold:{game_1}:{seat} -->
+  <rect x="40" y="216" width="200" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="238" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">hold:101:A1</text>
+  <text x="140" y="257" text-anchor="middle" font-size="11" fill="#27272A">seat_holds STRING</text>
+
+  <!-- order:{order_id} — 다른 game_id -->
+  <rect x="40" y="304" width="200" height="52" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="140" y="326" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">order:7823</text>
+  <text x="140" y="345" text-anchor="middle" font-size="11" fill="#27272A">orders HASH</text>
+
+  <!-- seat:{game_2}:B3 -->
+  <rect x="40" y="376" width="200" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="398" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">seat:202:B3</text>
+  <text x="140" y="417" text-anchor="middle" font-size="11" fill="#27272A">seat_statuses HASH</text>
+
+  <!-- ===== CRC16 박스 (가운데) ===== -->
+  <rect x="288" y="196" width="184" height="108" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="380" y="226" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">CRC16</text>
+  <text x="380" y="248" text-anchor="middle" font-size="12" fill="#B45309">해시 함수</text>
+  <text x="380" y="272" text-anchor="middle" font-size="11" fill="#27272A">slot = CRC16(key) % 16384</text>
+  <text x="380" y="290" text-anchor="middle" font-size="11" fill="#27272A">결과: 0 ~ 16383</text>
+
+  <!-- 화살표: 키 → CRC16 -->
+  <line x1="240" y1="98" x2="288" y2="230" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <line x1="240" y1="170" x2="288" y2="240" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <line x1="240" y1="242" x2="288" y2="250" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <line x1="240" y1="330" x2="288" y2="262" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <line x1="240" y1="402" x2="288" y2="270" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- ===== 슬롯 번호 (가운데-오른쪽) ===== -->
+  <!-- slot 4092 (game_id 101 관련) -->
+  <rect x="504" y="80" width="120" height="40" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="564" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">slot 4092</text>
+
+  <rect x="504" y="136" width="120" height="40" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="564" y="161" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">slot 4092</text>
+
+  <rect x="504" y="192" width="120" height="40" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="564" y="217" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">slot 4092</text>
+
+  <!-- slot 9105 (order_id) -->
+  <rect x="504" y="264" width="120" height="40" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="564" y="289" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">slot 9105</text>
+
+  <!-- slot 7331 (game_id 202 관련) -->
+  <rect x="504" y="320" width="120" height="40" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="564" y="345" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">slot 7331</text>
+
+  <!-- 화살표: CRC16 → 슬롯 -->
+  <line x1="472" y1="228" x2="504" y2="100" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-violet)"/>
+  <line x1="472" y1="237" x2="504" y2="156" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-violet)"/>
+  <line x1="472" y1="248" x2="504" y2="212" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-violet)"/>
+  <line x1="472" y1="262" x2="504" y2="284" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-slate)"/>
+  <line x1="472" y1="272" x2="504" y2="340" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-slate)"/>
+
+  <!-- ===== 노드 샤드 (오른쪽) ===== -->
+  <!-- Node A: slot 0 ~ 5460 -->
+  <rect x="656" y="64" width="128" height="96" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="720" y="90" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Node A</text>
+  <text x="720" y="109" text-anchor="middle" font-size="11" fill="#27272A">slot 0 ~ 5460</text>
+  <text x="720" y="128" text-anchor="middle" font-size="10" fill="#27272A">↑ slot 4092 배치</text>
+  <text x="720" y="148" text-anchor="middle" font-size="10" fill="#047857">● seat:101, inv:101</text>
+
+  <!-- Node B: slot 5461 ~ 10922 -->
+  <rect x="656" y="184" width="128" height="96" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="720" y="210" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Node B</text>
+  <text x="720" y="229" text-anchor="middle" font-size="11" fill="#27272A">slot 5461 ~ 10922</text>
+  <text x="720" y="248" text-anchor="middle" font-size="10" fill="#27272A">↑ slot 9105, 7331</text>
+  <text x="720" y="268" text-anchor="middle" font-size="10" fill="#334155">● order:7823, seat:202</text>
+
+  <!-- Node C: slot 10923 ~ 16383 -->
+  <rect x="656" y="304" width="128" height="80" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="720" y="330" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Node C</text>
+  <text x="720" y="349" text-anchor="middle" font-size="11" fill="#27272A">slot 10923 ~ 16383</text>
+  <text x="720" y="369" text-anchor="middle" font-size="10" fill="#475569">(이 예시에서 비어있음)</text>
+
+  <!-- 화살표: 슬롯 → 노드 -->
+  <line x1="624" y1="100" x2="656" y2="112" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+  <line x1="624" y1="156" x2="656" y2="120" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+  <line x1="624" y1="212" x2="656" y2="128" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+  <line x1="624" y1="284" x2="656" y2="232" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+  <line x1="624" y1="340" x2="656" y2="248" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+  <!-- ===== 슬롯 범위 안내 박스 ===== -->
+  <rect x="40" y="456" width="720" height="48" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="400" y="476" text-anchor="middle" font-size="12" fill="#6D28D9">총 16384 슬롯 (0 ~ 16383) — 3 노드 기준 각 노드가 약 5461 슬롯 담당</text>
+  <text x="400" y="494" text-anchor="middle" font-size="11" fill="#27272A">seat:101 · inv:101 · hold:101 → 모두 같은 Node A   |   order:7823 · seat:202 → Node B (다른 슬롯)</text>
+
+  <!-- ===== 화살표 마커 정의 ===== -->
+  <defs>
+    <marker id="arrow-black" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-slate" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+  </defs>
+
+  <!-- 범례 -->
+  <rect x="40" y="416" width="340" height="32" rx="4" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1"/>
+  <rect x="52" y="426" width="12" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="70" y="436" font-size="11" fill="#27272A">티켓팅 엔티티 (game_id 101)</text>
+  <rect x="200" y="426" width="12" height="12" rx="2" fill="#F8FAFC" stroke="#475569" stroke-width="1"/>
+  <text x="218" y="436" font-size="11" fill="#27272A">기타 엔티티 (다른 슬롯)</text>
+</svg>

@@ -1,0 +1,234 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 680" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">Istio 멀티클러스터 토폴로지 3종 비교</title>
+  <desc id="desc-1">Multi-Primary, Primary-Remote, 독립 mesh 세 가지 토폴로지를 나란히 배치해 Control Plane 위치와 클러스터 간 연결 구조를 비교합니다</desc>
+
+  <style>
+    .label-title { font-size: 13px; font-weight: 700; fill: #0A0A0A; }
+    .label-sub   { font-size: 11px; fill: #27272A; }
+    .label-cp    { font-size: 11px; font-weight: 600; }
+    .label-note  { font-size: 10px; fill: #475569; }
+    .arrow-line  { stroke: #0A0A0A; stroke-width: 1.5; fill: none; }
+    .arrow-dash  { stroke: #7C3AED; stroke-width: 1.5; fill: none; stroke-dasharray: 5 3; }
+    .box-cp      { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 1.5; rx: 6; }
+    .box-cluster { fill: #FFFBEB; stroke: #D97706; stroke-width: 1.5; }
+    .box-dp      { fill: #ECFDF5; stroke: #059669; stroke-width: 1.2; }
+    .box-header  { fill: #F8FAFC; stroke: #D4D4D8; stroke-width: 1; }
+    .divider     { stroke: #D4D4D8; stroke-width: 1; stroke-dasharray: 3 2; }
+  </style>
+
+  <!-- 상단 제목 -->
+  <text x="400" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">Istio 멀티클러스터 토폴로지 3종</text>
+
+  <!-- 구분선 (세로) -->
+  <line x1="272" y1="50" x2="272" y2="650" class="divider"/>
+  <line x1="544" y1="50" x2="544" y2="650" class="divider"/>
+
+  <!-- ===== 컬럼 1: Multi-Primary ===== -->
+  <text x="136" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#7C3AED">① Multi-Primary</text>
+  <text x="136" y="80" text-anchor="middle" class="label-note">각 클러스터 독립 Control Plane</text>
+
+  <!-- Cluster A -->
+  <rect x="24" y="96" width="104" height="200" rx="8" class="box-cluster"/>
+  <text x="76" y="114" text-anchor="middle" class="label-title">Cluster A</text>
+  <rect x="36" y="120" width="80" height="36" rx="4" class="box-cp"/>
+  <text x="76" y="134" text-anchor="middle" class="label-cp" fill="#6D28D9">istiod</text>
+  <text x="76" y="148" text-anchor="middle" class="label-note">(Control Plane)</text>
+  <rect x="36" y="164" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="76" y="182" text-anchor="middle" class="label-sub" fill="#047857">Service A</text>
+  <rect x="36" y="198" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="76" y="216" text-anchor="middle" class="label-sub" fill="#047857">Service B</text>
+  <rect x="36" y="232" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="76" y="250" text-anchor="middle" class="label-sub" fill="#047857">Envoy Proxy</text>
+  <text x="76" y="274" text-anchor="middle" class="label-note">East-West GW</text>
+  <text x="76" y="288" text-anchor="middle" class="label-note">서비스 디스커버리 공유</text>
+
+  <!-- Cluster B -->
+  <rect x="144" y="96" width="104" height="200" rx="8" class="box-cluster"/>
+  <text x="196" y="114" text-anchor="middle" class="label-title">Cluster B</text>
+  <rect x="156" y="120" width="80" height="36" rx="4" class="box-cp"/>
+  <text x="196" y="134" text-anchor="middle" class="label-cp" fill="#6D28D9">istiod</text>
+  <text x="196" y="148" text-anchor="middle" class="label-note">(Control Plane)</text>
+  <rect x="156" y="164" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="196" y="182" text-anchor="middle" class="label-sub" fill="#047857">Service C</text>
+  <rect x="156" y="198" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="196" y="216" text-anchor="middle" class="label-sub" fill="#047857">Service D</text>
+  <rect x="156" y="232" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="196" y="250" text-anchor="middle" class="label-sub" fill="#047857">Envoy Proxy</text>
+  <text x="196" y="274" text-anchor="middle" class="label-note">East-West GW</text>
+  <text x="196" y="288" text-anchor="middle" class="label-note">서비스 디스커버리 공유</text>
+
+  <!-- 양방향 화살표: istiod 동기화 -->
+  <line x1="116" y1="138" x2="156" y2="138" class="arrow-dash"/>
+  <polygon points="152,134 160,138 152,142" fill="#7C3AED"/>
+  <polygon points="120,134 112,138 120,142" fill="#7C3AED"/>
+  <text x="136" y="128" text-anchor="middle" font-size="9" fill="#7C3AED">서비스 발견 동기화</text>
+
+  <!-- 화살표: cross-cluster 트래픽 -->
+  <path d="M116,220 Q136,230 156,220" class="arrow-line"/>
+  <polygon points="152,216 160,220 152,224" fill="#0A0A0A"/>
+  <text x="136" y="248" text-anchor="middle" font-size="9" fill="#059669">cross-cluster mTLS</text>
+
+  <!-- 특징 요약 박스 -->
+  <rect x="24" y="308" width="224" height="80" rx="6" class="box-header"/>
+  <text x="136" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#0A0A0A">특징</text>
+  <text x="36" y="344" font-size="10" fill="#27272A">- 각 CP가 독립. 단일 CP 장애 시</text>
+  <text x="36" y="358" font-size="10" fill="#27272A">  반대 클러스터는 정상 가동</text>
+  <text x="36" y="372" font-size="10" fill="#27272A">- East-West GW + 서비스 디스커버리</text>
+  <text x="36" y="386" font-size="10" fill="#27272A">  구성 필요 (추가 인프라)</text>
+
+  <!-- ===== 컬럼 2: Primary-Remote ===== -->
+  <text x="408" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#D97706">② Primary-Remote</text>
+  <text x="408" y="80" text-anchor="middle" class="label-note">단일 Control Plane이 양 클러스터 관리</text>
+
+  <!-- Primary Cluster -->
+  <rect x="288" y="96" width="104" height="200" rx="8" class="box-cluster"/>
+  <text x="340" y="114" text-anchor="middle" class="label-title">Primary</text>
+  <rect x="300" y="120" width="80" height="36" rx="4" class="box-cp"/>
+  <text x="340" y="134" text-anchor="middle" class="label-cp" fill="#6D28D9">istiod</text>
+  <text x="340" y="148" text-anchor="middle" class="label-note">(Control Plane)</text>
+  <rect x="300" y="164" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="340" y="182" text-anchor="middle" class="label-sub" fill="#047857">Service A</text>
+  <rect x="300" y="198" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="340" y="216" text-anchor="middle" class="label-sub" fill="#047857">Service B</text>
+  <rect x="300" y="232" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="340" y="250" text-anchor="middle" class="label-sub" fill="#047857">Envoy Proxy</text>
+
+  <!-- Remote Cluster -->
+  <rect x="408" y="96" width="104" height="200" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="460" y="114" text-anchor="middle" class="label-title">Remote</text>
+  <rect x="420" y="120" width="80" height="36" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="460" y="134" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">istiod 없음</text>
+  <text x="460" y="148" text-anchor="middle" class="label-note">(CP 원격 의존)</text>
+  <rect x="420" y="164" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="460" y="182" text-anchor="middle" class="label-sub" fill="#047857">Service C</text>
+  <rect x="420" y="198" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="460" y="216" text-anchor="middle" class="label-sub" fill="#047857">Service D</text>
+  <rect x="420" y="232" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="460" y="250" text-anchor="middle" class="label-sub" fill="#047857">Envoy Proxy</text>
+
+  <!-- istiod → Remote 관리 화살표 -->
+  <line x1="380" y1="138" x2="420" y2="138" class="arrow-dash"/>
+  <polygon points="416,134 424,138 416,142" fill="#7C3AED"/>
+  <text x="400" y="128" text-anchor="middle" font-size="9" fill="#7C3AED">xDS 설정 전달</text>
+
+  <!-- latency 경고 -->
+  <rect x="288" y="308" width="224" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="400" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#BE123C">위험 포인트</text>
+  <text x="300" y="344" font-size="10" fill="#27272A">- Primary istiod 장애 = 양 클러스터</text>
+  <text x="300" y="358" font-size="10" fill="#27272A">  설정 동기화 중단</text>
+  <text x="300" y="372" font-size="10" fill="#27272A">- cross-cloud latency가 xDS 전달</text>
+  <text x="300" y="386" font-size="10" fill="#27272A">  안정성에 직접 영향</text>
+
+  <!-- ===== 컬럼 3: 독립 mesh ===== -->
+  <text x="672" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#059669">③ 독립 mesh</text>
+  <text x="672" y="80" text-anchor="middle" class="label-note">클러스터별 완전 분리</text>
+
+  <!-- Cloud 1 -->
+  <rect x="560" y="96" width="104" height="200" rx="8" class="box-cluster"/>
+  <text x="612" y="114" text-anchor="middle" class="label-title">AWS EKS</text>
+  <rect x="572" y="120" width="80" height="36" rx="4" class="box-cp"/>
+  <text x="612" y="134" text-anchor="middle" class="label-cp" fill="#6D28D9">istiod</text>
+  <text x="612" y="148" text-anchor="middle" class="label-note">(독립)</text>
+  <rect x="572" y="164" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="612" y="182" text-anchor="middle" class="label-sub" fill="#047857">Service A</text>
+  <rect x="572" y="198" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="612" y="216" text-anchor="middle" class="label-sub" fill="#047857">Service B</text>
+  <rect x="572" y="232" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="612" y="250" text-anchor="middle" class="label-sub" fill="#047857">Envoy Proxy</text>
+
+  <!-- Cloud 2 -->
+  <rect x="680" y="96" width="104" height="200" rx="8" class="box-cluster"/>
+  <text x="732" y="114" text-anchor="middle" class="label-title">GCP GKE</text>
+  <rect x="692" y="120" width="80" height="36" rx="4" class="box-cp"/>
+  <text x="732" y="134" text-anchor="middle" class="label-cp" fill="#6D28D9">istiod</text>
+  <text x="732" y="148" text-anchor="middle" class="label-note">(독립)</text>
+  <rect x="692" y="164" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="732" y="182" text-anchor="middle" class="label-sub" fill="#047857">Service C</text>
+  <rect x="692" y="198" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="732" y="216" text-anchor="middle" class="label-sub" fill="#047857">Service D</text>
+  <rect x="692" y="232" width="80" height="28" rx="4" class="box-dp"/>
+  <text x="732" y="250" text-anchor="middle" class="label-sub" fill="#047857">Envoy Proxy</text>
+
+  <!-- 분리선 (cross-cluster 트래픽 없음) -->
+  <line x1="680" y1="196" x2="784" y2="196" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="2 2"/>
+  <line x1="560" y1="196" x2="680" y2="196" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="2 2"/>
+  <text x="672" y="272" text-anchor="middle" font-size="9" fill="#475569">mesh 간 직접 통신 없음</text>
+  <text x="672" y="284" text-anchor="middle" font-size="9" fill="#475569">엣지 계층(CF Worker)이 라우팅</text>
+
+  <!-- 특징 요약 박스 -->
+  <rect x="560" y="308" width="224" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="672" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">강점</text>
+  <text x="572" y="344" font-size="10" fill="#27272A">- blast radius 완전 격리</text>
+  <text x="572" y="358" font-size="10" fill="#27272A">  (한 CP 장애 = 해당 클러스터만)</text>
+  <text x="572" y="372" font-size="10" fill="#27272A">- 추가 인프라 불필요</text>
+  <text x="572" y="386" font-size="10" fill="#27272A">- 각 CSP 네이티브 네트워크 활용</text>
+
+  <!-- 하단 비교 테이블 -->
+  <rect x="24" y="408" width="752" height="230" rx="8" class="box-header"/>
+  <text x="400" y="430" text-anchor="middle" font-size="12" font-weight="700" fill="#0A0A0A">세 토폴로지 핵심 비교</text>
+
+  <!-- 테이블 헤더 -->
+  <rect x="32" y="440" width="736" height="24" rx="4" fill="#F5F3FF"/>
+  <text x="120" y="457" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">항목</text>
+  <text x="300" y="457" text-anchor="middle" font-size="11" font-weight="700" fill="#7C3AED">① Multi-Primary</text>
+  <text x="490" y="457" text-anchor="middle" font-size="11" font-weight="700" fill="#D97706">② Primary-Remote</text>
+  <text x="680" y="457" text-anchor="middle" font-size="11" font-weight="700" fill="#059669">③ 독립 mesh</text>
+
+  <!-- 행 1 -->
+  <line x1="32" y1="464" x2="768" y2="464" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="120" y="478" text-anchor="middle" font-size="10" fill="#27272A">CP 수</text>
+  <text x="300" y="478" text-anchor="middle" font-size="10" fill="#27272A">클러스터 수만큼</text>
+  <text x="490" y="478" text-anchor="middle" font-size="10" fill="#27272A">1개 (Primary에만)</text>
+  <text x="680" y="478" text-anchor="middle" font-size="10" fill="#27272A">클러스터 수만큼 (독립)</text>
+
+  <!-- 행 2 -->
+  <line x1="32" y1="486" x2="768" y2="486" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="120" y="500" text-anchor="middle" font-size="10" fill="#27272A">cross-cluster 디스커버리</text>
+  <text x="300" y="500" text-anchor="middle" font-size="10" fill="#27272A">있음 (East-West GW)</text>
+  <text x="490" y="500" text-anchor="middle" font-size="10" fill="#27272A">있음 (xDS 공유)</text>
+  <text x="680" y="500" text-anchor="middle" font-size="10" fill="#27272A">없음 (엣지에서 분배)</text>
+
+  <!-- 행 3 -->
+  <line x1="32" y1="508" x2="768" y2="508" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="120" y="522" text-anchor="middle" font-size="10" fill="#27272A">CP 장애 blast radius</text>
+  <text x="300" y="522" text-anchor="middle" font-size="10" fill="#27272A">해당 클러스터만</text>
+  <text x="490" y="522" text-anchor="middle" font-size="10" fill="#BE123C">전체 클러스터</text>
+  <text x="680" y="522" text-anchor="middle" font-size="10" fill="#047857">해당 클러스터만</text>
+
+  <!-- 행 4 -->
+  <line x1="32" y1="530" x2="768" y2="530" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="120" y="544" text-anchor="middle" font-size="10" fill="#27272A">cross-cloud latency 영향</text>
+  <text x="300" y="544" text-anchor="middle" font-size="10" fill="#27272A">디스커버리에만 영향</text>
+  <text x="490" y="544" text-anchor="middle" font-size="10" fill="#BE123C">xDS 동기화에 직접 영향</text>
+  <text x="680" y="544" text-anchor="middle" font-size="10" fill="#047857">없음</text>
+
+  <!-- 행 5 -->
+  <line x1="32" y1="552" x2="768" y2="552" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="120" y="566" text-anchor="middle" font-size="10" fill="#27272A">추가 인프라</text>
+  <text x="300" y="566" text-anchor="middle" font-size="10" fill="#27272A">East-West GW 필요</text>
+  <text x="490" y="566" text-anchor="middle" font-size="10" fill="#27272A">없음</text>
+  <text x="680" y="566" text-anchor="middle" font-size="10" fill="#047857">없음</text>
+
+  <!-- 행 6 -->
+  <line x1="32" y1="574" x2="768" y2="574" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="120" y="590" text-anchor="middle" font-size="10" fill="#27272A">운영 복잡도</text>
+  <text x="300" y="590" text-anchor="middle" font-size="10" fill="#27272A">높음</text>
+  <text x="490" y="590" text-anchor="middle" font-size="10" fill="#27272A">중간</text>
+  <text x="680" y="590" text-anchor="middle" font-size="10" fill="#047857">낮음</text>
+
+  <!-- 세로 구분선 -->
+  <line x1="210" y1="440" x2="210" y2="622" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="400" y1="440" x2="400" y2="622" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="590" y1="440" x2="590" y2="622" stroke="#E4E4E7" stroke-width="1"/>
+
+  <!-- 범례 -->
+  <rect x="24" y="642" width="752" height="28" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <rect x="36" y="651" width="12" height="12" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="54" y="661" font-size="10" fill="#27272A">Control Plane (istiod)</text>
+  <rect x="180" y="651" width="12" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="198" y="661" font-size="10" fill="#27272A">Data Plane (서비스 / Envoy)</text>
+  <rect x="380" y="651" width="12" height="12" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="398" y="661" font-size="10" fill="#27272A">클러스터 경계</text>
+  <line x1="520" y1="657" x2="545" y2="657" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="552" y="661" font-size="10" fill="#27272A">설정 동기화 (xDS)</text>
+</svg>

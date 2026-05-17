@@ -1,0 +1,112 @@
+<svg
+  role="img"
+  aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 560"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-1">인덱싱 방식 비교 — ELK full-text 인덱스 vs Loki 레이블 인덱스</title>
+  <desc id="desc-1">ELK는 로그 원본을 토크나이즈해 역 인덱스를 생성하므로 인덱스 크기가 원본과 비슷하고, Loki는 레이블 메타데이터만 인덱싱하고 원본 로그는 압축 청크로 저장해 인덱스가 매우 작다는 구조를 비교한 Before/After 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">인덱싱 방식 비교</text>
+
+  <!-- ── ELK 영역 (왼쪽) ── -->
+  <rect x="32" y="56" width="352" height="464" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="208" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">ELK (Elasticsearch)</text>
+  <text x="208" y="98" text-anchor="middle" font-size="11" fill="#BE123C">full-text 인덱싱</text>
+
+  <!-- 로그 원본 박스 -->
+  <rect x="56" y="112" width="304" height="64" rx="6" fill="#FFF" stroke="#E11D48" stroke-width="1"/>
+  <text x="208" y="132" text-anchor="middle" font-size="12" font-weight="600" fill="#0A0A0A">로그 원본</text>
+  <text x="208" y="150" text-anchor="middle" font-size="11" fill="#27272A">"2026-03-27 ERROR payment timeout"</text>
+  <text x="208" y="165" text-anchor="middle" font-size="10" fill="#475569">원본 그대로 저장</text>
+
+  <!-- 화살표: 토크나이즈 -->
+  <line x1="208" y1="176" x2="208" y2="206" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <rect x="148" y="182" width="120" height="20" fill="#FFF1F2"/>
+  <text x="208" y="195" text-anchor="middle" font-size="10" fill="#BE123C">토크나이즈 (분석)</text>
+
+  <!-- 역 인덱스 박스 -->
+  <rect x="56" y="208" width="304" height="108" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="208" y="226" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">역 인덱스 (Inverted Index)</text>
+  <text x="72" y="248" font-size="11" fill="#27272A">"ERROR"  →  [doc1, doc3, doc7, ...]</text>
+  <text x="72" y="266" font-size="11" fill="#27272A">"timeout"  →  [doc1, doc5, doc9, ...]</text>
+  <text x="72" y="284" font-size="11" fill="#27272A">"payment"  →  [doc1, doc2, doc6, ...]</text>
+  <text x="72" y="302" font-size="11" fill="#27272A">"2026-03-27"  →  [doc1, doc4, ...]</text>
+
+  <!-- 크기 경고 -->
+  <rect x="56" y="328" width="304" height="48" rx="6" fill="#FFF" stroke="#E11D48" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="208" y="349" text-anchor="middle" font-size="12" font-weight="600" fill="#BE123C">인덱스 크기 ≈ 원본 크기</text>
+  <text x="208" y="367" text-anchor="middle" font-size="11" fill="#27272A">모든 단어가 인덱스 엔트리를 생성</text>
+
+  <!-- JVM + 메모리 표시 -->
+  <rect x="56" y="388" width="304" height="48" rx="6" fill="#FFF" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="208" y="409" text-anchor="middle" font-size="11" fill="#27272A">JVM 기반 — 힙 메모리 수 GB 필요</text>
+  <text x="208" y="427" text-anchor="middle" font-size="11" fill="#27272A">노드 3개 최소 구성 권장</text>
+
+  <!-- 쿼리 언어 -->
+  <rect x="56" y="448" width="304" height="40" rx="6" fill="#FFF" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="208" y="472" text-anchor="middle" font-size="11" fill="#27272A">쿼리: KQL / Lucene (별도 학습 필요)</text>
+
+  <!-- ── Loki 영역 (오른쪽) ── -->
+  <rect x="416" y="56" width="352" height="464" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="592" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">Loki (Grafana)</text>
+  <text x="592" y="98" text-anchor="middle" font-size="11" fill="#047857">레이블 인덱싱 (스트림 기반)</text>
+
+  <!-- 로그 + 레이블 박스 -->
+  <rect x="440" y="112" width="304" height="64" rx="6" fill="#FFF" stroke="#059669" stroke-width="1"/>
+  <text x="592" y="132" text-anchor="middle" font-size="12" font-weight="600" fill="#0A0A0A">로그 라인 + 레이블</text>
+  <text x="592" y="150" text-anchor="middle" font-size="11" fill="#27272A">"2026-03-27 ERROR payment timeout"</text>
+  <text x="592" y="165" text-anchor="middle" font-size="10" fill="#047857">레이블: {app="payment", level="error"}</text>
+
+  <!-- 화살표: 레이블 추출 / 압축 -->
+  <line x1="536" y1="176" x2="506" y2="206" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <line x1="648" y1="176" x2="678" y2="206" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <text x="456" y="195" text-anchor="middle" font-size="10" fill="#047857">레이블만</text>
+  <text x="728" y="195" text-anchor="middle" font-size="10" fill="#047857">원문 압축</text>
+
+  <!-- 인덱스 박스 (작음) -->
+  <rect x="440" y="208" width="136" height="108" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="508" y="226" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">레이블 인덱스</text>
+  <text x="508" y="244" text-anchor="middle" font-size="10" fill="#27272A">{app, level}</text>
+  <text x="508" y="260" text-anchor="middle" font-size="10" fill="#27272A">→ 청크 위치</text>
+  <text x="508" y="280" text-anchor="middle" font-size="10" fill="#27272A">메타데이터만</text>
+  <text x="508" y="296" text-anchor="middle" font-size="10" fill="#27272A">저장 (매우 작음)</text>
+  <text x="508" y="312" text-anchor="middle" font-size="10" fill="#047857">인덱스 << 원본</text>
+
+  <!-- 압축 청크 박스 -->
+  <rect x="592" y="208" width="152" height="108" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="668" y="226" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">압축 청크</text>
+  <text x="668" y="244" text-anchor="middle" font-size="10" fill="#27272A">원본 로그 라인</text>
+  <text x="668" y="260" text-anchor="middle" font-size="10" fill="#27272A">gzip / snappy</text>
+  <text x="668" y="276" text-anchor="middle" font-size="10" fill="#27272A">원본 대비 ~10배</text>
+  <text x="668" y="292" text-anchor="middle" font-size="10" fill="#27272A">압축률</text>
+  <text x="668" y="312" text-anchor="middle" font-size="10" fill="#047857">Object Storage</text>
+
+  <!-- 크기 비교 강조 -->
+  <rect x="440" y="328" width="304" height="48" rx="6" fill="#FFF" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="592" y="349" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">인덱스 크기 &lt;&lt; 원본 크기</text>
+  <text x="592" y="367" text-anchor="middle" font-size="11" fill="#27272A">레이블 조합 수만큼만 인덱스 엔트리 생성</text>
+
+  <!-- Go 기반 + 리소스 -->
+  <rect x="440" y="388" width="304" height="48" rx="6" fill="#FFF" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="592" y="409" text-anchor="middle" font-size="11" fill="#27272A">Go 기반 — 메모리 사용량 낮음</text>
+  <text x="592" y="427" text-anchor="middle" font-size="11" fill="#27272A">단일 인스턴스(단독/모놀리식) 시작 가능</text>
+
+  <!-- 쿼리 언어 -->
+  <rect x="440" y="448" width="304" height="40" rx="6" fill="#FFF" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="592" y="472" text-anchor="middle" font-size="11" fill="#27272A">쿼리: LogQL (PromQL과 유사 문법)</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>

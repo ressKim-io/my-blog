@@ -1,0 +1,93 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 420"
+  width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-2">PgBouncer pool_mode 3종 연결 점유 구간 타임라인</title>
+  <desc id="desc-2">session / transaction / statement 세 가지 pool_mode에서 클라이언트가 실제 DB 연결을 점유하는 구간을 시간축으로 비교한 타임라인 다이어그램</desc>
+
+  <!-- Background -->
+  <rect width="800" height="420" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="14" font-weight="600" fill="#0A0A0A">타임라인 — pool_mode별 DB 연결 점유 구간</text>
+
+  <!-- Time axis -->
+  <line x1="120" y1="55" x2="776" y2="55" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="120" y="50" text-anchor="middle" font-size="11" fill="#27272A">0</text>
+  <text x="248" y="50" text-anchor="middle" font-size="11" fill="#27272A">BEGIN</text>
+  <text x="376" y="50" text-anchor="middle" font-size="11" fill="#27272A">쿼리1</text>
+  <text x="504" y="50" text-anchor="middle" font-size="11" fill="#27272A">쿼리2</text>
+  <text x="632" y="50" text-anchor="middle" font-size="11" fill="#27272A">COMMIT</text>
+  <text x="760" y="50" text-anchor="middle" font-size="11" fill="#27272A">idle</text>
+  <!-- tick marks -->
+  <line x1="248" y1="52" x2="248" y2="60" stroke="#D4D4D8" stroke-width="1"/>
+  <line x1="376" y1="52" x2="376" y2="60" stroke="#D4D4D8" stroke-width="1"/>
+  <line x1="504" y1="52" x2="504" y2="60" stroke="#D4D4D8" stroke-width="1"/>
+  <line x1="632" y1="52" x2="632" y2="60" stroke="#D4D4D8" stroke-width="1"/>
+  <line x1="760" y1="52" x2="760" y2="60" stroke="#D4D4D8" stroke-width="1"/>
+
+  <!-- ======= session mode ======= -->
+  <!-- Row label -->
+  <text x="108" y="120" text-anchor="end" font-size="13" font-weight="600" fill="#047857">session</text>
+  <text x="108" y="136" text-anchor="end" font-size="11" fill="#27272A">클라이언트 연결</text>
+  <!-- Client connection bar (full width, green) -->
+  <rect x="120" y="104" width="648" height="24" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="444" y="121" text-anchor="middle" font-size="12" fill="#047857">클라이언트 접속 ~ 종료 내내 DB 연결 점유</text>
+
+  <!-- "DB 연결 점유" label -->
+  <text x="108" y="160" text-anchor="end" font-size="11" fill="#27272A">DB 연결 점유</text>
+  <rect x="120" y="144" width="648" height="20" rx="3" fill="#7C3AED" opacity="0.2" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="444" y="159" text-anchor="middle" font-size="11" fill="#6D28D9">점유</text>
+
+  <!-- annotation -->
+  <text x="776" y="121" text-anchor="start" font-size="11" fill="#27272A"></text>
+  <text x="120" y="178" font-size="11" fill="#475569">※ idle 상태에도 DB 연결 유지 → 다중화 효과 없음</text>
+
+  <!-- ======= transaction mode ======= -->
+  <text x="108" y="240" text-anchor="end" font-size="13" font-weight="600" fill="#D97706">transaction</text>
+  <text x="108" y="256" text-anchor="end" font-size="11" fill="#27272A">클라이언트 연결</text>
+  <!-- Client bar (full) -->
+  <rect x="120" y="224" width="648" height="24" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="444" y="241" text-anchor="middle" font-size="12" fill="#B45309">클라이언트 접속 유지</text>
+
+  <!-- DB connection hold: BEGIN ~ COMMIT only -->
+  <text x="108" y="280" text-anchor="end" font-size="11" fill="#27272A">DB 연결 점유</text>
+  <!-- idle before BEGIN -->
+  <rect x="120" y="264" width="128" height="20" rx="3" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="184" y="279" text-anchor="middle" font-size="11" fill="#27272A">반환됨</text>
+  <!-- hold BEGIN ~ COMMIT -->
+  <rect x="248" y="264" width="384" height="20" rx="3" fill="#7C3AED" opacity="0.2" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="440" y="279" text-anchor="middle" font-size="11" fill="#6D28D9">트랜잭션 동안만 점유</text>
+  <!-- release after COMMIT -->
+  <rect x="632" y="264" width="136" height="20" rx="3" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="700" y="279" text-anchor="middle" font-size="11" fill="#27272A">반환됨</text>
+
+  <text x="120" y="298" font-size="11" fill="#475569">※ COMMIT 즉시 반환 → 다른 클라이언트가 재사용 가능 (권장 모드)</text>
+
+  <!-- ======= statement mode ======= -->
+  <text x="108" y="360" text-anchor="end" font-size="13" font-weight="600" fill="#E11D48">statement</text>
+  <text x="108" y="376" text-anchor="end" font-size="11" fill="#27272A">클라이언트 연결</text>
+  <rect x="120" y="344" width="648" height="24" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="444" y="361" text-anchor="middle" font-size="12" fill="#BE123C">클라이언트 접속 유지</text>
+
+  <text x="108" y="400" text-anchor="end" font-size="11" fill="#27272A">DB 연결 점유</text>
+  <!-- idle before query1 -->
+  <rect x="120" y="384" width="256" height="20" rx="3" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="248" y="399" text-anchor="middle" font-size="11" fill="#27272A">반환됨</text>
+  <!-- hold query1 only -->
+  <rect x="376" y="384" width="64" height="20" rx="3" fill="#E11D48" opacity="0.2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="408" y="399" text-anchor="middle" font-size="10" fill="#BE123C">쿼리1</text>
+  <!-- release between queries -->
+  <rect x="440" y="384" width="64" height="20" rx="3" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="472" y="399" text-anchor="middle" font-size="10" fill="#27272A">반환</text>
+  <!-- hold query2 -->
+  <rect x="504" y="384" width="64" height="20" rx="3" fill="#E11D48" opacity="0.2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="536" y="399" text-anchor="middle" font-size="10" fill="#BE123C">쿼리2</text>
+  <!-- release after -->
+  <rect x="568" y="384" width="200" height="20" rx="3" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="668" y="399" text-anchor="middle" font-size="11" fill="#27272A">반환됨</text>
+
+  <text x="120" y="416" font-size="11" fill="#BE123C">※ 쿼리마다 반환 → 트랜잭션 불가, 사실상 운영 사용 없음</text>
+</svg>

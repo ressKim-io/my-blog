@@ -1,0 +1,102 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 480" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+
+  <title id="title-1">pglogical replication set 3종 분류 구조</title>
+  <desc id="desc-1">publisher 측 테이블 그룹이 default, insert_only, ddl_sql 세 가지 replication set으로 나뉘어 subscriber로 복제되는 구조. default는 INSERT·UPDATE·DELETE 전부, insert_only는 INSERT만, ddl_sql은 DDL 큐를 담당합니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">구조도 — pglogical replication set 3종</text>
+
+  <!-- ── Publisher 컨테이너 ── -->
+  <rect x="40" y="60" width="330" height="370" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="205" y="84" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Publisher (GCE VM · PostgreSQL 16)</text>
+
+  <!-- default set 박스 -->
+  <rect x="64" y="100" width="280" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="204" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">default set</text>
+  <text x="204" y="142" text-anchor="middle" font-size="11" fill="#047857">서비스 스키마 테이블 전체</text>
+  <text x="204" y="157" text-anchor="middle" font-size="11" fill="#27272A">INSERT · UPDATE · DELETE 복제</text>
+
+  <!-- insert_only set 박스 -->
+  <rect x="64" y="200" width="280" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="204" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">insert_only set</text>
+  <text x="204" y="242" text-anchor="middle" font-size="11" fill="#047857">append-only 성격 테이블</text>
+  <text x="204" y="257" text-anchor="middle" font-size="11" fill="#27272A">INSERT만 복제 (UPDATE·DELETE 무시)</text>
+
+  <!-- ddl_sql set 박스 -->
+  <rect x="64" y="300" width="280" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="204" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">ddl_sql set</text>
+  <text x="204" y="342" text-anchor="middle" font-size="11" fill="#6D28D9">pglogical 내부 DDL 큐</text>
+  <text x="204" y="357" text-anchor="middle" font-size="11" fill="#27272A">replicate_ddl_command() 경유 DDL</text>
+
+  <!-- 시퀀스 뱃지 (default set 하단) -->
+  <rect x="120" y="393" width="170" height="26" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="205" y="411" text-anchor="middle" font-size="11" font-weight="600" fill="#6D28D9">+ 시퀀스: add_all_sequences()</text>
+
+  <!-- ── 화살표 (publisher → subscriber) ── -->
+  <!-- default -->
+  <line x1="344" y1="140" x2="456" y2="140" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <!-- insert_only -->
+  <line x1="344" y1="240" x2="456" y2="240" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <!-- ddl_sql -->
+  <line x1="344" y1="340" x2="456" y2="340" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+
+  <!-- 화살표 라벨 -->
+  <rect x="354" y="126" width="92" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="400" y="139" text-anchor="middle" font-size="10" fill="#047857">DML 스트림</text>
+  <rect x="354" y="226" width="92" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="400" y="239" text-anchor="middle" font-size="10" fill="#047857">INSERT 전용</text>
+  <rect x="354" y="326" width="92" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="400" y="339" text-anchor="middle" font-size="10" fill="#6D28D9">DDL 큐</text>
+
+  <!-- ── Subscriber 컨테이너 ── -->
+  <rect x="456" y="60" width="300" height="370" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="606" y="84" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Subscriber (AWS RDS · PostgreSQL 16)</text>
+
+  <!-- default 수신 박스 -->
+  <rect x="476" y="100" width="260" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="606" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">default set 적용</text>
+  <text x="606" y="142" text-anchor="middle" font-size="11" fill="#047857">동일 스키마 행 재실행</text>
+  <text x="606" y="157" text-anchor="middle" font-size="11" fill="#27272A">read_only=on → 앱 직접 쓰기 차단</text>
+
+  <!-- insert_only 수신 박스 -->
+  <rect x="476" y="200" width="260" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="606" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">insert_only set 적용</text>
+  <text x="606" y="242" text-anchor="middle" font-size="11" fill="#047857">append-only 테이블 동기</text>
+  <text x="606" y="257" text-anchor="middle" font-size="11" fill="#27272A">로컬 DELETE 발생해도 무관</text>
+
+  <!-- ddl_sql 수신 박스 -->
+  <rect x="476" y="300" width="260" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="606" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">DDL 적용</text>
+  <text x="606" y="342" text-anchor="middle" font-size="11" fill="#6D28D9">스키마 변경 동기화</text>
+  <text x="606" y="357" text-anchor="middle" font-size="11" fill="#27272A">replicate_ddl_command() 경유만</text>
+
+  <!-- 시퀀스 setval 뱃지 -->
+  <rect x="520" y="393" width="172" height="26" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="606" y="411" text-anchor="middle" font-size="11" font-weight="600" fill="#6D28D9">setval() — last-value 기준</text>
+
+  <!-- ── 화살표 마커 정의 ── -->
+  <defs>
+    <marker id="arr-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+    <marker id="arr-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#7C3AED"/>
+    </marker>
+  </defs>
+
+  <!-- ── 범례 ── -->
+  <rect x="40" y="446" width="720" height="24" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <rect x="56" y="454" width="12" height="8" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="74" y="463" font-size="11" fill="#334155">DML 복제 (default / insert_only)</text>
+  <rect x="260" y="454" width="12" height="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="278" y="463" font-size="11" fill="#334155">DDL 복제 (ddl_sql)</text>
+  <rect x="430" y="454" width="12" height="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="448" y="463" font-size="11" fill="#334155">시퀀스 복제 (last-value 전파)</text>
+
+</svg>

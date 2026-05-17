@@ -1,0 +1,114 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 540" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-1">관측 파이프라인 시그널별 경로 분기도</title>
+  <desc id="desc-1">메트릭은 Alloy에서 Mimir로 직접 remote_write하고, 로그와 트레이스는 Kafka 토픽을 거쳐 각각 Loki와 Tempo로 전달되는 파이프라인 구조</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .label { font-size: 13px; fill: #0A0A0A; }
+    .sublabel { font-size: 11px; fill: #27272A; }
+    .arrow-label { font-size: 11px; fill: #27272A; }
+  </style>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0A0A0A" />
+    </marker>
+    <marker id="arrowhead-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669" />
+    </marker>
+    <marker id="arrowhead-violet" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#7C3AED" />
+    </marker>
+    <marker id="arrowhead-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#D97706" />
+    </marker>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="800" height="540" fill="#FAFAFA" />
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15px" font-weight="600" fill="#0A0A0A">시그널별 파이프라인 경로 분기</text>
+
+  <!-- 앱 박스 -->
+  <rect x="304" y="60" width="192" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" />
+  <text x="400" y="88" text-anchor="middle" class="label" font-weight="600">Application</text>
+  <text x="400" y="108" text-anchor="middle" class="sublabel">OTel SDK 계측</text>
+
+  <!-- 앱 → Collector 화살표 -->
+  <line x1="400" y1="124" x2="400" y2="156" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrowhead)" />
+  <rect x="326" y="132" width="148" height="16" fill="#FAFAFA" />
+  <text x="400" y="144" text-anchor="middle" class="arrow-label">OTLP gRPC (4317)</text>
+
+  <!-- Collector / Alloy 박스 -->
+  <rect x="272" y="160" width="256" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" />
+  <text x="400" y="188" text-anchor="middle" class="label" font-weight="600">OTel Collector (Front)</text>
+  <text x="400" y="208" text-anchor="middle" class="sublabel">수집 · 라우팅 · tail sampling</text>
+
+  <!-- Collector에서 세 방향 분기선 -->
+  <!-- 메트릭 → 왼쪽 아래 -->
+  <line x1="292" y1="224" x2="160" y2="280" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowhead-green)" />
+  <!-- 로그 → 가운데 아래 -->
+  <line x1="400" y1="224" x2="400" y2="280" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrowhead-violet)" />
+  <!-- 트레이스 → 오른쪽 아래 -->
+  <line x1="508" y1="224" x2="640" y2="280" stroke="#D97706" stroke-width="1.5" marker-end="url(#arrowhead-amber)" />
+
+  <!-- 분기 라벨 -->
+  <rect x="72" y="244" width="80" height="16" fill="#FAFAFA" />
+  <text x="112" y="256" text-anchor="middle" class="arrow-label" fill="#059669">metrics</text>
+
+  <rect x="354" y="244" width="92" height="16" fill="#FAFAFA" />
+  <text x="400" y="256" text-anchor="middle" class="arrow-label" fill="#7C3AED">logs</text>
+
+  <rect x="596" y="244" width="88" height="16" fill="#FAFAFA" />
+  <text x="640" y="256" text-anchor="middle" class="arrow-label" fill="#D97706">traces</text>
+
+  <!-- 메트릭 직접 경로 — Mimir -->
+  <rect x="64" y="284" width="192" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" />
+  <text x="160" y="312" text-anchor="middle" class="label" font-weight="600">Mimir</text>
+  <text x="160" y="332" text-anchor="middle" class="sublabel">remote_write (직접)</text>
+
+  <!-- Kafka 박스 — 로그+트레이스 -->
+  <rect x="296" y="284" width="208" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" />
+  <text x="400" y="308" text-anchor="middle" class="label" font-weight="600">Kafka</text>
+  <text x="400" y="326" text-anchor="middle" class="sublabel">otlp_logs · otlp_spans</text>
+
+  <!-- 트레이스 직접선 → Kafka -->
+  <!-- 이미 위에서 그어짐 -->
+
+  <!-- Kafka → OTel Collector Back 화살표 -->
+  <line x1="400" y1="348" x2="400" y2="392" stroke="#0A0A0A" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrowhead)" />
+  <rect x="308" y="360" width="184" height="16" fill="#FAFAFA" />
+  <text x="400" y="372" text-anchor="middle" class="arrow-label">Kafka consumer (소비)</text>
+
+  <!-- OTel Collector Back -->
+  <rect x="272" y="396" width="256" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" />
+  <text x="400" y="424" text-anchor="middle" class="label" font-weight="600">OTel Collector (Back)</text>
+  <text x="400" y="444" text-anchor="middle" class="sublabel">batch export → Loki / Tempo</text>
+
+  <!-- Back → Loki -->
+  <line x1="348" y1="460" x2="200" y2="496" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrowhead-violet)" />
+  <!-- Back → Tempo -->
+  <line x1="452" y1="460" x2="600" y2="496" stroke="#D97706" stroke-width="1.5" marker-end="url(#arrowhead-amber)" />
+
+  <!-- Loki 박스 -->
+  <rect x="96" y="500" width="208" height="24" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" />
+  <text x="200" y="517" text-anchor="middle" class="sublabel" font-weight="600" fill="#6D28D9">Loki (로그 백엔드)</text>
+
+  <!-- Tempo 박스 -->
+  <rect x="496" y="500" width="208" height="24" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" />
+  <text x="600" y="517" text-anchor="middle" class="sublabel" font-weight="600" fill="#B45309">Tempo (트레이스 백엔드)</text>
+
+  <!-- 직접 전송 강조 박스 -->
+  <rect x="24" y="380" width="192" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1" stroke-dasharray="5 3" />
+  <text x="120" y="400" text-anchor="middle" class="sublabel" fill="#047857">직접 전송</text>
+  <text x="120" y="418" text-anchor="middle" class="sublabel" fill="#047857">지연 허용 불가</text>
+  <text x="120" y="434" text-anchor="middle" class="sublabel" fill="#047857">(알림 30초 이내)</text>
+
+  <!-- Kafka 버퍼 강조 박스 -->
+  <rect x="520" y="380" width="256" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1" stroke-dasharray="5 3" />
+  <text x="648" y="400" text-anchor="middle" class="sublabel" fill="#6D28D9">Kafka 버퍼 경유</text>
+  <text x="648" y="418" text-anchor="middle" class="sublabel" fill="#6D28D9">버스트 흡수·OOM 방지</text>
+  <text x="648" y="434" text-anchor="middle" class="sublabel" fill="#6D28D9">(지연 수십초~분 허용)</text>
+</svg>

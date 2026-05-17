@@ -1,0 +1,102 @@
+<svg role="img" aria-labelledby="title-rel1 desc-rel1"
+  viewBox="0 0 800 500" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-rel1">수동 복구 vs Patroni 자동 failover — RTO 비교</title>
+  <desc id="desc-rel1">VM 단일 장애 시 수동 promote의 RTO 30분+와 Patroni + etcd 자동 failover의 RTO 수십 초를 비교하는 다이어그램. 왼쪽은 수동 복구, 오른쪽은 자동 failover 흐름을 보여줍니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="500" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" font-size="15" font-weight="700" fill="#0A0A0A" text-anchor="middle">수동 복구 vs Patroni 자동 failover — RTO 비교</text>
+
+  <!-- 구분선 -->
+  <line x1="400" y1="52" x2="400" y2="478" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 3"/>
+
+  <!-- ===== 왼쪽: 수동 복구 ===== -->
+  <text x="200" y="72" font-size="13" font-weight="700" fill="#BE123C" text-anchor="middle">수동 복구 (Patroni 없음)</text>
+  <text x="200" y="88" font-size="11" fill="#334155" text-anchor="middle">RTO 30분 이상</text>
+
+  <!-- VM 장애 박스 -->
+  <rect x="112" y="104" width="176" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="124" font-size="13" font-weight="600" fill="#BE123C" text-anchor="middle">GCE VM 장애</text>
+  <text x="200" y="141" font-size="11" fill="#BE123C" text-anchor="middle">Primary Postgres 다운</text>
+
+  <!-- 화살표 -->
+  <line x1="200" y1="152" x2="200" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="208" y="167" font-size="10" fill="#27272A">알림 수신</text>
+
+  <!-- 운영자 박스 -->
+  <rect x="112" y="176" width="176" height="48" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="200" y="196" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">운영자 대응</text>
+  <text x="200" y="213" font-size="11" fill="#334155" text-anchor="middle">PagerDuty → Slack → SSH</text>
+
+  <!-- 화살표 -->
+  <line x1="200" y1="224" x2="200" y2="246" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 수동 promote 박스 -->
+  <rect x="112" y="248" width="176" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="200" y="268" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">수동 promote</text>
+  <text x="200" y="284" font-size="11" fill="#334155" text-anchor="middle">pg_ctl promote 또는</text>
+  <text x="200" y="299" font-size="11" fill="#334155" text-anchor="middle">pg_promote() 실행</text>
+
+  <!-- 화살표 -->
+  <line x1="200" y1="312" x2="200" y2="334" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 앱 재연결 박스 -->
+  <rect x="112" y="336" width="176" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="200" y="356" font-size="13" font-weight="600" fill="#047857" text-anchor="middle">앱 연결 전환</text>
+  <text x="200" y="373" font-size="11" fill="#047857" text-anchor="middle">DSN 수동 변경 + 재시작</text>
+
+  <!-- RTO 표시 -->
+  <rect x="120" y="400" width="160" height="40" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="200" y="416" font-size="12" font-weight="700" fill="#BE123C" text-anchor="middle">총 RTO</text>
+  <text x="200" y="432" font-size="13" font-weight="800" fill="#BE123C" text-anchor="middle">30분 이상</text>
+
+  <!-- ===== 오른쪽: Patroni 자동 failover ===== -->
+  <text x="600" y="72" font-size="13" font-weight="700" fill="#047857" text-anchor="middle">Patroni + etcd 자동 failover</text>
+  <text x="600" y="88" font-size="11" fill="#334155" text-anchor="middle">RTO 수십 초</text>
+
+  <!-- VM 장애 박스 (오른쪽) -->
+  <rect x="512" y="104" width="176" height="48" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="600" y="124" font-size="13" font-weight="600" fill="#BE123C" text-anchor="middle">GCE VM 장애</text>
+  <text x="600" y="141" font-size="11" fill="#BE123C" text-anchor="middle">Primary Postgres 다운</text>
+
+  <!-- 화살표 -->
+  <line x1="600" y1="152" x2="600" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- etcd 합의 박스 -->
+  <rect x="512" y="176" width="176" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="196" font-size="13" font-weight="600" fill="#B45309" text-anchor="middle">etcd 합의</text>
+  <text x="600" y="212" font-size="11" fill="#B45309" text-anchor="middle">Leader lease 만료</text>
+  <text x="600" y="227" font-size="11" fill="#B45309" text-anchor="middle">→ Standby가 후보 선출</text>
+
+  <!-- 화살표 -->
+  <line x1="600" y1="240" x2="600" y2="262" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STONITH 박스 -->
+  <rect x="512" y="264" width="176" height="48" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="284" font-size="13" font-weight="600" fill="#B45309" text-anchor="middle">STONITH (펜싱)</text>
+  <text x="600" y="301" font-size="11" fill="#B45309" text-anchor="middle">구 Primary 강제 종료</text>
+
+  <!-- 화살표 -->
+  <line x1="600" y1="312" x2="600" y2="334" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 자동 promote 박스 -->
+  <rect x="512" y="336" width="176" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="600" y="356" font-size="13" font-weight="600" fill="#047857" text-anchor="middle">자동 promote + 연결 전환</text>
+  <text x="600" y="373" font-size="11" fill="#047857" text-anchor="middle">Patroni → HAProxy 자동 갱신</text>
+
+  <!-- RTO 표시 -->
+  <rect x="520" y="400" width="160" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="600" y="416" font-size="12" font-weight="700" fill="#047857" text-anchor="middle">총 RTO</text>
+  <text x="600" y="432" font-size="13" font-weight="800" fill="#047857" text-anchor="middle">수십 초 (자동화)</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>

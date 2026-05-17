@@ -203,3 +203,11 @@ OpenCost는 Helm uninstall만으로 제거됩니다. ServiceMonitor와 Mimir 데
 - **한계는 숨기지 말고 명시하고 보완 경로를 설계**합니다. OpenCost의 RI/Spot 미반영은 ADR에 적시하고 Phase 3에서 CUR/BigQuery로 보완하기로 명시했습니다. 이 경로가 없으면 같은 결정은 위험합니다.
 - **vendor-neutral 선택은 의사결정의 reversibility를 높입니다.** CNCF 프로젝트는 가격 정책 변경 리스크가 없고, 필요 시 상위 호환 도구로 이전하기가 쉽습니다.
 - **FinOps는 "데이터를 모으는 것"이 아니라 "행동을 바꾸는 것"**입니다. 예산 알림과 showback 구조를 함께 설계해야 비용 가시화가 실제 의사결정으로 연결됩니다.
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [OpenCost — K8s 리소스 사용량을 비용으로 환산하는 원리](/essays/goti-deepdive-opencost)

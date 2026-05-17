@@ -1,0 +1,116 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 560"
+  width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+
+  <title id="title-2">hash tag co-location 구조도 — {game_id}로 같은 슬롯에 모으기</title>
+  <desc id="desc-2">hash tag를 쓰지 않은 경우 관련 키들이 서로 다른 노드에 흩어지는 반면, {game_id} hash tag를 사용하면 같은 경기의 모든 키가 동일 슬롯과 노드에 배치되어 멀티키 연산이 가능해지는 Before/After 비교</desc>
+
+  <!-- Background -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">hash tag {game_id} — co-location Before / After</text>
+
+  <!-- ========== BEFORE 영역 ========== -->
+  <rect x="24" y="48" width="368" height="320" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="208" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">BEFORE — hash tag 없음</text>
+  <text x="208" y="96" text-anchor="middle" font-size="12" fill="#BE123C">키 전체가 CRC16 대상 → 슬롯 분산</text>
+
+  <!-- 키 박스 (BEFORE) -->
+  <rect x="48" y="112" width="168" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="132" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">seat:101:A1</text>
+  <text x="132" y="148" text-anchor="middle" font-size="10" fill="#27272A">CRC16("seat:101:A1") % 16384</text>
+
+  <rect x="48" y="168" width="168" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="132" y="187" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">inv:101:S1</text>
+  <text x="132" y="204" text-anchor="middle" font-size="10" fill="#27272A">CRC16("inv:101:S1") % 16384</text>
+
+  <rect x="48" y="224" width="168" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="132" y="243" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">hold:101:A1</text>
+  <text x="132" y="260" text-anchor="middle" font-size="10" fill="#27272A">CRC16("hold:101:A1") % 16384</text>
+
+  <!-- 노드 분산 표시 (BEFORE) -->
+  <rect x="248" y="112" width="120" height="44" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="308" y="131" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Node A</text>
+  <text x="308" y="148" text-anchor="middle" font-size="11" fill="#27272A">slot 4923</text>
+
+  <rect x="248" y="168" width="120" height="44" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="308" y="187" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Node C</text>
+  <text x="308" y="204" text-anchor="middle" font-size="11" fill="#27272A">slot 12047</text>
+
+  <rect x="248" y="224" width="120" height="44" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="308" y="243" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Node B</text>
+  <text x="308" y="260" text-anchor="middle" font-size="11" fill="#27272A">slot 8301</text>
+
+  <!-- 화살표 (BEFORE) -->
+  <line x1="216" y1="134" x2="248" y2="134" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-b-cyan)"/>
+  <line x1="216" y1="190" x2="248" y2="190" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-b-cyan)"/>
+  <line x1="216" y1="246" x2="248" y2="246" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-b-cyan)"/>
+
+  <!-- CROSS NODE 경고 -->
+  <rect x="48" y="288" width="320" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="208" y="310" text-anchor="middle" font-size="12" font-weight="700" fill="#BE123C">MGET seat:101:A1 inv:101:S1 hold:101:A1</text>
+  <text x="208" y="328" text-anchor="middle" font-size="11" fill="#BE123C">오류: CROSSSLOT Keys in request</text>
+  <text x="208" y="344" text-anchor="middle" font-size="11" fill="#BE123C">don't hash to the same slot</text>
+
+  <!-- ========== AFTER 영역 ========== -->
+  <rect x="408" y="48" width="368" height="320" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="592" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">AFTER — {game_id} hash tag 적용</text>
+  <text x="592" y="96" text-anchor="middle" font-size="12" fill="#047857">중괄호 안쪽만 CRC16 → 같은 슬롯</text>
+
+  <!-- 키 박스 (AFTER) -->
+  <rect x="432" y="112" width="196" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="530" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">seat:{101}:A1</text>
+  <text x="530" y="148" text-anchor="middle" font-size="10" fill="#27272A">CRC16("101") % 16384 = 4092</text>
+
+  <rect x="432" y="168" width="196" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="530" y="187" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">inv:{101}:S1</text>
+  <text x="530" y="204" text-anchor="middle" font-size="10" fill="#27272A">CRC16("101") % 16384 = 4092</text>
+
+  <rect x="432" y="224" width="196" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="530" y="243" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">hold:{101}:A1</text>
+  <text x="530" y="260" text-anchor="middle" font-size="10" fill="#27272A">CRC16("101") % 16384 = 4092</text>
+
+  <!-- 노드 (같은 노드 AFTER) -->
+  <rect x="652" y="152" width="112" height="124" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="708" y="178" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Node A</text>
+  <text x="708" y="198" text-anchor="middle" font-size="12" font-weight="600" fill="#7C3AED">slot 4092</text>
+  <text x="708" y="218" text-anchor="middle" font-size="10" fill="#047857">seat:{101}:A1</text>
+  <text x="708" y="234" text-anchor="middle" font-size="10" fill="#047857">inv:{101}:S1</text>
+  <text x="708" y="250" text-anchor="middle" font-size="10" fill="#047857">hold:{101}:A1</text>
+  <text x="708" y="266" text-anchor="middle" font-size="10" fill="#27272A">모두 같은 슬롯</text>
+
+  <!-- 화살표 (AFTER) -->
+  <line x1="628" y1="134" x2="652" y2="192" stroke="#059669" stroke-width="2" marker-end="url(#arrow-b-green)"/>
+  <line x1="628" y1="190" x2="652" y2="208" stroke="#059669" stroke-width="2" marker-end="url(#arrow-b-green)"/>
+  <line x1="628" y1="246" x2="652" y2="232" stroke="#059669" stroke-width="2" marker-end="url(#arrow-b-green)"/>
+
+  <!-- MGET 성공 -->
+  <rect x="432" y="288" width="320" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="592" y="310" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">MGET seat:{101}:A1 inv:{101}:S1 hold:{101}:A1</text>
+  <text x="592" y="328" text-anchor="middle" font-size="11" fill="#047857">성공: 모두 slot 4092, Node A</text>
+  <text x="592" y="344" text-anchor="middle" font-size="11" fill="#047857">단일 노드 왕복 1회 (multi-key 가능)</text>
+
+  <!-- ========== hash tag 규칙 설명 ========== -->
+  <rect x="24" y="384" width="752" height="80" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">hash tag 파싱 규칙</text>
+  <text x="400" y="430" text-anchor="middle" font-size="12" fill="#0A0A0A">키에 { } 가 있으면 첫 번째 { } 안쪽 문자열만 CRC16에 입력   |   { } 없으면 키 전체가 CRC16 대상</text>
+  <text x="400" y="450" text-anchor="middle" font-size="11" fill="#27272A">예: seat:{101}:A1 → "101" 해싱   |   inv:{101}:S1 → "101" 해싱   |   order:7823 → "order:7823" 전체 해싱</text>
+
+  <!-- ========== Lua 제약 안내 ========== -->
+  <rect x="24" y="480" width="752" height="64" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="504" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Lua EVALSHA + hash tag 제약</text>
+  <text x="400" y="524" text-anchor="middle" font-size="12" fill="#27272A">Lua 스크립트에 넘기는 KEYS[]는 모두 같은 슬롯이어야 함   |   hash tag로 co-location이 보장된 키끼리만 하나의 Lua 스크립트로 묶을 수 있음</text>
+
+  <!-- ========== 화살표 마커 ========== -->
+  <defs>
+    <marker id="arrow-b-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="arrow-b-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,114 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">Pod 내부 Envoy sidecar 주입과 iptables 트래픽 리디렉션 구조</title>
+  <desc id="desc-1">애플리케이션 컨테이너와 Envoy sidecar 컨테이너가 같은 Pod에 공존하며, iptables 규칙이 모든 인바운드·아웃바운드 트래픽을 Envoy로 가로채는 구조를 보여줍니다</desc>
+
+  <style>
+    .label { font-size: 13px; fill: #0A0A0A; }
+    .sublabel { font-size: 11px; fill: #27272A; }
+    .title-text { font-size: 14px; font-weight: 600; fill: #0A0A0A; }
+    .caption { font-size: 11px; fill: #475569; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; marker-end: url(#arrow-dark); }
+    .arrow-accent { stroke: #7C3AED; stroke-width: 2; fill: none; marker-end: url(#arrow-accent); }
+    .arrow-dashed { stroke: #D4D4D8; stroke-width: 1.5; fill: none; stroke-dasharray: 4 2; marker-end: url(#arrow-gray); }
+  </style>
+
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D4D4D8"/>
+    </marker>
+  </defs>
+
+  <!-- 배경: 노드(Worker Node) -->
+  <rect x="40" y="40" width="720" height="440" rx="12" ry="12"
+    fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="56" y="64" class="sublabel" fill="#B45309">Worker Node</text>
+
+  <!-- Pod 외곽 -->
+  <rect x="80" y="80" width="640" height="368" rx="10" ry="10"
+    fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="96" y="104" class="title-text">Pod</text>
+
+  <!-- iptables 영역 (좌측 레이블) -->
+  <rect x="96" y="120" width="160" height="288" rx="8" ry="8"
+    fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="176" y="144" text-anchor="middle" class="label" fill="#BE123C">iptables</text>
+  <text x="176" y="160" text-anchor="middle" class="sublabel" fill="#BE123C">규칙 (init container)</text>
+  <text x="176" y="200" text-anchor="middle" class="sublabel" fill="#475569">포트 15001</text>
+  <text x="176" y="216" text-anchor="middle" class="sublabel" fill="#475569">REDIRECT (아웃바운드)</text>
+  <text x="176" y="248" text-anchor="middle" class="sublabel" fill="#475569">포트 15006</text>
+  <text x="176" y="264" text-anchor="middle" class="sublabel" fill="#475569">REDIRECT (인바운드)</text>
+  <text x="176" y="296" text-anchor="middle" class="sublabel" fill="#475569">Envoy 자신의 트래픽은</text>
+  <text x="176" y="312" text-anchor="middle" class="sublabel" fill="#475569">UID 1337로 예외 처리</text>
+
+  <!-- 앱 컨테이너 -->
+  <rect x="288" y="120" width="160" height="120" rx="8" ry="8"
+    fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="368" y="148" text-anchor="middle" class="title-text" fill="#047857">앱 컨테이너</text>
+  <text x="368" y="168" text-anchor="middle" class="sublabel" fill="#047857">(예: goti-server)</text>
+  <text x="368" y="192" text-anchor="middle" class="sublabel" fill="#475569">포트 8080 Listen</text>
+  <text x="368" y="212" text-anchor="middle" class="sublabel" fill="#475569">비즈니스 로직만 담당</text>
+
+  <!-- Envoy sidecar 컨테이너 -->
+  <rect x="288" y="272" width="160" height="120" rx="8" ry="8"
+    fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="368" y="300" text-anchor="middle" class="title-text" fill="#6D28D9">Envoy sidecar</text>
+  <text x="368" y="320" text-anchor="middle" class="sublabel" fill="#6D28D9">istio-proxy 컨테이너</text>
+  <text x="368" y="344" text-anchor="middle" class="sublabel" fill="#475569">15001 (아웃바운드)</text>
+  <text x="368" y="360" text-anchor="middle" class="sublabel" fill="#475569">15006 (인바운드)</text>
+  <text x="368" y="376" text-anchor="middle" class="sublabel" fill="#475569">15090 (Prometheus)</text>
+
+  <!-- istiod (제어 평면) — Pod 외부 우측 -->
+  <rect x="544" y="120" width="160" height="120" rx="8" ry="8"
+    fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="624" y="152" text-anchor="middle" class="title-text" fill="#0E7490">istiod</text>
+  <text x="624" y="172" text-anchor="middle" class="sublabel" fill="#0E7490">제어 평면</text>
+  <text x="624" y="200" text-anchor="middle" class="sublabel" fill="#475569">xDS API</text>
+  <text x="624" y="216" text-anchor="middle" class="sublabel" fill="#475569">포트 15010 (gRPC)</text>
+
+  <!-- 외부 트래픽 (클라이언트) -->
+  <rect x="544" y="304" width="160" height="80" rx="8" ry="8"
+    fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="624" y="336" text-anchor="middle" class="title-text" fill="#334155">외부 클라이언트</text>
+  <text x="624" y="356" text-anchor="middle" class="sublabel" fill="#475569">또는 다른 서비스의 Envoy</text>
+
+  <!-- 화살표들 -->
+  <!-- 외부 → iptables (인바운드) -->
+  <path d="M544,344 L272,344" class="arrow"/>
+  <text x="408" y="338" text-anchor="middle" class="caption">인바운드 요청</text>
+
+  <!-- iptables → Envoy (인바운드 리디렉션) -->
+  <path d="M256,344 L288,344" class="arrow-accent"/>
+  <text x="272" y="338" text-anchor="middle" class="caption" fill="#6D28D9">REDIRECT</text>
+
+  <!-- Envoy → 앱 (인바운드 처리 후 전달) -->
+  <path d="M368,272 L368,240" class="arrow" marker-end="url(#arrow-dark)"/>
+  <text x="388" y="260" class="caption">처리 후 전달</text>
+
+  <!-- 앱 → iptables (아웃바운드) -->
+  <path d="M288,180 L256,180" class="arrow"/>
+  <text x="272" y="174" text-anchor="middle" class="caption">아웃바운드</text>
+
+  <!-- iptables → Envoy (아웃바운드 리디렉션) -->
+  <path d="M256,180 L256,296 L288,316" class="arrow-accent"/>
+  <text x="236" y="244" text-anchor="end" class="caption" fill="#6D28D9">REDIRECT</text>
+
+  <!-- Envoy → 외부 (아웃바운드 처리 후 전달) -->
+  <path d="M448,316 L544,332" class="arrow"/>
+  <text x="496" y="318" text-anchor="middle" class="caption">처리 후 전달</text>
+
+  <!-- istiod → Envoy (xDS 설정 push) -->
+  <path d="M544,180 L488,300" class="arrow-accent" stroke-dasharray="4 2"/>
+  <text x="540" y="248" text-anchor="middle" class="caption" fill="#6D28D9">xDS 설정 push</text>
+
+  <!-- 하단 캡션 -->
+  <text x="400" y="480" text-anchor="middle" class="sublabel" fill="#475569">
+    iptables 규칙이 트래픽을 투명하게 Envoy로 가로챔 — 앱 코드 수정 없음
+  </text>
+</svg>

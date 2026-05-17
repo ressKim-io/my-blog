@@ -1,0 +1,116 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 480" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-1">Pull 모델 vs Push(Remote Write) 모델 비교</title>
+  <desc id="desc-1">왼쪽에 Prometheus가 타깃을 scrape하는 pull 모델, 오른쪽에 Remote Write로 원격 저장소에 push하는 모델을 나란히 비교한 다이어그램</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">Pull 모델 vs Push (Remote Write) 모델</text>
+
+  <!-- ── 왼쪽 패널: Pull 모델 ── -->
+  <rect x="24" y="56" width="360" height="380" rx="8" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1.2"/>
+  <text x="204" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Pull (Scrape) 모델</text>
+
+  <!-- Prometheus box -->
+  <rect x="112" y="96" width="180" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="202" y="120" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Prometheus Server</text>
+  <text x="202" y="138" text-anchor="middle" font-size="11" fill="#27272A">scrape interval 마다 폴링</text>
+
+  <!-- 화살표 아래 (Prometheus → 타깃들) -->
+  <!-- 왼쪽 타깃 라인 -->
+  <line x1="165" y1="152" x2="100" y2="200" stroke="#0A0A0A" stroke-width="1.4" marker-end="url(#arrow-dark)"/>
+  <!-- 중간 타깃 라인 -->
+  <line x1="202" y1="152" x2="202" y2="200" stroke="#0A0A0A" stroke-width="1.4" marker-end="url(#arrow-dark)"/>
+  <!-- 오른쪽 타깃 라인 -->
+  <line x1="239" y1="152" x2="305" y2="200" stroke="#0A0A0A" stroke-width="1.4" marker-end="url(#arrow-dark)"/>
+
+  <!-- 화살표 라벨 -->
+  <rect x="170" y="162" width="64" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="202" y="174" text-anchor="middle" font-size="10" fill="#27272A">GET /metrics</text>
+
+  <!-- 타깃 박스 3개 -->
+  <rect x="48" y="200" width="104" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="100" y="222" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">App A</text>
+  <text x="100" y="238" text-anchor="middle" font-size="10" fill="#27272A">/metrics 노출 필수</text>
+
+  <rect x="150" y="200" width="104" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="202" y="222" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">App B</text>
+  <text x="202" y="238" text-anchor="middle" font-size="10" fill="#27272A">/metrics 노출 필수</text>
+
+  <rect x="253" y="200" width="104" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="305" y="222" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">App C</text>
+  <text x="305" y="238" text-anchor="middle" font-size="10" fill="#27272A">/metrics 노출 필수</text>
+
+  <!-- Prometheus TSDB -->
+  <rect x="112" y="288" width="180" height="48" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="202" y="310" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Prometheus TSDB</text>
+  <text x="202" y="326" text-anchor="middle" font-size="11" fill="#27272A">로컬 저장 (단일 노드)</text>
+
+  <line x1="202" y1="248" x2="202" y2="288" stroke="#0A0A0A" stroke-width="1.4" marker-end="url(#arrow-dark)"/>
+
+  <!-- 한계 박스 -->
+  <rect x="48" y="352" width="312" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.2"/>
+  <text x="204" y="373" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">한계</text>
+  <text x="204" y="390" text-anchor="middle" font-size="11" fill="#27272A">타깃이 /metrics를 노출해야 함</text>
+  <text x="204" y="406" text-anchor="middle" font-size="11" fill="#27272A">수명 짧은 배치·runner는 scrape 타이밍을 놓칠 수 있음</text>
+
+  <!-- ── 오른쪽 패널: Push/Remote Write 모델 ── -->
+  <rect x="416" y="56" width="360" height="380" rx="8" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1.2"/>
+  <text x="596" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Push (Remote Write) 모델</text>
+
+  <!-- 타깃 박스 3개 (이번엔 위에) -->
+  <rect x="440" y="96" width="104" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="492" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">App A</text>
+  <text x="492" y="134" text-anchor="middle" font-size="10" fill="#27272A">push 가능</text>
+
+  <rect x="544" y="96" width="104" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="596" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">k6 Runner</text>
+  <text x="596" y="134" text-anchor="middle" font-size="10" fill="#27272A">수명 짧은 배치</text>
+
+  <rect x="648" y="96" width="104" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="700" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">Prometheus</text>
+  <text x="700" y="134" text-anchor="middle" font-size="10" fill="#27272A">remote_write 설정</text>
+
+  <!-- 화살표 아래 (타깃 → Remote Write endpoint) -->
+  <line x1="492" y1="144" x2="548" y2="192" stroke="#7C3AED" stroke-width="1.6" marker-end="url(#arrow-purple)"/>
+  <line x1="596" y1="144" x2="596" y2="192" stroke="#7C3AED" stroke-width="1.6" marker-end="url(#arrow-purple)"/>
+  <line x1="700" y1="144" x2="645" y2="192" stroke="#7C3AED" stroke-width="1.6" marker-end="url(#arrow-purple)"/>
+
+  <!-- 화살표 라벨 -->
+  <rect x="548" y="154" width="96" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="596" y="166" text-anchor="middle" font-size="10" fill="#6D28D9">snappy+protobuf POST</text>
+
+  <!-- Remote Write Endpoint -->
+  <rect x="496" y="192" width="200" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="596" y="214" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Remote Write Endpoint</text>
+  <text x="596" y="232" text-anchor="middle" font-size="11" fill="#27272A">/api/v1/push</text>
+
+  <!-- 화살표 아래 (endpoint → Mimir) -->
+  <line x1="596" y1="248" x2="596" y2="288" stroke="#0A0A0A" stroke-width="1.4" marker-end="url(#arrow-dark)"/>
+
+  <!-- Mimir box -->
+  <rect x="496" y="288" width="200" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="596" y="310" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Grafana Mimir</text>
+  <text x="596" y="326" text-anchor="middle" font-size="11" fill="#27272A">분산 장기 저장 · 멀티테넌트</text>
+
+  <!-- 이점 박스 -->
+  <rect x="440" y="352" width="312" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="596" y="373" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">장점</text>
+  <text x="596" y="390" text-anchor="middle" font-size="11" fill="#27272A">타깃이 /metrics를 노출하지 않아도 됨</text>
+  <text x="596" y="406" text-anchor="middle" font-size="11" fill="#27272A">수명 짧은 runner도 측정 완료 후 push 가능</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+</svg>

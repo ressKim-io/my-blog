@@ -1,0 +1,96 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-2">Workers fetch() — Host 헤더 결정 흐름</title>
+  <desc id="desc-2">Cloudflare Workers가 fetch()를 호출할 때 URL hostname이 Host 헤더로 강제 설정되며, headers 객체의 Host 오버라이드가 런타임에 의해 무시되는 내부 흐름</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">Workers fetch() — Host 헤더 결정 흐름</text>
+
+  <!-- ───────── 코드 영역 ───────── -->
+  <rect x="24" y="52" width="280" height="152" rx="6" fill="#18181B" stroke="#27272A" stroke-width="1.5"/>
+  <text x="40" y="74" font-size="11" fill="#A1A1AA" font-family="'Geist Mono', monospace">// Workers 코드</text>
+  <text x="40" y="92" font-size="11" fill="#6EE7B7" font-family="'Geist Mono', monospace">await</text>
+  <text x="80" y="92" font-size="11" fill="#FDE68A" font-family="'Geist Mono', monospace">fetch</text>
+  <text x="108" y="92" font-size="11" fill="#E4E4E7" font-family="'Geist Mono', monospace">(url, {</text>
+  <text x="56" y="110" font-size="11" fill="#E4E4E7" font-family="'Geist Mono', monospace">headers: {</text>
+  <text x="72" y="128" font-size="11" fill="#FCA5A5" font-family="'Geist Mono', monospace">"Host": "dev-api.go-ti.shop"</text>
+  <text x="56" y="146" font-size="11" fill="#E4E4E7" font-family="'Geist Mono', monospace">}</text>
+  <text x="40" y="164" font-size="11" fill="#E4E4E7" font-family="'Geist Mono', monospace">})</text>
+  <text x="40" y="188" font-size="11" fill="#6B7280" font-family="'Geist Mono', monospace">// url = "https://resshome.iptime.org/..."</text>
+
+  <!-- 화살표: 코드 → 런타임 -->
+  <line x1="304" y1="128" x2="360" y2="128" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+  <text x="332" y="120" text-anchor="middle" font-size="11" fill="#27272A">호출</text>
+
+  <!-- ───────── Workers Runtime 박스 ───────── -->
+  <rect x="362" y="68" width="220" height="244" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="472" y="91" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">Workers Runtime</text>
+  <text x="472" y="108" text-anchor="middle" font-size="11" fill="#27272A">(V8 Isolate)</text>
+
+  <!-- 단계 1 -->
+  <rect x="378" y="120" width="188" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="472" y="137" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">1. URL hostname 추출</text>
+  <text x="472" y="152" text-anchor="middle" font-size="10" fill="#27272A">resshome.iptime.org</text>
+
+  <!-- 아래 화살표 -->
+  <line x1="472" y1="160" x2="472" y2="180" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- 단계 2 -->
+  <rect x="378" y="182" width="188" height="52" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="472" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">2. headers.Host 무시</text>
+  <text x="472" y="216" text-anchor="middle" font-size="10" fill="#27272A">"dev-api.go-ti.shop" 오버라이드</text>
+  <text x="472" y="229" text-anchor="middle" font-size="10" fill="#BE123C">→ 보안 정책으로 차단</text>
+
+  <!-- 아래 화살표 -->
+  <line x1="472" y1="234" x2="472" y2="254" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- 단계 3 -->
+  <rect x="378" y="256" width="188" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="472" y="273" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">3. Host 헤더 강제 설정</text>
+  <text x="472" y="288" text-anchor="middle" font-size="10" fill="#047857">Host: resshome.iptime.org</text>
+
+  <!-- 화살표: 런타임 → 실제 요청 -->
+  <line x1="582" y1="190" x2="648" y2="190" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+  <text x="615" y="182" text-anchor="middle" font-size="11" fill="#27272A">실제 전송</text>
+
+  <!-- ───────── 실제 전송 패킷 ───────── -->
+  <rect x="650" y="148" width="128" height="156" rx="6" fill="#18181B" stroke="#27272A" stroke-width="1.5"/>
+  <text x="714" y="171" text-anchor="middle" font-size="11" fill="#A1A1AA" font-family="'Geist Mono', monospace">HTTP Request</text>
+  <text x="666" y="192" font-size="10" fill="#6EE7B7" font-family="'Geist Mono', monospace">GET /api/...</text>
+  <text x="666" y="210" font-size="10" fill="#FCA5A5" font-family="'Geist Mono', monospace">Host:</text>
+  <text x="666" y="224" font-size="10" fill="#FCA5A5" font-family="'Geist Mono', monospace">  resshome.iptime.org</text>
+  <text x="666" y="242" font-size="10" fill="#A1A1AA" font-family="'Geist Mono', monospace">Accept: */*</text>
+  <text x="666" y="258" font-size="10" fill="#A1A1AA" font-family="'Geist Mono', monospace">...</text>
+  <text x="666" y="280" font-size="10" fill="#6B7280" font-family="'Geist Mono', monospace">// ❌ Istio 매칭 실패</text>
+  <text x="666" y="294" font-size="10" fill="#6B7280" font-family="'Geist Mono', monospace">//    → 404</text>
+
+  <!-- ───────── 보안 정책 노트 ───────── -->
+  <rect x="24" y="228" width="280" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="164" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">보안 정책 근거</text>
+  <text x="164" y="268" text-anchor="middle" font-size="11" fill="#27272A">Host 오버라이드 허용 시 Cloudflare가</text>
+  <text x="164" y="284" text-anchor="middle" font-size="11" fill="#27272A">경유하는 모든 트래픽에서</text>
+  <text x="164" y="300" text-anchor="middle" font-size="11" fill="#27272A">Host 스푸핑이 가능해집니다</text>
+
+  <!-- 연결선: 보안 정책 → 단계 2 -->
+  <line x1="304" y1="268" x2="376" y2="210" stroke="#D97706" stroke-width="1" stroke-dasharray="4 2" marker-end="url(#arr-amber)"/>
+
+  <!-- ───────── 해결책 안내 ───────── -->
+  <rect x="24" y="348" width="752" height="108" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="370" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">해결 — URL hostname 자체를 원하는 Host로 맞춘다</text>
+  <text x="40" y="393" font-size="12" fill="#0A0A0A">• fetch("https://dev-api.go-ti.shop/api/...") 로 호출하면 Host: dev-api.go-ti.shop 이 자동 설정됩니다</text>
+  <text x="40" y="413" font-size="12" fill="#0A0A0A">• dev-api.go-ti.shop 을 Cloudflare Proxy(Orange Cloud)로 등록하면 Cloudflare가 DDNS를 해석해 Kind PC로 전달합니다</text>
+  <text x="40" y="433" font-size="12" fill="#0A0A0A">• Istio Gateway는 Host: dev-api.go-ti.shop 을 정상 매칭해 VirtualService로 라우팅합니다</text>
+  <text x="40" y="449" font-size="11" fill="#475569">Headers 오버라이드가 아닌 URL 설계로 Host 헤더를 제어하는 것이 Workers의 올바른 사용 방법입니다</text>
+
+  <!-- 마커 -->
+  <defs>
+    <marker id="arr-b2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+</svg>

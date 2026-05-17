@@ -1,0 +1,124 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-1">OpenCost 비용 데이터 흐름도</title>
+  <desc id="desc-1">OpenCost가 K8s 리소스 사용량과 클라우드 Pricing API를 결합해 비용 메트릭을 산출하고, Prometheus exporter를 통해 Mimir와 Grafana까지 전달되는 전체 흐름</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">흐름도 — OpenCost 비용 데이터 파이프라인</text>
+
+  <!-- === 레이어 1: 데이터 소스 (상단) === -->
+
+  <!-- K8s API Server -->
+  <rect x="56" y="64" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">K8s API Server</text>
+  <text x="136" y="107" text-anchor="middle" font-size="11" fill="#27272A">리소스 사용량</text>
+
+  <!-- Cloud Pricing API -->
+  <rect x="312" y="64" width="176" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Cloud Pricing API</text>
+  <text x="400" y="107" text-anchor="middle" font-size="11" fill="#27272A">AWS · GCP 온디맨드 단가</text>
+
+  <!-- Node Exporter / cAdvisor -->
+  <rect x="568" y="64" width="176" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="656" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">cAdvisor / kubelet</text>
+  <text x="656" y="107" text-anchor="middle" font-size="11" fill="#27272A">컨테이너 CPU·Memory 사용량</text>
+
+  <!-- 화살표: K8s API → OpenCost -->
+  <line x1="136" y1="128" x2="136" y2="212" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="88" y="157" width="97" height="18" fill="#FAFAFA"/>
+  <text x="136" y="170" text-anchor="middle" font-size="11" fill="#27272A">Pod spec·limit·request</text>
+
+  <!-- 화살표: Pricing API → OpenCost -->
+  <line x1="400" y1="128" x2="400" y2="212" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="332" y="157" width="136" height="18" fill="#FAFAFA"/>
+  <text x="400" y="170" text-anchor="middle" font-size="11" fill="#27272A">vCPU·GB 시간당 단가</text>
+
+  <!-- 화살표: cAdvisor → OpenCost -->
+  <line x1="656" y1="128" x2="656" y2="212" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="600" y="157" width="113" height="18" fill="#FAFAFA"/>
+  <text x="656" y="170" text-anchor="middle" font-size="11" fill="#27272A">실제 사용량 시계열</text>
+
+  <!-- === 레이어 2: OpenCost 핵심 엔진 === -->
+
+  <!-- OpenCost Core -->
+  <rect x="168" y="212" width="464" height="96" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="400" y="242" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">OpenCost [Engine]</text>
+  <text x="400" y="264" text-anchor="middle" font-size="12" fill="#27272A">리소스 사용량 × 단가 → namespace / pod 별 비용 산출</text>
+  <text x="400" y="283" text-anchor="middle" font-size="11" fill="#27272A">Cost Allocation  ·  Idle Cost 분리  ·  Efficiency 계산</text>
+
+  <!-- 연결선: K8s → OpenCost 좌측 -->
+  <!-- 이미 위에서 136→136으로 그렸으므로 OpenCost 박스 상단에서 이어지는 수평선 추가 -->
+  <line x1="136" y1="212" x2="168" y2="212" stroke="#0A0A0A" stroke-width="1.5"/>
+
+  <!-- 연결선: cAdvisor → OpenCost 우측 -->
+  <line x1="656" y1="212" x2="632" y2="212" stroke="#0A0A0A" stroke-width="1.5"/>
+
+  <!-- === 레이어 3: Exporter → 저장소 === -->
+
+  <!-- Prometheus Exporter -->
+  <rect x="248" y="352" width="304" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="376" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Prometheus Exporter</text>
+  <text x="400" y="395" text-anchor="middle" font-size="11" fill="#27272A">/metrics — opencost_* 메트릭 노출</text>
+
+  <!-- 화살표: OpenCost → Exporter -->
+  <line x1="400" y1="308" x2="400" y2="352" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrow-accent)"/>
+  <rect x="327" y="321" width="147" height="18" fill="#FAFAFA"/>
+  <text x="400" y="334" text-anchor="middle" font-size="11" fill="#6D28D9">비용 메트릭 직렬화</text>
+
+  <!-- Mimir -->
+  <rect x="56" y="440" width="160" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="136" y="464" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Mimir</text>
+  <text x="136" y="483" text-anchor="middle" font-size="11" fill="#27272A">장기 저장 · PromQL</text>
+
+  <!-- Grafana / Alertmanager -->
+  <rect x="584" y="440" width="160" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="664" y="464" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">Grafana</text>
+  <text x="664" y="483" text-anchor="middle" font-size="11" fill="#27272A">FinOps 대시보드 · 알림</text>
+
+  <!-- 화살표: Exporter → Mimir (scrape) -->
+  <line x1="296" y1="416" x2="196" y2="440" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="196" y="420" width="103" height="18" fill="#FAFAFA"/>
+  <text x="247" y="433" text-anchor="middle" font-size="11" fill="#27272A">Prometheus scrape</text>
+
+  <!-- 화살표: Exporter → Grafana -->
+  <line x1="504" y1="416" x2="604" y2="440" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="499" y="420" width="103" height="18" fill="#FAFAFA"/>
+  <text x="550" y="433" text-anchor="middle" font-size="11" fill="#27272A">PromQL / 알림 규칙</text>
+
+  <!-- 화살표: Mimir → Grafana -->
+  <line x1="216" y1="472" x2="584" y2="472" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-weak)"/>
+  <rect x="340" y="460" width="120" height="18" fill="#FAFAFA"/>
+  <text x="400" y="473" text-anchor="middle" font-size="11" fill="#475569">장기 데이터 조회</text>
+
+  <!-- 범례 -->
+  <rect x="8" y="356" width="188" height="68" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="102" y="372" text-anchor="middle" font-size="11" font-weight="600" fill="#0A0A0A">범례</text>
+  <line x1="20" y1="386" x2="56" y2="386" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="64" y="390" font-size="11" fill="#27272A">데이터 흐름</text>
+  <line x1="20" y1="406" x2="56" y2="406" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrow-accent)"/>
+  <text x="64" y="410" font-size="11" fill="#27272A">비용 메트릭 생성</text>
+
+  <!-- 범례 -->
+  <rect x="612" y="356" width="180" height="68" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="702" y="372" text-anchor="middle" font-size="11" font-weight="600" fill="#0A0A0A">범례</text>
+  <line x1="624" y1="386" x2="660" y2="386" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-weak)"/>
+  <text x="668" y="390" font-size="11" fill="#27272A">비동기 조회</text>
+  <rect x="624" y="398" width="14" height="14" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="644" y="410" font-size="11" fill="#27272A">Backend 컴포넌트</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-weak" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>

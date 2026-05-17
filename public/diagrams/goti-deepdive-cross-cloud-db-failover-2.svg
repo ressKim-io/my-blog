@@ -1,0 +1,109 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">Split-Brain 방어 장치 — 잘못된 페일오버를 막는 4중 검사</title>
+  <desc id="desc-2">HMAC 검증, direct ping, pre-flight lag 체크, Slack 승인 네 관문을 순서대로 통과해야만 Step Functions 실행이 허가되는 흐름. 하나라도 실패하면 promote 거부로 분기됩니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="30" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">
+    Split-Brain 방어 장치 — 잘못된 페일오버를 막는 4중 검사
+  </text>
+
+  <defs>
+    <marker id="arr-black" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-rose" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E11D48"/>
+    </marker>
+    <marker id="arr-emerald" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- 진입: 웹훅 수신 -->
+  <rect x="300" y="48" width="200" height="44" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">웹훅 수신</text>
+  <text x="400" y="83" text-anchor="middle" font-size="11" fill="#27272A">HMAC 서명 포함 POST</text>
+
+  <!-- 화살표 아래로 -->
+  <line x1="400" y1="92" x2="400" y2="116" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-black)"/>
+
+  <!-- 검사 1: HMAC 검증 -->
+  <rect x="280" y="116" width="240" height="44" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="135" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">검사 1 — HMAC 서명 검증</text>
+  <text x="400" y="151" text-anchor="middle" font-size="11" fill="#27272A">shared secret으로 위변조 확인</text>
+
+  <!-- 실패 분기 우측 -->
+  <line x1="520" y1="138" x2="620" y2="138" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-rose)"/>
+  <rect x="622" y="118" width="130" height="40" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="687" y="134" text-anchor="middle" font-size="11" fill="#BE123C">promote 거부</text>
+  <text x="687" y="150" text-anchor="middle" font-size="11" fill="#BE123C">(재생 공격 방어)</text>
+  <text x="568" y="130" text-anchor="middle" font-size="10" fill="#E11D48">검증 실패</text>
+
+  <!-- 화살표 아래로 -->
+  <line x1="400" y1="160" x2="400" y2="184" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-black)"/>
+
+  <!-- 검사 2: direct ping -->
+  <rect x="260" y="184" width="280" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="204" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">검사 2 — AWS → GCP direct ping</text>
+  <text x="400" y="220" text-anchor="middle" font-size="11" fill="#27272A">edge 관점 실패 vs 실제 GCP 장애 구분</text>
+  <text x="400" y="232" text-anchor="middle" font-size="11" fill="#27272A">(네트워크 파티션·앱 CPU 폭주 오탐 방어)</text>
+
+  <!-- 실패 분기 우측 -->
+  <line x1="540" y1="210" x2="620" y2="210" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-rose)"/>
+  <rect x="622" y="190" width="130" height="40" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="687" y="206" text-anchor="middle" font-size="11" fill="#BE123C">promote 거부</text>
+  <text x="687" y="222" text-anchor="middle" font-size="11" fill="#BE123C">(GCP 살아있음)</text>
+  <text x="580" y="202" text-anchor="middle" font-size="10" fill="#E11D48">GCP 응답</text>
+
+  <!-- 화살표 아래로 -->
+  <line x1="400" y1="236" x2="400" y2="260" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-black)"/>
+
+  <!-- 검사 3: Pre-flight -->
+  <rect x="240" y="260" width="320" height="60" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="280" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">검사 3 — Pre-flight 검증</text>
+  <text x="400" y="296" text-anchor="middle" font-size="11" fill="#27272A">pglogical lag &lt; 30s (RPO 보호)</text>
+  <text x="400" y="310" text-anchor="middle" font-size="11" fill="#27272A">subscription replicating + RDS healthy</text>
+
+  <!-- 실패 분기 우측 -->
+  <line x1="560" y1="290" x2="620" y2="290" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-rose)"/>
+  <rect x="622" y="270" width="130" height="40" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="687" y="286" text-anchor="middle" font-size="11" fill="#BE123C">promote 거부</text>
+  <text x="687" y="302" text-anchor="middle" font-size="11" fill="#BE123C">(데이터 손실 위험)</text>
+  <text x="590" y="282" text-anchor="middle" font-size="10" fill="#E11D48">lag 초과</text>
+
+  <!-- 화살표 아래로 -->
+  <line x1="400" y1="320" x2="400" y2="344" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-black)"/>
+
+  <!-- 검사 4: Slack 승인 -->
+  <rect x="280" y="344" width="240" height="44" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="363" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">검사 4 — Slack 승인</text>
+  <text x="400" y="379" text-anchor="middle" font-size="11" fill="#27272A">사람 sanity check (KV truth source 확인)</text>
+
+  <!-- 실패 분기 우측 -->
+  <line x1="520" y1="366" x2="620" y2="366" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-rose)"/>
+  <rect x="622" y="346" width="130" height="40" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="687" y="362" text-anchor="middle" font-size="11" fill="#BE123C">promote 거부</text>
+  <text x="687" y="378" text-anchor="middle" font-size="11" fill="#BE123C">(사람 판단)</text>
+  <text x="568" y="358" text-anchor="middle" font-size="10" fill="#E11D48">거절</text>
+
+  <!-- 화살표 아래로 -->
+  <line x1="400" y1="388" x2="400" y2="412" stroke="#059669" stroke-width="2" marker-end="url(#arr-emerald)"/>
+
+  <!-- 최종: Step Functions 실행 -->
+  <rect x="280" y="412" width="240" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="432" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Step Functions 실행 허가</text>
+  <text x="400" y="448" text-anchor="middle" font-size="11" fill="#047857">5단계 promote 오케스트레이션 시작</text>
+  <text x="400" y="462" text-anchor="middle" font-size="11" fill="#047857">RTO ~10~12분</text>
+
+  <!-- 범례 -->
+  <rect x="16" y="460" width="220" height="50" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="24" y="476" font-size="11" font-weight="600" fill="#334155">범례</text>
+  <line x1="24" y1="488" x2="50" y2="488" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="56" y="492" font-size="10" fill="#334155">정상 흐름</text>
+  <line x1="24" y1="502" x2="50" y2="502" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="56" y="506" font-size="10" fill="#334155">거부 분기 (검사 실패)</text>
+</svg>

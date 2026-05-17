@@ -1,0 +1,128 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 600" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-1">도메인 엔티티 → Redis 자료구조 매핑</title>
+  <desc id="desc-1">seat_statuses·inventory·orders·tickets는 HASH, order_items는 LIST, user_orders·tickets 인덱스는 ZSET, seat_holds 잠금과 payment_idem은 STRING+TTL, user 보유 holds는 SET으로 매핑됩니다</desc>
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .section-label { font-size: 11px; fill: #27272A; }
+    .box-title { font-size: 13px; font-weight: 600; }
+    .box-sub  { font-size: 11px; fill: #27272A; }
+    .arrow-label { font-size: 11px; fill: #475569; }
+    .legend-label { font-size: 11px; fill: #334155; }
+  </style>
+
+  <!-- 배경 -->
+  <rect width="800" height="600" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">도메인 엔티티 → Redis 자료구조 매핑</text>
+
+  <!-- ─── 왼쪽: 도메인 엔티티 열 ─── -->
+  <text x="136" y="68" text-anchor="middle" class="section-label" font-weight="600">도메인 엔티티</text>
+
+  <!-- seat_statuses -->
+  <rect x="32" y="80" width="208" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="100" text-anchor="middle" class="box-title" fill="#047857">seat_statuses</text>
+  <text x="136" y="118" text-anchor="middle" class="box-sub">좌석별 상태 (AVAILABLE / HELD / SOLD)</text>
+
+  <!-- seat_holds -->
+  <rect x="32" y="152" width="208" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="172" text-anchor="middle" class="box-title" fill="#047857">seat_holds</text>
+  <text x="136" y="190" text-anchor="middle" class="box-sub">임시 점유 (TTL 만료 = 잠금 해제)</text>
+
+  <!-- inventory -->
+  <rect x="32" y="224" width="208" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="244" text-anchor="middle" class="box-title" fill="#047857">inventory</text>
+  <text x="136" y="262" text-anchor="middle" class="box-sub">잔여 수량 (섹션 단위)</text>
+
+  <!-- orders -->
+  <rect x="32" y="296" width="208" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="316" text-anchor="middle" class="box-title" fill="#047857">orders</text>
+  <text x="136" y="334" text-anchor="middle" class="box-sub">주문 헤더 (상태, 금액 등)</text>
+
+  <!-- order_items -->
+  <rect x="32" y="368" width="208" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="388" text-anchor="middle" class="box-title" fill="#047857">order_items</text>
+  <text x="136" y="406" text-anchor="middle" class="box-sub">주문 항목 목록 (삽입 순서 유지)</text>
+
+  <!-- user_orders index -->
+  <rect x="32" y="440" width="208" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="460" text-anchor="middle" class="box-title" fill="#047857">user_orders 인덱스</text>
+  <text x="136" y="478" text-anchor="middle" class="box-sub">유저별 주문 정렬 목록</text>
+
+  <!-- payment_idem -->
+  <rect x="32" y="512" width="208" height="48" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="136" y="532" text-anchor="middle" class="box-title" fill="#047857">payment_idem</text>
+  <text x="136" y="550" text-anchor="middle" class="box-sub">결제 멱등키 (24h TTL)</text>
+
+  <!-- ─── 오른쪽: Redis 자료구조 열 ─── -->
+  <text x="640" y="68" text-anchor="middle" class="section-label" font-weight="600">Redis 자료구조</text>
+
+  <!-- HASH 박스 (seat_statuses / inventory / orders / tickets) -->
+  <rect x="528" y="80" width="224" height="120" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="640" y="106" text-anchor="middle" class="box-title" fill="#6D28D9">HASH</text>
+  <text x="640" y="126" text-anchor="middle" class="box-sub">seat:{game_id}:{section_id}</text>
+  <text x="640" y="144" text-anchor="middle" class="box-sub">inv:{game_id}:{section_id}</text>
+  <text x="640" y="162" text-anchor="middle" class="box-sub">order:{order_id}</text>
+  <text x="640" y="180" text-anchor="middle" class="box-sub">HSET · HGET · HGETALL  O(N)</text>
+
+  <!-- STRING+TTL 박스 (seat_holds, payment_idem) -->
+  <rect x="528" y="224" width="224" height="96" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="640" y="250" text-anchor="middle" class="box-title" fill="#B45309">STRING + TTL</text>
+  <text x="640" y="270" text-anchor="middle" class="box-sub">hold:{game_id}:{seat_id}  EX 300</text>
+  <text x="640" y="290" text-anchor="middle" class="box-sub">payment:idem:{pg_tx_id}  EX 86400</text>
+  <text x="640" y="310" text-anchor="middle" class="box-sub">SET NX EX · GET  O(1)</text>
+
+  <!-- LIST 박스 (order_items) -->
+  <rect x="528" y="344" width="224" height="72" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="640" y="370" text-anchor="middle" class="box-title" fill="#0E7490">LIST</text>
+  <text x="640" y="390" text-anchor="middle" class="box-sub">order:items:{order_id}</text>
+  <text x="640" y="408" text-anchor="middle" class="box-sub">RPUSH · LRANGE  O(S+N)</text>
+
+  <!-- ZSET 박스 (user_orders index, user:tickets) -->
+  <rect x="528" y="440" width="224" height="96" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="640" y="466" text-anchor="middle" class="box-title" fill="#BE123C">ZSET</text>
+  <text x="640" y="486" text-anchor="middle" class="box-sub">user:orders:{user_id}  score=timestamp</text>
+  <text x="640" y="506" text-anchor="middle" class="box-sub">user:tickets:{user_id}  score=issued_at</text>
+  <text x="640" y="524" text-anchor="middle" class="box-sub">ZADD · ZRANGE · ZRANGEBYSCORE  O(log N)</text>
+
+  <!-- ─── 화살표 ─── -->
+  <!-- seat_statuses → HASH (중간 Y: 104) -->
+  <line x1="240" y1="104" x2="528" y2="130" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- inventory → HASH -->
+  <line x1="240" y1="248" x2="528" y2="155" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- orders → HASH -->
+  <line x1="240" y1="320" x2="528" y2="162" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- seat_holds → STRING+TTL -->
+  <line x1="240" y1="176" x2="528" y2="262" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- payment_idem → STRING+TTL -->
+  <line x1="240" y1="536" x2="528" y2="295" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- order_items → LIST -->
+  <line x1="240" y1="392" x2="528" y2="385" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- user_orders index → ZSET -->
+  <line x1="240" y1="464" x2="528" y2="476" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ─── 범례 ─── -->
+  <rect x="32" y="574" width="10" height="10" rx="2" fill="#ECFDF5" stroke="#059669"/>
+  <text x="48" y="583" class="legend-label">Backend 엔티티</text>
+  <rect x="160" y="574" width="10" height="10" rx="2" fill="#F5F3FF" stroke="#7C3AED"/>
+  <text x="176" y="583" class="legend-label">HASH</text>
+  <rect x="240" y="574" width="10" height="10" rx="2" fill="#FFFBEB" stroke="#D97706"/>
+  <text x="256" y="583" class="legend-label">STRING+TTL</text>
+  <rect x="352" y="574" width="10" height="10" rx="2" fill="#ECFEFF" stroke="#0891B2"/>
+  <text x="368" y="583" class="legend-label">LIST</text>
+  <rect x="416" y="574" width="10" height="10" rx="2" fill="#FFF1F2" stroke="#E11D48"/>
+  <text x="432" y="583" class="legend-label">ZSET</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>

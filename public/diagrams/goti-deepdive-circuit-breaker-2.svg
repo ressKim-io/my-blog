@@ -1,0 +1,117 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 480"
+  width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-2">서킷 브레이커 요청 흐름 — Closed/Open 상태별 동작 비교</title>
+  <desc id="desc-2">왼쪽 Closed 상태에서는 primary 오리진으로 요청이 통과하고, 오른쪽 Open 상태에서는 fallback으로 즉시 우회하는 두 경로를 나란히 보여주는 흐름도</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="16" font-weight="700" fill="#0A0A0A">요청 흐름 — 상태별 동작</text>
+
+  <!-- ====== 왼쪽: Closed 상태 ====== -->
+
+  <!-- 섹션 배경 -->
+  <rect x="24" y="54" width="356" height="390" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1" opacity="0.35"/>
+  <text x="202" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">Closed — 정상 통과</text>
+
+  <!-- Closed: 요청자 -->
+  <rect x="72" y="96" width="120" height="44" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="132" y="114" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">클라이언트 요청</text>
+  <text x="132" y="130" text-anchor="middle" font-size="11" fill="#475569">팀 A → AWS 배정</text>
+
+  <!-- 화살표: 요청자 → Worker -->
+  <line x1="132" y1="140" x2="132" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-black-l)"/>
+
+  <!-- Closed: Worker 판단 -->
+  <rect x="56" y="174" width="152" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="132" y="195" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">CF Worker</text>
+  <text x="132" y="211" text-anchor="middle" font-size="11" fill="#047857">circuit = closed</text>
+  <text x="132" y="224" text-anchor="middle" font-size="10" fill="#27272A">→ primary(AWS) 그대로</text>
+
+  <!-- 화살표: Worker → primary 오리진 -->
+  <line x1="132" y1="226" x2="132" y2="268" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald-l)"/>
+  <rect x="90" y="240" width="84" height="18" rx="2" fill="#FAFAFA"/>
+  <text x="132" y="253" text-anchor="middle" font-size="10" fill="#047857">timeout 1.5s 설정</text>
+
+  <!-- Closed: AWS 오리진 -->
+  <rect x="56" y="268" width="152" height="44" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="132" y="288" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">AWS 오리진</text>
+  <text x="132" y="304" text-anchor="middle" font-size="11" fill="#B45309">200 OK 응답</text>
+
+  <!-- 화살표: 오리진 → 응답 -->
+  <line x1="132" y1="312" x2="132" y2="354" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald-l)"/>
+
+  <!-- Closed: 응답 -->
+  <rect x="56" y="354" width="152" height="52" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="132" y="374" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">응답 반환</text>
+  <text x="132" y="390" text-anchor="middle" font-size="10" fill="#27272A">x-goti-route-circuit: closed</text>
+  <text x="132" y="404" text-anchor="middle" font-size="10" fill="#27272A">실패 카운터 유지</text>
+
+  <!-- ====== 오른쪽: Open 상태 ====== -->
+
+  <!-- 섹션 배경 -->
+  <rect x="420" y="54" width="356" height="390" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1" opacity="0.35"/>
+  <text x="598" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">Open — fallback 즉시 우회</text>
+
+  <!-- Open: 요청자 -->
+  <rect x="468" y="96" width="120" height="44" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="528" y="114" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">클라이언트 요청</text>
+  <text x="528" y="130" text-anchor="middle" font-size="11" fill="#475569">팀 A → AWS 배정</text>
+
+  <!-- 화살표: 요청자 → Worker -->
+  <line x1="528" y1="140" x2="528" y2="174" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-black-r)"/>
+
+  <!-- Open: Worker 판단 -->
+  <rect x="452" y="174" width="152" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="528" y="195" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">CF Worker</text>
+  <text x="528" y="211" text-anchor="middle" font-size="11" fill="#BE123C">circuit = open</text>
+  <text x="528" y="225" text-anchor="middle" font-size="10" fill="#27272A">AWS 접근 건너뜀</text>
+  <text x="528" y="237" text-anchor="middle" font-size="10" fill="#27272A">→ fallback(GCP)으로 교체</text>
+
+  <!-- X 표시 (AWS 접근 차단) -->
+  <line x1="540" y1="254" x2="600" y2="280" stroke="#E11D48" stroke-width="2" opacity="0.5"/>
+  <line x1="600" y1="254" x2="540" y2="280" stroke="#E11D48" stroke-width="2" opacity="0.5"/>
+  <text x="570" y="274" text-anchor="middle" font-size="22" fill="#E11D48" opacity="0.4">✕</text>
+  <text x="570" y="296" text-anchor="middle" font-size="10" fill="#BE123C">AWS — 차단됨</text>
+
+  <!-- 화살표: Worker → GCP (오른쪽으로 우회) -->
+  <line x1="528" y1="238" x2="680" y2="268" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-rose-r)"/>
+  <rect x="586" y="246" width="80" height="18" rx="2" fill="#FAFAFA"/>
+  <text x="626" y="259" text-anchor="middle" font-size="10" fill="#BE123C">즉시 우회</text>
+
+  <!-- Open: GCP 오리진 -->
+  <rect x="620" y="268" width="132" height="44" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="686" y="288" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">GCP 오리진</text>
+  <text x="686" y="304" text-anchor="middle" font-size="11" fill="#B45309">200 OK 응답</text>
+
+  <!-- 화살표: GCP → Worker 응답 -->
+  <line x1="680" y1="312" x2="560" y2="354" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arr-rose-r)"/>
+
+  <!-- Open: 응답 -->
+  <rect x="452" y="354" width="152" height="52" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="528" y="374" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">응답 반환</text>
+  <text x="528" y="390" text-anchor="middle" font-size="10" fill="#27272A">x-goti-route-circuit: open/aws</text>
+  <text x="528" y="404" text-anchor="middle" font-size="10" fill="#27272A">x-goti-route-failover: true</text>
+
+  <!-- ===== 화살표 마커 ===== -->
+  <defs>
+    <marker id="arr-black-l" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-emerald-l" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arr-black-r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-rose-r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#E11D48"/>
+    </marker>
+  </defs>
+
+</svg>

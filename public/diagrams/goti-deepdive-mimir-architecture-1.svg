@@ -1,0 +1,168 @@
+<svg
+  role="img"
+  aria-labelledby="title-mimir-1 desc-mimir-1"
+  viewBox="0 0 800 720"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-mimir-1">Grafana Mimir 컴포넌트 구조도 — Write Path와 Read Path</title>
+  <desc id="desc-mimir-1">remote_write로 수신된 메트릭이 Distributor → Ingester → Object Storage로 흐르는 Write Path와, Querier가 Ingester 메모리와 Store-Gateway를 병합해 PromQL을 처리하는 Read Path를 함께 표시한 아키텍처 구조도</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="720" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">Mimir 컴포넌트 구조도 — Write Path &amp; Read Path</text>
+
+  <!-- ── 범례 ── -->
+  <g transform="translate(32, 56)">
+    <rect x="0" y="0" width="12" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="18" y="11" font-size="11" fill="#27272A">Backend / Storage</text>
+    <rect x="130" y="0" width="12" height="12" rx="2" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+    <text x="148" y="11" font-size="11" fill="#27272A">수신 / 라우팅</text>
+    <rect x="260" y="0" width="12" height="12" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="278" y="11" font-size="11" fill="#27272A">Storage</text>
+    <rect x="360" y="0" width="12" height="12" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="378" y="11" font-size="11" fill="#27272A">쿼리 / 읽기</text>
+    <!-- Write Path 범례 -->
+    <line x1="474" y1="6" x2="510" y2="6" stroke="#059669" stroke-width="2"/>
+    <polygon points="508,3 514,6 508,9" fill="#059669"/>
+    <text x="520" y="11" font-size="11" fill="#27272A">Write Path</text>
+    <!-- Read Path 범례 -->
+    <line x1="600" y1="6" x2="636" y2="6" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 3"/>
+    <polygon points="634,3 640,6 634,9" fill="#7C3AED"/>
+    <text x="648" y="11" font-size="11" fill="#27272A">Read Path</text>
+  </g>
+
+  <!-- ──────────────────────────────
+       WRITE PATH (왼쪽 열)
+       ────────────────────────────── -->
+
+  <!-- Prometheus/Alloy (remote_write 소스) -->
+  <rect x="56" y="96" width="160" height="56" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="136" y="119" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">Prometheus / Alloy</text>
+  <text x="136" y="139" text-anchor="middle" font-size="11" fill="#27272A">remote_write (HTTP)</text>
+
+  <!-- 화살표: Alloy → Distributor -->
+  <line x1="216" y1="124" x2="282" y2="124" stroke="#059669" stroke-width="2"/>
+  <polygon points="280,120 286,124 280,128" fill="#059669"/>
+  <text x="249" y="117" text-anchor="middle" font-size="10" fill="#047857">remote_write</text>
+
+  <!-- Distributor -->
+  <rect x="288" y="96" width="160" height="56" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="368" y="116" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">Distributor</text>
+  <text x="368" y="133" text-anchor="middle" font-size="11" fill="#27272A">검증·중복 제거</text>
+  <text x="368" y="146" text-anchor="middle" font-size="11" fill="#27272A">consistent hashing</text>
+
+  <!-- 화살표: Distributor → Ingester (x3 복제) -->
+  <line x1="368" y1="152" x2="368" y2="216" stroke="#059669" stroke-width="2"/>
+  <polygon points="364,214 368,220 372,214" fill="#059669"/>
+  <text x="400" y="190" font-size="10" fill="#047857">replication N=3</text>
+
+  <!-- Ingester 그룹 -->
+  <rect x="208" y="224" width="136" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="276" y="248" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Ingester-0</text>
+  <text x="276" y="264" text-anchor="middle" font-size="11" fill="#27272A">WAL + 메모리</text>
+
+  <rect x="360" y="224" width="136" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="428" y="248" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Ingester-1</text>
+  <text x="428" y="264" text-anchor="middle" font-size="11" fill="#27272A">WAL + 메모리</text>
+
+  <rect x="512" y="224" width="136" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="580" y="248" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Ingester-2</text>
+  <text x="580" y="264" text-anchor="middle" font-size="11" fill="#27272A">WAL + 메모리</text>
+
+  <!-- 복제 라인 Distributor → Ingester-0 -->
+  <line x1="320" y1="152" x2="276" y2="224" stroke="#059669" stroke-width="1.5"/>
+  <polygon points="273,220 276,227 280,221" fill="#059669"/>
+
+  <!-- 복제 라인 Distributor → Ingester-2 -->
+  <line x1="416" y1="152" x2="580" y2="224" stroke="#059669" stroke-width="1.5"/>
+  <polygon points="576,220 580,227 584,221" fill="#059669"/>
+
+  <!-- 화살표: Ingester → Object Storage (flush) -->
+  <line x1="276" y1="280" x2="276" y2="352" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <polygon points="272,350 276,356 280,350" fill="#059669"/>
+
+  <line x1="428" y1="280" x2="400" y2="352" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <polygon points="396,350 400,356 404,350" fill="#059669"/>
+
+  <line x1="580" y1="280" x2="532" y2="352" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <polygon points="528,350 532,356 536,350" fill="#059669"/>
+
+  <text x="136" y="318" font-size="10" fill="#047857">블록 flush</text>
+  <text x="136" y="330" font-size="10" fill="#047857">(주기적)</text>
+
+  <!-- Object Storage -->
+  <rect x="208" y="360" width="344" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="380" y="383" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Object Storage</text>
+  <text x="380" y="401" text-anchor="middle" font-size="11" fill="#27272A">S3 / Minio — TSDB 블록 (장기 보관)</text>
+
+  <!-- Compactor -->
+  <rect x="600" y="360" width="136" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="668" y="383" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Compactor</text>
+  <text x="668" y="401" text-anchor="middle" font-size="11" fill="#27272A">블록 병합·다운샘플</text>
+
+  <!-- Compactor ↔ Object Storage -->
+  <line x1="600" y1="388" x2="552" y2="388" stroke="#059669" stroke-width="1.5"/>
+  <polygon points="554,384 548,388 554,392" fill="#059669"/>
+
+  <!-- ──────────────────────────────
+       READ PATH (아래)
+       ────────────────────────────── -->
+
+  <!-- Grafana (PromQL 소비자) -->
+  <rect x="56" y="504" width="160" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="136" y="527" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Grafana</text>
+  <text x="136" y="547" text-anchor="middle" font-size="11" fill="#27272A">PromQL 쿼리</text>
+
+  <!-- 화살표: Grafana → Query Frontend -->
+  <line x1="216" y1="532" x2="280" y2="532" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 3"/>
+  <polygon points="278,528 284,532 278,536" fill="#7C3AED"/>
+  <text x="248" y="525" text-anchor="middle" font-size="10" fill="#6D28D9">HTTP /query</text>
+
+  <!-- Query Frontend -->
+  <rect x="288" y="504" width="160" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="368" y="527" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Query Frontend</text>
+  <text x="368" y="544" text-anchor="middle" font-size="11" fill="#27272A">쿼리 분할·캐싱</text>
+  <text x="368" y="557" text-anchor="middle" font-size="11" fill="#27272A">멀티테넌시 라우팅</text>
+
+  <!-- 화살표: Query Frontend → Querier -->
+  <line x1="448" y1="532" x2="512" y2="532" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 3"/>
+  <polygon points="510,528 516,532 510,536" fill="#7C3AED"/>
+
+  <!-- Querier -->
+  <rect x="520" y="504" width="160" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="600" y="527" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Querier</text>
+  <text x="600" y="544" text-anchor="middle" font-size="11" fill="#27272A">Ingester + Store-Gateway</text>
+  <text x="600" y="557" text-anchor="middle" font-size="11" fill="#27272A">병합 후 PromQL 실행</text>
+
+  <!-- 화살표: Querier → Ingester (최신 데이터) -->
+  <line x1="600" y1="504" x2="490" y2="280" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <polygon points="487,282 490,276 494,282" fill="#7C3AED"/>
+  <text x="570" y="400" font-size="10" fill="#6D28D9">최신 데이터</text>
+  <text x="570" y="412" font-size="10" fill="#6D28D9">(메모리)</text>
+
+  <!-- Store-Gateway -->
+  <rect x="288" y="624" width="224" height="56" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="648" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Store-Gateway</text>
+  <text x="400" y="665" text-anchor="middle" font-size="11" fill="#27272A">Object Storage 인덱스 캐싱</text>
+
+  <!-- 화살표: Querier → Store-Gateway -->
+  <line x1="600" y1="560" x2="512" y2="624" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <polygon points="508,620 512,627 517,621" fill="#7C3AED"/>
+  <text x="580" y="600" font-size="10" fill="#6D28D9">오래된 데이터</text>
+  <text x="580" y="612" font-size="10" fill="#6D28D9">(블록)</text>
+
+  <!-- 화살표: Store-Gateway → Object Storage -->
+  <line x1="400" y1="624" x2="400" y2="416" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <polygon points="396,418 400,412 404,418" fill="#7C3AED"/>
+
+  <!-- X-Scope-OrgID 멀티테넌시 라벨 -->
+  <rect x="32" y="456" width="200" height="36" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="132" y="470" text-anchor="middle" font-size="11" font-weight="600" fill="#BE123C">멀티테넌시</text>
+  <text x="132" y="485" text-anchor="middle" font-size="10" fill="#BE123C">X-Scope-OrgID 헤더로 테넌트 격리</text>
+
+</svg>

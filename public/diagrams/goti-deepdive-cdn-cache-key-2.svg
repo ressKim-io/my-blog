@@ -1,0 +1,118 @@
+<svg
+  role="img"
+  aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 560"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-2">CDN Cache Key 구성 — URL + 식별자 분해 및 edge Worker 조작 흐름</title>
+  <desc id="desc-2">사용자 요청이 Cloudflare Workers에 도달하는 순간부터, JWE 토큰에서 sub claim을 추출해 Cache Key를 조합하고, edge에서 캐시 HIT·MISS를 판정한 뒤 origin으로 요청을 전달하거나 캐시 응답을 반환하는 전체 흐름을 보여줍니다</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="560" fill="#FAFAFA" rx="4"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">Cache Key 구성 및 edge Worker 조작 흐름</text>
+
+  <!-- ──── 1단계: 클라이언트 요청 ──── -->
+  <rect x="32" y="56" width="200" height="80" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="132" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">클라이언트 (브라우저)</text>
+  <text x="132" y="100" text-anchor="middle" font-size="11" fill="#475569">GET /queue/status</text>
+  <text x="132" y="116" text-anchor="middle" font-size="11" fill="#475569">Authorization: JWE(sub=user-a)</text>
+
+  <!-- 화살표 1→2 -->
+  <line x1="232" y1="96" x2="288" y2="96" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="260" y="88" text-anchor="middle" font-size="10" fill="#27272A">HTTPS 요청</text>
+
+  <!-- ──── 2단계: Cloudflare Workers (edge) ──── -->
+  <rect x="288" y="48" width="240" height="256" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="408" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">Cloudflare Workers (edge)</text>
+
+  <!-- 2-1: JWE 파싱 -->
+  <rect x="304" y="88" width="208" height="44" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="408" y="108" text-anchor="middle" font-size="12" font-weight="600" fill="#5B21B6">① JWE 검증 + sub 추출</text>
+  <text x="408" y="124" text-anchor="middle" font-size="11" fill="#6D28D9">AES-256-GCM 복호화 → sub claim</text>
+
+  <!-- 2-2: Cache Key 조합 -->
+  <rect x="304" y="144" width="208" height="44" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="408" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="#5B21B6">② Cache Key 조합</text>
+  <text x="408" y="178" text-anchor="middle" font-size="11" fill="#6D28D9">/queue/status::{sub}</text>
+
+  <!-- 2-3: 캐시 판정 -->
+  <rect x="304" y="200" width="208" height="44" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="408" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#5B21B6">③ 캐시 HIT / MISS 판정</text>
+  <text x="408" y="234" text-anchor="middle" font-size="11" fill="#6D28D9">caches.default.match(request)</text>
+
+  <!-- ──── 3단계: HIT 경로 (오른쪽 위) ──── -->
+  <!-- 화살표: Workers → HIT 박스 -->
+  <line x1="528" y1="222" x2="584" y2="180" stroke="#059669" stroke-width="1.8" marker-end="url(#arr-emerald)"/>
+  <text x="572" y="210" text-anchor="middle" font-size="10" fill="#047857">HIT</text>
+
+  <rect x="584" y="144" width="184" height="68" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="676" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">캐시 HIT 응답 반환</text>
+  <text x="676" y="185" text-anchor="middle" font-size="11" fill="#065F46">origin 요청 없음</text>
+  <text x="676" y="200" text-anchor="middle" font-size="11" fill="#065F46">cf-cache-status: HIT</text>
+
+  <!-- 화살표: HIT → Client -->
+  <line x1="676" y1="144" x2="676" y2="96" stroke="#059669" stroke-width="1.8" marker-end="url(#arr-emerald)"/>
+  <line x1="676" y1="96" x2="232" y2="96" stroke="#059669" stroke-width="1.8" marker-end="url(#arr-emerald)"/>
+  <text x="454" y="88" text-anchor="middle" font-size="10" fill="#047857">캐시 응답 (TTL 내)</text>
+
+  <!-- ──── 4단계: MISS 경로 ──── -->
+  <!-- 화살표: Workers → MISS → Origin -->
+  <line x1="408" y1="304" x2="408" y2="344" stroke="#475569" stroke-dasharray="5 3" stroke-width="1.8" marker-end="url(#arr-slate)"/>
+  <text x="440" y="332" text-anchor="middle" font-size="10" fill="#475569">MISS</text>
+
+  <!-- ──── Origin 박스 ──── -->
+  <rect x="256" y="344" width="304" height="80" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="408" y="368" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Origin (goti-queue 서비스)</text>
+  <text x="408" y="386" text-anchor="middle" font-size="11" fill="#92400E">JWE 재검증 → Redis ZRANGE 순번 조회</text>
+  <text x="408" y="402" text-anchor="middle" font-size="11" fill="#92400E">Cache-Control: public, max-age=N 응답</text>
+
+  <!-- 화살표: Origin → Workers (응답) -->
+  <line x1="408" y1="344" x2="408" y2="304" stroke="#D97706" stroke-width="1.5" marker-end="url(#arr-amber)"/>
+
+  <!-- ──── Workers: 응답 캐시 저장 ──── -->
+  <rect x="304" y="248" width="208" height="44" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="408" y="266" text-anchor="middle" font-size="12" font-weight="600" fill="#5B21B6">④ 응답을 Cache Key로 저장</text>
+  <text x="408" y="282" text-anchor="middle" font-size="11" fill="#6D28D9">caches.default.put(key, response)</text>
+
+  <!-- ──── Cache Key 구성 요소 해설 ──── -->
+  <rect x="32" y="456" width="736" height="80" rx="8" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1.2"/>
+  <text x="400" y="478" text-anchor="middle" font-size="12" font-weight="700" fill="#0A0A0A">Cache Key 구성 요소</text>
+
+  <!-- 구성 요소 3가지 -->
+  <rect x="48" y="490" width="200" height="36" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1"/>
+  <text x="148" y="506" text-anchor="middle" font-size="11" font-weight="600" fill="#0E7490">URL path</text>
+  <text x="148" y="520" text-anchor="middle" font-size="11" fill="#0E7490">/queue/status</text>
+
+  <rect x="300" y="490" width="200" height="36" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="400" y="506" text-anchor="middle" font-size="11" font-weight="600" fill="#5B21B6">사용자 식별자 (sub)</text>
+  <text x="400" y="520" text-anchor="middle" font-size="11" fill="#6D28D9">JWE sub claim</text>
+
+  <rect x="552" y="490" width="200" height="36" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="652" y="506" text-anchor="middle" font-size="11" font-weight="600" fill="#5B21B6">선택: 버전·리전</text>
+  <text x="652" y="520" text-anchor="middle" font-size="11" fill="#6D28D9">v1, ap-northeast (필요 시)</text>
+
+  <!-- 구성 요소 구분 텍스트 -->
+  <text x="272" y="512" text-anchor="middle" font-size="14" fill="#475569">+</text>
+  <text x="524" y="512" text-anchor="middle" font-size="14" fill="#475569">+</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arr-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-emerald" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arr-slate" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+</svg>

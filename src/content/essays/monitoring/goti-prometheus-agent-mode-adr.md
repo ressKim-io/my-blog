@@ -193,3 +193,11 @@ Agent Mode 전환 후 기대되는 변화를 정리합니다.
 **Agent Mode는 "Mimir가 있다면" 자연스러운 선택입니다.** Prometheus + Mimir 조합에서 장기 저장을 Mimir가 담당한다면, Prometheus의 로컬 TSDB는 중복 투자입니다. 처음 스택을 구성할 때부터 Agent Mode를 검토하는 것이 효율적입니다
 
 **알람 평가(ruler) 역할 확인이 선행돼야 합니다.** Agent Mode에서 Prometheus는 rule evaluation을 수행할 수 없습니다. Mimir ruler가 이미 활성화되어 있다면 문제없지만, 그렇지 않다면 alert가 조용히 멈춥니다. 전환 전 반드시 확인해야 하는 항목입니다
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다
+
+- [Prometheus Agent Mode — 로컬 TSDB를 버리고 remote_write 전용으로](/essays/goti-deepdive-prometheus-agent-mode)

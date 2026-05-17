@@ -1,0 +1,117 @@
+<svg
+  role="img"
+  aria-labelledby="title-gomemlimit-1 desc-gomemlimit-1"
+  viewBox="0 0 800 560"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="'Pretendard', system-ui, sans-serif"
+>
+  <title id="title-gomemlimit-1">GOMEMLIMIT 설정 전후 메모리 곡선 비교</title>
+  <desc id="desc-gomemlimit-1">위 패널은 GOMEMLIMIT 미설정 시 메모리가 OOM Kill 한계까지 상승해 프로세스가 종료되는 곡선을 보여주고, 아래 패널은 GOMEMLIMIT 설정 시 soft limit 지점(90%)에서 GC가 발동해 메모리가 안정 구간 내에서 유지되는 곡선을 보여줍니다</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA" rx="4"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">
+    메모리 곡선 비교 — GOMEMLIMIT 미설정 vs 설정
+  </text>
+
+  <!-- ========== 상단 패널: 미설정 ========== -->
+  <rect x="32" y="48" width="736" height="220" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.2"/>
+  <text x="52" y="72" font-size="13" font-weight="700" fill="#BE123C">GOMEMLIMIT 미설정</text>
+
+  <!-- 축 -->
+  <!-- Y축 -->
+  <line x1="100" y1="88" x2="100" y2="248" stroke="#D4D4D8" stroke-width="1.2"/>
+  <!-- X축 -->
+  <line x1="100" y1="248" x2="740" y2="248" stroke="#D4D4D8" stroke-width="1.2"/>
+
+  <!-- Y축 라벨 -->
+  <text x="96" y="92" text-anchor="end" font-size="11" fill="#27272A">OOM 한계</text>
+  <text x="96" y="150" text-anchor="end" font-size="11" fill="#27272A">80%</text>
+  <text x="96" y="200" text-anchor="end" font-size="11" fill="#27272A">50%</text>
+  <text x="96" y="248" text-anchor="end" font-size="11" fill="#27272A">0%</text>
+
+  <!-- OOM 한계선 (빨간 점선) -->
+  <line x1="100" y1="92" x2="740" y2="92" stroke="#E11D48" stroke-width="1" stroke-dasharray="5 3"/>
+  <text x="745" y="96" font-size="11" fill="#E11D48">OOM Kill</text>
+
+  <!-- 메모리 곡선 (미설정 — 천천히 오르다 한계 돌파) -->
+  <!-- GC가 거의 안 걸리므로 완만하게 계속 상승 -->
+  <polyline
+    points="100,240 160,236 220,228 280,218 340,205 400,190 450,175 500,158 550,138 590,118 620,104 645,93"
+    fill="none" stroke="#E11D48" stroke-width="2.5"/>
+
+  <!-- OOM Kill 지점 표시 -->
+  <circle cx="645" cy="93" r="5" fill="#E11D48"/>
+  <line x1="645" y1="88" x2="645" y2="248" stroke="#E11D48" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="650" y="178" font-size="11" fill="#BE123C">OOMKill</text>
+  <text x="650" y="192" font-size="11" fill="#BE123C">프로세스</text>
+  <text x="650" y="206" font-size="11" fill="#BE123C">종료</text>
+
+  <!-- GC 없음 강조 텍스트 -->
+  <text x="280" y="170" font-size="11" fill="#BE123C" font-style="italic">GC 거의 미발동 — 메모리 계속 증가</text>
+
+  <!-- X축 라벨 -->
+  <text x="100" y="262" text-anchor="middle" font-size="11" fill="#27272A">시작</text>
+  <text x="400" y="262" text-anchor="middle" font-size="11" fill="#27272A">시간 →</text>
+  <text x="640" y="262" text-anchor="middle" font-size="11" fill="#27272A">crash</text>
+
+  <!-- ========== 하단 패널: 설정 ========== -->
+  <rect x="32" y="288" width="736" height="240" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="52" y="312" font-size="13" font-weight="700" fill="#047857">GOMEMLIMIT = container limit × 90% 설정</text>
+
+  <!-- 축 -->
+  <line x1="100" y1="328" x2="100" y2="500" stroke="#D4D4D8" stroke-width="1.2"/>
+  <line x1="100" y1="500" x2="740" y2="500" stroke="#D4D4D8" stroke-width="1.2"/>
+
+  <!-- Y축 라벨 -->
+  <text x="96" y="332" text-anchor="end" font-size="11" fill="#27272A">OOM 한계</text>
+  <text x="96" y="356" text-anchor="end" font-size="11" fill="#27272A">90%</text>
+  <text x="96" y="400" text-anchor="end" font-size="11" fill="#27272A">60%</text>
+  <text x="96" y="450" text-anchor="end" font-size="11" fill="#27272A">30%</text>
+  <text x="96" y="500" text-anchor="end" font-size="11" fill="#27272A">0%</text>
+
+  <!-- OOM 한계선 -->
+  <line x1="100" y1="332" x2="740" y2="332" stroke="#E11D48" stroke-width="1" stroke-dasharray="5 3"/>
+  <text x="745" y="336" font-size="11" fill="#E11D48">OOM Kill</text>
+
+  <!-- GOMEMLIMIT soft limit 선 (90%) -->
+  <line x1="100" y1="356" x2="740" y2="356" stroke="#059669" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="108" y="350" font-size="11" fill="#047857" font-weight="600">GOMEMLIMIT (90%) — GC 발동 기준선</text>
+
+  <!-- 메모리 곡선 (설정 — 오르다 soft limit 근처에서 GC 발동, 톱니 패턴으로 안정) -->
+  <polyline
+    points="100,492 160,486 220,476 280,462 340,448 390,436 420,362 445,400 460,388 480,372 500,362 524,396 540,384 560,368 580,360 608,392 625,378 645,365 665,375 685,368 710,372 740,370"
+    fill="none" stroke="#059669" stroke-width="2.5"/>
+
+  <!-- GC 발동 지점 표시 (첫 번째) -->
+  <circle cx="420" cy="362" r="4" fill="#059669"/>
+  <text x="424" y="346" font-size="11" fill="#047857" font-weight="600">GC 발동</text>
+  <!-- GC 발동 (두 번째) -->
+  <circle cx="500" cy="362" r="4" fill="#059669"/>
+  <!-- GC 발동 (세 번째) -->
+  <circle cx="580" cy="360" r="4" fill="#059669"/>
+
+  <!-- 안정 구간 표시 -->
+  <rect x="490" y="345" width="260" height="168" rx="4" fill="none" stroke="#059669" stroke-width="1" stroke-dasharray="5 3" opacity="0.6"/>
+  <text x="620" y="525" text-anchor="middle" font-size="11" fill="#047857">안정 구간 유지</text>
+
+  <!-- X축 라벨 -->
+  <text x="100" y="514" text-anchor="middle" font-size="11" fill="#27272A">시작</text>
+  <text x="420" y="514" text-anchor="middle" font-size="11" fill="#27272A">최초 GC 발동</text>
+  <text x="720" y="514" text-anchor="middle" font-size="11" fill="#27272A">안정화 →</text>
+
+  <!-- 범례 -->
+  <rect x="32" y="534" width="736" height="22" rx="3" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="52" y1="545" x2="72" y2="545" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="78" y="549" font-size="11" fill="#334155">메모리 증가 (미설정)</text>
+  <line x1="220" y1="545" x2="240" y2="545" stroke="#059669" stroke-width="2.5"/>
+  <text x="246" y="549" font-size="11" fill="#334155">메모리 곡선 (GOMEMLIMIT 설정)</text>
+  <circle cx="440" cy="545" r="4" fill="#059669"/>
+  <text x="450" y="549" font-size="11" fill="#334155">GC 발동 지점</text>
+  <line x1="560" y1="545" x2="580" y2="545" stroke="#E11D48" stroke-width="1" stroke-dasharray="5 3"/>
+  <text x="586" y="549" font-size="11" fill="#334155">OOM Kill 한계선</text>
+</svg>

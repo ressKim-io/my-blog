@@ -1,0 +1,113 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 560" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">istiod JWKS fetch와 STRICT mTLS 충돌 구조도</title>
+  <desc id="desc-2">istiod의 discovery 컨테이너가 mesh 내부 jwksUri를 직접 HTTP로 호출할 때 Envoy sidecar를 거치지 않아 mTLS 인증서가 없고, STRICT mTLS 정책이 적용된 user-service 파드가 403 또는 연결 거부를 반환하는 구조</desc>
+
+  <style>
+    .label { font-size: 13px; fill: #0A0A0A; }
+    .sublabel { font-size: 11px; fill: #27272A; }
+    .arrow-label { font-size: 11px; fill: #0A0A0A; }
+  </style>
+
+  <defs>
+    <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow2-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow2-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15px" font-weight="600" fill="#0A0A0A">구조도 — istiod JWKS fetch와 STRICT mTLS 충돌</text>
+
+  <!-- istiod 영역 박스 -->
+  <rect x="40" y="56" width="240" height="180" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="160" y="80" text-anchor="middle" class="label" font-weight="700" fill="#B45309">istiod [Control Plane]</text>
+
+  <!-- Pilot/discovery 컨테이너 -->
+  <rect x="60" y="92" width="200" height="56" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="160" y="115" text-anchor="middle" class="label" font-weight="600">pilot-discovery</text>
+  <text x="160" y="132" text-anchor="middle" class="sublabel">표준 HTTP 클라이언트</text>
+
+  <!-- JWKS 캐시 -->
+  <rect x="60" y="160" width="200" height="56" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="160" y="183" text-anchor="middle" class="label" font-weight="600" fill="#6D28D9">JWKS 캐시</text>
+  <text x="160" y="200" text-anchor="middle" class="sublabel">jwks_fetch_interval (기본 20분)</text>
+
+  <!-- mesh 영역 박스 -->
+  <rect x="360" y="56" width="400" height="360" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="560" y="80" text-anchor="middle" class="sublabel" font-weight="600" fill="#334155">Istio Mesh (STRICT mTLS)</text>
+
+  <!-- user-service 파드 -->
+  <rect x="400" y="96" width="320" height="136" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="560" y="118" text-anchor="middle" class="label" font-weight="600" fill="#BE123C">user-service 파드</text>
+
+  <!-- Envoy sidecar (user-service) -->
+  <rect x="420" y="128" width="120" height="48" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="480" y="149" text-anchor="middle" class="label" font-weight="600">Envoy</text>
+  <text x="480" y="164" text-anchor="middle" class="sublabel">mTLS 인터셉트</text>
+
+  <!-- user-service app -->
+  <rect x="560" y="128" width="140" height="48" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="630" y="149" text-anchor="middle" class="label" font-weight="600">app</text>
+  <text x="630" y="164" text-anchor="middle" class="sublabel">/.well-known/jwks.json</text>
+
+  <!-- PeerAuthentication STRICT 뱃지 -->
+  <rect x="420" y="198" width="280" height="24" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="560" y="213" text-anchor="middle" class="sublabel" font-weight="600" fill="#E11D48">PeerAuthentication: STRICT</text>
+
+  <!-- 다른 Go 서비스 파드 -->
+  <rect x="400" y="260" width="140" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="470" y="284" text-anchor="middle" class="label" font-weight="600">Go 서비스 파드</text>
+  <text x="470" y="301" text-anchor="middle" class="sublabel">Envoy sidecar 보유</text>
+  <text x="470" y="316" text-anchor="middle" class="sublabel">mTLS 인증서 있음</text>
+
+  <!-- 정상 서비스 간 통신 화살표 -->
+  <line x1="560" y1="310" x2="542" y2="310" stroke="#059669" stroke-width="1.5"/>
+  <line x1="542" y1="288" x2="542" y2="332"/>
+  <line x1="542" y1="310" x2="420" y2="310" stroke="#059669" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="480" y="328" text-anchor="middle" class="sublabel" fill="#047857">서비스 간 mTLS 정상</text>
+
+  <!-- istiod → user-service 직접 HTTP 화살표 (실패) -->
+  <line x1="280" y1="120" x2="418" y2="152" stroke="#E11D48" stroke-width="2" marker-end="url(#arrow2-red)"/>
+  <rect x="270" y="120" width="120" height="26" fill="#FAFAFA"/>
+  <text x="330" y="131" text-anchor="middle" class="arrow-label" font-weight="600" fill="#E11D48">plain HTTP 요청</text>
+  <text x="330" y="143" text-anchor="middle" class="sublabel" fill="#E11D48">(mTLS 인증서 없음)</text>
+
+  <!-- 거부 아이콘 -->
+  <circle cx="418" cy="152" r="14" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <line x1="410" y1="144" x2="426" y2="160" stroke="#E11D48" stroke-width="2"/>
+  <line x1="426" y1="144" x2="410" y2="160" stroke="#E11D48" stroke-width="2"/>
+
+  <!-- 거부 설명 -->
+  <rect x="380" y="370" width="360" height="32" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="560" y="384" text-anchor="middle" class="label" font-weight="600" fill="#E11D48">RBAC 403 또는 연결 거부</text>
+  <text x="560" y="397" text-anchor="middle" class="sublabel">workload identity 미발급 → principal 없어서 AuthorizationPolicy 통과 불가</text>
+
+  <!-- 연결선: Envoy → 거부 설명 -->
+  <line x1="480" y1="224" x2="480" y2="368" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow2-red)"/>
+
+  <!-- 하단 비교 박스: jwksUri vs inline -->
+  <rect x="40" y="460" width="340" height="80" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="210" y="482" text-anchor="middle" class="label" font-weight="600" fill="#BE123C">jwksUri (mesh 내부) — 동작 안 함</text>
+  <text x="210" y="500" text-anchor="middle" class="sublabel">istiod가 Envoy를 거치지 않고 직접 호출</text>
+  <text x="210" y="516" text-anchor="middle" class="sublabel">STRICT mTLS 환경에서 구조적 제약</text>
+  <text x="210" y="532" text-anchor="middle" class="sublabel">Istio Issue #40553, #26984, #45138</text>
+
+  <rect x="420" y="460" width="340" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="590" y="482" text-anchor="middle" class="label" font-weight="600" fill="#047857">inline jwks — 동작함</text>
+  <text x="590" y="500" text-anchor="middle" class="sublabel">Envoy가 로컬 메모리에서 공개키 보유</text>
+  <text x="590" y="516" text-anchor="middle" class="sublabel">istiod가 xDS로 Envoy에 JWKS 배포</text>
+  <text x="590" y="532" text-anchor="middle" class="sublabel">네트워크 호출 없음 → mTLS 제약 없음</text>
+
+  <!-- istiod xDS 화살표 → Envoy (inline 경로) -->
+  <line x1="280" y1="180" x2="420" y2="180" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow2)"/>
+  <rect x="298" y="164" width="104" height="14" fill="#FAFAFA"/>
+  <text x="350" y="175" text-anchor="middle" class="arrow-label" fill="#6D28D9">xDS 설정 배포</text>
+</svg>

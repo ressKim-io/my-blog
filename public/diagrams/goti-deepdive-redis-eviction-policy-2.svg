@@ -1,0 +1,137 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+     viewBox="0 0 800 520"
+     width="100%" height="auto"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="title-2">eviction(강제 축출)과 TTL 만료(자가 회복)의 차이</title>
+  <desc id="desc-2">eviction은 maxmemory 한도 도달 시 Redis가 정책에 따라 키를 강제로 제거하는 반면, TTL 만료는 키가 스스로 유효기간을 갖고 만료되는 두 메커니즘의 트리거·타이밍·영향 범위를 비교합니다</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .label-title { font-size: 14px; font-weight: 600; }
+    .label-body { font-size: 12px; }
+    .label-meta { font-size: 11px; fill: #27272A; }
+    .label-caption { font-size: 13px; font-weight: 600; }
+  </style>
+
+  <!-- 제목 -->
+  <text x="400" y="30" text-anchor="middle" class="label-title" fill="#0A0A0A">비교도 — eviction(강제 축출) vs TTL 만료(자가 회복)</text>
+
+  <!-- === 화살표 === -->
+  <defs>
+    <marker id="arr-black" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arr-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+
+  <!-- 구분선 (세로 중앙) -->
+  <line x1="400" y1="48" x2="400" y2="488" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 4"/>
+
+  <!-- 왼쪽 컬럼 헤더: Eviction -->
+  <rect x="40" y="48" width="320" height="36" rx="4"
+        fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="71" text-anchor="middle" class="label-caption" fill="#BE123C">Eviction — 강제 축출</text>
+
+  <!-- 오른쪽 컬럼 헤더: TTL 만료 -->
+  <rect x="440" y="48" width="320" height="36" rx="4"
+        fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="71" text-anchor="middle" class="label-caption" fill="#6D28D9">TTL 만료 — 자가 회복</text>
+
+  <!-- ===== 왼쪽: Eviction 흐름 ===== -->
+
+  <!-- 트리거 -->
+  <rect x="56" y="108" width="288" height="44" rx="4"
+        fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="128" text-anchor="middle" class="label-body" fill="#BE123C">트리거: used_memory >= maxmemory</text>
+  <text x="200" y="144" text-anchor="middle" class="label-meta">새 쓰기 명령이 들어올 때마다 검사</text>
+
+  <line x1="200" y1="152" x2="200" y2="180" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arr-rose)"/>
+
+  <!-- 정책 적용 -->
+  <rect x="56" y="180" width="288" height="44" rx="4"
+        fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="200" text-anchor="middle" class="label-body" fill="#BE123C">maxmemory-policy 적용</text>
+  <text x="200" y="216" text-anchor="middle" class="label-meta">LRU 근사 샘플 10개 중 가장 오래된 키 선택</text>
+
+  <line x1="200" y1="224" x2="200" y2="252" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arr-rose)"/>
+
+  <!-- 대상 키 제거 -->
+  <rect x="56" y="252" width="288" height="44" rx="4"
+        fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="272" text-anchor="middle" class="label-body" fill="#BE123C">대상 키 즉시 제거</text>
+  <text x="200" y="288" text-anchor="middle" class="label-meta">TTL 유무·만료 여부와 무관하게 삭제</text>
+
+  <line x1="200" y1="296" x2="200" y2="324" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arr-rose)"/>
+
+  <!-- 쓰기 허용 -->
+  <rect x="56" y="324" width="288" height="44" rx="4"
+        fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="344" text-anchor="middle" class="label-body" fill="#BE123C">메모리 공간 확보 → 쓰기 허용</text>
+  <text x="200" y="360" text-anchor="middle" class="label-meta">noeviction이면 이 단계 없이 오류 반환</text>
+
+  <!-- 특징 박스 -->
+  <rect x="56" y="392" width="288" height="80" rx="4"
+        fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="200" y="412" text-anchor="middle" class="label-meta" fill="#475569">특징</text>
+  <text x="72" y="430" class="label-meta" fill="#334155">- 외부 트리거: 메모리 압박</text>
+  <text x="72" y="448" class="label-meta" fill="#334155">- 예측 불가 — 언제 어떤 키가 사라질지 모름</text>
+  <text x="72" y="466" class="label-meta" fill="#334155">- SoT 패턴에서 noeviction으로 차단</text>
+
+  <!-- ===== 오른쪽: TTL 만료 흐름 ===== -->
+
+  <!-- 트리거 -->
+  <rect x="456" y="108" width="288" height="44" rx="4"
+        fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="128" text-anchor="middle" class="label-body" fill="#6D28D9">트리거: EXPIRE / PEXPIRE 설정 시점</text>
+  <text x="600" y="144" text-anchor="middle" class="label-meta">키마다 만료 시각을 expires 딕셔너리에 저장</text>
+
+  <line x1="600" y1="152" x2="600" y2="180" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arr-violet)"/>
+
+  <!-- 두 가지 삭제 경로 -->
+  <rect x="456" y="180" width="288" height="44" rx="4"
+        fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="200" text-anchor="middle" class="label-body" fill="#6D28D9">만료 처리 경로 (두 가지 병행)</text>
+  <text x="600" y="216" text-anchor="middle" class="label-meta">능동(Lazy) + 주기적(Active) 삭제</text>
+
+  <line x1="600" y1="224" x2="600" y2="252" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arr-violet)"/>
+
+  <!-- 능동 삭제 -->
+  <rect x="456" y="252" width="136" height="56" rx="4"
+        fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="524" y="272" text-anchor="middle" class="label-body" fill="#6D28D9">Lazy 삭제</text>
+  <text x="524" y="288" text-anchor="middle" class="label-meta">접근 시 만료 확인</text>
+  <text x="524" y="302" text-anchor="middle" class="label-meta">→ 즉시 제거</text>
+
+  <!-- 주기적 삭제 -->
+  <rect x="608" y="252" width="136" height="56" rx="4"
+        fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="676" y="272" text-anchor="middle" class="label-body" fill="#6D28D9">Active 삭제</text>
+  <text x="676" y="288" text-anchor="middle" class="label-meta">100ms 주기 백그라운드</text>
+  <text x="676" y="302" text-anchor="middle" class="label-meta">랜덤 샘플 스캔</text>
+
+  <line x1="524" y1="308" x2="600" y2="338" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arr-violet)"/>
+  <line x1="676" y1="308" x2="600" y2="338" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arr-violet)"/>
+
+  <!-- 키 제거 -->
+  <rect x="456" y="338" width="288" height="44" rx="4"
+        fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="358" text-anchor="middle" class="label-body" fill="#6D28D9">만료된 키 제거</text>
+  <text x="600" y="374" text-anchor="middle" class="label-meta">만료 시각이 지난 키만 정확히 삭제</text>
+
+  <!-- 특징 박스 -->
+  <rect x="456" y="392" width="288" height="80" rx="4"
+        fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="600" y="412" text-anchor="middle" class="label-meta" fill="#475569">특징</text>
+  <text x="472" y="430" class="label-meta" fill="#334155">- 내부 트리거: 시간 경과</text>
+  <text x="472" y="448" class="label-meta" fill="#334155">- 예측 가능 — EXPIRE 설정 시점에 결정</text>
+  <text x="472" y="466" class="label-meta" fill="#334155">- SoT 패턴: hold 만료(seat_holds TTL)에 활용</text>
+
+</svg>

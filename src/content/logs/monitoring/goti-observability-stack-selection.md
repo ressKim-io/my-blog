@@ -371,3 +371,14 @@ v1.x chart에서 `overrides.defaults`와 `per_tenant_overrides` 경로 혼동으
 - Tempo OOM + Kafka 버퍼 + tail sampling
 - Mimir Ingester OOM + webhook 교착
 - Tempo spanmetrics 유실 문제
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [Grafana Mimir — Distributor·Ingester·Querier가 PromQL을 수평 확장하는 법](/essays/goti-deepdive-mimir-architecture)
+- [Grafana Loki — 레이블 인덱싱으로 로그를 싸게 저장하는 법](/essays/goti-deepdive-loki-label-indexing)
+- [Grafana Tempo — 분산 트레이싱 저장·Exemplar·metrics_generator 동작 원리](/essays/goti-deepdive-tempo-tracing)
+- [관측 파이프라인의 Kafka 버퍼 — 시그널별 백프레셔 설계 원리](/essays/goti-deepdive-telemetry-kafka-buffer)

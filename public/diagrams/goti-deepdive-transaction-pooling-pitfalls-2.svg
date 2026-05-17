@@ -1,0 +1,124 @@
+<svg role="img" aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 440" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg">
+  <title id="title-2">transaction mode가 깨뜨리는 세션 의존 기능 3종</title>
+  <desc id="desc-2">prepared statement, LISTEN/NOTIFY, advisory lock 세 가지 모두 PostgreSQL 백엔드 연결에 바인딩된 세션 상태이며, transaction mode에서 연결이 교체될 때 소멸한다</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title { font-size: 14px; font-weight: 600; fill: #0A0A0A; }
+    .label { font-size: 12px; fill: #0A0A0A; }
+    .sublabel { font-size: 11px; fill: #27272A; }
+    .code { font-family: 'Geist Mono', 'Courier New', monospace; font-size: 11px; fill: #27272A; }
+    .conn-box { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 1.5; }
+    .feature-ok { fill: #ECFDF5; stroke: #059669; stroke-width: 1; }
+    .feature-err { fill: #FFF1F2; stroke: #E11D48; stroke-width: 1; }
+    .feature-warn { fill: #FFFBEB; stroke: #D97706; stroke-width: 1; }
+    .neutral { fill: #F8FAFC; stroke: #475569; stroke-width: 1; }
+    .badge-ok { fill: #059669; }
+    .badge-err { fill: #E11D48; }
+    .badge-warn { fill: #D97706; }
+  </style>
+
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-err" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E11D48"/>
+    </marker>
+    <marker id="arr-ok" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- 제목 -->
+  <text x="400" y="28" text-anchor="middle" class="title">transaction mode가 깨뜨리는 세션 의존 기능 3종</text>
+
+  <!-- ── 열 헤더 ── -->
+  <rect x="16" y="44" width="220" height="32" rx="4" class="neutral"/>
+  <text x="126" y="65" text-anchor="middle" class="label">기능</text>
+
+  <rect x="248" y="44" width="240" height="32" rx="4" class="feature-ok"/>
+  <text x="368" y="65" text-anchor="middle" class="label" fill="#047857">session mode (연결 고정)</text>
+
+  <rect x="504" y="44" width="280" height="32" rx="4" class="feature-err"/>
+  <text x="644" y="65" text-anchor="middle" class="label" fill="#BE123C">transaction mode (연결 교체)</text>
+
+  <!-- 행 구분선 -->
+  <line x1="16" y1="84" x2="784" y2="84" stroke="#E4E4E7" stroke-width="1"/>
+
+  <!-- ── 행 1: prepared statement ── -->
+  <!-- 기능 셀 -->
+  <rect x="16" y="92" width="220" height="88" rx="4" class="neutral"/>
+  <text x="126" y="114" text-anchor="middle" class="label" font-weight="600">Prepared</text>
+  <text x="126" y="130" text-anchor="middle" class="label" font-weight="600">Statement</text>
+  <text x="126" y="150" text-anchor="middle" class="sublabel">PREPARE stmt_1 AS ...</text>
+  <text x="126" y="166" text-anchor="middle" class="sublabel">EXECUTE stmt_1</text>
+
+  <!-- session mode 셀 -->
+  <rect x="248" y="92" width="240" height="88" rx="4" class="feature-ok"/>
+  <rect x="262" y="104" width="60" height="18" rx="3" class="badge-ok"/>
+  <text x="292" y="117" text-anchor="middle" class="sublabel" fill="white">정상 동작</text>
+  <text x="368" y="138" text-anchor="middle" class="sublabel" fill="#047857">stmt_1이 conn-1에 저장됨</text>
+  <text x="368" y="154" text-anchor="middle" class="sublabel" fill="#047857">연결이 바뀌지 않으므로</text>
+  <text x="368" y="170" text-anchor="middle" class="sublabel" fill="#047857">EXECUTE 시 항상 찾을 수 있음</text>
+
+  <!-- transaction mode 셀 -->
+  <rect x="504" y="92" width="280" height="88" rx="4" class="feature-err"/>
+  <rect x="518" y="104" width="60" height="18" rx="3" class="badge-err"/>
+  <text x="548" y="117" text-anchor="middle" class="sublabel" fill="white">충돌 발생</text>
+  <text x="644" y="138" text-anchor="middle" class="sublabel" fill="#BE123C">COMMIT 시 DISCARD ALL 실행</text>
+  <text x="644" y="154" text-anchor="middle" class="sublabel" fill="#BE123C">다음 트랜잭션: 다른 conn 배정</text>
+  <text x="644" y="170" text-anchor="middle" class="sublabel" fill="#BE123C">→ "stmt_1 does not exist" 오류</text>
+
+  <!-- ── 행 2: LISTEN/NOTIFY ── -->
+  <line x1="16" y1="188" x2="784" y2="188" stroke="#E4E4E7" stroke-width="1"/>
+
+  <rect x="16" y="196" width="220" height="88" rx="4" class="neutral"/>
+  <text x="126" y="218" text-anchor="middle" class="label" font-weight="600">LISTEN /</text>
+  <text x="126" y="234" text-anchor="middle" class="label" font-weight="600">NOTIFY</text>
+  <text x="126" y="254" text-anchor="middle" class="sublabel">LISTEN channel_name</text>
+  <text x="126" y="270" text-anchor="middle" class="sublabel">비동기 알림 수신</text>
+
+  <rect x="248" y="196" width="240" height="88" rx="4" class="feature-ok"/>
+  <rect x="262" y="208" width="60" height="18" rx="3" class="badge-ok"/>
+  <text x="292" y="221" text-anchor="middle" class="sublabel" fill="white">정상 동작</text>
+  <text x="368" y="242" text-anchor="middle" class="sublabel" fill="#047857">연결이 고정되어 있어</text>
+  <text x="368" y="258" text-anchor="middle" class="sublabel" fill="#047857">알림이 동일 conn에 도달함</text>
+  <text x="368" y="274" text-anchor="middle" class="sublabel" fill="#047857">앱이 알림을 수신할 수 있음</text>
+
+  <rect x="504" y="196" width="280" height="88" rx="4" class="feature-err"/>
+  <rect x="518" y="208" width="60" height="18" rx="3" class="badge-err"/>
+  <text x="548" y="221" text-anchor="middle" class="sublabel" fill="white">수신 불가</text>
+  <text x="644" y="242" text-anchor="middle" class="sublabel" fill="#BE123C">LISTEN 등록은 세션 상태</text>
+  <text x="644" y="258" text-anchor="middle" class="sublabel" fill="#BE123C">트랜잭션 종료 시 conn 반환</text>
+  <text x="644" y="274" text-anchor="middle" class="sublabel" fill="#BE123C">→ 알림이 다른 conn에 도달</text>
+
+  <!-- ── 행 3: advisory lock ── -->
+  <line x1="16" y1="292" x2="784" y2="292" stroke="#E4E4E7" stroke-width="1"/>
+
+  <rect x="16" y="300" width="220" height="88" rx="4" class="neutral"/>
+  <text x="126" y="322" text-anchor="middle" class="label" font-weight="600">Advisory Lock</text>
+  <text x="126" y="338" text-anchor="middle" class="label" font-weight="600">(session scope)</text>
+  <text x="126" y="358" text-anchor="middle" class="sublabel">pg_advisory_lock(key)</text>
+  <text x="126" y="374" text-anchor="middle" class="sublabel">명시 해제 전까지 유지</text>
+
+  <rect x="248" y="300" width="240" height="88" rx="4" class="feature-ok"/>
+  <rect x="262" y="312" width="60" height="18" rx="3" class="badge-ok"/>
+  <text x="292" y="325" text-anchor="middle" class="sublabel" fill="white">정상 동작</text>
+  <text x="368" y="346" text-anchor="middle" class="sublabel" fill="#047857">lock이 연결 수명과 같음</text>
+  <text x="368" y="362" text-anchor="middle" class="sublabel" fill="#047857">명시적 unlock 또는</text>
+  <text x="368" y="378" text-anchor="middle" class="sublabel" fill="#047857">연결 종료 시 해제</text>
+
+  <rect x="504" y="300" width="280" height="88" rx="4" class="feature-err"/>
+  <rect x="518" y="312" width="60" height="18" rx="3" class="badge-err"/>
+  <text x="548" y="325" text-anchor="middle" class="sublabel" fill="white">lock 소멸</text>
+  <text x="644" y="346" text-anchor="middle" class="sublabel" fill="#BE123C">conn 반환 시 lock 강제 해제</text>
+  <text x="644" y="362" text-anchor="middle" class="sublabel" fill="#BE123C">다음 Tx는 다른 conn 받아</text>
+  <text x="644" y="378" text-anchor="middle" class="sublabel" fill="#BE123C">→ cross-connection lock 깨짐</text>
+
+  <!-- ── 공통 원인 설명 ── -->
+  <rect x="16" y="400" width="768" height="32" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="400" y="420" text-anchor="middle" class="sublabel" fill="#6D28D9" font-weight="600">공통 원인: 세 기능 모두 PostgreSQL 백엔드 연결(프로세스)에 바인딩된 세션 상태 — transaction mode는 매 트랜잭션마다 이 연결을 교체합니다</text>
+</svg>

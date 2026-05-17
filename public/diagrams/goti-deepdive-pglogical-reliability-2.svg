@@ -1,0 +1,107 @@
+<svg role="img" aria-labelledby="title-rel2 desc-rel2"
+  viewBox="0 0 800 480" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-rel2">WAL archive 유무에 따른 PITR 복구 가능 시점 차이</title>
+  <desc id="desc-rel2">WAL archive 없는 환경에서는 가장 최근 스냅샷 시점까지만 복구 가능하여 스냅샷 이후 변경이 유실됩니다. WAL archive 환경에서는 wal-g나 Barman이 WAL을 오브젝트 스토리지에 지속 보관하여 장애 직전 시점까지 PITR이 가능합니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" font-size="15" font-weight="700" fill="#0A0A0A" text-anchor="middle">WAL archive 유무에 따른 PITR 복구 가능 시점</text>
+
+  <!-- 시간 축 레이블 (공통) -->
+  <text x="80" y="70" font-size="11" fill="#334155">T0</text>
+  <text x="76" y="84" font-size="10" fill="#334155">스냅샷</text>
+  <text x="320" y="70" font-size="11" fill="#334155">T1</text>
+  <text x="284" y="84" font-size="10" fill="#334155">변경 누적</text>
+  <text x="560" y="70" font-size="11" fill="#334155">T2</text>
+  <text x="536" y="84" font-size="10" fill="#334155">장애 발생</text>
+  <text x="704" y="70" font-size="11" fill="#334155">T3</text>
+  <text x="680" y="84" font-size="10" fill="#334155">복구 완료</text>
+
+  <!-- 공통 시간축 선 -->
+  <line x1="80" y1="90" x2="730" y2="90" stroke="#D4D4D8" stroke-width="1.5"/>
+  <circle cx="80" cy="90" r="4" fill="#475569"/>
+  <circle cx="320" cy="90" r="4" fill="#475569"/>
+  <circle cx="560" cy="90" r="4" fill="#475569"/>
+  <circle cx="720" cy="90" r="4" fill="#475569"/>
+
+  <!-- ===== WAL archive 없는 경우 (위쪽) ===== -->
+  <text x="400" y="122" font-size="13" font-weight="700" fill="#BE123C" text-anchor="middle">WAL archive 없음 (스냅샷만)</text>
+
+  <!-- T0: 스냅샷 영역 -->
+  <rect x="80" y="134" width="80" height="48" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="120" y="154" font-size="12" font-weight="600" fill="#B45309" text-anchor="middle">스냅샷</text>
+  <text x="120" y="170" font-size="10" fill="#B45309" text-anchor="middle">gcloud disks</text>
+
+  <!-- T0~T2: WAL 기록 (선) -->
+  <line x1="160" y1="158" x2="560" y2="158" stroke="#D4D4D8" stroke-width="8" stroke-linecap="round"/>
+  <text x="360" y="148" font-size="10" fill="#334155" text-anchor="middle">WAL 기록 (로컬만, archive 없음)</text>
+
+  <!-- T2: 장애 마크 -->
+  <line x1="560" y1="128" x2="560" y2="192" stroke="#E11D48" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="560" y="124" font-size="11" fill="#BE123C" text-anchor="middle">VM 장애</text>
+
+  <!-- 유실 구간 표시 -->
+  <rect x="160" y="174" width="400" height="24" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="360" y="190" font-size="11" font-weight="600" fill="#BE123C" text-anchor="middle">T0 이후 모든 변경 유실</text>
+
+  <!-- T3: 복구 결과 -->
+  <rect x="600" y="134" width="120" height="48" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="660" y="154" font-size="12" font-weight="600" fill="#BE123C" text-anchor="middle">T0 시점으로만</text>
+  <text x="660" y="170" font-size="11" fill="#BE123C" text-anchor="middle">복구 가능</text>
+
+  <!-- 화살표 -->
+  <line x1="560" y1="158" x2="598" y2="158" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr2)"/>
+
+  <!-- 구분선 -->
+  <line x1="40" y1="218" x2="760" y2="218" stroke="#E4E4E7" stroke-width="1"/>
+
+  <!-- ===== WAL archive 있는 경우 (아래쪽) ===== -->
+  <text x="400" y="244" font-size="13" font-weight="700" fill="#047857" text-anchor="middle">WAL archive 있음 (wal-g / Barman → GCS·S3)</text>
+
+  <!-- T0: 풀 백업 박스 -->
+  <rect x="80" y="256" width="80" height="48" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="120" y="276" font-size="12" font-weight="600" fill="#B45309" text-anchor="middle">풀 백업</text>
+  <text x="120" y="292" font-size="10" fill="#B45309" text-anchor="middle">일일 1회</text>
+
+  <!-- WAL archive 연속 화살표 -->
+  <rect x="160" y="264" width="400" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="360" y="276" font-size="11" fill="#047857" text-anchor="middle">WAL 세그먼트 연속 archive</text>
+  <text x="360" y="290" font-size="10" fill="#047857" text-anchor="middle">(wal-g / Barman → GCS / S3, 분 단위)</text>
+
+  <!-- T2: 장애 마크 -->
+  <line x1="560" y1="250" x2="560" y2="314" stroke="#E11D48" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="560" y="246" font-size="11" fill="#BE123C" text-anchor="middle">VM 장애</text>
+
+  <!-- PITR 복구 가능 구간 -->
+  <rect x="160" y="306" width="400" height="24" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="360" y="322" font-size="11" font-weight="600" fill="#047857" text-anchor="middle">T0 이후 장애 직전까지 임의 시점 복구 가능 (PITR)</text>
+
+  <!-- T3: 복구 결과 -->
+  <rect x="600" y="256" width="120" height="48" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="660" y="276" font-size="12" font-weight="600" fill="#047857" text-anchor="middle">장애 직전 임의</text>
+  <text x="660" y="292" font-size="11" fill="#047857" text-anchor="middle">시점으로 복구</text>
+
+  <!-- 화살표 -->
+  <line x1="560" y1="280" x2="598" y2="280" stroke="#059669" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+  <!-- wal-g / Barman 아이콘 박스 -->
+  <rect x="232" y="344" width="296" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="380" y="366" font-size="12" font-weight="700" fill="#6D28D9" text-anchor="middle">wal-g / Barman 역할</text>
+  <text x="380" y="386" font-size="11" fill="#6D28D9" text-anchor="middle">archive_command: WAL 세그먼트 완성 즉시 업로드</text>
+  <text x="380" y="402" font-size="11" fill="#6D28D9" text-anchor="middle">restore_command: 복구 시 필요 WAL 순서대로 다운로드</text>
+  <text x="380" y="418" font-size="11" fill="#6D28D9" text-anchor="middle">Restore drill: 분기 1회 실제 복구 검증 권장</text>
+
+  <!-- 마커 정의 -->
+  <defs>
+    <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

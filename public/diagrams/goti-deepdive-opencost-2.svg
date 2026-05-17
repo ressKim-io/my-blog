@@ -1,0 +1,79 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 480" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-2">OpenCost Cost Allocation — namespace·pod 비용 분해 구조도</title>
+  <desc id="desc-2">노드 비용을 CPU·Memory 가중치로 namespace와 pod에 배분하는 Cost Allocation 원리와 Idle Cost 분리 방식을 보여주는 구조도</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">구조도 — Cost Allocation: 노드 비용 → namespace·pod 분해</text>
+
+  <!-- === 상단: 노드 비용 입력 === -->
+
+  <!-- Node -->
+  <rect x="280" y="56" width="240" height="72" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="400" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Node (EC2 m5.xlarge)</text>
+  <text x="400" y="101" text-anchor="middle" font-size="12" fill="#27272A">$0.192/hr — 4 vCPU · 16 GB</text>
+
+  <!-- 화살표 down -->
+  <line x1="400" y1="128" x2="400" y2="172" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <rect x="310" y="139" width="180" height="18" fill="#FAFAFA"/>
+  <text x="400" y="152" text-anchor="middle" font-size="11" fill="#27272A">Pricing API 단가 × 사용 시간</text>
+
+  <!-- === 중간: 비용 분해 엔진 === -->
+
+  <rect x="168" y="172" width="464" height="80" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="400" y="198" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">Cost Allocation 엔진</text>
+  <text x="400" y="218" text-anchor="middle" font-size="12" fill="#27272A">CPU cost = 노드 비용 × (pod CPU request / 노드 총 CPU)</text>
+  <text x="400" y="237" text-anchor="middle" font-size="12" fill="#27272A">Memory cost = 노드 비용 × (pod Mem request / 노드 총 Mem)</text>
+
+  <!-- === 하단 분기: namespace별 출력 === -->
+
+  <!-- 화살표 → ns-a -->
+  <line x1="280" y1="252" x2="160" y2="320" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+  <!-- 화살표 → idle -->
+  <line x1="400" y1="252" x2="400" y2="320" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr2-weak)"/>
+
+  <!-- 화살표 → ns-b -->
+  <line x1="520" y1="252" x2="640" y2="320" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+  <!-- namespace: ticketing -->
+  <rect x="56" y="320" width="200" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="156" y="346" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">ns: ticketing</text>
+  <text x="156" y="366" text-anchor="middle" font-size="11" fill="#27272A">CPU $0.048/hr</text>
+  <text x="156" y="383" text-anchor="middle" font-size="11" fill="#27272A">Mem $0.024/hr</text>
+
+  <!-- Idle Cost -->
+  <rect x="300" y="320" width="200" height="80" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="400" y="346" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">Idle Cost</text>
+  <text x="400" y="366" text-anchor="middle" font-size="11" fill="#27272A">할당되지 않은 용량</text>
+  <text x="400" y="383" text-anchor="middle" font-size="11" fill="#27272A">request 미설정 Pod 포함</text>
+
+  <!-- namespace: resale -->
+  <rect x="544" y="320" width="200" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="644" y="346" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">ns: resale</text>
+  <text x="644" y="366" text-anchor="middle" font-size="11" fill="#27272A">CPU $0.020/hr</text>
+  <text x="644" y="383" text-anchor="middle" font-size="11" fill="#27272A">Mem $0.010/hr</text>
+
+  <!-- === 하단: 집계 결과 === -->
+
+  <!-- 화살표 →  집계 -->
+  <line x1="156" y1="400" x2="280" y2="440" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <line x1="644" y1="400" x2="520" y2="440" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+  <!-- Prometheus exporter 메트릭 -->
+  <rect x="248" y="440" width="304" height="28" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="458" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">opencost_namespace_cost_hourly{namespace="ticketing"} 0.072</text>
+
+  <!-- 화살표 마커 -->
+  <defs>
+    <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr2-weak" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>

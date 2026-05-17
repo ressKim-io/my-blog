@@ -1,0 +1,103 @@
+<svg
+  role="img"
+  aria-labelledby="title-2 desc-2"
+  viewBox="0 0 760 420"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-2">Sidecar 모드 트래픽 흐름 — iptables 리디렉션과 Envoy 처리 단계</title>
+  <desc id="desc-2">외부 요청이 iptables 규칙에 의해 Envoy inbound(포트 15006)로 리디렉션되고, L4 mTLS 종료·L7 파싱·메트릭·트레이스 기록 후 App Container로 전달되며, 아웃바운드 응답은 다시 iptables를 통해 Envoy outbound(포트 15001)를 거쳐 mTLS로 원격 Pod의 Envoy inbound에 도달하는 5단계 흐름</desc>
+
+  <rect width="760" height="420" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="380" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="#0A0A0A">Sidecar 모드 — 트래픽 흐름 (Pod 내부)</text>
+
+  <!-- Pod 외곽 -->
+  <rect x="160" y="48" width="440" height="348" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="380" y="70" text-anchor="middle" font-size="11" fill="#047857">Pod (App + Envoy Sidecar)</text>
+
+  <!-- ─── 1. 외부 요청 ─── -->
+  <rect x="24" y="88" width="128" height="48" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="88" y="108" text-anchor="middle" font-size="12" font-weight="bold" fill="#334155">외부 요청</text>
+  <text x="88" y="126" text-anchor="middle" font-size="10" fill="#334155">HTTP / gRPC</text>
+
+  <!-- 외부 요청 → Envoy inbound 화살표 -->
+  <line x1="152" y1="112" x2="184" y2="112" stroke="#0A0A0A" stroke-width="1.5"/>
+  <polygon points="180,108 184,112 180,116" fill="#0A0A0A"/>
+  <!-- iptables 라벨 배경 -->
+  <rect x="152" y="96" width="32" height="14" fill="#FAFAFA"/>
+  <text x="168" y="107" text-anchor="middle" font-size="9" fill="#6D28D9">iptables</text>
+  <text x="168" y="118" text-anchor="middle" font-size="9" fill="#6D28D9">→ :15006</text>
+
+  <!-- ─── 2. Envoy inbound ─── -->
+  <rect x="184" y="80" width="160" height="96" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="264" y="102" text-anchor="middle" font-size="12" font-weight="bold" fill="#6D28D9">Envoy inbound</text>
+  <text x="264" y="118" text-anchor="middle" font-size="10" fill="#6D28D9">:15006</text>
+  <text x="264" y="136" text-anchor="middle" font-size="10" fill="#6D28D9">L4 mTLS 종료</text>
+  <text x="264" y="150" text-anchor="middle" font-size="10" fill="#6D28D9">L7 파싱 · 메트릭 · 트레이스</text>
+  <text x="264" y="164" text-anchor="middle" font-size="10" fill="#6D28D9">Span 생성 / OTLP export</text>
+
+  <!-- Envoy inbound → App Container 화살표 -->
+  <line x1="264" y1="176" x2="264" y2="208" stroke="#0A0A0A" stroke-width="1.5"/>
+  <polygon points="260,204 264,208 268,204" fill="#0A0A0A"/>
+
+  <!-- ─── 3. App Container ─── -->
+  <rect x="184" y="208" width="160" height="56" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="264" y="232" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">App Container</text>
+  <text x="264" y="250" text-anchor="middle" font-size="10" fill="#047857">비즈니스 로직 처리</text>
+
+  <!-- App Container → Envoy outbound 화살표 -->
+  <line x1="264" y1="264" x2="264" y2="296" stroke="#0A0A0A" stroke-width="1.5"/>
+  <polygon points="260,292 264,296 268,292" fill="#0A0A0A"/>
+  <!-- iptables 라벨 -->
+  <rect x="270" y="272" width="32" height="14" fill="#FAFAFA"/>
+  <text x="286" y="283" font-size="9" fill="#6D28D9">iptables</text>
+  <text x="286" y="294" font-size="9" fill="#6D28D9">→ :15001</text>
+
+  <!-- ─── 4. Envoy outbound ─── -->
+  <rect x="184" y="296" width="160" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="264" y="318" text-anchor="middle" font-size="12" font-weight="bold" fill="#6D28D9">Envoy outbound</text>
+  <text x="264" y="334" text-anchor="middle" font-size="10" fill="#6D28D9">:15001</text>
+  <text x="264" y="350" text-anchor="middle" font-size="10" fill="#6D28D9">L7 라우팅 · DestinationRule 적용</text>
+  <text x="264" y="366" text-anchor="middle" font-size="10" fill="#6D28D9">mTLS 암호화 · OTLP export</text>
+
+  <!-- Envoy outbound → 원격 Pod 화살표 -->
+  <line x1="344" y1="336" x2="584" y2="336" stroke="#0A0A0A" stroke-width="1.5"/>
+  <polygon points="580,332 584,336 580,340" fill="#0A0A0A"/>
+  <!-- mTLS 라벨 -->
+  <rect x="430" y="322" width="64" height="14" fill="#FAFAFA"/>
+  <text x="462" y="333" text-anchor="middle" font-size="10" fill="#E11D48" font-weight="bold">mTLS</text>
+
+  <!-- ─── 5. 원격 Pod Envoy inbound ─── -->
+  <rect x="584" y="296" width="152" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="660" y="318" text-anchor="middle" font-size="12" font-weight="bold" fill="#6D28D9">원격 Pod</text>
+  <text x="660" y="334" text-anchor="middle" font-size="11" fill="#6D28D9">Envoy inbound</text>
+  <text x="660" y="350" text-anchor="middle" font-size="10" fill="#6D28D9">mTLS 종료</text>
+  <text x="660" y="366" text-anchor="middle" font-size="10" fill="#6D28D9">L7 파싱 · 메트릭 기록</text>
+
+  <!-- 단계 번호 -->
+  <circle cx="88" cy="148" r="10" fill="#7C3AED"/>
+  <text x="88" y="152" text-anchor="middle" font-size="10" font-weight="bold" fill="#FAFAFA">1</text>
+
+  <circle cx="264" cy="52" r="10" fill="#7C3AED"/>
+  <text x="264" y="56" text-anchor="middle" font-size="10" font-weight="bold" fill="#FAFAFA">2</text>
+
+  <circle cx="380" cy="232" r="10" fill="#059669"/>
+  <text x="380" y="236" text-anchor="middle" font-size="10" font-weight="bold" fill="#FAFAFA">3</text>
+
+  <circle cx="264" cy="388" r="10" fill="#7C3AED"/>
+  <text x="264" y="392" text-anchor="middle" font-size="10" font-weight="bold" fill="#FAFAFA">4</text>
+
+  <circle cx="660" cy="388" r="10" fill="#7C3AED"/>
+  <text x="660" y="392" text-anchor="middle" font-size="10" font-weight="bold" fill="#FAFAFA">5</text>
+
+  <!-- 범례 -->
+  <rect x="24" y="360" width="120" height="48" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="32" y="370" width="12" height="12" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="50" y="380" font-size="10" fill="#334155">Envoy Sidecar</text>
+  <rect x="32" y="388" width="12" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="50" y="398" font-size="10" fill="#334155">App Container</text>
+</svg>

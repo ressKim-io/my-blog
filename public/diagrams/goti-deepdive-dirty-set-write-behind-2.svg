@@ -1,0 +1,111 @@
+<svg
+  role="img"
+  aria-labelledby="title-2 desc-2"
+  viewBox="0 0 800 480"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-2">Reconciliation 루프 — 캐시-DB drift 감지 및 보정 흐름도</title>
+  <desc id="desc-2">Reconciliation Job이 주기적으로 Redis 집계값과 RDS count를 비교해 drift를 감지하고, drift 발생 시 알림을 보내거나 Redis 값을 RDS 기준으로 덮어쓰는 자동 복구 흐름</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">흐름도 — Reconciliation drift 감지 및 복구</text>
+
+  <!-- ────────────── 화살표 (먼저) ────────────── -->
+
+  <!-- Job → Redis 조회 -->
+  <line x1="400" y1="100" x2="240" y2="140" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+  <rect x="280" y="108" width="80" height="18" fill="#FAFAFA"/>
+  <text x="320" y="120" text-anchor="middle" font-size="11" fill="#27272A">집계 조회</text>
+
+  <!-- Job → RDS 조회 -->
+  <line x1="400" y1="100" x2="560" y2="140" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+  <rect x="440" y="108" width="80" height="18" fill="#FAFAFA"/>
+  <text x="480" y="120" text-anchor="middle" font-size="11" fill="#27272A">COUNT 조회</text>
+
+  <!-- Redis → 비교 -->
+  <line x1="200" y1="200" x2="320" y2="248" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- RDS → 비교 -->
+  <line x1="600" y1="200" x2="480" y2="248" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr-b2)"/>
+
+  <!-- 비교 → drift 없음 -->
+  <line x1="320" y1="300" x2="160" y2="380" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-g2)"/>
+  <rect x="196" y="328" width="72" height="18" fill="#FAFAFA"/>
+  <text x="232" y="340" text-anchor="middle" font-size="11" fill="#047857">일치</text>
+
+  <!-- 비교 → drift 있음 -->
+  <line x1="480" y1="300" x2="600" y2="358" stroke="#E11D48" stroke-width="2" marker-end="url(#arr-r2)"/>
+  <rect x="504" y="316" width="72" height="18" fill="#FAFAFA"/>
+  <text x="540" y="328" text-anchor="middle" font-size="11" fill="#BE123C">불일치(drift)</text>
+
+  <!-- drift → 알림 -->
+  <line x1="640" y1="398" x2="720" y2="398" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr-r2)"/>
+  <text x="756" y="402" text-anchor="middle" font-size="11" fill="#BE123C">알림</text>
+
+  <!-- drift → Redis 덮어쓰기 -->
+  <line x1="600" y1="398" x2="480" y2="440" stroke="#7C3AED" stroke-width="2" marker-end="url(#arr-v2)"/>
+  <rect x="498" y="413" width="80" height="18" fill="#FAFAFA"/>
+  <text x="538" y="425" text-anchor="middle" font-size="11" fill="#6D28D9">Redis 값 교정</text>
+
+  <!-- ────────────── 박스 ────────────── -->
+
+  <!-- Reconciliation Job -->
+  <rect x="320" y="56" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Reconciliation</text>
+  <text x="400" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Job</text>
+  <text x="400" y="113" text-anchor="middle" font-size="10" fill="#27272A">매 N분 실행</text>
+
+  <!-- Redis -->
+  <rect x="80" y="140" width="120" height="60" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="140" y="165" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Redis</text>
+  <text x="140" y="182" text-anchor="middle" font-size="11" fill="#6D28D9">캐시 집계값</text>
+
+  <!-- RDS -->
+  <rect x="600" y="140" width="120" height="60" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="660" y="165" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">RDS</text>
+  <text x="660" y="182" text-anchor="middle" font-size="11" fill="#6D28D9">DB count</text>
+
+  <!-- 비교 로직 -->
+  <rect x="320" y="248" width="160" height="60" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="273" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">값 비교</text>
+  <text x="400" y="290" text-anchor="middle" font-size="11" fill="#B45309">Redis ↔ RDS</text>
+
+  <!-- 정상 결과 -->
+  <rect x="80" y="360" width="120" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="385" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">정상</text>
+  <text x="140" y="402" text-anchor="middle" font-size="11" fill="#047857">다음 주기 대기</text>
+
+  <!-- drift 감지 -->
+  <rect x="520" y="360" width="120" height="60" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="580" y="385" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">Drift 감지</text>
+  <text x="580" y="402" text-anchor="middle" font-size="11" fill="#BE123C">알림 + 복구</text>
+
+  <!-- Redis 교정 결과 -->
+  <rect x="360" y="430" width="120" height="36" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="420" y="451" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Redis ← RDS 기준 덮어쓰기</text>
+
+  <!-- 범례 -->
+  <rect x="40" y="10" width="160" height="30" rx="4" fill="none"/>
+
+  <!-- 화살촉 마커 -->
+  <defs>
+    <marker id="arr-b2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr-g2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arr-r2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#E11D48"/>
+    </marker>
+    <marker id="arr-v2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7C3AED"/>
+    </marker>
+  </defs>
+</svg>

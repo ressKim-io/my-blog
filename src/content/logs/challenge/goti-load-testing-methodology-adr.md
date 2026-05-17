@@ -284,3 +284,13 @@ Redis FLUSHDB, HPA/KEDA 비활성, Redis DB 분리, `RUNNER_ID` 라벨은 모두
 서버 Prometheus의 `http_request_duration`은 서버가 응답을 만드는 데 걸린 시간입니다.
 클라이언트가 TLS handshake·TCP 연결·Cloudflare edge를 거친 후 실제로 기다린 시간은 k6 클라이언트 메트릭(`http_req_duration`, TTFB)으로만 측정됩니다.
 두 지표를 같은 시간축에 놓고 보면 병목 위치(서버 vs edge)가 명확해집니다.
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [k6 — VU 모델과 thresholds로 부하를 만들고 합격을 판정하는 원리](/essays/goti-deepdive-k6-load-testing)
+- [Prometheus Remote Write — snappy 압축 protobuf로 메트릭을 push하는 원리](/essays/goti-deepdive-prometheus-remote-write)
+- [k6 executor — VU 라이프사이클과 워크로드 모델의 동작 원리](/essays/goti-deepdive-k6-executor)

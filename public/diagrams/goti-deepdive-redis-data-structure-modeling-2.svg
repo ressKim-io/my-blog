@@ -1,0 +1,125 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 480" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-2">Redis 5대 자료구조 — 시간복잡도·적합 용도 비교</title>
+  <desc id="desc-2">HASH·STRING·LIST·ZSET·SET 각각의 대표 명령, 시간복잡도, 주요 용도를 나란히 비교합니다</desc>
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .head-label { font-size: 13px; font-weight: 700; }
+    .col-title  { font-size: 13px; font-weight: 600; }
+    .cell-text  { font-size: 11px; }
+    .cell-code  { font-family: 'Geist Mono', 'Consolas', monospace; font-size: 11px; }
+    .dim        { fill: #475569; }
+  </style>
+
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">Redis 5대 자료구조 — 시간복잡도와 적합 용도</text>
+
+  <!-- 열 헤더 배경 -->
+  <rect x="24" y="48" width="752" height="36" rx="4" fill="#F4F4F5"/>
+
+  <!-- 열 헤더 텍스트 -->
+  <text x="100" y="70" text-anchor="middle" class="head-label" fill="#0A0A0A">자료구조</text>
+  <text x="272" y="70" text-anchor="middle" class="head-label" fill="#0A0A0A">대표 명령</text>
+  <text x="456" y="70" text-anchor="middle" class="head-label" fill="#0A0A0A">시간복잡도</text>
+  <text x="640" y="70" text-anchor="middle" class="head-label" fill="#0A0A0A">주요 용도</text>
+
+  <!-- 행 구분선 -->
+  <line x1="24" y1="84" x2="776" y2="84" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="24" y1="160" x2="776" y2="160" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="24" y1="236" x2="776" y2="236" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="24" y1="312" x2="776" y2="312" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="24" y1="388" x2="776" y2="388" stroke="#E4E4E7" stroke-width="1"/>
+
+  <!-- 열 구분선 -->
+  <line x1="184" y1="48" x2="184" y2="464" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="368" y1="48" x2="368" y2="464" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="544" y1="48" x2="544" y2="464" stroke="#E4E4E7" stroke-width="1"/>
+
+  <!-- 테두리 -->
+  <rect x="24" y="48" width="752" height="416" rx="4" fill="none" stroke="#D4D4D8" stroke-width="1"/>
+
+  <!-- ─── 행 1: HASH ─── -->
+  <rect x="24" y="84" width="160" height="76" fill="#F5F3FF"/>
+  <text x="104" y="115" text-anchor="middle" class="col-title" fill="#6D28D9">HASH</text>
+  <text x="104" y="134" text-anchor="middle" class="cell-text dim">필드-값 쌍의 집합</text>
+  <text x="104" y="150" text-anchor="middle" class="cell-text dim">키 하나에 여러 속성</text>
+
+  <text x="276" y="108" text-anchor="middle" class="cell-code" fill="#0A0A0A">HSET / HGET / HGETALL</text>
+  <text x="276" y="126" text-anchor="middle" class="cell-code" fill="#0A0A0A">HMSET / HDEL / HEXISTS</text>
+  <text x="276" y="144" text-anchor="middle" class="cell-code" fill="#0A0A0A">HINCRBY</text>
+
+  <text x="456" y="115" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(1) 단일 필드 읽기</text>
+  <text x="456" y="133" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(N) 전체 읽기 (HGETALL)</text>
+
+  <text x="640" y="108" text-anchor="middle" class="cell-text" fill="#0A0A0A">엔티티 객체 저장</text>
+  <text x="640" y="126" text-anchor="middle" class="cell-text" fill="#0A0A0A">(주문, 좌석 상태, 인벤토리)</text>
+  <text x="640" y="144" text-anchor="middle" class="cell-text" fill="#0A0A0A">필드 부분 갱신에 최적</text>
+
+  <!-- ─── 행 2: STRING + TTL ─── -->
+  <rect x="24" y="160" width="160" height="76" fill="#FFFBEB"/>
+  <text x="104" y="191" text-anchor="middle" class="col-title" fill="#B45309">STRING</text>
+  <text x="104" y="208" text-anchor="middle" class="cell-text dim">바이트 시퀀스 단일 값</text>
+  <text x="104" y="224" text-anchor="middle" class="cell-text dim">TTL 만료 기본 지원</text>
+
+  <text x="276" y="184" text-anchor="middle" class="cell-code" fill="#0A0A0A">SET / GET / DEL</text>
+  <text x="276" y="202" text-anchor="middle" class="cell-code" fill="#0A0A0A">SET NX EX / SETNX</text>
+  <text x="276" y="220" text-anchor="middle" class="cell-code" fill="#0A0A0A">INCR / DECR</text>
+
+  <text x="456" y="199" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(1) 모든 연산</text>
+
+  <text x="640" y="184" text-anchor="middle" class="cell-text" fill="#0A0A0A">임시 잠금 (NX = 최초만 성공)</text>
+  <text x="640" y="202" text-anchor="middle" class="cell-text" fill="#0A0A0A">멱등키 (TTL로 자동 만료)</text>
+  <text x="640" y="220" text-anchor="middle" class="cell-text" fill="#0A0A0A">카운터, 세션 토큰</text>
+
+  <!-- ─── 행 3: LIST ─── -->
+  <rect x="24" y="236" width="160" height="76" fill="#ECFEFF"/>
+  <text x="104" y="267" text-anchor="middle" class="col-title" fill="#0E7490">LIST</text>
+  <text x="104" y="284" text-anchor="middle" class="cell-text dim">삽입 순서 보장</text>
+  <text x="104" y="300" text-anchor="middle" class="cell-text dim">양쪽 끝 O(1) 조작</text>
+
+  <text x="276" y="260" text-anchor="middle" class="cell-code" fill="#0A0A0A">RPUSH / LPUSH</text>
+  <text x="276" y="278" text-anchor="middle" class="cell-code" fill="#0A0A0A">LPOP / RPOP</text>
+  <text x="276" y="296" text-anchor="middle" class="cell-code" fill="#0A0A0A">LRANGE / LLEN</text>
+
+  <text x="456" y="267" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(1) 양 끝 push/pop</text>
+  <text x="456" y="285" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(S+N) LRANGE (범위 조회)</text>
+
+  <text x="640" y="260" text-anchor="middle" class="cell-text" fill="#0A0A0A">순서 있는 하위 항목</text>
+  <text x="640" y="278" text-anchor="middle" class="cell-text" fill="#0A0A0A">(주문 항목 목록)</text>
+  <text x="640" y="296" text-anchor="middle" class="cell-text" fill="#0A0A0A">큐, 로그 버퍼</text>
+
+  <!-- ─── 행 4: ZSET ─── -->
+  <rect x="24" y="312" width="160" height="76" fill="#FFF1F2"/>
+  <text x="104" y="343" text-anchor="middle" class="col-title" fill="#BE123C">ZSET</text>
+  <text x="104" y="360" text-anchor="middle" class="cell-text dim">score 기준 정렬</text>
+  <text x="104" y="376" text-anchor="middle" class="cell-text dim">중복 없는 정렬 집합</text>
+
+  <text x="276" y="336" text-anchor="middle" class="cell-code" fill="#0A0A0A">ZADD / ZRANGE</text>
+  <text x="276" y="354" text-anchor="middle" class="cell-code" fill="#0A0A0A">ZRANGEBYSCORE</text>
+  <text x="276" y="372" text-anchor="middle" class="cell-code" fill="#0A0A0A">ZRANK / ZSCORE / ZCARD</text>
+
+  <text x="456" y="343" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(log N) 추가·삭제</text>
+  <text x="456" y="361" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(log N + M) 범위 조회</text>
+
+  <text x="640" y="336" text-anchor="middle" class="cell-text" fill="#0A0A0A">정렬 인덱스 (유저별 주문 목록)</text>
+  <text x="640" y="354" text-anchor="middle" class="cell-text" fill="#0A0A0A">score = 타임스탬프 → 최신순</text>
+  <text x="640" y="372" text-anchor="middle" class="cell-text" fill="#0A0A0A">리더보드, 범위 검색</text>
+
+  <!-- ─── 행 5: SET ─── -->
+  <rect x="24" y="388" width="160" height="76" fill="#F8FAFC"/>
+  <text x="104" y="419" text-anchor="middle" class="col-title" fill="#334155">SET</text>
+  <text x="104" y="436" text-anchor="middle" class="cell-text dim">중복 없는 비순서 집합</text>
+  <text x="104" y="452" text-anchor="middle" class="cell-text dim">교집합·합집합 연산</text>
+
+  <text x="276" y="412" text-anchor="middle" class="cell-code" fill="#0A0A0A">SADD / SREM / SMEMBERS</text>
+  <text x="276" y="430" text-anchor="middle" class="cell-code" fill="#0A0A0A">SISMEMBER / SCARD</text>
+  <text x="276" y="448" text-anchor="middle" class="cell-code" fill="#0A0A0A">SUNION / SINTER / SDIFF</text>
+
+  <text x="456" y="419" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(1) 추가·멤버십 확인</text>
+  <text x="456" y="437" text-anchor="middle" class="cell-text" fill="#0A0A0A">O(N) 전체 열거</text>
+
+  <text x="640" y="412" text-anchor="middle" class="cell-text" fill="#0A0A0A">유저 보유 holds 집합</text>
+  <text x="640" y="430" text-anchor="middle" class="cell-text" fill="#0A0A0A">중복 방지·멤버십 검사</text>
+  <text x="640" y="448" text-anchor="middle" class="cell-text" fill="#0A0A0A">태그 교집합 검색</text>
+</svg>

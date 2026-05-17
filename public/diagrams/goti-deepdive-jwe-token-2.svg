@@ -1,0 +1,123 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 680" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">JWE 기반 Stateless 검증 흐름</title>
+  <desc id="desc-2">클라이언트가 JWE 토큰을 발급받은 뒤 매 polling 요청 시 서버가 서버 상태 없이 복호화와 exp 검증만으로 사용자를 식별하는 5단계 흐름입니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="680" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">JWE Stateless 검증 흐름</text>
+  <text x="400" y="54" text-anchor="middle" font-size="11" fill="#27272A">토큰 발급 → CDN polling → 서버 stateless 검증</text>
+
+  <!-- ── 참여자 헤더 ─────────────────────────────── -->
+  <!-- Client -->
+  <rect x="40" y="80" width="140" height="44" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="110" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Client</text>
+  <text x="110" y="114" text-anchor="middle" font-size="10" fill="#0E7490">Browser / App</text>
+
+  <!-- Cloudflare CDN -->
+  <rect x="300" y="80" width="200" height="44" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#B45309">Cloudflare CDN</text>
+  <text x="400" y="114" text-anchor="middle" font-size="10" fill="#B45309">Edge PoP — Cache 판단</text>
+
+  <!-- Origin Server -->
+  <rect x="620" y="80" width="140" height="44" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="690" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">Origin</text>
+  <text x="690" y="114" text-anchor="middle" font-size="10" fill="#047857">goti-queue 서버</text>
+
+  <!-- 생명선 -->
+  <line x1="110" y1="124" x2="110" y2="660" stroke="#0891B2" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="400" y1="124" x2="400" y2="660" stroke="#D97706" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="690" y1="124" x2="690" y2="660" stroke="#059669" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- ── STEP 1: 토큰 발급 ──────────────────────── -->
+  <rect x="40" y="148" width="720" height="20" rx="3" fill="#F5F3FF"/>
+  <text x="400" y="162" text-anchor="middle" font-size="10" font-weight="700" fill="#6D28D9">① 대기열 진입 — JWE 토큰 발급</text>
+
+  <!-- Client → Origin: POST /queue/enter -->
+  <line x1="110" y1="184" x2="680" y2="184" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <rect x="270" y="170" width="200" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="370" y="183" text-anchor="middle" font-size="10" fill="#0A0A0A">POST /queue/enter</text>
+
+  <!-- Origin → Client: JWE token 반환 -->
+  <line x1="680" y1="212" x2="120" y2="212" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-green)"/>
+  <rect x="270" y="198" width="260" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="400" y="211" text-anchor="middle" font-size="10" fill="#047857">JWE 토큰 (user_id, exp, queue_pos 암호화)</text>
+
+  <!-- JWE 토큰 박스 (클라이언트 저장) -->
+  <rect x="40" y="228" width="180" height="40" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="130" y="244" text-anchor="middle" font-size="10" font-weight="600" fill="#6D28D9">클라이언트 저장</text>
+  <text x="130" y="260" text-anchor="middle" font-size="10" fill="#6D28D9">header.encKey.iv.cipher.tag</text>
+
+  <!-- ── STEP 2: CDN polling (Cache HIT) ───────── -->
+  <rect x="40" y="284" width="720" height="20" rx="3" fill="#FFFBEB"/>
+  <text x="400" y="298" text-anchor="middle" font-size="10" font-weight="700" fill="#B45309">② polling — CDN Cache HIT (origin 요청 없음)</text>
+
+  <!-- Client → CDN: GET /queue/status + JWE -->
+  <line x1="110" y1="320" x2="390" y2="320" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <rect x="148" y="306" width="200" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="248" y="319" text-anchor="middle" font-size="10" fill="#0A0A0A">GET /queue/status + JWE 토큰</text>
+
+  <!-- CDN → Client: Cache HIT 응답 -->
+  <line x1="390" y1="348" x2="120" y2="348" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-amber)"/>
+  <rect x="148" y="334" width="210" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="253" y="347" text-anchor="middle" font-size="10" fill="#B45309">cf-cache-status: HIT → 캐시 응답 반환</text>
+
+  <!-- HIT 설명 박스 -->
+  <rect x="240" y="364" width="320" height="28" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="400" y="382" text-anchor="middle" font-size="10" fill="#B45309">TTL 내 재요청은 origin에 전달되지 않음 → origin Redis QPS 수십 req/s 유지</text>
+
+  <!-- ── STEP 3: CDN Cache MISS → Origin ───────── -->
+  <rect x="40" y="408" width="720" height="20" rx="3" fill="#ECFDF5"/>
+  <text x="400" y="422" text-anchor="middle" font-size="10" font-weight="700" fill="#047857">③ Cache MISS (TTL 만료) → Origin 도달 — JWE Stateless 검증</text>
+
+  <!-- CDN → Origin: Cache MISS 포워딩 -->
+  <line x1="410" y1="444" x2="680" y2="444" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <rect x="450" y="430" width="190" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="545" y="443" text-anchor="middle" font-size="10" fill="#0A0A0A">Cache MISS → Origin 포워딩</text>
+
+  <!-- Origin 검증 박스 -->
+  <rect x="540" y="464" width="220" height="100" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="650" y="482" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">Stateless 검증</text>
+  <text x="650" y="500" text-anchor="middle" font-size="10" fill="#047857">1. AES-256-GCM 복호화</text>
+  <text x="650" y="516" text-anchor="middle" font-size="10" fill="#047857">   → user_id, exp 추출</text>
+  <text x="650" y="532" text-anchor="middle" font-size="10" fill="#047857">2. exp 만료 확인</text>
+  <text x="650" y="548" text-anchor="middle" font-size="10" fill="#047857">3. Redis ZRANGE 순번 조회</text>
+
+  <!-- 검증 성공 강조 -->
+  <rect x="540" y="570" width="220" height="24" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="650" y="586" text-anchor="middle" font-size="10" font-weight="600" fill="#6D28D9">세션 저장소 조회 없음 — 키만 있으면 검증 완료</text>
+
+  <!-- Origin → CDN: 응답 + Cache-Control -->
+  <line x1="680" y1="608" x2="410" y2="608" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-green)"/>
+  <rect x="450" y="594" width="200" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="550" y="607" text-anchor="middle" font-size="10" fill="#047857">Cache-Control: max-age=N → CDN 캐시 갱신</text>
+
+  <!-- CDN → Client -->
+  <line x1="390" y1="636" x2="120" y2="636" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-amber)"/>
+  <rect x="148" y="622" width="220" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="258" y="635" text-anchor="middle" font-size="10" fill="#B45309">순번 응답 (다음 TTL 동안 CDN HIT 제공)</text>
+
+  <!-- ── 화살표 마커 정의 ─────────────────────── -->
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+
+  <!-- 범례 -->
+  <line x1="40" y1="658" x2="60" y2="658" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="66" y="662" font-size="10" fill="#27272A">요청</text>
+  <line x1="120" y1="658" x2="140" y2="658" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="146" y="662" font-size="10" fill="#27272A">응답</text>
+  <rect x="210" y="652" width="10" height="10" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="226" y="662" font-size="10" fill="#27272A">Stateless 검증 영역</text>
+  <rect x="360" y="652" width="10" height="10" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="376" y="662" font-size="10" fill="#27272A">JWE 암호화 영역</text>
+</svg>

@@ -1,0 +1,142 @@
+<svg
+  role="img"
+  aria-labelledby="title-cf-edge-2 desc-cf-edge-2"
+  viewBox="0 0 800 600"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-cf-edge-2">CloudFront Custom Error Response vs Cloudflare Pages SPA fallback 비교</title>
+  <desc id="desc-cf-edge-2">CloudFront에서 Custom Error Response가 Distribution 전역으로 적용되어 API 에러까지 index.html로 덮어쓰는 문제와, Cloudflare Pages에서 SPA fallback이 정적 파일 영역에만 격리 적용되어 API 에러 응답이 정상 전달되는 구조를 Before/After로 비교</desc>
+
+  <style>
+    .label-sm { font-size: 11px; fill: #27272A; }
+    .label-md { font-size: 12px; }
+    .label-lg { font-size: 13px; font-weight: 600; }
+    .err-label { font-size: 11px; fill: #BE123C; font-weight: 600; }
+    .ok-label { font-size: 11px; fill: #047857; font-weight: 600; }
+    .before-bg { fill: #FFF1F2; }
+    .after-bg { fill: #ECFDF5; }
+    .section-title { font-size: 14px; font-weight: 700; }
+  </style>
+
+  <!-- ===== BEFORE: CloudFront ===== -->
+  <!-- 제목 -->
+  <text x="200" y="32" text-anchor="middle" class="section-title" fill="#BE123C">Before — CloudFront</text>
+
+  <!-- CloudFront Distribution 영역 -->
+  <rect x="80" y="48" width="240" height="232" rx="10"
+        fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="200" y="40" text-anchor="middle" style="font-size:11px; fill:#BE123C; font-weight:600;">Distribution 전역</text>
+
+  <!-- S3 박스 -->
+  <rect x="100" y="64" width="100" height="56" rx="6"
+        fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="150" y="88" text-anchor="middle" class="label-lg" fill="#047857">S3</text>
+  <text x="150" y="104" text-anchor="middle" class="label-sm">정적 파일 (SPA)</text>
+  <text x="150" y="116" text-anchor="middle" class="label-sm">Behavior: /*</text>
+
+  <!-- API Origin 박스 -->
+  <rect x="100" y="148" width="100" height="56" rx="6"
+        fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="150" y="172" text-anchor="middle" class="label-lg" fill="#0E7490">API Origin</text>
+  <text x="150" y="188" text-anchor="middle" class="label-sm">Kind PC</text>
+  <text x="150" y="200" text-anchor="middle" class="label-sm">Behavior: /api/*</text>
+
+  <!-- Custom Error Response 박스 (전역) -->
+  <rect x="100" y="220" width="200" height="48" rx="6"
+        fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="241" text-anchor="middle" class="label-lg" fill="#BE123C">Custom Error Response</text>
+  <text x="200" y="257" text-anchor="middle" class="label-sm">403/404 → /index.html (전역 적용)</text>
+
+  <!-- 문제 표시 -->
+  <rect x="88" y="288" width="224" height="52" rx="6"
+        fill="#FEE2E2" stroke="#E11D48" stroke-width="1"/>
+  <text x="200" y="309" text-anchor="middle" class="err-label">문제: API 404가 index.html로 교체</text>
+  <text x="200" y="325" text-anchor="middle" class="label-sm">GET /api/users/999 → 200 HTML</text>
+  <text x="200" y="337" text-anchor="middle" class="label-sm">에러 핸들링 전부 깨짐</text>
+
+  <!-- 연결: Custom Error Response → 전역 커버 (SPA, API 모두) -->
+  <line x1="200" y1="220" x2="150" y2="204" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arrow-rose)"/>
+  <line x1="200" y1="220" x2="150" y2="120" stroke="#E11D48" stroke-width="1.5" marker-end="url(#arrow-rose)"/>
+
+  <!-- ===== AFTER: Cloudflare ===== -->
+  <!-- 제목 -->
+  <text x="590" y="32" text-anchor="middle" class="section-title" fill="#047857">After — Cloudflare</text>
+
+  <!-- Cloudflare Edge 영역 -->
+  <rect x="430" y="48" width="320" height="232" rx="10"
+        fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="590" y="40" text-anchor="middle" style="font-size:11px; fill:#047857; font-weight:600;">Cloudflare 엣지</text>
+
+  <!-- Pages 박스 -->
+  <rect x="452" y="64" width="128" height="80" rx="6"
+        fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="516" y="88" text-anchor="middle" class="label-lg" fill="#047857">Cloudflare Pages</text>
+  <text x="516" y="106" text-anchor="middle" class="label-sm">정적 파일 (SPA)</text>
+  <text x="516" y="120" text-anchor="middle" class="label-sm">SPA fallback</text>
+  <text x="516" y="134" text-anchor="middle" class="label-sm">Pages 영역에만 적용</text>
+
+  <!-- Workers 박스 -->
+  <rect x="452" y="164" width="128" height="68" rx="6"
+        fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="516" y="188" text-anchor="middle" class="label-lg" fill="#0E7490">Workers</text>
+  <text x="516" y="206" text-anchor="middle" class="label-sm">/api/* 프록시</text>
+  <text x="516" y="220" text-anchor="middle" class="label-sm">fallback 비적용</text>
+
+  <!-- API 에러 응답 박스 -->
+  <rect x="600" y="164" width="136" height="68" rx="6"
+        fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="668" y="188" text-anchor="middle" class="label-lg" fill="#0E7490">Backend API</text>
+  <text x="668" y="206" text-anchor="middle" class="label-sm">404 JSON 에러 반환</text>
+  <text x="668" y="220" text-anchor="middle" class="label-sm">그대로 클라이언트에</text>
+
+  <!-- Workers → Backend 화살표 -->
+  <line x1="580" y1="198" x2="598" y2="198" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrow-cyan2)"/>
+
+  <!-- 정상 작동 표시 -->
+  <rect x="442" y="252" width="296" height="52" rx="6"
+        fill="#D1FAE5" stroke="#059669" stroke-width="1"/>
+  <text x="590" y="273" text-anchor="middle" class="ok-label">정상: API 에러가 그대로 전달됨</text>
+  <text x="590" y="289" text-anchor="middle" class="label-sm">GET /api/users/999 → 404 JSON</text>
+  <text x="590" y="301" text-anchor="middle" class="label-sm">에러 핸들링 정상 동작</text>
+
+  <!-- SPA fallback 격리 표시 선 -->
+  <rect x="452" y="150" width="128" height="14" rx="3"
+        fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="516" y="161" text-anchor="middle" style="font-size:10px; fill:#6D28D9; font-weight:600;">격리 경계 — fallback 적용 범위</text>
+
+  <!-- 비교 구분선 -->
+  <line x1="400" y1="24" x2="400" y2="360" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="400" y="380" text-anchor="middle" style="font-size:12px; fill:#475569; font-weight:600;">구조적 분리로 해결</text>
+
+  <!-- 하단 요약 -->
+  <rect x="80" y="400" width="640" height="148" rx="8"
+        fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="424" text-anchor="middle" style="font-size:13px; font-weight:700; fill:#0A0A0A;">핵심 차이</text>
+
+  <rect x="96" y="436" width="280" height="96" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="236" y="456" text-anchor="middle" style="font-size:12px; font-weight:600; fill:#BE123C;">CloudFront</text>
+  <text x="236" y="473" text-anchor="middle" class="label-sm">Custom Error Response = Distribution 전역</text>
+  <text x="236" y="489" text-anchor="middle" class="label-sm">Behavior 분리와 무관하게 /api/*에도 적용</text>
+  <text x="236" y="505" text-anchor="middle" class="label-sm">API 에러가 HTML로 교체되는 구조적 한계</text>
+  <text x="236" y="521" text-anchor="middle" class="label-sm">Behavior 단위 격리 불가</text>
+
+  <rect x="424" y="436" width="280" height="96" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="564" y="456" text-anchor="middle" style="font-size:12px; font-weight:600; fill:#047857;">Cloudflare</text>
+  <text x="564" y="473" text-anchor="middle" class="label-sm">Pages = 정적 파일 실행 환경 (독립)</text>
+  <text x="564" y="489" text-anchor="middle" class="label-sm">Workers = 동적 실행 환경 (독립)</text>
+  <text x="564" y="505" text-anchor="middle" class="label-sm">SPA fallback은 Pages 영역에만 격리 적용</text>
+  <text x="564" y="521" text-anchor="middle" class="label-sm">API 에러 응답 오염 없음</text>
+
+  <!-- 마커 정의 -->
+  <defs>
+    <marker id="arrow-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-cyan2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,140 @@
+<svg
+  role="img"
+  aria-labelledby="title-1 desc-1"
+  viewBox="0 0 880 600"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-1">Sidecar 모드 vs Ambient 모드 데이터 플레인 구조 비교</title>
+  <desc id="desc-1">왼쪽은 Sidecar 모드로 각 Pod 안에 Envoy 프록시가 주입된 구조, 오른쪽은 Ambient 모드로 노드별 ztunnel(L4)과 네임스페이스별 Waypoint(L7)가 분리된 구조</desc>
+
+  <!-- 배경 -->
+  <rect width="880" height="600" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="440" y="36" text-anchor="middle" font-size="16" font-weight="bold" fill="#0A0A0A">데이터 플레인 모드 비교</text>
+
+  <!-- ───── 왼쪽: Sidecar 모드 ───── -->
+  <!-- 노드 배경 -->
+  <rect x="32" y="56" width="376" height="520" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="220" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#B45309">Sidecar 모드</text>
+  <text x="220" y="95" text-anchor="middle" font-size="11" fill="#B45309">Kubernetes 노드</text>
+
+  <!-- Pod A -->
+  <rect x="56" y="112" width="152" height="160" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="132" y="132" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">Pod A</text>
+  <!-- App Container -->
+  <rect x="72" y="144" width="120" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="132" y="160" text-anchor="middle" font-size="11" fill="#047857">App Container</text>
+  <text x="132" y="175" text-anchor="middle" font-size="10" fill="#047857">비즈니스 로직</text>
+  <!-- Envoy Sidecar A -->
+  <rect x="72" y="196" width="120" height="40" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="132" y="212" text-anchor="middle" font-size="11" font-weight="bold" fill="#6D28D9">Envoy Sidecar</text>
+  <text x="132" y="228" text-anchor="middle" font-size="10" fill="#6D28D9">L4 + L7 처리</text>
+  <!-- iptables 화살표 inside Pod A -->
+  <line x1="132" y1="184" x2="132" y2="196" stroke="#7C3AED" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="145" y="193" font-size="9" fill="#6D28D9">iptables 리디렉션</text>
+
+  <!-- Pod B -->
+  <rect x="232" y="112" width="152" height="160" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="308" y="132" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">Pod B</text>
+  <!-- App Container B -->
+  <rect x="248" y="144" width="120" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="308" y="160" text-anchor="middle" font-size="11" fill="#047857">App Container</text>
+  <text x="308" y="175" text-anchor="middle" font-size="10" fill="#047857">비즈니스 로직</text>
+  <!-- Envoy Sidecar B -->
+  <rect x="248" y="196" width="120" height="40" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="308" y="212" text-anchor="middle" font-size="11" font-weight="bold" fill="#6D28D9">Envoy Sidecar</text>
+  <text x="308" y="228" text-anchor="middle" font-size="10" fill="#6D28D9">L4 + L7 처리</text>
+  <!-- iptables 화살표 inside Pod B -->
+  <line x1="308" y1="184" x2="308" y2="196" stroke="#7C3AED" stroke-width="1" stroke-dasharray="3 2"/>
+  <text x="321" y="193" font-size="9" fill="#6D28D9">iptables 리디렉션</text>
+
+  <!-- Pod 간 mTLS 화살표 -->
+  <line x1="192" y1="216" x2="248" y2="216" stroke="#7C3AED" stroke-width="1.5"/>
+  <polygon points="244,212 248,216 244,220" fill="#7C3AED"/>
+  <text x="220" y="210" text-anchor="middle" font-size="9" fill="#6D28D9">mTLS</text>
+
+  <!-- Pod C (3번째) -->
+  <rect x="56" y="296" width="152" height="160" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="132" y="316" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">Pod C</text>
+  <rect x="72" y="328" width="120" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="132" y="344" text-anchor="middle" font-size="11" fill="#047857">App Container</text>
+  <text x="132" y="359" text-anchor="middle" font-size="10" fill="#047857">비즈니스 로직</text>
+  <rect x="72" y="380" width="120" height="40" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="132" y="396" text-anchor="middle" font-size="11" font-weight="bold" fill="#6D28D9">Envoy Sidecar</text>
+  <text x="132" y="412" text-anchor="middle" font-size="10" fill="#6D28D9">L4 + L7 처리</text>
+  <line x1="132" y1="368" x2="132" y2="380" stroke="#7C3AED" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- 설명 텍스트 Sidecar -->
+  <rect x="56" y="472" width="328" height="88" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="220" y="492" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">특징</text>
+  <text x="72" y="510" font-size="10" fill="#334155">• Pod마다 Envoy 컨테이너 주입 (자동 또는 수동)</text>
+  <text x="72" y="526" font-size="10" fill="#334155">• iptables 규칙으로 트래픽 강제 리디렉션</text>
+  <text x="72" y="542" font-size="10" fill="#334155">• L4(TCP) + L7(HTTP) 처리를 Envoy 하나가 담당</text>
+  <text x="72" y="558" font-size="10" fill="#334155">• 메트릭·트레이스·mTLS 모두 Sidecar에서 처리</text>
+
+  <!-- ───── 오른쪽: Ambient 모드 ───── -->
+  <!-- 노드 배경 -->
+  <rect x="472" y="56" width="376" height="520" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="660" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#0E7490">Ambient 모드</text>
+  <text x="660" y="95" text-anchor="middle" font-size="11" fill="#0E7490">Kubernetes 노드</text>
+
+  <!-- ztunnel (노드 레벨) -->
+  <rect x="496" y="108" width="328" height="56" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="660" y="130" text-anchor="middle" font-size="12" font-weight="bold" fill="#BE123C">ztunnel (노드 레벨, DaemonSet)</text>
+  <text x="660" y="150" text-anchor="middle" font-size="10" fill="#BE123C">L4 mTLS 암호화 · 기본 관측성 · 인증만 처리</text>
+
+  <!-- Waypoint (네임스페이스 레벨) -->
+  <rect x="496" y="180" width="328" height="56" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="660" y="202" text-anchor="middle" font-size="12" font-weight="bold" fill="#6D28D9">Waypoint Proxy (네임스페이스 레벨)</text>
+  <text x="660" y="222" text-anchor="middle" font-size="10" fill="#6D28D9">L7 HTTP 파싱 · AuthorizationPolicy · 트래픽 정책 (선택 배포)</text>
+
+  <!-- Pod D (Sidecar 없음) -->
+  <rect x="496" y="256" width="144" height="96" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="568" y="276" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">Pod D</text>
+  <rect x="512" y="288" width="112" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="568" y="304" text-anchor="middle" font-size="11" fill="#047857">App Container</text>
+  <text x="568" y="319" text-anchor="middle" font-size="10" fill="#047857">Sidecar 없음</text>
+
+  <!-- Pod E (Sidecar 없음) -->
+  <rect x="656" y="256" width="144" height="96" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="728" y="276" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">Pod E</text>
+  <rect x="672" y="288" width="112" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="728" y="304" text-anchor="middle" font-size="11" fill="#047857">App Container</text>
+  <text x="728" y="319" text-anchor="middle" font-size="10" fill="#047857">Sidecar 없음</text>
+
+  <!-- Pod → ztunnel 화살표 -->
+  <line x1="568" y1="256" x2="660" y2="164" stroke="#E11D48" stroke-width="1.5"/>
+  <polygon points="656,168 660,164 664,168" fill="#E11D48"/>
+  <text x="590" y="218" font-size="9" fill="#BE123C">HBONE 터널</text>
+
+  <line x1="728" y1="256" x2="660" y2="164" stroke="#E11D48" stroke-width="1.5"/>
+  <polygon points="656,168 660,164 664,168" fill="#E11D48"/>
+
+  <!-- ztunnel → Waypoint 화살표 (L7 필요 시) -->
+  <line x1="660" y1="180" x2="660" y2="164" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <polygon points="656,168 660,164 664,168" fill="#7C3AED"/>
+  <text x="670" y="174" font-size="9" fill="#6D28D9">L7 필요 시만</text>
+
+  <!-- Pod F (3번째) -->
+  <rect x="576" y="368" width="144" height="96" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="648" y="388" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">Pod F</text>
+  <rect x="592" y="400" width="112" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="648" y="416" text-anchor="middle" font-size="11" fill="#047857">App Container</text>
+  <text x="648" y="431" text-anchor="middle" font-size="10" fill="#047857">Sidecar 없음</text>
+
+  <line x1="648" y1="368" x2="660" y2="164" stroke="#E11D48" stroke-width="1" stroke-dasharray="2 2"/>
+
+  <!-- 설명 텍스트 Ambient -->
+  <rect x="496" y="480" width="328" height="80" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="660" y="499" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">특징</text>
+  <text x="512" y="517" font-size="10" fill="#334155">• Pod 내부 프록시 없음 — 노드 ztunnel이 L4 담당</text>
+  <text x="512" y="533" font-size="10" fill="#334155">• L7 처리는 Waypoint(선택)가 네임스페이스 단위 수행</text>
+  <text x="512" y="549" font-size="10" fill="#334155">• Sidecar 오버헤드 없음 — 리소스 70~90% 절감 가능</text>
+
+  <!-- 범례 -->
+  <rect x="32" y="584" width="816" height="1" fill="#E4E4E7"/>
+</svg>

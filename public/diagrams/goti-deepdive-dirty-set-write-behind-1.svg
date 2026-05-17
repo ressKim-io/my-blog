@@ -1,0 +1,132 @@
+<svg
+  role="img"
+  aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 480"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-1">Write-Behind 쓰기 흐름도 — Dirty Set 적재에서 배치 Flush까지</title>
+  <desc id="desc-1">애플리케이션이 Redis에 쓰고 Dirty Set에 키를 추가한 뒤, 비동기 Flush Worker가 주기적으로 배치 읽기와 RDS UPSERT를 수행하는 5단계 흐름</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">흐름도 — Write-Behind 쓰기 경로</text>
+
+  <!-- ────────────── 화살표 (박스보다 먼저) ────────────── -->
+
+  <!-- 1 → 2: 쓰기 요청 -->
+  <line x1="160" y1="120" x2="280" y2="120" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <rect x="181" y="105" width="78" height="18" fill="#FAFAFA"/>
+  <text x="220" y="117" text-anchor="middle" font-size="11" fill="#27272A">SET / HSET</text>
+
+  <!-- 2 → 3: dirty 키 추가 -->
+  <line x1="400" y1="120" x2="520" y2="120" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <rect x="421" y="105" width="78" height="18" fill="#FAFAFA"/>
+  <text x="460" y="117" text-anchor="middle" font-size="11" fill="#27272A">SADD dirty 키</text>
+
+  <!-- 3 → 4: Worker가 dirty set 폴링 -->
+  <line x1="640" y1="150" x2="640" y2="240" stroke="#0A0A0A" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-black)"/>
+  <rect x="648" y="188" width="84" height="18" fill="#FAFAFA"/>
+  <text x="690" y="200" text-anchor="middle" font-size="11" fill="#27272A">SMEMBERS + DEL</text>
+
+  <!-- 4 → 5: 배치 읽기 -->
+  <line x1="520" y1="280" x2="400" y2="280" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+  <rect x="421" y="265" width="78" height="18" fill="#FAFAFA"/>
+  <text x="460" y="277" text-anchor="middle" font-size="11" fill="#27272A">MGET / HGETALL</text>
+
+  <!-- 5 → RDS: UPSERT -->
+  <line x1="280" y1="280" x2="160" y2="280" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrow-violet)"/>
+  <rect x="180" y="265" width="80" height="18" fill="#FAFAFA"/>
+  <text x="220" y="277" text-anchor="middle" font-size="11" fill="#6D28D9">Batch UPSERT</text>
+
+  <!-- Worker → dirty set 루프 (점선, 주기) -->
+  <path d="M640,380 Q720,380 720,280 Q720,240 640,240" fill="none" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow-amber)"/>
+  <rect x="722" y="300" width="60" height="18" fill="#FAFAFA"/>
+  <text x="752" y="312" text-anchor="middle" font-size="11" fill="#B45309">주기 반복</text>
+
+  <!-- ────────────── 박스 ────────────── -->
+
+  <!-- 1. 애플리케이션 -->
+  <rect x="40" y="88" width="120" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="100" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">애플리케이션</text>
+  <text x="100" y="132" text-anchor="middle" font-size="11" fill="#047857">쓰기 요청</text>
+  <text x="100" y="145" text-anchor="middle" font-size="10" fill="#27272A">[Service]</text>
+
+  <!-- 2. Redis 데이터 영역 -->
+  <rect x="280" y="88" width="120" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="340" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Redis</text>
+  <text x="340" y="132" text-anchor="middle" font-size="11" fill="#6D28D9">캐시 데이터</text>
+  <text x="340" y="145" text-anchor="middle" font-size="10" fill="#27272A">[In-Memory]</text>
+
+  <!-- 3. Dirty Set -->
+  <rect x="520" y="88" width="120" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="580" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Dirty Set</text>
+  <text x="580" y="132" text-anchor="middle" font-size="11" fill="#6D28D9">변경 키 목록</text>
+  <text x="580" y="145" text-anchor="middle" font-size="10" fill="#27272A">[Redis Set]</text>
+
+  <!-- 4. Flush Worker -->
+  <rect x="520" y="248" width="120" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="580" y="272" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Flush Worker</text>
+  <text x="580" y="289" text-anchor="middle" font-size="11" fill="#047857">비동기 배치</text>
+  <text x="580" y="302" text-anchor="middle" font-size="10" fill="#27272A">[Goroutine]</text>
+
+  <!-- 5. 배치 읽기 중간 (Redis 재참조 — 같은 박스 활용, 화살표로만 표현) -->
+
+  <!-- RDS -->
+  <rect x="40" y="248" width="120" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="100" y="272" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">RDS</text>
+  <text x="100" y="289" text-anchor="middle" font-size="11" fill="#6D28D9">영속 저장소</text>
+  <text x="100" y="302" text-anchor="middle" font-size="10" fill="#27272A">[PostgreSQL]</text>
+
+  <!-- Worker 상자 (right) -->
+  <rect x="600" y="240" width="80" height="80" rx="6" fill="none" stroke="none"/>
+
+  <!-- 단계 번호 레이블 -->
+  <circle cx="220" cy="104" r="10" fill="#059669"/>
+  <text x="220" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#FAFAFA">1</text>
+
+  <circle cx="460" cy="104" r="10" fill="#7C3AED"/>
+  <text x="460" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#FAFAFA">2</text>
+
+  <circle cx="660" cy="195" r="10" fill="#059669"/>
+  <text x="660" y="199" text-anchor="middle" font-size="11" font-weight="700" fill="#FAFAFA">3</text>
+
+  <circle cx="460" cy="264" r="10" fill="#7C3AED"/>
+  <text x="460" y="268" text-anchor="middle" font-size="11" font-weight="700" fill="#FAFAFA">4</text>
+
+  <circle cx="220" cy="264" r="10" fill="#6D28D9"/>
+  <text x="220" y="268" text-anchor="middle" font-size="11" font-weight="700" fill="#FAFAFA">5</text>
+
+  <!-- 범례 -->
+  <rect x="40" y="400" width="720" height="60" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="60" y="422" font-size="11" font-weight="600" fill="#0A0A0A">범례</text>
+  <line x1="60" y1="435" x2="100" y2="435" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="108" y="439" font-size="11" fill="#27272A">동기 쓰기</text>
+  <line x1="180" y1="435" x2="220" y2="435" stroke="#0A0A0A" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="228" y="439" font-size="11" fill="#27272A">비동기 폴링</text>
+  <line x1="320" y1="435" x2="360" y2="435" stroke="#7C3AED" stroke-width="2"/>
+  <text x="368" y="439" font-size="11" fill="#27272A">배치 UPSERT</text>
+  <line x1="460" y1="435" x2="500" y2="435" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="508" y="439" font-size="11" fill="#27272A">주기 반복 루프</text>
+  <rect x="600" y="427" width="14" height="14" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="620" y="439" font-size="11" fill="#27272A">서비스/워커</text>
+  <rect x="680" y="427" width="14" height="14" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="700" y="439" font-size="11" fill="#27272A">저장소</text>
+
+  <!-- arrowhead 마커 -->
+  <defs>
+    <marker id="arrow-black" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#D97706"/>
+    </marker>
+  </defs>
+</svg>

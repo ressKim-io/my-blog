@@ -245,3 +245,12 @@ Helm chart에 SingleBinary 모드가 추가되면 그때 전환하면 됩니다.
 - prod(EKS) 배포 시 Mimir 리소스 최적화 검토
 - OTel Collector Operator 도입 검토 (auto-instrumentation, sidecar injection)
 - Kafka SCRAM-SHA-512 인증 설정 (prod 전용)
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다.
+
+- [관측 파이프라인의 Kafka 버퍼 — 시그널별 백프레셔 설계 원리](/essays/goti-deepdive-telemetry-kafka-buffer)
+- [OTel Collector — receiver/processor/exporter 3단 파이프라인 동작 원리](/essays/goti-deepdive-otel-collector-pipeline)

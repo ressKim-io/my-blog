@@ -1,0 +1,171 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto">
+  <title id="title-1">GitOps 이미지 업데이트 세 가지 방식 비교 흐름도</title>
+  <desc id="desc-1">CI Push, ArgoCD Image Updater, Renovate 세 방식이 컨테이너 레지스트리에서 GitOps 레포까지 새 이미지 태그를 반영하는 흐름을 나란히 비교합니다</desc>
+
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .label-sm { font-size: 11px; fill: #27272A; }
+    .label-md { font-size: 13px; }
+    .label-lg { font-size: 14px; font-weight: 600; }
+    .section-title { font-size: 13px; font-weight: 700; }
+    .arrow-label { font-size: 11px; fill: #475569; }
+  </style>
+
+  <!-- 배경 -->
+  <rect width="800" height="600" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" class="label-lg" font-size="15" fill="#0A0A0A">GitOps 이미지 자동 업데이트 — 세 가지 방식 비교</text>
+
+  <!-- ─────────── 공통 상단 영역: 컨테이너 레지스트리 ─────────── -->
+  <!-- Registry 박스 -->
+  <rect x="310" y="52" width="180" height="48" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="72" text-anchor="middle" class="label-md" fill="#B45309">컨테이너 레지스트리</text>
+  <text x="400" y="88" text-anchor="middle" class="label-sm">(ECR / Harbor / GCP AR)</text>
+
+  <!-- CI 빌드 -->
+  <rect x="310" y="128" width="180" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="143" text-anchor="middle" class="label-md" fill="#047857">CI 빌드 완료</text>
+  <text x="400" y="158" text-anchor="middle" class="label-sm">새 이미지 태그 push</text>
+
+  <!-- CI → Registry 화살표 -->
+  <line x1="400" y1="100" x2="400" y2="128" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- 구분선 -->
+  <line x1="30" y1="188" x2="770" y2="188" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="400" y="205" text-anchor="middle" class="label-sm" fill="#475569">이미지 push 이후 — 세 방식이 갈라지는 지점</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 방식 A: CI Push (왼쪽) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="30" y="215" width="220" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="140" y="234" text-anchor="middle" class="section-title" fill="#047857">방식 A — CI Push</text>
+
+  <!-- CI Runner 박스 -->
+  <rect x="50" y="255" width="180" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="140" y="270" text-anchor="middle" class="label-md" fill="#047857">CI Runner</text>
+  <text x="140" y="285" text-anchor="middle" class="label-sm">git commit 직접 실행</text>
+
+  <!-- CI Runner → GitOps Repo 화살표 (직접) -->
+  <line x1="140" y1="295" x2="140" y2="355" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <rect x="68" y="315" width="100" height="16" rx="2" fill="#FAFAFA"/>
+  <text x="118" y="326" text-anchor="middle" class="arrow-label" fill="#047857">image.tag 직접 commit</text>
+
+  <!-- GitOps Repo A -->
+  <rect x="50" y="355" width="180" height="40" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="140" y="370" text-anchor="middle" class="label-md" fill="#B45309">GitOps Repo</text>
+  <text x="140" y="385" text-anchor="middle" class="label-sm">values.yaml 갱신</text>
+
+  <!-- GitOps Repo A → ArgoCD A -->
+  <line x1="140" y1="395" x2="140" y2="455" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- ArgoCD A -->
+  <rect x="50" y="455" width="180" height="40" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="140" y="470" text-anchor="middle" class="label-md" fill="#6D28D9">ArgoCD auto-sync</text>
+  <text x="140" y="485" text-anchor="middle" class="label-sm">클러스터 반영</text>
+
+  <!-- 특징 라벨 A -->
+  <rect x="50" y="510" width="180" height="46" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="140" y="525" text-anchor="middle" class="label-sm">즉시 (~1분)</text>
+  <text x="140" y="539" text-anchor="middle" class="label-sm">race condition 주의</text>
+  <text x="140" y="553" text-anchor="middle" class="label-sm">(동시 push 충돌 가능)</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 방식 B: Image Updater (중앙) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="290" y="215" width="220" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.2"/>
+  <text x="400" y="234" text-anchor="middle" class="section-title" fill="#BE123C">방식 B — Image Updater</text>
+
+  <!-- Image Updater Pod -->
+  <rect x="310" y="255" width="180" height="40" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="270" text-anchor="middle" class="label-md" fill="#BE123C">Image Updater Pod</text>
+  <text x="400" y="285" text-anchor="middle" class="label-sm">클러스터 내 실행, polling</text>
+
+  <!-- Image Updater polling 화살표 (레지스트리 방향, 점선) -->
+  <path d="M 400 255 Q 400 215 400 168" stroke="#E11D48" stroke-width="1.2" stroke-dasharray="4 2" fill="none" marker-end="url(#arrow-rose)"/>
+  <rect x="405" y="205" width="80" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="445" y="215" text-anchor="middle" class="label-sm" fill="#BE123C">태그 polling</text>
+
+  <!-- Image Updater → GitOps Repo B -->
+  <line x1="400" y1="295" x2="400" y2="355" stroke="#E11D48" stroke-width="2" marker-end="url(#arrow-rose)"/>
+  <rect x="310" y="315" width="100" height="16" rx="2" fill="#FAFAFA"/>
+  <text x="360" y="326" text-anchor="middle" class="arrow-label" fill="#BE123C">write-back (annotation)</text>
+
+  <!-- GitOps Repo B -->
+  <rect x="310" y="355" width="180" height="40" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="370" text-anchor="middle" class="label-md" fill="#B45309">GitOps Repo</text>
+  <text x="400" y="385" text-anchor="middle" class="label-sm">.argocd-source 파일 갱신</text>
+
+  <!-- GitOps Repo B → ArgoCD B -->
+  <line x1="400" y1="395" x2="400" y2="455" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- ArgoCD B -->
+  <rect x="310" y="455" width="180" height="40" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="470" text-anchor="middle" class="label-md" fill="#6D28D9">ArgoCD auto-sync</text>
+  <text x="400" y="485" text-anchor="middle" class="label-sm">클러스터 반영</text>
+
+  <!-- 특징 라벨 B -->
+  <rect x="310" y="510" width="180" height="46" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="525" text-anchor="middle" class="label-sm">빠름 (~2분)</text>
+  <text x="400" y="539" text-anchor="middle" class="label-sm">ApplicationSet sync loop 주의</text>
+  <text x="400" y="553" text-anchor="middle" class="label-sm">클러스터 다운 시 중단</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 방식 C: Renovate (오른쪽) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="550" y="215" width="220" height="28" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <text x="660" y="234" text-anchor="middle" class="section-title" fill="#0E7490">방식 C — Renovate</text>
+
+  <!-- Renovate (GitHub Actions) -->
+  <rect x="570" y="255" width="180" height="40" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="660" y="270" text-anchor="middle" class="label-md" fill="#0E7490">Renovate</text>
+  <text x="660" y="285" text-anchor="middle" class="label-sm">GitHub Actions 외부 실행</text>
+
+  <!-- Renovate polling 화살표 (레지스트리 방향, 점선) -->
+  <path d="M 660 255 Q 660 215 660 168" stroke="#0891B2" stroke-width="1.2" stroke-dasharray="4 2" fill="none" marker-end="url(#arrow-cyan)"/>
+  <rect x="665" y="205" width="80" height="14" rx="2" fill="#FAFAFA"/>
+  <text x="705" y="215" text-anchor="middle" class="label-sm" fill="#0891B2">datasource 스캔</text>
+
+  <!-- Renovate → PR -->
+  <line x1="660" y1="295" x2="660" y2="355" stroke="#0891B2" stroke-width="2" marker-end="url(#arrow-cyan)"/>
+  <rect x="575" y="315" width="90" height="16" rx="2" fill="#FAFAFA"/>
+  <text x="620" y="326" text-anchor="middle" class="arrow-label" fill="#0891B2">PR 생성 → automerge</text>
+
+  <!-- GitOps Repo C -->
+  <rect x="570" y="355" width="180" height="40" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="660" y="370" text-anchor="middle" class="label-md" fill="#B45309">GitOps Repo</text>
+  <text x="660" y="385" text-anchor="middle" class="label-sm">PR 히스토리로 변경 추적</text>
+
+  <!-- GitOps Repo C → ArgoCD C -->
+  <line x1="660" y1="395" x2="660" y2="455" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-black)"/>
+
+  <!-- ArgoCD C -->
+  <rect x="570" y="455" width="180" height="40" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="660" y="470" text-anchor="middle" class="label-md" fill="#6D28D9">ArgoCD auto-sync</text>
+  <text x="660" y="485" text-anchor="middle" class="label-sm">클러스터 반영</text>
+
+  <!-- 특징 라벨 C -->
+  <rect x="570" y="510" width="180" height="46" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="660" y="525" text-anchor="middle" class="label-sm">5~15분 (PR+automerge)</text>
+  <text x="660" y="539" text-anchor="middle" class="label-sm">클러스터 독립적</text>
+  <text x="660" y="553" text-anchor="middle" class="label-sm">PR revert로 명확한 롤백</text>
+
+  <!-- ─── 범례 ─── -->
+  <!-- 범례는 없음 (색상 + 섹션 타이틀로 자기 충족) -->
+
+  <!-- ─── Arrow markers ─── -->
+  <defs>
+    <marker id="arrow-black" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+  </defs>
+</svg>

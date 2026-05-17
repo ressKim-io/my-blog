@@ -1,0 +1,127 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 560" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">KRaft 컨트롤러 쿼럼 — 메타데이터 로그 복제 및 리더 선출 흐름</title>
+  <desc id="desc-2">Active Controller가 메타데이터 변경을 메타데이터 로그에 기록하고 Follower에 복제한 뒤 커밋하는 정상 흐름과, Active Controller 장애 시 Follower가 투표해 새 Leader를 선출하는 장애 복구 흐름을 보여줍니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">KRaft 컨트롤러 쿼럼 — 메타데이터 로그 복제 흐름</text>
+
+  <!-- ===== 정상 흐름 섹션 ===== -->
+  <text x="400" y="58" text-anchor="middle" font-size="12" fill="#27272A">① 정상 동작 — Append → Replicate → Commit</text>
+
+  <!-- Active Controller -->
+  <rect x="48" y="72" width="136" height="80" rx="6" fill="#7C3AED" />
+  <text x="116" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#FAFAFA">Active</text>
+  <text x="116" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#FAFAFA">Controller</text>
+  <text x="116" y="138" text-anchor="middle" font-size="10" fill="#E9D5FF">(Epoch N, Leader)</text>
+
+  <!-- Follower 1 -->
+  <rect x="328" y="72" width="136" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="396" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Follower</text>
+  <text x="396" y="120" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Controller-2</text>
+  <text x="396" y="138" text-anchor="middle" font-size="10" fill="#6D28D9">(Epoch N)</text>
+
+  <!-- Follower 2 -->
+  <rect x="608" y="72" width="136" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="676" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Follower</text>
+  <text x="676" y="120" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Controller-3</text>
+  <text x="676" y="138" text-anchor="middle" font-size="10" fill="#6D28D9">(Epoch N)</text>
+
+  <!-- 메타데이터 로그 박스들 -->
+  <!-- Active 로그 -->
+  <rect x="48" y="184" width="136" height="64" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="116" y="206" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">메타데이터 로그</text>
+  <text x="116" y="222" text-anchor="middle" font-size="10" fill="#27272A">offset 0..N → append</text>
+  <text x="116" y="236" text-anchor="middle" font-size="10" fill="#7C3AED">__cluster_metadata</text>
+
+  <!-- Follower 1 로그 -->
+  <rect x="328" y="184" width="136" height="64" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="396" y="206" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">메타데이터 로그</text>
+  <text x="396" y="222" text-anchor="middle" font-size="10" fill="#27272A">offset 0..N → fetch</text>
+  <text x="396" y="236" text-anchor="middle" font-size="10" fill="#7C3AED">__cluster_metadata</text>
+
+  <!-- Follower 2 로그 -->
+  <rect x="608" y="184" width="136" height="64" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="676" y="206" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">메타데이터 로그</text>
+  <text x="676" y="222" text-anchor="middle" font-size="10" fill="#27272A">offset 0..N → fetch</text>
+  <text x="676" y="236" text-anchor="middle" font-size="10" fill="#7C3AED">__cluster_metadata</text>
+
+  <!-- 연결 화살표: Active Controller → 로그 -->
+  <line x1="116" y1="152" x2="116" y2="184" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow2-dark)"/>
+
+  <!-- 복제 화살표: Active → Follower 1 로그 -->
+  <line x1="184" y1="216" x2="328" y2="216" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrow2-violet)"/>
+  <text x="256" y="208" text-anchor="middle" font-size="10" fill="#7C3AED">Fetch 응답</text>
+
+  <!-- 복제 화살표: Active → Follower 2 로그 -->
+  <line x1="184" y1="232" x2="240" y2="232" stroke="#7C3AED" stroke-width="1.5"/>
+  <line x1="240" y1="232" x2="240" y2="260" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <line x1="240" y1="260" x2="608" y2="260" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow2-violet)"/>
+  <text x="424" y="256" text-anchor="middle" font-size="10" fill="#7C3AED">Fetch 응답</text>
+
+  <!-- Ack 화살표 (역방향): Follower 1 → Active -->
+  <line x1="328" y1="196" x2="184" y2="196" stroke="#059669" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arrow2-green)"/>
+  <text x="256" y="192" text-anchor="middle" font-size="9" fill="#047857">fetchOffset ACK</text>
+
+  <!-- Commit 표시 -->
+  <rect x="48" y="280" width="136" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="116" y="298" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">Commit (과반 ACK)</text>
+  <line x1="116" y1="248" x2="116" y2="280" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow2-dark)"/>
+
+  <!-- Broker들에게 메타데이터 캐시 전파 -->
+  <rect x="248" y="336" width="304" height="40" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="356" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">Broker들의 메타데이터 캐시 업데이트</text>
+  <text x="400" y="368" text-anchor="middle" font-size="10" fill="#27272A">(토픽·파티션·ISR·리더 정보 반영)</text>
+  <line x1="116" y1="312" x2="116" y2="330" stroke="#0A0A0A" stroke-width="1.5"/>
+  <line x1="116" y1="330" x2="400" y2="330" stroke="#0A0A0A" stroke-width="1.5"/>
+  <line x1="400" y1="330" x2="400" y2="336" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow2-dark)"/>
+
+  <!-- ===== 구분선 ===== -->
+  <line x1="32" y1="400" x2="768" y2="400" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="400" y="420" text-anchor="middle" font-size="12" fill="#27272A">② 장애 복구 — Active Controller 장애 시 리더 선출</text>
+
+  <!-- 장애 Controller (회색 처리) -->
+  <rect x="48" y="436" width="136" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="116" y="462" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">Active Controller</text>
+  <text x="116" y="478" text-anchor="middle" font-size="11" fill="#BE123C">장애 (타임아웃)</text>
+  <text x="116" y="492" text-anchor="middle" font-size="10" fill="#475569">Epoch N</text>
+
+  <!-- 선출 투표 화살표 -->
+  <line x1="328" y1="476" x2="608" y2="476" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow2-rose)"/>
+  <text x="468" y="468" text-anchor="middle" font-size="10" fill="#BE123C">VoteRequest (Epoch N+1)</text>
+
+  <!-- 새 Leader -->
+  <rect x="608" y="436" width="136" height="64" rx="6" fill="#7C3AED"/>
+  <text x="676" y="462" text-anchor="middle" font-size="12" font-weight="700" fill="#FAFAFA">새 Active</text>
+  <text x="676" y="478" text-anchor="middle" font-size="12" font-weight="700" fill="#FAFAFA">Controller</text>
+  <text x="676" y="492" text-anchor="middle" font-size="10" fill="#E9D5FF">Epoch N+1 (당선)</text>
+
+  <!-- Follower (선출 참여) -->
+  <rect x="328" y="436" width="136" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="396" y="462" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Follower</text>
+  <text x="396" y="478" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Controller-2</text>
+  <text x="396" y="492" text-anchor="middle" font-size="10" fill="#6D28D9">VoteGranted</text>
+
+  <!-- 선출 완료 후 새 Leader → Follower 메타데이터 동기화 -->
+  <line x1="608" y1="476" x2="464" y2="476" stroke="#059669" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#arrow2-green)"/>
+  <text x="540" y="500" text-anchor="middle" font-size="9" fill="#047857">BeginQuorumEpoch 브로드캐스트</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow2-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow2-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrow2-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow2-rose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#BE123C"/>
+    </marker>
+  </defs>
+</svg>

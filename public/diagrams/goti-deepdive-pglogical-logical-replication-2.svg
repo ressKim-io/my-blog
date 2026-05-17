@@ -1,0 +1,71 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">WAL 블록 → 행 이벤트 변환 흐름</title>
+  <desc id="desc-2">트랜잭션 BEGIN부터 COMMIT까지 WAL에 기록된 물리 블록 변경이 논리 디코딩 플러그인을 통해 행 단위 이벤트로 변환되어 Subscriber에 전달되는 6단계 과정</desc>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">WAL 블록 → 행 이벤트 변환 흐름</text>
+  <text x="400" y="50" text-anchor="middle" font-size="11" fill="#27272A">논리 디코딩(logical decoding)이 물리 WAL을 의미 있는 변경으로 해석하는 과정</text>
+
+  <!-- 단계 세로 흐름 (6단계) -->
+
+  <!-- 단계 1: 트랜잭션 시작 -->
+  <rect x="64" y="72" width="672" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="104" y="93" font-size="12" font-weight="700" fill="#047857">① 트랜잭션 시작 (BEGIN)</text>
+  <text x="104" y="113" font-size="11" fill="#047857">WAL에 XID(트랜잭션 ID) 기록. 논리 디코딩 플러그인이 이 XID 추적 시작</text>
+
+  <!-- 화살표 1→2 -->
+  <line x1="400" y1="124" x2="400" y2="146" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow2-dark)"/>
+
+  <!-- 단계 2: DML 실행 -->
+  <rect x="64" y="148" width="672" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="104" y="169" font-size="12" font-weight="700" fill="#B45309">② DML 실행 — WAL에 물리 변경 기록</text>
+  <text x="104" y="187" font-size="11" fill="#B45309">heap 파일 blkno 17, offset 384의 튜플 수정 — 저수준 블록 표현</text>
+  <text x="104" y="203" font-size="11" fill="#B45309">예) UPDATE orders SET status='paid' WHERE id=42 → 페이지 변경 바이트열로 WAL 기록</text>
+
+  <!-- 화살표 2→3 -->
+  <line x1="400" y1="212" x2="400" y2="234" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow2-dark)"/>
+
+  <!-- 단계 3: COMMIT -->
+  <rect x="64" y="236" width="672" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="104" y="257" font-size="12" font-weight="700" fill="#047857">③ 트랜잭션 커밋 (COMMIT)</text>
+  <text x="104" y="277" font-size="11" fill="#047857">WAL에 COMMIT 레코드 기록. 이 시점 이후 논리 디코딩 대상이 됨</text>
+
+  <!-- 화살표 3→4 -->
+  <line x1="400" y1="288" x2="400" y2="310" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow2-dark)"/>
+
+  <!-- 단계 4: 논리 디코딩 플러그인 처리 -->
+  <rect x="64" y="312" width="672" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="104" y="333" font-size="12" font-weight="700" fill="#6D28D9">④ 논리 디코딩 플러그인 (pglogical_output) — 핵심 변환</text>
+  <text x="104" y="351" font-size="11" fill="#6D28D9">WAL 레코드를 순서대로 읽으며 BEGIN~COMMIT 사이의 변경 추출</text>
+  <text x="104" y="369" font-size="11" fill="#6D28D9">시스템 카탈로그(pg_attribute, pg_class)와 대조 → 테이블명·컬럼명·값으로 변환</text>
+  <text x="104" y="387" font-size="11" fill="#6D28D9">wal_level=logical 필수 (커밋 시점 스키마 힌트 포함)</text>
+
+  <!-- 화살표 4→5 -->
+  <line x1="400" y1="384" x2="400" y2="406" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow2-dark)"/>
+
+  <!-- 단계 5: 행 이벤트 직렬화 -->
+  <rect x="64" y="408" width="672" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="104" y="429" font-size="12" font-weight="700" fill="#BE123C">⑤ 행 이벤트 직렬화 (binary 포맷)</text>
+  <text x="104" y="449" font-size="11" fill="#BE123C">table=orders, op=UPDATE, old_pk=42, new=(status='paid', paid_at=...) — 복제 슬롯에 큐잉</text>
+
+  <!-- 화살표 5→6 -->
+  <line x1="400" y1="460" x2="400" y2="482" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#arrow2-accent)"/>
+
+  <!-- 단계 6: Subscriber Apply -->
+  <rect x="64" y="484" width="672" height="24" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="501" text-anchor="middle" font-size="12" font-weight="600" fill="#0E7490">⑥ Subscriber Apply Worker — 대상 DB에 재실행 (at-least-once)</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow2-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow2-accent" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+</svg>

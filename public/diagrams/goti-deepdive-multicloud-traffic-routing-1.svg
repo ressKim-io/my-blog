@@ -1,0 +1,111 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">멀티클라우드 트래픽 라우팅 아키텍처 — 엣지 단일점 라우팅 구조</title>
+  <desc id="desc-1">사용자 브라우저에서 출발한 요청이 Cloudflare 엣지 Workers에서 팀 코드 기반으로 라우팅 결정을 받고, AWS ALB 또는 GCP Load Balancer로 포워딩되는 흐름</desc>
+
+  <style>
+    .label-sm { font-size: 11px; fill: #27272A; }
+    .label-md { font-size: 13px; }
+    .label-lg { font-size: 14px; font-weight: 600; }
+    .arrow { stroke: #0A0A0A; stroke-width: 1.5; fill: none; }
+    .arrow-strong { stroke: #7C3AED; stroke-width: 2; fill: none; }
+    .arrow-head { fill: #0A0A0A; }
+    .arrow-head-strong { fill: #7C3AED; }
+  </style>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 화살표 (박스보다 먼저) -->
+  <!-- 브라우저 → CF Edge -->
+  <line x1="160" y1="72" x2="310" y2="72" class="arrow"/>
+  <polygon points="310,68 320,72 310,76" class="arrow-head"/>
+  <!-- CF Edge → AWS (왼쪽 아래) -->
+  <line x1="360" y1="160" x2="200" y2="270" class="arrow-strong"/>
+  <polygon points="197,269 196,280 207,274" class="arrow-head-strong"/>
+  <!-- CF Edge → GCP (오른쪽 아래) -->
+  <line x1="440" y1="160" x2="592" y2="270" class="arrow-strong"/>
+  <polygon points="593,269 604,274 593,280" class="arrow-head-strong"/>
+  <!-- AWS → RDS (아래) -->
+  <line x1="200" y1="368" x2="200" y2="430" class="arrow"/>
+  <polygon points="196,430 200,440 204,430" class="arrow-head"/>
+  <!-- GCP → pg-primary (아래) -->
+  <line x1="592" y1="368" x2="592" y2="430" class="arrow"/>
+  <polygon points="588,430 592,440 596,430" class="arrow-head"/>
+  <!-- pglogical 복제 화살표 (양쪽 사이) -->
+  <line x1="264" y1="455" x2="528" y2="455" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3" fill="none"/>
+  <polygon points="264,451 254,455 264,459" fill="#7C3AED"/>
+
+  <!-- 응답 헤더 표시선 (점선) -->
+  <line x1="400" y1="210" x2="400" y2="240" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+
+  <!-- 사용자 브라우저 -->
+  <rect x="40" y="48" width="120" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="100" y="68" text-anchor="middle" class="label-lg" fill="#0E7490">사용자</text>
+  <text x="100" y="84" text-anchor="middle" class="label-sm">브라우저</text>
+
+  <!-- 화살표 라벨: HTTPS 요청 -->
+  <rect x="200" y="60" width="80" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="240" y="73" text-anchor="middle" class="label-sm">HTTPS 요청</text>
+
+  <!-- Cloudflare Edge 박스 -->
+  <rect x="320" y="48" width="160" height="112" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="400" y="72" text-anchor="middle" class="label-lg" fill="#B45309">Cloudflare Edge</text>
+  <text x="400" y="92" text-anchor="middle" class="label-md" fill="#B45309">Workers</text>
+  <!-- 내부 설명 -->
+  <text x="400" y="112" text-anchor="middle" class="label-sm">팀 코드 → 클라우드 결정</text>
+  <text x="400" y="128" text-anchor="middle" class="label-sm">Circuit Breaker</text>
+  <text x="400" y="144" text-anchor="middle" class="label-sm">응답 헤더 기록</text>
+
+  <!-- 라우팅 결정 라벨 왼쪽 -->
+  <rect x="228" y="185" width="96" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="276" y="198" text-anchor="middle" class="label-sm" fill="#7C3AED">삼성계열 → AWS</text>
+  <!-- 라우팅 결정 라벨 오른쪽 -->
+  <rect x="480" y="185" width="96" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="528" y="198" text-anchor="middle" class="label-sm" fill="#7C3AED">두산계열 → GCP</text>
+
+  <!-- AWS EKS 박스 -->
+  <rect x="96" y="270" width="208" height="98" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="200" y="294" text-anchor="middle" class="label-lg" fill="#B45309">AWS EKS</text>
+  <text x="200" y="312" text-anchor="middle" class="label-sm">ap-northeast-2</text>
+  <text x="200" y="330" text-anchor="middle" class="label-sm">Istio (독립) · 6 Go MSA</text>
+  <text x="200" y="348" text-anchor="middle" class="label-sm">ALB → Istio IngressGateway</text>
+
+  <!-- GCP GKE 박스 -->
+  <rect x="488" y="270" width="208" height="98" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="592" y="294" text-anchor="middle" class="label-lg" fill="#B45309">GCP GKE</text>
+  <text x="592" y="312" text-anchor="middle" class="label-sm">asia-northeast3</text>
+  <text x="592" y="330" text-anchor="middle" class="label-sm">Istio (독립) · 6 Go MSA</text>
+  <text x="592" y="348" text-anchor="middle" class="label-sm">GCP LB → Istio IngressGateway</text>
+
+  <!-- AWS RDS 박스 -->
+  <rect x="112" y="430" width="176" height="48" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="200" y="452" text-anchor="middle" class="label-md" fill="#6D28D9">AWS RDS</text>
+  <text x="200" y="468" text-anchor="middle" class="label-sm">pglogical subscriber (read-only)</text>
+
+  <!-- GCP pg-primary 박스 -->
+  <rect x="504" y="430" width="176" height="48" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="592" y="452" text-anchor="middle" class="label-md" fill="#6D28D9">GCP pg-primary VM</text>
+  <text x="592" y="468" text-anchor="middle" class="label-sm">pglogical publisher (쓰기)</text>
+
+  <!-- pglogical 복제 라벨 -->
+  <rect x="344" y="444" width="112" height="20" rx="3" fill="#FAFAFA"/>
+  <text x="400" y="458" text-anchor="middle" class="label-sm" fill="#7C3AED">pglogical 단방향 복제</text>
+
+  <!-- 응답 헤더 박스 (중앙 아래) -->
+  <rect x="288" y="248" width="224" height="48" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="400" y="268" text-anchor="middle" class="label-sm">x-goti-route-assigned: aws|gcp</text>
+  <text x="400" y="284" text-anchor="middle" class="label-sm">x-goti-route-circuit: open/aws</text>
+
+  <!-- 범례 -->
+  <rect x="32" y="490" width="736" height="22" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <line x1="48" y1="501" x2="68" y2="501" stroke="#7C3AED" stroke-width="2"/>
+  <text x="74" y="505" class="label-sm">라우팅 결정 경로</text>
+  <line x1="178" y1="501" x2="198" y2="501" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="204" y="505" class="label-sm">데이터 흐름</text>
+  <line x1="280" y1="501" x2="300" y2="501" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="306" y="505" class="label-sm">pglogical 복제</text>
+  <rect x="408" y="494" width="12" height="12" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1"/>
+  <text x="425" y="505" class="label-sm">Cloud/Infra</text>
+  <rect x="504" y="494" width="12" height="12" rx="2" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="521" y="505" class="label-sm">Database/Storage</text>
+</svg>

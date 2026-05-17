@@ -1,0 +1,115 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-1">ApplicationSet clusterGenerator 자동 Application 생성 흐름</title>
+  <desc id="desc-1">단일 prod/ 소스와 cluster-overrides/{eks,gke}.yaml이 ApplicationSet에 입력되어 EKS·GKE 두 클러스터에 각각 Application을 자동 생성하는 흐름</desc>
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title { font-size: 13px; font-weight: 600; }
+    .sub { font-size: 11px; fill: #27272A; }
+    .label { font-size: 11px; fill: #334155; }
+  </style>
+
+  <!-- ===== 화살표 먼저 ===== -->
+
+  <!-- prod/ → ApplicationSet -->
+  <line x1="200" y1="120" x2="360" y2="200" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- overrides/eks.yaml → ApplicationSet -->
+  <line x1="200" y1="240" x2="360" y2="248" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- overrides/gke.yaml → ApplicationSet -->
+  <line x1="200" y1="340" x2="360" y2="280" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ApplicationSet → App EKS -->
+  <line x1="560" y1="240" x2="660" y2="160" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrPurple)"/>
+  <!-- ApplicationSet → App GKE -->
+  <line x1="560" y1="260" x2="660" y2="340" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrPurple)"/>
+
+  <!-- App EKS → EKS Cluster -->
+  <line x1="760" y1="136" x2="760" y2="72" stroke="#D97706" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrAmber)"/>
+  <!-- App GKE → GKE Cluster -->
+  <line x1="760" y1="368" x2="760" y2="432" stroke="#D97706" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrAmber)"/>
+
+  <!-- arrowhead 정의 -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrPurple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrAmber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Git Repo 영역 ===== -->
+  <rect x="24" y="72" width="176" height="320" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="112" y="95" text-anchor="middle" class="title" fill="#047857">Git Repo</text>
+  <text x="112" y="111" text-anchor="middle" class="sub">(Goti-k8s)</text>
+
+  <!-- prod/ 박스 -->
+  <rect x="40" y="96" width="144" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="112" y="117" text-anchor="middle" class="title" fill="#047857">environments/prod/</text>
+  <text x="112" y="133" text-anchor="middle" class="sub">base values.yaml</text>
+  <text x="112" y="147" text-anchor="middle" class="sub">모든 클러스터 공통</text>
+
+  <!-- cluster-overrides 헤더 -->
+  <rect x="40" y="192" width="144" height="24" rx="4" fill="#047857" stroke="none"/>
+  <text x="112" y="208" text-anchor="middle" font-size="11px" fill="#ECFDF5" font-family="'Pretendard', system-ui, sans-serif">cluster-overrides/</text>
+
+  <!-- eks.yaml 박스 -->
+  <rect x="40" y="216" width="144" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="112" y="237" text-anchor="middle" class="title" fill="#047857">eks.yaml</text>
+  <text x="112" y="253" text-anchor="middle" class="sub">AWS 전용 오버라이드</text>
+
+  <!-- gke.yaml 박스 -->
+  <rect x="40" y="304" width="144" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="112" y="325" text-anchor="middle" class="title" fill="#047857">gke.yaml</text>
+  <text x="112" y="341" text-anchor="middle" class="sub">GCP 전용 오버라이드</text>
+
+  <!-- ===== ApplicationSet 박스 ===== -->
+  <rect x="360" y="192" width="200" height="112" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="460" y="218" text-anchor="middle" class="title" fill="#6D28D9">ApplicationSet</text>
+  <text x="460" y="236" text-anchor="middle" class="sub">clusterGenerator</text>
+  <text x="460" y="256" text-anchor="middle" class="sub">ArgoCD Secret 레이블</text>
+  <text x="460" y="272" text-anchor="middle" class="sub">argocd.argoproj.io/secret-type:</text>
+  <text x="460" y="287" text-anchor="middle" class="sub">cluster 를 순회</text>
+
+  <!-- ===== Application 박스 (EKS) ===== -->
+  <rect x="660" y="104" width="120" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="720" y="124" text-anchor="middle" class="title" fill="#6D28D9">Application</text>
+  <text x="720" y="140" text-anchor="middle" class="sub">(EKS 클러스터)</text>
+  <text x="720" y="156" text-anchor="middle" class="sub">자동 생성</text>
+
+  <!-- ===== Application 박스 (GKE) ===== -->
+  <rect x="660" y="304" width="120" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="720" y="324" text-anchor="middle" class="title" fill="#6D28D9">Application</text>
+  <text x="720" y="340" text-anchor="middle" class="sub">(GKE 클러스터)</text>
+  <text x="720" y="356" text-anchor="middle" class="sub">자동 생성</text>
+
+  <!-- ===== EKS 클러스터 ===== -->
+  <rect x="688" y="24" width="96" height="48" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="736" y="44" text-anchor="middle" class="title" fill="#B45309">AWS EKS</text>
+  <text x="736" y="60" text-anchor="middle" class="sub">동기화 대상</text>
+
+  <!-- ===== GKE 클러스터 ===== -->
+  <rect x="688" y="432" width="96" height="48" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="736" y="452" text-anchor="middle" class="title" fill="#B45309">GCP GKE</text>
+  <text x="736" y="468" text-anchor="middle" class="sub">동기화 대상</text>
+
+  <!-- 화살표 중간 라벨 -->
+  <rect x="580" y="181" width="72" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="616" y="193" text-anchor="middle" class="label">Application 생성</text>
+
+  <!-- 점선 설명 라벨 -->
+  <rect x="670" y="74" width="80" height="14" rx="3" fill="#FAFAFA"/>
+  <text x="710" y="85" text-anchor="middle" font-size="10px" fill="#B45309" font-family="'Pretendard', system-ui, sans-serif">sync (점선)</text>
+
+  <!-- 범례 -->
+  <rect x="24" y="416" width="288" height="88" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="36" y="434" class="title" fill="#334155">범례</text>
+  <line x1="36" y1="446" x2="72" y2="446" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="80" y="450" class="label">소스 입력</text>
+  <line x1="36" y1="466" x2="72" y2="466" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrPurple)"/>
+  <text x="80" y="470" class="label">Application 자동 생성</text>
+  <line x1="36" y1="486" x2="72" y2="486" stroke="#D97706" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrAmber)"/>
+  <text x="80" y="490" class="label">클러스터 동기화</text>
+</svg>

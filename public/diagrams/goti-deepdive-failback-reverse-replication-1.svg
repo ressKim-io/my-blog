@@ -1,0 +1,138 @@
+<svg
+  role="img"
+  aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 620"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-1">Failover / Failback 상태 전이 — T0~T4</title>
+  <desc id="desc-1">정상(T0)에서 GCP 장애(T1), AWS 승격(T2), GCP 복구(T3), 역방향 복제 재구성(T4) 까지 다섯 단계 상태 전이와 각 단계에서 publisher·subscriber 역할이 어떻게 바뀌는지 보여주는 흐름도</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="620" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#0A0A0A">흐름도 — Failover / Failback 상태 전이 (T0 → T4)</text>
+
+  <!-- ===== T0 ===== -->
+  <!-- 레이블 -->
+  <text x="24" y="82" font-size="12" font-weight="700" fill="#059669">T0 — 정상</text>
+
+  <!-- GCP box -->
+  <rect x="80" y="92" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="160" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">GCP pg-primary</text>
+  <text x="160" y="133" text-anchor="middle" font-size="11" fill="#047857">publisher (쓰기)</text>
+  <text x="160" y="148" text-anchor="middle" font-size="11" fill="#047857">read_only = off</text>
+
+  <!-- 화살표 GCP→AWS -->
+  <line x1="240" y1="124" x2="360" y2="124" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="300" y="116" text-anchor="middle" font-size="11" fill="#047857">복제</text>
+
+  <!-- AWS box -->
+  <rect x="360" y="92" width="160" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="440" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">AWS RDS</text>
+  <text x="440" y="133" text-anchor="middle" font-size="11" fill="#B45309">subscriber (읽기 전용)</text>
+  <text x="440" y="148" text-anchor="middle" font-size="11" fill="#B45309">read_only = on</text>
+
+  <!-- ===== T1 ===== -->
+  <text x="24" y="202" font-size="12" font-weight="700" fill="#E11D48">T1 — GCP 장애</text>
+
+  <!-- GCP box (fault) -->
+  <rect x="80" y="212" width="160" height="64" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="160" y="236" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">GCP pg-primary</text>
+  <text x="160" y="253" text-anchor="middle" font-size="11" fill="#BE123C">⚡ 장애 (응답 없음)</text>
+  <text x="160" y="268" text-anchor="middle" font-size="11" fill="#BE123C">복제 스트림 중단</text>
+
+  <!-- 화살표 단절 표시 -->
+  <line x1="240" y1="244" x2="296" y2="244" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="268" y="260" text-anchor="middle" font-size="11" fill="#BE123C">단절</text>
+  <line x1="304" y1="244" x2="360" y2="244" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <!-- AWS box -->
+  <rect x="360" y="212" width="160" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="440" y="236" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">AWS RDS</text>
+  <text x="440" y="253" text-anchor="middle" font-size="11" fill="#B45309">read_only = on (유지)</text>
+  <text x="440" y="268" text-anchor="middle" font-size="11" fill="#B45309">Cloudflare → AWS 전환</text>
+
+  <!-- ===== T2 ===== -->
+  <text x="24" y="322" font-size="12" font-weight="700" fill="#D97706">T2 — AWS 승격 (Failover)</text>
+
+  <!-- GCP box -->
+  <rect x="80" y="332" width="160" height="64" rx="6" fill="#F8FAFC" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="160" y="356" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">GCP pg-primary</text>
+  <text x="160" y="373" text-anchor="middle" font-size="11" fill="#334155">장애 중 (stale 데이터)</text>
+  <text x="160" y="388" text-anchor="middle" font-size="11" fill="#334155">T1 이후 변경 없음</text>
+
+  <!-- 화살표 단절 -->
+  <line x1="240" y1="364" x2="296" y2="364" stroke="#475569" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="304" y1="364" x2="360" y2="364" stroke="#475569" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- AWS box (active) -->
+  <rect x="360" y="332" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="440" y="356" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">AWS RDS</text>
+  <text x="440" y="373" text-anchor="middle" font-size="11" fill="#047857">publisher 역할 (승격)</text>
+  <text x="440" y="388" text-anchor="middle" font-size="11" fill="#047857">read_only = off</text>
+
+  <!-- ===== T3 ===== -->
+  <text x="24" y="442" font-size="12" font-weight="700" fill="#7C3AED">T3 — GCP 복구</text>
+
+  <!-- GCP box restored -->
+  <rect x="80" y="452" width="160" height="64" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="160" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">GCP pg-primary</text>
+  <text x="160" y="493" text-anchor="middle" font-size="11" fill="#6D28D9">재기동 완료</text>
+  <text x="160" y="508" text-anchor="middle" font-size="11" fill="#6D28D9">T1 기준 stale 상태</text>
+
+  <!-- 화살표 단절 (아직 재구성 전) -->
+  <line x1="240" y1="484" x2="296" y2="484" stroke="#7C3AED" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="304" y1="484" x2="360" y2="484" stroke="#7C3AED" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- AWS box -->
+  <rect x="360" y="452" width="160" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="440" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">AWS RDS</text>
+  <text x="440" y="493" text-anchor="middle" font-size="11" fill="#047857">publisher 역할 유지</text>
+  <text x="440" y="508" text-anchor="middle" font-size="11" fill="#047857">read_only = off</text>
+
+  <!-- ===== T4 ===== -->
+  <text x="24" y="562" font-size="12" font-weight="700" fill="#059669">T4 — Failback (역방향 복제)</text>
+
+  <!-- GCP box (subscriber now) -->
+  <rect x="80" y="572" width="160" height="40" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="160" y="590" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">GCP pg-primary</text>
+  <text x="160" y="606" text-anchor="middle" font-size="11" fill="#B45309">subscriber / read_only = on</text>
+
+  <!-- 화살표 역방향 AWS→GCP -->
+  <line x1="360" y1="592" x2="248" y2="592" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="304" y="582" text-anchor="middle" font-size="11" fill="#047857">역방향 복제</text>
+
+  <!-- AWS box -->
+  <rect x="360" y="572" width="160" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="440" y="590" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">AWS RDS</text>
+  <text x="440" y="606" text-anchor="middle" font-size="11" fill="#047857">publisher / read_only = off</text>
+
+  <!-- 범례 -->
+  <rect x="570" y="92" width="210" height="192" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="675" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="#0A0A0A">범례</text>
+  <rect x="586" y="126" width="16" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="610" y="137" font-size="11" fill="#0A0A0A">Active / publisher</text>
+  <rect x="586" y="148" width="16" height="12" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="610" y="159" font-size="11" fill="#0A0A0A">Passive / subscriber</text>
+  <rect x="586" y="170" width="16" height="12" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="610" y="181" font-size="11" fill="#0A0A0A">장애 상태</text>
+  <rect x="586" y="192" width="16" height="12" rx="2" fill="#F8FAFC" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="610" y="203" font-size="11" fill="#0A0A0A">복구 대기 / stale</text>
+  <line x1="586" y1="218" x2="602" y2="218" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="610" y="222" font-size="11" fill="#0A0A0A">복제 스트림</text>
+  <line x1="586" y1="238" x2="602" y2="238" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="610" y="242" font-size="11" fill="#0A0A0A">복제 단절</text>
+  <line x1="586" y1="258" x2="602" y2="258" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-green)"/>
+  <text x="610" y="262" font-size="11" fill="#0A0A0A">복제 준비 중</text>
+
+  <!-- arrowhead 정의 -->
+  <defs>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

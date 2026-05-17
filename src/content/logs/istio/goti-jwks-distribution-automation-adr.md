@@ -205,3 +205,11 @@ JWT 키 회전 이벤트를 GitHub Actions로 감지해 Goti-k8s 6개 values.yam
 - **mesh 외부 도구로 제약을 우회하는 편이 깔끔할 때가 있습니다.** Istio 내부에서 모든 것을 해결하려다 보안 정책을 완화하는 것보다, GitHub Actions 같은 mesh 외부 도구로 처리하는 쪽이 정책을 지키면서 자동화를 확보합니다
 - **복수 kid JWKS는 롤아웃 일시 401의 유일한 완화책입니다.** 단일 키만 등록하면 교체 순간 401이 발생합니다. 구키·신키를 동시에 등록하고 순차적으로 제거하는 구조를 미리 설계합니다
 - **ADR 개정 이력은 "기각된 옵션"의 근거를 남기는 데 유용합니다.** Rev 1에서 Option A를 권고했다가 Rev 2에서 기각한 기록을 남겨두면, 나중에 누군가 "왜 jwksUri 안 써요?"를 물었을 때 바로 참조 가능합니다
+
+---
+
+## 🔗 관련 기술 해설
+
+이 글에서 결정한 기술의 동작 원리는 다음 해설글에서 자세히 다룹니다
+
+- [Istio JWT 검증 — RequestAuthentication·JWKS·STRICT mTLS 충돌 원리](/essays/goti-deepdive-istio-jwt-jwks)

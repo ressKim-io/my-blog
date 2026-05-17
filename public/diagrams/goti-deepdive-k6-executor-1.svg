@@ -1,0 +1,170 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">executor 종류별 VU 동작 타임라인 비교</title>
+  <desc id="desc-1">constant-vus에서는 VU 3개가 duration 내내 iteration을 반복하고, per-vu-iterations:1에서는 VU 3개가 각 1회 iteration을 완료하고 종료하는 타임라인 비교</desc>
+
+  <style>
+    .title-text { font-size: 14px; font-weight: 700; fill: #0A0A0A; }
+    .label { font-size: 12px; fill: #27272A; }
+    .label-small { font-size: 11px; fill: #475569; }
+    .section-title { font-size: 13px; font-weight: 600; fill: #0A0A0A; }
+    .axis-label { font-size: 11px; fill: #475569; }
+    .vu-label { font-size: 12px; fill: #0A0A0A; }
+    .iter-text { font-size: 10px; fill: #047857; }
+    .iter-text-light { font-size: 10px; fill: #ECFDF5; }
+    .highlight-text { font-size: 11px; fill: #6D28D9; font-weight: 600; }
+  </style>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" class="title-text">executor 종류별 VU 동작 타임라인 비교</text>
+
+  <!-- ===== 왼쪽: constant-vus ===== -->
+  <!-- 섹션 배경 -->
+  <rect x="24" y="50" width="360" height="440" rx="8" fill="#F0FDF4" stroke="#059669" stroke-width="1.5"/>
+
+  <!-- 섹션 제목 -->
+  <text x="204" y="74" text-anchor="middle" class="section-title" fill="#047857">constant-vus</text>
+  <text x="204" y="91" text-anchor="middle" class="label-small">vus: 3, duration: 30s</text>
+
+  <!-- 시간 축 -->
+  <line x1="64" y1="116" x2="356" y2="116" stroke="#D4D4D8" stroke-width="1.5"/>
+  <!-- 시간 눈금 -->
+  <line x1="64" y1="112" x2="64" y2="120" stroke="#475569" stroke-width="1"/>
+  <line x1="161" y1="112" x2="161" y2="120" stroke="#475569" stroke-width="1"/>
+  <line x1="258" y1="112" x2="258" y2="120" stroke="#475569" stroke-width="1"/>
+  <line x1="356" y1="112" x2="356" y2="120" stroke="#475569" stroke-width="1"/>
+  <text x="64" y="132" text-anchor="middle" class="axis-label">0s</text>
+  <text x="161" y="132" text-anchor="middle" class="axis-label">10s</text>
+  <text x="258" y="132" text-anchor="middle" class="axis-label">20s</text>
+  <text x="356" y="132" text-anchor="middle" class="axis-label">30s</text>
+
+  <!-- duration 종료선 (강조) -->
+  <line x1="356" y1="116" x2="356" y2="400" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="358" y="398" class="label-small" fill="#BE123C">duration 종료</text>
+
+  <!-- VU 1 -->
+  <text x="44" y="166" text-anchor="middle" class="vu-label">VU 1</text>
+  <!-- iteration 1 -->
+  <rect x="64" y="150" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="103" y="169" text-anchor="middle" class="iter-text">iter #1</text>
+  <!-- iteration 2 -->
+  <rect x="144" y="150" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="183" y="169" text-anchor="middle" class="iter-text">iter #2</text>
+  <!-- iteration 3 (잘림) -->
+  <rect x="224" y="150" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="263" y="169" text-anchor="middle" class="iter-text">iter #3</text>
+  <!-- iteration 4 (duration에서 잘림) -->
+  <rect x="304" y="150" width="52" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="330" y="169" text-anchor="middle" class="label-small" fill="#BE123C">중단</text>
+
+  <!-- VU 2 -->
+  <text x="44" y="226" text-anchor="middle" class="vu-label">VU 2</text>
+  <rect x="64" y="210" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="103" y="229" text-anchor="middle" class="iter-text">iter #1</text>
+  <rect x="144" y="210" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="183" y="229" text-anchor="middle" class="iter-text">iter #2</text>
+  <rect x="224" y="210" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="263" y="229" text-anchor="middle" class="iter-text">iter #3</text>
+  <rect x="304" y="210" width="52" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="330" y="229" text-anchor="middle" class="label-small" fill="#BE123C">중단</text>
+
+  <!-- VU 3 -->
+  <text x="44" y="286" text-anchor="middle" class="vu-label">VU 3</text>
+  <rect x="64" y="270" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="103" y="289" text-anchor="middle" class="iter-text">iter #1</text>
+  <rect x="144" y="270" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="183" y="289" text-anchor="middle" class="iter-text">iter #2</text>
+  <rect x="224" y="270" width="78" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="263" y="289" text-anchor="middle" class="iter-text">iter #3</text>
+  <rect x="304" y="270" width="52" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="330" y="289" text-anchor="middle" class="label-small" fill="#BE123C">중단</text>
+
+  <!-- 설명 박스 -->
+  <rect x="40" y="320" width="328" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="56" y="340" class="label" fill="#047857">- VU 3개가 duration 내내 iteration 반복</text>
+  <text x="56" y="358" class="label" fill="#047857">- 총 iteration 수 = 처리 속도에 따라 가변</text>
+  <text x="56" y="376" class="label" fill="#BE123C">- duration 종료 시 미완료 iteration 강제 중단</text>
+
+  <!-- 화살표: "무한 반복" 표시 -->
+  <text x="204" y="416" text-anchor="middle" class="label-small" fill="#475569">→ 시간 기반 종료 (iteration 완결 보장 없음)</text>
+  <rect x="64" y="424" width="280" height="24" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="204" y="440" text-anchor="middle" class="highlight-text">처리량 측정, 안정성 검증에 적합</text>
+  <text x="204" y="466" text-anchor="middle" class="label-small">종료: 30s duration 경과 후</text>
+
+  <!-- ===== 오른쪽: per-vu-iterations:1 ===== -->
+  <rect x="416" y="50" width="360" height="440" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+
+  <text x="596" y="74" text-anchor="middle" class="section-title" fill="#6D28D9">per-vu-iterations: 1</text>
+  <text x="596" y="91" text-anchor="middle" class="label-small">vus: 3, iterations: 1, maxDuration: 10m</text>
+
+  <!-- 시간 축 -->
+  <line x1="456" y1="116" x2="748" y2="116" stroke="#D4D4D8" stroke-width="1.5"/>
+  <line x1="456" y1="112" x2="456" y2="120" stroke="#475569" stroke-width="1"/>
+  <line x1="552" y1="112" x2="552" y2="120" stroke="#475569" stroke-width="1"/>
+  <line x1="660" y1="112" x2="660" y2="120" stroke="#475569" stroke-width="1"/>
+  <line x1="748" y1="112" x2="748" y2="120" stroke="#475569" stroke-width="1"/>
+  <text x="456" y="132" text-anchor="middle" class="axis-label">t=0</text>
+  <text x="552" y="132" text-anchor="middle" class="axis-label">빠른 VU</text>
+  <text x="660" y="132" text-anchor="middle" class="axis-label">느린 VU</text>
+  <text x="748" y="132" text-anchor="middle" class="axis-label">종료</text>
+
+  <!-- VU 1 (빠름) -->
+  <text x="436" y="166" text-anchor="middle" class="vu-label">VU 1</text>
+  <rect x="456" y="150" width="88" height="28" rx="4" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="500" y="169" text-anchor="middle" class="iter-text" fill="#6D28D9">iter #1 (E2E)</text>
+  <!-- 종료 표시 -->
+  <line x1="544" y1="144" x2="544" y2="184" stroke="#059669" stroke-width="2"/>
+  <text x="548" y="162" class="label-small" fill="#047857">완료 →</text>
+  <text x="548" y="176" class="label-small" fill="#047857">VU 해제</text>
+
+  <!-- VU 2 (보통) -->
+  <text x="436" y="226" text-anchor="middle" class="vu-label">VU 2</text>
+  <rect x="456" y="210" width="120" height="28" rx="4" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="516" y="229" text-anchor="middle" class="iter-text" fill="#6D28D9">iter #1 (E2E)</text>
+  <line x1="576" y1="204" x2="576" y2="244" stroke="#059669" stroke-width="2"/>
+  <text x="580" y="222" class="label-small" fill="#047857">완료 →</text>
+  <text x="580" y="236" class="label-small" fill="#047857">VU 해제</text>
+
+  <!-- VU 3 (느림) -->
+  <text x="436" y="286" text-anchor="middle" class="vu-label">VU 3</text>
+  <rect x="456" y="270" width="196" height="28" rx="4" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="554" y="289" text-anchor="middle" class="iter-text" fill="#6D28D9">iter #1 (E2E) — 긴 처리</text>
+  <line x1="652" y1="264" x2="652" y2="304" stroke="#059669" stroke-width="2"/>
+  <text x="656" y="282" class="label-small" fill="#047857">완료 →</text>
+  <text x="656" y="296" class="label-small" fill="#047857">VU 해제</text>
+
+  <!-- 모든 VU 완료 후 테스트 종료 표시 -->
+  <line x1="660" y1="116" x2="660" y2="400" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="662" y="398" class="label-small" fill="#6D28D9">테스트 종료</text>
+
+  <!-- 설명 박스 -->
+  <rect x="432" y="320" width="328" height="80" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="448" y="340" class="label" fill="#6D28D9">- 1 VU = 1 사용자 = 1회 E2E (완결 보장)</text>
+  <text x="448" y="358" class="label" fill="#6D28D9">- 총 iteration 수 = VU 수 (고정, 정확)</text>
+  <text x="448" y="376" class="label" fill="#047857">- 마지막 VU 완료 시 테스트 자동 종료</text>
+
+  <rect x="456" y="424" width="280" height="24" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1"/>
+  <text x="596" y="440" text-anchor="middle" class="highlight-text">E2E 성공률, 동시 사용자 피크 재현에 적합</text>
+  <text x="596" y="466" text-anchor="middle" class="label-small">종료: 모든 VU iteration 완료 후</text>
+
+  <!-- 중앙 구분선 -->
+  <line x1="400" y1="50" x2="400" y2="490" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="6 4"/>
+
+  <!-- 범례 -->
+  <rect x="24" y="496" width="752" height="20" rx="4" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <rect x="36" y="502" width="12" height="8" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="52" y="512" class="label-small">정상 완료 iteration</text>
+  <rect x="170" y="502" width="12" height="8" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="186" y="512" class="label-small">강제 중단 iteration</text>
+  <rect x="304" y="502" width="12" height="8" rx="2" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1"/>
+  <text x="320" y="512" class="label-small">E2E 1회 iteration</text>
+  <line x1="430" y1="506" x2="442" y2="506" stroke="#059669" stroke-width="2"/>
+  <text x="446" y="512" class="label-small">VU 완료/해제</text>
+  <line x1="540" y1="506" x2="552" y2="506" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="556" y="512" class="label-small">duration 강제 종료</text>
+  <line x1="680" y1="506" x2="692" y2="506" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="696" y="512" class="label-small">테스트 자동 종료</text>
+</svg>

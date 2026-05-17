@@ -1,0 +1,94 @@
+<svg role="img" aria-labelledby="title-1 desc-1"
+  viewBox="0 0 800 560"
+  width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  font-family="'Pretendard', system-ui, sans-serif">
+
+  <title id="title-1">서킷 브레이커 3-상태 머신 다이어그램</title>
+  <desc id="desc-1">Closed(정상)에서 실패 임계 초과 시 Open으로 전이하고, TTL 만료 후 Half-Open으로 전이해 probe 성공 시 Closed로 복귀하거나 실패 시 Open으로 되돌아가는 상태 머신</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="38" text-anchor="middle" font-size="16" font-weight="700" fill="#0A0A0A">서킷 브레이커 — 3-상태 머신</text>
+
+  <!-- ===== 화살표 먼저 ===== -->
+
+  <!-- Closed → Open (아래 → 오른쪽 경로, 곡선) -->
+  <path d="M 280 210 Q 400 290 520 210" fill="none" stroke="#E11D48" stroke-width="2" marker-end="url(#arrow-rose)"/>
+  <!-- 라벨 배경 -->
+  <rect x="320" y="255" width="160" height="22" rx="3" fill="#FAFAFA"/>
+  <text x="400" y="271" text-anchor="middle" font-size="11" fill="#BE123C">실패 임계 초과 (timeout / 5xx)</text>
+
+  <!-- Open → Half-Open (오른쪽 → 아래) -->
+  <path d="M 600 290 Q 620 420 520 460" fill="none" stroke="#D97706" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrow-amber)"/>
+  <!-- 라벨 배경 -->
+  <rect x="556" y="360" width="104" height="32" rx="3" fill="#FAFAFA"/>
+  <text x="608" y="374" text-anchor="middle" font-size="11" fill="#B45309">TTL 만료</text>
+  <text x="608" y="388" text-anchor="middle" font-size="11" fill="#B45309">(첫 probe 허용)</text>
+
+  <!-- Half-Open → Closed (성공, 아래 → 왼쪽) -->
+  <path d="M 480 460 Q 400 510 280 460" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arrow-emerald)"/>
+  <!-- 라벨 배경 -->
+  <rect x="304" y="488" width="132" height="22" rx="3" fill="#FAFAFA"/>
+  <text x="370" y="503" text-anchor="middle" font-size="11" fill="#047857">probe 성공 → 정상 복귀</text>
+
+  <!-- Half-Open → Open (실패 시 재오픈, 오른쪽으로) -->
+  <path d="M 560 440 Q 620 400 600 300" fill="none" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-rose)"/>
+  <!-- 라벨 배경 -->
+  <rect x="626" y="358" width="92" height="22" rx="3" fill="#FAFAFA"/>
+  <text x="672" y="373" text-anchor="middle" font-size="11" fill="#BE123C">probe 실패 → 재오픈</text>
+
+  <!-- Closed 자기 루프 (정상 요청 통과) -->
+  <path d="M 175 170 C 145 130 120 150 140 185 C 150 200 165 205 180 200" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow-emerald)"/>
+  <rect x="78" y="142" width="80" height="22" rx="3" fill="#FAFAFA"/>
+  <text x="118" y="157" text-anchor="middle" font-size="11" fill="#047857">정상 요청 통과</text>
+
+  <!-- ===== 상태 박스 ===== -->
+
+  <!-- CLOSED -->
+  <rect x="100" y="188" width="180" height="88" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="190" y="220" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">Closed</text>
+  <text x="190" y="240" text-anchor="middle" font-size="12" fill="#047857">● 정상 운영</text>
+  <text x="190" y="257" text-anchor="middle" font-size="11" fill="#27272A">모든 요청 통과</text>
+  <text x="190" y="271" text-anchor="middle" font-size="11" fill="#27272A">실패 카운터 집계 중</text>
+
+  <!-- OPEN -->
+  <rect x="520" y="188" width="180" height="88" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="610" y="220" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">Open</text>
+  <text x="610" y="240" text-anchor="middle" font-size="12" fill="#BE123C">● 차단 중</text>
+  <text x="610" y="257" text-anchor="middle" font-size="11" fill="#27272A">모든 요청 즉시 fallback</text>
+  <text x="610" y="271" text-anchor="middle" font-size="11" fill="#27272A">TTL 타이머 동작 중</text>
+
+  <!-- HALF-OPEN -->
+  <rect x="320" y="420" width="180" height="88" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="410" y="452" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">Half-Open</text>
+  <text x="410" y="472" text-anchor="middle" font-size="12" fill="#B45309">● 탐색 중</text>
+  <text x="410" y="490" text-anchor="middle" font-size="11" fill="#27272A">첫 요청만 원래 경로로</text>
+  <text x="410" y="504" text-anchor="middle" font-size="11" fill="#27272A">결과에 따라 전이 결정</text>
+
+  <!-- ===== 화살표 마커 정의 ===== -->
+  <defs>
+    <marker id="arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#E11D48"/>
+    </marker>
+    <marker id="arrow-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#D97706"/>
+    </marker>
+  </defs>
+
+  <!-- ===== 범례 ===== -->
+  <rect x="40" y="494" width="226" height="52" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="56" y="512" font-size="11" font-weight="600" fill="#27272A">범례</text>
+  <line x1="56" y1="520" x2="78" y2="520" stroke="#E11D48" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="84" y="524" font-size="11" fill="#27272A">실패 전이 / 재오픈</text>
+  <line x1="56" y1="536" x2="78" y2="536" stroke="#059669" stroke-width="2"/>
+  <text x="84" y="540" font-size="11" fill="#27272A">정상 복귀</text>
+  <line x1="140" y1="536" x2="162" y2="536" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="168" y="540" font-size="11" fill="#27272A">타임아웃 전이</text>
+
+</svg>

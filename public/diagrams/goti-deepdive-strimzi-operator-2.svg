@@ -1,0 +1,121 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto">
+  <title id="title-2">GitOps → Strimzi Operator 선언적 운영 흐름</title>
+  <desc id="desc-2">Git 저장소의 Kafka/KafkaTopic CR을 ArgoCD가 감지해 Kubernetes에 적용하면, Strimzi Operator가 reconciliation loop로 StatefulSet·토픽·사용자를 생성하는 전체 흐름을 보여줍니다</desc>
+  <style>
+    text { font-family: 'Pretendard', system-ui, sans-serif; }
+    .title-text { font-size: 13px; font-weight: 600; }
+    .sub-text { font-size: 11px; fill: #27272A; }
+    .arrow-label { font-size: 11px; fill: #334155; }
+  </style>
+
+  <!-- 배경 -->
+  <rect width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 다이어그램 제목 -->
+  <text x="400" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">흐름도 — GitOps → Strimzi Operator 선언적 운영</text>
+
+  <!-- ── 레인 구분선 (점선) ── -->
+  <line x1="40" y1="60" x2="760" y2="60" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- ━━━ 박스 1: Git 저장소 ━━━ -->
+  <rect x="60" y="80" width="160" height="80" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="140" y="108" text-anchor="middle" class="title-text" fill="#0E7490">Git 저장소</text>
+  <text x="140" y="126" text-anchor="middle" class="sub-text">Kafka CR</text>
+  <text x="140" y="142" text-anchor="middle" class="sub-text">KafkaTopic CR</text>
+
+  <!-- 화살표: Git → ArgoCD -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+  <line x1="220" y1="120" x2="288" y2="120" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="228" y="108" width="52" height="16" fill="#FAFAFA"/>
+  <text x="254" y="120" text-anchor="middle" class="arrow-label">감지/sync</text>
+
+  <!-- ━━━ 박스 2: ArgoCD ━━━ -->
+  <rect x="288" y="80" width="160" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="368" y="108" text-anchor="middle" class="title-text" fill="#B45309">ArgoCD</text>
+  <text x="368" y="126" text-anchor="middle" class="sub-text">CR diff 감지</text>
+  <text x="368" y="142" text-anchor="middle" class="sub-text">kubectl apply</text>
+
+  <!-- 화살표: ArgoCD → K8s API Server -->
+  <line x1="448" y1="120" x2="516" y2="120" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="452" y="108" width="60" height="16" fill="#FAFAFA"/>
+  <text x="482" y="120" text-anchor="middle" class="arrow-label">CR apply</text>
+
+  <!-- ━━━ 박스 3: K8s API Server ━━━ -->
+  <rect x="516" y="80" width="200" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="616" y="108" text-anchor="middle" class="title-text" fill="#6D28D9">K8s API Server</text>
+  <text x="616" y="126" text-anchor="middle" class="sub-text">Desired State 저장</text>
+  <text x="616" y="142" text-anchor="middle" class="sub-text">(etcd)</text>
+
+  <!-- 수직 화살표: K8s API → Strimzi Operator -->
+  <line x1="616" y1="160" x2="616" y2="228" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrow-accent)"/>
+  <rect x="576" y="180" width="80" height="16" fill="#FAFAFA"/>
+  <text x="616" y="192" text-anchor="middle" class="arrow-label" fill="#7C3AED">Watch 이벤트</text>
+
+  <!-- ━━━ 박스 4: Strimzi Operator ━━━ (중앙, 강조) -->
+  <rect x="440" y="228" width="352" height="96" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="616" y="256" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">Strimzi Operator</text>
+  <text x="616" y="276" text-anchor="middle" class="sub-text">Reconciliation Loop</text>
+  <text x="616" y="294" text-anchor="middle" class="sub-text">Desired State vs Actual State 비교 → 조치</text>
+  <text x="616" y="312" text-anchor="middle" class="sub-text">(KafkaTopic·KafkaUser·StatefulSet 관리)</text>
+
+  <!-- 화살표: Operator → StatefulSet -->
+  <line x1="560" y1="324" x2="460" y2="400" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="476" y="348" width="72" height="16" fill="#FAFAFA"/>
+  <text x="512" y="360" text-anchor="middle" class="arrow-label">생성/갱신</text>
+
+  <!-- 화살표: Operator → KafkaTopic -->
+  <line x1="616" y1="324" x2="616" y2="400" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="576" y="348" width="80" height="16" fill="#FAFAFA"/>
+  <text x="616" y="360" text-anchor="middle" class="arrow-label">생성/갱신</text>
+
+  <!-- 화살표: Operator → KafkaUser -->
+  <line x1="672" y1="324" x2="760" y2="400" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="688" y="348" width="64" height="16" fill="#FAFAFA"/>
+  <text x="720" y="360" text-anchor="middle" class="arrow-label">생성/갱신</text>
+
+  <!-- ━━━ 박스 5: StatefulSet ━━━ -->
+  <rect x="360" y="400" width="160" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="440" y="428" text-anchor="middle" class="title-text" fill="#047857">StatefulSet</text>
+  <text x="440" y="448" text-anchor="middle" class="sub-text">Kafka Broker Pods</text>
+  <text x="440" y="464" text-anchor="middle" class="sub-text">(replicas × 브로커)</text>
+
+  <!-- ━━━ 박스 6: KafkaTopic ━━━ -->
+  <rect x="536" y="400" width="160" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="616" y="428" text-anchor="middle" class="title-text" fill="#047857">토픽 생성</text>
+  <text x="616" y="448" text-anchor="middle" class="sub-text">KafkaTopic → Kafka</text>
+  <text x="616" y="464" text-anchor="middle" class="sub-text">내부 토픽 API</text>
+
+  <!-- ━━━ 박스 7: KafkaUser ━━━ -->
+  <rect x="712" y="400" width="72" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="748" y="428" text-anchor="middle" class="title-text" fill="#047857">사용자</text>
+  <text x="748" y="448" text-anchor="middle" class="sub-text">KafkaUser</text>
+  <text x="748" y="464" text-anchor="middle" class="sub-text">ACL 관리</text>
+
+  <!-- ━━━ Sync Wave 범례 ━━━ -->
+  <rect x="60" y="240" width="360" height="140" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="80" y="264" class="title-text" fill="#334155">ArgoCD Sync Wave 순서</text>
+  <text x="80" y="286" class="sub-text">Wave -5  Strimzi CRD 설치</text>
+  <text x="80" y="304" class="sub-text">Wave -4  Strimzi Operator Deployment</text>
+  <text x="80" y="322" class="sub-text">Wave  0  Kafka CR → 클러스터 생성 (~2-3분)</text>
+  <text x="80" y="340" class="sub-text">Wave  1  KafkaTopic CR → 토픽 생성</text>
+  <text x="80" y="358" class="sub-text">Wave  2  KafkaUser CR → 사용자/ACL</text>
+  <text x="80" y="376" class="sub-text">Wave  5  Application Deployments</text>
+
+  <!-- ━━━ 범례 ━━━ -->
+  <rect x="60" y="496" width="680" height="44" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="80" y="510" width="14" height="14" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5" rx="2"/>
+  <text x="100" y="521" class="sub-text" fill="#0E7490">소스/CI</text>
+  <rect x="160" y="510" width="14" height="14" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" rx="2"/>
+  <text x="180" y="521" class="sub-text" fill="#B45309">GitOps 오케스트레이터</text>
+  <rect x="300" y="510" width="14" height="14" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" rx="2"/>
+  <text x="320" y="521" class="sub-text" fill="#6D28D9">K8s 인프라</text>
+  <rect x="420" y="510" width="14" height="14" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" rx="2"/>
+  <text x="440" y="521" class="sub-text" fill="#047857">Strimzi / Kafka 리소스</text>
+</svg>

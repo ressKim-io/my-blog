@@ -1,0 +1,103 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 600" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">일반 JRE 이미지 레이어 vs distroless/static 이미지 레이어 비교</title>
+  <desc id="desc-1">왼쪽은 eclipse-temurin JRE 기반 Java 이미지로 OS 베이스·시스템 유틸리티·JRE·애플리케이션 JAR 레이어가 쌓여 약 280MB에 달합니다. 오른쪽은 distroless/static-debian12:nonroot 기반 Go 이미지로 최소 OS 레이어 하나와 정적 바이너리만 존재해 약 20~50MB 수준입니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="600" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="36" font-size="15" font-weight="700" fill="#0A0A0A" text-anchor="middle">컨테이너 이미지 레이어 비교</text>
+  <text x="400" y="56" font-size="12" fill="#27272A" text-anchor="middle">일반 JRE 이미지 (Before) vs distroless/static (After)</text>
+
+  <!-- ─── 왼쪽: 일반 JRE 이미지 ─── -->
+  <text x="192" y="92" font-size="13" font-weight="700" fill="#0A0A0A" text-anchor="middle">eclipse-temurin:21-jre-jammy</text>
+  <text x="192" y="108" font-size="11" fill="#27272A" text-anchor="middle">~280MB</text>
+
+  <!-- Layer 5: APP JAR (emerald - 애플리케이션) -->
+  <rect x="56" y="120" width="272" height="56" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="192" y="143" font-size="13" font-weight="600" fill="#047857" text-anchor="middle">애플리케이션 JAR</text>
+  <text x="192" y="161" font-size="11" fill="#047857" text-anchor="middle">app.jar · 실제 서비스 코드</text>
+
+  <!-- Layer 4: JRE (amber - 런타임) -->
+  <rect x="56" y="184" width="272" height="56" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="192" y="207" font-size="13" font-weight="600" fill="#B45309" text-anchor="middle">JRE · JVM</text>
+  <text x="192" y="225" font-size="11" fill="#B45309" text-anchor="middle">OpenJDK 21 클래스 파일 · jshell · JMX</text>
+
+  <!-- Layer 3: 시스템 유틸리티 (rose - 보안 위험 레이어) -->
+  <rect x="56" y="248" width="272" height="56" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="192" y="271" font-size="13" font-weight="600" fill="#BE123C" text-anchor="middle">시스템 유틸리티</text>
+  <text x="192" y="289" font-size="11" fill="#BE123C" text-anchor="middle">bash · curl · apt · wget · coreutils</text>
+
+  <!-- Layer 2: C 런타임 (slate) -->
+  <rect x="56" y="312" width="272" height="48" rx="4" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="192" y="331" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">C 런타임 · 시스템 라이브러리</text>
+  <text x="192" y="349" font-size="11" fill="#334155" text-anchor="middle">libc6 · libssl · libgcc</text>
+
+  <!-- Layer 1: OS 베이스 (slate) -->
+  <rect x="56" y="368" width="272" height="48" rx="4" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="192" y="391" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">OS 베이스</text>
+  <text x="192" y="409" font-size="11" fill="#334155" text-anchor="middle">Debian base-files · base-passwd</text>
+
+  <!-- 레이어 번호 라벨 (왼쪽) -->
+  <text x="44" y="153" font-size="10" fill="#475569" text-anchor="middle">L5</text>
+  <text x="44" y="217" font-size="10" fill="#475569" text-anchor="middle">L4</text>
+  <text x="44" y="281" font-size="10" fill="#BE123C" font-weight="600" text-anchor="middle">L3</text>
+  <text x="44" y="341" font-size="10" fill="#475569" text-anchor="middle">L2</text>
+  <text x="44" y="401" font-size="10" fill="#475569" text-anchor="middle">L1</text>
+
+  <!-- CVE 경고 라벨 -->
+  <rect x="56" y="428" width="272" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="192" y="447" font-size="11" fill="#BE123C" text-anchor="middle" font-weight="600">CVE 표면: OS 패키지 수백 개 포함</text>
+
+  <!-- ─── 중앙 화살표 ─── -->
+  <line x1="360" y1="300" x2="440" y2="300" stroke="#7C3AED" stroke-width="2"/>
+  <polygon points="440,295 450,300 440,305" fill="#7C3AED"/>
+  <text x="400" y="288" font-size="11" fill="#7C3AED" text-anchor="middle" font-weight="600">Go 전환</text>
+  <text x="400" y="316" font-size="10" fill="#7C3AED" text-anchor="middle">+ distroless</text>
+
+  <!-- ─── 오른쪽: distroless/static 이미지 ─── -->
+  <text x="608" y="92" font-size="13" font-weight="700" fill="#0A0A0A" text-anchor="middle">distroless/static-debian12:nonroot</text>
+  <text x="608" y="108" font-size="11" fill="#27272A" text-anchor="middle">~20~50MB</text>
+
+  <!-- Layer 2: Go 정적 바이너리 (emerald) -->
+  <rect x="472" y="200" width="272" height="56" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="608" y="223" font-size="13" font-weight="600" fill="#047857" text-anchor="middle">Go 정적 바이너리</text>
+  <text x="608" y="241" font-size="11" fill="#047857" text-anchor="middle">server (CGO_ENABLED=0 빌드)</text>
+
+  <!-- Layer 1: 최소 OS (slate) -->
+  <rect x="472" y="264" width="272" height="56" rx="4" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="608" y="287" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">최소 OS 레이어</text>
+  <text x="608" y="305" font-size="11" fill="#334155" text-anchor="middle">ca-certificates · tzdata · /etc/passwd</text>
+
+  <!-- 레이어 번호 라벨 (오른쪽) -->
+  <text x="460" y="233" font-size="10" fill="#475569" text-anchor="middle">L2</text>
+  <text x="460" y="297" font-size="10" fill="#475569" text-anchor="middle">L1</text>
+
+  <!-- 없음 표시 (비어있는 공간) -->
+  <rect x="472" y="332" width="272" height="48" rx="4" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="608" y="356" font-size="12" fill="#A1A1AA" text-anchor="middle">bash · sh · curl · apt</text>
+  <text x="608" y="374" font-size="12" fill="#A1A1AA" text-anchor="middle">없음 (제거됨)</text>
+
+  <!-- CVE OK 라벨 -->
+  <rect x="472" y="428" width="272" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="608" y="447" font-size="11" fill="#047857" text-anchor="middle" font-weight="600">CVE 표면: OS 패키지 최소화</text>
+
+  <!-- ─── 범례 ─── -->
+  <rect x="200" y="490" width="400" height="88" rx="6" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="400" y="510" font-size="11" font-weight="700" fill="#0A0A0A" text-anchor="middle">범례</text>
+
+  <rect x="220" y="520" width="14" height="14" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="240" y="532" font-size="11" fill="#047857">애플리케이션 코드</text>
+
+  <rect x="340" y="520" width="14" height="14" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="360" y="532" font-size="11" fill="#B45309">언어 런타임</text>
+
+  <rect x="460" y="520" width="14" height="14" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="480" y="532" font-size="11" fill="#BE123C">CVE 위험 레이어</text>
+
+  <rect x="220" y="546" width="14" height="14" rx="2" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="240" y="558" font-size="11" fill="#334155">OS·시스템 레이어</text>
+
+  <rect x="340" y="546" width="14" height="14" rx="2" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="360" y="558" font-size="11" fill="#A1A1AA">제거된 항목</text>
+</svg>

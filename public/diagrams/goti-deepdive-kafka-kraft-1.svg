@@ -1,0 +1,155 @@
+<svg role="img" aria-labelledby="title-1 desc-1" viewBox="0 0 800 520" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-1">구조 비교 — ZooKeeper 앙상블(Before) vs KRaft 컨트롤러 쿼럼(After)</title>
+  <desc id="desc-1">왼쪽은 Kafka 3.x 이전 구조로 Broker 3대 외에 별도 ZooKeeper 앙상블 3대가 필요합니다. 오른쪽은 KRaft 구조로 컨트롤러 역할이 Broker 안에 내장되어 ZooKeeper Pod이 없습니다.</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="520" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">Before / After — ZooKeeper 앙상블 vs KRaft 컨트롤러 쿼럼</text>
+
+  <!-- 구분선 -->
+  <line x1="400" y1="48" x2="400" y2="500" stroke="#E4E4E7" stroke-width="1.5" stroke-dasharray="6 3"/>
+
+  <!-- ===== LEFT: ZooKeeper 구조 ===== -->
+  <text x="200" y="68" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Before — Kafka + ZooKeeper</text>
+  <text x="200" y="84" text-anchor="middle" font-size="11" fill="#27272A">Kafka 3.x 이전</text>
+
+  <!-- ZooKeeper 앙상블 영역 -->
+  <rect x="36" y="100" width="328" height="130" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 2"/>
+  <text x="200" y="120" text-anchor="middle" font-size="11" fill="#B45309">ZooKeeper 앙상블 (~1.5GB RAM)</text>
+
+  <!-- ZK 노드 3개 -->
+  <rect x="56" y="132" width="80" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="96" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">ZK-1</text>
+  <text x="96" y="184" text-anchor="middle" font-size="10" fill="#B45309">Leader</text>
+  <text x="96" y="198" text-anchor="middle" font-size="10" fill="#27272A">메타데이터</text>
+
+  <rect x="160" y="132" width="80" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="200" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">ZK-2</text>
+  <text x="200" y="184" text-anchor="middle" font-size="10" fill="#B45309">Follower</text>
+  <text x="200" y="198" text-anchor="middle" font-size="10" fill="#27272A">메타데이터</text>
+
+  <rect x="264" y="132" width="80" height="80" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="304" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">ZK-3</text>
+  <text x="304" y="184" text-anchor="middle" font-size="10" fill="#B45309">Follower</text>
+  <text x="304" y="198" text-anchor="middle" font-size="10" fill="#27272A">메타데이터</text>
+
+  <!-- ZK 연결선 -->
+  <line x1="136" y1="172" x2="160" y2="172" stroke="#D97706" stroke-width="1.5"/>
+  <line x1="240" y1="172" x2="264" y2="172" stroke="#D97706" stroke-width="1.5"/>
+
+  <!-- ZK → Broker 연결 화살표 -->
+  <line x1="96" y1="255" x2="96" y2="295" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <line x1="200" y1="248" x2="200" y2="295" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <line x1="304" y1="255" x2="304" y2="295" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-dark)"/>
+  <text x="200" y="278" text-anchor="middle" font-size="10" fill="#27272A">메타데이터 읽기/쓰기</text>
+
+  <!-- Kafka Broker 영역 (ZK 구조) -->
+  <rect x="36" y="296" width="328" height="140" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 2"/>
+  <text x="200" y="316" text-anchor="middle" font-size="11" fill="#047857">Kafka Broker 3대 (메시지만 처리)</text>
+
+  <rect x="56" y="328" width="80" height="88" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="96" y="356" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Broker-1</text>
+  <text x="96" y="372" text-anchor="middle" font-size="10" fill="#27272A">파티션 저장</text>
+  <text x="96" y="386" text-anchor="middle" font-size="10" fill="#27272A">메시지 처리</text>
+  <text x="96" y="400" text-anchor="middle" font-size="10" fill="#27272A">복제(replica)</text>
+
+  <rect x="160" y="328" width="80" height="88" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="200" y="356" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Broker-2</text>
+  <text x="200" y="372" text-anchor="middle" font-size="10" fill="#27272A">파티션 저장</text>
+  <text x="200" y="386" text-anchor="middle" font-size="10" fill="#27272A">메시지 처리</text>
+  <text x="200" y="400" text-anchor="middle" font-size="10" fill="#27272A">복제(replica)</text>
+
+  <rect x="264" y="328" width="80" height="88" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="304" y="356" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Broker-3</text>
+  <text x="304" y="372" text-anchor="middle" font-size="10" fill="#27272A">파티션 저장</text>
+  <text x="304" y="386" text-anchor="middle" font-size="10" fill="#27272A">메시지 처리</text>
+  <text x="304" y="400" text-anchor="middle" font-size="10" fill="#27272A">복제(replica)</text>
+
+  <!-- 요약 라벨 (ZK) -->
+  <rect x="36" y="452" width="328" height="36" rx="4" fill="#FEF3C7" stroke="#D97706" stroke-width="1"/>
+  <text x="200" y="465" text-anchor="middle" font-size="11" fill="#B45309">총 6 Pod = ZK 3 + Broker 3</text>
+  <text x="200" y="480" text-anchor="middle" font-size="11" fill="#B45309">메타데이터 시스템 2개를 별도 운영</text>
+
+  <!-- ===== RIGHT: KRaft 구조 ===== -->
+  <text x="600" y="68" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">After — KRaft (ZooKeeper 제거)</text>
+  <text x="600" y="84" text-anchor="middle" font-size="11" fill="#27272A">Kafka 4.x (KRaft only)</text>
+
+  <!-- KRaft 컨트롤러 쿼럼 -->
+  <rect x="436" y="100" width="328" height="320" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 2"/>
+  <text x="600" y="120" text-anchor="middle" font-size="11" fill="#047857">KRaft 컨트롤러 쿼럼 (combined mode)</text>
+
+  <!-- KRaft 노드 3개 — 컨트롤러+브로커 겸용 -->
+  <rect x="452" y="132" width="88" height="260" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="496" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Node-1</text>
+  <rect x="462" y="168" width="68" height="26" rx="4" fill="#7C3AED" />
+  <text x="496" y="185" text-anchor="middle" font-size="10" fill="#FAFAFA" font-weight="600">Controller</text>
+  <text x="496" y="202" text-anchor="middle" font-size="9" fill="#6D28D9">Active Leader</text>
+  <line x1="462" y1="212" x2="530" y2="212" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="462" y="220" width="68" height="26" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="496" y="237" text-anchor="middle" font-size="10" fill="#047857">Broker</text>
+  <text x="496" y="256" text-anchor="middle" font-size="10" fill="#27272A">파티션 저장</text>
+  <text x="496" y="270" text-anchor="middle" font-size="10" fill="#27272A">메시지 처리</text>
+  <text x="496" y="284" text-anchor="middle" font-size="10" fill="#27272A">복제(replica)</text>
+  <text x="496" y="300" text-anchor="middle" font-size="9" fill="#27272A">메타데이터 로그</text>
+  <text x="496" y="314" text-anchor="middle" font-size="9" fill="#27272A">로컬 복사본</text>
+  <text x="496" y="328" text-anchor="middle" font-size="9" fill="#27272A">보유</text>
+  <text x="496" y="346" text-anchor="middle" font-size="9" fill="#6D28D9">__cluster_metadata</text>
+  <text x="496" y="360" text-anchor="middle" font-size="9" fill="#6D28D9">토픽에 저장</text>
+  <text x="496" y="374" text-anchor="middle" font-size="9" fill="#6D28D9">오프셋 기반</text>
+
+  <rect x="556" y="132" width="88" height="260" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="600" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Node-2</text>
+  <rect x="566" y="168" width="68" height="26" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="600" y="185" text-anchor="middle" font-size="10" fill="#6D28D9" font-weight="600">Controller</text>
+  <text x="600" y="202" text-anchor="middle" font-size="9" fill="#6D28D9">Follower</text>
+  <line x1="566" y1="212" x2="634" y2="212" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="566" y="220" width="68" height="26" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="237" text-anchor="middle" font-size="10" fill="#047857">Broker</text>
+  <text x="600" y="256" text-anchor="middle" font-size="10" fill="#27272A">파티션 저장</text>
+  <text x="600" y="270" text-anchor="middle" font-size="10" fill="#27272A">메시지 처리</text>
+  <text x="600" y="284" text-anchor="middle" font-size="10" fill="#27272A">복제(replica)</text>
+  <text x="600" y="300" text-anchor="middle" font-size="9" fill="#27272A">메타데이터 로그</text>
+  <text x="600" y="314" text-anchor="middle" font-size="9" fill="#27272A">로컬 복사본</text>
+  <text x="600" y="328" text-anchor="middle" font-size="9" fill="#27272A">보유</text>
+  <text x="600" y="346" text-anchor="middle" font-size="9" fill="#6D28D9">__cluster_metadata</text>
+  <text x="600" y="360" text-anchor="middle" font-size="9" fill="#6D28D9">토픽에 저장</text>
+  <text x="600" y="374" text-anchor="middle" font-size="9" fill="#6D28D9">오프셋 기반</text>
+
+  <rect x="660" y="132" width="88" height="260" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="704" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Node-3</text>
+  <rect x="670" y="168" width="68" height="26" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="704" y="185" text-anchor="middle" font-size="10" fill="#6D28D9" font-weight="600">Controller</text>
+  <text x="704" y="202" text-anchor="middle" font-size="9" fill="#6D28D9">Follower</text>
+  <line x1="670" y1="212" x2="738" y2="212" stroke="#D4D4D8" stroke-width="1"/>
+  <rect x="670" y="220" width="68" height="26" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="704" y="237" text-anchor="middle" font-size="10" fill="#047857">Broker</text>
+  <text x="704" y="256" text-anchor="middle" font-size="10" fill="#27272A">파티션 저장</text>
+  <text x="704" y="270" text-anchor="middle" font-size="10" fill="#27272A">메시지 처리</text>
+  <text x="704" y="284" text-anchor="middle" font-size="10" fill="#27272A">복제(replica)</text>
+  <text x="704" y="300" text-anchor="middle" font-size="9" fill="#27272A">메타데이터 로그</text>
+  <text x="704" y="314" text-anchor="middle" font-size="9" fill="#27272A">로컬 복사본</text>
+  <text x="704" y="328" text-anchor="middle" font-size="9" fill="#27272A">보유</text>
+  <text x="704" y="346" text-anchor="middle" font-size="9" fill="#6D28D9">__cluster_metadata</text>
+  <text x="704" y="360" text-anchor="middle" font-size="9" fill="#6D28D9">토픽에 저장</text>
+  <text x="704" y="374" text-anchor="middle" font-size="9" fill="#6D28D9">오프셋 기반</text>
+
+  <!-- KRaft 내부 Raft 연결선 -->
+  <line x1="540" y1="181" x2="566" y2="181" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <line x1="634" y1="181" x2="660" y2="181" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="600" y="411" text-anchor="middle" font-size="9" fill="#7C3AED">Raft 복제 (메타데이터 로그)</text>
+
+  <!-- 요약 라벨 (KRaft) -->
+  <rect x="436" y="452" width="328" height="36" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="465" text-anchor="middle" font-size="11" fill="#047857">총 3 Pod = Node 3대 (겸용)</text>
+  <text x="600" y="480" text-anchor="middle" font-size="11" fill="#047857">메타데이터 관리 시스템 단일화</text>
+
+  <!-- 화살표 정의 -->
+  <defs>
+    <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>

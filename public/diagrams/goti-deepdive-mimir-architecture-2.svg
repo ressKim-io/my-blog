@@ -1,0 +1,98 @@
+<svg
+  role="img"
+  aria-labelledby="title-mimir-2 desc-mimir-2"
+  viewBox="0 0 800 480"
+  width="100%"
+  height="auto"
+  xmlns="http://www.w3.org/2000/svg"
+  style="font-family: 'Pretendard', system-ui, sans-serif;"
+>
+  <title id="title-mimir-2">Mimir Ingester Replication N=3 HA 구조도</title>
+  <desc id="desc-mimir-2">Distributor가 consistent hashing으로 Ingester-0, Ingester-1, Ingester-2에 동일 샘플을 3개 복제 전송하고, Ingester-1 장애 시 나머지 두 복제본으로 quorum을 만족해 데이터를 보존하는 HA 흐름</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="480" fill="#FAFAFA"/>
+
+  <!-- 타이틀 -->
+  <text x="400" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">Ingester Replication N=3 — HA 구조</text>
+
+  <!-- ── 범례 ── -->
+  <g transform="translate(32, 52)">
+    <rect x="0" y="0" width="12" height="12" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="18" y="11" font-size="11" fill="#27272A">정상 Ingester</text>
+    <rect x="120" y="0" width="12" height="12" rx="2" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+    <text x="138" y="11" font-size="11" fill="#27272A">장애 Ingester</text>
+    <line x1="252" y1="6" x2="280" y2="6" stroke="#059669" stroke-width="2"/>
+    <polygon points="278,3 284,6 278,9" fill="#059669"/>
+    <text x="290" y="11" font-size="11" fill="#27272A">복제 전송</text>
+    <line x1="380" y1="6" x2="408" y2="6" stroke="#E11D48" stroke-width="2" stroke-dasharray="5 3"/>
+    <polygon points="406,3 412,6 406,9" fill="#E11D48"/>
+    <text x="418" y="11" font-size="11" fill="#27272A">실패 / 장애</text>
+  </g>
+
+  <!-- ── Distributor ── -->
+  <rect x="312" y="88" width="176" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="400" y="113" text-anchor="middle" font-size="14" font-weight="600" fill="#0E7490">Distributor</text>
+  <text x="400" y="131" text-anchor="middle" font-size="11" fill="#27272A">consistent hashing</text>
+  <text x="400" y="147" text-anchor="middle" font-size="11" fill="#27272A">N=3 복제 ring 선택</text>
+
+  <!-- Distributor → Ingester-0 (정상) -->
+  <line x1="360" y1="152" x2="136" y2="236" stroke="#059669" stroke-width="2"/>
+  <polygon points="133,233 136,240 140,233" fill="#059669"/>
+  <text x="218" y="196" text-anchor="middle" font-size="10" fill="#047857">복제 1</text>
+
+  <!-- Distributor → Ingester-1 (장애) -->
+  <line x1="400" y1="152" x2="400" y2="236" stroke="#E11D48" stroke-width="2" stroke-dasharray="5 3"/>
+  <polygon points="396,234 400,241 404,234" fill="#E11D48"/>
+  <text x="430" y="196" text-anchor="middle" font-size="10" fill="#BE123C">복제 2</text>
+
+  <!-- Distributor → Ingester-2 (정상) -->
+  <line x1="440" y1="152" x2="664" y2="236" stroke="#059669" stroke-width="2"/>
+  <polygon points="660,233 664,240 668,233" fill="#059669"/>
+  <text x="580" y="196" text-anchor="middle" font-size="10" fill="#047857">복제 3</text>
+
+  <!-- ── Ingester-0 (정상) ── -->
+  <rect x="56" y="240" width="160" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="136" y="264" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Ingester-0</text>
+  <text x="136" y="282" text-anchor="middle" font-size="11" fill="#27272A">WAL + 메모리</text>
+  <text x="136" y="298" text-anchor="middle" font-size="11" fill="#27272A">정상 운영 중</text>
+
+  <!-- ── Ingester-1 (장애) ── -->
+  <rect x="320" y="240" width="160" height="72" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="400" y="264" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">Ingester-1</text>
+  <text x="400" y="282" text-anchor="middle" font-size="11" fill="#BE123C">OOMKilled / 재시작 중</text>
+  <text x="400" y="298" text-anchor="middle" font-size="10" fill="#BE123C">WAL 유실 없음 (나머지 2개)</text>
+
+  <!-- 장애 X 표시 -->
+  <line x1="330" y1="250" x2="470" y2="302" stroke="#E11D48" stroke-width="1.5" opacity="0.5"/>
+  <line x1="470" y1="250" x2="330" y2="302" stroke="#E11D48" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- ── Ingester-2 (정상) ── -->
+  <rect x="584" y="240" width="160" height="72" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="664" y="264" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Ingester-2</text>
+  <text x="664" y="282" text-anchor="middle" font-size="11" fill="#27272A">WAL + 메모리</text>
+  <text x="664" y="298" text-anchor="middle" font-size="11" fill="#27272A">정상 운영 중</text>
+
+  <!-- ── Quorum 설명 박스 ── -->
+  <rect x="160" y="352" width="480" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="375" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Quorum 충족 — 데이터 보존</text>
+  <text x="400" y="393" text-anchor="middle" font-size="11" fill="#27272A">write quorum: (N/2)+1 = 2개 이상 성공 → 쓰기 완료 인정</text>
+  <text x="400" y="409" text-anchor="middle" font-size="11" fill="#27272A">Ingester-1 장애 시 0·2번 복제본으로 quorum 유지, 데이터 무손실</text>
+
+  <!-- Ingester-0 → Quorum -->
+  <line x1="136" y1="312" x2="260" y2="352" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <polygon points="257,348 260,355 264,349" fill="#059669"/>
+
+  <!-- Ingester-2 → Quorum -->
+  <line x1="664" y1="312" x2="540" y2="352" stroke="#059669" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <polygon points="543,348 540,355 537,349" fill="#059669"/>
+
+  <!-- ── 멀티테넌시 보조 설명 ── -->
+  <rect x="32" y="432" width="328" height="32" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1"/>
+  <text x="196" y="453" text-anchor="middle" font-size="11" fill="#BE123C">모든 요청 헤더: X-Scope-OrgID: {tenant-id}</text>
+
+  <!-- ── WAL 복구 설명 ── -->
+  <rect x="440" y="432" width="328" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="604" y="453" text-anchor="middle" font-size="11" fill="#047857">재시작 시 로컬 WAL로 메모리 복원</text>
+
+</svg>

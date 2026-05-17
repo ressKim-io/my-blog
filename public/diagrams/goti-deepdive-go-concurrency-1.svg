@@ -1,0 +1,124 @@
+<svg role="img" aria-labelledby="title-1 desc-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="100%" height="auto" style="font-family: 'Pretendard', system-ui, sans-serif;">
+  <title id="title-1">GMP 스케줄러 구조도</title>
+  <desc id="desc-1">Go GMP 스케줄러에서 다수의 G(goroutine)가 P(processor)의 로컬 큐에 배치되고 M(OS thread)에 매핑되는 구조. work-stealing으로 P 간 부하 균형을 맞춤</desc>
+
+  <style>
+    .title-text { font-size: 15px; font-weight: 600; fill: #0A0A0A; }
+    .subtitle { font-size: 12px; fill: #475569; }
+    .label-main { font-size: 13px; font-weight: 600; fill: #0A0A0A; }
+    .label-sub  { font-size: 11px; fill: #27272A; }
+    .label-tiny { font-size: 10px; fill: #475569; }
+    .arrow-label { font-size: 11px; fill: #0A0A0A; }
+    .legend-text { font-size: 11px; fill: #334155; }
+  </style>
+
+  <!-- 배경 -->
+  <rect x="0" y="0" width="800" height="560" fill="#FAFAFA"/>
+
+  <!-- 제목 -->
+  <text x="400" y="32" text-anchor="middle" class="title-text">GMP 스케줄러 — G · M · P 매핑 구조</text>
+  <text x="400" y="50" text-anchor="middle" class="subtitle">Go 런타임이 goroutine을 OS 스레드에 다중화하는 방식</text>
+
+  <!-- ── 글로벌 런큐 ── -->
+  <rect x="296" y="72" width="208" height="44" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="400" y="89" text-anchor="middle" class="label-main" fill="#6D28D9">글로벌 런큐 (Global Run Queue)</text>
+  <text x="400" y="106" text-anchor="middle" class="label-tiny">P 로컬 큐 오버플로 G · 새로 생성된 G 일부</text>
+
+  <!-- 글로벌→P 화살표 (아래로) -->
+  <line x1="220" y1="116" x2="176" y2="155" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="400" y1="116" x2="400" y2="155" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="580" y1="116" x2="624" y2="155" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+
+  <!-- ── P 박스 3개 ── -->
+  <!-- P0 -->
+  <rect x="80" y="160" width="192" height="180" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="176" y="182" text-anchor="middle" class="label-main" fill="#B45309">P0 (Processor)</text>
+  <!-- P0 로컬 큐 G 박스들 -->
+  <rect x="96" y="194" width="52" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="122" y="214" text-anchor="middle" class="label-sub" fill="#047857">G3</text>
+  <rect x="156" y="194" width="52" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="182" y="214" text-anchor="middle" class="label-sub" fill="#047857">G4</text>
+  <rect x="216" y="194" width="44" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="238" y="214" text-anchor="middle" class="label-sub" fill="#047857">G5</text>
+  <text x="176" y="246" text-anchor="middle" class="label-tiny">로컬 큐 (최대 256개)</text>
+  <!-- P0 실행 중 G -->
+  <rect x="104" y="258" width="144" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="176" y="276" text-anchor="middle" class="label-sub" fill="#047857">G1 실행 중</text>
+  <text x="176" y="292" text-anchor="middle" class="label-tiny">Running goroutine</text>
+  <!-- P0 M 박스 -->
+  <rect x="104" y="310" width="144" height="24" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="176" y="326" text-anchor="middle" class="label-sub" fill="#0E7490">M0 (OS Thread)</text>
+
+  <!-- P1 -->
+  <rect x="304" y="160" width="192" height="180" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="400" y="182" text-anchor="middle" class="label-main" fill="#B45309">P1 (Processor)</text>
+  <rect x="320" y="194" width="52" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="346" y="214" text-anchor="middle" class="label-sub" fill="#047857">G8</text>
+  <rect x="380" y="194" width="52" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="406" y="214" text-anchor="middle" class="label-sub" fill="#047857">G9</text>
+  <rect x="440" y="194" width="44" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="462" y="214" text-anchor="middle" class="label-sub" fill="#047857">G10</text>
+  <text x="400" y="246" text-anchor="middle" class="label-tiny">로컬 큐 (최대 256개)</text>
+  <rect x="328" y="258" width="144" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="276" text-anchor="middle" class="label-sub" fill="#047857">G6 실행 중</text>
+  <text x="400" y="292" text-anchor="middle" class="label-tiny">Running goroutine</text>
+  <rect x="328" y="310" width="144" height="24" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="400" y="326" text-anchor="middle" class="label-sub" fill="#0E7490">M1 (OS Thread)</text>
+
+  <!-- P2 -->
+  <rect x="528" y="160" width="192" height="180" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="624" y="182" text-anchor="middle" class="label-main" fill="#B45309">P2 (Processor)</text>
+  <rect x="544" y="194" width="52" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="570" y="214" text-anchor="middle" class="label-sub" fill="#047857">G12</text>
+  <rect x="604" y="194" width="52" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="630" y="214" text-anchor="middle" class="label-sub" fill="#047857">G13</text>
+  <rect x="664" y="194" width="44" height="32" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="686" y="214" text-anchor="middle" class="label-sub" fill="#047857">G14</text>
+  <text x="624" y="246" text-anchor="middle" class="label-tiny">로컬 큐 (최대 256개)</text>
+  <rect x="552" y="258" width="144" height="40" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="624" y="276" text-anchor="middle" class="label-sub" fill="#047857">G11 실행 중</text>
+  <text x="624" y="292" text-anchor="middle" class="label-tiny">Running goroutine</text>
+  <rect x="552" y="310" width="144" height="24" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="624" y="326" text-anchor="middle" class="label-sub" fill="#0E7490">M2 (OS Thread)</text>
+
+  <!-- ── work-stealing 화살표 (P0 ← P2) ── -->
+  <path d="M 528 250 C 468 230 312 230 272 250" fill="none" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrowRose)"/>
+  <rect x="352" y="222" width="96" height="18" rx="3" fill="#FAFAFA"/>
+  <text x="400" y="234" text-anchor="middle" class="arrow-label" fill="#BE123C">work-stealing</text>
+
+  <!-- ── OS 커널 영역 ── -->
+  <rect x="64" y="372" width="672" height="64" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="400" y="394" text-anchor="middle" class="label-main" fill="#334155">OS 커널 (Linux Kernel)</text>
+  <text x="400" y="412" text-anchor="middle" class="label-tiny">M(OS Thread)을 실제 CPU에 스케줄링 · syscall 처리 · 컨텍스트 스위칭</text>
+  <text x="400" y="428" text-anchor="middle" class="label-tiny">Go 런타임은 M과 커널 사이에서 goroutine 다중화를 수행 (N:M 모델)</text>
+
+  <!-- M → OS 화살표 -->
+  <line x1="176" y1="334" x2="176" y2="372" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="400" y1="334" x2="400" y2="372" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="624" y1="334" x2="624" y2="372" stroke="#0891B2" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- ── 범례 ── -->
+  <rect x="64" y="460" width="672" height="84" rx="6" fill="#F8FAFC" stroke="#D4D4D8" stroke-width="1"/>
+  <text x="88" y="478" class="legend-text" font-weight="600">범례</text>
+  <rect x="88" y="486" width="14" height="14" rx="2" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="108" y="498" class="legend-text">G (goroutine) — KB 단위 스택, Go 런타임이 관리</text>
+  <rect x="88" y="506" width="14" height="14" rx="2" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="108" y="518" class="legend-text">P (processor) — 로컬 런큐 보유, GOMAXPROCS 수만큼 생성</text>
+  <rect x="400" y="486" width="14" height="14" rx="2" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="420" y="498" class="legend-text">M (OS thread) — 커널 스케줄러가 CPU에 매핑</text>
+  <line x1="400" y1="512" x2="414" y2="512" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="420" y="518" class="legend-text">work-stealing — 빈 P가 다른 P 큐에서 G를 절반 가져옴</text>
+
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/>
+    </marker>
+    <marker id="arrowRose" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+</svg>

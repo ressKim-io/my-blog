@@ -1,0 +1,152 @@
+<svg role="img" aria-labelledby="title-2 desc-2" viewBox="0 0 800 440" width="100%" height="auto"
+  xmlns="http://www.w3.org/2000/svg" font-family="'Pretendard', system-ui, sans-serif">
+  <title id="title-2">Tempo metrics_generator 동작 구조도</title>
+  <desc id="desc-2">애플리케이션 span이 Tempo에 유입되면 metrics_generator가 병렬로 spanmetrics(RED 메트릭)와 service_graphs(서비스맵)를 생성해 Prometheus remote_write로 내보내는 구조</desc>
+
+  <!-- 배경 -->
+  <rect width="800" height="440" fill="#FAFAFA" rx="4"/>
+  <text x="400" y="30" text-anchor="middle" font-size="15" font-weight="600" fill="#0A0A0A">Tempo metrics_generator — span → RED 메트릭·서비스맵 생성</text>
+
+  <!-- ======================== 왼쪽: App / Alloy ======================== -->
+  <rect x="32" y="56" width="140" height="72" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="102" y="78" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">Application</text>
+  <text x="102" y="95" text-anchor="middle" font-size="10" fill="#27272A">OTel SDK</text>
+  <text x="102" y="110" text-anchor="middle" font-size="10" fill="#27272A">span 생성 + 전파</text>
+
+  <rect x="32" y="152" width="140" height="64" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="102" y="174" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">Alloy</text>
+  <text x="102" y="191" text-anchor="middle" font-size="10" fill="#27272A">tail sampling</text>
+  <text x="102" y="207" text-anchor="middle" font-size="10" fill="#27272A">OTLP → Kafka</text>
+
+  <!-- App → Alloy -->
+  <line x1="102" y1="128" x2="102" y2="150" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <defs>
+    <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="arr2-accent" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="arr2-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+    </marker>
+    <marker id="arr2-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#D97706"/>
+    </marker>
+  </defs>
+  <rect x="75" y="131" width="54" height="14" fill="#FAFAFA"/>
+  <text x="102" y="142" text-anchor="middle" font-size="10" fill="#27272A">OTLP gRPC</text>
+
+  <!-- Alloy → Kafka -->
+  <line x1="173" y1="184" x2="209" y2="184" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <rect x="178" y="170" width="28" height="14" fill="#FAFAFA"/>
+  <text x="192" y="181" text-anchor="middle" font-size="10" fill="#27272A">10%</text>
+
+  <!-- ======================== Kafka ======================== -->
+  <rect x="210" y="160" width="100" height="48" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="260" y="182" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">Kafka</text>
+  <text x="260" y="198" text-anchor="middle" font-size="10" fill="#27272A">otlp_spans topic</text>
+
+  <!-- Kafka → Tempo -->
+  <line x1="311" y1="184" x2="347" y2="184" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+  <!-- ======================== Tempo 메인 박스 ======================== -->
+  <rect x="348" y="56" width="280" height="328" rx="8" fill="#F0FDF4" stroke="#059669" stroke-width="2"/>
+  <text x="488" y="82" text-anchor="middle" font-size="14" font-weight="600" fill="#047857">Grafana Tempo</text>
+
+  <!-- Distributor -->
+  <rect x="364" y="96" width="248" height="48" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="488" y="117" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Distributor</text>
+  <text x="488" y="134" text-anchor="middle" font-size="10" fill="#27272A">OTLP 수신 → Ingester 분배</text>
+
+  <!-- Distributor → Ingester / metrics_generator 분기 화살표 -->
+  <line x1="488" y1="144" x2="420" y2="172" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <line x1="488" y1="144" x2="556" y2="172" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr2-accent)"/>
+
+  <!-- Ingester -->
+  <rect x="364" y="172" width="100" height="56" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="414" y="194" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">Ingester</text>
+  <text x="414" y="210" text-anchor="middle" font-size="10" fill="#27272A">WAL + 메모리</text>
+  <text x="414" y="223" text-anchor="middle" font-size="10" fill="#27272A">블록 compaction</text>
+
+  <!-- metrics_generator -->
+  <rect x="492" y="172" width="120" height="56" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="552" y="193" text-anchor="middle" font-size="11" font-weight="600" fill="#6D28D9">metrics_generator</text>
+  <text x="552" y="209" text-anchor="middle" font-size="10" fill="#27272A">span 스트림 처리</text>
+  <text x="552" y="222" text-anchor="middle" font-size="10" fill="#27272A">병렬 파이프라인</text>
+
+  <!-- 분기: spanmetrics / service_graphs -->
+  <line x1="520" y1="228" x2="440" y2="256" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arr2-accent)"/>
+  <line x1="584" y1="228" x2="584" y2="256" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arr2-accent)"/>
+
+  <!-- spanmetrics 프로세서 -->
+  <rect x="364" y="256" width="148" height="68" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="438" y="276" text-anchor="middle" font-size="11" font-weight="600" fill="#6D28D9">spanmetrics 프로세서</text>
+  <text x="438" y="292" text-anchor="middle" font-size="10" fill="#27272A">span duration → histogram</text>
+  <text x="438" y="306" text-anchor="middle" font-size="10" fill="#27272A">traces_spanmetrics_</text>
+  <text x="438" y="319" text-anchor="middle" font-size="10" fill="#27272A">latency_bucket</text>
+
+  <!-- service_graphs 프로세서 -->
+  <rect x="520" y="256" width="92" height="68" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="566" y="276" text-anchor="middle" font-size="11" font-weight="600" fill="#6D28D9">service_graphs</text>
+  <text x="566" y="292" text-anchor="middle" font-size="10" fill="#27272A">parent/child span</text>
+  <text x="566" y="306" text-anchor="middle" font-size="10" fill="#27272A">→ edge 추출</text>
+  <text x="566" y="319" text-anchor="middle" font-size="10" fill="#27272A">호출 그래프 생성</text>
+
+  <!-- 두 프로세서 → remote_write -->
+  <line x1="438" y1="324" x2="438" y2="348" stroke="#059669" stroke-width="1.5" marker-end="url(#arr2-green)"/>
+  <line x1="566" y1="324" x2="566" y2="348" stroke="#059669" stroke-width="1.5" marker-end="url(#arr2-green)"/>
+
+  <!-- remote_write 박스 -->
+  <rect x="364" y="348" width="248" height="24" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.2"/>
+  <text x="488" y="364" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">Prometheus remote_write → Mimir</text>
+
+  <!-- Ingester → Object Storage -->
+  <line x1="414" y1="228" x2="414" y2="256" stroke="#059669" stroke-width="1.5" marker-end="url(#arr2-green)"/>
+
+  <!-- ======================== 오른쪽: 출력 ======================== -->
+  <!-- Object Storage -->
+  <rect x="664" y="96" width="112" height="80" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="720" y="119" text-anchor="middle" font-size="12" font-weight="600" fill="#6D28D9">Object Storage</text>
+  <text x="720" y="137" text-anchor="middle" font-size="10" fill="#27272A">S3 / Minio</text>
+  <text x="720" y="153" text-anchor="middle" font-size="10" fill="#27272A">Parquet 블록</text>
+  <text x="720" y="166" text-anchor="middle" font-size="10" fill="#27272A">(trace 장기 보관)</text>
+
+  <!-- Ingester → Object Storage -->
+  <line x1="465" y1="200" x2="662" y2="136" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4 2" marker-end="url(#arr2-accent)"/>
+  <rect x="520" y="156" width="60" height="14" fill="#FAFAFA"/>
+  <text x="550" y="167" text-anchor="middle" font-size="10" fill="#6D28D9">compaction</text>
+
+  <!-- Mimir -->
+  <rect x="664" y="220" width="112" height="80" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="720" y="244" text-anchor="middle" font-size="12" font-weight="600" fill="#047857">Mimir</text>
+  <text x="720" y="261" text-anchor="middle" font-size="10" fill="#27272A">RED 메트릭 저장</text>
+  <text x="720" y="277" text-anchor="middle" font-size="10" fill="#27272A">서비스맵 데이터</text>
+  <text x="720" y="291" text-anchor="middle" font-size="10" fill="#27272A">PromQL 쿼리</text>
+
+  <!-- remote_write → Mimir -->
+  <line x1="613" y1="360" x2="662" y2="280" stroke="#059669" stroke-width="1.5" marker-end="url(#arr2-green)"/>
+
+  <!-- Grafana -->
+  <rect x="664" y="340" width="112" height="72" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="720" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">Grafana</text>
+  <text x="720" y="379" text-anchor="middle" font-size="10" fill="#27272A">서비스맵 패널</text>
+  <text x="720" y="395" text-anchor="middle" font-size="10" fill="#27272A">RED 대시보드</text>
+
+  <!-- Mimir → Grafana -->
+  <line x1="720" y1="300" x2="720" y2="338" stroke="#D97706" stroke-width="1.5" marker-end="url(#arr2-amber)"/>
+
+  <!-- ======================== 하단 설명 박스 ======================== -->
+  <rect x="32" y="390" width="300" height="36" rx="4" fill="#F8FAFC" stroke="#D4D4D8"/>
+  <text x="182" y="408" text-anchor="middle" font-size="10" fill="#27272A">tail sampling: 오류·느린 요청 보존 → 나머지 무작위 10%</text>
+  <text x="182" y="422" text-anchor="middle" font-size="10" fill="#27272A">Object Storage만으로 운영 (Elasticsearch/Cassandra 불필요)</text>
+
+  <!-- 범례 -->
+  <rect x="348" y="390" width="280" height="36" rx="4" fill="#FAFAFA" stroke="#D4D4D8"/>
+  <line x1="360" y1="408" x2="385" y2="408" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="392" y="411" font-size="10" fill="#27272A">동기 흐름</text>
+  <line x1="440" y1="408" x2="465" y2="408" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="472" y="411" font-size="10" fill="#27272A">비동기/병렬</text>
+  <rect x="520" y="401" width="10" height="10" rx="2" fill="#F5F3FF" stroke="#7C3AED"/>
+  <text x="535" y="411" font-size="10" fill="#27272A">metrics_generator</text>
+</svg>
