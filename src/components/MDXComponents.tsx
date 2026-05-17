@@ -85,7 +85,7 @@ export const mdxComponents = {
         <a
           href={`#${id}`}
           aria-label={`${typeof children === 'string' ? children : 'section'} 링크`}
-          className="absolute -left-6 top-1/2 -translate-y-1/2 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity hover:!text-[var(--accent)] no-underline"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity hover:!text-[var(--accent)] no-underline"
           style={{ textDecoration: 'none' }}
         >
           #

@@ -126,10 +126,18 @@
   }
 
   .prose h2 {
-    font-size: 1.625rem;
-    margin-top: 2.75rem;
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    margin-top: 3.5rem;
+    margin-bottom: 1.25rem;
     line-height: 1.3;
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .prose h2:first-child {
+    margin-top: 0;
   }
 
   .prose h3 {
@@ -226,6 +234,11 @@
     border: none;
     border-top: 1px solid var(--border);
     margin: 2.5rem 0;
+  }
+
+  /* h2 바로 앞 hr 숨김 — 섹션 헤더 밴드와 '--- ' 구분선이 겹치는 이중선 방지 */
+  .prose hr:has(+ h2) {
+    display: none;
   }
 
   .prose a {
