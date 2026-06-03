@@ -40,6 +40,7 @@ const categoryLabels: Record<string, string> = {
   argocd: 'ArgoCD',
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
+  network: 'Network',
 };
 
 function formatDate(date: string) {

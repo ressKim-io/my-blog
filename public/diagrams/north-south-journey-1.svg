@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="arG" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+    <marker id="arA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#D97706"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="380" fill="#FFFFFF"/>
+
+  <!-- HIT return lane -->
+  <polyline points="605,74 605,34 85,34 85,72" fill="none" stroke="#059669" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arG)"/>
+  <text x="345" y="27" text-anchor="middle" font-size="11.5" font-weight="600" fill="#059669">Cache HIT — served from edge (no origin)</text>
+
+  <!-- top row boxes -->
+  <rect x="30" y="74" width="110" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="85" y="101" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0E7490">Device</text>
+
+  <rect x="190" y="74" width="120" height="44" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="250" y="101" text-anchor="middle" font-size="12.5" fill="#334155">DNS resolve</text>
+
+  <rect x="360" y="74" width="130" height="44" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="425" y="101" text-anchor="middle" font-size="12.5" fill="#334155">Access Network</text>
+
+  <rect x="540" y="74" width="130" height="44" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="605" y="101" text-anchor="middle" font-size="12.5" font-weight="600" fill="#047857">CDN Edge / PoP</text>
+
+  <!-- top row arrows -->
+  <line x1="140" y1="96" x2="186" y2="96" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="310" y1="96" x2="356" y2="96" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="490" y1="96" x2="536" y2="96" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <!-- MISS branch into cloud -->
+  <polyline points="605,118 605,165 215,165 215,250" fill="none" stroke="#D97706" stroke-width="1.6" marker-end="url(#arA)"/>
+  <text x="430" y="159" text-anchor="middle" font-size="11.5" font-weight="600" fill="#B45309">MISS / dynamic</text>
+
+  <!-- cloud region -->
+  <rect x="120" y="210" width="760" height="120" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <text x="136" y="230" font-size="12" font-weight="700" fill="#B45309">Cloud Region (VPC)</text>
+
+  <rect x="150" y="252" width="130" height="44" rx="8" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5"/>
+  <text x="215" y="279" text-anchor="middle" font-size="12" fill="#B45309">ALB (L7 LB)</text>
+
+  <rect x="320" y="252" width="140" height="44" rx="8" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5"/>
+  <text x="390" y="279" text-anchor="middle" font-size="12" fill="#B45309">Ingress / GW</text>
+
+  <rect x="500" y="252" width="150" height="44" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="575" y="279" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">Service (ClusterIP)</text>
+
+  <rect x="690" y="252" width="110" height="44" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="745" y="279" text-anchor="middle" font-size="12.5" font-weight="600" fill="#047857">Pod</text>
+
+  <!-- region internal arrows -->
+  <line x1="280" y1="274" x2="316" y2="274" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="460" y1="274" x2="496" y2="274" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="650" y1="274" x2="686" y2="274" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <!-- bottom note -->
+  <text x="450" y="358" text-anchor="middle" font-size="11" fill="#94A3B8">Response returns to the user in reverse order</text>
+</svg>

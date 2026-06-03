@@ -44,6 +44,8 @@ const escapeXml = (s) =>
 function generateSitemap(posts) {
   // deepdive 시리즈 id 를 콘텐츠에서 자동 도출 — series.ts 와 별도 동기화 불필요
   // (id = series.name 에서 'goti-deepdive-' 접두사를 뗀 값)
+  // 비-deepdive 등록 시리즈(series.ts seriesList)는 접두사가 없으므로 명시 allowlist 로 포함
+  const REGISTERED_PLAIN_SERIES = ['packet-journey'];
   const seriesIds = [
     ...new Set(
       posts
@@ -51,9 +53,14 @@ function generateSitemap(posts) {
           (p) =>
             p.track === 'essays' &&
             typeof p.series?.name === 'string' &&
-            p.series.name.startsWith('goti-deepdive-'),
+            (p.series.name.startsWith('goti-deepdive-') ||
+              REGISTERED_PLAIN_SERIES.includes(p.series.name)),
         )
-        .map((p) => p.series.name.slice('goti-deepdive-'.length)),
+        .map((p) =>
+          p.series.name.startsWith('goti-deepdive-')
+            ? p.series.name.slice('goti-deepdive-'.length)
+            : p.series.name,
+        ),
     ),
   ];
   const staticPages = [

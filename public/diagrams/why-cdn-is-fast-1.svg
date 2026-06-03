@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 350" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <rect x="0" y="0" width="760" height="350" fill="#FFFFFF"/>
+
+  <!-- 1 Network location -->
+  <text x="190" y="59" text-anchor="end" font-size="12.5" font-weight="600" fill="#334155">Network location</text>
+  <rect x="200" y="40" width="480" height="28" rx="5" fill="#059669"/>
+  <text x="688" y="59" font-size="11" fill="#059669">★★★★★</text>
+
+  <!-- 2 Home line -->
+  <text x="190" y="105" text-anchor="end" font-size="12.5" font-weight="600" fill="#334155">Home line limits</text>
+  <rect x="200" y="86" width="384" height="28" rx="5" fill="#059669"/>
+  <text x="592" y="105" font-size="11" fill="#059669">★★★★</text>
+
+  <!-- 3 Cache tiers -->
+  <text x="190" y="151" text-anchor="end" font-size="12.5" fill="#334155">Cache tiers (RAM)</text>
+  <rect x="200" y="132" width="288" height="28" rx="5" fill="#D97706"/>
+  <text x="496" y="151" font-size="11" fill="#D97706">★★★</text>
+
+  <!-- 4 HW + TCP tuning -->
+  <text x="190" y="197" text-anchor="end" font-size="12.5" fill="#334155">HW + TCP tuning</text>
+  <rect x="200" y="178" width="288" height="28" rx="5" fill="#D97706"/>
+  <text x="496" y="197" font-size="11" fill="#D97706">★★★</text>
+
+  <!-- 5 Warm connections -->
+  <text x="190" y="243" text-anchor="end" font-size="12.5" fill="#334155">Warm connections</text>
+  <rect x="200" y="224" width="192" height="28" rx="5" fill="#64748B"/>
+  <text x="400" y="243" font-size="11" fill="#64748B">★★</text>
+
+  <!-- 6 Distribution -->
+  <text x="190" y="289" text-anchor="end" font-size="12.5" fill="#334155">Distribution</text>
+  <rect x="200" y="270" width="192" height="28" rx="5" fill="#64748B"/>
+  <text x="400" y="289" font-size="11" fill="#64748B">★★</text>
+
+  <!-- caption -->
+  <text x="380" y="328" text-anchor="middle" font-size="11" fill="#94A3B8">Same country, same distance — location &amp; line dominate; box performance is small</text>
+</svg>

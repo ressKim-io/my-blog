@@ -65,6 +65,13 @@ export const seriesList: SeriesMeta[] = [
     tagline: 'Service Mesh',
     blurb: 'Istio 서비스 메시 구조, 사이드카 vs Ambient, 멀티클러스터, JWT/JWKS 검증',
   },
+  {
+    id: 'packet-journey',
+    seriesName: 'packet-journey',
+    title: '네트워크 지연',
+    tagline: 'Latency · CDN · Datacenter',
+    blurb: '빛의 속도부터 데이터센터 입지까지 — 패킷이 사용자에게 닿기까지의 지연을 한 줄기로 해부합니다',
+  },
 ];
 
 // 홈 쇼케이스 featured(큰 카드)로 고정할 시리즈 — 교체는 이 한 줄만 수정

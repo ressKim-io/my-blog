@@ -19,6 +19,7 @@ const categoryLabelMap: Record<string, string> = {
   argocd: 'ArgoCD',
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
+  network: 'Network',
 };
 
 const statusBadge: Record<string, { label: string; mark: string; color: string }> = {
