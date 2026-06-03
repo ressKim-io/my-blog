@@ -123,8 +123,6 @@ export default function LinkPreview({
               </>
             )}
             <span className="text-[var(--border-strong)]">·</span>
-            <span className="text-[var(--muted)] tabular-nums">{meta.readingTime}분</span>
-            <span className="text-[var(--border-strong)]">·</span>
             <time className="text-[var(--muted)] tabular-nums">{meta.date.slice(0, 10)}</time>
           </div>
           <h4 className="text-[15px] font-semibold text-[var(--text)] leading-snug mb-1.5">

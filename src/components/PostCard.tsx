@@ -62,8 +62,6 @@ export default function PostCard({ post, track, variant = 'card', showExcerpt = 
         <span>{categoryLabel}</span>
         <span className="text-[var(--border-strong)]">·</span>
         <time>{formatDate(post.date)}</time>
-        <span className="text-[var(--border-strong)]">·</span>
-        <span>{post.readingTime}분</span>
         {post.series && (
           <>
             <span className="text-[var(--border-strong)]">·</span>

@@ -92,7 +92,6 @@ export default function PostDetail({ post, allPosts, seriesPosts }: PostDetailPr
     articleSection: categoryLabel,
     keywords: post.tags?.join(', '),
     inLanguage: 'ko',
-    timeRequired: `PT${post.readingTime}M`,
   };
   const jsonLd = JSON.stringify(articleSchema).replace(/</g, '\\u003c');
 
@@ -141,8 +140,6 @@ export default function PostDetail({ post, allPosts, seriesPosts }: PostDetailPr
                   <time>{formatDate(post.date)}</time>
                   <span className="text-[var(--border-strong)]">·</span>
                   <span>{categoryLabel}</span>
-                  <span className="text-[var(--border-strong)]">·</span>
-                  <span>{post.readingTime}분 읽기</span>
                   {post.series && (
                     <>
                       <span className="text-[var(--border-strong)]">·</span>

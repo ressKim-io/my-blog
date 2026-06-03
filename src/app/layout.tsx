@@ -63,7 +63,6 @@ export default function RootLayout({
     date: p.date,
     type: p.type,
     category: p.category,
-    readingTime: p.readingTime,
   }));
 
   return (

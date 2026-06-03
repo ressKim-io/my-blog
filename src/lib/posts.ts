@@ -21,7 +21,6 @@ export interface PostData {
   content: string;
   type?: PostType;
   track: Track;
-  readingTime: number;
 }
 
 const TYPE_TAGS: PostType[] = ['troubleshooting', 'adr', 'concept', 'retrospective'];
@@ -72,7 +71,6 @@ function readPost(relativePath: string): PostData {
     content,
     type,
     track: trackFromDir,
-    readingTime: estimateReadingTime(content),
   };
 }
 
@@ -173,29 +171,11 @@ export function toListItem(p: PostData): PostListItem {
     date: p.date,
     type: p.type,
     track: p.track,
-    readingTime: p.readingTime,
   };
 }
 
 export function getEssaysList(): PostListItem[] {
   return getEssays().map(toListItem);
-}
-
-/**
- * 한국어 250자/분, 영문 200단어/분 가중 평균.
- * 코드블록은 본문보다 천천히 읽힌다고 가정해 0.5x 가중.
- */
-export function estimateReadingTime(content: string): number {
-  const codeBlocks = content.match(/```[\s\S]*?```/g) ?? [];
-  const codeChars = codeBlocks.reduce((sum, block) => sum + block.length, 0);
-  const stripped = content.replace(/```[\s\S]*?```/g, '');
-
-  const koreanChars = (stripped.match(/[가-힣]/g) ?? []).length;
-  const englishWords = (stripped.match(/[a-zA-Z][a-zA-Z'-]*/g) ?? []).length;
-
-  const minutes =
-    koreanChars / 250 + englishWords / 200 + codeChars / 500;
-  return Math.max(1, Math.ceil(minutes));
 }
 
 export interface Heading {

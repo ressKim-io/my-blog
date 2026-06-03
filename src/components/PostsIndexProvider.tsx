@@ -11,7 +11,6 @@ export interface PostMeta {
   date: string;
   type?: PostType;
   category: string;
-  readingTime: number;
 }
 
 const PostsIndexCtx = createContext<Map<string, PostMeta>>(new Map());

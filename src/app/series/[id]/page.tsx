@@ -37,7 +37,6 @@ export default async function SeriesDetailPage({ params }: Props) {
   const series = getSeriesById(id);
   if (!series) notFound();
 
-  const totalReading = series.posts.reduce((n, p) => n + p.readingTime, 0);
   const others = getAllSeries()
     .filter((s) => s.id !== id)
     .slice(0, 3);
@@ -69,8 +68,6 @@ export default async function SeriesDetailPage({ params }: Props) {
             <p className="mt-3 text-[16px] leading-relaxed text-[var(--muted)]">{series.blurb}</p>
             <div className="mt-5 flex items-center gap-3 text-[13px] text-[var(--muted)]">
               <span className="font-mono">{series.count}편</span>
-              <span className="text-[var(--border-strong)]">·</span>
-              <span className="font-mono">약 {totalReading}분</span>
             </div>
           </header>
 
@@ -94,9 +91,6 @@ export default async function SeriesDetailPage({ params }: Props) {
                       </p>
                     )}
                   </div>
-                  <span className="shrink-0 font-mono text-[12px] text-[var(--muted-soft)]">
-                    {post.readingTime}분
-                  </span>
                 </Link>
               </li>
             ))}
