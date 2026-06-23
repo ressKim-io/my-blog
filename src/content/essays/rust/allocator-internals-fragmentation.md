@@ -1,7 +1,7 @@
 ---
 title: "왜 jemalloc으로 바꾸면 빨라질까 — 할당자 내부와 단편화의 비밀"
 excerpt: "#[global_allocator] 단 한 줄의 교체가 서버의 처리량(Throughput)과 RSS를 뒤바꾸는 마법. tcache, arena, size class부터 jemalloc의 decay 상태 기계까지, 블랙박스 같았던 메모리 할당자(Allocator)의 내부를 낱낱이 해부합니다."
-category: systems
+category: rust
 tags:
   - rust
   - allocator

@@ -1,7 +1,7 @@
 ---
 title: "제네릭은 왜 빠르고 dyn은 왜 느릴까 — 디스패치와 코드 생성의 비밀"
 excerpt: "Rust가 자랑하는 '비용 없는 추상화(Zero-cost abstraction)'가 컴파일러 레벨에서 실제로 무엇을 걷어내는지. 정적 디스패치(제네릭)와 동적 디스패치(vtable)의 진짜 성능 차이가 '간접 호출'이 아닌 '인라인(Inline) 상실'에 있는 이유를 LLVM 최적화 관점에서 해부해 봅니다."
-category: systems
+category: rust
 tags:
   - rust
   - compiler

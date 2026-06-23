@@ -1,7 +1,7 @@
 ---
 title: "한 줌의 스레드로 1만 연결을 버티는 마법 — epoll과 io_uring"
 excerpt: "도대체 누가 기다리고, 누가 일하는가? 패킷이 NIC에서 올라오는 밑바닥 경로, 2018년(Meltdown) 이후 Syscall이 갑자기 비싸진 이유, epoll의 '준비 통지'와 io_uring의 '완료 통지'의 근본적 차이. 그리고 Rust의 소유권(Ownership)이 비동기 I/O 버퍼와 어떻게 직결되는지 대미를 장식합니다."
-category: systems
+category: rust
 tags:
   - rust
   - epoll

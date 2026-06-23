@@ -1,7 +1,7 @@
 ---
 title: "free 했는데 왜 메모리가 안 줄어들까 — 가상 메모리와 OOMKill"
 excerpt: "Box::new 한 줄이 커널까지 내려가는 길과, free가 물리 메모리(RSS)를 즉시 안 돌려줘 컨테이너가 OOMKill되는 이유. 가상 메모리·page fault·커널 회수를 운영 관점에서 해부합니다"
-category: systems
+category: rust
 tags:
   - rust
   - virtual-memory

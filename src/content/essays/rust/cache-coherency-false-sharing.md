@@ -1,7 +1,7 @@
 ---
 title: "병렬화했는데 왜 더 느려질까 — 캐시 코히런시와 False Sharing"
 excerpt: "스레드를 늘렸는데 처리량(Throughput)이 안 오르거나 오히려 떨어지는 기묘한 현상, 하드웨어 층위에서 해부해 봅니다. MESI 코히런시부터 Rust의 #[repr]과 CachePadded가 이를 어떻게 해결하는지 밑바닥까지 파헤쳐 봅니다."
-category: systems
+category: rust
 tags:
   - rust
   - false-sharing

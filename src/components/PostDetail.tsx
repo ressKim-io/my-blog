@@ -1,6 +1,7 @@
 import Link from './Link';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
+import remarkCjkFriendly from 'remark-cjk-friendly';
 import { mdxComponents } from './MDXComponents';
 import TOC from './TOC';
 import ReadingProgressBar from './ReadingProgressBar';
@@ -41,7 +42,7 @@ const categoryLabels: Record<string, string> = {
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
   network: 'Network',
-  systems: 'Systems',
+  rust: 'Rust',
 };
 
 function formatDate(date: string) {
@@ -169,7 +170,7 @@ export default function PostDetail({ post, allPosts, seriesPosts }: PostDetailPr
                 <MDXRemote
                   source={post.content}
                   components={mdxComponents}
-                  options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+                  options={{ mdxOptions: { remarkPlugins: [remarkGfm, remarkCjkFriendly] } }}
                 />
               </div>
 

@@ -15,6 +15,8 @@ const categoryLabels: Record<string, string> = {
   argocd: 'ArgoCD',
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
+  network: 'Network',
+  rust: 'Rust',
 };
 
 const typeLabels: Record<string, string> = {

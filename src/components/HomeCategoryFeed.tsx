@@ -26,7 +26,7 @@ const categoryLabels: Record<string, string> = {
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
   network: 'Network',
-  systems: 'Systems',
+  rust: 'Rust',
 };
 
 export default function HomeCategoryFeed({ posts, categories, limit = 8 }: HomeCategoryFeedProps) {

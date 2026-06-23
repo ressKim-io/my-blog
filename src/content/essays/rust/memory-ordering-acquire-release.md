@@ -1,7 +1,7 @@
 ---
 title: "분명 순서대로 썼는데 왜 거꾸로 보일까? — Memory Ordering과 Acquire/Release"
 excerpt: "멀티스레드 환경에서 ready가 true인데 data는 0인 기묘한 버그의 정체. 컴파일러와 하드웨어가 저지르는 '순서 재배치'를 Acquire/Release와 SeqCst로 어떻게 통제하는지, 그리고 Rust의 Send/Sync가 진짜로 막아주는 게 무엇인지 밑바닥부터 해부합니다."
-category: systems
+category: rust
 tags:
   - rust
   - memory-ordering

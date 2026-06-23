@@ -1,7 +1,7 @@
 ---
 title: "panic이 C언어의 국경을 넘으면 왜 터질까 — 링킹과 ABI의 세계"
 excerpt: "타입은 기계어가 되는 순간 증발합니다. gcc(C)와 rustc(Rust)가 서로를 부를 때 무엇을 합의하는지, 그리고 Rust의 panic이 ABI 경계를 넘어가면 왜 '정의되지 않은 동작(UB)'이라는 끔찍한 결말을 맞는지 링킹과 ABI 관점에서 해부해 봅니다."
-category: systems
+category: rust
 tags:
   - rust
   - ffi
