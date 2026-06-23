@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="760" height="470" fill="#FFFFFF"/>
+
+  <text x="380" y="28" text-anchor="middle" font-size="12" fill="#64748B">A 3-tier funnel — the higher the tier, the more common and the cheaper</text>
+
+  <!-- threads -->
+  <rect x="150" y="44" width="120" height="34" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.4"/>
+  <text x="210" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Thread 1</text>
+  <rect x="320" y="44" width="120" height="34" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.4"/>
+  <text x="380" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Thread 2</text>
+  <rect x="490" y="44" width="120" height="34" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.4"/>
+  <text x="550" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Thread 3</text>
+
+  <line x1="210" y1="78" x2="210" y2="104" stroke="#475569" stroke-width="1.4" marker-end="url(#ar)"/>
+  <line x1="380" y1="78" x2="380" y2="104" stroke="#475569" stroke-width="1.4" marker-end="url(#ar)"/>
+  <line x1="550" y1="78" x2="550" y2="104" stroke="#475569" stroke-width="1.4" marker-end="url(#ar)"/>
+
+  <!-- tier 1: tcache -->
+  <rect x="120" y="106" width="520" height="66" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
+  <text x="380" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">per-thread cache (tcache)</text>
+  <text x="380" y="156" text-anchor="middle" font-size="11.5" fill="#475569">most malloc / free end right here — no lock, no atomic, no cross-core traffic</text>
+
+  <line x1="380" y1="172" x2="380" y2="200" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="392" y="190" font-size="11" fill="#94A3B8">tcache empty (rare)</text>
+
+  <!-- tier 2: arenas -->
+  <rect x="200" y="202" width="360" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="380" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">arenas (≈ 4 × CPU)</text>
+  <text x="380" y="251" text-anchor="middle" font-size="11.5" fill="#475569">sharded lock → 1/N contention</text>
+
+  <line x1="380" y1="266" x2="380" y2="294" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="392" y="284" font-size="11" fill="#94A3B8">arena empty (rarer)</text>
+
+  <!-- tier 3: page heap -->
+  <rect x="270" y="296" width="220" height="58" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.6"/>
+  <text x="380" y="322" text-anchor="middle" font-size="13.5" font-weight="700" fill="#334155">page heap</text>
+  <text x="380" y="342" text-anchor="middle" font-size="11" fill="#64748B">need more pages (rarest)</text>
+
+  <line x1="380" y1="354" x2="380" y2="382" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+
+  <!-- tier 4: kernel -->
+  <rect x="300" y="384" width="160" height="58" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.7"/>
+  <text x="380" y="410" text-anchor="middle" font-size="13.5" font-weight="700" fill="#B45309">kernel</text>
+  <text x="380" y="430" text-anchor="middle" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#92400E">brk / mmap + #PF</text>
+
+  <!-- right rail -->
+  <line x1="690" y1="120" x2="690" y2="420" stroke="#CBD5E1" stroke-width="1.4"/>
+  <path d="M690,420 L686,410 L694,410 Z" fill="#CBD5E1"/>
+  <text x="704" y="130" font-size="11" fill="#047857">frequent</text>
+  <text x="704" y="146" font-size="11" fill="#047857">cheap</text>
+  <text x="704" y="408" font-size="11" fill="#B45309">rare</text>
+  <text x="704" y="424" font-size="11" fill="#B45309">expensive</text>
+</svg>

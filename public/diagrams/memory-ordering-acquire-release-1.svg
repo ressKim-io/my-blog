@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 430" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="arV" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="780" height="430" fill="#FFFFFF"/>
+
+  <text x="390" y="28" text-anchor="middle" font-size="12" fill="#64748B">A release / acquire pair builds a one-way bridge — A's earlier writes become visible after B's acquire</text>
+
+  <!-- Thread A header -->
+  <rect x="70" y="52" width="260" height="34" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="200" y="74" text-anchor="middle" font-size="13.5" font-weight="700" fill="#047857">Thread A (producer)</text>
+
+  <!-- A write box -->
+  <rect x="92" y="100" width="216" height="50" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.3"/>
+  <text x="200" y="130" text-anchor="middle" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#334155">data = 42</text>
+
+  <!-- A release bar -->
+  <rect x="70" y="172" width="260" height="48" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.7"/>
+  <text x="200" y="201" text-anchor="middle" font-size="12.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#BE123C">ready.store(true, Release)</text>
+  <text x="200" y="240" text-anchor="middle" font-size="11" fill="#9F1239">↑ earlier writes can't sink below this</text>
+
+  <!-- Thread B header -->
+  <rect x="450" y="52" width="260" height="34" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="580" y="74" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0E7490">Thread B (consumer)</text>
+
+  <!-- B acquire bar -->
+  <rect x="450" y="172" width="260" height="48" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.7"/>
+  <text x="580" y="201" text-anchor="middle" font-size="12.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#BE123C">ready.load(Acquire) == true</text>
+  <text x="580" y="156" text-anchor="middle" font-size="11" fill="#9F1239">↓ later reads can't rise above this</text>
+
+  <!-- B read box -->
+  <rect x="472" y="244" width="216" height="50" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.3"/>
+  <text x="580" y="268" text-anchor="middle" font-size="13" font-family="'Geist Mono', ui-monospace, monospace" fill="#334155">read data</text>
+  <text x="580" y="285" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">⇒ 42 guaranteed</text>
+
+  <!-- synchronizes-with bridge -->
+  <path d="M330,196 L446,196" fill="none" stroke="#7C3AED" stroke-width="2" marker-end="url(#arV)"/>
+  <text x="390" y="186" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6D28D9">synchronizes-with</text>
+
+  <!-- caption -->
+  <rect x="120" y="344" width="540" height="62" rx="9" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1"/>
+  <text x="390" y="370" text-anchor="middle" font-size="11.5" fill="#6D28D9">Release packs up everything done so far; Acquire only sees it after receiving the value.</text>
+  <text x="390" y="390" text-anchor="middle" font-size="11.5" fill="#6D28D9">Without the pair, B could observe ready == true while data is still 0.</text>
+</svg>

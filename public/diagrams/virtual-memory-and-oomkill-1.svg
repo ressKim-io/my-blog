@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 430" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="arR" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#BE123C"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="780" height="430" fill="#FFFFFF"/>
+
+  <text x="390" y="28" text-anchor="middle" font-size="12" fill="#64748B">Allocation reserves virtual address space — physical memory (RSS) is committed only on first touch</text>
+
+  <!-- user space band -->
+  <text x="44" y="66" font-size="11" font-weight="700" fill="#94A3B8">USER SPACE</text>
+
+  <!-- 1. Box::new -->
+  <rect x="44" y="78" width="150" height="76" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="119" y="108" text-anchor="middle" font-size="13.5" font-weight="700" fill="#047857">Box::new(v)</text>
+  <text x="119" y="130" text-anchor="middle" font-size="11" fill="#475569">heap allocation</text>
+
+  <!-- 2. malloc -->
+  <rect x="232" y="78" width="170" height="76" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.6"/>
+  <text x="317" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">malloc</text>
+  <text x="317" y="126" text-anchor="middle" font-size="11.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#475569">brk / mmap</text>
+  <text x="317" y="144" text-anchor="middle" font-size="10.5" fill="#94A3B8">VmSize ↑ here</text>
+
+  <!-- 3. virtual page -->
+  <rect x="440" y="78" width="184" height="76" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6" stroke-dasharray="6 4"/>
+  <text x="532" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">virtual page</text>
+  <text x="532" y="126" text-anchor="middle" font-size="11" fill="#6D28D9">reserved, not backed</text>
+  <text x="532" y="144" text-anchor="middle" font-size="10.5" fill="#94A3B8">no physical frame yet</text>
+
+  <line x1="194" y1="116" x2="230" y2="116" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="402" y1="116" x2="438" y2="116" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <!-- first touch -> page fault -->
+  <path d="M532,154 L532,232" fill="none" stroke="#BE123C" stroke-width="1.9" marker-end="url(#arR)"/>
+  <text x="544" y="188" font-size="11.5" font-weight="700" fill="#BE123C">first write</text>
+  <text x="544" y="204" font-size="11.5" fill="#BE123C">→ page fault (#PF)</text>
+
+  <!-- kernel band -->
+  <text x="44" y="262" font-size="11" font-weight="700" fill="#94A3B8">KERNEL</text>
+
+  <!-- kernel box -->
+  <rect x="300" y="244" width="380" height="86" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.6"/>
+  <text x="490" y="276" text-anchor="middle" font-size="13.5" font-weight="700" fill="#B45309">allocate a physical frame, map it into the page table</text>
+  <text x="490" y="300" text-anchor="middle" font-size="12" fill="#B45309">↳ now real memory is committed</text>
+  <text x="490" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="#92400E">RSS ↑ here (not at allocation)</text>
+
+  <!-- takeaway -->
+  <rect x="120" y="372" width="540" height="46" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="390" y="392" text-anchor="middle" font-size="11.5" fill="#475569">Virtual size (VmSize) grows when you allocate — physical memory (RSS) grows when you first touch.</text>
+  <text x="390" y="409" text-anchor="middle" font-size="11.5" fill="#475569">That gap is why "I allocated 10 GB" need not mean "I used 10 GB of RAM."</text>
+</svg>

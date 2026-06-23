@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 420" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="arA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#B45309"/>
+    </marker>
+    <marker id="arG" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="780" height="420" fill="#FFFFFF"/>
+
+  <text x="390" y="28" text-anchor="middle" font-size="12" fill="#64748B">Lazy binding — the first call resolves through the dynamic linker and caches the address in the GOT</text>
+
+  <!-- caller -->
+  <rect x="40" y="170" width="150" height="64" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.6"/>
+  <text x="115" y="198" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">caller</text>
+  <text x="115" y="218" text-anchor="middle" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#475569">call foo@plt</text>
+
+  <!-- PLT stub -->
+  <rect x="232" y="170" width="150" height="64" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="307" y="198" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">PLT stub</text>
+  <text x="307" y="218" text-anchor="middle" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#475569">jmp *foo@GOT</text>
+
+  <!-- GOT entry -->
+  <rect x="424" y="170" width="160" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.7"/>
+  <text x="504" y="196" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6D28D9">GOT[foo]</text>
+  <text x="504" y="216" text-anchor="middle" font-size="10.5" fill="#6D28D9">mutable data slot</text>
+
+  <line x1="190" y1="202" x2="230" y2="202" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="382" y1="202" x2="422" y2="202" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <!-- resolver (first call) -->
+  <rect x="430" y="56" width="300" height="70" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.7"/>
+  <text x="580" y="82" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B45309">dynamic linker resolver</text>
+  <text x="580" y="102" text-anchor="middle" font-size="11" font-family="'Geist Mono', ui-monospace, monospace" fill="#92400E">_dl_runtime_resolve</text>
+  <text x="580" y="118" text-anchor="middle" font-size="10.5" fill="#92400E">find foo, patch GOT[foo]</text>
+
+  <!-- real foo -->
+  <rect x="430" y="300" width="300" height="60" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
+  <text x="580" y="326" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">real foo (in libfoo.so)</text>
+  <text x="580" y="345" text-anchor="middle" font-size="10.5" fill="#475569">the actual function body</text>
+
+  <!-- first call: GOT -> resolver (dashed amber) -->
+  <path d="M504,170 L504,128" fill="none" stroke="#B45309" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arA)"/>
+  <text x="514" y="150" font-size="10.5" font-weight="700" fill="#B45309">1st call</text>
+  <!-- resolver patches GOT -->
+  <path d="M560,126 C560,150 540,150 520,168" fill="none" stroke="#B45309" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arA)"/>
+  <text x="600" y="150" font-size="10" fill="#92400E">patch</text>
+  <!-- resolver -> real foo -->
+  <path d="M700,126 C720,180 720,250 700,298" fill="none" stroke="#B45309" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arA)"/>
+
+  <!-- second call: GOT -> real foo (emerald) -->
+  <path d="M504,234 L504,298" fill="none" stroke="#059669" stroke-width="1.8" marker-end="url(#arG)"/>
+  <text x="514" y="270" font-size="10.5" font-weight="700" fill="#047857">2nd call → direct</text>
+
+  <!-- footer -->
+  <rect x="40" y="378" width="700" height="34" rx="8" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>
+  <text x="390" y="399" text-anchor="middle" font-size="11" fill="#BE123C">Security cost: the GOT must be writable to be patched. Full RELRO + BIND_NOW resolves everything up front and locks it read-only.</text>
+</svg>

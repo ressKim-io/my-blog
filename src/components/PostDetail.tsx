@@ -41,6 +41,7 @@ const categoryLabels: Record<string, string> = {
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
   network: 'Network',
+  systems: 'Systems',
 };
 
 function formatDate(date: string) {

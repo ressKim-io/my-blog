@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arR" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#BE123C"/>
+    </marker>
+    <marker id="arS" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="760" height="440" fill="#FFFFFF"/>
+
+  <text x="380" y="28" text-anchor="middle" font-size="12" fill="#64748B">Each thread writes only its own variable — yet a and b share one 64-byte line</text>
+
+  <!-- Core 0 -->
+  <rect x="56" y="70" width="200" height="84" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="156" y="103" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Core 0</text>
+  <text x="156" y="128" text-anchor="middle" font-size="12.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#334155">a++   (only a)</text>
+
+  <!-- Core 1 -->
+  <rect x="504" y="70" width="200" height="84" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="604" y="103" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">Core 1</text>
+  <text x="604" y="128" text-anchor="middle" font-size="12.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#334155">b++   (only b)</text>
+
+  <!-- independence note -->
+  <text x="380" y="116" text-anchor="middle" font-size="12" font-style="italic" fill="#94A3B8">logically independent</text>
+
+  <!-- cache line -->
+  <rect x="288" y="296" width="184" height="76" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.7"/>
+  <line x1="380" y1="296" x2="380" y2="372" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <text x="334" y="342" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">a</text>
+  <text x="426" y="342" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">b</text>
+  <text x="380" y="390" text-anchor="middle" font-size="11" fill="#6D28D9">one shared 64-byte line</text>
+
+  <!-- Core0 -> line : RFO step 1 -->
+  <path d="M150,154 C150,230 250,250 322,298" fill="none" stroke="#BE123C" stroke-width="1.8" marker-end="url(#arR)"/>
+  <text x="118" y="210" font-size="11.5" font-weight="700" fill="#BE123C">① take line (M)</text>
+  <text x="118" y="226" font-size="11" fill="#BE123C">invalidate Core 1 &#8594; I</text>
+
+  <!-- Core1 -> line : RFO step 2 -->
+  <path d="M610,154 C610,230 510,250 438,298" fill="none" stroke="#BE123C" stroke-width="1.8" marker-end="url(#arR)"/>
+  <text x="528" y="210" font-size="11.5" font-weight="700" fill="#BE123C">② take line (M)</text>
+  <text x="528" y="226" font-size="11" fill="#BE123C">invalidate Core 0 &#8594; I</text>
+
+  <!-- ping-pong loop between cores -->
+  <path d="M262,86 C340,58 420,58 498,86" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arS)"/>
+  <path d="M498,138 C420,166 340,166 262,138" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arS)"/>
+  <text x="380" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#475569">RFO ping-pong, every increment</text>
+
+  <!-- takeaway bar -->
+  <rect x="120" y="408" width="520" height="26" rx="7" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>
+  <text x="380" y="425" text-anchor="middle" font-size="11.5" fill="#BE123C">L1 hit (~1 ns) turns into a cross-core transfer (tens–100+ ns) on every a++ / b++</text>
+</svg>

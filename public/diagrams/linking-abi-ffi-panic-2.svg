@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 440" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arU" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="780" height="440" fill="#FFFFFF"/>
+
+  <text x="390" y="28" text-anchor="middle" font-size="12" fill="#64748B">A panic unwinds frame by frame using CFI metadata — a C frame without it has undefined behavior</text>
+
+  <!-- unwind direction arrow -->
+  <line x1="74" y1="356" x2="74" y2="96" stroke="#7C3AED" stroke-width="2" marker-end="url(#arU)"/>
+  <text x="60" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9" transform="rotate(-90 60 230)">unwind direction  ·  _Unwind_RaiseException</text>
+
+  <!-- caller frame (top) -->
+  <rect x="150" y="74" width="420" height="56" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.4"/>
+  <text x="360" y="106" text-anchor="middle" font-size="12" fill="#94A3B8">caller frame …  (never reached safely)</text>
+
+  <!-- C frame (the problem) -->
+  <rect x="150" y="150" width="420" height="72" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="360" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">C frame — compiled without -fexceptions</text>
+  <text x="360" y="198" text-anchor="middle" font-size="11" fill="#9F1239">no .eh_frame / wrong personality</text>
+  <text x="360" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">✕  undefined behavior</text>
+
+  <!-- Rust frame -->
+  <rect x="150" y="242" width="420" height="64" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="360" y="268" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">Rust frame — has CFI + landing pad</text>
+  <text x="360" y="288" text-anchor="middle" font-size="11" fill="#475569">runs Drop, then continues up</text>
+
+  <!-- panic frame (bottom) -->
+  <rect x="150" y="326" width="420" height="56" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="360" y="358" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6D28D9">panic!()  — Rust frame (unwinding starts here)</text>
+
+  <!-- failure notes -->
+  <text x="588" y="172" font-size="10.5" fill="#9F1239">① can't find caller frame</text>
+  <text x="588" y="188" font-size="10.5" fill="#9F1239">→ stack walk derails</text>
+  <text x="588" y="208" font-size="10.5" fill="#9F1239">② C cleanup never runs</text>
+  <text x="588" y="224" font-size="10.5" fill="#9F1239">→ lock held, resource leak</text>
+
+  <!-- footer -->
+  <rect x="100" y="400" width="580" height="34" rx="8" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1"/>
+  <text x="390" y="421" text-anchor="middle" font-size="11" fill="#6D28D9">Rust 1.81+: a panic crossing extern "C" auto-aborts (defined). extern "C-unwind" allows controlled unwinding.</text>
+</svg>

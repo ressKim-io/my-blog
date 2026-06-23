@@ -20,6 +20,7 @@ const categoryLabelMap: Record<string, string> = {
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
   network: 'Network',
+  systems: 'Systems',
 };
 
 export default function EssaysPage() {

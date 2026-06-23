@@ -26,6 +26,7 @@ const categoryLabels: Record<string, string> = {
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
   network: 'Network',
+  systems: 'Systems',
 };
 
 export default function HomeCategoryFeed({ posts, categories, limit = 8 }: HomeCategoryFeedProps) {

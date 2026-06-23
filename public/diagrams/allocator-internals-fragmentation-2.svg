@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 370" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="780" height="370" fill="#FFFFFF"/>
+
+  <text x="390" y="28" text-anchor="middle" font-size="12" fill="#64748B">Freed pages decay through states — they leave RSS only at the last step</text>
+
+  <!-- DIRTY -->
+  <rect x="40" y="92" width="190" height="92" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="135" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">DIRTY</text>
+  <text x="135" y="148" text-anchor="middle" font-size="11.5" fill="#9F1239">physical pages held</text>
+  <text x="135" y="166" text-anchor="middle" font-size="11.5" font-weight="700" fill="#9F1239">= real RSS</text>
+
+  <!-- MUZZY -->
+  <rect x="295" y="92" width="190" height="92" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="390" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">MUZZY</text>
+  <text x="390" y="146" text-anchor="middle" font-size="11" fill="#92400E">MADV_FREE — kernel may</text>
+  <text x="390" y="162" text-anchor="middle" font-size="11" fill="#92400E">reclaim if pressured</text>
+  <text x="390" y="178" text-anchor="middle" font-size="10.5" fill="#B45309">still counted in RSS</text>
+
+  <!-- CLEAN -->
+  <rect x="550" y="92" width="190" height="92" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="645" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">CLEAN</text>
+  <text x="645" y="146" text-anchor="middle" font-size="11" fill="#475569">MADV_DONTNEED —</text>
+  <text x="645" y="162" text-anchor="middle" font-size="11" fill="#475569">pages returned</text>
+  <text x="645" y="178" text-anchor="middle" font-size="10.5" font-weight="700" fill="#047857">RSS actually drops</text>
+
+  <!-- arrows -->
+  <line x1="230" y1="138" x2="293" y2="138" stroke="#475569" stroke-width="1.7" marker-end="url(#ar)"/>
+  <text x="261" y="124" text-anchor="middle" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#334155">dirty_decay_ms</text>
+
+  <line x1="485" y1="138" x2="548" y2="138" stroke="#475569" stroke-width="1.7" marker-end="url(#ar)"/>
+  <text x="516" y="124" text-anchor="middle" font-size="10.5" font-family="'Geist Mono', ui-monospace, monospace" fill="#334155">muzzy_decay_ms</text>
+
+  <!-- danger note -->
+  <rect x="80" y="248" width="620" height="84" rx="9" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>
+  <text x="390" y="276" text-anchor="middle" font-size="12" font-weight="700" fill="#BE123C">OOMKill is driven by DIRTY pages — the real physical footprint</text>
+  <text x="390" y="298" text-anchor="middle" font-size="11.5" fill="#9F1239">MUZZY inflates the RSS time series and confuses monitoring,</text>
+  <text x="390" y="316" text-anchor="middle" font-size="11.5" fill="#9F1239">but the kernel can reclaim it under pressure — so it is not the direct cause of a kill</text>
+</svg>

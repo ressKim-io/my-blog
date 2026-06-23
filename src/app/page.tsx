@@ -20,6 +20,7 @@ const categoryLabelMap: Record<string, string> = {
   monitoring: 'Monitoring',
   cicd: 'CI/CD',
   network: 'Network',
+  systems: 'Systems',
 };
 
 const statusBadge: Record<string, { label: string; mark: string; color: string }> = {
