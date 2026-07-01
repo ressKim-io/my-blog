@@ -1,0 +1,17 @@
+name = "ress-blog-analytics"
+main = "worker.ts"
+compatibility_date = "2026-06-01"
+
+# `npx wrangler d1 create ress-blog-analytics` 실행 후 출력된 database_id를 붙여넣으세요.
+[[d1_databases]]
+binding = "DB"
+database_name = "ress-blog-analytics"
+database_id = "PASTE_DATABASE_ID_HERE"
+
+[vars]
+# 블로그 origin (경로 제외). GitHub 사용자명이 다르면 수정하세요.
+ALLOWED_ORIGIN = "https://resskim-io.github.io"
+
+# 시크릿은 이 파일에 두지 말고 아래 명령으로 등록하세요:
+#   npx wrangler secret put DASHBOARD_PASSWORD   # /stats 로그인 비밀번호
+#   npx wrangler secret put HASH_SALT            # 아무 긴 랜덤 문자열

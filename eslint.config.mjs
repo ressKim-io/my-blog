@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".claude/**",
     // claude design 와이어프레임 프로토타입 (블로그 소스 아님)
     "tmp-design/**",
+    // Cloudflare Worker (방문자 분석 백엔드 — 별도 배포, Next 빌드와 무관)
+    "analytics/**",
   ]),
 ]);
 

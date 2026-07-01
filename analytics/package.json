@@ -1,0 +1,15 @@
+{
+  "name": "ress-blog-analytics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ress Blog 방문자 분석 — Cloudflare Worker + D1 (블로그 본체와 별도 배포)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute ress-blog-analytics --remote --file schema.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "latest",
+    "wrangler": "latest"
+  }
+}

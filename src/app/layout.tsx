@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { getAllPosts } from "@/lib/posts";
 import { PostsIndexProvider, type PostMeta } from "@/components/PostsIndexProvider";
+import Analytics from "@/components/Analytics";
 
 const SITE_URL = "https://resskim-io.github.io/my-blog";
 
@@ -87,6 +88,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <PostsIndexProvider posts={postsIndex}>{children}</PostsIndexProvider>
+        <Analytics />
       </body>
     </html>
   );
