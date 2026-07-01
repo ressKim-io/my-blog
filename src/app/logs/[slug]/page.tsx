@@ -21,6 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.title,
     description: post.excerpt,
+    // logs 트랙 격리: 공개(URL 직접 접근)는 유지하되 검색엔진 색인은 차단한다.
+    // robots.txt Disallow가 아닌 noindex 메타를 쓰는 이유 — Disallow면 크롤러가
+    // 페이지를 못 읽어 noindex 태그도 못 보고 URL만 색인될 수 있다.
+    robots: { index: false, follow: false },
     alternates: { canonical: `/logs/${slug}/` },
     openGraph: {
       type: 'article',
