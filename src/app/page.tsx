@@ -44,10 +44,17 @@ export default function Home() {
     date: p.date,
   }));
   const counts = new Map<string, number>();
-  essays.forEach((p) => counts.set(p.category, (counts.get(p.category) ?? 0) + 1));
+  const latest = new Map<string, string>();
+  essays.forEach((p) => {
+    counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
+    const cur = latest.get(p.category);
+    if (!cur || p.date > cur) latest.set(p.category, p.date);
+  });
+  // 최근에 글을 쓴 카테고리가 앞에 오도록 카테고리별 최신 글 날짜 내림차순 정렬
   const categories = Object.entries(categoryLabelMap)
     .filter(([name]) => counts.has(name))
-    .map(([name, label]) => ({ name, label, count: counts.get(name) ?? 0 }));
+    .map(([name, label]) => ({ name, label, count: counts.get(name) ?? 0 }))
+    .sort((a, b) => (latest.get(b.name) ?? '').localeCompare(latest.get(a.name) ?? ''));
 
   const activeProjects = getActiveProjects();
 
