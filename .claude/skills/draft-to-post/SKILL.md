@@ -1,46 +1,59 @@
 ---
 name: draft-to-post
-description: drafts/*.md 원본 로그/ADR을 src/content/{essays|logs}/{category}/*.md 블로그 글로 변환합니다. 트랙·카테고리 디렉토리 결정, 격식체 100%, 이모지 섹션 헤더(🔥🤔✅📚), 분량 가이드, 이미지 힌트를 적용합니다. "draft를 블로그 글로 만들어줘", "이 draft 변환해줘", "게시할 수 있게 정리해줘" 등의 요청에서 사용합니다.
+description: drafts/*.md 원본(로그/ADR/학습 정리)을 src/content/{essays|logs}/{category}/*.md 블로그 글로 변환합니다. 변환 프로파일(goti 실전 기록 / 심화 해설 시리즈)을 판별해 트랙·카테고리 디렉토리, 격식체, 마침표·이모지 규칙, 분량 가이드, 다이어그램 판단을 적용합니다. "draft를 블로그 글로 만들어줘", "이 draft 변환해줘", "게시할 수 있게 정리해줘" 등의 요청에서 사용합니다.
 ---
 
 # Draft → Blog Post 변환
 
 ## 입력/출력
 
-- **입력**: `drafts/<name>.md` (원본 로그/ADR — 보통 반말체·내부 표현·불완전 문장)
-- **출력**: `src/content/{track}/{category}/goti-<slug>.md`
+- **입력**: `drafts/<name>.md` (원본 로그/ADR/학습 정리 — 반말체·내부 표현·ASCII 그림 등 블로그 양식 미준수 상태)
+- **출력**: `src/content/{track}/{category}/<slug>.md`
 - **자산**: `public/diagrams/{slug}-{n}.svg`, `public/images/{file}.png` — **평탄 구조 유지** (디렉토리 분리해도 본문의 `/diagrams/...` 경로 변경 X)
+
+## 0단계: 변환 프로파일 판별 (가장 먼저)
+
+draft가 어느 프로파일인지부터 정한다. 프로파일이 문체·네이밍·태그 규칙을 결정한다.
+
+| 프로파일 | 대상 | 시리즈 계획 문서 (SSOT) |
+|---|---|---|
+| **A. goti 실전 기록** | go-ti 프로젝트 작업 로그/ADR/트러블슈팅 | `.claude/plans/series-plan.md` (S1~S18) |
+| **B. 심화 해설 시리즈** | 학습 정리 기반 레퍼런스급 개념 글 (rust-cs-layer, kernel-runtime-tradeoffs) | 시리즈별 plan: `.claude/plans/kernel-runtime-series/plan.md` 등 |
+| **단독 글** | 어느 시리즈에도 속하지 않음 | 없음 (`series` 필드 생략) |
+
+- 계획 문서에 없는 draft를 만나면 **사용자에게 어느 시리즈/프로파일인지 확인** (추측 금지)
+- 프로파일 B는 시리즈별 plan 문서가 이 스킬보다 우선한다. plan에 확정 규칙·편별 slug·order·상태 표가 있으니 **반드시 통독 후 시작**하고, 편 완료 시 상태 표를 갱신한다
 
 ## 트랙·카테고리 결정 (1순위 SSOT)
 
 **디렉토리 위치가 트랙·카테고리의 단일 진실 원천**입니다. frontmatter `type` 필드는 표시 메타로만 쓰이며 트랙 격리에 영향 없음.
 
 **트랙 결정** — 본문 구조로 판단:
-- `essays/` — "옵션 비교 → 결정 → 근거" / 회고 / 개념 정리 (다듬은 글)
+- `essays/` — "옵션 비교 → 결정 → 근거" / 회고 / 개념 정리 (다듬은 글). 프로파일 B는 항상 essays
 - `logs/` — "증상 → 원인 → 해결 → 배운 점" / 작업 노트 (트러블슈팅)
 - **한 시리즈는 한 트랙으로 통일** (essays/logs 혼합 시 시리즈 navigation이 갈라짐)
 
-**카테고리 6종**: `kubernetes` · `istio` · `challenge` · `monitoring` · `argocd` · `cicd`
+**카테고리 9종**: `kubernetes` · `istio` · `challenge` · `monitoring` · `argocd` · `cicd` · `network` · `rust` · `runtime`
 
-frontmatter `category`와 디렉토리 위치가 일치하도록 작성합니다.
+frontmatter `category`와 디렉토리 위치가 일치하도록 작성합니다. 카테고리 신설 시에는 표시명 맵 4곳(`src/app/page.tsx`, `src/app/essays/page.tsx`, `src/components/PostCard.tsx`, `src/components/HomeCategoryFeed.tsx`)과 CLAUDE.md 갱신이 필요합니다.
 
 ## 네이밍
 
-- go-ti 글: `goti-<topic>.md`
-- ADR 성격: `goti-adr-<topic>.md` 또는 `goti-<topic>-adr.md`
+- **프로파일 A**: `goti-<topic>.md`, ADR은 `goti-adr-<topic>.md` 또는 `goti-<topic>-adr.md`
+- **프로파일 B / 단독**: 접두사 없는 영문 주제 slug (예: `syscall-mode-switch-cost.md`). 시리즈 plan에 slug 제안이 있으면 그걸 따름
 - 원본의 날짜 접두어(`2026-03-22-`)는 제거 — 파일명이 URL slug
+- slug는 전역 유일 (트랙·카테고리가 달라도 URL 충돌)
 
 ## Front Matter
 
 ```yaml
 ---
 title: "명확한 한 줄 제목 — 부제로 포인트 강조"
-excerpt: "무엇을 발견했고 어떻게 해결했는지 1~2문장"
-category: istio  # kubernetes | istio | challenge | monitoring | argocd | cicd
+excerpt: "무엇을 다루는지 1~3문장 (검색·카드 노출용)"
+category: istio  # 9종 중 택1, 디렉토리와 일치
 tags:
-  - go-ti        # ← 반드시 첫 번째
+  - go-ti        # 프로파일 A만: 반드시 첫 번째. B는 주인공 언어/기술 태그부터
   - <기술명1>
-  - <기술명2>
 series:
   name: "goti-<series-slug>"  # 단독 글이면 series 필드 전체 생략
   order: 1
@@ -48,45 +61,55 @@ date: "YYYY-MM-DD"
 ---
 ```
 
-- `title` 60자 이내, 포인트가 드러나는 제목
-- `excerpt` 1~2문장, 검색·카드 노출용
-- `date`는 원본 draft 날짜 우선
-- **첫 태그 `go-ti` 절대 규칙** — `/blog?tag=go-ti`로 프로젝트 모아보기. 예외 없음
+- `title` 60자 이내. 프로파일 B는 질문형 후킹 관례 (예: "왜 X일까 — Y")
+- `date`: 프로파일 A는 원본 draft 날짜 우선, B는 발행일
+- **프로파일 A 태그 절대 규칙**: 첫 태그 `go-ti` (`/blog?tag=go-ti` 모아보기). 예외 없음
+- **프로파일 B 태그**: 그 편의 주인공 언어/기술을 앞에 (예: rust 중심 편이면 rust 먼저)
 
-## 문체 (CLAUDE.md 규칙 그대로)
+## 문체 — 공통 규칙
 
-- 격식체 100% (~합니다 / ~입니다 / ~했습니다)
-- 마침표(.) 생략 — URL/버전/소수점/약어 예외, `?`/`!` 유지
-- 한 문장 50자 이내 권장
+- **격식체 100%** (~합니다 / ~입니다 / ~했습니다). 원본이 반말·해요체여도 전부 변환
+- 한 문장 50자 이내 권장, 간결하게
 - 모든 코드블록에 언어 명시 (`bash`/`yaml`/`text` 등)
+- **번역투 금지**: 문장 중간의 대시(—) 삽입구·절 연결 남발 금지, "~라는 점" 반복 금지, 영어 문장 구조 직역 금지. 자연 연결어(그래서, 이때, 반대로, 결국)로 끊어 쓰기. 소리 내 읽어 어색하면 실패
+  - 대시 허용 예외: 제목 부제("제목 — 부제"), 불릿의 "**굵은 라벨** — 설명" 형식(의도된 목록 관례)
+- **불릿 마침표**: 완결문 불릿(~합니다 종결)은 프로파일 문체를 따르고, 명사형 조각 불릿("락 없음", "예측 가능")은 마침표 생략 가능
 
-원본이 반말·해요체여도 변환 시 **전부 격식체**로 바꿉니다.
+## 문체 — 프로파일별 차이 (혼동 주의)
+
+| 항목 | A. goti 실전 기록 | B. 심화 해설 시리즈 |
+|---|---|---|
+| 문장 끝 마침표 | **생략** (URL/버전/약어 예외, ?/! 유지) | **유지** (일반 산문 구두점) |
+| 이모지 섹션 헤더 | 트러블슈팅 4종 세트 (🔥🤔✅📚) | **금지** (kernel-runtime에서 사용자 확정) |
+| 어조 | 건조·기록체 | 설명체 + 리듬용 "~죠"·의문형 "~까요?" 가끔 허용 |
+| 글 시작 | 한 줄 요약 블록쿼트 | 시리즈 소개 블록쿼트 ("시리즈 X의 N편" + 연결/후킹) |
+| 글 끝 | 배운 점 | 핵심 요약 bullet + [다음 편 예고] |
+
+## 프로파일 B 전용: 깊이 = 자립성
+
+- **축약 금지**: 원본의 수치·자료구조·기전을 그대로 보존. 밀도 ≠ 축약, 깊되 풀어서
+- **용어 첫 등장 시 정의부터** (예: "MSR은 OS가 CPU 동작을 설정하는 특수 레지스터 모음"). 그 문단만 읽어도 검색 없이 이해되게
+- 원본의 학습 목표 목록·"이 문서의 성격" 류 메타 블록은 서두 산문에 녹이고 섹션으로 남기지 않음
+- 원본의 8단 구조는 글 흐름에 맞게 재편하되, 시리즈 척추 섹션(예: 3언어 수렴 비교)과 심화 질문 섹션은 유지
+- 버전 민감 사실은 시리즈 plan의 기준 버전 표와 대조, 필요 시 웹 검색으로 확인
 
 ## 섹션 구조
 
-**트러블슈팅(logs)** — 기본 4섹션:
+**트러블슈팅(logs, 프로파일 A)** — 기본 4섹션:
 
 ```markdown
 ## 한 줄 요약
 > 무엇을 발견했고 어떻게 해결했는지 1~2문장
 
 ## 🔥 문제: <증상 한 줄>
-- 기존 아키텍처/기대 동작
-- 실제 일어난 일, 에러 메시지/로그
-
 ## 🤔 원인: <진짜 원인 한 줄>
-- 왜 그렇게 되는지, 내부 동작
-- 공식 문서/소스 링크
-
 ## ✅ 해결: <어떻게 풀었는지>
-- 변경된 설정/코드
-- 재현 확인 방법
-
 ## 📚 배운 점
-- 일반화된 교훈 3~5개
 ```
 
-**ADR(essays)**: `## 배경 → ## 선택지 → ## 결정 → ## 근거`
+**ADR(essays, 프로파일 A)**: `## 배경 → ## 선택지 → ## 결정 → ## 근거`
+
+**프로파일 B**: 고정 템플릿 없음. 질문형/서술형 헤더(이모지 없음)로 서사 흐름에 맞게 구성
 
 ## 🧭 선택지 비교 섹션 (조건부)
 
@@ -115,53 +138,45 @@ date: "YYYY-MM-DD"
 ## 이미지·다이어그램
 
 - 사이즈 힌트(alt 텍스트): `|short`(600px) / 기본(800px) / `|tall`(1100px) / `|xtall`(1600px) / `|auto`
-- 다이어그램 텍스트는 영어로 (한글은 폰트 깨짐). 한글 설명은 본문에 별도로
-- ASCII 박스/다단계 흐름 금지 — CLAUDE.md "ASCII 박스/다이어그램 정책" 참고
-
-## 시리즈 (반드시 series-plan.md 참조)
-
-`.claude/plans/series-plan.md`가 단일 기준. 추측·즉석 판단 금지.
-
-1. series-plan.md Read
-2. draft가 어느 시리즈(S1~S18) 또는 단독 글인지 확인
-3. `name`/`order`를 그대로 frontmatter에 기입
-4. 단독 글은 `series` 필드 전체 생략 (빈 객체 X)
-5. **한 시리즈 = 한 트랙** — 통일 안 되면 시리즈 navigation 분리
-
-series-plan.md에 없는 draft를 만나면 사용자에게 어느 시리즈로 편입할지 확인.
+- SVG 직접 작성이 기본: `public/diagrams/{slug}-{n}.svg`, 스타일은 `.claude/plans/diagram-conversion/best-practices.md` 준수. **라벨은 영문**, 상세 설명은 본문 한글로
+- ASCII 박스/다단계 흐름 금지 — CLAUDE.md "ASCII 박스/다이어그램 정책" 참고. 평탄화 우선순위: 표 형태 → markdown 표 / 공간·구조·흐름 → SVG / 1~2줄 흐름 → 인라인
+- **능동 시각화 판단 (사용자 확정 규칙)**: 원본에 그림이 없어도 섹션마다 필요성을 판단해 SVG를 신규 작성한다. 기준 — 그림 = 공간·구조·대응·상태 전이·시간 축 개념 / 표 = 수치·나열 비교 / 산문 = 서사·인과. 변환 마지막에 **전 섹션 재감사**를 한 번 더 돈다
+- SVG가 대신하게 된 표/ASCII는 삭제(중복 금지). SVG 번호는 문서 등장 순서와 일치
 
 ## 변환 절차
 
 1. `drafts/<name>.md` 정독
-2. `series-plan.md`로 시리즈/order 확인
-3. **트랙·카테고리 결정** (위 가이드)
+2. **프로파일 판별** + 해당 시리즈 계획 문서 Read (0단계)
+3. 트랙·카테고리 결정
 4. 같은 시리즈의 기존 글 1편 참조 (톤·구조)
-5. front matter 작성 + 섹션 구성 + 격식체 변환
-6. 코드블록 언어 명시 + 이미지 힌트 + 표·다이어그램 뒤 분량 가이드 적용
-7. `src/content/{track}/{category}/goti-<slug>.md`에 Write
-8. drafts 원본은 손대지 않음 (참조용 보존). 발행 상태(`_index.md`)는 사용자 배치 처리
+5. front matter 작성 + 섹션 구성 + 격식체 변환 (프로파일별 문체 규칙 적용)
+6. 다이어그램: ASCII 평탄화 + 능동 시각화 판단 + SVG 작성 → 전 섹션 재감사
+7. 코드블록 언어 명시 + 이미지 힌트 + 표·다이어그램 뒤 분량 가이드 적용
+8. `src/content/{track}/{category}/<slug>.md`에 Write
+9. 프로파일 B는 시리즈 plan의 상태 표 갱신. drafts 원본은 손대지 않음 (참조용 보존)
 
 ## Gotchas
 
-- **디렉토리 = SSOT, frontmatter `type` 명시 불필요**: 트랙 격리는 디렉토리만 본다. `type: troubleshooting`을 적어도 logs로 가지 않음 (위치 우선)
-- **시리즈 분리 위험**: ADR + 트러블슈팅이 섞인 시리즈는 한 트랙(보통 logs)으로 통일. 분리 시 시리즈 페이지가 갈라짐
-- **자산 경로 변경 금지**: 디렉토리 분리해도 본문의 `![](/diagrams/foo-1.svg)`·`/images/...`는 그대로
-- **slug 충돌**: 트랙/카테고리 디렉토리가 달라도 파일명(slug)은 전역 유일. URL 충돌
+- **디렉토리 = SSOT, frontmatter `type` 명시 불필요**: 트랙 격리는 디렉토리만 본다
+- **시리즈 분리 위험**: 한 시리즈는 한 트랙으로 통일. 분리 시 시리즈 페이지가 갈라짐
+- **자산 경로 변경 금지**: 본문의 `![](/diagrams/foo-1.svg)`·`/images/...`는 평탄 그대로
+- **slug 충돌**: 파일명(slug)은 전역 유일
 - **drafts 원본 손대지 않음**: 변환 후에도 보존
-- **첫 태그 `go-ti`**: 첫 번째가 아니면 `/blog?tag=go-ti`에서 누락
+- **프로파일 혼동이 최다 실수 지점**: A에 마침표 찍거나, B에 이모지 헤더 넣거나, B에 `go-ti` 태그 넣지 않도록 0단계에서 확정하고 시작
 
 ## 안 되는 것
 
-- 원본에 없는 사실(성능 수치·추가 맥락) 지어내기
+- 원본에 없는 사실(성능 수치·실무 사례·추가 맥락) 지어내기
 - 실명·민감 고유명사 노출 (이니셜·역할명으로 익명화)
-- 이모지 섹션 헤더 외의 장식 이모지
+- 프로파일 규칙 밖의 장식 이모지
 - 긴 서론·결론
 
 ## 참고 자료
 
-- 시리즈 단일 기준: `.claude/plans/series-plan.md`
-- drafts 인덱스: `drafts/_index.md`
+- goti 시리즈 기준: `.claude/plans/series-plan.md`
+- 심화 시리즈 기준: `.claude/plans/kernel-runtime-series/plan.md` (진행 중, 편별 상태 표 포함)
 - 좋은 변환 예시(ADR/essays): `src/content/essays/argocd/goti-container-image-update-strategy-adr.md`
 - 좋은 변환 예시(트러블슈팅/logs): `src/content/logs/monitoring/goti-mimir-ingester-oom-webhook-deadlock.md`
-- 다이어그램 스타일: `.claude/Draw-io-*.md`, `.claude/plans/diagram-conversion/best-practices.md`
+- 좋은 변환 예시(심화 시리즈): `src/content/essays/runtime/syscall-mode-switch-cost.md` (피드백 2라운드 반영 파일럿)
+- 다이어그램 스타일: `.claude/plans/diagram-conversion/best-practices.md`, `.claude/Draw-io-*.md`
 - 코어 규칙: `CLAUDE.md` (블로그 글 작성 핵심 규칙 / ASCII 정책)
