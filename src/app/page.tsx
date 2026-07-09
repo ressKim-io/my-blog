@@ -21,6 +21,7 @@ const categoryLabelMap: Record<string, string> = {
   cicd: 'CI/CD',
   network: 'Network',
   rust: 'Rust',
+  runtime: '언어 & 런타임',
 };
 
 const statusBadge: Record<string, { label: string; mark: string; color: string }> = {

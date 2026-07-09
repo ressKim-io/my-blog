@@ -17,6 +17,7 @@ const categoryLabels: Record<string, string> = {
   cicd: 'CI/CD',
   network: 'Network',
   rust: 'Rust',
+  runtime: '언어 & 런타임',
 };
 
 const typeLabels: Record<string, string> = {

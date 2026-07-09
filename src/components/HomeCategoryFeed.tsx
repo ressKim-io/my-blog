@@ -27,6 +27,7 @@ const categoryLabels: Record<string, string> = {
   cicd: 'CI/CD',
   network: 'Network',
   rust: 'Rust',
+  runtime: '언어 & 런타임',
 };
 
 export default function HomeCategoryFeed({ posts, categories, limit = 8 }: HomeCategoryFeedProps) {
