@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">How Rust, Go and Java cross the kernel gate</title>
+  <desc id="d2">Three lanes show what happens when application code calls read. Rust goes through a thin libc wrapper and the thread blocks in the kernel. Go wraps the call with entersyscall and exitsyscall, issues the syscall directly, and absorbs blocking with user-level scheduling. Java goes through JVM native code and libc, with generations of abstraction stacked on top.</desc>
+  <defs>
+    <marker id="ar2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="500" fill="#FFFFFF"/>
+
+  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">app code calls read() — who stands between you and the kernel?</text>
+
+  <!-- kernel box (shared, right) -->
+  <rect x="648" y="64" width="120" height="356" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.7"/>
+  <text x="708" y="98" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">Kernel</text>
+  <text x="708" y="116" text-anchor="middle" font-size="11" fill="#64748B">(Ring 0)</text>
+  <text x="708" y="244" text-anchor="middle" font-size="12" fill="#334155">sys_read</text>
+  <text x="708" y="262" text-anchor="middle" font-size="10.5" fill="#64748B">same physical</text>
+  <text x="708" y="276" text-anchor="middle" font-size="10.5" fill="#64748B">cost for all three</text>
+
+  <!-- Rust lane -->
+  <rect x="32" y="76" width="140" height="64" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="102" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Rust app</text>
+  <text x="102" y="122" text-anchor="middle" font-size="11" fill="#334155">std::fs::read</text>
+
+  <rect x="220" y="76" width="180" height="64" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
+  <text x="310" y="102" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">libc read() wrapper</text>
+  <text x="310" y="122" text-anchor="middle" font-size="10.5" fill="#64748B">thin — no runtime in the way</text>
+
+  <line x1="172" y1="108" x2="216" y2="108" stroke="#475569" stroke-width="1.6" marker-end="url(#ar2)"/>
+  <line x1="400" y1="108" x2="644" y2="108" stroke="#475569" stroke-width="1.6" marker-end="url(#ar2)"/>
+  <text x="522" y="98" text-anchor="middle" font-size="10.5" fill="#334155">syscall — thread simply blocks</text>
+  <text x="32" y="164" font-size="10.5" fill="#64748B">predictable and transparent — but a blocked OS thread just sits idle</text>
+
+  <!-- Go lane -->
+  <rect x="32" y="202" width="140" height="64" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="102" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Go app</text>
+  <text x="102" y="248" text-anchor="middle" font-size="11" fill="#334155">file.Read()</text>
+
+  <rect x="220" y="190" width="340" height="88" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
+  <text x="390" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">Go runtime</text>
+  <text x="390" y="234" text-anchor="middle" font-size="11" fill="#047857">runtime.entersyscall / exitsyscall</text>
+  <text x="390" y="254" text-anchor="middle" font-size="10.5" fill="#047857">blocking → hand P to another goroutine</text>
+  <text x="390" y="268" text-anchor="middle" font-size="10.5" fill="#047857">network → netpoller (epoll), non-blocking</text>
+
+  <line x1="172" y1="234" x2="216" y2="234" stroke="#475569" stroke-width="1.6" marker-end="url(#ar2)"/>
+  <line x1="560" y1="234" x2="644" y2="234" stroke="#475569" stroke-width="1.6" marker-end="url(#ar2)"/>
+  <text x="602" y="224" text-anchor="middle" font-size="10.5" fill="#334155">direct syscall</text>
+  <text x="602" y="250" text-anchor="middle" font-size="10.5" fill="#64748B">(no libc)</text>
+  <text x="32" y="300" font-size="10.5" fill="#64748B">the runtime wraps the gate — blocking is absorbed by user-level scheduling</text>
+
+  <!-- Java lane -->
+  <rect x="32" y="328" width="140" height="64" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="102" y="354" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Java app</text>
+  <text x="102" y="374" text-anchor="middle" font-size="11" fill="#334155">InputStream.read()</text>
+
+  <rect x="220" y="328" width="160" height="64" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
+  <text x="300" y="354" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">JVM native code</text>
+  <text x="300" y="374" text-anchor="middle" font-size="10.5" fill="#047857">runtime + JNI layer</text>
+
+  <rect x="416" y="328" width="110" height="64" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
+  <text x="471" y="354" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">libc</text>
+  <text x="471" y="374" text-anchor="middle" font-size="10.5" fill="#64748B">read()</text>
+
+  <line x1="172" y1="360" x2="216" y2="360" stroke="#475569" stroke-width="1.6" marker-end="url(#ar2)"/>
+  <line x1="380" y1="360" x2="412" y2="360" stroke="#475569" stroke-width="1.6" marker-end="url(#ar2)"/>
+  <line x1="526" y1="360" x2="644" y2="360" stroke="#475569" stroke-width="1.6" marker-end="url(#ar2)"/>
+  <text x="585" y="350" text-anchor="middle" font-size="10.5" fill="#334155">syscall</text>
+  <text x="32" y="426" font-size="10.5" fill="#64748B">generations of abstraction on top: blocking I/O → NIO (epoll) → virtual threads (Loom)</text>
+
+  <!-- legend -->
+  <rect x="32" y="448" width="736" height="32" rx="7" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="400" y="468" text-anchor="middle" font-size="11.5" fill="#334155">cyan = your code · green = language runtime layer · gray = C library / kernel</text>
+</svg>
