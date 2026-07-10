@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">ThinLTO summary index versus fat LTO merged module</title>
+  <desc id="d5">ThinLTO has each module emit a function summary (call graph, size, linkage) rather than its full IR. A thin-link step reads the summary index and decides which functions to import where, then parallel backends pull in only those functions and inline them. Fat LTO instead merges the entire IR of every crate into one module and re-optimizes it serially, giving the best code for the longest build and the most memory.</desc>
+  <defs>
+    <marker id="m5" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
+
+  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">tearing down crate boundaries at link time — two strategies</text>
+
+  <line x1="400" y1="44" x2="400" y2="392" stroke="#D4D4D8" stroke-width="1.2" stroke-dasharray="5 4"/>
+
+  <text x="200" y="64" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">ThinLTO — lto = "thin"</text>
+
+  <rect x="40" y="80" width="320" height="72" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="200" y="102" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">1. each module emits a summary</text>
+  <text x="200" y="122" text-anchor="middle" font-size="10.5" fill="#047857">call graph · function size · symbol linkage</text>
+  <text x="200" y="140" text-anchor="middle" font-size="10.5" font-weight="700" fill="#047857">metadata only — not the body IR</text>
+  <line x1="200" y1="152" x2="200" y2="176" stroke="#475569" stroke-width="1.5" marker-end="url(#m5)"/>
+
+  <rect x="40" y="180" width="320" height="72" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
+  <text x="200" y="202" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">2. thin-link reads the summary index</text>
+  <text x="200" y="222" text-anchor="middle" font-size="10.5" fill="#047857">decides which function to import where</text>
+  <text x="200" y="240" text-anchor="middle" font-size="10" fill="#64748B">this index is the whole idea</text>
+  <line x1="200" y1="252" x2="200" y2="276" stroke="#475569" stroke-width="1.5" marker-end="url(#m5)"/>
+
+  <rect x="40" y="280" width="320" height="72" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="200" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">3. parallel backends</text>
+  <text x="200" y="322" text-anchor="middle" font-size="10.5" fill="#047857">pull in only the imported functions,</text>
+  <text x="200" y="340" text-anchor="middle" font-size="10.5" fill="#047857">inline them, keep the parallelism</text>
+
+  <rect x="40" y="366" width="320" height="42" rx="7" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.2"/>
+  <text x="200" y="384" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">most of the global-optimization win</text>
+  <text x="200" y="400" text-anchor="middle" font-size="10.5" fill="#047857">at little parallelism loss — start here</text>
+
+  <text x="600" y="64" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6D28D9">fat LTO — lto = true</text>
+
+  <rect x="440" y="80" width="86" height="52" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
+  <text x="483" y="111" text-anchor="middle" font-size="10.5" fill="#6D28D9">crate IR</text>
+  <rect x="536" y="80" width="86" height="52" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
+  <text x="579" y="111" text-anchor="middle" font-size="10.5" fill="#6D28D9">crate IR</text>
+  <rect x="632" y="80" width="86" height="52" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
+  <text x="675" y="111" text-anchor="middle" font-size="10.5" fill="#6D28D9">crate IR</text>
+
+  <line x1="483" y1="132" x2="560" y2="172" stroke="#475569" stroke-width="1.4" marker-end="url(#m5)"/>
+  <line x1="579" y1="132" x2="579" y2="172" stroke="#475569" stroke-width="1.4" marker-end="url(#m5)"/>
+  <line x1="675" y1="132" x2="598" y2="172" stroke="#475569" stroke-width="1.4" marker-end="url(#m5)"/>
+  <text x="600" y="152" text-anchor="middle" font-size="10" fill="#64748B">merge everything</text>
+
+  <rect x="440" y="180" width="280" height="172" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="580" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#6D28D9">one giant module</text>
+  <text x="580" y="240" text-anchor="middle" font-size="10.5" fill="#6D28D9">re-optimized as a whole</text>
+  <text x="580" y="272" text-anchor="middle" font-size="10.5" fill="#6D28D9">best code quality</text>
+  <text x="580" y="292" text-anchor="middle" font-size="10.5" fill="#6D28D9">longest build</text>
+  <text x="580" y="312" text-anchor="middle" font-size="10.5" fill="#6D28D9">highest memory use</text>
+  <text x="580" y="336" text-anchor="middle" font-size="10" fill="#64748B">link becomes the bottleneck at scale</text>
+
+  <rect x="440" y="366" width="280" height="42" rx="7" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.2"/>
+  <text x="580" y="392" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">no summaries, no shortcuts — merge it all</text>
+</svg>
