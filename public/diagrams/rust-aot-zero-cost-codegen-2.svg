@@ -1,70 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
   <title id="t2">Monomorphization multiplies one generic into many instances</title>
-  <desc id="d2">One generic function is cloned into a separate compiled function for every concrete type it is used with. Each clone becomes dedicated machine code with the abstraction erased, which is what zero-cost means physically. The bill arrives in two forms: the .text section grows and pressures the instruction cache and instruction TLB, and the LLVM IR volume grows as instances times function size, which blows up compile time.</desc>
+  <desc id="d2">One generic function is cloned into a separate compiled body for every concrete type it is used with, and each clone becomes dedicated branchless machine code. The bill arrives in two forms: the .text section grows and pressures the instruction cache and instruction TLB, and the LLVM IR volume grows as instances times function size, which blows up compile time.</desc>
   <defs>
-    <marker id="m2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="a2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
     </marker>
-    <marker id="m2r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#BE123C"/>
+    <marker id="a2r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="460" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">one generic in, one function per concrete type out — and a bill in two currencies</text>
+  <line x1="208" y1="120" x2="268" y2="76" stroke="#475569" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="208" y1="126" x2="268" y2="142" stroke="#475569" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="208" y1="132" x2="268" y2="208" stroke="#475569" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="472" y1="76" x2="532" y2="112" stroke="#475569" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="472" y1="142" x2="532" y2="126" stroke="#475569" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="472" y1="208" x2="532" y2="140" stroke="#475569" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="400" y1="262" x2="240" y2="288" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a2r)"/>
+  <line x1="400" y1="262" x2="560" y2="288" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a2r)"/>
 
-  <rect x="40" y="88" width="184" height="76" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
-  <text x="132" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#0E7490">source — one generic</text>
-  <text x="132" y="136" text-anchor="middle" font-size="10.5" fill="#0E7490" font-family="ui-monospace, monospace">fn max&lt;T: Ord&gt;(</text>
-  <text x="132" y="152" text-anchor="middle" font-size="10.5" fill="#0E7490" font-family="ui-monospace, monospace">a: T, b: T) -&gt; T</text>
+  <rect x="32" y="88" width="176" height="76" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="120" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">fn max&lt;T&gt;</text>
+  <text x="120" y="144" text-anchor="middle" font-size="13" fill="#0E7490">one generic</text>
 
-  <line x1="224" y1="126" x2="286" y2="76" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
-  <line x1="224" y1="126" x2="286" y2="126" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
-  <line x1="224" y1="126" x2="286" y2="176" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
-  <text x="255" y="200" text-anchor="middle" font-size="10" fill="#64748B">monomorphization</text>
+  <text x="240" y="196" text-anchor="middle" font-size="13" fill="#64748B">monomorphization</text>
 
-  <rect x="290" y="52" width="172" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
-  <text x="376" y="72" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;i32&gt;</text>
-  <text x="376" y="89" text-anchor="middle" font-size="10" fill="#6D28D9">its own compiled body</text>
+  <rect x="272" y="48" width="200" height="52" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
+  <text x="372" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;i32&gt;</text>
+  <rect x="272" y="116" width="200" height="52" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
+  <text x="372" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;u64&gt;</text>
+  <rect x="272" y="184" width="200" height="52" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
+  <text x="372" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;String&gt;</text>
 
-  <rect x="290" y="104" width="172" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
-  <text x="376" y="124" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;u64&gt;</text>
-  <text x="376" y="141" text-anchor="middle" font-size="10" fill="#6D28D9">its own compiled body</text>
+  <rect x="536" y="88" width="232" height="76" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="652" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">machine code</text>
+  <text x="652" y="144" text-anchor="middle" font-size="13" fill="#047857" font-family="ui-monospace, monospace">cmov / csel</text>
 
-  <rect x="290" y="156" width="172" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
-  <text x="376" y="176" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;String&gt;</text>
-  <text x="376" y="193" text-anchor="middle" font-size="10" fill="#6D28D9">calls &lt;str as Ord&gt;::cmp</text>
+  <text x="400" y="256" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">the bill</text>
 
-  <text x="376" y="222" text-anchor="middle" font-size="10.5" fill="#64748B">… one per concrete type actually used</text>
+  <rect x="72" y="292" width="296" height="80" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="220" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">code bloat</text>
+  <text x="220" y="348" text-anchor="middle" font-size="13" fill="#BE123C">i-cache · iTLB pressure</text>
 
-  <line x1="462" y1="76" x2="524" y2="100" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
-  <line x1="462" y1="128" x2="524" y2="128" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
-  <line x1="462" y1="180" x2="524" y2="156" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
-
-  <rect x="528" y="88" width="232" height="80" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
-  <text x="644" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">dedicated machine code</text>
-  <text x="644" y="134" text-anchor="middle" font-size="10.5" fill="#047857">generic · trait · if/else all gone</text>
-  <text x="644" y="154" text-anchor="middle" font-size="10.5" font-weight="700" fill="#047857">cmov / csel — one branchless line</text>
-
-  <text x="644" y="192" text-anchor="middle" font-size="10.5" fill="#047857">this is what "zero-cost" means physically</text>
-
-  <line x1="400" y1="240" x2="220" y2="280" stroke="#E11D48" stroke-width="1.6" marker-end="url(#m2r)"/>
-  <line x1="400" y1="240" x2="580" y2="280" stroke="#E11D48" stroke-width="1.6" marker-end="url(#m2r)"/>
-  <text x="400" y="238" text-anchor="middle" font-size="11" font-weight="700" fill="#BE123C">the bill — both of them quantitative</text>
-
-  <rect x="48" y="288" width="320" height="128" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
-  <text x="208" y="312" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">1. code bloat — runtime cost</text>
-  <text x="208" y="336" text-anchor="middle" font-size="10.5" fill="#BE123C">same logic, once per type → .text grows</text>
-  <text x="208" y="356" text-anchor="middle" font-size="10.5" fill="#BE123C">→ i-cache and iTLB pressure</text>
-  <text x="208" y="376" text-anchor="middle" font-size="10.5" fill="#BE123C">→ misses, and misses are latency</text>
-  <text x="208" y="402" text-anchor="middle" font-size="10" fill="#64748B">the paradox: zero-cost returns as a cache miss</text>
-
-  <rect x="432" y="288" width="320" height="128" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
-  <text x="592" y="312" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">2. compile time — build cost</text>
-  <text x="592" y="336" text-anchor="middle" font-size="10.5" fill="#BE123C">LLVM IR volume ≈ instances × body size</text>
-  <text x="592" y="356" text-anchor="middle" font-size="10.5" fill="#BE123C">deeply generic crates multiply hardest</text>
-  <text x="592" y="376" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">serde · diesel — this is why they crawl</text>
-  <text x="592" y="402" text-anchor="middle" font-size="10" fill="#64748B">"rustc is slow" = "the IR handed to LLVM was huge"</text>
-
-  <text x="400" y="444" text-anchor="middle" font-size="10.5" fill="#64748B">the abstraction is free at run time; you paid for it in binary size and in build time</text>
+  <rect x="432" y="292" width="296" height="80" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="580" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">compile time</text>
+  <text x="580" y="348" text-anchor="middle" font-size="13" fill="#BE123C">IR ≈ instances × size</text>
 </svg>

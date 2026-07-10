@@ -1,62 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t1">The rustc compilation pipeline</title>
-  <desc id="d1">Rust source lowers through HIR, MIR, LLVM IR and finally target machine code. The rustc frontend owns everything down to MIR, where borrow checking, automatic drop insertion and MIR optimization happen; borrow checking leaves zero runtime trace. The LLVM backend owns everything from LLVM IR down, where monomorphized instances multiply and classic optimizations decide most of the runtime speed.</desc>
+  <title id="t1">The rustc pipeline — safety decided in MIR, speed decided in LLVM</title>
+  <desc id="d1">Rust source passes through four intermediate representations. The rustc frontend owns HIR and MIR, where the borrow checker and automatic drop insertion decide safety and leave no runtime trace. The LLVM backend owns LLVM IR onward, where monomorphized instances multiply and the -O3 passes decide most of the runtime speed. The result is fixed machine code.</desc>
   <defs>
-    <marker id="m1" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="a1" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
     </marker>
   </defs>
   <rect x="0" y="0" width="800" height="520" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">two compilers, one pipeline — safety is decided above, speed below</text>
+  <line x1="400" y1="104" x2="400" y2="132" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+  <line x1="400" y1="192" x2="400" y2="220" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+  <line x1="400" y1="296" x2="400" y2="324" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+  <line x1="400" y1="400" x2="400" y2="428" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+  <line x1="224" y1="216" x2="246" y2="216" stroke="#94A3B8" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <line x1="224" y1="364" x2="246" y2="364" stroke="#94A3B8" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <line x1="554" y1="260" x2="574" y2="260" stroke="#94A3B8" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <line x1="554" y1="364" x2="574" y2="364" stroke="#94A3B8" stroke-width="1.3" stroke-dasharray="4 3"/>
 
-  <rect x="524" y="48" width="232" height="184" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.4" stroke-dasharray="5 3"/>
-  <text x="640" y="70" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0E7490">rustc frontend</text>
-  <text x="640" y="90" text-anchor="middle" font-size="10.5" fill="#0E7490">Rust-specific safety + meaning</text>
-  <text x="640" y="114" text-anchor="middle" font-size="10.5" fill="#0E7490">borrow checker lives here</text>
-  <text x="640" y="132" text-anchor="middle" font-size="10.5" fill="#0E7490">passing it leaves</text>
-  <text x="640" y="148" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0E7490">zero runtime trace</text>
-  <text x="640" y="176" text-anchor="middle" font-size="10" fill="#64748B">MIR opt shrinks the IR volume</text>
-  <text x="640" y="192" text-anchor="middle" font-size="10" fill="#64748B">handed to LLVM — which is why</text>
-  <text x="640" y="208" text-anchor="middle" font-size="10" fill="#64748B">"rustc is slow" usually means</text>
-  <text x="640" y="224" text-anchor="middle" font-size="10" fill="#64748B">"the IR was huge"</text>
+  <rect x="248" y="48" width="304" height="56" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="400" y="83" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">source .rs</text>
 
-  <rect x="524" y="288" width="232" height="152" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4" stroke-dasharray="5 3"/>
-  <text x="640" y="310" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6D28D9">LLVM backend</text>
-  <text x="640" y="330" text-anchor="middle" font-size="10.5" fill="#6D28D9">most of the runtime speed</text>
-  <text x="640" y="346" text-anchor="middle" font-size="10.5" fill="#6D28D9">is decided here</text>
-  <text x="640" y="372" text-anchor="middle" font-size="10.5" fill="#6D28D9">inline · loop unroll</text>
-  <text x="640" y="390" text-anchor="middle" font-size="10.5" fill="#6D28D9">SLP / loop vectorize</text>
-  <text x="640" y="408" text-anchor="middle" font-size="10.5" fill="#6D28D9">GVN · register alloc</text>
-  <text x="640" y="426" text-anchor="middle" font-size="10.5" fill="#6D28D9">instruction scheduling</text>
+  <rect x="248" y="136" width="304" height="56" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="400" y="171" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">HIR</text>
 
-  <rect x="48" y="48" width="380" height="44" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="238" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">source .rs</text>
-  <text x="450" y="112" font-size="10" fill="#64748B">parse · type inference · trait resolution</text>
-  <line x1="238" y1="92" x2="238" y2="120" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
+  <rect x="248" y="224" width="304" height="72" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="400" y="253" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">MIR</text>
+  <text x="400" y="277" text-anchor="middle" font-size="13" fill="#6D28D9">basic-block CFG</text>
 
-  <rect x="48" y="124" width="380" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
-  <text x="238" y="145" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">HIR</text>
-  <text x="238" y="161" text-anchor="middle" font-size="10" fill="#0E7490">high-level IR, close to syntax</text>
-  <text x="450" y="188" font-size="10" fill="#64748B">desugaring: for → loop, ? → match, closure → struct</text>
-  <line x1="238" y1="168" x2="238" y2="196" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
+  <rect x="248" y="328" width="304" height="72" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="400" y="357" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">LLVM IR</text>
+  <text x="400" y="381" text-anchor="middle" font-size="13" fill="#B45309">instances multiply</text>
 
-  <rect x="48" y="200" width="380" height="88" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
-  <text x="238" y="222" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">MIR — basic-block CFG</text>
-  <text x="238" y="242" text-anchor="middle" font-size="10.5" fill="#0E7490">borrow check (NLL dataflow) → zero trace</text>
-  <text x="238" y="259" text-anchor="middle" font-size="10.5" fill="#0E7490">automatic drop insertion (RAII)</text>
-  <text x="238" y="276" text-anchor="middle" font-size="10.5" fill="#0E7490">MIR opt: const-prop, inline, DCE</text>
-  <line x1="238" y1="288" x2="238" y2="316" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
+  <rect x="248" y="432" width="304" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="400" y="467" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">machine code</text>
 
-  <rect x="48" y="320" width="380" height="64" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
-  <text x="238" y="342" text-anchor="middle" font-size="12" font-weight="700" fill="#6D28D9">LLVM IR</text>
-  <text x="238" y="362" text-anchor="middle" font-size="10.5" fill="#6D28D9">monomorphized instances multiply here</text>
-  <text x="238" y="377" text-anchor="middle" font-size="10" fill="#6D28D9">volume ≈ instances × function size</text>
-  <line x1="238" y1="384" x2="238" y2="412" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
+  <rect x="40" y="136" width="184" height="160" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="132" y="208" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">rustc frontend</text>
+  <text x="132" y="232" text-anchor="middle" font-size="13" fill="#334155">safety</text>
 
-  <rect x="48" y="416" width="380" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
-  <text x="238" y="440" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">target machine code</text>
-  <text x="238" y="459" text-anchor="middle" font-size="10.5" fill="#334155">x86-64 or AArch64, fixed in .text</text>
+  <rect x="40" y="328" width="184" height="72" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="132" y="357" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">LLVM backend</text>
+  <text x="132" y="381" text-anchor="middle" font-size="13" fill="#334155">speed</text>
 
-  <text x="238" y="498" text-anchor="middle" font-size="10.5" fill="#64748B">run it a thousand times — these bytes never change</text>
+  <rect x="576" y="224" width="184" height="72" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.3" stroke-dasharray="5 3"/>
+  <text x="668" y="253" text-anchor="middle" font-size="13" fill="#6D28D9">borrow check</text>
+  <text x="668" y="277" text-anchor="middle" font-size="13" fill="#6D28D9">drop insertion</text>
+
+  <rect x="576" y="328" width="184" height="72" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.3" stroke-dasharray="5 3"/>
+  <text x="668" y="357" text-anchor="middle" font-size="13" fill="#B45309">-O3 passes</text>
+  <text x="668" y="381" text-anchor="middle" font-size="13" fill="#B45309">inline · vectorize</text>
 </svg>
