@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Two axes of M to N runtimes</title>
+  <desc id="d3">A map with two axes. Vertical: preemptive at the top, cooperative at the bottom. Horizontal: transparent blocking code on the left, async-colored code on the right. Go goroutines sit top-left with signal-based preemption. Java virtual threads sit middle-left, yielding at blocking points. Rust tokio tasks sit bottom-right, yielding only at await points.</desc>
+  <rect x="0" y="0" width="800" height="460" fill="#FFFFFF"/>
+
+  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">same M:N idea, different answers — who yields, and what the code looks like</text>
+
+  <line x1="400" y1="64" x2="400" y2="388" stroke="#D4D4D8" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <line x1="80" y1="226" x2="720" y2="226" stroke="#D4D4D8" stroke-width="1.3" stroke-dasharray="6 4"/>
+
+  <text x="400" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#475569">preemptive — runtime can interrupt a task</text>
+  <text x="400" y="410" text-anchor="middle" font-size="11.5" font-weight="700" fill="#475569">cooperative — task must yield by itself</text>
+  <text x="80" y="218" font-size="11.5" font-weight="700" fill="#475569">transparent</text>
+  <text x="80" y="234" font-size="10.5" fill="#64748B">plain blocking code</text>
+  <text x="720" y="218" text-anchor="end" font-size="11.5" font-weight="700" fill="#475569">colored</text>
+  <text x="720" y="234" text-anchor="end" font-size="10.5" fill="#64748B">async/await everywhere</text>
+
+  <rect x="130" y="84" width="210" height="60" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
+  <text x="235" y="109" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">Go goroutines</text>
+  <text x="235" y="128" text-anchor="middle" font-size="10.5" fill="#047857">SIGURG async preemption (1.14+)</text>
+
+  <rect x="130" y="158" width="210" height="60" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.6"/>
+  <text x="235" y="183" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B45309">Java virtual threads</text>
+  <text x="235" y="202" text-anchor="middle" font-size="10.5" fill="#B45309">yields at blocking / mount points</text>
+
+  <rect x="470" y="290" width="210" height="60" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="575" y="315" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">Rust tokio tasks</text>
+  <text x="575" y="334" text-anchor="middle" font-size="10.5" fill="#0E7490">yields only at .await</text>
+
+  <text x="130" y="374" font-size="10.5" fill="#64748B">1:1 OS threads live off this map — the kernel preempts them with time slices</text>
+
+  <rect x="80" y="424" width="640" height="26" rx="7" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="400" y="441" text-anchor="middle" font-size="11" fill="#334155">Go and Loom converge on "transparent + runtime absorbs blocking" — tokio trades that for explicitness</text>
+</svg>

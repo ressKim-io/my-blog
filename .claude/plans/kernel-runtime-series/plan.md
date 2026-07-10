@@ -137,6 +137,8 @@ date: "발행일"
 4. "Java가 CPU 효율 역전" → **조건부**(peak throughput 한정, tail latency·메모리·웜업 열세)
 5. 고루틴 초기 스택 8KB → **2KB** (Go 1.4+ 연속 스택)
 6. Linux 6.x 표기 → 7.x
+7. "tokio는 cgroup CFS quota를 못 본다"(1.2 draft) → 낡음. num_cpus·std `available_parallelism`
+   모두 cgroup quota 파싱 (2026-07-10 웹 검증, rust-lang/rust#92697). 단 명시 설정 권장은 유지
 
 ## 6. 편별 매핑·진행 상태
 
@@ -145,7 +147,7 @@ date: "발행일"
 | # | draft | slug (제안) | order | 상태 |
 |---|-------|-------------|-------|------|
 | 1.1 | `1부_1.1_유저모드_커널모드_syscall비용.md` | `syscall-mode-switch-cost` | 1 | ✅ 발행 (2026-07-10, 파일럿 — 피드백 2라운드 반영, SVG 7개) |
-| 1.2 | `1부_1.2_스레드모델_1대1_vs_유저레벨스케줄링.md` | `thread-models-kernel-vs-user` | 2 | ☐ |
+| 1.2 | `1부_1.2_스레드모델_1대1_vs_유저레벨스케줄링.md` | `thread-models-kernel-vs-user` | 2 | ✅ 발행 (2026-07-10, 새 문체 첫 적용·SVG 6개·tokio cgroup 사실 교정) |
 | 1.3 | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 3 | ☐ |
 | 2.1 | `2부_2.1_Rust_AOT_컴파일러엄격함과_하드웨어직거래.md` | `rust-aot-zero-cost-codegen` | 4 | ☐ |
 | 2.2 | `2부_2.2_Go_AOT_빠른빌드의대가와_정적기계어의한계.md` | `go-aot-fast-build-tradeoff` | 5 | ☐ |

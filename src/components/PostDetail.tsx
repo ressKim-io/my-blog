@@ -170,7 +170,13 @@ export default function PostDetail({ post, allPosts, seriesPosts }: PostDetailPr
                 <MDXRemote
                   source={post.content}
                   components={mdxComponents}
-                  options={{ mdxOptions: { remarkPlugins: [remarkGfm, remarkCjkFriendly] } }}
+                  options={{
+                    mdxOptions: {
+                      // singleTilde: false — 물결표 1개(수백 KB~8MB 같은 범위 표기)가
+                      // 한 문단에 2번 나오면 취소선으로 렌더되는 사고 방지. ~~취소선~~은 유지
+                      remarkPlugins: [[remarkGfm, { singleTilde: false }], remarkCjkFriendly],
+                    },
+                  }}
                 />
               </div>
 
