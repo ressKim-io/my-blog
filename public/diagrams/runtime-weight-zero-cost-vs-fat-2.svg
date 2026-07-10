@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">The runtime weight spectrum and its flip</title>
+  <desc id="d2">Five runtimes ordered from light to heavy: Rust no_std, Rust std, Go, JVM native-image, traditional JVM with JIT. Weight grows to the right, but peak throughput after warmup also favors the right end, so the heaviest runtime can win on long-running hot paths.</desc>
+  <defs>
+    <marker id="m2a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="m2b" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="300" fill="#FFFFFF"/>
+
+  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">one spectrum, two readings</text>
+
+  <text x="400" y="56" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">weight — binary size · baseline RSS · startup</text>
+  <text x="64" y="78" font-size="10.5" fill="#64748B">lighter</text>
+  <text x="736" y="78" text-anchor="end" font-size="10.5" fill="#64748B">heavier</text>
+  <line x1="64" y1="90" x2="732" y2="90" stroke="#475569" stroke-width="1.5" marker-end="url(#m2a)"/>
+
+  <rect x="48" y="118" width="128" height="46" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="112" y="138" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0E7490">Rust</text>
+  <text x="112" y="154" text-anchor="middle" font-size="10.5" fill="#0E7490">no_std</text>
+
+  <rect x="192" y="118" width="128" height="46" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="256" y="138" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0E7490">Rust</text>
+  <text x="256" y="154" text-anchor="middle" font-size="10.5" fill="#0E7490">std</text>
+
+  <rect x="336" y="118" width="128" height="46" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="400" y="146" text-anchor="middle" font-size="11.5" font-weight="700" fill="#047857">Go</text>
+
+  <rect x="480" y="118" width="128" height="46" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="544" y="138" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6D28D9">JVM</text>
+  <text x="544" y="154" text-anchor="middle" font-size="10.5" fill="#6D28D9">native-image</text>
+
+  <rect x="624" y="118" width="128" height="46" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="688" y="138" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6D28D9">JVM</text>
+  <text x="688" y="154" text-anchor="middle" font-size="10.5" fill="#6D28D9">traditional JIT</text>
+
+  <text x="400" y="204" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">peak throughput after warmup — same direction</text>
+  <line x1="64" y1="218" x2="732" y2="218" stroke="#059669" stroke-width="2" marker-end="url(#m2b)"/>
+  <text x="400" y="240" text-anchor="middle" font-size="10.5" fill="#047857">the heavy end wins long-running hot paths (weight bought adaptability)</text>
+
+  <text x="400" y="274" text-anchor="middle" font-size="10.5" fill="#64748B">* not a strict ordering — Rust stays high and predictable; the flip is about the JVM end</text>
+</svg>

@@ -148,7 +148,7 @@ date: "발행일"
 |---|-------|-------------|-------|------|
 | 1.1 | `1부_1.1_유저모드_커널모드_syscall비용.md` | `syscall-mode-switch-cost` | 1 | ✅ 발행 (2026-07-10, 파일럿 — 피드백 2라운드 반영, SVG 7개) |
 | 1.2 | `1부_1.2_스레드모델_1대1_vs_유저레벨스케줄링.md` | `thread-models-kernel-vs-user` | 2 | ✅ 발행 (2026-07-10, 새 문체 첫 적용·SVG 6개·tokio cgroup 사실 교정) |
-| 1.3 | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 3 | ☐ |
+| 1.3 | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 3 | ✅ 발행 (2026-07-10, SVG 5개·Go 1.26 기준 교정·리뷰어 P0 0건 — 1부 완결) |
 | 2.1 | `2부_2.1_Rust_AOT_컴파일러엄격함과_하드웨어직거래.md` | `rust-aot-zero-cost-codegen` | 4 | ☐ |
 | 2.2 | `2부_2.2_Go_AOT_빠른빌드의대가와_정적기계어의한계.md` | `go-aot-fast-build-tradeoff` | 5 | ☐ |
 | 2.3 | `2부_2.3_Java_JIT_웜업의반전과_C2런타임최적화.md` | `java-jit-c2-runtime-optimization` | 6 | ☐ |
