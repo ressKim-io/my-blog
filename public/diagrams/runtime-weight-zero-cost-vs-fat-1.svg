@@ -1,49 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t1">The language runtime layer</title>
-  <desc id="d1">Application code sits on top, the OS kernel at the bottom. Between them lives the language runtime layer, which may contain memory management, a scheduler, a JIT compiler, reflection, unwinding, dynamic dispatch and a bytecode interpreter. How much a language puts in this layer decides how heavy its runtime is.</desc>
-  <rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">The language runtime layer — what can live between your code and the kernel</title>
+  <desc id="d1">Between application code and the OS kernel sits the language runtime, a layer of managed code that runs with and beneath your program. Candidates for that layer include a garbage collector and allocator, an M:N user-level scheduler, a just-in-time compiler, reflection and runtime type information, exception unwinding, dynamic dispatch, and a class loader with a bytecode interpreter. How heavy a runtime is means simply how much of this middle layer you filled in.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">the language runtime — managed code that runs with and beneath your program</text>
+  <rect x="32" y="48" width="480" height="60" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="272" y="85" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">application code</text>
 
-  <rect x="88" y="44" width="464" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
-  <text x="320" y="75" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">application code (what you wrote)</text>
+  <rect x="32" y="124" width="480" height="184" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="272" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">language runtime layer</text>
 
-  <rect x="88" y="120" width="464" height="224" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.7"/>
-  <text x="320" y="142" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6D28D9">language runtime layer — what can live here</text>
+  <rect x="48" y="168" width="144" height="56" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="120" y="201" text-anchor="middle" font-size="13" fill="#6D28D9">GC + allocator</text>
+  <rect x="200" y="168" width="144" height="56" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="272" y="201" text-anchor="middle" font-size="13" fill="#6D28D9">M:N scheduler</text>
+  <rect x="352" y="168" width="144" height="56" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="424" y="201" text-anchor="middle" font-size="13" fill="#6D28D9">JIT compiler</text>
 
-  <rect x="104" y="156" width="216" height="36" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
-  <text x="212" y="178" text-anchor="middle" font-size="11" fill="#6D28D9">memory: GC + allocator</text>
-  <rect x="328" y="156" width="216" height="36" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
-  <text x="436" y="178" text-anchor="middle" font-size="11" fill="#6D28D9">scheduler: M:N user tasks</text>
+  <rect x="48" y="236" width="144" height="56" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="120" y="269" text-anchor="middle" font-size="13" fill="#6D28D9">reflection</text>
+  <rect x="200" y="236" width="144" height="56" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="272" y="269" text-anchor="middle" font-size="13" fill="#6D28D9">unwinding</text>
+  <rect x="352" y="236" width="144" height="56" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="424" y="269" text-anchor="middle" font-size="13" fill="#6D28D9">class loader</text>
 
-  <rect x="104" y="200" width="216" height="36" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
-  <text x="212" y="222" text-anchor="middle" font-size="11" fill="#6D28D9">JIT compiler (codegen at run time)</text>
-  <rect x="328" y="200" width="216" height="36" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
-  <text x="436" y="222" text-anchor="middle" font-size="11" fill="#6D28D9">reflection / runtime type info</text>
+  <rect x="32" y="324" width="480" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.6"/>
+  <text x="272" y="358" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">OS kernel</text>
 
-  <rect x="104" y="244" width="216" height="36" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
-  <text x="212" y="266" text-anchor="middle" font-size="11" fill="#6D28D9">exception / panic unwinding</text>
-  <rect x="328" y="244" width="216" height="36" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
-  <text x="436" y="266" text-anchor="middle" font-size="11" fill="#6D28D9">dynamic dispatch (vtable)</text>
-
-  <rect x="104" y="288" width="216" height="36" rx="6" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.2"/>
-  <text x="212" y="305" text-anchor="middle" font-size="11" fill="#6D28D9">class loader +</text>
-  <text x="212" y="319" text-anchor="middle" font-size="11" fill="#6D28D9">bytecode interpreter</text>
-
-  <rect x="88" y="368" width="464" height="48" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="320" y="397" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">OS kernel (part 1's world)</text>
-
-  <line x1="600" y1="126" x2="600" y2="338" stroke="#475569" stroke-width="1.3"/>
-  <line x1="594" y1="132" x2="600" y2="126" stroke="#475569" stroke-width="1.3"/>
-  <line x1="606" y1="132" x2="600" y2="126" stroke="#475569" stroke-width="1.3"/>
-  <line x1="594" y1="332" x2="600" y2="338" stroke="#475569" stroke-width="1.3"/>
-  <line x1="606" y1="332" x2="600" y2="338" stroke="#475569" stroke-width="1.3"/>
-
-  <text x="612" y="160" font-size="11" font-weight="700" fill="#334155">how heavy a runtime is</text>
-  <text x="612" y="176" font-size="11" fill="#334155">= what you put in</text>
-  <text x="612" y="192" font-size="11" fill="#334155">this middle layer</text>
-
-  <text x="612" y="230" font-size="11" fill="#0E7490">Rust — nearly empty</text>
-  <text x="612" y="252" font-size="11" fill="#047857">Go — pragmatically filled</text>
-  <text x="612" y="274" font-size="11" fill="#6D28D9">JVM — an entire VM</text>
+  <rect x="544" y="124" width="224" height="184" rx="9" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1.4"/>
+  <text x="656" y="156" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">how much you filled in</text>
+  <text x="656" y="196" text-anchor="middle" font-size="13" fill="#047857">Rust — nearly empty</text>
+  <text x="656" y="230" text-anchor="middle" font-size="13" fill="#0E7490">Go — pragmatically filled</text>
+  <text x="656" y="264" text-anchor="middle" font-size="13" fill="#BE123C">JVM — an entire VM</text>
 </svg>
