@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t7">An interface value is two pointers, and the itab turns a method call into an indirect CALL</title>
+  <desc id="d7">A Go interface value holds an itab pointer and a data pointer. The data pointer points at the concrete value. The itab points at a struct holding the interface type, the concrete type, a type hash, and Fun, a table of method function pointers. Loading a slot out of Fun and jumping to it produces an indirect call, which costs a possible branch target mispredict and blocks inlining.</desc>
+  <defs>
+    <marker id="a7" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="a7r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="350" fill="#FFFFFF"/>
+
+  <line x1="224" y1="179" x2="284" y2="112" stroke="#475569" stroke-width="1.5" marker-end="url(#a7)"/>
+  <line x1="224" y1="211" x2="284" y2="294" stroke="#475569" stroke-width="1.5" marker-end="url(#a7)"/>
+  <line x1="482" y1="201" x2="556" y2="142" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a7r)"/>
+  <line x1="660" y1="160" x2="660" y2="188" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a7r)"/>
+
+  <rect x="32" y="128" width="192" height="104" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="128" y="154" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">interface value</text>
+  <rect x="44" y="166" width="168" height="26" rx="3" fill="#FFFFFF" stroke="#0891B2" stroke-width="1.1"/>
+  <text x="128" y="185" text-anchor="middle" font-size="13" fill="#0E7490" font-family="ui-monospace, monospace">itab</text>
+  <rect x="44" y="198" width="168" height="26" rx="3" fill="#FFFFFF" stroke="#0891B2" stroke-width="1.1"/>
+  <text x="128" y="217" text-anchor="middle" font-size="13" fill="#0E7490" font-family="ui-monospace, monospace">data</text>
+
+  <rect x="288" y="48" width="192" height="184" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="384" y="76" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">itab</text>
+  <rect x="300" y="92" width="168" height="26" rx="3" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.1"/>
+  <text x="384" y="111" text-anchor="middle" font-size="13" fill="#6D28D9" font-family="ui-monospace, monospace">Inter</text>
+  <rect x="300" y="124" width="168" height="26" rx="3" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.1"/>
+  <text x="384" y="143" text-anchor="middle" font-size="13" fill="#6D28D9" font-family="ui-monospace, monospace">Type</text>
+  <rect x="300" y="156" width="168" height="26" rx="3" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.1"/>
+  <text x="384" y="175" text-anchor="middle" font-size="13" fill="#6D28D9" font-family="ui-monospace, monospace">Hash</text>
+  <rect x="300" y="188" width="168" height="26" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="1.4"/>
+  <text x="384" y="207" text-anchor="middle" font-size="13" font-weight="700" fill="#047857" font-family="ui-monospace, monospace">Fun[ ]</text>
+
+  <rect x="288" y="272" width="192" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="384" y="306" text-anchor="middle" font-size="14" font-weight="700" fill="#334155" font-family="ui-monospace, monospace">*os.File</text>
+
+  <rect x="560" y="96" width="200" height="64" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="660" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C" font-family="ui-monospace, monospace">CALL CX</text>
+  <text x="660" y="147" text-anchor="middle" font-size="13" fill="#BE123C">indirect call</text>
+
+  <rect x="560" y="192" width="200" height="96" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="660" y="220" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">two costs</text>
+  <text x="660" y="246" text-anchor="middle" font-size="13" fill="#BE123C">branch mispredict</text>
+  <text x="660" y="270" text-anchor="middle" font-size="13" fill="#BE123C">no inlining</text>
+</svg>

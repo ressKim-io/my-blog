@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Escape analysis decides stack or heap</title>
+  <desc id="d4">The compiler asks whether a pointer to the variable outlives the function frame. If not, the variable stays on the stack where allocation is nearly free and the garbage collector never sees it. If it does, the compiler calls runtime.newobject, and the heap object costs collection later plus CPU right now through mark workers and Mark Assist.</desc>
+  <defs>
+    <marker id="a4g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+    <marker id="a4r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="350" y1="104" x2="216" y2="170" stroke="#059669" stroke-width="1.6" marker-end="url(#a4g)"/>
+  <line x1="450" y1="104" x2="584" y2="170" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a4r)"/>
+  <line x1="608" y1="272" x2="608" y2="292" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a4r)"/>
+
+  <rect x="240" y="48" width="320" height="56" rx="28" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="400" y="83" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">does it outlive the frame?</text>
+
+  <text x="252" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">no</text>
+  <text x="552" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">yes</text>
+
+  <rect x="64" y="176" width="256" height="96" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="192" y="208" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">stack</text>
+  <text x="192" y="234" text-anchor="middle" font-size="13" fill="#047857">allocation is nearly free</text>
+  <text x="192" y="256" text-anchor="middle" font-size="13" fill="#047857">the GC never sees it</text>
+
+  <rect x="480" y="176" width="256" height="96" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="608" y="208" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">heap</text>
+  <text x="608" y="234" text-anchor="middle" font-size="13" fill="#BE123C" font-family="ui-monospace, monospace">runtime.newobject</text>
+  <text x="608" y="256" text-anchor="middle" font-size="13" fill="#BE123C">the GC must reclaim it</text>
+
+  <rect x="480" y="296" width="256" height="72" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="608" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">and it takes CPU now</text>
+  <text x="608" y="348" text-anchor="middle" font-size="13" fill="#BE123C">mark workers · Mark Assist</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 372" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">The prove pass combines facts to remove a bounds check</title>
+  <desc id="d5">The loop initializer establishes that i is at least zero and the loop condition establishes that i is below len(b). Go's prove pass combines the two facts, proves the index is always in range, and deletes the compare and conditional jump that guarded the access. Without the proof, every element access keeps that compare and branch.</desc>
+  <defs>
+    <marker id="a5" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="a5g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="372" fill="#FFFFFF"/>
+
+  <line x1="208" y1="104" x2="260" y2="150" stroke="#475569" stroke-width="1.6" marker-end="url(#a5)"/>
+  <line x1="208" y1="232" x2="260" y2="186" stroke="#475569" stroke-width="1.6" marker-end="url(#a5)"/>
+  <line x1="416" y1="168" x2="468" y2="168" stroke="#059669" stroke-width="1.6" marker-end="url(#a5g)"/>
+  <line x1="616" y1="208" x2="616" y2="276" stroke="#059669" stroke-width="1.6" marker-end="url(#a5g)"/>
+
+  <rect x="32" y="72" width="176" height="64" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="120" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">i &gt;= 0</text>
+  <text x="120" y="122" text-anchor="middle" font-size="13" fill="#0E7490">from the initializer</text>
+
+  <rect x="32" y="200" width="176" height="64" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="120" y="228" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">i &lt; len(b)</text>
+  <text x="120" y="250" text-anchor="middle" font-size="13" fill="#0E7490">from the loop condition</text>
+
+  <rect x="264" y="128" width="152" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="340" y="162" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">prove pass</text>
+  <text x="340" y="186" text-anchor="middle" font-size="13" fill="#6D28D9">combines facts</text>
+
+  <rect x="472" y="128" width="288" height="80" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="616" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">proved</text>
+  <text x="616" y="188" text-anchor="middle" font-size="17" font-weight="700" fill="#047857" font-family="ui-monospace, monospace">0 &lt;= i &lt; len(b)</text>
+
+  <rect x="32" y="280" width="384" height="64" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="224" y="308" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">without the proof</text>
+  <text x="224" y="330" text-anchor="middle" font-size="13" fill="#BE123C">CMPQ + JAE on every access</text>
+
+  <rect x="472" y="280" width="288" height="64" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <text x="616" y="308" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">with the proof</text>
+  <text x="616" y="330" text-anchor="middle" font-size="13" fill="#047857">only the load survives</text>
+</svg>

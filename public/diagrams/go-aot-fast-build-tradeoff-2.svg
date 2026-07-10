@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 376" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">The inline budget of 80 is a gate</title>
+  <desc id="d2">Each function gets a cost score. A function costing 8 passes the budget of 80 and is inlined, after which other optimizations can cross the former call boundary. A function costing 120 fails the gate, a CALL instruction remains, and the whole chain of optimizations behind that boundary is blocked.</desc>
+  <defs>
+    <marker id="a2g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+    <marker id="a2r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="376" fill="#FFFFFF"/>
+
+  <line x1="208" y1="108" x2="266" y2="164" stroke="#059669" stroke-width="1.6" marker-end="url(#a2g)"/>
+  <line x1="208" y1="284" x2="266" y2="228" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a2r)"/>
+  <line x1="448" y1="164" x2="506" y2="118" stroke="#059669" stroke-width="1.6" marker-end="url(#a2g)"/>
+  <line x1="448" y1="228" x2="506" y2="290" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a2r)"/>
+
+  <rect x="32" y="72" width="176" height="72" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="120" y="103" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">func add</text>
+  <text x="120" y="126" text-anchor="middle" font-size="13" fill="#0E7490">cost 8</text>
+
+  <rect x="32" y="248" width="176" height="72" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="120" y="279" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">func parse</text>
+  <text x="120" y="302" text-anchor="middle" font-size="13" fill="#0E7490">cost 120</text>
+
+  <rect x="272" y="140" width="176" height="112" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="360" y="174" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">inline budget</text>
+  <text x="360" y="222" text-anchor="middle" font-size="34" font-weight="700" fill="#6D28D9">80</text>
+
+  <rect x="512" y="72" width="256" height="92" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="640" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">inlined</text>
+  <text x="640" y="129" text-anchor="middle" font-size="13" fill="#047857">optimizations cross</text>
+  <text x="640" y="150" text-anchor="middle" font-size="13" fill="#047857">the boundary</text>
+
+  <rect x="512" y="248" width="256" height="92" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="640" y="280" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">CALL remains</text>
+  <text x="640" y="305" text-anchor="middle" font-size="13" fill="#BE123C">the chain behind it</text>
+  <text x="640" y="326" text-anchor="middle" font-size="13" fill="#BE123C">is blocked too</text>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t8 d8" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t8">PGO reopens two levers at build time, and both freeze when the build ends</title>
+  <desc id="d8">A profile named default.pgo is read at build time. It raises the inline budget for hot functions from 80 to 2000, and it devirtualizes interface calls whose profile shows a single dominant concrete type, replacing an indirect call with a direct one. Typical gain is two to seven percent. But once traffic shifts and a different concrete type becomes hot, the type guard starts missing and execution falls back to the indirect call. Nothing changes until someone recaptures the profile and rebuilds.</desc>
+  <defs>
+    <marker id="a8" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="a8g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+    <marker id="a8r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <line x1="208" y1="88" x2="268" y2="88" stroke="#475569" stroke-width="1.6" marker-end="url(#a8)"/>
+  <line x1="416" y1="80" x2="476" y2="68" stroke="#059669" stroke-width="1.6" marker-end="url(#a8g)"/>
+  <line x1="416" y1="96" x2="476" y2="152" stroke="#059669" stroke-width="1.6" marker-end="url(#a8g)"/>
+  <line x1="256" y1="284" x2="284" y2="284" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a8r)"/>
+  <line x1="512" y1="284" x2="540" y2="284" stroke="#E11D48" stroke-width="1.6" marker-end="url(#a8r)"/>
+  <path d="M656,244 L656,228 L344,228 L344,126" fill="none" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#a8r)"/>
+  <text x="500" y="220" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">only a rebuild moves this</text>
+
+  <rect x="32" y="56" width="176" height="64" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="120" y="95" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">default.pgo</text>
+
+  <rect x="272" y="56" width="144" height="64" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="344" y="95" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">build</text>
+
+  <rect x="480" y="32" width="288" height="72" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="624" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">hot inline budget</text>
+  <text x="624" y="88" text-anchor="middle" font-size="17" font-weight="700" fill="#047857" font-family="ui-monospace, monospace">80 → 2000</text>
+
+  <rect x="480" y="120" width="288" height="72" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="624" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">devirtualization</text>
+  <text x="624" y="174" text-anchor="middle" font-size="13" fill="#047857">indirect call → direct call</text>
+
+  <rect x="32" y="248" width="224" height="72" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.6"/>
+  <text x="144" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">traffic shifts</text>
+  <text x="144" y="302" text-anchor="middle" font-size="13" fill="#B45309">another type gets hot</text>
+
+  <rect x="288" y="248" width="224" height="72" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="400" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">the guard misses</text>
+  <text x="400" y="302" text-anchor="middle" font-size="13" fill="#BE123C">back to the indirect call</text>
+
+  <rect x="544" y="248" width="224" height="72" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="656" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">frozen</text>
+  <text x="656" y="302" text-anchor="middle" font-size="13" fill="#BE123C">the machine code cannot adapt</text>
+</svg>

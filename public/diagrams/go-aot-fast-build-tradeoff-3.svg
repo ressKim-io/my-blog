@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 348" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">ABI0 passed arguments through the stack, ABIInternal passes them in registers</title>
+  <desc id="d3">Under the old ABI0 convention the caller wrote every argument into a stack memory slot and the callee read it back. Under ABIInternal, introduced in Go 1.17, up to nine integer arguments travel directly in CPU registers and never touch memory.</desc>
+  <defs>
+    <marker id="a3r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#BE123C"/>
+    </marker>
+    <marker id="a3g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="348" fill="#FFFFFF"/>
+
+  <line x1="400" y1="64" x2="400" y2="312" stroke="#E4E4E7" stroke-width="1.2"/>
+
+  <text x="200" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">ABI0 — stack</text>
+  <text x="600" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">ABIInternal — registers</text>
+
+  <line x1="160" y1="124" x2="220" y2="152" stroke="#BE123C" stroke-width="1.6" marker-end="url(#a3r)"/>
+  <line x1="220" y1="252" x2="162" y2="270" stroke="#BE123C" stroke-width="1.6" marker-end="url(#a3r)"/>
+  <line x1="560" y1="124" x2="620" y2="152" stroke="#059669" stroke-width="1.6" marker-end="url(#a3g)"/>
+  <line x1="620" y1="252" x2="562" y2="270" stroke="#059669" stroke-width="1.6" marker-end="url(#a3g)"/>
+
+  <rect x="40" y="88" width="120" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="100" y="123" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">caller</text>
+  <rect x="40" y="240" width="120" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="100" y="275" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">callee</text>
+  <text x="192" y="112" text-anchor="middle" font-size="13" fill="#BE123C">write</text>
+  <text x="192" y="300" text-anchor="middle" font-size="13" fill="#BE123C">read</text>
+
+  <rect x="224" y="88" width="144" height="208" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="296" y="114" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">stack memory</text>
+  <rect x="244" y="130" width="104" height="34" rx="4" fill="#FFFFFF" stroke="#E11D48" stroke-width="1.1"/>
+  <text x="296" y="153" text-anchor="middle" font-size="13" fill="#BE123C" font-family="ui-monospace, monospace">a0</text>
+  <rect x="244" y="172" width="104" height="34" rx="4" fill="#FFFFFF" stroke="#E11D48" stroke-width="1.1"/>
+  <text x="296" y="195" text-anchor="middle" font-size="13" fill="#BE123C" font-family="ui-monospace, monospace">a1</text>
+  <rect x="244" y="214" width="104" height="34" rx="4" fill="#FFFFFF" stroke="#E11D48" stroke-width="1.1"/>
+  <text x="296" y="237" text-anchor="middle" font-size="13" fill="#BE123C" font-family="ui-monospace, monospace">a2</text>
+  <rect x="244" y="256" width="104" height="34" rx="4" fill="#FFFFFF" stroke="#E11D48" stroke-width="1.1"/>
+  <text x="296" y="279" text-anchor="middle" font-size="13" fill="#BE123C" font-family="ui-monospace, monospace">a3</text>
+
+  <rect x="440" y="88" width="120" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="500" y="123" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">caller</text>
+  <rect x="440" y="240" width="120" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="500" y="275" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">callee</text>
+
+  <rect x="624" y="88" width="144" height="208" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="696" y="114" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">CPU registers</text>
+  <rect x="640" y="132" width="112" height="34" rx="4" fill="#FFFFFF" stroke="#059669" stroke-width="1.1"/>
+  <text x="696" y="155" text-anchor="middle" font-size="13" fill="#047857" font-family="ui-monospace, monospace">AX BX CX</text>
+  <rect x="640" y="174" width="112" height="34" rx="4" fill="#FFFFFF" stroke="#059669" stroke-width="1.1"/>
+  <text x="696" y="197" text-anchor="middle" font-size="13" fill="#047857" font-family="ui-monospace, monospace">DI SI R8</text>
+  <rect x="640" y="216" width="112" height="34" rx="4" fill="#FFFFFF" stroke="#059669" stroke-width="1.1"/>
+  <text x="696" y="239" text-anchor="middle" font-size="13" fill="#047857" font-family="ui-monospace, monospace">R9 R10 R11</text>
+  <text x="696" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">9 integer slots</text>
+</svg>
