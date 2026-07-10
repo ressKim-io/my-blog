@@ -1,57 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t1">One-to-one threading model</title>
-  <desc id="d1">Three application threads map one to one onto three kernel tasks. The kernel scheduler assigns them time slices on a limited number of CPU cores. Each thread carries its own bill: a task_struct, a reserved stack and a scheduler slot.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">The 1:1 model — every app thread is one kernel task</title>
+  <desc id="d1">In the one-to-one model each application thread maps to exactly one kernel task, represented by a task_struct. The kernel scheduler hands those tasks time slices on the available cores, so only as many threads truly run at once as there are cores. Each thread carries a bill: kernel memory for the task_struct, a reserved stack, a scheduler slot, and a context switch every time the kernel swaps it.</desc>
   <defs>
     <marker id="m1" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">1:1 model — every app thread is one kernel task, and every task has a bill</text>
+  <line x1="140" y1="106" x2="140" y2="140" stroke="#475569" stroke-width="1.6" marker-end="url(#m1)"/>
+  <line x1="300" y1="106" x2="300" y2="140" stroke="#475569" stroke-width="1.6" marker-end="url(#m1)"/>
+  <line x1="460" y1="106" x2="460" y2="140" stroke="#475569" stroke-width="1.6" marker-end="url(#m1)"/>
+  <line x1="300" y1="202" x2="300" y2="236" stroke="#475569" stroke-width="1.6" marker-end="url(#m1)"/>
+  <line x1="300" y1="298" x2="300" y2="332" stroke="#475569" stroke-width="1.6" marker-end="url(#m1)"/>
 
-  <text x="118" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0E7490">app threads</text>
-  <text x="346" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">kernel tasks (task_struct)</text>
-  <text x="565" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#047857">kernel scheduler</text>
-  <text x="720" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">cores</text>
+  <text x="44" y="72" font-size="13" font-weight="700" fill="#64748B">app threads</text>
+  <rect x="88" y="50" width="104" height="56" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="140" y="85" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">T1</text>
+  <rect x="248" y="50" width="104" height="56" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="300" y="85" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">T2</text>
+  <rect x="408" y="50" width="104" height="56" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="460" y="85" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">T3</text>
 
-  <rect x="48" y="84" width="140" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
-  <text x="118" y="115" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">T1</text>
-  <rect x="48" y="156" width="140" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
-  <text x="118" y="187" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">T2</text>
-  <rect x="48" y="228" width="140" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
-  <text x="118" y="259" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">T3</text>
+  <text x="44" y="176" font-size="13" font-weight="700" fill="#64748B">kernel tasks</text>
+  <rect x="88" y="146" width="104" height="56" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="140" y="180" text-anchor="middle" font-size="13" fill="#6D28D9" font-family="ui-monospace, monospace">task_struct</text>
+  <rect x="248" y="146" width="104" height="56" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="300" y="180" text-anchor="middle" font-size="13" fill="#6D28D9" font-family="ui-monospace, monospace">task_struct</text>
+  <rect x="408" y="146" width="104" height="56" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="460" y="180" text-anchor="middle" font-size="13" fill="#6D28D9" font-family="ui-monospace, monospace">task_struct</text>
 
-  <rect x="256" y="84" width="180" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="346" y="115" text-anchor="middle" font-size="12" fill="#334155">kT1 — task_struct</text>
-  <rect x="256" y="156" width="180" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="346" y="187" text-anchor="middle" font-size="12" fill="#334155">kT2 — task_struct</text>
-  <rect x="256" y="228" width="180" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="346" y="259" text-anchor="middle" font-size="12" fill="#334155">kT3 — task_struct</text>
+  <rect x="88" y="240" width="424" height="58" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.6"/>
+  <text x="300" y="266" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">kernel scheduler</text>
+  <text x="300" y="288" text-anchor="middle" font-size="13" fill="#334155">EEVDF — time slices</text>
 
-  <rect x="500" y="84" width="130" height="196" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
-  <text x="565" y="170" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">EEVDF</text>
-  <text x="565" y="190" text-anchor="middle" font-size="10.5" fill="#047857">time slices</text>
-  <text x="565" y="206" text-anchor="middle" font-size="10.5" fill="#047857">(CFS until 6.6)</text>
+  <rect x="128" y="332" width="152" height="56" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="204" y="367" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">core 0</text>
+  <rect x="320" y="332" width="152" height="56" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="396" y="367" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">core 1</text>
 
-  <rect x="680" y="104" width="80" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="720" y="135" text-anchor="middle" font-size="12" fill="#334155">core 0</text>
-  <rect x="680" y="208" width="80" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="720" y="239" text-anchor="middle" font-size="12" fill="#334155">core 1</text>
-
-  <line x1="188" y1="110" x2="252" y2="110" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-  <line x1="188" y1="182" x2="252" y2="182" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-  <line x1="188" y1="254" x2="252" y2="254" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-  <line x1="436" y1="110" x2="496" y2="120" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-  <line x1="436" y1="182" x2="496" y2="182" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-  <line x1="436" y1="254" x2="496" y2="244" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-  <line x1="630" y1="140" x2="676" y2="130" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-  <line x1="630" y1="224" x2="676" y2="234" stroke="#475569" stroke-width="1.5" marker-end="url(#m1)"/>
-
-  <text x="400" y="316" text-anchor="middle" font-size="10.5" fill="#64748B">only as many threads truly run at once as there are cores — the rest wait for a slice</text>
-
-  <rect x="48" y="340" width="704" height="72" rx="8" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>
-  <text x="400" y="364" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">per-thread bill</text>
-  <text x="400" y="383" text-anchor="middle" font-size="11" fill="#BE123C">task_struct (kernel memory) + reserved stack (hundreds of KB – MB) + scheduler slot</text>
-  <text x="400" y="400" text-anchor="middle" font-size="11" fill="#BE123C">+ a context switch (and its cache pollution) every time the kernel swaps it</text>
+  <rect x="560" y="146" width="208" height="152" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="664" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">per-thread bill</text>
+  <text x="664" y="212" text-anchor="middle" font-size="13" fill="#BE123C" font-family="ui-monospace, monospace">task_struct</text>
+  <text x="664" y="240" text-anchor="middle" font-size="13" fill="#BE123C">reserved stack</text>
+  <text x="664" y="268" text-anchor="middle" font-size="13" fill="#BE123C">context switch</text>
 </svg>

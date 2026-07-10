@@ -1,61 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t6">Java virtual thread mount and unmount</title>
-  <desc id="d6">A virtual thread mounts on a carrier platform thread to run. When it hits blocking I/O, its stack state is saved to the heap as a Continuation object and it unmounts, freeing the carrier immediately for the next virtual thread. When the I/O completes, the virtual thread remounts on any available carrier and resumes.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">Virtual thread lifecycle — mount, unmount to the heap, remount</title>
+  <desc id="d6">A virtual thread must mount onto a carrier thread, an ordinary platform thread from a work-stealing pool sized to the core count, in order to run. When it blocks on I/O it unmounts: its stack state is saved into a Continuation object on the heap and the carrier is freed to pick up the next virtual thread immediately. When the I/O completes the virtual thread remounts on any available carrier. Pinning is when the unmount step fails and the carrier stays held.</desc>
   <defs>
     <marker id="m6" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
     </marker>
-    <marker id="m6v" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
-    </marker>
-    <marker id="m6g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
-    </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="470" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">the carrier never waits — blocking moves to the heap, not to an OS thread</text>
+  <line x1="264" y1="106" x2="304" y2="106" stroke="#475569" stroke-width="1.6" marker-end="url(#m6)"/>
+  <line x1="386" y1="146" x2="386" y2="216" stroke="#475569" stroke-width="1.6" marker-end="url(#m6)"/>
+  <line x1="430" y1="216" x2="430" y2="146" stroke="#475569" stroke-width="1.6" marker-end="url(#m6)"/>
+  <line x1="524" y1="106" x2="564" y2="106" stroke="#475569" stroke-width="1.6" marker-end="url(#m6)"/>
 
-  <!-- virtual thread -->
-  <rect x="60" y="88" width="200" height="64" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
-  <text x="160" y="114" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">virtual thread VT1</text>
-  <text x="160" y="134" text-anchor="middle" font-size="10.5" fill="#334155">hundreds of bytes at birth</text>
+  <rect x="40" y="72" width="224" height="68" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="152" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">virtual thread VT1</text>
+  <text x="152" y="126" text-anchor="middle" font-size="13" fill="#0E7490">hundreds of bytes</text>
 
-  <!-- carrier -->
-  <rect x="300" y="180" width="220" height="84" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.7"/>
-  <text x="410" y="210" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">carrier thread</text>
-  <text x="410" y="230" text-anchor="middle" font-size="10.5" fill="#64748B">platform thread — ForkJoinPool</text>
-  <text x="410" y="246" text-anchor="middle" font-size="10.5" fill="#64748B">parallelism ≈ core count</text>
+  <text x="284" y="94" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">1</text>
+  <text x="284" y="130" text-anchor="middle" font-size="13" fill="#64748B">mount</text>
 
-  <!-- heap -->
-  <rect x="570" y="88" width="190" height="72" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
-  <text x="665" y="116" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6D28D9">heap — Continuation</text>
-  <text x="665" y="136" text-anchor="middle" font-size="10.5" fill="#6D28D9">saved stack state of VT1</text>
+  <rect x="304" y="72" width="220" height="68" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="414" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">carrier thread</text>
+  <text x="414" y="126" text-anchor="middle" font-size="13" fill="#6D28D9">≈ core count</text>
 
-  <!-- next VT -->
-  <rect x="60" y="300" width="200" height="64" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
-  <text x="160" y="326" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">next virtual thread</text>
-  <text x="160" y="346" text-anchor="middle" font-size="10.5" fill="#334155">millions can be waiting</text>
+  <text x="352" y="186" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">2</text>
+  <text x="352" y="206" text-anchor="middle" font-size="13" fill="#64748B">unmount</text>
+  <text x="466" y="186" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">3</text>
+  <text x="466" y="206" text-anchor="middle" font-size="13" fill="#64748B">remount</text>
 
-  <!-- arrows -->
-  <line x1="260" y1="130" x2="330" y2="180" stroke="#475569" stroke-width="1.7" marker-end="url(#m6)"/>
-  <text x="240" y="166" font-size="11" font-weight="700" fill="#334155">1 mount</text>
+  <rect x="304" y="220" width="220" height="68" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="414" y="250" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">heap — Continuation</text>
+  <text x="414" y="274" text-anchor="middle" font-size="13" fill="#047857">saved stack state</text>
 
-  <line x1="520" y1="196" x2="588" y2="152" stroke="#7C3AED" stroke-width="1.7" marker-end="url(#m6v)"/>
-  <text x="548" y="182" font-size="11" font-weight="700" fill="#6D28D9">2 unmount</text>
-  <text x="562" y="198" font-size="10" fill="#6D28D9">blocking I/O →</text>
-  <text x="562" y="212" font-size="10" fill="#6D28D9">state saved, carrier freed</text>
+  <rect x="564" y="72" width="196" height="68" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="662" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">next VT</text>
+  <text x="662" y="126" text-anchor="middle" font-size="13" fill="#0E7490">carrier never waits</text>
 
-  <path d="M665,164 C660,300 560,330 524,262" fill="none" stroke="#059669" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#m6g)"/>
-  <text x="648" y="300" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">3 remount</text>
-  <text x="648" y="316" text-anchor="middle" font-size="10" fill="#047857">I/O done → resumes on</text>
-  <text x="648" y="330" text-anchor="middle" font-size="10" fill="#047857">any available carrier</text>
-
-  <line x1="260" y1="330" x2="330" y2="266" stroke="#475569" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#m6)"/>
-  <text x="236" y="290" font-size="10.5" fill="#64748B">carrier immediately</text>
-  <text x="236" y="304" font-size="10.5" fill="#64748B">picks the next VT</text>
-
-  <rect x="60" y="400" width="700" height="48" rx="7" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>
-  <text x="410" y="420" text-anchor="middle" font-size="11" font-weight="700" fill="#BE123C">pinning = step 2 fails and the carrier stays held</text>
-  <text x="410" y="438" text-anchor="middle" font-size="11" fill="#BE123C">synchronized used to cause this — fixed by JEP 491 (JDK 24) · JNI and class-init blocking still pin</text>
+  <rect x="160" y="320" width="480" height="56" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="400" y="344" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">pinning</text>
+  <text x="400" y="366" text-anchor="middle" font-size="13" fill="#BE123C">step 2 fails — the carrier stays held</text>
 </svg>

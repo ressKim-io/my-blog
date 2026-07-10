@@ -1,62 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t5">Go syscall handoff</title>
-  <desc id="d5">Before: goroutine G1 enters a blocking syscall and drags its OS thread M0 into the kernel, while the P still holds queued goroutines G2 and G3. After: the P detaches from the blocked M0 and moves to another thread M1, so G2 and G3 keep running. M0 stays blocked in the kernel with only G1. When the syscall returns, G1 must reacquire a P.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">Syscall handoff — the P detaches from a blocked M and keeps scheduling elsewhere</title>
+  <desc id="d5">When goroutine G1 enters a blocking system call, the OS thread M0 running it is stuck inside the kernel. Rather than stalling the whole scheduler, the runtime hands the logical processor P over to another OS thread M1, which immediately resumes scheduling the waiting goroutines G2 and G3. M0 stays blocked with G1 and wakes when the syscall returns, at which point G1 must reacquire a P to continue.</desc>
   <defs>
     <marker id="m5" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
     </marker>
-    <marker id="m5a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#D97706"/>
+    <marker id="m5g" markerWidth="12" markerHeight="12" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#059669"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="460" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">one blocked goroutine costs one M — never the whole scheduler</text>
+  <line x1="180" y1="144" x2="180" y2="172" stroke="#475569" stroke-width="1.6" marker-end="url(#m5)"/>
+  <line x1="180" y1="228" x2="180" y2="256" stroke="#475569" stroke-width="1.6" marker-end="url(#m5)"/>
+  <line x1="580" y1="144" x2="580" y2="172" stroke="#475569" stroke-width="1.6" marker-end="url(#m5)"/>
+  <line x1="332" y1="180" x2="428" y2="180" stroke="#059669" stroke-width="2.2" marker-end="url(#m5g)"/>
+  <text x="380" y="168" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">handoff</text>
 
-  <text x="208" y="56" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">before — G1 enters a blocking syscall</text>
-  <text x="592" y="56" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">after — handoff</text>
-  <line x1="400" y1="64" x2="400" y2="380" stroke="#E4E4E7" stroke-width="1"/>
+  <text x="180" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">before</text>
+  <text x="580" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">after</text>
 
-  <!-- before -->
-  <rect x="88" y="76" width="240" height="56" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
-  <text x="208" y="99" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">P — runq: [G2] [G3]</text>
-  <text x="208" y="118" text-anchor="middle" font-size="10.5" fill="#047857">attached to M0</text>
+  <rect x="40" y="72" width="280" height="72" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="180" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">P</text>
+  <text x="180" y="126" text-anchor="middle" font-size="13" fill="#0E7490" font-family="ui-monospace, monospace">runq: [G2] [G3]</text>
 
-  <line x1="208" y1="132" x2="208" y2="164" stroke="#475569" stroke-width="1.5" marker-end="url(#m5)"/>
+  <rect x="40" y="176" width="280" height="52" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="180" y="208" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">M0 — running G1</text>
 
-  <rect x="108" y="168" width="200" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="208" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">M0 — running G1</text>
-  <text x="208" y="208" text-anchor="middle" font-size="10.5" fill="#64748B">entersyscall</text>
+  <rect x="40" y="260" width="280" height="72" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="180" y="290" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C" font-family="ui-monospace, monospace">sys_read</text>
+  <text x="180" y="314" text-anchor="middle" font-size="13" fill="#BE123C">blocked in the kernel</text>
 
-  <!-- privilege boundary -->
-  <line x1="48" y1="252" x2="752" y2="252" stroke="#D4D4D8" stroke-width="1.4" stroke-dasharray="7 5"/>
-  <text x="52" y="244" font-size="10.5" fill="#64748B">user</text>
-  <text x="52" y="268" font-size="10.5" fill="#64748B">kernel</text>
+  <rect x="440" y="72" width="280" height="72" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="580" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">P — keeps scheduling</text>
+  <text x="580" y="126" text-anchor="middle" font-size="13" fill="#047857" font-family="ui-monospace, monospace">runq: [G2] [G3]</text>
 
-  <line x1="208" y1="220" x2="208" y2="280" stroke="#475569" stroke-width="1.5" marker-end="url(#m5)"/>
-  <rect x="108" y="284" width="200" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="208" y="306" text-anchor="middle" font-size="12" fill="#334155">sys_read … blocked</text>
-  <text x="208" y="324" text-anchor="middle" font-size="10.5" fill="#64748B">M0 is stuck here with G1</text>
+  <rect x="440" y="176" width="280" height="52" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="580" y="208" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">M1 — picks up the P</text>
 
-  <!-- after -->
-  <rect x="472" y="76" width="240" height="56" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.7"/>
-  <text x="592" y="99" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">P — runq: [G2] [G3]</text>
-  <text x="592" y="118" text-anchor="middle" font-size="10.5" fill="#047857">keeps scheduling, untouched</text>
-
-  <path d="M330,104 C380,88 420,88 468,104" fill="none" stroke="#D97706" stroke-width="1.8" marker-end="url(#m5a)"/>
-  <text x="400" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="#B45309">handoff — P moves to M1</text>
-
-  <line x1="592" y1="132" x2="592" y2="164" stroke="#475569" stroke-width="1.5" marker-end="url(#m5)"/>
-
-  <rect x="492" y="168" width="200" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="592" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">M1 — picks up the P</text>
-  <text x="592" y="208" text-anchor="middle" font-size="10.5" fill="#64748B">idle or newly created thread</text>
-
-  <rect x="492" y="284" width="200" height="52" rx="8" fill="#FFFFFF" stroke="#475569" stroke-width="1.4" stroke-dasharray="6 4"/>
-  <text x="592" y="306" text-anchor="middle" font-size="12" fill="#334155">M0 + G1 — still blocked</text>
-  <text x="592" y="324" text-anchor="middle" font-size="10.5" fill="#64748B">wakes on syscall return</text>
-
-  <rect x="48" y="396" width="704" height="44" rx="7" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
-  <text x="400" y="414" text-anchor="middle" font-size="11" fill="#334155">on return, exitsyscall runs: G1 must reacquire a P to continue</text>
-  <text x="400" y="431" text-anchor="middle" font-size="11" fill="#334155">(no free P → G1 goes to the global queue and M0 parks)</text>
+  <rect x="440" y="260" width="280" height="72" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="580" y="290" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">M0 + G1 — still blocked</text>
+  <text x="580" y="314" text-anchor="middle" font-size="13" fill="#BE123C">wakes on syscall return</text>
 </svg>
