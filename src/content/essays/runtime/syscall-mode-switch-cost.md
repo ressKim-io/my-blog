@@ -12,7 +12,7 @@ tags:
 series:
   name: "kernel-runtime-tradeoffs"
   order: 1
-date: "2026-07-10"
+date: "2026-06-26"
 ---
 
 > **시리즈 "커널과 런타임으로 톺아보는 Rust · Go · Java"의 1편**

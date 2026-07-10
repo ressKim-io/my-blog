@@ -28,7 +28,7 @@
 | 시리즈 슬러그 | `kernel-runtime-tradeoffs` |
 | 시리즈 표시명 | **커널과 런타임으로 톺아보는 Rust · Go · Java** |
 | series.order | 1부터 연속 (1.1=1 … 3.5=12, 4부 이후 13번부터 이어붙임) |
-| date | 각 편 발행(변환 완료) 당일 |
+| date | **2026-06-26 기준 편당 하루씩 순차** (2026-07-10 사용자 확정). `date = 06-25 + order` — 1편 06-26, 4편 06-29, 5편 06-30 … 12편 07-07. 실제 변환 작업일과 무관하게 order로 계산 |
 | 제목 스타일 | rust-cs-layer 관례를 따름 — 질문형 후킹 + 부제 (예: "왜 X일까 — Y") |
 
 카테고리 표시명을 바꾸고 싶으면 4개 파일의 `categoryLabelMap`만 수정:
@@ -114,7 +114,7 @@ tags: ["rust", "go", "java", "(주제 태그 2~3개)"]
 series:
   name: "kernel-runtime-tradeoffs"
   order: N
-date: "발행일"
+date: "2026-06-25 + order 일"   # order=5 → "2026-06-30", order=12 → "2026-07-07"
 ---
 ```
 - tags[0]부터 언어 태그를 넣되 그 편의 주인공 언어를 앞에 (2.1이면 rust 먼저, 2.3이면 java 먼저)
@@ -146,10 +146,10 @@ date: "발행일"
 
 | # | draft | slug (제안) | order | 상태 |
 |---|-------|-------------|-------|------|
-| 1.1 | `1부_1.1_유저모드_커널모드_syscall비용.md` | `syscall-mode-switch-cost` | 1 | ✅ 발행 (2026-07-10, 파일럿 — 피드백 2라운드 반영, SVG 7개) |
-| 1.2 | `1부_1.2_스레드모델_1대1_vs_유저레벨스케줄링.md` | `thread-models-kernel-vs-user` | 2 | ✅ 발행 (2026-07-10, 새 문체 첫 적용·SVG 6개·tokio cgroup 사실 교정) |
-| 1.3 | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 3 | ✅ 발행 (2026-07-10, SVG 5개·Go 1.26 기준 교정·리뷰어 P0 0건 — 1부 완결) |
-| 2.1 | `2부_2.1_Rust_AOT_컴파일러엄격함과_하드웨어직거래.md` | `rust-aot-zero-cost-codegen` | 4 | ✅ 발행 (2026-07-10, SVG 7개 — 2부 시작, Opus 4.8 첫 변환·리뷰어 P0 0건) |
+| 1.1 | `1부_1.1_유저모드_커널모드_syscall비용.md` | `syscall-mode-switch-cost` | 1 | ✅ 발행 (2026-06-26, 파일럿 — 피드백 2라운드 반영, SVG 7개) |
+| 1.2 | `1부_1.2_스레드모델_1대1_vs_유저레벨스케줄링.md` | `thread-models-kernel-vs-user` | 2 | ✅ 발행 (2026-06-27, 새 문체 첫 적용·SVG 6개·tokio cgroup 사실 교정) |
+| 1.3 | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 3 | ✅ 발행 (2026-06-28, SVG 5개·Go 1.26 기준 교정·리뷰어 P0 0건 — 1부 완결) |
+| 2.1 | `2부_2.1_Rust_AOT_컴파일러엄격함과_하드웨어직거래.md` | `rust-aot-zero-cost-codegen` | 4 | ✅ 발행 (2026-06-29, SVG 8개 — 2부 시작, Opus 4.8 첫 변환·리뷰어 P0 0건) |
 | 2.2 | `2부_2.2_Go_AOT_빠른빌드의대가와_정적기계어의한계.md` | `go-aot-fast-build-tradeoff` | 5 | ☐ |
 | 2.3 | `2부_2.3_Java_JIT_웜업의반전과_C2런타임최적화.md` | `java-jit-c2-runtime-optimization` | 6 | ☐ |
 | 2.4 | `2부_2.4_소결_롱런서버에서_Java가_CPU효율을_역전하는_조건.md` | `java-jit-inversion-conditions` | 7 | ☐ |
