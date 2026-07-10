@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t2">What a crate ships inside its rlib</title>
-  <desc id="d2">Compiling crate A produces libA.rlib, which holds two kinds of items. Ordinary non-generic functions are already compiled to object code and are opaque to downstream crates, so calls to them remain a CALL instruction at the crate boundary. Generic functions and functions marked inline are serialized as MIR, so crate B reads that MIR and monomorphizes and inlines them on its own side.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">Monomorphization multiplies one generic into many instances</title>
+  <desc id="d2">One generic function is cloned into a separate compiled function for every concrete type it is used with. Each clone becomes dedicated machine code with the abstraction erased, which is what zero-cost means physically. The bill arrives in two forms: the .text section grows and pressures the instruction cache and instruction TLB, and the LLVM IR volume grows as instances times function size, which blows up compile time.</desc>
   <defs>
     <marker id="m2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
@@ -8,49 +8,63 @@
     <marker id="m2r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#BE123C"/>
     </marker>
-    <marker id="m2g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#047857"/>
-    </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="460" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">crossing the crate boundary is not a metaphor — it is MIR serialized into the rlib</text>
+  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">one generic in, one function per concrete type out — and a bill in two currencies</text>
 
-  <rect x="40" y="48" width="336" height="272" rx="10" fill="none" stroke="#475569" stroke-width="1.5"/>
-  <text x="56" y="70" font-size="11.5" font-weight="700" fill="#334155">libA.rlib (crate A, compiled)</text>
+  <rect x="40" y="88" width="184" height="76" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="132" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#0E7490">source — one generic</text>
+  <text x="132" y="136" text-anchor="middle" font-size="10.5" fill="#0E7490" font-family="ui-monospace, monospace">fn max&lt;T: Ord&gt;(</text>
+  <text x="132" y="152" text-anchor="middle" font-size="10.5" fill="#0E7490" font-family="ui-monospace, monospace">a: T, b: T) -&gt; T</text>
 
-  <rect x="56" y="88" width="304" height="96" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
-  <text x="208" y="110" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">(1) already compiled — object code</text>
-  <text x="208" y="132" text-anchor="middle" font-size="10.5" fill="#BE123C">plain non-generic, non-#[inline] functions</text>
-  <text x="208" y="152" text-anchor="middle" font-size="10.5" fill="#BE123C">downstream crates cannot see inside</text>
-  <text x="208" y="170" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">opaque</text>
+  <line x1="224" y1="126" x2="286" y2="76" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
+  <line x1="224" y1="126" x2="286" y2="126" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
+  <line x1="224" y1="126" x2="286" y2="176" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
+  <text x="255" y="200" text-anchor="middle" font-size="10" fill="#64748B">monomorphization</text>
 
-  <rect x="56" y="200" width="304" height="104" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
-  <text x="208" y="222" text-anchor="middle" font-size="11.5" font-weight="700" fill="#047857">(2) serialized as MIR</text>
-  <text x="208" y="244" text-anchor="middle" font-size="10.5" fill="#047857">generic functions</text>
-  <text x="208" y="262" text-anchor="middle" font-size="10.5" fill="#047857">#[inline] functions</text>
-  <text x="208" y="280" text-anchor="middle" font-size="10.5" fill="#047857">(+ small-function heuristic)</text>
-  <text x="208" y="298" text-anchor="middle" font-size="10" fill="#64748B">the body travels, not just the symbol</text>
+  <rect x="290" y="52" width="172" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
+  <text x="376" y="72" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;i32&gt;</text>
+  <text x="376" y="89" text-anchor="middle" font-size="10" fill="#6D28D9">its own compiled body</text>
 
-  <line x1="360" y1="136" x2="428" y2="136" stroke="#E11D48" stroke-width="1.6" marker-end="url(#m2r)"/>
-  <line x1="360" y1="250" x2="428" y2="250" stroke="#059669" stroke-width="1.6" marker-end="url(#m2g)"/>
+  <rect x="290" y="104" width="172" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
+  <text x="376" y="124" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;u64&gt;</text>
+  <text x="376" y="141" text-anchor="middle" font-size="10" fill="#6D28D9">its own compiled body</text>
 
-  <rect x="432" y="48" width="328" height="272" rx="10" fill="none" stroke="#475569" stroke-width="1.5"/>
-  <text x="448" y="70" font-size="11.5" font-weight="700" fill="#334155">crate B (compiling now)</text>
+  <rect x="290" y="156" width="172" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4"/>
+  <text x="376" y="176" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9" font-family="ui-monospace, monospace">max::&lt;String&gt;</text>
+  <text x="376" y="193" text-anchor="middle" font-size="10" fill="#6D28D9">calls &lt;str as Ord&gt;::cmp</text>
 
-  <rect x="448" y="88" width="296" height="96" rx="8" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1.2"/>
-  <text x="596" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#BE123C">stays a CALL at the boundary</text>
-  <text x="596" y="134" text-anchor="middle" font-size="10.5" fill="#BE123C">no inlining — the body is invisible</text>
-  <text x="596" y="154" text-anchor="middle" font-size="10.5" fill="#BE123C">no downstream optimization</text>
-  <text x="596" y="172" text-anchor="middle" font-size="10" fill="#64748B">(default build, LTO off)</text>
+  <text x="376" y="222" text-anchor="middle" font-size="10.5" fill="#64748B">… one per concrete type actually used</text>
 
-  <rect x="448" y="200" width="296" height="104" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.2"/>
-  <text x="596" y="224" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">crate B re-compiles the MIR</text>
-  <text x="596" y="246" text-anchor="middle" font-size="10.5" fill="#047857">monomorphize → inline → codegen</text>
-  <text x="596" y="266" text-anchor="middle" font-size="10.5" fill="#047857">on its own side of the boundary</text>
-  <text x="596" y="290" text-anchor="middle" font-size="10" fill="#64748B">#[inline] = a physical permission switch</text>
+  <line x1="462" y1="76" x2="524" y2="100" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
+  <line x1="462" y1="128" x2="524" y2="128" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
+  <line x1="462" y1="180" x2="524" y2="156" stroke="#475569" stroke-width="1.5" marker-end="url(#m2)"/>
 
-  <rect x="40" y="344" width="720" height="48" rx="8" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.2"/>
-  <text x="400" y="366" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">to tear the boundary down more broadly: LTO</text>
-  <text x="400" y="383" text-anchor="middle" font-size="10.5" fill="#6D28D9">link-time optimization re-opens the IR of every crate at link time</text>
+  <rect x="528" y="88" width="232" height="80" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="644" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">dedicated machine code</text>
+  <text x="644" y="134" text-anchor="middle" font-size="10.5" fill="#047857">generic · trait · if/else all gone</text>
+  <text x="644" y="154" text-anchor="middle" font-size="10.5" font-weight="700" fill="#047857">cmov / csel — one branchless line</text>
+
+  <text x="644" y="192" text-anchor="middle" font-size="10.5" fill="#047857">this is what "zero-cost" means physically</text>
+
+  <line x1="400" y1="240" x2="220" y2="280" stroke="#E11D48" stroke-width="1.6" marker-end="url(#m2r)"/>
+  <line x1="400" y1="240" x2="580" y2="280" stroke="#E11D48" stroke-width="1.6" marker-end="url(#m2r)"/>
+  <text x="400" y="238" text-anchor="middle" font-size="11" font-weight="700" fill="#BE123C">the bill — both of them quantitative</text>
+
+  <rect x="48" y="288" width="320" height="128" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="208" y="312" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">1. code bloat — runtime cost</text>
+  <text x="208" y="336" text-anchor="middle" font-size="10.5" fill="#BE123C">same logic, once per type → .text grows</text>
+  <text x="208" y="356" text-anchor="middle" font-size="10.5" fill="#BE123C">→ i-cache and iTLB pressure</text>
+  <text x="208" y="376" text-anchor="middle" font-size="10.5" fill="#BE123C">→ misses, and misses are latency</text>
+  <text x="208" y="402" text-anchor="middle" font-size="10" fill="#64748B">the paradox: zero-cost returns as a cache miss</text>
+
+  <rect x="432" y="288" width="320" height="128" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="592" y="312" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">2. compile time — build cost</text>
+  <text x="592" y="336" text-anchor="middle" font-size="10.5" fill="#BE123C">LLVM IR volume ≈ instances × body size</text>
+  <text x="592" y="356" text-anchor="middle" font-size="10.5" fill="#BE123C">deeply generic crates multiply hardest</text>
+  <text x="592" y="376" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">serde · diesel — this is why they crawl</text>
+  <text x="592" y="402" text-anchor="middle" font-size="10" fill="#64748B">"rustc is slow" = "the IR handed to LLVM was huge"</text>
+
+  <text x="400" y="444" text-anchor="middle" font-size="10.5" fill="#64748B">the abstraction is free at run time; you paid for it in binary size and in build time</text>
 </svg>

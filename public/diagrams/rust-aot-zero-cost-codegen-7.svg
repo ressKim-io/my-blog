@@ -1,58 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t7">When profile feedback is applied — once at build, or continuously at run time</title>
-  <desc id="d7">Both AOT and JIT consume execution profiles, so profile-guided optimization is not exclusive to JIT. The difference is timing. An AOT build applies the profile once, at build time, after which the machine code is frozen no matter how traffic shifts. A JIT collects a profile throughout execution and rewrites machine code repeatedly, adapting to what the program actually does.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">Vector-length-agnostic SVE code adapts to the hardware width</title>
+  <desc id="d6">On x86 the vector width is baked into the machine code, so an AVX2 binary and an AVX-512 binary are different code and one AOT build cannot use both. ARM SVE is vector-length agnostic: the width stays a symbol resolved by the hardware, so one binary runs at full width on Graviton3 with two 256-bit pipes and on Graviton4 with four 128-bit pipes, without a rebuild.</desc>
   <defs>
-    <marker id="m7" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="m6" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
     </marker>
-    <marker id="m7v" markerWidth="9" markerHeight="9" refX="6" refY="2.6" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L6,2.6 L0,5.2 Z" fill="#6D28D9"/>
-    </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">PGO is not a JIT privilege — the difference is when the profile lands</text>
+  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">the width is baked in (x86) or left as a symbol (ARM SVE)</text>
 
-  <text x="60" y="66" font-size="12" font-weight="700" fill="#0E7490">AOT (Rust · Go · native-image)</text>
+  <rect x="40" y="44" width="320" height="152" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="200" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">x86 — fixed width, baked into .text</text>
+  <rect x="60" y="80" width="130" height="44" rx="6" fill="#FFFFFF" stroke="#FECDD3" stroke-width="1.2"/>
+  <text x="125" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">AVX2 binary</text>
+  <text x="125" y="115" text-anchor="middle" font-size="10" fill="#BE123C">256-bit ops</text>
+  <rect x="210" y="80" width="130" height="44" rx="6" fill="#FFFFFF" stroke="#FECDD3" stroke-width="1.2"/>
+  <text x="275" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">AVX-512 binary</text>
+  <text x="275" y="115" text-anchor="middle" font-size="10" fill="#BE123C">512-bit ops</text>
+  <text x="200" y="146" text-anchor="middle" font-size="10.5" fill="#BE123C">different machine code — pick one at build time</text>
+  <text x="200" y="166" text-anchor="middle" font-size="10.5" fill="#BE123C">to use both: ship both + runtime dispatch</text>
+  <text x="200" y="184" text-anchor="middle" font-size="10" fill="#64748B">#[target_feature] + is_x86_feature_detected!</text>
 
-  <rect x="60" y="82" width="132" height="46" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
-  <text x="126" y="103" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0E7490">build + PGO</text>
-  <text x="126" y="119" text-anchor="middle" font-size="10" fill="#0E7490">profile applied once</text>
+  <rect x="440" y="44" width="320" height="152" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="600" y="66" text-anchor="middle" font-size="11.5" font-weight="700" fill="#047857">ARM SVE — vector length agnostic</text>
+  <rect x="500" y="84" width="200" height="56" rx="7" fill="#FFFFFF" stroke="#059669" stroke-width="1.4"/>
+  <text x="600" y="106" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">one VLA binary</text>
+  <text x="600" y="126" text-anchor="middle" font-size="10.5" fill="#047857">width stays a symbol: vscale</text>
+  <text x="600" y="162" text-anchor="middle" font-size="10.5" fill="#047857">the hardware resolves the width at run time</text>
+  <text x="600" y="182" text-anchor="middle" font-size="10.5" font-weight="700" fill="#047857">no rebuild, no dispatch table</text>
 
-  <line x1="192" y1="105" x2="240" y2="105" stroke="#475569" stroke-width="1.5" marker-end="url(#m7)"/>
+  <line x1="540" y1="196" x2="480" y2="240" stroke="#475569" stroke-width="1.5" marker-end="url(#m6)"/>
+  <line x1="660" y1="196" x2="720" y2="240" stroke="#475569" stroke-width="1.5" marker-end="url(#m6)"/>
 
-  <rect x="244" y="82" width="496" height="46" rx="7" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
-  <text x="492" y="103" text-anchor="middle" font-size="11" font-weight="700" fill="#334155">machine code frozen — .text never changes again</text>
-  <text x="492" y="119" text-anchor="middle" font-size="10" fill="#64748B">traffic shifts, hot branches move, the code does not</text>
+  <rect x="392" y="248" width="176" height="126" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="480" y="270" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0E7490">Graviton3</text>
+  <text x="480" y="287" text-anchor="middle" font-size="10" fill="#0E7490">Neoverse V1 · SVE</text>
+  <rect x="410" y="298" width="66" height="20" rx="4" fill="#FFFFFF" stroke="#0891B2" stroke-width="1.1"/>
+  <text x="443" y="312" text-anchor="middle" font-size="9.5" fill="#0E7490">256-bit</text>
+  <rect x="484" y="298" width="66" height="20" rx="4" fill="#FFFFFF" stroke="#0891B2" stroke-width="1.1"/>
+  <text x="517" y="312" text-anchor="middle" font-size="9.5" fill="#0E7490">256-bit</text>
+  <text x="480" y="338" text-anchor="middle" font-size="10.5" fill="#0E7490">2 wide pipes</text>
+  <text x="480" y="358" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0E7490">512 bit / cycle</text>
 
-  <text x="60" y="164" font-size="10.5" fill="#0E7490">a snapshot taken once, at build time</text>
-  <text x="740" y="164" text-anchor="end" font-size="10.5" font-weight="700" fill="#0E7490">p99 stays glued to p50</text>
+  <rect x="600" y="248" width="176" height="126" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+  <text x="688" y="270" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B45309">Graviton4</text>
+  <text x="688" y="287" text-anchor="middle" font-size="10" fill="#B45309">Neoverse V2 · SVE2</text>
+  <rect x="614" y="298" width="36" height="20" rx="4" fill="#FFFFFF" stroke="#D97706" stroke-width="1.1"/>
+  <text x="632" y="312" text-anchor="middle" font-size="9" fill="#B45309">128b</text>
+  <rect x="654" y="298" width="36" height="20" rx="4" fill="#FFFFFF" stroke="#D97706" stroke-width="1.1"/>
+  <text x="672" y="312" text-anchor="middle" font-size="9" fill="#B45309">128b</text>
+  <rect x="694" y="298" width="36" height="20" rx="4" fill="#FFFFFF" stroke="#D97706" stroke-width="1.1"/>
+  <text x="712" y="312" text-anchor="middle" font-size="9" fill="#B45309">128b</text>
+  <rect x="734" y="298" width="30" height="20" rx="4" fill="#FFFFFF" stroke="#D97706" stroke-width="1.1"/>
+  <text x="749" y="312" text-anchor="middle" font-size="9" fill="#B45309">128b</text>
+  <text x="688" y="338" text-anchor="middle" font-size="10.5" fill="#B45309">4 narrow pipes</text>
+  <text x="688" y="358" text-anchor="middle" font-size="10.5" font-weight="700" fill="#B45309">512 bit / cycle</text>
 
-  <line x1="60" y1="186" x2="740" y2="186" stroke="#E4E4E7" stroke-width="1.2"/>
+  <rect x="40" y="248" width="320" height="126" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.3"/>
+  <text x="200" y="272" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">why this matters for AOT</text>
+  <text x="200" y="296" text-anchor="middle" font-size="10.5" fill="#334155">AOT's worst weakness is having to pick</text>
+  <text x="200" y="314" text-anchor="middle" font-size="10.5" fill="#334155">the target before you know the machine</text>
+  <text x="200" y="340" text-anchor="middle" font-size="10.5" fill="#334155">VLA softens that at the architecture level —</text>
+  <text x="200" y="358" text-anchor="middle" font-size="10.5" fill="#334155">the code never commits to a width</text>
 
-  <text x="60" y="216" font-size="12" font-weight="700" fill="#6D28D9">JIT (JVM)</text>
-
-  <rect x="60" y="232" width="132" height="46" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
-  <text x="126" y="253" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9">interpret</text>
-  <text x="126" y="269" text-anchor="middle" font-size="10" fill="#6D28D9">start collecting profile</text>
-
-  <line x1="192" y1="255" x2="240" y2="255" stroke="#475569" stroke-width="1.5" marker-end="url(#m7)"/>
-
-  <rect x="244" y="232" width="496" height="46" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
-  <text x="492" y="253" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">machine code rewritten again and again</text>
-  <text x="492" y="269" text-anchor="middle" font-size="10" fill="#6D28D9">it learns which branch is hot and which call site is really one type</text>
-
-  <line x1="300" y1="290" x2="300" y2="278" stroke="#7C3AED" stroke-width="1.3" marker-end="url(#m7v)"/>
-  <line x1="380" y1="290" x2="380" y2="278" stroke="#7C3AED" stroke-width="1.3" marker-end="url(#m7v)"/>
-  <line x1="460" y1="290" x2="460" y2="278" stroke="#7C3AED" stroke-width="1.3" marker-end="url(#m7v)"/>
-  <line x1="540" y1="290" x2="540" y2="278" stroke="#7C3AED" stroke-width="1.3" marker-end="url(#m7v)"/>
-  <line x1="620" y1="290" x2="620" y2="278" stroke="#7C3AED" stroke-width="1.3" marker-end="url(#m7v)"/>
-  <line x1="700" y1="290" x2="700" y2="278" stroke="#7C3AED" stroke-width="1.3" marker-end="url(#m7v)"/>
-  <text x="492" y="308" text-anchor="middle" font-size="10" fill="#6D28D9">profile fed back continuously, for as long as the process lives</text>
-
-  <text x="60" y="336" font-size="10.5" fill="#6D28D9">adaptation, not a snapshot</text>
-  <text x="740" y="336" text-anchor="end" font-size="10.5" font-weight="700" fill="#6D28D9">warm-up + deopt spikes in the tail</text>
-
-  <rect x="60" y="352" width="680" height="34" rx="7" fill="#FFFBEB" stroke="#D97706" stroke-width="1.2"/>
-  <text x="400" y="374" text-anchor="middle" font-size="11" font-weight="700" fill="#B45309">AOT's weakness is that it cannot re-optimize itself — not that it cannot see a profile</text>
+  <text x="400" y="404" text-anchor="middle" font-size="10.5" fill="#64748B">the cost: benchmarks must now separate "better code" from "different pipe geometry"</text>
 </svg>

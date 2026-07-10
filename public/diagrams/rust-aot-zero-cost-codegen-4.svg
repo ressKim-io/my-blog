@@ -1,53 +1,67 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t4">Codegen units trade build speed for optimization horizon</title>
-  <desc id="d4">rustc splits a crate's monomorphized items into N codegen units and runs LLVM on them in parallel. Many units means a fast parallel build but inlining cannot cross a unit boundary. Setting codegen-units to one puts the whole crate under a single optimization horizon at the cost of all parallelism. Release defaults to 16, debug to 256.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Fat pointer and vtable layout for dyn Trait</title>
+  <desc id="d3">A reference to dyn Draw is a two-word fat pointer holding a data pointer and a vtable pointer. The vtable is emitted statically into .rodata, one per concrete type, with three fixed leading slots (drop_in_place, size, align) followed by one function pointer per trait method. Calling a method loads the slot and jumps indirectly, costing a possible branch-target misprediction and blocking inlining entirely.</desc>
   <defs>
-    <marker id="m4" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+    <marker id="m3" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+    <marker id="m3r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#BE123C"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">how wide can LLVM see? — the optimization horizon inside one crate</text>
+  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">&amp;dyn Draw — Rust does not hide what dynamic dispatch costs</text>
 
-  <line x1="400" y1="44" x2="400" y2="308" stroke="#D4D4D8" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text x="150" y="60" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">fat pointer (2 words)</text>
+  <rect x="48" y="72" width="102" height="52" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="99" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="#0E7490">data_ptr</text>
+  <text x="99" y="112" text-anchor="middle" font-size="10" fill="#0E7490">→ the value</text>
+  <rect x="150" y="72" width="102" height="52" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="201" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">vtable_ptr</text>
+  <text x="201" y="112" text-anchor="middle" font-size="10" fill="#6D28D9">→ the table</text>
 
-  <text x="200" y="62" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">many CGUs — the default</text>
-  <text x="200" y="80" text-anchor="middle" font-size="10.5" fill="#64748B">release = 16 · debug = 256</text>
+  <text x="150" y="152" text-anchor="middle" font-size="10.5" fill="#64748B">twice the width of a thin reference</text>
 
-  <rect x="48" y="96" width="70" height="88" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.4"/>
-  <text x="83" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">CGU</text>
-  <rect x="126" y="96" width="70" height="88" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.4"/>
-  <text x="161" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">CGU</text>
-  <rect x="204" y="96" width="70" height="88" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.4"/>
-  <text x="239" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">CGU</text>
-  <rect x="282" y="96" width="70" height="88" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.4"/>
-  <text x="317" y="146" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">CGU</text>
+  <line x1="201" y1="124" x2="201" y2="176" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#m3)"/>
 
-  <text x="200" y="204" text-anchor="middle" font-size="10.5" fill="#047857">one LLVM instance each, all in parallel</text>
+  <rect x="48" y="180" width="304" height="212" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.7"/>
+  <text x="200" y="202" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6D28D9">vtable — one per concrete type, in .rodata</text>
+  <text x="200" y="219" text-anchor="middle" font-size="10" fill="#64748B">emitted statically at compile time</text>
 
-  <line x1="118" y1="140" x2="124" y2="140" stroke="#E11D48" stroke-width="1.6"/>
-  <line x1="196" y1="140" x2="202" y2="140" stroke="#E11D48" stroke-width="1.6"/>
-  <line x1="274" y1="140" x2="280" y2="140" stroke="#E11D48" stroke-width="1.6"/>
-  <text x="200" y="230" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">inlining cannot cross a CGU boundary</text>
-  <text x="200" y="248" text-anchor="middle" font-size="10.5" fill="#BE123C">optimization opportunities are lost there</text>
+  <rect x="64" y="230" width="272" height="26" rx="5" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.1"/>
+  <text x="76" y="248" font-size="10.5" fill="#6D28D9">[0]  drop_in_place — destructor fn ptr</text>
+  <rect x="64" y="260" width="272" height="26" rx="5" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.1"/>
+  <text x="76" y="278" font-size="10.5" fill="#6D28D9">[1]  size (bytes)</text>
+  <rect x="64" y="290" width="272" height="26" rx="5" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.1"/>
+  <text x="76" y="308" font-size="10.5" fill="#6D28D9">[2]  align (bytes)</text>
+  <rect x="64" y="320" width="272" height="26" rx="5" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.4"/>
+  <text x="76" y="338" font-size="10.5" font-weight="700" fill="#6D28D9">[3]  Draw::method0 — fn ptr</text>
+  <rect x="64" y="350" width="272" height="26" rx="5" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.1"/>
+  <text x="76" y="368" font-size="10.5" fill="#6D28D9">[4]  Draw::method1 — fn ptr</text>
 
-  <rect x="48" y="266" width="304" height="42" rx="7" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.2"/>
-  <text x="200" y="292" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">fast build · weaker code</text>
+  <line x1="352" y1="333" x2="416" y2="333" stroke="#475569" stroke-width="1.5" marker-end="url(#m3)"/>
 
-  <text x="600" y="62" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">codegen-units = 1</text>
-  <text x="600" y="80" text-anchor="middle" font-size="10.5" fill="#64748B">maximum optimization</text>
+  <text x="600" y="60" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">calling x.method0() — AArch64</text>
 
-  <rect x="448" y="96" width="304" height="88" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.7"/>
-  <text x="600" y="136" text-anchor="middle" font-size="12" font-weight="700" fill="#6D28D9">one CGU — the whole crate</text>
-  <text x="600" y="158" text-anchor="middle" font-size="10.5" fill="#6D28D9">a single optimization horizon</text>
+  <rect x="424" y="76" width="336" height="72" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.4"/>
+  <text x="440" y="102" font-size="11" fill="#334155" font-family="ui-monospace, monospace">ldr  x8, [x_vtable, #24]</text>
+  <text x="640" y="102" text-anchor="end" font-size="10" fill="#64748B">load slot 3 (3 × 8)</text>
+  <text x="440" y="128" font-size="11" fill="#334155" font-family="ui-monospace, monospace">blr  x8</text>
+  <text x="640" y="128" text-anchor="end" font-size="10" fill="#64748B">indirect jump</text>
 
-  <text x="600" y="204" text-anchor="middle" font-size="10.5" fill="#6D28D9">one LLVM instance, no parallelism</text>
-  <text x="600" y="230" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6D28D9">every inline opportunity is visible</text>
-  <text x="600" y="248" text-anchor="middle" font-size="10.5" fill="#6D28D9">nothing is hidden behind a boundary</text>
+  <rect x="424" y="180" width="336" height="96" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="592" y="204" text-anchor="middle" font-size="11.5" font-weight="700" fill="#BE123C">the bill</text>
+  <text x="592" y="228" text-anchor="middle" font-size="10.5" fill="#BE123C">BTB mispredict → pipeline flush</text>
+  <text x="592" y="248" text-anchor="middle" font-size="10.5" fill="#BE123C">target unknown at compile time</text>
+  <text x="592" y="266" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">→ inlining is blocked outright</text>
+  <line x1="592" y1="148" x2="592" y2="176" stroke="#E11D48" stroke-width="1.5" marker-end="url(#m3r)"/>
 
-  <rect x="448" y="266" width="304" height="42" rx="7" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.2"/>
-  <text x="600" y="292" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">slow build · stronger code</text>
+  <rect x="424" y="296" width="336" height="96" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.2"/>
+  <text x="592" y="320" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">the same family of cost, three languages</text>
+  <text x="592" y="342" text-anchor="middle" font-size="10.5" fill="#047857">Rust — vtable (this page)</text>
+  <text x="592" y="360" text-anchor="middle" font-size="10.5" fill="#047857">Go — itab indirect call</text>
+  <text x="592" y="378" text-anchor="middle" font-size="10.5" fill="#047857">Java — megamorphic call site</text>
 
-  <text x="400" y="346" text-anchor="middle" font-size="10.5" fill="#64748B">debug builds pick 256 on purpose — code quality is irrelevant there, build speed is everything</text>
+  <text x="400" y="418" text-anchor="middle" font-size="10.5" fill="#64748B">zero-cost holds when you choose static dispatch; dyn makes the price visible instead of hiding it</text>
 </svg>
