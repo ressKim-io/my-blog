@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 384" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">SuperWord packs a scalar loop into one SIMD instruction</title>
+  <desc id="d5">Eight sequential scalar additions on the left are unrolled by C2, checked for data dependence, and the independent isomorphic operations are packed together. On the right they become a single wide AVX instruction that computes eight lanes at once.</desc>
+  <defs>
+    <marker id="m5k" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="384" fill="#FFFFFF"/>
+
+  <line x1="236" y1="196" x2="298" y2="196" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#m5k)"/>
+  <line x1="500" y1="196" x2="562" y2="196" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#m5k)"/>
+
+  <text x="140" y="64" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">scalar loop</text>
+
+  <rect x="64" y="84" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <rect x="64" y="112" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <rect x="64" y="140" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <rect x="64" y="168" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <rect x="64" y="196" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <rect x="64" y="224" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <rect x="64" y="252" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+  <rect x="64" y="280" width="152" height="20" rx="3" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.2"/>
+
+  <text x="140" y="330" text-anchor="middle" font-size="13" fill="#0E7490">8 sequential adds</text>
+
+  <rect x="304" y="148" width="192" height="96" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="400" y="182" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">SuperWord</text>
+  <text x="400" y="208" text-anchor="middle" font-size="13" fill="#6D28D9">unroll · pack</text>
+  <text x="400" y="230" text-anchor="middle" font-size="13" fill="#6D28D9">independent ops</text>
+
+  <text x="670" y="148" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">1 AVX instruction</text>
+
+  <rect x="568" y="164" width="204" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <line x1="593" y1="164" x2="593" y2="228" stroke="#059669" stroke-width="1"/>
+  <line x1="618" y1="164" x2="618" y2="228" stroke="#059669" stroke-width="1"/>
+  <line x1="643" y1="164" x2="643" y2="228" stroke="#059669" stroke-width="1"/>
+  <line x1="668" y1="164" x2="668" y2="228" stroke="#059669" stroke-width="1"/>
+  <line x1="693" y1="164" x2="693" y2="228" stroke="#059669" stroke-width="1"/>
+  <line x1="718" y1="164" x2="718" y2="228" stroke="#059669" stroke-width="1"/>
+  <line x1="743" y1="164" x2="743" y2="228" stroke="#059669" stroke-width="1"/>
+
+  <text x="670" y="258" text-anchor="middle" font-size="13" fill="#047857">8 lanes at once</text>
+</svg>

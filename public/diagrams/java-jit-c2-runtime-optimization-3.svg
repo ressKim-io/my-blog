@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Throughput climbs in steps during JVM warmup</title>
+  <desc id="d3">A statically compiled Rust or Go binary runs at a flat high throughput from the first instant. Java starts low in the interpreter, steps up when C1 compiles with profiling, steps up again when C2 compiles, and only then settles at a plateau that sits above the flat static line. The whole climb is the warmup region, where latency tails are worst.</desc>
+  <defs>
+    <marker id="m3k" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <rect x="88" y="48" width="552" height="288" fill="#FFF1F2" opacity="0.4"/>
+
+  <line x1="88" y1="336" x2="756" y2="336" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#m3k)"/>
+  <line x1="88" y1="336" x2="88" y2="40" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#m3k)"/>
+  <line x1="640" y1="48" x2="640" y2="336" stroke="#BE123C" stroke-width="1.3" stroke-dasharray="5 3"/>
+
+  <line x1="88" y1="118" x2="744" y2="118" stroke="#059669" stroke-width="2.4"/>
+
+  <path d="M88,292 H216 L256,232 H400 L444,152 H560 L604,96 H744" fill="none" stroke="#7C3AED" stroke-width="2.6"/>
+
+  <text x="52" y="196" font-size="14" font-weight="700" fill="#334155" transform="rotate(-90 52 196)" text-anchor="middle">throughput</text>
+  <text x="748" y="362" text-anchor="end" font-size="14" font-weight="700" fill="#334155">time</text>
+
+  <text x="150" y="282" font-size="14" font-weight="700" fill="#6D28D9">L0</text>
+  <text x="320" y="222" font-size="14" font-weight="700" fill="#6D28D9">L3</text>
+  <text x="672" y="86" font-size="14" font-weight="700" fill="#6D28D9">L4</text>
+
+  <text x="672" y="140" font-size="14" font-weight="700" fill="#047857">Rust · Go</text>
+
+  <text x="300" y="76" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">warmup</text>
+  <text x="300" y="100" text-anchor="middle" font-size="13" fill="#BE123C">cold, worst tail latency</text>
+</svg>

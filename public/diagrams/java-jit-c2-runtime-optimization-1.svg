@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 424" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">Machine code is born at run time, not at build time</title>
+  <desc id="d1">javac turns source into architecture-agnostic bytecode. Inside the HotSpot JVM the interpreter runs that bytecode and records what it sees into the MDO, the JIT compilers read the MDO and emit machine code into the code cache, and hot methods then execute from the code cache.</desc>
+  <defs>
+    <marker id="m1k" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="m1v" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+    <marker id="m1a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#B45309"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="424" fill="#FFFFFF"/>
+
+  <line x1="200" y1="60" x2="264" y2="60" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#m1k)"/>
+  <line x1="376" y1="96" x2="376" y2="138" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#m1k)"/>
+
+  <rect x="48" y="32" width="152" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="124" y="66" text-anchor="middle" font-size="15" font-weight="700" fill="#334155" font-family="ui-monospace, monospace">.java</text>
+
+  <text x="232" y="50" text-anchor="middle" font-size="13" fill="#334155" font-family="ui-monospace, monospace">javac</text>
+
+  <rect x="272" y="24" width="208" height="72" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="376" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">bytecode .class</text>
+  <text x="376" y="78" text-anchor="middle" font-size="13" fill="#0E7490">architecture-agnostic</text>
+
+  <rect x="32" y="144" width="736" height="256" rx="12" fill="#FAFAFA" stroke="#D4D4D8" stroke-width="1.4"/>
+  <text x="56" y="178" font-size="15" font-weight="700" fill="#334155">HotSpot JVM</text>
+
+  <line x1="248" y1="236" x2="298" y2="236" stroke="#7C3AED" stroke-width="1.6" marker-end="url(#m1v)"/>
+  <line x1="496" y1="236" x2="546" y2="236" stroke="#7C3AED" stroke-width="1.6" marker-end="url(#m1v)"/>
+  <line x1="648" y1="272" x2="648" y2="298" stroke="#B45309" stroke-width="1.6" marker-end="url(#m1a)"/>
+  <path d="M552,340 H152 V278" fill="none" stroke="#B45309" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#m1a)"/>
+
+  <rect x="56" y="200" width="192" height="72" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="152" y="242" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">interpreter</text>
+
+  <rect x="304" y="200" width="192" height="72" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="400" y="232" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">MDO</text>
+  <text x="400" y="255" text-anchor="middle" font-size="13" fill="#6D28D9">profile store</text>
+
+  <rect x="552" y="200" width="192" height="72" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="648" y="242" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">JIT · C1 C2</text>
+
+  <rect x="552" y="304" width="192" height="72" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.6"/>
+  <text x="648" y="336" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">code cache</text>
+  <text x="648" y="359" text-anchor="middle" font-size="13" fill="#B45309">filled at runtime</text>
+
+  <text x="272" y="226" text-anchor="middle" font-size="13" fill="#6D28D9">records</text>
+  <text x="520" y="226" text-anchor="middle" font-size="13" fill="#6D28D9">reads</text>
+  <text x="664" y="292" font-size="13" fill="#B45309">emits</text>
+  <text x="352" y="332" text-anchor="middle" font-size="13" fill="#B45309">hot code runs</text>
+</svg>

@@ -2,7 +2,7 @@
 
 > **세션 재개용 문서**. 새 세션에서 이 작업을 이어갈 때는 이 파일을 먼저 통독한 뒤,
 > §6 상태 표에서 첫 미완료(☐) 편부터 §7 절차대로 진행합니다.
-> 마지막 갱신: 2026-07-10 (2.2 발행 완료, 다음 착수 = 2.3)
+> 마지막 갱신: 2026-07-10 (2.3 발행 완료, 다음 착수 = 2.4)
 > ★ 2026-07-10 SVG 글자 최소화 원칙 확정 — §4.2 하단 참조. **기존 26개 소급 적용 완료(R1~R4)**.
 > 발행된 34개 SVG 전부 폰트 13px 이상
 
@@ -171,7 +171,7 @@ date: "2026-06-25 + order 일"   # order=5 → "2026-06-30", order=12 → "2026-
 | 1.3 | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 3 | ✅ 발행 (2026-06-28, SVG 5개·Go 1.26 기준 교정·리뷰어 P0 0건 — 1부 완결) |
 | 2.1 | `2부_2.1_Rust_AOT_컴파일러엄격함과_하드웨어직거래.md` | `rust-aot-zero-cost-codegen` | 4 | ✅ 발행 (2026-06-29, SVG 8개 — 2부 시작, Opus 4.8 첫 변환·리뷰어 P0 0건) |
 | 2.2 | `2부_2.2_Go_AOT_빠른빌드의대가와_정적기계어의한계.md` | `go-aot-fast-build-tradeoff` | 5 | ✅ 발행 (2026-06-30, SVG 8개 — 글자 최소화 원칙 첫 적용, itab·simd 사실 교정, 리뷰어 P0 0건) |
-| 2.3 | `2부_2.3_Java_JIT_웜업의반전과_C2런타임최적화.md` | `java-jit-c2-runtime-optimization` | 6 | ☐ |
+| 2.3 | `2부_2.3_Java_JIT_웜업의반전과_C2런타임최적화.md` | `java-jit-c2-runtime-optimization` | 6 | ✅ 발행 (2026-07-01, SVG 9개 — 복선 8건 전부 회수, 재감사로 스칼라 치환 SVG 추가, JEP 401·코드캐시 사실 교정, 리뷰어 P0 1건 수정) |
 | 2.4 | `2부_2.4_소결_롱런서버에서_Java가_CPU효율을_역전하는_조건.md` | `java-jit-inversion-conditions` | 7 | ☐ |
 | 3.1 | `3부_3.1_커널의메모리_게으른할당과_페이지폴트.md` | `kernel-lazy-allocation-page-fault` | 8 | ☐ |
 | 3.2 | `3부_3.2_유저공간할당자_ptmalloc과_Rust의malloc위임.md` | `ptmalloc-rust-malloc-delegation` | 9 | ☐ |

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 352" role="img" aria-labelledby="t9 d9" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t9">Four points on one spectrum from AOT to JIT</title>
+  <desc id="d9">Ordered by how much warmup they cost: a native image has none but gives up runtime adaptation, stopping at C1 warms up fast but keeps a low peak, the Leyden AOT cache starts with a pre-baked profile and still reaches the full C2 peak, and full tiered compilation from cold pays the longest warmup for the same peak. The left half never re-optimizes after the build; the right half keeps re-optimizing forever.</desc>
+  <defs>
+    <marker id="m8k" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="352" fill="#FFFFFF"/>
+
+  <line x1="48" y1="64" x2="768" y2="64" stroke="#334155" stroke-width="1.5" marker-end="url(#m8k)"/>
+  <text x="48" y="44" font-size="13" font-weight="700" fill="#334155">warmup: none</text>
+  <text x="768" y="44" text-anchor="end" font-size="13" font-weight="700" fill="#334155">warmup: longest</text>
+
+  <rect x="48" y="96" width="170" height="112" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="133" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">native-image</text>
+  <text x="133" y="158" text-anchor="middle" font-size="13" fill="#047857">closed-world AOT</text>
+  <text x="133" y="186" text-anchor="middle" font-size="13" fill="#047857">peak: PGO only</text>
+
+  <rect x="234" y="96" width="170" height="112" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="319" y="130" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">StopAtLevel=1</text>
+  <text x="319" y="158" text-anchor="middle" font-size="13" fill="#0E7490">C1 only, no C2</text>
+  <text x="319" y="186" text-anchor="middle" font-size="13" fill="#0E7490">peak: low</text>
+
+  <rect x="420" y="96" width="170" height="112" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="505" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">Leyden cache</text>
+  <text x="505" y="158" text-anchor="middle" font-size="13" fill="#6D28D9">profile pre-baked</text>
+  <text x="505" y="186" text-anchor="middle" font-size="13" fill="#6D28D9">peak: full C2</text>
+
+  <rect x="606" y="96" width="170" height="112" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="691" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">full tiered</text>
+  <text x="691" y="158" text-anchor="middle" font-size="13" fill="#B45309">C1 → C2 from cold</text>
+  <text x="691" y="186" text-anchor="middle" font-size="13" fill="#B45309">peak: full C2</text>
+
+  <rect x="48" y="248" width="356" height="56" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="226" y="283" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">frozen after the build</text>
+
+  <rect x="420" y="248" width="356" height="56" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="598" y="283" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">re-optimizes forever</text>
+</svg>

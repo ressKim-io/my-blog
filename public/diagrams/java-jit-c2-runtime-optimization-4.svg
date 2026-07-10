@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 344" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">The inline cache state machine</title>
+  <desc id="d4">A call site that has seen only one receiver type is monomorphic and becomes a direct, inlined call. A second type makes it bimorphic, which C2 can still inline behind type guards. Once many types appear the site goes megamorphic, falls back to a vtable lookup, cannot be inlined, and becomes the breeding ground for repeated deoptimization.</desc>
+  <defs>
+    <marker id="m4k" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="344" fill="#FFFFFF"/>
+
+  <line x1="256" y1="152" x2="284" y2="152" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#m4k)"/>
+  <line x1="512" y1="152" x2="540" y2="152" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#m4k)"/>
+
+  <rect x="32" y="88" width="224" height="128" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="144" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">monomorphic</text>
+  <text x="144" y="156" text-anchor="middle" font-size="13" fill="#047857">1 type</text>
+  <text x="144" y="188" text-anchor="middle" font-size="13" fill="#047857">direct call · inlined</text>
+
+  <rect x="288" y="88" width="224" height="128" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="400" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">bimorphic</text>
+  <text x="400" y="156" text-anchor="middle" font-size="13" fill="#B45309">2 types</text>
+  <text x="400" y="188" text-anchor="middle" font-size="13" fill="#B45309">guarded inline</text>
+
+  <rect x="544" y="88" width="224" height="128" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="656" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">megamorphic</text>
+  <text x="656" y="156" text-anchor="middle" font-size="13" fill="#BE123C">many types</text>
+  <text x="656" y="188" text-anchor="middle" font-size="13" fill="#BE123C">vtable lookup</text>
+
+  <text x="270" y="136" text-anchor="middle" font-size="13" fill="#334155">+1</text>
+  <text x="526" y="136" text-anchor="middle" font-size="13" fill="#334155">+n</text>
+
+  <rect x="32" y="248" width="224" height="56" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="144" y="283" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">fastest</text>
+
+  <rect x="544" y="248" width="224" height="56" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="656" y="283" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">no inline · deopt storm</text>
+</svg>
