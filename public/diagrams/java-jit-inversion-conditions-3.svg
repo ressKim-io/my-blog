@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">JIT and AOT are one continuous spectrum, not a dichotomy</title>
+  <desc id="d3">A single axis runs from pure AOT on the left, where the profile is a file consumed once at build time, to pure JIT on the right, where the profile lives in the MDO and is consumed throughout the run. Rust, Go and GraalVM sit on the AOT side and move rightward as they adopt PGO. HotSpot sits on the JIT side and Leyden moves leftward from it by pre-baking an AOT cache. The two ends converge toward the middle.</desc>
+  <defs>
+    <marker id="i3g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+    <marker id="i3v" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <line x1="48" y1="168" x2="752" y2="168" stroke="#334155" stroke-width="1.6"/>
+  <text x="48" y="56" font-size="15" font-weight="700" fill="#047857">pure AOT</text>
+  <text x="48" y="80" font-size="13" fill="#334155">profile = file, build-time</text>
+  <text x="752" y="56" text-anchor="end" font-size="15" font-weight="700" fill="#6D28D9">pure JIT</text>
+  <text x="752" y="80" text-anchor="end" font-size="13" fill="#334155">profile = MDO, run-time</text>
+
+  <line x1="120" y1="152" x2="120" y2="184" stroke="#334155" stroke-width="1.4"/>
+  <line x1="260" y1="152" x2="260" y2="184" stroke="#334155" stroke-width="1.4"/>
+  <line x1="400" y1="152" x2="400" y2="184" stroke="#334155" stroke-width="1.4"/>
+  <line x1="560" y1="152" x2="560" y2="184" stroke="#334155" stroke-width="1.4"/>
+  <line x1="700" y1="152" x2="700" y2="184" stroke="#334155" stroke-width="1.4"/>
+
+  <text x="120" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">Rust</text>
+  <text x="260" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">Go</text>
+  <text x="400" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">GraalVM</text>
+  <text x="560" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">Leyden</text>
+  <text x="700" y="146" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">HotSpot</text>
+
+  <line x1="140" y1="224" x2="420" y2="224" stroke="#059669" stroke-width="2" marker-end="url(#i3g)"/>
+  <text x="230" y="248" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">+PGO absorbs profile</text>
+
+  <line x1="680" y1="280" x2="520" y2="280" stroke="#7C3AED" stroke-width="2" marker-end="url(#i3v)"/>
+  <text x="600" y="304" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">Leyden pre-bakes AOT</text>
+</svg>

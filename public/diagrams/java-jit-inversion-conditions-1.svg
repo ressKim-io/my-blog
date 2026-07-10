@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 384" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">Four conditions that must all hold for the inversion</title>
+  <desc id="d1">The peak throughput inversion only happens when all four conditions hold at once: the process is long-running, the metric is peak throughput, the work is CPU-bound and polymorphic, and the workload types are stable. The fourth is the fragile one, drawn with a dashed red border, because a traffic spike breaks it and triggers a deopt storm.</desc>
+  <defs>
+    <marker id="i1v" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+    <marker id="i1k" markerWidth="9" markerHeight="9" refX="6.5" refY="2.8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L6.5,2.8 L0,5.6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="384" fill="#FFFFFF"/>
+
+  <line x1="256" y1="64" x2="356" y2="168" stroke="#334155" stroke-width="1.4" marker-end="url(#i1k)"/>
+  <line x1="256" y1="136" x2="356" y2="176" stroke="#334155" stroke-width="1.4" marker-end="url(#i1k)"/>
+  <line x1="256" y1="208" x2="356" y2="192" stroke="#334155" stroke-width="1.4" marker-end="url(#i1k)"/>
+  <line x1="256" y1="288" x2="356" y2="200" stroke="#334155" stroke-width="1.4" marker-end="url(#i1k)"/>
+  <line x1="452" y1="184" x2="536" y2="184" stroke="#7C3AED" stroke-width="2.2" marker-end="url(#i1v)"/>
+
+  <rect x="48" y="36" width="208" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="152" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">long-running</text>
+
+  <rect x="48" y="108" width="208" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="152" y="142" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">peak metric</text>
+
+  <rect x="48" y="180" width="208" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="152" y="214" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">CPU + polymorphic</text>
+
+  <rect x="48" y="260" width="208" height="56" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6" stroke-dasharray="6 3"/>
+  <text x="152" y="284" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">stable types</text>
+  <text x="152" y="308" text-anchor="middle" font-size="13" fill="#BE123C">fragile</text>
+
+  <circle cx="404" cy="184" r="48" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="404" y="190" text-anchor="middle" font-size="17" font-weight="700" fill="#6D28D9">AND</text>
+
+  <rect x="536" y="136" width="216" height="96" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="644" y="178" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">peak inversion</text>
+  <text x="644" y="204" text-anchor="middle" font-size="13" fill="#6D28D9">only when all four hold</text>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 344" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Deciding at build time versus at run time is one trade, paid both ways</title>
+  <desc id="d4">Deciding at build time buys predictability, a small footprint and instant startup, but pays with no re-adaptation, frozen in the snapshot. Deciding at run time buys adaptation, peak throughput and automatic vectorization, but pays with warmup, latency spikes and a heavy footprint. Neither side escapes its bill.</desc>
+  <rect x="0" y="0" width="800" height="344" fill="#FFFFFF"/>
+
+  <line x1="400" y1="40" x2="400" y2="312" stroke="#E4E4E7" stroke-width="1.2"/>
+
+  <rect x="40" y="40" width="320" height="52" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="200" y="73" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">decide at build time</text>
+
+  <rect x="440" y="40" width="320" height="52" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="600" y="73" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">decide at run time</text>
+
+  <text x="56" y="132" font-size="14" font-weight="700" fill="#047857">you get</text>
+  <text x="56" y="160" font-size="13" fill="#334155">predictable</text>
+  <text x="56" y="184" font-size="13" fill="#334155">small footprint</text>
+  <text x="56" y="208" font-size="13" fill="#334155">instant startup</text>
+
+  <text x="56" y="252" font-size="14" font-weight="700" fill="#BE123C">you pay</text>
+  <text x="56" y="280" font-size="13" fill="#334155">no re-adaptation</text>
+  <text x="56" y="304" font-size="13" fill="#334155">frozen in the snapshot</text>
+
+  <text x="456" y="132" font-size="14" font-weight="700" fill="#6D28D9">you get</text>
+  <text x="456" y="160" font-size="13" fill="#334155">adaptation</text>
+  <text x="456" y="184" font-size="13" fill="#334155">peak throughput</text>
+  <text x="456" y="208" font-size="13" fill="#334155">auto-vectorization</text>
+
+  <text x="456" y="252" font-size="14" font-weight="700" fill="#BE123C">you pay</text>
+  <text x="456" y="280" font-size="13" fill="#334155">warmup, spikes</text>
+  <text x="456" y="304" font-size="13" fill="#334155">heavy footprint</text>
+</svg>
