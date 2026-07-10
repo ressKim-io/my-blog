@@ -259,7 +259,7 @@ tokio의 멀티스레드 런타임은 워커 스레드 풀(기본은 코어 수)
 **함정 2: 협력형의 대가** — tokio에는 Go의 SIGURG 선점도, Loom의 자동 unmount도 없습니다. 태스크가 `.await` 없이 CPU를 오래 쥐거나 블로킹 호출을 하면, 그 워커 스레드 전체가 멈춥니다
 
 ```rust
-// async 안의 블로킹 호출 → 워커 스레드가 통째로 마비
+// async 안의 블로킹 호출 → 워커 스레드가 통째로 멈춤
 tokio::spawn(async {
     std::thread::sleep(Duration::from_secs(1)); // .await가 아님 → 스케줄러 정지
     // 블로킹이 꼭 필요하면 tokio::task::spawn_blocking으로 격리해야 한다

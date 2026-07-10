@@ -159,7 +159,7 @@ Rust는 이 세금이 없습니다. 제로코스트니까요
 
 **AOT가 프로파일을 흡수하는 방향**(왼쪽 초록 화살표) — 정적 언어들이 JIT의 무기인 실측 프로파일을 빌드 시점에 끌어옵니다
 
-- Rust는 `-Cprofile-generate`로 프로파일을 뜨고 `-Cprofile-use`로 되먹입니다(PGO). 대체로 10% 이상, rustc 자신은 약 15%를 얻죠. 여기에 BOLT로 링크 이후 basic block을 재배치하기도 합니다
+- Rust는 `-Cprofile-generate`로 프로파일을 뜨고 `-Cprofile-use`로 다시 반영합니다(PGO). 대체로 10% 이상, rustc 자신은 약 15%를 얻죠. 여기에 BOLT로 링크 이후 basic block을 재배치하기도 합니다
 - Go는 `default.pgo`를 1.21부터 자동 적용합니다. 핫 함수 인라인 예산을 80에서 2000으로 올리고 역가상화를 수행해 2~7%를 얻습니다(5편)
 - GraalVM native-image는 계측 실행으로 프로파일을 떠서(`--pgo-instrument` → `.iprof` → `--pgo`) 빌드에 먹입니다. 나아가 JDK 24부터는 **GraalNN**이라는 그래프 신경망 정적 프로파일러로, 계측 없이도 분기 확률을 추론합니다. `-O3`에서 켜지고 마이크로서비스 벤치마크에서 약 8%를 얻죠. AOT 컴파일러가 JIT 비슷한 최적화를 하는 셈입니다
 
