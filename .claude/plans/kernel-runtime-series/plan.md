@@ -228,7 +228,7 @@ SVG와 글을 함께 봐야 하고, 한 세션에 전부 하면 컨텍스트가 
 | 배치 | 글 | SVG | 심각도 (texts / minFont / maxLabelChars) | 상태 |
 |---|---|---|---|---|
 | R1 | `rust-aot-zero-cost-codegen` (2.1) | 8 | 최악 — 34 / 9px / 97자 | ✅ 완료 (texts ≤15 · minFont 13 · maxLabel 34자. SVG7의 Graviton 파이프는 본문 표와 중복이라 삭제, 본문 왼쪽/오른쪽 → 위쪽/아래쪽 1곳 수정) |
-| R2 | `syscall-mode-switch-cost` (1.1) | 7 | 높음 — 30 / 9.5px / 91자 | ☐ |
+| R2 | `syscall-mode-switch-cost` (1.1) | 7 | 높음 — 30 / 9.5px / 91자 | ✅ 완료 (texts ≤16 · minFont 13 · maxLabel 28자. 본문 앵커 유지: SVG2 번호 배지 1~4·rsp 라벨, SVG3 빨간 박스 양방향, SVG4 곡선·점선·붉은 구간, SVG1/5 좌우 배치) |
 | R3 | `thread-models-kernel-vs-user` (1.2) | 6 | 중간 — 23 / 10px / 103자 | ☐ |
 | R4 | `runtime-weight-zero-cost-vs-fat` (1.3) | 5 | 중간 — 30 / 9.5px / 90자 | ☐ |
 

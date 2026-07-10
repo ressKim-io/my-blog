@@ -1,61 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t5">KPTI — page table split before and after</title>
-  <desc id="d5">Left, before KPTI: one page table holds both user and kernel mappings, and speculative execution could peek at kernel data, which is the Meltdown vulnerability. Right, with KPTI on: the user table keeps only user mappings plus a tiny trampoline, the kernel table keeps full mappings, and CR3 is swapped between them on every syscall entry and exit, causing TLB pressure.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">KPTI before and after — the kernel is removed from the user page table</title>
+  <desc id="d5">Before KPTI a process had a single page table holding both user and kernel mappings, with the kernel hidden only by permission bits, which Meltdown bypassed through speculative execution. With KPTI the page table is split in two: the user table keeps only a tiny trampoline stub, and the kernel table holds everything. Isolation becomes physical, at the price of swapping CR3 on every crossing.</desc>
   <defs>
-    <marker id="ar5" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#D97706"/>
-    </marker>
-    <marker id="ar5s" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M7,0 L0,3 L7,6 Z" fill="#D97706"/>
-    </marker>
-    <marker id="ar5r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#BE123C"/>
+    <marker id="s5" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="480" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">remove the kernel from the user's map — and pay a swap at every crossing</text>
+  <line x1="400" y1="24" x2="400" y2="376" stroke="#E4E4E7" stroke-width="1.2"/>
 
-  <text x="210" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">KPTI OFF (pre-Meltdown)</text>
-  <text x="590" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">KPTI ON (default today)</text>
+  <text x="200" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">KPTI OFF</text>
+  <text x="600" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">KPTI ON</text>
 
-  <!-- left: one table -->
-  <rect x="80" y="76" width="260" height="240" rx="10" fill="none" stroke="#475569" stroke-width="1.6"/>
-  <rect x="82" y="78" width="256" height="116" rx="8" fill="#ECFEFF"/>
-  <text x="210" y="126" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">user mappings</text>
-  <text x="210" y="146" text-anchor="middle" font-size="10.5" fill="#334155">app code · heap · stacks</text>
-  <rect x="82" y="196" width="256" height="118" rx="8" fill="#ECFDF5"/>
-  <text x="210" y="244" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">kernel mappings</text>
-  <text x="210" y="264" text-anchor="middle" font-size="10.5" fill="#047857">always in the map, permission-hidden</text>
+  <rect x="48" y="76" width="304" height="180" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.6"/>
+  <text x="200" y="104" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">one page table</text>
+  <rect x="68" y="120" width="264" height="52" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.3"/>
+  <text x="200" y="152" text-anchor="middle" font-size="14" fill="#0E7490">user mappings</text>
+  <rect x="68" y="184" width="264" height="52" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.3"/>
+  <text x="200" y="216" text-anchor="middle" font-size="14" fill="#BE123C">kernel mappings</text>
 
-  <line x1="210" y1="352" x2="210" y2="300" stroke="#BE123C" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ar5r)"/>
-  <text x="210" y="372" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">Meltdown: user-mode speculation could peek at kernel data</text>
-  <text x="210" y="396" text-anchor="middle" font-size="11" fill="#64748B">one CR3, never swapped on syscall</text>
+  <rect x="48" y="288" width="304" height="72" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="200" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">kernel is in the map</text>
+  <text x="200" y="340" text-anchor="middle" font-size="13" fill="#BE123C">Meltdown could peek</text>
 
-  <!-- right: two tables -->
-  <rect x="420" y="76" width="150" height="240" rx="10" fill="none" stroke="#0891B2" stroke-width="1.6"/>
-  <rect x="422" y="78" width="146" height="196" rx="8" fill="#ECFEFF"/>
-  <text x="495" y="110" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0E7490">user table</text>
-  <text x="495" y="130" text-anchor="middle" font-size="10.5" fill="#334155">user mappings only</text>
-  <text x="495" y="148" text-anchor="middle" font-size="10.5" fill="#334155">(kernel stripped out)</text>
-  <rect x="422" y="276" width="146" height="38" rx="8" fill="#ECFDF5"/>
-  <text x="495" y="292" text-anchor="middle" font-size="10.5" font-weight="700" fill="#047857">trampoline</text>
-  <text x="495" y="306" text-anchor="middle" font-size="9.5" fill="#047857">tiny kernel entry stub</text>
+  <rect x="440" y="76" width="150" height="180" rx="9" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="515" y="104" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">user table</text>
+  <rect x="456" y="120" width="118" height="52" rx="5" fill="#FFFFFF" stroke="#0891B2" stroke-width="1.3"/>
+  <text x="515" y="152" text-anchor="middle" font-size="13" fill="#0E7490">user only</text>
+  <rect x="456" y="184" width="118" height="52" rx="5" fill="#FFFBEB" stroke="#D97706" stroke-width="1.3"/>
+  <text x="515" y="216" text-anchor="middle" font-size="13" fill="#B45309">trampoline</text>
 
-  <rect x="610" y="76" width="150" height="240" rx="10" fill="none" stroke="#059669" stroke-width="1.6"/>
-  <rect x="612" y="78" width="146" height="236" rx="8" fill="#ECFDF5"/>
-  <text x="685" y="110" text-anchor="middle" font-size="12.5" font-weight="700" fill="#047857">kernel table</text>
-  <text x="685" y="130" text-anchor="middle" font-size="10.5" fill="#047857">full mappings</text>
-  <text x="685" y="148" text-anchor="middle" font-size="10.5" fill="#047857">(user + kernel)</text>
+  <rect x="618" y="76" width="150" height="180" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="693" y="104" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">kernel table</text>
+  <rect x="634" y="120" width="118" height="116" rx="5" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.3"/>
+  <text x="693" y="184" text-anchor="middle" font-size="13" fill="#6D28D9">user + kernel</text>
 
-  <!-- swap arrow -->
-  <line x1="574" y1="200" x2="606" y2="200" stroke="#D97706" stroke-width="2" marker-start="url(#ar5s)" marker-end="url(#ar5)"/>
-  <text x="590" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#B45309">CR3</text>
-  <text x="590" y="352" text-anchor="middle" font-size="10.5" font-weight="700" fill="#B45309">swapped on every syscall entry &amp; exit</text>
-  <text x="590" y="370" text-anchor="middle" font-size="10.5" fill="#B45309">→ TLB pressure (PCID avoids a full flush)</text>
+  <line x1="592" y1="166" x2="616" y2="166" stroke="#E11D48" stroke-width="1.8" marker-end="url(#s5)"/>
+  <line x1="616" y1="190" x2="592" y2="190" stroke="#E11D48" stroke-width="1.8" marker-end="url(#s5)"/>
+  <text x="604" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C" font-family="ui-monospace, monospace">CR3</text>
 
-  <!-- bottom legend -->
-  <rect x="80" y="414" width="640" height="50" rx="7" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
-  <text x="400" y="434" text-anchor="middle" font-size="11.5" fill="#334155">isolation becomes physical: in user mode, kernel memory simply isn't in the map.</text>
-  <text x="400" y="452" text-anchor="middle" font-size="11.5" fill="#334155">the price: a page-table swap on every single crossing — the KPTI tax.</text>
+  <rect x="440" y="288" width="328" height="72" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="604" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">swapped every crossing</text>
+  <text x="604" y="340" text-anchor="middle" font-size="13" fill="#BE123C">TLB pressure</text>
 </svg>

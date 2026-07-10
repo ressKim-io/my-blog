@@ -1,45 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t4">Indirect cost of a syscall over time</title>
-  <desc id="d4">A curve of effective user-code speed over time. It runs at a warmed-up baseline, drops when the syscall is issued, stays low while in the kernel, and after returning it climbs back slowly through a re-warm zone where branch predictors retrain and the pipeline refills, before reaching the baseline again.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">The indirect cost — user code runs below its warmed-up speed after returning</title>
+  <desc id="d4">The curve is the effective speed of user code over time. Entering the kernel drains the pipeline and speed collapses. After returning, the CPU is cold: branch predictors were cleared and the pipeline is empty, so user code runs below the dashed warmed-up baseline until the predictors retrain. That red re-warm zone, not the kernel work itself, is where the real cost lives.</desc>
   <defs>
-    <marker id="ax4" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
+    <marker id="s4" markerWidth="9" markerHeight="9" refX="6.5" refY="2.8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L6.5,2.8 L0,5.6 Z" fill="#475569"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="800" height="430" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
 
-  <text x="400" y="26" text-anchor="middle" font-size="12" fill="#64748B">what you pay after returning — the CPU must re-warm its accelerated state</text>
+  <rect x="268" y="110" width="104" height="210" fill="#F1F5F9"/>
+  <rect x="372" y="110" width="240" height="210" fill="#FFF1F2" opacity="0.75"/>
 
-  <!-- shaded regions -->
-  <rect x="300" y="60" width="110" height="280" fill="#F1F5F9"/>
-  <rect x="410" y="60" width="230" height="280" fill="#FFF1F2"/>
+  <line x1="80" y1="60" x2="80" y2="320" stroke="#475569" stroke-width="1.5"/>
+  <line x1="80" y1="320" x2="756" y2="320" stroke="#475569" stroke-width="1.5" marker-end="url(#s4)"/>
+  <line x1="80" y1="110" x2="744" y2="110" stroke="#94A3B8" stroke-width="1.4" stroke-dasharray="6 4"/>
 
-  <!-- axes -->
-  <line x1="64" y1="340" x2="756" y2="340" stroke="#94A3B8" stroke-width="1.4" marker-end="url(#ax4)"/>
-  <line x1="64" y1="340" x2="64" y2="56" stroke="#94A3B8" stroke-width="1.4" marker-end="url(#ax4)"/>
-  <text x="70" y="50" font-size="10.5" fill="#64748B">effective speed of your code</text>
-  <text x="744" y="360" text-anchor="end" font-size="10.5" fill="#64748B">time</text>
+  <path d="M80,110 L236,110 C252,110 252,286 268,286 L372,286 C420,286 470,180 560,134 C616,114 668,110 744,110" fill="none" stroke="#7C3AED" stroke-width="2.4"/>
 
-  <!-- baseline dashed -->
-  <line x1="300" y1="110" x2="740" y2="110" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="4 3"/>
-  <text x="738" y="100" text-anchor="end" font-size="10" fill="#64748B">warmed-up baseline</text>
-
-  <!-- region labels -->
-  <text x="355" y="80" text-anchor="middle" font-size="10.5" font-weight="700" fill="#475569">in the kernel</text>
-  <text x="355" y="94" text-anchor="middle" font-size="9.5" fill="#64748B">drain · barriers · work</text>
-  <text x="525" y="80" text-anchor="middle" font-size="10.5" font-weight="700" fill="#BE123C">re-warm zone</text>
-  <text x="525" y="94" text-anchor="middle" font-size="9.5" fill="#BE123C">mispredicts · pipeline refills</text>
-
-  <!-- throughput curve -->
-  <path d="M64,110 L300,110 L310,310 L410,310 C460,306 520,150 640,113 L740,110"
-        fill="none" stroke="#7C3AED" stroke-width="2.4"/>
-
-  <!-- annotations -->
-  <text x="180" y="98" text-anchor="middle" font-size="10.5" fill="#334155">predictors trained, pipeline full</text>
-  <text x="452" y="330" font-size="10.5" fill="#BE123C">returned, but cold</text>
-
-  <!-- bottom note -->
-  <rect x="64" y="374" width="692" height="42" rx="7" fill="#F8FAFC" stroke="#E4E4E7" stroke-width="1"/>
-  <text x="410" y="391" text-anchor="middle" font-size="11" fill="#334155">the kernel work itself may be short — the expensive part is that user code</text>
-  <text x="410" y="407" text-anchor="middle" font-size="11" fill="#334155">runs below its warmed-up speed until predictors retrain (the red zone)</text>
+  <text x="92" y="52" font-size="13" font-weight="700" fill="#334155">effective speed of user code</text>
+  <text x="752" y="344" text-anchor="end" font-size="13" fill="#334155">time</text>
+  <text x="744" y="100" text-anchor="end" font-size="13" fill="#64748B">warmed-up baseline</text>
+  <text x="320" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">in the kernel</text>
+  <text x="492" y="240" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">re-warm zone</text>
+  <text x="492" y="264" text-anchor="middle" font-size="13" fill="#BE123C">predictors retraining</text>
+  <text x="676" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">back to full speed</text>
 </svg>
