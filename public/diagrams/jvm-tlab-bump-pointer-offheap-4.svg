@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" role="img" aria-labelledby="j4 e4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j4">What the JVM does when the object does not fit the current buffer</title>
+  <desc id="e4">If the object fits in the thread's buffer it is allocated by bumping the pointer. If it does not fit but retiring the buffer would waste less than the target, the buffer is retired and a fresh one is taken from Eden. A larger object goes straight into the shared part of Eden with a compare-and-swap. An object that takes up half a region or more is humongous: it skips Eden entirely, is allocated in the old generation, and is never moved by evacuation.</desc>
+  <defs>
+    <marker id="j4d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+    <marker id="j4g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="430" fill="#FFFFFF"/>
+
+  <line x1="384" y1="72" x2="384" y2="92" stroke="#334155" stroke-width="1.8" marker-end="url(#j4d)"/>
+  <line x1="384" y1="148" x2="384" y2="172" stroke="#334155" stroke-width="1.8" marker-end="url(#j4d)"/>
+  <line x1="384" y1="228" x2="384" y2="252" stroke="#334155" stroke-width="1.8" marker-end="url(#j4d)"/>
+  <line x1="384" y1="308" x2="384" y2="332" stroke="#334155" stroke-width="1.8" marker-end="url(#j4d)"/>
+
+  <line x1="496" y1="122" x2="568" y2="122" stroke="#059669" stroke-width="1.8" marker-end="url(#j4g)"/>
+  <line x1="496" y1="202" x2="568" y2="202" stroke="#059669" stroke-width="1.8" marker-end="url(#j4g)"/>
+  <line x1="496" y1="282" x2="568" y2="282" stroke="#059669" stroke-width="1.8" marker-end="url(#j4g)"/>
+  <text x="532" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">yes</text>
+  <text x="532" y="192" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">yes</text>
+  <text x="532" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">yes</text>
+
+  <rect x="272" y="24" width="224" height="48" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="384" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">new T · size s</text>
+
+  <rect x="272" y="96" width="224" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="384" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">fits in TLAB?</text>
+  <rect x="576" y="96" width="176" height="52" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="664" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">bump pointer</text>
+
+  <rect x="272" y="176" width="224" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="384" y="208" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">waste under target?</text>
+  <rect x="576" y="176" width="176" height="52" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="664" y="208" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">retire · new TLAB</text>
+
+  <rect x="272" y="256" width="224" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="384" y="288" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">under 50% of region?</text>
+  <rect x="576" y="256" width="176" height="52" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="664" y="288" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">Eden shared · CAS</text>
+
+  <rect x="272" y="336" width="224" height="64" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="384" y="366" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">Humongous → Old</text>
+  <text x="384" y="388" text-anchor="middle" font-size="13" fill="#BE123C">never moved</text>
+</svg>

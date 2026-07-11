@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 330" role="img" aria-labelledby="j5 e5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j5">Every Java object carries a header, and compact headers halve it</title>
+  <desc id="e5">The standard layout puts an eight byte mark word, holding the identity hash, the collector's age counter and the lock state, in front of a four byte compressed class pointer, so the header alone is twelve bytes before any field exists. Compact object headers fold the class reference into the mark word, bringing the header down to eight bytes and giving four bytes back on every single object.</desc>
+  <rect x="0" y="0" width="800" height="330" fill="#FFFFFF"/>
+
+  <text x="64" y="56" font-size="14" font-weight="700" fill="#334155">standard · 12B header</text>
+
+  <rect x="64" y="76" width="256" height="64" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="192" y="114" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">mark word · 8B</text>
+  <rect x="320" y="76" width="128" height="64" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="384" y="114" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">klass · 4B</text>
+  <rect x="448" y="76" width="192" height="64" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="544" y="114" text-anchor="middle" font-size="13" fill="#0E7490">fields</text>
+  <rect x="640" y="76" width="64" height="64" fill="#FFFFFF" stroke="#475569" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="672" y="114" text-anchor="middle" font-size="13" fill="#334155">pad</text>
+
+  <text x="64" y="216" font-size="14" font-weight="700" fill="#047857">compact · 8B header</text>
+
+  <rect x="64" y="236" width="256" height="64" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="192" y="274" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">mark word + klass · 8B</text>
+  <rect x="320" y="236" width="192" height="64" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="416" y="274" text-anchor="middle" font-size="13" fill="#0E7490">fields</text>
+  <rect x="512" y="236" width="192" height="64" fill="#FFFFFF" stroke="#059669" stroke-width="1.8" stroke-dasharray="6 4"/>
+  <text x="608" y="274" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">saved</text>
+</svg>

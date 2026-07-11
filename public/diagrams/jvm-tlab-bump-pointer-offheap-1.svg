@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 370" role="img" aria-labelledby="j1 e1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j1">The generational heap, and the slice of Eden each thread gets</title>
+  <desc id="e1">The Java heap is split into a young generation and an old generation. New objects are born in Eden, part of the young generation, and survivors are copied into the survivor spaces and eventually promoted to the old generation. Eden itself is carved up so that every thread owns a private buffer, its thread-local allocation buffer, and a thread allocates only inside its own buffer so it never contends with another thread.</desc>
+  <rect x="0" y="0" width="800" height="370" fill="#FFFFFF"/>
+
+  <rect x="48" y="48" width="704" height="248" rx="12" fill="#FFFFFF" stroke="#475569" stroke-width="2"/>
+  <text x="68" y="78" font-size="14" font-weight="700" fill="#334155">GC heap</text>
+
+  <rect x="64" y="96" width="496" height="184" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="84" y="124" font-size="14" font-weight="700" fill="#6D28D9">Young</text>
+
+  <rect x="80" y="136" width="352" height="128" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="100" y="164" font-size="14" font-weight="700" fill="#047857">Eden</text>
+  <rect x="96" y="180" width="72" height="64" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+  <text x="132" y="218" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">TLAB</text>
+  <rect x="176" y="180" width="72" height="64" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+  <rect x="256" y="180" width="72" height="64" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+  <rect x="336" y="180" width="80" height="64" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="376" y="218" text-anchor="middle" font-size="13" fill="#047857">shared</text>
+
+  <rect x="448" y="136" width="48" height="128" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="472" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">S0</text>
+  <rect x="504" y="136" width="48" height="128" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="528" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">S1</text>
+
+  <rect x="576" y="96" width="160" height="184" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="656" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">Old</text>
+  <text x="656" y="196" text-anchor="middle" font-size="13" fill="#334155">promoted</text>
+
+  <text x="400" y="340" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">each thread allocates only in its own TLAB</text>
+</svg>

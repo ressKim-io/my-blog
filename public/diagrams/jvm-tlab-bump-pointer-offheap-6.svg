@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" role="img" aria-labelledby="j6 e6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j6">The compressed-oops cliff sits exactly at 32 gigabytes</title>
+  <desc id="e6">With the default eight byte object alignment the JVM can encode a reference as a 32-bit offset up to a 32 gigabyte heap. Ask for a heap at or beyond that and compression switches off, so every reference and every class pointer doubles from four bytes to eight and the heap suddenly holds fewer objects than it did just below the line. Raising the object alignment to sixteen bytes pushes the same cliff out to roughly 64 gigabytes.</desc>
+  <rect x="0" y="0" width="800" height="350" fill="#FFFFFF"/>
+
+  <text x="400" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">compressed oops</text>
+
+  <text x="436" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">cliff</text>
+  <line x1="436" y1="100" x2="436" y2="196" stroke="#E11D48" stroke-width="2" stroke-dasharray="6 4"/>
+
+  <text x="120" y="161" text-anchor="end" font-size="13" font-weight="700" fill="#334155">align 8</text>
+  <rect x="136" y="120" width="300" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="286" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">4B refs</text>
+  <rect x="436" y="120" width="300" height="60" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="586" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">8B refs</text>
+
+  <text x="120" y="257" text-anchor="end" font-size="13" font-weight="700" fill="#334155">align 16</text>
+  <rect x="136" y="216" width="600" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="436" y="253" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">4B refs</text>
+
+  <line x1="136" y1="300" x2="736" y2="300" stroke="#475569" stroke-width="1.5"/>
+  <line x1="136" y1="296" x2="136" y2="306" stroke="#475569" stroke-width="1.5"/>
+  <line x1="436" y1="296" x2="436" y2="306" stroke="#475569" stroke-width="1.5"/>
+  <line x1="736" y1="296" x2="736" y2="306" stroke="#475569" stroke-width="1.5"/>
+  <text x="136" y="326" text-anchor="middle" font-size="13" fill="#334155">0</text>
+  <text x="436" y="326" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">32GB</text>
+  <text x="736" y="326" text-anchor="middle" font-size="13" fill="#334155">64GB</text>
+</svg>

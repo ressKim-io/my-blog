@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="j10 e10" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j10">The cheaper the allocation, the heavier the runtime that pays for it</title>
+  <desc id="e10">Reading left to right, allocation gets cheaper: Rust pops a chunk from a malloc bin, Go scans a bitmap for a free slot, and Java simply bumps a pointer. Reading the other line, the burden the runtime carries to reclaim that memory rises in exactly the same order: Rust hands reclamation to the programmer, Go runs a non-moving collector, and Java runs a moving generational one. This sketches the direction of the trade, not a measured ratio.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <text x="160" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Rust</text>
+  <text x="400" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Go</text>
+  <text x="640" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Java</text>
+
+  <line x1="160" y1="72" x2="160" y2="268" stroke="#E4E4E7" stroke-width="1.2"/>
+  <line x1="400" y1="72" x2="400" y2="268" stroke="#E4E4E7" stroke-width="1.2"/>
+  <line x1="640" y1="72" x2="640" y2="268" stroke="#E4E4E7" stroke-width="1.2"/>
+
+  <polyline points="160,112 400,168 640,232" fill="none" stroke="#E11D48" stroke-width="2.5"/>
+  <circle cx="160" cy="112" r="7" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <circle cx="400" cy="168" r="7" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <circle cx="640" cy="232" r="7" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+
+  <polyline points="160,240 400,184 640,120" fill="none" stroke="#7C3AED" stroke-width="2.5"/>
+  <circle cx="160" cy="240" r="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <circle cx="400" cy="184" r="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <circle cx="640" cy="120" r="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+
+  <text x="160" y="294" text-anchor="middle" font-size="13" fill="#334155">malloc bin</text>
+  <text x="400" y="294" text-anchor="middle" font-size="13" fill="#334155">bitmap slot</text>
+  <text x="640" y="294" text-anchor="middle" font-size="13" fill="#334155">bump pointer</text>
+
+  <line x1="120" y1="332" x2="164" y2="332" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="174" y="337" font-size="13" font-weight="700" fill="#BE123C">allocation cost</text>
+  <line x1="404" y1="332" x2="448" y2="332" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="458" y="337" font-size="13" font-weight="700" fill="#6D28D9">reclamation on the runtime</text>
+</svg>

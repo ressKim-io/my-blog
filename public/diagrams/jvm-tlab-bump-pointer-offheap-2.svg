@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 290" role="img" aria-labelledby="j2 e2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j2">Bump the pointer: allocation is one addition</title>
+  <desc id="e2">A thread-local buffer is nothing but a run of empty space with a pointer to the next free byte and a pointer to the end. Allocating an object means checking that it fits before the end, handing back the current top, and moving top forward by the size of the object. There is no lock, no compare-and-swap and no list to walk.</desc>
+  <defs>
+    <marker id="j2g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="290" fill="#FFFFFF"/>
+
+  <line x1="64" y1="104" x2="64" y2="124" stroke="#475569" stroke-width="1.5"/>
+  <text x="64" y="94" text-anchor="middle" font-size="13" fill="#334155">start</text>
+  <line x1="400" y1="104" x2="400" y2="124" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="94" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">top</text>
+  <line x1="736" y1="104" x2="736" y2="124" stroke="#475569" stroke-width="1.5"/>
+  <text x="736" y="94" text-anchor="middle" font-size="13" fill="#334155">end</text>
+
+  <rect x="64" y="128" width="240" height="76" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="184" y="172" text-anchor="middle" font-size="13" fill="#0E7490">allocated</text>
+
+  <rect x="304" y="128" width="96" height="76" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="352" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">new</text>
+
+  <rect x="400" y="128" width="336" height="76" fill="#FFFFFF" stroke="#475569" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="568" y="172" text-anchor="middle" font-size="13" fill="#334155">free</text>
+
+  <line x1="304" y1="228" x2="396" y2="228" stroke="#059669" stroke-width="2" marker-end="url(#j2g)"/>
+  <text x="352" y="258" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">top += size</text>
+</svg>

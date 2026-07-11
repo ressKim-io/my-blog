@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="j8 e8" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j8">-Xmx fences the GC heap; the container counts everything</title>
+  <desc id="e8">The maximum heap flag bounds one thing only, the garbage-collected heap of young and old generations. Metaspace, the JIT code cache, direct byte buffers and the stack of every thread all live outside that fence, in native memory. The container's cgroup accounting adds up the resident memory of all of it, which is why a process can be killed for exceeding its limit while its heap still looks healthy.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <rect x="48" y="56" width="704" height="280" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="68" y="88" font-size="15" font-weight="700" fill="#BE123C">container limit · cgroup</text>
+
+  <rect x="72" y="112" width="280" height="200" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="212" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">GC heap</text>
+  <text x="212" y="208" text-anchor="middle" font-size="13" fill="#047857">Young + Old</text>
+
+  <rect x="60" y="100" width="304" height="224" rx="12" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-dasharray="7 4"/>
+  <rect x="152" y="312" width="120" height="24" fill="#FFF1F2"/>
+  <text x="212" y="330" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">-Xmx</text>
+
+  <text x="552" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">outside -Xmx</text>
+
+  <rect x="392" y="112" width="320" height="44" rx="7" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="552" y="140" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">Metaspace</text>
+  <rect x="392" y="164" width="320" height="44" rx="7" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="552" y="192" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">Code Cache</text>
+  <rect x="392" y="216" width="320" height="44" rx="7" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="552" y="244" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">Direct Memory</text>
+  <rect x="392" y="268" width="320" height="44" rx="7" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="552" y="296" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">Thread Stacks</text>
+</svg>

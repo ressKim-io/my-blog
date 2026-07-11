@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" role="img" aria-labelledby="j7 e7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j7">Java is on a trajectory to stop paying the object-header tax</title>
+  <desc id="e7">Compact object headers arrived as an experiment in JDK 24, became a real product feature you must opt into in JDK 25, and are proposed to become the default layout in JDK 27, which takes the header from twelve bytes down to eight. Project Valhalla's value classes aim further still: an object with no identity needs no header at all, so the tax disappears rather than shrinking.</desc>
+  <defs>
+    <marker id="j7d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="300" fill="#FFFFFF"/>
+
+  <text x="136" y="48" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">JDK 24 · JEP 450</text>
+  <text x="312" y="48" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">JDK 25 · JEP 519</text>
+  <text x="488" y="48" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">JDK 27 · JEP 534</text>
+  <text x="664" y="48" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">JDK 28+ · JEP 401</text>
+
+  <text x="136" y="76" text-anchor="middle" font-size="13" fill="#334155">experiment</text>
+  <text x="312" y="76" text-anchor="middle" font-size="13" fill="#334155">product · opt-in</text>
+  <text x="488" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">default</text>
+  <text x="664" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">value class</text>
+
+  <rect x="76" y="120" width="120" height="60" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="136" y="157" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">12B</text>
+
+  <rect x="252" y="120" width="120" height="60" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="312" y="157" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">12B</text>
+
+  <rect x="448" y="120" width="80" height="60" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="488" y="157" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">8B</text>
+
+  <rect x="638" y="120" width="52" height="60" rx="7" fill="#FFFFFF" stroke="#059669" stroke-width="1.8" stroke-dasharray="5 3"/>
+  <text x="664" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">none</text>
+
+  <line x1="76" y1="232" x2="712" y2="232" stroke="#475569" stroke-width="2" marker-end="url(#j7d)"/>
+  <text x="400" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">default object header</text>
+</svg>

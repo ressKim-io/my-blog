@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 330" role="img" aria-labelledby="j9 e9" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="j9">The same question, answered at a different time</title>
+  <desc id="e9">Rust and Go decide at compile time whether a value lives on the stack or the heap, and because they compile ahead of time the answer never changes at run time. Java asks the same question while the program is running: if the just-in-time compiler proves the object cannot escape it removes the allocation entirely by scalar replacement, but that proof depends on inlining and on the profile, and a deoptimisation can take it back.</desc>
+  <defs>
+    <marker id="j9d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="330" fill="#FFFFFF"/>
+
+  <line x1="400" y1="24" x2="400" y2="306" stroke="#E4E4E7" stroke-width="1.2"/>
+
+  <text x="200" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Rust · Go</text>
+  <text x="600" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Java</text>
+
+  <line x1="200" y1="136" x2="200" y2="170" stroke="#334155" stroke-width="1.8" marker-end="url(#j9d)"/>
+  <line x1="600" y1="136" x2="524" y2="170" stroke="#334155" stroke-width="1.8" marker-end="url(#j9d)"/>
+  <line x1="600" y1="136" x2="668" y2="170" stroke="#334155" stroke-width="1.8" marker-end="url(#j9d)"/>
+
+  <rect x="88" y="88" width="224" height="48" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="200" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">compile time</text>
+
+  <rect x="88" y="176" width="224" height="56" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="200" y="211" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">stack or heap</text>
+  <text x="200" y="268" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">deterministic</text>
+
+  <rect x="488" y="88" width="224" height="48" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="600" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">run time · JIT</text>
+
+  <rect x="440" y="176" width="152" height="56" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="516" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">scalar replaced</text>
+  <rect x="608" y="176" width="104" height="56" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="660" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">heap</text>
+
+  <text x="600" y="268" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">conditional</text>
+  <text x="600" y="294" text-anchor="middle" font-size="13" fill="#BE123C">deopt can undo it</text>
+</svg>
