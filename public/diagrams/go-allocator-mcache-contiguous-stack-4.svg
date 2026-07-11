@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Allocation is a bit scan, not a list walk</title>
+  <desc id="d4">Because every slot in a span is the same size, the allocator does not have to search a free list for a fitting chunk. It keeps a bitmap called allocCache in which each bit stands for one slot, one meaning taken and zero meaning free. Finding the next free slot is a bit operation on that word, and the slot address follows from its index.</desc>
+  <rect x="0" y="0" width="800" height="300" fill="#FFFFFF"/>
+
+  <text x="64" y="44" font-size="14" font-weight="700" fill="#6D28D9">mspan · 24B class</text>
+
+  <rect x="64" y="64" width="72" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <rect x="144" y="64" width="72" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <rect x="224" y="64" width="72" height="64" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <rect x="304" y="64" width="72" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <rect x="384" y="64" width="72" height="64" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <rect x="464" y="64" width="72" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <rect x="544" y="64" width="72" height="64" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <rect x="624" y="64" width="72" height="64" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.6" stroke-dasharray="5 3"/>
+
+  <text x="64" y="172" font-size="13" font-weight="700" fill="#334155">allocCache</text>
+
+  <rect x="64" y="184" width="72" height="44" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.3"/>
+  <text x="100" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">1</text>
+  <rect x="144" y="184" width="72" height="44" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.3"/>
+  <text x="180" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">1</text>
+  <rect x="224" y="184" width="72" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="260" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">0</text>
+  <rect x="304" y="184" width="72" height="44" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.3"/>
+  <text x="340" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">1</text>
+  <rect x="384" y="184" width="72" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="420" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">0</text>
+  <rect x="464" y="184" width="72" height="44" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.3"/>
+  <text x="500" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">1</text>
+  <rect x="544" y="184" width="72" height="44" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.3"/>
+  <text x="580" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">1</text>
+  <rect x="624" y="184" width="72" height="44" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="660" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">0</text>
+
+  <rect x="216" y="56" width="88" height="180" rx="8" fill="none" stroke="#059669" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="260" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">next free slot</text>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">A size class splits into scan and noscan spans</title>
+  <desc id="d3">Every size class is split in two depending on whether the objects it holds contain pointers. Objects with pointers go into a scan span, which the garbage collector must walk slot by slot. Objects without pointers go into a noscan span, which the collector can skip in one step. The pair of them is what the runtime calls a span class, so there are roughly twice as many span kinds as size classes.</desc>
+  <defs>
+    <marker id="g3d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="360" y1="80" x2="248" y2="136" stroke="#334155" stroke-width="1.8" marker-end="url(#g3d)"/>
+  <line x1="440" y1="80" x2="552" y2="136" stroke="#334155" stroke-width="1.8" marker-end="url(#g3d)"/>
+  <line x1="236" y1="232" x2="236" y2="272" stroke="#334155" stroke-width="1.8" marker-end="url(#g3d)"/>
+  <line x1="564" y1="232" x2="564" y2="272" stroke="#334155" stroke-width="1.8" marker-end="url(#g3d)"/>
+
+  <rect x="320" y="28" width="160" height="52" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="400" y="60" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">size class · 24B</text>
+
+  <rect x="112" y="144" width="248" height="88" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="236" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">scan span</text>
+  <text x="236" y="208" text-anchor="middle" font-size="13" fill="#6D28D9">has pointers</text>
+
+  <rect x="440" y="144" width="248" height="88" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="564" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">noscan span</text>
+  <text x="564" y="208" text-anchor="middle" font-size="13" fill="#047857">no pointers</text>
+
+  <rect x="112" y="280" width="248" height="56" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="236" y="315" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">GC walks every slot</text>
+
+  <rect x="440" y="280" width="248" height="56" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="564" y="315" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">GC skips the span</text>
+
+  <text x="400" y="376" text-anchor="middle" font-size="13" fill="#334155">span class = size class × scan / noscan</text>
+</svg>

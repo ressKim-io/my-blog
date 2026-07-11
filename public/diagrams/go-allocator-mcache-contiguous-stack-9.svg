@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t9 d9" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t9">Three languages, three names, one answer</title>
+  <desc id="d9">Rust reaches the glibc thread cache, Go reaches the per-processor mcache, and Java reaches its thread-local allocation buffer. The names and the owners differ, but all three arrived at the same answer: the common case, a small allocation, is served from a cache private to the thread or processor, with no lock at all. What differs is what each cache is fused with — the malloc implementation below it, Go's scheduler and collector, or the JVM's Eden and its collector.</desc>
+  <defs>
+    <marker id="g9d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+    <marker id="g9v" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="160" y1="92" x2="160" y2="130" stroke="#334155" stroke-width="1.8" marker-end="url(#g9d)"/>
+  <line x1="400" y1="92" x2="400" y2="130" stroke="#334155" stroke-width="1.8" marker-end="url(#g9d)"/>
+  <line x1="640" y1="92" x2="640" y2="130" stroke="#334155" stroke-width="1.8" marker-end="url(#g9d)"/>
+
+  <line x1="160" y1="256" x2="288" y2="290" stroke="#7C3AED" stroke-width="1.8" marker-end="url(#g9v)"/>
+  <line x1="400" y1="256" x2="400" y2="290" stroke="#7C3AED" stroke-width="1.8" marker-end="url(#g9v)"/>
+  <line x1="640" y1="256" x2="512" y2="290" stroke="#7C3AED" stroke-width="1.8" marker-end="url(#g9v)"/>
+
+  <rect x="64" y="40" width="192" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="160" y="72" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Rust</text>
+  <rect x="304" y="40" width="192" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="400" y="72" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Go</text>
+  <rect x="544" y="40" width="192" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="640" y="72" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Java</text>
+
+  <rect x="64" y="136" width="192" height="72" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="160" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">glibc tcache</text>
+  <rect x="304" y="136" width="192" height="72" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="400" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">mcache · per P</text>
+  <rect x="544" y="136" width="192" height="72" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="640" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">TLAB · per thread</text>
+
+  <text x="160" y="240" text-anchor="middle" font-size="13" fill="#334155">fused with libc</text>
+  <text x="400" y="240" text-anchor="middle" font-size="13" fill="#334155">fused with GMP · GC</text>
+  <text x="640" y="240" text-anchor="middle" font-size="13" fill="#334155">fused with Eden · GC</text>
+
+  <rect x="200" y="296" width="400" height="64" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="400" y="335" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">local cache · no lock</text>
+</svg>

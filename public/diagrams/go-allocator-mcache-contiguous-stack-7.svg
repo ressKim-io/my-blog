@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 310" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t7">Where the escape analysis verdict physically lands</title>
+  <desc id="d7">If the compiler proves an object does not outlive its function, the object is laid down on the goroutine stack. It never touches the allocator and the collector never sees it, and it disappears with the frame when the function returns. If the object escapes, it lands in a slot of some span reached through the per-P cache, and from then on the collector is responsible for reclaiming it.</desc>
+  <defs>
+    <marker id="g7g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+    <marker id="g7v" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="310" fill="#FFFFFF"/>
+
+  <line x1="352" y1="76" x2="232" y2="138" stroke="#059669" stroke-width="1.8" marker-end="url(#g7g)"/>
+  <line x1="448" y1="76" x2="568" y2="138" stroke="#7C3AED" stroke-width="1.8" marker-end="url(#g7v)"/>
+
+  <rect x="320" y="24" width="160" height="52" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="400" y="56" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">escape analysis</text>
+
+  <rect x="176" y="96" width="112" height="22" fill="#FFFFFF"/>
+  <text x="232" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">no escape</text>
+  <rect x="512" y="96" width="112" height="22" fill="#FFFFFF"/>
+  <text x="568" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">escapes</text>
+
+  <rect x="88" y="144" width="264" height="72" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="220" y="188" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">goroutine stack</text>
+
+  <rect x="448" y="144" width="264" height="72" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="580" y="188" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">heap · span slot</text>
+
+  <text x="220" y="252" text-anchor="middle" font-size="13" fill="#047857">no allocator · no GC</text>
+  <text x="220" y="278" text-anchor="middle" font-size="13" fill="#047857">gone with the frame</text>
+  <text x="580" y="252" text-anchor="middle" font-size="13" fill="#6D28D9">through mcache</text>
+  <text x="580" y="278" text-anchor="middle" font-size="13" fill="#6D28D9">GC must reclaim</text>
+</svg>

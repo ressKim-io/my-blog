@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">The cost staircase: cheap and common at the bottom, dear and rare at the top</title>
+  <desc id="d5">Almost every allocation is served by the lock-free mcache. Refilling from the mcentral costs a lock and happens sometimes. Growing from the mheap costs the global lock and happens rarely. Calling the kernel for a new arena is the most expensive step of all and happens very rarely. Each step up the staircase is both more expensive and less frequent than the one below it.</desc>
+  <defs>
+    <marker id="g5d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="40" y1="336" x2="40" y2="96" stroke="#475569" stroke-width="1.8" marker-end="url(#g5d)"/>
+  <text x="40" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">cost</text>
+
+  <line x1="224" y1="292" x2="238" y2="248" stroke="#334155" stroke-width="1.6" marker-end="url(#g5d)"/>
+  <line x1="400" y1="236" x2="414" y2="192" stroke="#334155" stroke-width="1.6" marker-end="url(#g5d)"/>
+  <line x1="576" y1="180" x2="590" y2="136" stroke="#334155" stroke-width="1.6" marker-end="url(#g5d)"/>
+
+  <rect x="64" y="272" width="160" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="144" y="306" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">mcache</text>
+
+  <rect x="240" y="216" width="160" height="56" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="320" y="250" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">mcentral</text>
+
+  <rect x="416" y="160" width="160" height="56" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="496" y="194" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">mheap</text>
+
+  <rect x="592" y="104" width="160" height="56" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="672" y="138" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">mmap</text>
+
+  <line x1="64" y1="352" x2="752" y2="352" stroke="#E4E4E7" stroke-width="1.2"/>
+  <text x="144" y="378" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">most</text>
+  <text x="320" y="378" text-anchor="middle" font-size="13" fill="#334155">sometimes</text>
+  <text x="496" y="378" text-anchor="middle" font-size="13" fill="#334155">rare</text>
+  <text x="672" y="378" text-anchor="middle" font-size="13" fill="#334155">very rare</text>
+</svg>
