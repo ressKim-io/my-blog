@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="c3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="c3">A garbage collector is what you get when you want all three at once</title>
+  <desc id="d3">Three wishes overlap. Memory safety, meaning no use-after-free and no dangling pointer. No bookkeeping, meaning the programmer never writes lifetimes by hand. And cheap allocation of the kind that gives up returning objects one at a time. Where all three overlap sits the garbage collector, and that is where Go and Java live. Rust sits in the upper lens: it keeps safety and mostly keeps freedom from bookkeeping, but it gives up the third wish, and that is exactly why it needs no collector.</desc>
+  <rect x="0" y="0" width="800" height="520" fill="#FFFFFF"/>
+
+  <circle cx="310" cy="210" r="140" fill="#ECFEFF" fill-opacity="0.72" stroke="#0891B2" stroke-width="2"/>
+  <circle cx="490" cy="210" r="140" fill="#ECFDF5" fill-opacity="0.72" stroke="#059669" stroke-width="2"/>
+  <circle cx="400" cy="350" r="140" fill="#FFFBEB" fill-opacity="0.72" stroke="#D97706" stroke-width="2"/>
+
+  <text x="228" y="196" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">safety</text>
+  <text x="572" y="196" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">no bookkeeping</text>
+  <text x="400" y="448" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">cheap alloc</text>
+
+  <rect x="352" y="140" width="96" height="44" rx="9" fill="#FFFFFF" stroke="#0891B2" stroke-width="2.2"/>
+  <text x="400" y="169" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Rust</text>
+
+  <rect x="332" y="242" width="136" height="60" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="400" y="270" text-anchor="middle" font-size="17" font-weight="700" fill="#6D28D9">GC</text>
+  <text x="400" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">Go · Java</text>
+</svg>

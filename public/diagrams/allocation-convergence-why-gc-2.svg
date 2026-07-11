@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-labelledby="c2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="c2">Somebody has to answer "is this still alive?" — you only choose who</title>
+  <desc id="d2">The bookkeeping of liveness never disappears; it only moves. It can sit in the programmer's head, as manual free in C, and then a mistake is a use-after-free or a leak. It can sit in the compiler, as ownership in Rust, proved before the program ever runs and costing nothing at run time. It can sit in the runtime, either as a tracing collector that walks the heap, or as reference counting that frees the moment a count hits zero but cannot break a cycle on its own.</desc>
+  <defs>
+    <marker id="cv2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="320" fill="#FFFFFF"/>
+
+  <rect x="272" y="24" width="256" height="56" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="400" y="59" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">is this still alive?</text>
+
+  <line x1="360" y1="80" x2="150" y2="144" stroke="#334155" stroke-width="1.6" marker-end="url(#cv2)"/>
+  <line x1="380" y1="80" x2="320" y2="144" stroke="#334155" stroke-width="1.6" marker-end="url(#cv2)"/>
+  <line x1="420" y1="80" x2="490" y2="144" stroke="#334155" stroke-width="1.6" marker-end="url(#cv2)"/>
+  <line x1="440" y1="80" x2="660" y2="144" stroke="#334155" stroke-width="1.6" marker-end="url(#cv2)"/>
+
+  <rect x="48" y="152" width="160" height="64" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="128" y="191" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">programmer</text>
+  <text x="128" y="248" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">C</text>
+  <text x="128" y="276" text-anchor="middle" font-size="13" fill="#BE123C">use-after-free</text>
+
+  <rect x="232" y="152" width="160" height="64" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="312" y="191" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">compiler</text>
+  <text x="312" y="248" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Rust</text>
+  <text x="312" y="276" text-anchor="middle" font-size="13" fill="#047857">zero at run time</text>
+
+  <rect x="416" y="152" width="160" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="496" y="191" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">runtime · trace</text>
+  <text x="496" y="248" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Go · Java</text>
+  <text x="496" y="276" text-anchor="middle" font-size="13" fill="#6D28D9">runtime CPU</text>
+
+  <rect x="600" y="152" width="160" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8" stroke-dasharray="6 4"/>
+  <text x="680" y="191" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">runtime · count</text>
+  <text x="680" y="248" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">Swift · Rc</text>
+  <text x="680" y="276" text-anchor="middle" font-size="13" fill="#6D28D9">cycles leak</text>
+</svg>

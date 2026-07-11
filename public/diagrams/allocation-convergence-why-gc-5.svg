@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="c5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="c5">How the object model lays values out in memory</title>
+  <desc id="d5">An array of Java objects is an array of references. Reading an element means following a pointer to somewhere else on the heap, where the object sits behind its own header, and neighbouring elements can be far apart. A Go slice of structs or a Rust vector lays the values themselves end to end, with no header in front of each one and no pointer to chase, which is what the prefetcher and the translation buffer reward.</desc>
+  <defs>
+    <marker id="cv5" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="64" y="44" font-size="14" font-weight="700" fill="#6D28D9">Object[] · Java</text>
+
+  <line x1="100" y1="112" x2="450" y2="74" stroke="#475569" stroke-width="1.4" marker-end="url(#cv5)"/>
+  <line x1="180" y1="112" x2="434" y2="184" stroke="#475569" stroke-width="1.4" marker-end="url(#cv5)"/>
+  <line x1="260" y1="112" x2="602" y2="128" stroke="#475569" stroke-width="1.4" marker-end="url(#cv5)"/>
+  <line x1="340" y1="112" x2="586" y2="224" stroke="#475569" stroke-width="1.4" marker-end="url(#cv5)"/>
+
+  <rect x="64" y="64" width="72" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="100" y="94" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">ref</text>
+  <rect x="144" y="64" width="72" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <rect x="224" y="64" width="72" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <rect x="304" y="64" width="72" height="48" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+
+  <rect x="456" y="48" width="24" height="44" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <rect x="480" y="48" width="88" height="44" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="608" y="104" width="24" height="44" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <rect x="632" y="104" width="88" height="44" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="440" y="160" width="24" height="44" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <rect x="464" y="160" width="88" height="44" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <rect x="592" y="200" width="24" height="44" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <rect x="616" y="200" width="88" height="44" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+
+  <text x="576" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">scattered · header in front</text>
+
+  <text x="64" y="308" font-size="14" font-weight="700" fill="#047857">[]struct · Vec&lt;T&gt;</text>
+
+  <rect x="64" y="324" width="80" height="48" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="104" y="354" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">val</text>
+  <rect x="144" y="324" width="80" height="48" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <rect x="224" y="324" width="80" height="48" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <rect x="304" y="324" width="80" height="48" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <rect x="384" y="324" width="80" height="48" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <rect x="464" y="324" width="80" height="48" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+
+  <text x="656" y="354" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">contiguous · no chase</text>
+</svg>

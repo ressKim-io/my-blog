@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" role="img" aria-labelledby="c4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="c4">Three places the bill can land, and where each language sends it</title>
+  <desc id="d4">If you refuse to move objects you keep the fragmentation. If you move them you pay the barriers and the pauses that moving requires. If you refuse to hand the bookkeeping to a runtime at all, the compiler and the programmer carry it instead. Java leans into the cost of moving, Go leans into fragmentation, and Rust leans into the compiler and the human. This sketches which corner each language leans toward, not a measured position.</desc>
+  <rect x="0" y="0" width="800" height="460" fill="#FFFFFF"/>
+
+  <path d="M400,72 L120,392 L680,392 Z" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+
+  <text x="400" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">compiler · human</text>
+  <text x="400" y="66" text-anchor="middle" font-size="13" fill="#334155">not the runtime</text>
+
+  <text x="112" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">fragmentation</text>
+  <text x="112" y="440" text-anchor="middle" font-size="13" fill="#334155">not moving</text>
+
+  <text x="688" y="420" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">moving cost</text>
+  <text x="688" y="440" text-anchor="middle" font-size="13" fill="#334155">barrier · pause</text>
+
+  <circle cx="330" cy="190" r="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <text x="330" y="172" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Rust</text>
+
+  <circle cx="230" cy="340" r="8" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="230" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">Go</text>
+
+  <circle cx="590" cy="340" r="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="590" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">Java</text>
+</svg>
