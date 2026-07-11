@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 384" role="img" aria-labelledby="t8 d8" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t8">Overcommit sells more promises than reality; the bill is the OOM Killer</title>
+  <desc id="d8">The sum of virtual promises across processes is allowed to exceed physical RAM plus swap, because most pages are never touched. When the promises are actually claimed all at once, reality runs out, and the kernel's OOM Killer picks a victim by oom_score and sends SIGKILL. In a container the cgroup memory limit triggers the same ending, reported by Kubernetes as OOMKilled.</desc>
+  <defs>
+    <marker id="k8r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="384" fill="#FFFFFF"/>
+
+  <rect x="48" y="48" width="424" height="76" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="260" y="80" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">promises · VSZ</text>
+  <text x="260" y="106" text-anchor="middle" font-size="13" fill="#6D28D9">every VMA of every process</text>
+
+  <rect x="48" y="156" width="280" height="76" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="188" y="188" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">RAM + swap</text>
+  <text x="188" y="214" text-anchor="middle" font-size="13" fill="#B45309">reality</text>
+
+  <text x="392" y="200" font-size="15" font-weight="700" fill="#BE123C">promises &gt; reality</text>
+
+  <line x1="560" y1="124" x2="560" y2="256" stroke="#E11D48" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#k8r)"/>
+  <text x="578" y="176" font-size="13" fill="#BE123C">claimed</text>
+  <text x="578" y="196" font-size="13" fill="#BE123C">all at once</text>
+
+  <rect x="416" y="260" width="336" height="96" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="584" y="296" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">OOM Killer</text>
+  <text x="584" y="326" text-anchor="middle" font-size="13" fill="#BE123C" font-family="ui-monospace, monospace">oom_score → SIGKILL</text>
+
+  <rect x="48" y="280" width="304" height="76" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="200" y="312" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">container: memory.max</text>
+  <text x="200" y="338" text-anchor="middle" font-size="13" fill="#BE123C">→ OOMKilled</text>
+</svg>

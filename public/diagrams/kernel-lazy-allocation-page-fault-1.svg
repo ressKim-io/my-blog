@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">Part three climbs from the kernel up to the language runtimes</title>
+  <desc id="d1">A three-layer stack. At the bottom sits the kernel, which owns pages, page faults and overcommit — this post, 3.1. Above it sits the user-space allocator layer: libc malloc, Go's allocator, the JVM TLAB — post 3.2. On top sit the three language runtimes: Rust delegating to libc, Go with its own runtime allocator, and the JVM heap — posts 3.2 through 3.4. Every layer ultimately gets physical frames only from the kernel below.</desc>
+  <defs>
+    <marker id="k1a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="360" y1="148" x2="360" y2="120" stroke="#334155" stroke-width="1.6" marker-end="url(#k1a)"/>
+  <line x1="360" y1="272" x2="360" y2="244" stroke="#334155" stroke-width="1.6" marker-end="url(#k1a)"/>
+
+  <rect x="64" y="40" width="592" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <rect x="88" y="64" width="168" height="40" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.2"/>
+  <text x="172" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">Rust → libc</text>
+  <rect x="276" y="64" width="168" height="40" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.2"/>
+  <text x="360" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">Go runtime</text>
+  <rect x="464" y="64" width="168" height="40" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.2"/>
+  <text x="548" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">JVM heap</text>
+
+  <rect x="64" y="164" width="592" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="360" y="196" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">user-space allocator</text>
+  <text x="360" y="222" text-anchor="middle" font-size="13" fill="#6D28D9">malloc · TCMalloc-style · TLAB</text>
+
+  <rect x="64" y="288" width="592" height="80" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="360" y="320" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">kernel</text>
+  <text x="360" y="346" text-anchor="middle" font-size="13" fill="#B45309">pages · faults · overcommit</text>
+
+  <text x="688" y="86" font-size="13" fill="#334155">3.2–3.4</text>
+  <text x="688" y="210" font-size="13" fill="#334155">3.2</text>
+  <text x="688" y="326" font-size="14" font-weight="700" fill="#B45309">3.1 ★</text>
+</svg>

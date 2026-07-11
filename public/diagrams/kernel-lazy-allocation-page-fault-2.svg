@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 384" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">The same virtual address maps to different physical frames per process</title>
+  <desc id="d2">Process A and process B each use the virtual address 0x1000. The MMU translates each access through that process's own page table, so A's 0x1000 lands on physical frame 12 while B's 0x1000 lands on frame 87. Neither process can reach the other's frame, which is how isolation falls out of translation.</desc>
+  <defs>
+    <marker id="k2a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0E7490"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="384" fill="#FFFFFF"/>
+
+  <line x1="248" y1="112" x2="332" y2="168" stroke="#0891B2" stroke-width="1.8" marker-end="url(#k2a)"/>
+  <line x1="248" y1="288" x2="332" y2="216" stroke="#0891B2" stroke-width="1.8" marker-end="url(#k2a)"/>
+  <line x1="468" y1="176" x2="556" y2="120" stroke="#0891B2" stroke-width="1.8" marker-end="url(#k2a)"/>
+  <line x1="468" y1="208" x2="556" y2="300" stroke="#0891B2" stroke-width="1.8" marker-end="url(#k2a)"/>
+
+  <rect x="48" y="56" width="200" height="88" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="148" y="90" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">process A</text>
+  <text x="148" y="118" text-anchor="middle" font-size="14" fill="#0E7490" font-family="ui-monospace, monospace">0x1000</text>
+
+  <rect x="48" y="240" width="200" height="88" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="148" y="274" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">process B</text>
+  <text x="148" y="302" text-anchor="middle" font-size="14" fill="#0E7490" font-family="ui-monospace, monospace">0x1000</text>
+
+  <rect x="336" y="152" width="132" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="402" y="186" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">MMU</text>
+  <text x="402" y="210" text-anchor="middle" font-size="13" fill="#6D28D9">per-process map</text>
+
+  <rect x="560" y="48" width="192" height="296" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.6"/>
+  <text x="656" y="78" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">physical RAM</text>
+
+  <rect x="584" y="96" width="144" height="40" rx="5" fill="#FFFFFF" stroke="#D97706" stroke-width="1.4"/>
+  <text x="656" y="122" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">frame 12 — A</text>
+  <rect x="584" y="152" width="144" height="40" rx="5" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1.2"/>
+  <rect x="584" y="208" width="144" height="40" rx="5" fill="#FAFAFA" stroke="#E4E4E7" stroke-width="1.2"/>
+  <rect x="584" y="276" width="144" height="40" rx="5" fill="#FFFFFF" stroke="#D97706" stroke-width="1.4"/>
+  <text x="656" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">frame 87 — B</text>
+</svg>

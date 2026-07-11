@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 344" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">Minor faults stay in RAM; major faults go to disk</title>
+  <desc id="d6">A minor fault is resolved entirely in memory — the kernel attaches a frame it already has, costing hundreds to thousands of cycles. A major fault must read the page's content from disk or swap, real I/O that costs microseconds on NVMe to milliseconds on spinning disks, more than a thousand times a minor fault.</desc>
+  <defs>
+    <marker id="k6r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="344" fill="#FFFFFF"/>
+
+  <line x1="400" y1="32" x2="400" y2="312" stroke="#E4E4E7" stroke-width="1.2"/>
+
+  <text x="200" y="56" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">minor fault</text>
+  <rect x="56" y="80" width="288" height="96" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="200" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">frame from RAM</text>
+  <text x="200" y="146" text-anchor="middle" font-size="13" fill="#047857">no I/O</text>
+
+  <rect x="56" y="216" width="288" height="64" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="200" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">100s–1000s cycles</text>
+
+  <text x="600" y="56" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">major fault</text>
+  <rect x="456" y="80" width="288" height="96" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="600" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">read disk · swap</text>
+  <text x="600" y="146" text-anchor="middle" font-size="13" fill="#BE123C">real I/O</text>
+
+  <line x1="600" y1="176" x2="600" y2="208" stroke="#E11D48" stroke-width="1.8" marker-end="url(#k6r)"/>
+
+  <rect x="456" y="216" width="288" height="64" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="600" y="244" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">µs–ms</text>
+  <text x="600" y="268" text-anchor="middle" font-size="13" fill="#BE123C">1,000× and beyond</text>
+</svg>

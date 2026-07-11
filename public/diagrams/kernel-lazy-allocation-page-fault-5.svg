@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">mmap only writes a ledger entry; the frame arrives at first write</title>
+  <desc id="d5">On the left, an mmap call registers a VMA — one ledger line saying this one-megabyte range is valid and writable — while the physical RAM row below holds zero frames and RSS does not move. The first write to a page raises a page fault, the kernel attaches one physical frame and fills the page-table entry, RSS grows by four kilobytes, and the program resumes as if nothing happened.</desc>
+  <defs>
+    <marker id="k5r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+    <marker id="k5a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#B45309"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="72" y="48" font-size="14" font-weight="700" fill="#334155" font-family="ui-monospace, monospace">mmap(1MB)</text>
+  <text x="728" y="48" text-anchor="end" font-size="14" font-weight="700" fill="#334155">first write</text>
+
+  <line x1="400" y1="40" x2="400" y2="360" stroke="#E4E4E7" stroke-width="1.2"/>
+
+  <rect x="48" y="72" width="304" height="88" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="200" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">VMA · ledger only</text>
+  <text x="200" y="132" text-anchor="middle" font-size="13" fill="#6D28D9" font-family="ui-monospace, monospace">[A, A+1MB) RW anon</text>
+
+  <rect x="48" y="240" width="304" height="72" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.4" stroke-dasharray="6 3"/>
+  <text x="200" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">frames: 0</text>
+  <text x="200" y="296" text-anchor="middle" font-size="13" fill="#B45309">RSS +0</text>
+
+  <line x1="448" y1="116" x2="448" y2="184" stroke="#E11D48" stroke-width="2" marker-end="url(#k5r)"/>
+  <text x="466" y="152" font-size="13" fill="#BE123C">touch</text>
+
+  <rect x="448" y="72" width="304" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.6"/>
+  <text x="600" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">*p = 1</text>
+
+  <rect x="448" y="188" width="304" height="60" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="600" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">page fault</text>
+
+  <line x1="600" y1="248" x2="600" y2="276" stroke="#B45309" stroke-width="1.8" marker-end="url(#k5a)"/>
+
+  <rect x="448" y="280" width="304" height="88" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="600" y="312" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">frame + PTE</text>
+  <text x="600" y="340" text-anchor="middle" font-size="13" fill="#B45309">RSS +4KB · resume</text>
+</svg>
