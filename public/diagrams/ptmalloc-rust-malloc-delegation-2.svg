@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">ptmalloc nests three layers: arena, heap, and chunk</title>
+  <desc id="d2">An arena is a memory pool guarded by one mutex. Inside it sits a heap, the contiguous land taken from the kernel, and the heap is cut into chunks with an unsplit top chunk at the end. The main arena grows with brk, while extra thread arenas created under lock contention take their land with mmap.</desc>
+  <defs>
+    <marker id="a2a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#B45309"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
+
+  <line x1="200" y1="264" x2="200" y2="338" stroke="#B45309" stroke-width="2.2" marker-end="url(#a2a)"/>
+  <line x1="600" y1="264" x2="600" y2="338" stroke="#B45309" stroke-width="2.2" marker-end="url(#a2a)"/>
+
+  <rect x="48" y="56" width="304" height="208" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="68" y="90" font-size="15" font-weight="700" fill="#6D28D9">main arena</text>
+  <rect x="256" y="70" width="80" height="28" rx="14" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4"/>
+  <text x="296" y="89" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">mutex</text>
+
+  <rect x="64" y="112" width="272" height="136" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.6"/>
+  <text x="80" y="139" font-size="13" font-weight="700" fill="#B45309">heap · brk</text>
+  <rect x="80" y="156" width="48" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <rect x="136" y="156" width="48" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <rect x="192" y="156" width="48" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <rect x="248" y="156" width="72" height="48" rx="6" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="284" y="186" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">top</text>
+  <text x="160" y="230" text-anchor="middle" font-size="13" fill="#0E7490">chunks</text>
+
+  <rect x="448" y="56" width="304" height="208" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="468" y="90" font-size="15" font-weight="700" fill="#6D28D9">thread arena</text>
+  <rect x="656" y="70" width="80" height="28" rx="14" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.4"/>
+  <text x="696" y="89" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">mutex</text>
+
+  <rect x="464" y="112" width="272" height="136" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.6"/>
+  <text x="480" y="139" font-size="13" font-weight="700" fill="#B45309">heap · mmap</text>
+  <rect x="480" y="156" width="48" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <rect x="536" y="156" width="48" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <rect x="592" y="156" width="48" height="48" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <rect x="648" y="156" width="72" height="48" rx="6" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+  <text x="214" y="308" font-size="14" font-weight="700" fill="#B45309">brk</text>
+  <text x="614" y="308" font-size="14" font-weight="700" fill="#B45309">mmap</text>
+
+  <rect x="48" y="344" width="704" height="64" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="400" y="383" text-anchor="middle" font-size="16" font-weight="700" fill="#B45309">kernel</text>
+</svg>

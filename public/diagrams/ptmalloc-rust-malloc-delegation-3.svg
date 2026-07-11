@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 390" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">The boundary tag: one 8-byte slot serves two owners</title>
+  <desc id="d3">Two neighbouring chunks A and B are laid out from low to high address. When A is in use its payload runs over the slot that would hold B's prev_size field. When A is freed the same slot records A's size instead, and A's body now holds the free-list pointers fd and bk. The slot is shared, so the real per-chunk header overhead is eight bytes rather than sixteen.</desc>
+  <rect x="0" y="0" width="800" height="390" fill="#FFFFFF"/>
+
+  <rect x="416" y="112" width="96" height="224" fill="#FFF1F2"/>
+  <text x="464" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">shared 8B</text>
+
+  <text x="80" y="128" font-size="14" font-weight="700" fill="#334155">A in use</text>
+  <rect x="80" y="136" width="112" height="72" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="136" y="180" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">size A</text>
+  <rect x="192" y="136" width="320" height="72" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="352" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">A payload</text>
+  <rect x="512" y="136" width="112" height="72" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="568" y="180" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">size B</text>
+  <rect x="624" y="136" width="112" height="72" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="680" y="180" text-anchor="middle" font-size="13" fill="#0E7490">B payload</text>
+
+  <text x="80" y="248" font-size="14" font-weight="700" fill="#334155">A free</text>
+  <rect x="80" y="256" width="112" height="72" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="136" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">size A</text>
+  <rect x="192" y="256" width="224" height="72" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="304" y="300" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">fd / bk</text>
+  <rect x="416" y="256" width="96" height="72" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="464" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">prev_size</text>
+  <rect x="512" y="256" width="112" height="72" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="568" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">size B</text>
+  <rect x="624" y="256" width="112" height="72" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="680" y="300" text-anchor="middle" font-size="13" fill="#0E7490">B payload</text>
+
+  <rect x="416" y="112" width="96" height="224" fill="none" stroke="#E11D48" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="400" y="366" text-anchor="middle" font-size="13" fill="#334155">low address → high address</text>
+</svg>

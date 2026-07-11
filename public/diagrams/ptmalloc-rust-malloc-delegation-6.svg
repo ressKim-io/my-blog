@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 410" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">More arenas buy less lock contention and cost more memory</title>
+  <desc id="d6">On the left every thread queues on the single mutex of one arena, so contention is high but only one set of management structures exists. On the right each thread gets its own arena, so the lock queue disappears, but the top chunk and the whole set of bins are duplicated per arena and resident memory grows.</desc>
+  <defs>
+    <marker id="a6d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="410" fill="#FFFFFF"/>
+
+  <text x="200" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">1 arena</text>
+  <text x="600" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">N arenas</text>
+  <text x="600" y="68" text-anchor="middle" font-size="13" fill="#334155">cap: cores × 8</text>
+  <line x1="400" y1="24" x2="400" y2="396" stroke="#E4E4E7" stroke-width="1.2"/>
+
+  <line x1="104" y1="124" x2="172" y2="170" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+  <line x1="168" y1="124" x2="190" y2="170" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+  <line x1="232" y1="124" x2="210" y2="170" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+  <line x1="296" y1="124" x2="228" y2="170" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+  <line x1="200" y1="220" x2="200" y2="246" stroke="#334155" stroke-width="1.8" marker-end="url(#a6d)"/>
+
+  <circle cx="104" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <circle cx="168" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <circle cx="232" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <circle cx="296" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+
+  <rect x="144" y="176" width="112" height="44" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="200" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">lock</text>
+
+  <rect x="88" y="252" width="224" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="200" y="284" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">arena</text>
+  <text x="200" y="310" text-anchor="middle" font-size="13" fill="#6D28D9">top + bins</text>
+
+  <text x="200" y="384" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">contention ↑ · RSS ↓</text>
+
+  <line x1="472" y1="124" x2="472" y2="246" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+  <line x1="536" y1="124" x2="536" y2="246" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+  <line x1="600" y1="124" x2="600" y2="246" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+  <line x1="664" y1="124" x2="664" y2="246" stroke="#334155" stroke-width="1.6" marker-end="url(#a6d)"/>
+
+  <circle cx="472" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <circle cx="536" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <circle cx="600" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <circle cx="664" cy="104" r="18" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+
+  <rect x="448" y="252" width="48" height="80" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <rect x="512" y="252" width="48" height="80" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <rect x="576" y="252" width="48" height="80" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <rect x="640" y="252" width="48" height="80" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+
+  <text x="600" y="358" text-anchor="middle" font-size="13" fill="#6D28D9">top + bins × N</text>
+  <text x="600" y="384" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">contention ↓ · RSS ↑</text>
+</svg>

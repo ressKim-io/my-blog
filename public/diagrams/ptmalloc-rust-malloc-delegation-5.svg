@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">Two bin shapes: singly linked for speed, doubly linked for merging</title>
+  <desc id="d5">The tcache and fastbins are singly linked lists touched only at the head, which makes push and pop cheap. The unsorted, small and large bins are doubly linked through fd and bk pointers, because chunks must be pulled out from the middle when they are re-sorted and merged with a neighbour.</desc>
+  <defs>
+    <marker id="a5g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+    <marker id="a5v" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7C3AED"/>
+    </marker>
+    <marker id="a5vs" markerWidth="10" markerHeight="10" refX="3" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M10,0 L3,3 L10,6 Z" fill="#7C3AED"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="64" y="56" font-size="15" font-weight="700" fill="#047857">singly linked · LIFO</text>
+  <text x="736" y="56" text-anchor="end" font-size="13" fill="#334155">tcache · fastbin</text>
+
+  <line x1="128" y1="112" x2="164" y2="112" stroke="#059669" stroke-width="1.8" marker-end="url(#a5g)"/>
+  <line x1="256" y1="112" x2="292" y2="112" stroke="#059669" stroke-width="1.8" marker-end="url(#a5g)"/>
+  <line x1="384" y1="112" x2="420" y2="112" stroke="#059669" stroke-width="1.8" marker-end="url(#a5g)"/>
+
+  <rect x="64" y="88" width="64" height="48" rx="7" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="96" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">head</text>
+  <rect x="168" y="88" width="88" height="48" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="212" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">chunk</text>
+  <rect x="296" y="88" width="88" height="48" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <rect x="424" y="88" width="88" height="48" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+
+  <text x="64" y="180" font-size="13" fill="#334155">push · pop at head only</text>
+
+  <text x="64" y="248" font-size="15" font-weight="700" fill="#6D28D9">doubly linked · fd / bk</text>
+  <text x="736" y="248" text-anchor="end" font-size="13" fill="#334155">unsorted · small · large</text>
+
+  <line x1="260" y1="304" x2="292" y2="304" stroke="#7C3AED" stroke-width="1.8" marker-end="url(#a5v)" marker-start="url(#a5vs)"/>
+  <line x1="388" y1="304" x2="420" y2="304" stroke="#7C3AED" stroke-width="1.8" marker-end="url(#a5v)" marker-start="url(#a5vs)"/>
+
+  <rect x="168" y="280" width="88" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="212" y="310" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">chunk</text>
+  <rect x="296" y="280" width="88" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <rect x="424" y="280" width="88" height="48" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+
+  <path d="M296,344 L296,356 L512,356 L512,344" fill="none" stroke="#E11D48" stroke-width="1.8" stroke-dasharray="5 3"/>
+  <text x="404" y="380" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">coalesce</text>
+  <text x="64" y="380" font-size="13" fill="#334155">unlink from middle</text>
+</svg>

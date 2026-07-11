@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Where malloc looks for a free chunk, from cheapest to most expensive</title>
+  <desc id="d4">A malloc request falls through the drawers in order: the lock-free thread cache first, then fastbins, then the unsorted list, then the size-sorted small and large bins, then the unsplit top chunk at the end of the arena, and only if all of those fail does it call the kernel with brk or mmap. The search stops and returns at the first drawer that has a fitting chunk.</desc>
+  <defs>
+    <marker id="a4d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+    <marker id="a4g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="480" fill="#FFFFFF"/>
+
+  <rect x="592" y="88" width="160" height="368" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.8" stroke-dasharray="6 4"/>
+  <text x="672" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">hit · return</text>
+
+  <line x1="464" y1="112" x2="584" y2="112" stroke="#059669" stroke-width="1.6" marker-end="url(#a4g)"/>
+  <line x1="464" y1="176" x2="584" y2="176" stroke="#059669" stroke-width="1.6" marker-end="url(#a4g)"/>
+  <line x1="464" y1="240" x2="584" y2="240" stroke="#059669" stroke-width="1.6" marker-end="url(#a4g)"/>
+  <line x1="464" y1="304" x2="584" y2="304" stroke="#059669" stroke-width="1.6" marker-end="url(#a4g)"/>
+  <line x1="464" y1="368" x2="584" y2="368" stroke="#059669" stroke-width="1.6" marker-end="url(#a4g)"/>
+  <line x1="464" y1="432" x2="584" y2="432" stroke="#059669" stroke-width="1.6" marker-end="url(#a4g)"/>
+
+  <line x1="296" y1="72" x2="296" y2="84" stroke="#334155" stroke-width="1.8" marker-end="url(#a4d)"/>
+  <line x1="296" y1="136" x2="296" y2="148" stroke="#334155" stroke-width="1.8" marker-end="url(#a4d)"/>
+  <line x1="296" y1="200" x2="296" y2="212" stroke="#334155" stroke-width="1.8" marker-end="url(#a4d)"/>
+  <line x1="296" y1="264" x2="296" y2="276" stroke="#334155" stroke-width="1.8" marker-end="url(#a4d)"/>
+  <line x1="296" y1="328" x2="296" y2="340" stroke="#334155" stroke-width="1.8" marker-end="url(#a4d)"/>
+  <line x1="296" y1="392" x2="296" y2="404" stroke="#334155" stroke-width="1.8" marker-end="url(#a4d)"/>
+
+  <rect x="136" y="24" width="320" height="48" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="296" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490" font-family="ui-monospace, monospace">malloc(n)</text>
+
+  <rect x="136" y="88" width="320" height="48" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="152" y="118" font-size="14" font-weight="700" fill="#047857">tcache</text>
+  <text x="440" y="118" text-anchor="end" font-size="13" fill="#047857">no lock</text>
+
+  <rect x="136" y="152" width="320" height="48" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="152" y="182" font-size="14" font-weight="700" fill="#047857">fastbin</text>
+
+  <rect x="136" y="216" width="320" height="48" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="152" y="246" font-size="14" font-weight="700" fill="#6D28D9">unsorted</text>
+
+  <rect x="136" y="280" width="320" height="48" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="152" y="310" font-size="14" font-weight="700" fill="#6D28D9">small / large</text>
+
+  <rect x="136" y="344" width="320" height="48" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="152" y="374" font-size="14" font-weight="700" fill="#B45309">top chunk</text>
+
+  <rect x="136" y="408" width="320" height="48" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="152" y="438" font-size="14" font-weight="700" fill="#BE123C">kernel</text>
+  <text x="440" y="438" text-anchor="end" font-size="13" fill="#BE123C">brk / mmap</text>
+</svg>

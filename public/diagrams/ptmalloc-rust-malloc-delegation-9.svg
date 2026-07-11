@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t9 d9" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t9">Who borrows the shared wholesaler and who builds their own</title>
+  <desc id="d9">C, C++ and Rust all allocate through the same libc malloc, which then decides between brk and mmap. Go bypasses libc entirely and its runtime maps memory from the kernel itself, and the JVM reserves its GC heap the same way and hands out objects from thread-local allocation buffers. The dashed path shows that JNI and direct byte buffers still fall back to libc malloc, which is why a Java container has resident memory that the heap flag never covers.</desc>
+  <defs>
+    <marker id="a9c" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0891B2"/>
+    </marker>
+    <marker id="a9a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#B45309"/>
+    </marker>
+    <marker id="a9r" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#E11D48"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <path d="M636,100 L636,132 L368,132 L368,152" fill="none" stroke="#E11D48" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#a9r)"/>
+
+  <line x1="124" y1="100" x2="124" y2="154" stroke="#0891B2" stroke-width="1.8" marker-end="url(#a9c)"/>
+  <line x1="308" y1="100" x2="308" y2="154" stroke="#0891B2" stroke-width="1.8" marker-end="url(#a9c)"/>
+  <line x1="492" y1="100" x2="492" y2="154" stroke="#0891B2" stroke-width="1.8" marker-end="url(#a9c)"/>
+  <line x1="676" y1="100" x2="676" y2="154" stroke="#0891B2" stroke-width="1.8" marker-end="url(#a9c)"/>
+
+  <line x1="216" y1="224" x2="216" y2="298" stroke="#B45309" stroke-width="2.2" marker-end="url(#a9a)"/>
+  <line x1="492" y1="224" x2="492" y2="298" stroke="#B45309" stroke-width="2.2" marker-end="url(#a9a)"/>
+  <line x1="676" y1="224" x2="676" y2="298" stroke="#B45309" stroke-width="2.2" marker-end="url(#a9a)"/>
+
+  <rect x="512" y="122" width="88" height="22" fill="#FFFFFF"/>
+  <text x="556" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">JNI · Direct</text>
+
+  <rect x="48" y="48" width="152" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="124" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">C / C++</text>
+  <rect x="232" y="48" width="152" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="308" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">Rust</text>
+  <rect x="416" y="48" width="152" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="492" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">Go</text>
+  <rect x="600" y="48" width="152" height="52" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="676" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">Java</text>
+
+  <rect x="48" y="160" width="336" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="216" y="199" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">libc malloc · ptmalloc</text>
+  <rect x="416" y="160" width="152" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="492" y="199" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">runtime alloc</text>
+  <rect x="600" y="160" width="152" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="676" y="199" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">GC heap · TLAB</text>
+
+  <rect x="48" y="304" width="704" height="64" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="400" y="332" text-anchor="middle" font-size="16" font-weight="700" fill="#B45309">kernel</text>
+  <text x="400" y="354" text-anchor="middle" font-size="13" fill="#B45309">brk / mmap</text>
+</svg>

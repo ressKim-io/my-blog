@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t7">The mmap threshold decides whether a chunk comes from the heap or gets its own mapping</title>
+  <desc id="d7">Requests smaller than the mmap threshold are served from the arena heap, which the main arena grows with brk and never hands straight back. Requests at or above the threshold get a private mmap mapping that is returned to the kernel with munmap the moment it is freed. The threshold starts at 128 kilobytes and climbs on its own, up to a 32 megabyte ceiling on 64-bit systems, whenever a large mapped chunk is freed.</desc>
+  <defs>
+    <marker id="a7d" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="450" fill="#FFFFFF"/>
+
+  <line x1="352" y1="88" x2="210" y2="136" stroke="#334155" stroke-width="1.8" marker-end="url(#a7d)"/>
+  <line x1="448" y1="88" x2="590" y2="136" stroke="#334155" stroke-width="1.8" marker-end="url(#a7d)"/>
+  <line x1="200" y1="208" x2="200" y2="234" stroke="#334155" stroke-width="1.8" marker-end="url(#a7d)"/>
+  <line x1="600" y1="208" x2="600" y2="234" stroke="#334155" stroke-width="1.8" marker-end="url(#a7d)"/>
+
+  <rect x="320" y="32" width="160" height="56" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="400" y="66" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">chunk size</text>
+
+  <rect x="196" y="96" width="112" height="22" fill="#FFFFFF"/>
+  <text x="252" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">&lt; threshold</text>
+  <rect x="496" y="96" width="112" height="22" fill="#FFFFFF"/>
+  <text x="552" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">≥ threshold</text>
+
+  <rect x="88" y="144" width="224" height="64" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="200" y="183" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">arena heap</text>
+  <rect x="136" y="240" width="128" height="48" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="200" y="270" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">brk</text>
+  <text x="200" y="322" text-anchor="middle" font-size="13" fill="#334155">reused · no munmap</text>
+
+  <rect x="488" y="144" width="224" height="64" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="600" y="183" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">own mmap</text>
+  <rect x="488" y="240" width="224" height="48" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="600" y="270" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">munmap on free</text>
+  <text x="600" y="322" text-anchor="middle" font-size="13" fill="#334155">returned at once</text>
+
+  <text x="400" y="378" text-anchor="middle" font-size="13" fill="#334155">threshold grows on free</text>
+  <line x1="176" y1="392" x2="616" y2="392" stroke="#475569" stroke-width="2" marker-end="url(#a7d)"/>
+  <line x1="176" y1="384" x2="176" y2="402" stroke="#475569" stroke-width="2"/>
+  <line x1="624" y1="384" x2="624" y2="402" stroke="#475569" stroke-width="2"/>
+  <text x="176" y="424" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">128KB</text>
+  <text x="624" y="424" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">32MB cap</text>
+</svg>
