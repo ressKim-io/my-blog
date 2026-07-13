@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">Each collector picks a corner, and each corner sends a different invoice</title>
+  <desc id="d1">The trade-off triangle from Part 3, now with all four approaches placed on it. Rust sits at the top vertex, where the accounting is handed to the compiler and the programmer, so there is no runtime collection at all; its bill is the cognitive cost of ownership and the reference cycles that Arc cannot break. Go sits at the left vertex, refusing to move objects, so its moving cost is zero and it pays in fragmentation and in mark assist instead. G1 and ZGC both sit at the right vertex, because both relocate objects, but they settle up differently: G1 pays for relocation with stop-the-world pauses and, when relocation fails, with a full collection, while ZGC performs the same relocation concurrently and pays instead with a load barrier on every read and with allocation stalls. Whichever corner is chosen, the total cost is conserved; only its shape and its due date change.</desc>
+  <rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
+
+  <path d="M 400 80 L 190 330 L 610 330 Z" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+
+  <text x="400" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">accounting</text>
+  <circle cx="400" cy="72" r="12" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <text x="470" y="70" font-size="15" font-weight="700" fill="#0E7490">Rust</text>
+  <text x="470" y="92" font-size="13" font-weight="600" fill="#0E7490">no runtime collection</text>
+
+  <text x="150" y="356" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">fragmentation</text>
+  <circle cx="190" cy="330" r="12" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="150" y="384" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">Go</text>
+  <text x="150" y="406" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">mark assist</text>
+
+  <text x="650" y="356" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">moving cost</text>
+  <circle cx="596" cy="330" r="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <circle cx="624" cy="330" r="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="650" y="384" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">G1 · ZGC</text>
+  <text x="650" y="406" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">same corner, different bill</text>
+
+  <text x="400" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">the total is conserved</text>
+  <text x="400" y="256" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">only its shape changes</text>
+</svg>

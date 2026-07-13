@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Each collector hides its bill on a different screen</title>
+  <desc id="d3">Because the three collectors send their bills to different places, the same monitoring dashboard cannot serve all three. For Go, the number that matters is the assist figure in the gctrace line: when it grows relative to background marking, the mutator is being conscripted and tail latency is about to follow. For G1, the average pause is always reassuring and therefore useless; what matters is the tail of the pause distribution, together with repeated evacuation failures and any full collection, and on JDK 25 the log strings for both of those have changed. For ZGC, looking at pauses at all is the trap: the allocation stall count and the throughput number have to sit on the same screen as the pause chart, or the collector's real cost is invisible. Reusing one template across all three guarantees you miss exactly the thing each one is hiding.</desc>
+  <rect x="0" y="0" width="800" height="320" fill="#FFFFFF"/>
+
+  <rect x="30" y="50" width="240" height="180" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="150" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">Go</text>
+  <text x="150" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">watch: assist</text>
+  <text x="150" y="156" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">in the gctrace line</text>
+  <text x="150" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">vs background marking</text>
+
+  <rect x="280" y="50" width="240" height="180" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="400" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">G1</text>
+  <text x="400" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">watch: the pause tail</text>
+  <text x="400" y="156" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Evacuation Failure</text>
+  <text x="400" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Pause Full</text>
+
+  <rect x="530" y="50" width="240" height="180" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.2"/>
+  <text x="650" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">ZGC</text>
+  <text x="650" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">never pauses alone</text>
+  <text x="650" y="156" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">Allocation Stall</text>
+  <text x="650" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">+ throughput, same screen</text>
+
+  <text x="400" y="280" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">one template for all three = missing exactly what each one hides</text>
+</svg>

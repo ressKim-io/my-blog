@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">The runtime's bill does not stay inside the runtime</title>
+  <desc id="d5">Three of the collector's costs cross out of the process and land on the cluster's ledger. The memory headroom a collector insists on, whether that is Go letting the heap swell to roughly twice the live set at the default GOGC or ZGC always keeping free pages in reserve to relocate into, decides directly how many pods will fit on a node, and therefore what the cluster costs. The startup window, where collection and warm-up overlap, becomes cold-start latency, which is what makes autoscaling and serverless expensive. And because cgroup accounting sums the heap together with native memory, memory living outside the heap can quietly grow until the pod is killed for running out of memory, with nothing whatsoever wrong in the GC log. This is where Part 5 begins.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <rect x="280" y="26" width="240" height="48" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="400" y="56" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">the GC bill</text>
+
+  <path d="M 320 78 L 155 126" stroke="#475569" stroke-width="2" marker-end="url(#s5)"/>
+  <path d="M 400 78 L 400 126" stroke="#475569" stroke-width="2" marker-end="url(#s5)"/>
+  <path d="M 480 78 L 645 126" stroke="#475569" stroke-width="2" marker-end="url(#s5)"/>
+
+  <rect x="30" y="132" width="240" height="120" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2.2"/>
+  <text x="150" y="166" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">memory headroom</text>
+  <text x="150" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">→ bin packing</text>
+  <text x="150" y="228" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">how many pods fit</text>
+
+  <rect x="280" y="132" width="240" height="120" rx="12" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.2"/>
+  <text x="400" y="166" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">GC + warm-up</text>
+  <text x="400" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">→ cold start</text>
+  <text x="400" y="228" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">autoscaling economics</text>
+
+  <rect x="530" y="132" width="240" height="120" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.2"/>
+  <text x="650" y="166" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">memory off the heap</text>
+  <text x="650" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">→ OOMKilled</text>
+  <text x="650" y="228" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">GC log looks clean</text>
+
+  <text x="400" y="304" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">the triangle inside the runtime becomes an invoice on the cluster</text>
+
+  <defs>
+    <marker id="s5" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+</svg>

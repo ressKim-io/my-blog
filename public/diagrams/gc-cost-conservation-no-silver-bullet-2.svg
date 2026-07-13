@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">When the collector falls behind, each one hurts somewhere else</title>
+  <desc id="d2">The same failure condition applied to all three collectors: reclamation cannot keep up with allocation. In Go the allocating goroutine is conscripted into marking, so the request thread itself stops serving its user and starts collecting garbage. In G1 there is no free region left to copy survivors into, so the collector abandons partial collection and compacts the entire heap in one stop-the-world pass that ignores the pause target and grows with the heap. In ZGC the supply of free pages runs dry and the allocating thread is simply blocked until one appears, a delay that never appears in any pause statistic. Three different organs, one disease. None of the three is painless; they merely hurt in different places.</desc>
+  <rect x="0" y="0" width="800" height="340" fill="#FFFFFF"/>
+
+  <rect x="230" y="26" width="340" height="46" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="2.2"/>
+  <text x="400" y="55" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">reclaim cannot keep up with allocation</text>
+
+  <path d="M 300 76 L 155 128" stroke="#475569" stroke-width="2" marker-end="url(#s2)"/>
+  <path d="M 400 76 L 400 128" stroke="#475569" stroke-width="2" marker-end="url(#s2)"/>
+  <path d="M 500 76 L 645 128" stroke="#475569" stroke-width="2" marker-end="url(#s2)"/>
+
+  <rect x="30" y="134" width="240" height="130" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="150" y="166" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">Go</text>
+  <text x="150" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">the request thread</text>
+  <text x="150" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">is conscripted</text>
+  <text x="150" y="250" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">mark assist</text>
+
+  <rect x="280" y="134" width="240" height="130" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="400" y="166" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">G1</text>
+  <text x="400" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">the whole heap</text>
+  <text x="400" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">stops</text>
+  <text x="400" y="250" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">Full GC</text>
+
+  <rect x="530" y="134" width="240" height="130" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.2"/>
+  <text x="650" y="166" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">ZGC</text>
+  <text x="650" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">allocation itself</text>
+  <text x="650" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">is blocked</text>
+  <text x="650" y="250" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">invisible to pause metrics</text>
+
+  <text x="400" y="308" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">no painless option — only a different place to hurt</text>
+
+  <defs>
+    <marker id="s2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+</svg>

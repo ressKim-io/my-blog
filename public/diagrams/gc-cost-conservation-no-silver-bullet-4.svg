@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">The allocation decision in Part 3 already fixed the collection outcome</title>
+  <desc id="d4">Reading left to right, each allocation strategy from Part 3 forces a collection strategy in Part 4. Bumping a pointer, as the JVM does in its thread-local buffers, only works if the region is always one clean empty run, and keeping it that way means the survivors have to be moved out; a moving collector becomes physically mandatory, and the only remaining question is whether the move happens inside a pause, which gives G1, or concurrently, which gives ZGC. Allocating into a size-class slot, as Go does, means a dead slot is reusable where it lies, so nothing needs moving; the collector becomes non-moving mark-sweep, moving cost falls to zero, and the price is paid as a full scan every cycle. Handing allocation to a free-list malloc, as Rust does, leaves the timing of release to the compiler, and no collector is needed at all. The three collectors of Part 4 were never three independent designs; they were three logical consequences of a decision already made in Part 3.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="150" y="42" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">allocation (Part 3)</text>
+  <text x="580" y="42" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">collection (Part 4)</text>
+
+  <rect x="40" y="70" width="220" height="60" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="150" y="96" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">bump the pointer</text>
+  <text x="150" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">JVM</text>
+
+  <path d="M 266 100 L 326 100" stroke="#7C3AED" stroke-width="2.2" marker-end="url(#v4)"/>
+  <rect x="332" y="70" width="200" height="60" rx="10" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="432" y="96" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">moving GC</text>
+  <text x="432" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">mandatory</text>
+
+  <path d="M 538 90 L 592 68" stroke="#7C3AED" stroke-width="2" marker-end="url(#v4)"/>
+  <path d="M 538 112 L 592 134" stroke="#E11D48" stroke-width="2" marker-end="url(#r4)"/>
+  <rect x="598" y="40" width="170" height="46" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="683" y="69" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">G1 — pause</text>
+  <rect x="598" y="112" width="170" height="46" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="683" y="141" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">ZGC — concurrent</text>
+
+  <line x1="40" y1="180" x2="760" y2="180" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <rect x="40" y="204" width="220" height="60" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="150" y="230" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">size-class slot</text>
+  <text x="150" y="252" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Go</text>
+
+  <path d="M 266 234 L 326 234" stroke="#059669" stroke-width="2.2" marker-end="url(#g4)"/>
+  <rect x="332" y="204" width="436" height="60" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="550" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">non-moving mark-sweep</text>
+  <text x="550" y="252" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">moving cost 0, full scan every cycle</text>
+
+  <line x1="40" y1="288" x2="760" y2="288" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <rect x="40" y="312" width="220" height="60" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.2"/>
+  <text x="150" y="338" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">free list malloc</text>
+  <text x="150" y="360" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">Rust</text>
+
+  <path d="M 266 342 L 326 342" stroke="#0891B2" stroke-width="2.2" marker-end="url(#c4)"/>
+  <rect x="332" y="312" width="436" height="60" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="550" y="338" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">no collector at all</text>
+  <text x="550" y="360" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">the compiler decides when</text>
+
+  <defs>
+    <marker id="v4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/></marker>
+    <marker id="r4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+    <marker id="g4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+    <marker id="c4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0891B2"/></marker>
+  </defs>
+</svg>
