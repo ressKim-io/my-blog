@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">The heap sawtooths between live and the pacer's goal</title>
+  <desc id="d2">Heap size plotted against time. Allocation pushes the heap steadily upward from the live line toward the heap goal. When it touches the goal the collector runs, the garbage is removed, and the heap drops back to the live line, so the curve repeats as a sawtooth. With GOGC at its default of one hundred the goal sits at roughly twice the live heap, which is exactly what the measured log shows: a live heap of 193 megabytes with a goal of 387. Raising GOGC lifts the goal line, so collections come less often and cost less CPU but hold more memory.</desc>
+  <rect x="0" y="0" width="800" height="340" fill="#FFFFFF"/>
+
+  <line x1="90" y1="290" x2="760" y2="290" stroke="#0A0A0A" stroke-width="1.8"/>
+  <line x1="90" y1="290" x2="90" y2="50" stroke="#0A0A0A" stroke-width="1.8"/>
+  <text x="60" y="170" text-anchor="middle" font-size="14" font-weight="700" fill="#334155" transform="rotate(-90 60 170)">heap</text>
+  <text x="700" y="316" font-size="14" font-weight="700" fill="#334155">time</text>
+
+  <line x1="90" y1="90" x2="760" y2="90" stroke="#7C3AED" stroke-width="1.8" stroke-dasharray="7 4"/>
+  <text x="768" y="86" text-anchor="end" font-size="14" font-weight="700" fill="#6D28D9">heap goal ≈ 2 × live</text>
+
+  <line x1="90" y1="240" x2="760" y2="240" stroke="#059669" stroke-width="1.8" stroke-dasharray="7 4"/>
+  <text x="768" y="262" text-anchor="end" font-size="14" font-weight="700" fill="#047857">live</text>
+
+  <path d="M 110 240 L 250 90 L 250 240 L 390 90 L 390 240 L 530 90 L 530 240 L 670 90 L 670 240"
+        fill="none" stroke="#0A0A0A" stroke-width="2.4"/>
+
+  <circle cx="250" cy="90" r="6" fill="#E11D48"/>
+  <circle cx="390" cy="90" r="6" fill="#E11D48"/>
+  <circle cx="530" cy="90" r="6" fill="#E11D48"/>
+  <circle cx="670" cy="90" r="6" fill="#E11D48"/>
+  <text x="460" y="62" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">GC starts here</text>
+</svg>

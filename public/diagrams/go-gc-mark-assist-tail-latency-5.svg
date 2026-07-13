@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">A goroutine in debt must mark before it may allocate</title>
+  <desc id="d4">Two goroutines ask for memory during the same marking phase. The first still has allocation credit left, so its request is served straight away and it carries on with its own work with no added delay. The second has spent its credit and gone into debt, so before the runtime will hand it any memory it must first perform a slice of the collector's marking work. That detour is time the request spends collecting somebody else's garbage instead of serving the user, and because it is triggered by the act of allocating rather than scheduled in advance, there is no way to predict which request it lands on. This is the shape of Go's tail latency.</desc>
+  <rect x="0" y="0" width="800" height="320" fill="#FFFFFF"/>
+
+  <text x="50" y="60" font-size="15" font-weight="700" fill="#047857">credit ≥ 0</text>
+  <rect x="180" y="76" width="180" height="34" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="270" y="99" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">allocate</text>
+  <rect x="400" y="76" width="300" height="34" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="550" y="99" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">own work continues</text>
+  <path d="M 364 93 L 394 93" stroke="#059669" stroke-width="1.8" marker-end="url(#g4)"/>
+  <text x="710" y="99" font-size="13" font-weight="700" fill="#047857">no delay</text>
+
+  <line x1="50" y1="150" x2="750" y2="150" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="50" y="196" font-size="15" font-weight="700" fill="#BE123C">credit &lt; 0</text>
+
+  <rect x="180" y="212" width="150" height="34" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="255" y="235" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">wants to allocate</text>
+
+  <rect x="350" y="212" width="220" height="34" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <text x="460" y="235" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">mark assist: pay the debt</text>
+
+  <rect x="590" y="212" width="150" height="34" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="665" y="235" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">allocate, resume</text>
+
+  <path d="M 334 229 L 344 229" stroke="#E11D48" stroke-width="1.8" marker-end="url(#r4)"/>
+  <path d="M 574 229 L 584 229" stroke="#E11D48" stroke-width="1.8" marker-end="url(#r4)"/>
+
+  <path d="M 350 264 L 570 264" stroke="#E11D48" stroke-width="2.2"/>
+  <text x="460" y="294" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">this is the tail latency</text>
+
+  <defs>
+    <marker id="g4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+    <marker id="r4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+  </defs>
+</svg>

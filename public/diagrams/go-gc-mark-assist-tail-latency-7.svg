@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">Every two minutes the whole live cache is marked again from scratch</title>
+  <desc id="d6">The heap is almost entirely one long-lived LRU cache, with very little garbage in it. Along the timeline, the runtime's sysmon thread forces a collection every two minutes whether or not anything was allocated, because forcegcperiod caps the interval. Since Go has no generations, none of that cache can be skipped as already-known-live: the collector must walk all of it again, from the start, at every one of those forced cycles. So the latency spikes repeat on a fixed two-minute rhythm, and tuning the service to produce less garbage does not help, because the cost tracks the size of the live heap rather than the amount of garbage.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <rect x="60" y="40" width="680" height="60" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="400" y="66" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">huge LRU cache — long-lived, live</text>
+  <text x="400" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">very little garbage</text>
+
+  <line x1="60" y1="180" x2="760" y2="180" stroke="#0A0A0A" stroke-width="1.8"/>
+
+  <line x1="150" y1="130" x2="150" y2="180" stroke="#E11D48" stroke-width="2.4"/>
+  <line x1="320" y1="130" x2="320" y2="180" stroke="#E11D48" stroke-width="2.4"/>
+  <line x1="490" y1="130" x2="490" y2="180" stroke="#E11D48" stroke-width="2.4"/>
+  <line x1="660" y1="130" x2="660" y2="180" stroke="#E11D48" stroke-width="2.4"/>
+
+  <text x="150" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">0 min</text>
+  <text x="320" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">2 min</text>
+  <text x="490" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">4 min</text>
+  <text x="660" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">6 min</text>
+
+  <text x="405" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">forcegcperiod: forced GC</text>
+
+  <text x="150" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">full scan</text>
+  <text x="320" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">full scan</text>
+  <text x="490" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">full scan</text>
+  <text x="660" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">full scan</text>
+
+  <path d="M 150 262 L 150 296" stroke="#E11D48" stroke-width="3"/>
+  <path d="M 320 262 L 320 296" stroke="#E11D48" stroke-width="3"/>
+  <path d="M 490 262 L 490 296" stroke="#E11D48" stroke-width="3"/>
+  <path d="M 660 262 L 660 296" stroke="#E11D48" stroke-width="3"/>
+  <text x="405" y="330" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">regular latency spikes</text>
+</svg>

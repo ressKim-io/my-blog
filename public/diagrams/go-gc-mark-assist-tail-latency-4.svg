@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">A quarter of the Ps are pinned to marking while the GC runs</title>
+  <desc id="d3">With GOMAXPROCS set to four, three of the logical processors keep running application goroutines while one is pinned to a dedicated mark worker for the whole concurrent marking phase. That one in four ratio is not adaptive; it is the runtime constant gcBackgroundUtilization, fixed at zero point two five. The application therefore proceeds on seventy five percent of its cores while marking proceeds in the background on the rest. In a container this is where the trap lies: if GOMAXPROCS is larger than the CPU actually granted to the pod, the quarter is computed against the wrong denominator.</desc>
+  <rect x="0" y="0" width="800" height="300" fill="#FFFFFF"/>
+
+  <text x="60" y="60" font-size="15" font-weight="700" fill="#334155">GOMAXPROCS = 4</text>
+
+  <text x="80" y="106" font-size="14" font-weight="700" fill="#334155">P0</text>
+  <rect x="130" y="86" width="520" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="390" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">application goroutines</text>
+
+  <text x="80" y="150" font-size="14" font-weight="700" fill="#334155">P1</text>
+  <rect x="130" y="130" width="520" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="390" y="149" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">application goroutines</text>
+
+  <text x="80" y="194" font-size="14" font-weight="700" fill="#334155">P2</text>
+  <rect x="130" y="174" width="520" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="390" y="193" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">application goroutines</text>
+
+  <text x="80" y="238" font-size="14" font-weight="700" fill="#334155">P3</text>
+  <rect x="130" y="218" width="520" height="28" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <text x="390" y="237" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">dedicated mark worker</text>
+
+  <path d="M 668 232 L 700 232" stroke="#7C3AED" stroke-width="2"/>
+  <text x="712" y="228" font-size="15" font-weight="700" fill="#6D28D9">25%</text>
+  <text x="712" y="250" font-size="13" font-weight="600" fill="#6D28D9">pinned</text>
+</svg>

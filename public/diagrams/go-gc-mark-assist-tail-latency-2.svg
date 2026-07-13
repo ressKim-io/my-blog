@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">One cycle stops the mutator only twice, and both stops are tiny</title>
+  <desc id="d1">A single garbage collection cycle laid out on a timeline. The mutator bar runs almost the whole width, broken only by two very short stops at either end of the marking phase: sweep termination at the start, where the write barrier is switched on and the roots are prepared, and mark termination at the end, where the barrier is switched off. Measured on Go 1.26.5 these were 0.13 and 0.02 milliseconds. Between them sits the long concurrent mark phase, during which the application keeps running, and after them the sweep, which is also concurrent and lazy: the memory is reclaimed when the next allocation asks for that size class.</desc>
+  <rect x="0" y="0" width="800" height="320" fill="#FFFFFF"/>
+
+  <text x="40" y="88" font-size="14" font-weight="700" fill="#334155">mutator</text>
+  <rect x="130" y="70" width="18" height="28" rx="3" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <rect x="156" y="70" width="470" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <rect x="634" y="70" width="16" height="28" rx="3" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+  <rect x="658" y="70" width="102" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+
+  <text x="40" y="148" font-size="14" font-weight="700" fill="#334155">GC</text>
+  <rect x="156" y="130" width="470" height="24" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.8"/>
+  <text x="391" y="147" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">concurrent mark</text>
+  <rect x="658" y="130" width="102" height="24" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.8"/>
+  <text x="709" y="147" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">lazy sweep</text>
+
+  <path d="M 139 190 L 139 112" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="139" y="212" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">STW</text>
+  <text x="139" y="234" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">0.13 ms</text>
+  <text x="139" y="256" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">barrier on</text>
+
+  <path d="M 642 190 L 642 112" stroke="#E11D48" stroke-width="1.6"/>
+  <text x="642" y="212" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">STW</text>
+  <text x="642" y="234" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">0.02 ms</text>
+  <text x="642" y="256" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">barrier off</text>
+
+  <text x="391" y="290" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">mutator keeps running here</text>
+</svg>

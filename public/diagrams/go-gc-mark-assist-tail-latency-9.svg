@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t8 d8" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t8">Go pays zero moving cost and settles the bill in tail latency instead</title>
+  <desc id="d8">Go's position on the trade-off triangle is the lower-left corner. By never moving an object it pays nothing at the moving-cost vertex, accepting fragmentation instead, which its size classes largely contain. All of the accounting sits in the runtime, with neither the programmer nor the compiler involved. Having chosen that corner, Go then pushes the orthogonal concurrency axis as far as it goes and drives the stop-the-world pause below a millisecond. The four items listed to the right are what that costs: a quarter of the CPU held by background marking, mark assist conscripting the mutator, a full scan every cycle because there are no generations, and a forced collection every two minutes regardless of allocation.</desc>
+  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
+
+  <path d="M 250 70 L 90 320 L 410 320 Z" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+  <text x="250" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">accounting: runtime</text>
+  <text x="75" y="346" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">fragmentation</text>
+  <text x="420" y="346" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">moving cost</text>
+
+  <circle cx="120" cy="308" r="13" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="120" y="380" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">Go is here</text>
+  <text x="410" y="380" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">cost = 0</text>
+
+  <rect x="480" y="80" width="290" height="230" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="625" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">the bill for sub-ms pauses</text>
+
+  <text x="505" y="152" font-size="14" font-weight="600" fill="#BE123C">25% CPU background mark</text>
+  <text x="505" y="190" font-size="14" font-weight="600" fill="#BE123C">mark assist → tail latency</text>
+  <text x="505" y="228" font-size="14" font-weight="600" fill="#BE123C">no generations → full scan</text>
+  <text x="505" y="266" font-size="14" font-weight="600" fill="#BE123C">forced GC every 2 min</text>
+  <text x="625" y="296" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">Green Tea eases the first two</text>
+</svg>

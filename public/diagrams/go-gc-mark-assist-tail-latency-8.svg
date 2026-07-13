@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t7">Queueing spans instead of objects turns scattered reads into contiguous ones</title>
+  <desc id="d7">Above, the classic marking loop: the work queue holds individual objects, and those objects are scattered all over the heap, so pulling one out and scanning it drags in a fresh cache line almost every time. Below, Green Tea: the queue holds spans, contiguous blocks of memory, and once several objects inside one span are due to be scanned the whole block is walked in one pass. The reads become sequential, the cache is used the way the hardware wants it used, and marking gets cheaper. What has not changed is the policy: the collector still does not move objects and still has no generations.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <text x="50" y="46" font-size="15" font-weight="700" fill="#334155">classic: queue of objects</text>
+
+  <rect x="50" y="66" width="200" height="42" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="150" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">work queue</text>
+
+  <circle cx="330" cy="87" r="10" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+  <circle cx="430" cy="140" r="10" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+  <circle cx="560" cy="70" r="10" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+  <circle cx="660" cy="130" r="10" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+  <circle cx="730" cy="80" r="10" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+
+  <path d="M 254 87 L 316 87" stroke="#E11D48" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#r7)"/>
+  <path d="M 344 92 L 416 135" stroke="#E11D48" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#r7)"/>
+  <path d="M 444 133 L 546 76" stroke="#E11D48" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#r7)"/>
+  <path d="M 572 78 L 648 122" stroke="#E11D48" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#r7)"/>
+  <text x="500" y="176" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">scattered → cache miss each hop</text>
+
+  <line x1="50" y1="212" x2="750" y2="212" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="50" y="252" font-size="15" font-weight="700" fill="#047857">Green Tea: queue of spans</text>
+
+  <rect x="50" y="272" width="200" height="42" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="150" y="299" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">work queue</text>
+
+  <rect x="330" y="266" width="180" height="54" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <rect x="540" y="266" width="180" height="54" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="420" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">span</text>
+  <text x="630" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">span</text>
+
+  <path d="M 254 293 L 316 293" stroke="#059669" stroke-width="2" marker-end="url(#g7)"/>
+  <path d="M 514 293 L 532 293" stroke="#059669" stroke-width="2" marker-end="url(#g7)"/>
+  <text x="500" y="356" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">contiguous → scan the block in one pass</text>
+
+  <defs>
+    <marker id="r7" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+    <marker id="g7" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+  </defs>
+</svg>
