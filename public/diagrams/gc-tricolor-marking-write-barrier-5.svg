@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">STW pays in latency; concurrent pays in throughput</title>
+  <desc id="d5">Two timelines. In the stop-the-world model the mutator bar is cut clean in half by the collector: nothing of the application runs while the collector marks, and that gap is the pause, which grows with the heap. In the concurrent model the collector runs alongside in the background, so only a short stop remains for scanning the roots. The mutator never really stops, but its bar is now hatched, and that hatching is the barrier tax paid on every pointer write or read. The pause did not vanish; it was converted into slower ordinary execution.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <defs>
+    <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="#ECFDF5"/>
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#059669" stroke-width="2.4"/>
+    </pattern>
+  </defs>
+
+  <text x="50" y="52" font-size="16" font-weight="700" fill="#BE123C">stop-the-world</text>
+
+  <text x="50" y="98" font-size="13" font-weight="600" fill="#334155">mutator</text>
+  <rect x="140" y="82" width="180" height="24" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <rect x="500" y="82" width="250" height="24" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+
+  <text x="50" y="138" font-size="13" font-weight="600" fill="#334155">GC</text>
+  <rect x="320" y="122" width="180" height="24" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.6"/>
+
+  <path d="M 320 162 L 500 162" stroke="#E11D48" stroke-width="2"/>
+  <text x="410" y="184" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">pause · grows with heap</text>
+
+  <line x1="50" y1="212" x2="750" y2="212" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="50" y="252" font-size="16" font-weight="700" fill="#047857">concurrent</text>
+
+  <text x="50" y="298" font-size="13" font-weight="600" fill="#334155">mutator</text>
+  <rect x="140" y="282" width="24" height="24" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <rect x="176" y="282" width="574" height="24" rx="4" fill="url(#hatch)" stroke="#059669" stroke-width="1.6"/>
+
+  <text x="50" y="338" font-size="13" font-weight="600" fill="#334155">GC</text>
+  <rect x="176" y="322" width="574" height="18" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.6"/>
+
+  <text x="152" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">STW</text>
+  <text x="470" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">hatching = barrier tax</text>
+</svg>

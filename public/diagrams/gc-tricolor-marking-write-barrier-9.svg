@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t8 d8" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t8">Generational GC needs a remembered set to find old-to-young pointers</title>
+  <desc id="d8">The heap is split into a small young space and a large old space. A young collection wants to scan only the young space plus the roots, because that is the whole point of splitting. But a pointer living in the old space can be the only thing keeping a young object alive, and missing it would free a live object. Scanning all of old to find such pointers would throw away the saving. So the write barrier records every old-to-young pointer as it is created, marking the enclosing card dirty, and the remembered set collects those cards. A young collection then scans the roots, the young space, and only the recorded cards.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <rect x="60" y="70" width="180" height="180" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="150" y="105" text-anchor="middle" font-size="17" font-weight="700" fill="#047857">young</text>
+  <circle cx="110" cy="160" r="14" fill="#FFFFFF" stroke="#059669" stroke-width="1.6"/>
+  <circle cx="155" cy="190" r="14" fill="#FFFFFF" stroke="#059669" stroke-width="1.6"/>
+  <circle cx="195" cy="150" r="14" fill="#FFFFFF" stroke="#059669" stroke-width="1.6"/>
+  <text x="150" y="235" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">scanned often</text>
+
+  <rect x="400" y="70" width="340" height="180" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="570" y="105" text-anchor="middle" font-size="17" font-weight="700" fill="#6D28D9">old</text>
+  <circle cx="470" cy="170" r="14" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.6"/>
+  <circle cx="620" cy="200" r="14" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.6"/>
+  <circle cx="700" cy="150" r="14" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="570" y="235" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">scanned rarely</text>
+
+  <path d="M 456 170 L 215 158" stroke="#D97706" stroke-width="3" marker-end="url(#w8)"/>
+  <text x="330" y="145" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">old → young</text>
+
+  <rect x="230" y="290" width="340" height="60" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="400" y="316" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">remembered set · card table</text>
+  <text x="400" y="339" text-anchor="middle" font-size="13" font-weight="600" fill="#B45309">write barrier records it here</text>
+  <path d="M 400 200 L 400 284" stroke="#D97706" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#w8)"/>
+
+  <defs>
+    <marker id="w8" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#D97706"/></marker>
+  </defs>
+</svg>

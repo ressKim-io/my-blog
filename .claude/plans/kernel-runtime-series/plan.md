@@ -2,9 +2,8 @@
 
 > **세션 재개용 문서**. 새 세션에서 이 작업을 이어갈 때는 이 파일을 먼저 통독한 뒤,
 > §6 상태 표에서 첫 미완료(☐) 편부터 §7 절차대로 진행합니다.
-> 마지막 갱신: 2026-07-11 (**3.5 발행 — 1~3부 12편 전량 완료. draft 소진**.
-> 3부 배치 리뷰 1회 실행 완료(8~11편, P0 1건 수정). 12편은 자체 상호참조 검증 완료.
-> **다음: 4부 draft 도착 대기** — 도착 시 §6 표에 13번부터 행 추가)
+> 마지막 갱신: 2026-07-13 (**4부 draft 5편 도착 — 분석 완료, §10에 착수 메모**.
+> 1~3부 12편은 전량 발행 완료. 다음: 13편(4.1)부터 한 편씩 변환)
 > ★ 2026-07-10 SVG 글자 최소화 원칙 확정 — §4.2 하단 참조. **기존 26개 소급 적용 완료(R1~R4)**.
 > 발행된 34개 SVG 전부 폰트 13px 이상
 
@@ -186,6 +185,11 @@ date: "2026-06-25 + order 일"   # order=5 → "2026-06-30", order=12 → "2026-
 | 3.3 | `3부_3.3_Go자체할당자_P별캐시와_연속스택.md` | `go-allocator-mcache-contiguous-stack` | 10 | ✅ 발행 (2026-07-05, SVG 9개 — 5편 이스케이프 분석 복선 회수(스택 vs span 슬롯 착지), 2편 GMP의 P → mcache 무락 근거. **로컬 Go 1.26.5 툴체인 소스로 상수 직접 확정**(heapArenaBytes 64MB·PageShift 13·MaxSmallSize 32768·NumSizeClasses 68·TinySize 16·stackMin 2048). 사실 교정: 크기 클래스 낭비는 반올림·페이지쪼개기 **2원천**(각 12.5%, 곱하면 최악 26.6%, 512B 경계로 한쪽만 작동 — draft의 "대체로 12%"는 뭉뚱그림), 심화Q5 `madvdontneed=1`은 1.16 이후 무의미 → `=0`이 MADV_FREE 복원(3.1과 통일). 재감사로 GOMAXPROCS(cgroup 읽음)↔GOMEMLIMIT(안 읽음) 표 추가 — 9편 계층 어긋남의 확장) |
 | 3.4 | `3부_3.4_JVM의TLAB_포인터만미는할당과_힙밖지형.md` | `jvm-tlab-bump-pointer-offheap` | 11 | ✅ 발행 (2026-07-06, SVG 10개 — 7편 "힙은 60%인데 OOMKilled" 복선 물리적 회수. **로컬 JDK 25.0.3으로 전 수치 실측**(PrintFlagsFinal + 실제 -Xlog:gc+tlab 로그). 교정 4건: ① draft의 "샌드박스 JDK 11 기본 1MB" region → 힙÷2048 파생(실측표) ② JEP 401 "프리뷰" → 6편 정정 유지(Submitted·메인라인 밖) ③ `-XX:+PrintTLAB`는 JDK 25에 없음 → `-Xlog:gc+tlab=trace` ④ target refills 공식 `100÷(2×TLABWasteTargetPercent)`. draft에 없던 추가: JEP 534(JDK 27 헤더 기본값화), MaxRAMPercentage 기본 25%, ZGC 비세대 모드 JDK 24 제거. 재감사로 헤더 궤적 SVG 추가(7번 삽입 → 8~10 재정렬) |
 | 3.5 | `3부_3.5_소결_수렴하는할당과_왜GC가필연인가.md` | `allocation-convergence-why-gc` | 12 | ✅ 발행 (2026-07-07, SVG 5개 — **3부 완결**. 소결이라 표3+SVG5. 하드웨어가 강제한 수렴, 회계의 보존 법칙(4행선지), GC 필연의 3조건 벤(Rust가 반례), 트레이드오프 삼각형(4부 뼈대), 객체 모델 지역성. 교정: ① draft의 "2.2에서 예고한 디스코드 사례" → 5편에 0건, 삭제 ② draft가 참조계수 순환누수에 Python을 묶었으나 CPython은 순환 수집기 있음 → Swift ARC·Rust Rc만 ③ draft의 "3.4에서 예고한 sub-ms STW·allocation stall" → 11편에 0건, 실제 11편 예고 문구로 교체) |
+| 4.1 | `4부_4.1_GC기본원리_삼색마킹과_쓰기배리어.md` | `gc-tricolor-marking-write-barrier` | 13 | ✅ 발행 (2026-07-08, SVG 10개 — **4부 시작**. 5편 Mark Assist 복선 확인·다음 편 예고로 연결. **웹 검증 2건**: ① proposal 17503 원문 확인 — 하이브리드 배리어의 목적이 "STW 스택 재스캔 제거"이고 예비 실험 최악 STW **50µs 미만**(draft의 "100µs 미만"보다 정확한 1차 출처) ② draft가 각주만 달았던 arxiv 2210.17175(LXR)를 원문 대조 — **"로드 배리어는 리멤버링 배리어의 약 5배"** 확인, 추가로 **필드 로드 64.3/µs vs 스토어 4.3/µs(약 15배 빈도차)** 수치를 draft에 없던 근거로 확보. 재감사로 SVG 1개 추가(#8 배리어 총세금 = 빈도 × 단가 면적 논증 — 읽기 배리어 섹션이 이 편의 결론인데 그림이 없었음 → 8 삽입, 뒤 번호 재정렬). 로드 배리어 fast/slow path 흐름은 16편(ZGC)과 중복이라 의도적으로 안 그림) |
+| 4.2 | `4부_4.2_GoGC_MarkAssist와_왜_tail이_튀는가.md` | `go-gc-mark-assist-tail-latency` | 14 | ☐ 미착수 (date 2026-07-09 · ASCII 9 · 표 2 · SVG 예상 9) |
+| 4.3 | `4부_4.3_JavaG1_region과_왜_가끔_크게_멈추나.md` | `java-g1-region-full-gc-cliff` | 15 | ☐ 미착수 (date 2026-07-10 · ASCII 6 · 표 2 · SVG 예상 8) |
+| 4.4 | `4부_4.4_GenerationalZGC_colored포인터와_allocation_stall.md` | `generational-zgc-colored-pointer-stall` | 16 | ☐ 미착수 (date 2026-07-11 · ASCII 5 · 표 2 · SVG 예상 7) |
+| 4.5 | `4부_4.5_소결_은탄환은없다_비용보존과_세GC의삼각형.md` | `gc-cost-conservation-no-silver-bullet` | 17 | ☐ 미착수 (date 2026-07-12 · ASCII 2 · 표 2 · SVG 예상 5 — 4부 완결) |
 
 - slug는 제안값 — 변환 착수 시점에 확정 (SVG 파일명이 slug에 묶이므로 착수 후 변경 금지)
 
@@ -284,3 +288,99 @@ for f in public/diagrams/{slug}-*.svg; do
   echo "$(grep -c '<text' $f) texts, minFont $(grep -oh 'font-size="[0-9.]*"' $f | grep -o '[0-9.]*' | sort -n | head -1)  $(basename $f)"
 done
 ```
+
+---
+
+## 10. 4부(GC) 착수 메모 — draft 분석 결과 (2026-07-13)
+
+draft 5편(4.1~4.5, 총 134KB)과 `drafts/00_이어가기_브리핑_4부.md`를 통독하고,
+발행된 12편 및 로컬 툴체인(Go 1.26.5 · JDK 25.0.3)과 대조한 결과입니다.
+
+### 10.1 복선 검증 — draft의 4개 주장 중 2개가 거짓
+
+3부에서 반복된 패턴(draft가 "N절에서 예고했다"고 쓰지만 실제 발행 글에는 없음)이 또 나왔습니다.
+**변환 전에 반드시 아래대로 교정할 것.**
+
+| draft의 주장 | 실제 발행 글 | 조치 |
+|---|---|---|
+| 4.2: "2.2에서 예고한 **디스코드 사례**를 회수합니다" | ❌ 5편에 디스코드 **0건** (12편 변환 때 이미 같은 거짓을 발견해 삭제한 이력) | 디스코드는 "예고했던 사례"가 아니라 **새로 소개하는 외부 사례**로 서술 |
+| 4.2: (같은 문단) | ✅ 5편 `:240` `:242` `:513`에 **Mark Assist·`gcBackgroundUtilization` 25%** 복선 실재 | 회수 대상을 **Mark Assist로 교체**. "5편에서 이름만 던져 둔 Mark Assist를 여기서 해부한다" |
+| 4.2: "3.3에서 Green Tea GC를 4부로 미뤄 뒀다" | ✅ 10편 `:426` "자세한 이야기는 4부에서 하겠습니다" 실재 | 그대로 회수 |
+| 4.3: "3.4에서 humongous → 동시 마킹을 예고" | ✅ 11편 `:179~203` `:538` 실재 | 그대로 회수. **단 §10.3의 충돌 주의** |
+| 4.4: "3.4·2.4에서 **allocation stall**을 예고" | ❌ 11편·7편 모두 `allocation stall` **0건** | allocation stall은 **4.4가 처음 꺼내는 개념**으로 서술 |
+| 4.4: (같은 문단) | ✅ 11편 `:133~147` "이사를 백그라운드로 옮겼다" + 12편 `:318` "barrier가 처리량에 상시로 붙는 세금" 실재 | **처리량 세금만** 복선 회수 |
+
+### 10.2 12편(3.5)이 4부에 남긴 계약 — 반드시 이행
+
+`allocation-convergence-why-gc.md :315~319`의 다음 편 예고가 4부의 계약서입니다.
+
+1. Go **Mark Assist**가 고루틴을 GC 노동에 차출하는 순간 + 백그라운드 25% → **4.2**
+2. G1의 **Full GC** STW → **4.3**
+3. 11편이 "빚이 사라진 게 아니라 청구서의 모양이 바뀐 것"이라며 미뤄 둔
+   **Generational ZGC의 진짜 값** = 이사를 백그라운드로 옮긴 대가로 barrier가 처리량에 붙는 세금 → **4.4**
+4. **트레이드오프 삼각형**(단편화 ↔ 이동 비용 ↔ 컴파일러·사람)이 4부의 뼈대 → **전 편**
+
+### 10.3 사실 교정 — 로컬 실측으로 확인·반박한 것
+
+**✅ 확인(그대로 씀)**
+- `forcegcperiod = 2 * 60 * 1e9` — Go 1.26.5 `runtime/proc.go:6476`. draft의 "2분" 정확
+- `gcBackgroundUtilization = 0.25` — `runtime/mgcpacer.go:39`
+- JDK 25.0.3 G1 기본값(`-Xmx2g` 실측): region 1MB · `MaxGCPauseMillis` 200 ·
+  IHOP 45 · `G1UseAdaptiveIHOP` true · `G1MixedGCCountTarget` 8 ·
+  `G1HeapWastePercent` 5 · `G1ReservePercent` 10 · `ParallelRefProcEnabled` true
+- **Preventive GC는 JDK 25에 없음** — `-XX:+G1UsePreventiveGC` → `Unrecognized VM option`.
+  draft의 "JDK 20에서 제거" 주장이 실측으로 확인됨
+
+**❌/⚠️ 교정 필요**
+1. **draft 4.3 서두의 "샌드박스 OpenJDK 11로 실측, JDK 25도 동일"** → 그 문장 자체를 삭제하고
+   **로컬 JDK 25.0.3으로 전량 재실측**해 표를 다시 뽑을 것 (11편이 세운 관례)
+2. **draft 4.3 `ParallelGCThreads`/`ConcGCThreads` = "4 / 1"** → 코어 수 파생 에르고노믹.
+   JDK 25·8코어 머신에서 **8 / 2**. 고정 수치로 쓰지 말고 "코어 수에서 파생, 동시:병렬 ≈ 1:4"로 서술
+3. **draft 4.3 `G1MixedGCLiveThresholdPercent` 85** → 값은 맞지만 **experimental 플래그**.
+   `-XX:+UnlockExperimentalVMOptions` 없이는 못 바꿈. "실측 기본값" 표에 그냥 얹으면 오해를 부름
+4. **draft 4.3 "`G1EagerReclaimHumongousObjects`, 기본 on, 실측 확인"** → **JDK 25에 그 플래그가 없음**.
+   남은 것은 `G1EagerReclaimRemSetThreshold`(experimental, 기본 10)뿐.
+   eager reclaim **동작**은 남았지만 on/off 스위치는 제거됨 → 문장 재작성
+5. **draft 4.2의 `gctrace` 출력** — "문서에 기록된 형식을 그대로 주해"라고 draft가 자백함(= 실측 아님).
+   **로컬 Go 1.26.5로 실제 프로그램을 돌려 gctrace를 뽑아 교체**할 것
+6. **11편과의 충돌 정리** — 11편은 "humongous는 **이사(evacuation) 대상에서 빠진다**"고 썼고,
+   4.3 draft는 "eager reclaim으로 young GC마다 통째 반납"이라 함. 둘 다 사실이나 독자에겐 모순으로 보임.
+   4.3에서 **명시적으로 이어 붙일 것**: 복사를 안 할 뿐 회수 경로는 따로 있다
+
+**웹 검증 대상 (변환 시 편별로)**
+- 디스코드 Read States 사례의 실제 수치(2분 주기·지연 폭) — 원문 대조 필수. 부정확한 각색 금지
+- load 배리어 ≈ store 배리어의 5배 (draft 인용: arxiv 2210.17175)
+- ZGC가 G1보다 처리량 5~10%↓ / generational이 비세대보다 ~10%↑ / 작은 힙 배리어 오버헤드 ~15%
+- Green Tea GC 1.26 기본 · `GOEXPERIMENT=nogreenteagc`가 1.27에서 제거 예정인지
+- G1 region 상한 512MB(JDK 18, JDK-8276929) / Preventive GC 제거(JDK-8297639)
+- ZPage Small 2MB · Medium 32MB · Large N×2MB
+- ARM64 **TBI**(Top Byte Ignore)와 colored pointer의 관계
+
+### 10.4 ASCII 인벤토리 — 총 29블록 (전부 언어 미지정 코드펜스)
+
+| 편 | ASCII | 이미 markdown 표 | 주요 ASCII 소재 |
+|---|---|---|---|
+| 4.1 | 7 | 3 | 근사 질문 전환 · 도달성 그래프 · 삼색 파면 · STW vs 동시 타임라인 · lost object 사고 · 배리어 3종 의사코드 · 삼각형 |
+| 4.2 | 9 | 2 | GC 4국면 · 힙 목표 공식 · 톱니 그래프 · P별 25% 점유 · Mark Assist 크레딧 · 디스코드 2분 타임라인 · gctrace 주해 · Green Tea span 큐 · 삼각형 |
+| 4.3 | 6 | 2 | region 모델(연속 vs 흩어짐) · G1 사이클 흐름 · evacuation 전후 · humongous 2종 · 지연 절벽 그래프 · 삼각형 |
+| 4.4 | 5 | 2 | 64비트 colored pointer 배치 · load 배리어 분기 · 동시 이사 3단계 · allocation stall · 삼각형 |
+| 4.5 | 2 | 2 | 삼각형 종합(4방식) · 할당→회수 인과의 사슬 |
+
+- **삼각형 ASCII가 5편 전부에 반복 등장** — 12편에서 이미 SVG로 만든 자산이 있음.
+  4부는 "그 삼각형 위에 각 GC를 얹는" 변주이므로 **편마다 다른 SVG로 새로 그림**(같은 그림 재탕 금지)
+- 4.2의 `gctrace` 주해는 ASCII 박스가 아니라 **필드 라벨링** — 실측 로그 ` ```text` + 본문 표로 평탄화
+- 4.1의 배리어 3종 의사코드는 **코드**이므로 ` ```go`/` ```text`로 살리되 박스는 제거
+
+### 10.5 편당 SVG 예상 — 총 37개
+
+4.1=8 · 4.2=9 · 4.3=8 · 4.4=7 · 4.5=5. 1~3부 실적(편당 4~10)과 같은 밀도입니다.
+§4.2의 **글자 최소화 원칙**(폰트 13px 하한 · 박스 라벨 1~3단어 · 텍스트 15개 이하)을
+처음부터 지켜 작성하고, §7 편당 절차 5단계의 **전 섹션 재감사**를 빠뜨리지 말 것.
+
+### 10.6 문체 — 4부 draft의 특이 위험
+
+- draft가 **대시(—) 삽입구를 1~3부보다 더 많이** 씁니다. 문장을 끊고 연결어로 바꿀 것
+- "**은탄환**"(silver bullet)은 §4.1 직역 은유 렉시콘의 경계에 있지만,
+  브룩스 이래 정착된 번역어이고 **4부의 주제어**이므로 유지합니다. `lint:post`가 잡으면 예외 처리
+- draft의 "청구서·환전·징집" 비유는 시리즈 고유 어휘로 이미 12편까지 정착 → 유지
+- "**뮤테이터(mutator)**"는 첫 등장 시 정의부터 (draft 4.1 `:132`에 정의 있음, 살릴 것)

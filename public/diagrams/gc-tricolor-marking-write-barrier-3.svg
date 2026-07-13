@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">The gray set is the wavefront that sweeps the object graph</title>
+  <desc id="d3">A chain of objects runs from the root to the right. The first two are black, meaning fully scanned and never revisited. The third is gray: discovered, but its children have not been followed yet. Everything beyond is still white, undiscovered. The gray set is the frontier, and marking advances it rightward by taking one gray object, painting its children gray, and turning itself black. When no gray object remains the wave has swept the whole graph, and whatever is still white is garbage.</desc>
+  <rect x="0" y="0" width="800" height="340" fill="#FFFFFF"/>
+
+  <text x="50" y="126" font-size="15" font-weight="700" fill="#334155">root</text>
+
+  <circle cx="170" cy="120" r="26" fill="#27272A" stroke="#0A0A0A" stroke-width="2"/>
+  <circle cx="290" cy="120" r="26" fill="#27272A" stroke="#0A0A0A" stroke-width="2"/>
+  <circle cx="410" cy="120" r="26" fill="#A1A1AA" stroke="#3F3F46" stroke-width="2.5"/>
+  <circle cx="530" cy="120" r="26" fill="#FFFFFF" stroke="#71717A" stroke-width="2"/>
+  <circle cx="650" cy="120" r="26" fill="#FFFFFF" stroke="#71717A" stroke-width="2"/>
+
+  <path d="M 96 120 L 140 120" stroke="#0A0A0A" stroke-width="1.8" marker-end="url(#a3)"/>
+  <path d="M 198 120 L 260 120" stroke="#0A0A0A" stroke-width="1.8" marker-end="url(#a3)"/>
+  <path d="M 318 120 L 380 120" stroke="#0A0A0A" stroke-width="1.8" marker-end="url(#a3)"/>
+  <path d="M 438 120 L 500 120" stroke="#0A0A0A" stroke-width="1.8" marker-end="url(#a3)"/>
+  <path d="M 558 120 L 620 120" stroke="#0A0A0A" stroke-width="1.8" marker-end="url(#a3)"/>
+
+  <path d="M 410 170 L 410 196" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="410" y="222" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">frontier</text>
+  <path d="M 470 214 L 650 214" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#v3)"/>
+  <text x="580" y="248" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">marking advances</text>
+
+  <circle cx="120" cy="290" r="11" fill="#27272A" stroke="#0A0A0A" stroke-width="1.6"/>
+  <text x="142" y="296" font-size="13" font-weight="600" fill="#0A0A0A">black: done</text>
+  <circle cx="300" cy="290" r="11" fill="#A1A1AA" stroke="#3F3F46" stroke-width="1.6"/>
+  <text x="322" y="296" font-size="13" font-weight="600" fill="#0A0A0A">gray: children pending</text>
+  <circle cx="560" cy="290" r="11" fill="#FFFFFF" stroke="#71717A" stroke-width="1.6"/>
+  <text x="582" y="296" font-size="13" font-weight="600" fill="#0A0A0A">white: unseen</text>
+
+  <defs>
+    <marker id="a3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/></marker>
+    <marker id="v3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/></marker>
+  </defs>
+</svg>

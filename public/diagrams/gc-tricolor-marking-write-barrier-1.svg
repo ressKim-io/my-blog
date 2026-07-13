@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">Reachability is a safe over-approximation of liveness</title>
+  <desc id="d1">Inside the heap sits the set of objects the collector can still reach from the roots. Strictly inside that set sits the smaller set of objects the program will actually use again. The gap between the two is the leak the collector cannot see: still reachable, never used. Everything outside the reachable set is unreachable, and that is the only thing a collector ever frees. The approximation errs in one direction only, so a live object is never mistaken for garbage.</desc>
+  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
+
+  <rect x="50" y="40" width="700" height="340" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+  <text x="72" y="70" font-size="15" font-weight="700" fill="#334155">heap</text>
+
+  <ellipse cx="400" cy="220" rx="270" ry="130" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <ellipse cx="340" cy="225" rx="160" ry="88" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+
+  <text x="340" y="220" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">actually used</text>
+  <text x="340" y="245" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">(unknowable)</text>
+
+  <text x="588" y="205" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">reachable</text>
+  <text x="588" y="228" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">= kept</text>
+
+  <text x="560" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#B45309">leak zone</text>
+  <path d="M 545 292 L 505 262" stroke="#D97706" stroke-width="1.6" fill="none"/>
+
+  <circle cx="120" cy="120" r="9" fill="#E4E4E7" stroke="#475569" stroke-width="1.4"/>
+  <circle cx="150" cy="330" r="9" fill="#E4E4E7" stroke="#475569" stroke-width="1.4"/>
+  <circle cx="680" cy="345" r="9" fill="#E4E4E7" stroke="#475569" stroke-width="1.4"/>
+  <text x="140" y="360" font-size="14" font-weight="700" fill="#334155">unreachable → freed</text>
+</svg>

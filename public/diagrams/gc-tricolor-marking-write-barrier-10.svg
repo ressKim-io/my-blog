@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-labelledby="t9 d9" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t9">Concurrency is an axis orthogonal to the triangle, and it is paid in barrier tax</title>
+  <desc id="d9">The triangle from the previous part is unchanged: fragmentation at the lower left, moving cost at the lower right, and the location of the accounting at the top. Whichever corner a collector picks, it still faces a separate question that cuts straight across the triangle, drawn here as a dashed axis: does it stop the program to do the work, or run alongside it? Choosing to run alongside does not make the work free. It moves the cost out of the pause and into every ordinary pointer write and read, as a barrier that slows normal execution. Latency is not eliminated, it is exchanged for throughput.</desc>
+  <rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
+
+  <path d="M 400 80 L 170 330 L 630 330 Z" fill="#FAFAFA" stroke="#475569" stroke-width="2.2"/>
+
+  <text x="400" y="60" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">accounting</text>
+  <text x="400" y="42" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">human · compiler · runtime</text>
+
+  <text x="140" y="358" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">fragmentation</text>
+  <text x="140" y="380" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Go</text>
+
+  <text x="660" y="358" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">moving cost</text>
+  <text x="660" y="380" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">G1 · ZGC</text>
+
+  <line x1="60" y1="245" x2="740" y2="245" stroke="#E11D48" stroke-width="2.4" stroke-dasharray="9 5"/>
+  <text x="60" y="228" font-size="15" font-weight="700" fill="#BE123C">concurrency</text>
+  <text x="740" y="228" text-anchor="end" font-size="15" font-weight="700" fill="#BE123C">barrier tax</text>
+
+  <rect x="248" y="404" width="304" height="30" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+  <text x="400" y="424" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">latency → throughput</text>
+</svg>

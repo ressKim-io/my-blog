@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">Roots reach live objects; cycles and orphans stay unreachable</title>
+  <desc id="d2">On the left is the root set: stack locals, CPU registers and globals. Following pointers from there reaches A, then B, then C, plus D and E, and those are the live objects. Below sit two unreachable groups. X and Y point at each other, so each has a reference count of one, yet no root can arrive at that island: this is the cycle that defeats reference counting but not tracing. P points at Q and nothing points at P, an ordinary orphan. Tracing frees both groups because it asks only whether a root can arrive.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <rect x="40" y="70" width="180" height="110" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="130" y="110" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">roots</text>
+  <text x="130" y="136" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">stack · registers</text>
+  <text x="130" y="157" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">globals</text>
+
+  <circle cx="330" cy="90" r="24" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="330" y="96" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">A</text>
+  <circle cx="450" cy="90" r="24" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="450" y="96" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">B</text>
+  <circle cx="570" cy="90" r="24" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="570" y="96" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">C</text>
+  <circle cx="450" cy="170" r="24" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="450" y="176" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">D</text>
+  <circle cx="330" cy="170" r="24" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="330" y="176" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">E</text>
+
+  <path d="M 222 105 L 302 92" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#a2)"/>
+  <path d="M 222 145 L 302 166" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#a2)"/>
+  <path d="M 356 90 L 424 90" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#a2)"/>
+  <path d="M 476 90 L 544 90" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#a2)"/>
+  <path d="M 348 110 L 432 152" stroke="#0A0A0A" stroke-width="1.6" marker-end="url(#a2)"/>
+  <text x="660" y="96" font-size="14" font-weight="700" fill="#047857">live</text>
+
+  <circle cx="330" cy="300" r="24" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="330" y="306" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">X</text>
+  <circle cx="450" cy="300" r="24" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="450" y="306" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">Y</text>
+  <path d="M 352 288 L 428 288" stroke="#E11D48" stroke-width="1.6" marker-end="url(#r2)"/>
+  <path d="M 428 314 L 352 314" stroke="#E11D48" stroke-width="1.6" marker-end="url(#r2)"/>
+  <text x="510" y="295" font-size="14" font-weight="700" fill="#BE123C">cycle</text>
+  <text x="510" y="317" font-size="13" font-weight="600" fill="#BE123C">refcount 1</text>
+
+  <circle cx="640" cy="300" r="24" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="640" y="306" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">P</text>
+  <circle cx="730" cy="300" r="18" fill="#F8FAFC" stroke="#475569" stroke-width="1.6"/>
+  <text x="730" y="306" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">Q</text>
+  <path d="M 666 300 L 710 300" stroke="#475569" stroke-width="1.6" marker-end="url(#s2)"/>
+  <text x="640" y="355" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">orphan</text>
+
+  <defs>
+    <marker id="a2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/></marker>
+    <marker id="r2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+    <marker id="s2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+</svg>

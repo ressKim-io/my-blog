@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t7">Insertion barrier shades the new value; deletion barrier shades the old one</title>
+  <desc id="d7">A single pointer assignment sits at the top: a slot is about to be overwritten, so two values are in play at that instant, the old value that is being discarded and the new value that is arriving. The two barrier designs grab opposite ends of the same statement. The Dijkstra insertion barrier shades the incoming value, which keeps a black object from ever pointing at an unshaded white one and so preserves the strong invariant. The Yuasa deletion barrier shades the outgoing value instead, preserving the graph as it looked when marking began, which is why it is called snapshot-at-the-beginning.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <rect x="270" y="40" width="260" height="56" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="400" y="75" text-anchor="middle" font-size="17" font-weight="700" fill="#6D28D9">slot ← ptr</text>
+
+  <path d="M 330 100 L 220 150" stroke="#475569" stroke-width="1.8" marker-end="url(#s7)"/>
+  <path d="M 470 100 L 580 150" stroke="#475569" stroke-width="1.8" marker-end="url(#s7)"/>
+
+  <text x="190" y="145" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">old value</text>
+  <text x="610" y="145" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">new value</text>
+
+  <rect x="60" y="175" width="290" height="150" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="205" y="212" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">deletion (Yuasa)</text>
+  <text x="205" y="248" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">shade(*slot)</text>
+  <text x="205" y="284" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">keeps the snapshot</text>
+  <text x="205" y="308" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">cost: floating garbage</text>
+
+  <rect x="450" y="175" width="290" height="150" rx="12" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="595" y="212" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">insertion (Dijkstra)</text>
+  <text x="595" y="248" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">shade(ptr)</text>
+  <text x="595" y="284" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">keeps the strong invariant</text>
+  <text x="595" y="308" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">cost: stack re-scan</text>
+
+  <text x="400" y="360" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">Go hybrid = both</text>
+
+  <defs>
+    <marker id="s7" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+</svg>

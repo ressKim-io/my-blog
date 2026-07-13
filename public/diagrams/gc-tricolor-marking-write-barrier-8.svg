@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t8b d8b" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t8b">A read barrier is dearer code on a far busier path</title>
+  <desc id="d8b">Two rectangles whose areas represent the total tax a barrier imposes. Width stands for how often the barrier runs, and height for what one execution costs. A write barrier sits on pointer stores, which the LXR paper measures at about four point three per microsecond, and one execution is comparatively cheap, so its rectangle is narrow and short. A read barrier sits on pointer loads, measured at about sixty four per microsecond, roughly fifteen times more frequent, and the same paper puts a load barrier at around five times the cost of an object remembering barrier. Wide and tall multiply, which is why ZGC pays its bill in throughput rather than in pause time.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="90" y1="330" x2="760" y2="330" stroke="#0A0A0A" stroke-width="1.8"/>
+  <line x1="90" y1="330" x2="90" y2="60" stroke="#0A0A0A" stroke-width="1.8"/>
+  <text x="425" y="366" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">how often it runs</text>
+  <text x="66" y="195" text-anchor="middle" font-size="14" font-weight="700" fill="#334155" transform="rotate(-90 66 195)">cost per run</text>
+
+  <rect x="100" y="278" width="90" height="52" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="145" y="258" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">write barrier</text>
+  <text x="145" y="310" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">1×</text>
+
+  <rect x="240" y="70" width="500" height="260" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.4"/>
+  <text x="490" y="140" text-anchor="middle" font-size="17" font-weight="700" fill="#BE123C">read barrier</text>
+  <text x="490" y="176" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">5× the cost</text>
+  <text x="490" y="204" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">15× the traffic</text>
+
+  <text x="145" y="352" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">4.3 /µs</text>
+  <text x="490" y="352" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">64.3 /µs</text>
+</svg>

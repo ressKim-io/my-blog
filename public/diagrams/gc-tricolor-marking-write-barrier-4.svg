@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Strong invariant forbids black-to-white; weak invariant allows it if a gray path survives</title>
+  <desc id="d4">The top row shows the strong tricolor invariant: a black object must never point straight at a white one, because black is never revisited and the white object would never be found. The bottom row shows the weak invariant, which does tolerate that edge on one condition. The same white object must still be reachable through some other path that runs through a gray object, so the frontier is guaranteed to arrive there eventually. Insertion barriers preserve the strong rule, deletion barriers preserve the weak one.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="50" y="52" font-size="16" font-weight="700" fill="#BE123C">strong invariant</text>
+
+  <circle cx="220" cy="120" r="26" fill="#27272A" stroke="#0A0A0A" stroke-width="2"/>
+  <circle cx="470" cy="120" r="26" fill="#FFFFFF" stroke="#71717A" stroke-width="2"/>
+  <path d="M 248 120 L 442 120" stroke="#E11D48" stroke-width="2.4" marker-end="url(#r4)"/>
+  <line x1="326" y1="96" x2="366" y2="144" stroke="#E11D48" stroke-width="3.5"/>
+  <line x1="366" y1="96" x2="326" y2="144" stroke="#E11D48" stroke-width="3.5"/>
+  <text x="560" y="126" font-size="15" font-weight="700" fill="#BE123C">forbidden</text>
+
+  <line x1="50" y1="190" x2="750" y2="190" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="50" y="232" font-size="16" font-weight="700" fill="#047857">weak invariant</text>
+
+  <circle cx="220" cy="300" r="26" fill="#27272A" stroke="#0A0A0A" stroke-width="2"/>
+  <circle cx="470" cy="300" r="26" fill="#FFFFFF" stroke="#71717A" stroke-width="2"/>
+  <path d="M 248 300 L 442 300" stroke="#71717A" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#g4)"/>
+
+  <circle cx="345" cy="368" r="24" fill="#A1A1AA" stroke="#3F3F46" stroke-width="2.2"/>
+  <path d="M 240 322 L 322 356" stroke="#059669" stroke-width="2.2" marker-end="url(#e4)"/>
+  <path d="M 368 356 L 452 322" stroke="#059669" stroke-width="2.2" marker-end="url(#e4)"/>
+  <text x="560" y="306" font-size="15" font-weight="700" fill="#047857">allowed</text>
+  <text x="560" y="328" font-size="13" font-weight="600" fill="#047857">gray path survives</text>
+
+  <defs>
+    <marker id="r4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+    <marker id="g4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#71717A"/></marker>
+    <marker id="e4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+  </defs>
+</svg>

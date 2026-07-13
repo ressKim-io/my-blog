@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">Two events combine to lose a live object</title>
+  <desc id="d6">Three panels read left to right. In the first, A is already black and never revisited, B is gray, and C is white and reachable only through B. In the second, the mutator does two things in the same instant: black A starts pointing at white C, and the link from B to C is cut, destroying the only gray path. In the third, C is reachable only from a black object that will never be scanned again, so C stays white to the end and is freed as garbage, while A still holds a pointer into that freed memory. Blocking either one of the two events prevents the accident, and that is what the two kinds of write barrier do.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <text x="40" y="46" font-size="15" font-weight="700" fill="#6D28D9">1</text>
+  <circle cx="70" cy="120" r="22" fill="#27272A" stroke="#0A0A0A" stroke-width="2"/>
+  <text x="70" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">A</text>
+  <circle cx="150" cy="120" r="22" fill="#A1A1AA" stroke="#3F3F46" stroke-width="2"/>
+  <text x="150" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">B</text>
+  <circle cx="230" cy="120" r="22" fill="#FFFFFF" stroke="#71717A" stroke-width="2"/>
+  <text x="230" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">C</text>
+  <path d="M 94 120 L 124 120" stroke="#0A0A0A" stroke-width="1.8" marker-end="url(#a6)"/>
+  <path d="M 174 120 L 204 120" stroke="#0A0A0A" stroke-width="1.8" marker-end="url(#a6)"/>
+
+  <line x1="285" y1="60" x2="285" y2="330" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="315" y="46" font-size="15" font-weight="700" fill="#6D28D9">2</text>
+  <circle cx="345" cy="120" r="22" fill="#27272A" stroke="#0A0A0A" stroke-width="2"/>
+  <text x="345" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">A</text>
+  <circle cx="425" cy="120" r="22" fill="#A1A1AA" stroke="#3F3F46" stroke-width="2"/>
+  <text x="425" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">B</text>
+  <circle cx="505" cy="120" r="22" fill="#FFFFFF" stroke="#71717A" stroke-width="2"/>
+  <text x="505" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#0A0A0A">C</text>
+
+  <path d="M 449 120 L 479 120" stroke="#71717A" stroke-width="1.8" stroke-dasharray="4 3"/>
+  <line x1="456" y1="108" x2="474" y2="132" stroke="#E11D48" stroke-width="3"/>
+  <line x1="474" y1="108" x2="456" y2="132" stroke="#E11D48" stroke-width="3"/>
+  <path d="M 352 143 Q 425 205 498 143" stroke="#E11D48" stroke-width="2.4" fill="none" marker-end="url(#r6)"/>
+  <text x="425" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">black → white, gray path cut</text>
+
+  <line x1="560" y1="60" x2="560" y2="330" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="590" y="46" font-size="15" font-weight="700" fill="#6D28D9">3</text>
+  <circle cx="620" cy="120" r="22" fill="#27272A" stroke="#0A0A0A" stroke-width="2"/>
+  <text x="620" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">A</text>
+  <circle cx="730" cy="120" r="22" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.4" stroke-dasharray="5 3"/>
+  <text x="730" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">C</text>
+  <path d="M 644 120 L 704 120" stroke="#E11D48" stroke-width="2.2" marker-end="url(#r6)"/>
+  <text x="675" y="185" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">freed</text>
+  <text x="675" y="208" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">dangling pointer</text>
+
+  <defs>
+    <marker id="a6" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0A0A0A"/></marker>
+    <marker id="r6" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+  </defs>
+</svg>
