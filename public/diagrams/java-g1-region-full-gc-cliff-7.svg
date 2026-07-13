@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t7">G1 buys away fragmentation and pays for it in evacuation pauses and one cliff</title>
+  <desc id="d7">G1 sits at the lower-right corner of the trade-off triangle, the moving-cost vertex, exactly opposite the corner Go chose. Moving objects buys two things Go could not have: compaction, so fragmentation disappears, and generations, so a long-lived cache is not rescanned on every cycle. The bill arrives in two forms. There is a steady one, the evacuation pause on every young and mixed collection plus the SATB write barrier that runs during marking. And there is a rare one, the full collection that fires when evacuation cannot find a free region, ignores the pause target and grows with the heap. The total risk was not removed; its distribution was changed, from a constant small tax into an occasional large shock.</desc>
+  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
+
+  <path d="M 250 70 L 90 320 L 410 320 Z" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+  <text x="250" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">accounting: runtime</text>
+  <text x="75" y="346" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">fragmentation</text>
+  <text x="420" y="346" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">moving cost</text>
+
+  <text x="75" y="372" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Go</text>
+  <circle cx="390" cy="308" r="13" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="420" y="380" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">G1 is here</text>
+
+  <rect x="480" y="70" width="290" height="110" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="625" y="98" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">what moving buys</text>
+  <text x="505" y="130" font-size="14" font-weight="600" fill="#047857">compaction → no fragmentation</text>
+  <text x="505" y="160" font-size="14" font-weight="600" fill="#047857">generations → young only</text>
+
+  <rect x="480" y="200" width="290" height="150" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="625" y="228" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">what it costs</text>
+  <text x="505" y="260" font-size="14" font-weight="600" fill="#BE123C">evacuation pause (steady)</text>
+  <text x="505" y="288" font-size="14" font-weight="600" fill="#BE123C">SATB barrier (steady)</text>
+  <text x="505" y="322" font-size="15" font-weight="700" fill="#BE123C">Full GC cliff (rare, huge)</text>
+
+  <text x="625" y="386" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">risk redistributed, not removed</text>
+</svg>

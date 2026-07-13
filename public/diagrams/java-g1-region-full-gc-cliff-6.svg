@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">G1 stays inside its pause target until evacuation fails, then falls off a cliff</title>
+  <desc id="d6">Pause time plotted over the life of a service. For the vast majority of collections the bars are low and even, because young and mixed collections are partial and sized to fit under the MaxGCPauseMillis target, drawn here as a dashed line at two hundred milliseconds. Then evacuation fails: there is no free region left to copy the survivors into and the heap cannot grow. G1 abandons partial collection and compacts the entire heap in one stop-the-world pass. That pause ignores the target completely and grows with the size of the heap, which is why it appears as a single cliff rising far above everything around it.</desc>
+  <rect x="0" y="0" width="800" height="340" fill="#FFFFFF"/>
+
+  <line x1="80" y1="270" x2="760" y2="270" stroke="#0A0A0A" stroke-width="1.8"/>
+  <line x1="80" y1="270" x2="80" y2="40" stroke="#0A0A0A" stroke-width="1.8"/>
+  <text x="52" y="160" text-anchor="middle" font-size="14" font-weight="700" fill="#334155" transform="rotate(-90 52 160)">pause</text>
+  <text x="700" y="296" font-size="14" font-weight="700" fill="#334155">time</text>
+
+  <line x1="80" y1="230" x2="760" y2="230" stroke="#7C3AED" stroke-width="1.8" stroke-dasharray="7 4"/>
+  <text x="90" y="222" font-size="13" font-weight="700" fill="#6D28D9">MaxGCPauseMillis 200</text>
+
+  <g fill="#ECFDF5" stroke="#059669" stroke-width="1.6">
+    <rect x="105" y="246" width="20" height="24"/>
+    <rect x="140" y="252" width="20" height="18"/>
+    <rect x="175" y="243" width="20" height="27"/>
+    <rect x="210" y="250" width="20" height="20"/>
+    <rect x="245" y="245" width="20" height="25"/>
+    <rect x="280" y="254" width="20" height="16"/>
+    <rect x="315" y="242" width="20" height="28"/>
+    <rect x="350" y="249" width="20" height="21"/>
+    <rect x="385" y="244" width="20" height="26"/>
+    <rect x="420" y="251" width="20" height="19"/>
+    <rect x="455" y="246" width="20" height="24"/>
+    <rect x="490" y="253" width="20" height="17"/>
+    <rect x="525" y="243" width="20" height="27"/>
+    <rect x="560" y="250" width="20" height="20"/>
+  </g>
+  <text x="330" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">young · mixed — partial, predictable</text>
+
+  <rect x="620" y="60" width="34" height="210" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.4"/>
+  <text x="700" y="86" font-size="15" font-weight="700" fill="#BE123C">Full GC</text>
+  <text x="700" y="110" font-size="13" font-weight="600" fill="#BE123C">evacuation</text>
+  <text x="700" y="130" font-size="13" font-weight="600" fill="#BE123C">failed</text>
+  <text x="700" y="158" font-size="13" font-weight="700" fill="#BE123C">target ignored</text>
+  <text x="700" y="180" font-size="13" font-weight="700" fill="#BE123C">scales with heap</text>
+</svg>

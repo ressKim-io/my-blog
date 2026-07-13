@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">Eager reclaim rescues reference-free humongous objects, and only those</title>
+  <desc id="d5">Two humongous objects of exactly the same size take completely different paths on JDK 25. A byte array carries no outgoing references, so every young collection can cheaply prove that nothing points at it and hand the whole region straight back. Measured over three thousand such allocations: no concurrent marking cycles at all, no full collections, and the heap dropping from 919 megabytes to 4 in a single young pause. An object array of the same size carries references, does not get that cheap treatment, and must instead wait for a concurrent marking cycle before its region can be freed. Measured the same way: four concurrent cycles, two full collections, and a heap that refused to come down at all. JDK 26 extends eager reclaim to every humongous type, but on JDK 25 the split is real.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <rect x="40" y="40" width="330" height="54" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="205" y="65" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">byte[] — no references inside</text>
+  <text x="205" y="85" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">2MB humongous</text>
+
+  <rect x="430" y="40" width="330" height="54" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.2"/>
+  <text x="595" y="65" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">Object[] — holds references</text>
+  <text x="595" y="85" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">2MB humongous</text>
+
+  <path d="M 205 100 L 205 138" stroke="#059669" stroke-width="2.2" marker-end="url(#g5)"/>
+  <path d="M 595 100 L 595 138" stroke="#E11D48" stroke-width="2.2" marker-end="url(#r5)"/>
+
+  <rect x="40" y="146" width="330" height="54" rx="10" fill="#FFFFFF" stroke="#059669" stroke-width="2"/>
+  <text x="205" y="171" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">eager reclaim at young GC</text>
+  <text x="205" y="191" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">region handed back whole</text>
+
+  <rect x="430" y="146" width="330" height="54" rx="10" fill="#FFFFFF" stroke="#E11D48" stroke-width="2"/>
+  <text x="595" y="171" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">must wait for marking</text>
+  <text x="595" y="191" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">regions pile up meanwhile</text>
+
+  <path d="M 205 206 L 205 244" stroke="#059669" stroke-width="2.2" marker-end="url(#g5)"/>
+  <path d="M 595 206 L 595 244" stroke="#E11D48" stroke-width="2.2" marker-end="url(#r5)"/>
+
+  <rect x="40" y="252" width="330" height="96" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2.4"/>
+  <text x="205" y="280" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">0 concurrent cycles · 0 full GC</text>
+  <text x="205" y="310" text-anchor="middle" font-size="17" font-weight="700" fill="#047857">919MB → 4MB</text>
+  <text x="205" y="334" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">measured, JDK 25</text>
+
+  <rect x="430" y="252" width="330" height="96" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.4"/>
+  <text x="595" y="280" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">4 concurrent cycles · 2 full GC</text>
+  <text x="595" y="310" text-anchor="middle" font-size="17" font-weight="700" fill="#BE123C">2043MB → 2043MB</text>
+  <text x="595" y="334" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">measured, JDK 25</text>
+
+  <defs>
+    <marker id="g5" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+    <marker id="r5" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+  </defs>
+</svg>

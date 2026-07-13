@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">Young collections repeat until IHOP fires; then marking, then mixed</title>
+  <desc id="d2">The normal state of G1 is a loop of short young collections, each one a stop-the-world evacuation sized to fit inside the pause target. That loop continues untouched no matter how large the old generation grows, which is why a long-lived cache costs nothing on the common path. Only when old occupancy crosses the initiating heap occupancy percent, forty five by default, does G1 start a concurrent marking cycle riding on the next young pause, to find out which old regions hold the most garbage. Once marking finishes, the collector runs a bounded series of mixed collections, up to eight, each adding a few of the emptiest old regions to the young set, and stops as soon as reclaimable garbage falls below five percent of the heap. Then the young loop resumes.</desc>
+  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
+
+  <rect x="250" y="30" width="300" height="52" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="400" y="53" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">Young GC (STW)</text>
+  <text x="400" y="73" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">short · inside pause target</text>
+
+  <path d="M 250 56 Q 150 56 150 100 Q 150 140 244 62" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#g2)"/>
+  <text x="112" y="140" font-size="13" font-weight="700" fill="#047857">repeat</text>
+
+  <path d="M 400 88 L 400 122" stroke="#D97706" stroke-width="2.4" marker-end="url(#w2)"/>
+  <text x="416" y="112" font-size="14" font-weight="700" fill="#B45309">old &gt; IHOP 45%</text>
+
+  <rect x="180" y="130" width="440" height="130" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="400" y="158" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">concurrent marking cycle</text>
+  <text x="400" y="186" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">SATB write barrier · runs alongside</text>
+  <rect x="210" y="204" width="160" height="38" rx="7" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="290" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">short STW: start</text>
+  <rect x="430" y="204" width="160" height="38" rx="7" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.6"/>
+  <text x="510" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">short STW: remark</text>
+
+  <path d="M 400 266 L 400 300" stroke="#475569" stroke-width="2.2" marker-end="url(#s2)"/>
+  <text x="416" y="290" font-size="13" font-weight="600" fill="#334155">now we know where the garbage is</text>
+
+  <rect x="250" y="308" width="300" height="56" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.2"/>
+  <text x="400" y="332" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Mixed GC (STW) × up to 8</text>
+  <text x="400" y="353" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">young + the emptiest old regions</text>
+
+  <path d="M 550 336 Q 680 336 680 190 Q 680 50 556 56" stroke="#475569" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#s2)"/>
+  <text x="700" y="200" font-size="13" font-weight="700" fill="#334155">waste &lt; 5%</text>
+
+  <defs>
+    <marker id="g2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+    <marker id="w2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#D97706"/></marker>
+    <marker id="s2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+</svg>

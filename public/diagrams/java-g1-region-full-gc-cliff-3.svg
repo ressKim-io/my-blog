@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Evacuation copies only the survivors, then hands the whole region back</title>
+  <desc id="d3">Before the collection, two regions hold a mix of live objects and garbage. G1 copies only the live objects out, packing them tightly into a fresh region, and then returns both source regions to the free list in one piece. Nothing is left behind to fragment the heap, which is the whole point of moving. The price is paid twice over: once to copy the surviving bytes, and once to find and rewrite every pointer that used to point at their old addresses. The remembered set is what makes the second part affordable, since it records where the incoming pointers live, so the collector does not have to search the heap. That copy-and-rewrite time is the stop-the-world pause.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <text x="50" y="46" font-size="15" font-weight="700" fill="#334155">before</text>
+
+  <rect x="50" y="66" width="230" height="70" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2"/>
+  <rect x="310" y="66" width="230" height="70" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2"/>
+  <g fill="#059669">
+    <circle cx="80" cy="101" r="9"/><circle cx="140" cy="101" r="9"/><circle cx="230" cy="101" r="9"/>
+    <circle cx="355" cy="101" r="9"/><circle cx="440" cy="101" r="9"/><circle cx="510" cy="101" r="9"/>
+  </g>
+  <g fill="#E4E4E7">
+    <circle cx="110" cy="101" r="9"/><circle cx="170" cy="101" r="9"/><circle cx="200" cy="101" r="9"/><circle cx="260" cy="101" r="9"/>
+    <circle cx="385" cy="101" r="9"/><circle cx="410" cy="101" r="9"/><circle cx="470" cy="101" r="9"/>
+  </g>
+  <text x="580" y="96" font-size="13" font-weight="700" fill="#047857">live</text>
+  <circle cx="565" cy="91" r="8" fill="#059669"/>
+  <text x="580" y="122" font-size="13" font-weight="700" fill="#334155">garbage</text>
+  <circle cx="565" cy="117" r="8" fill="#E4E4E7"/>
+
+  <path d="M 400 152 L 400 190" stroke="#475569" stroke-width="2.4" marker-end="url(#s3)"/>
+  <text x="416" y="178" font-size="14" font-weight="700" fill="#334155">copy survivors + rewrite pointers</text>
+
+  <text x="50" y="228" font-size="15" font-weight="700" fill="#334155">after</text>
+
+  <rect x="50" y="248" width="230" height="70" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="165" y="290" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">free</text>
+  <rect x="310" y="248" width="230" height="70" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="425" y="290" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">free</text>
+
+  <rect x="570" y="248" width="180" height="70" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2.4"/>
+  <g fill="#059669">
+    <circle cx="600" cy="283" r="9"/><circle cx="626" cy="283" r="9"/><circle cx="652" cy="283" r="9"/>
+    <circle cx="678" cy="283" r="9"/><circle cx="704" cy="283" r="9"/><circle cx="730" cy="283" r="9"/>
+  </g>
+  <text x="660" y="238" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">packed · no fragmentation</text>
+
+  <text x="290" y="344" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">this time is the STW pause</text>
+
+  <defs>
+    <marker id="s3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+</svg>
