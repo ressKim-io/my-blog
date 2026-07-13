@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t7 d7" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t7">The pause chart looks perfect while the thread is blocked five times longer</title>
+  <desc id="d7">Both bars come from the same five second run, measured on JDK 25 with the collector deliberately starved of CPU. The pause bar is what a monitoring dashboard would show: twenty three thousand stop-the-world pauses adding up to 23.8 milliseconds, with the single worst one lasting 0.019 milliseconds. No latency alarm would ever fire on that. The second bar is what the application thread actually experienced: 1,305 allocation stalls adding up to 136.5 milliseconds, five point seven times more time lost, with the worst single stall at 1.31 milliseconds, roughly seventy times the worst pause. None of that second bar appears in any pause metric, which is the whole point.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <text x="400" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">same 5-second run · JDK 25</text>
+
+  <text x="180" y="106" text-anchor="end" font-size="15" font-weight="700" fill="#047857">GC pause</text>
+  <rect x="200" y="80" width="86" height="46" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="306" y="103" font-size="16" font-weight="700" fill="#047857">23.8 ms</text>
+  <text x="306" y="123" font-size="13" font-weight="600" fill="#047857">worst 0.019 ms</text>
+
+  <text x="180" y="216" text-anchor="end" font-size="15" font-weight="700" fill="#BE123C">allocation stall</text>
+  <rect x="200" y="190" width="490" height="46" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.6"/>
+  <text x="710" y="213" font-size="16" font-weight="700" fill="#BE123C">136.5 ms</text>
+  <text x="710" y="233" font-size="13" font-weight="600" fill="#BE123C">worst 1.31 ms</text>
+
+  <text x="445" y="290" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">5.7× the time lost</text>
+  <text x="445" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">and none of it shows up on the pause dashboard</text>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Relocation runs while the mutator keeps going; readers heal their own pointers</title>
+  <desc id="d3">Three steps, top to bottom. First the collector copies the live object into a new page and leaves a forwarding note in the space it vacated, and the application keeps running throughout. Second, whenever an application thread happens to read a pointer that still refers to the old location, the load barrier notices the stale colour, follows the forwarding note to the new address, and writes the corrected pointer back where it found it. Third, once nothing points at the old page any more, the whole page is handed back. G1 would have done all of this inside a stop-the-world pause; ZGC never stops the mutator to do it.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="40" y="52" font-size="15" font-weight="700" fill="#6D28D9">1</text>
+  <rect x="70" y="30" width="230" height="60" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="185" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">old page</text>
+  <text x="185" y="77" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">forwarding note</text>
+
+  <path d="M 306 60 L 466 60" stroke="#7C3AED" stroke-width="2.4" marker-end="url(#v3)"/>
+  <text x="386" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">copy</text>
+
+  <rect x="472" y="30" width="230" height="60" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="587" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">new page</text>
+  <text x="587" y="77" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">object lives here now</text>
+
+  <text x="720" y="66" font-size="13" font-weight="700" fill="#334155">app runs</text>
+
+  <line x1="40" y1="120" x2="760" y2="120" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="40" y="176" font-size="15" font-weight="700" fill="#6D28D9">2</text>
+  <rect x="70" y="150" width="180" height="56" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="160" y="184" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">stale pointer</text>
+
+  <path d="M 256 178 L 320 178" stroke="#E11D48" stroke-width="2.2" marker-end="url(#r3)"/>
+  <rect x="326" y="150" width="200" height="56" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <text x="426" y="184" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">load barrier heals it</text>
+
+  <path d="M 532 178 L 596 178" stroke="#059669" stroke-width="2.2" marker-end="url(#g3)"/>
+  <rect x="602" y="150" width="150" height="56" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="677" y="184" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">new address</text>
+
+  <line x1="40" y1="240" x2="760" y2="240" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="40" y="300" font-size="15" font-weight="700" fill="#6D28D9">3</text>
+  <rect x="70" y="270" width="290" height="60" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="215" y="306" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">nothing points here → free</text>
+
+  <text x="420" y="306" font-size="15" font-weight="700" fill="#BE123C">no stop-the-world anywhere</text>
+  <text x="420" y="352" font-size="14" font-weight="700" fill="#334155">G1 would have paused for all of this</text>
+
+  <defs>
+    <marker id="v3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/></marker>
+    <marker id="r3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+    <marker id="g3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+  </defs>
+</svg>

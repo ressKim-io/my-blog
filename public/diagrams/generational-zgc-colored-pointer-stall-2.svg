@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">The load barrier checks the colour, fixes the pointer, and writes the fix back</title>
+  <desc id="d2">Every time the program loads a reference out of a field, ZGC first inspects the colour bits of that pointer. If the colour matches the phase the collector is currently in, the pointer is good and execution continues immediately: this is the fast path and it costs almost nothing. If the colour is stale the slow path runs. A stale colour means one of two things: the object has not been marked yet this cycle, in which case it is pushed onto the marking queue, or it has already been relocated, in which case the forwarding table is consulted and the pointer is rewritten to the new address. Crucially, the corrected pointer is then stored back into the field it came from, so the next read of that field takes the fast path. This is self-healing, and it is why the collector never has to stop the world to fix every pointer at once.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <rect x="300" y="30" width="200" height="46" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="400" y="59" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">load a reference</text>
+
+  <path d="M 400 80 L 400 106" stroke="#475569" stroke-width="2" marker-end="url(#s2)"/>
+  <rect x="300" y="110" width="200" height="46" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <text x="400" y="139" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">check the colour</text>
+
+  <path d="M 300 133 L 190 133 L 190 176" stroke="#059669" stroke-width="2.2" fill="none" marker-end="url(#g2)"/>
+  <path d="M 500 133 L 610 133 L 610 176" stroke="#E11D48" stroke-width="2.2" fill="none" marker-end="url(#r2)"/>
+  <text x="228" y="126" font-size="13" font-weight="700" fill="#047857">good</text>
+  <text x="546" y="126" font-size="13" font-weight="700" fill="#BE123C">stale</text>
+
+  <rect x="70" y="182" width="240" height="60" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="190" y="207" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">fast path</text>
+  <text x="190" y="229" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">use it as-is</text>
+
+  <rect x="490" y="182" width="240" height="90" rx="9" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="610" y="207" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">slow path</text>
+  <text x="610" y="230" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">not marked → mark queue</text>
+  <text x="610" y="254" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">relocated → new address</text>
+
+  <path d="M 610 276 L 610 306" stroke="#7C3AED" stroke-width="2.4" marker-end="url(#v2)"/>
+  <rect x="440" y="310" width="340" height="60" rx="9" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <text x="610" y="335" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">self-healing</text>
+  <text x="610" y="357" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">write the fixed pointer back into the field</text>
+
+  <path d="M 436 340 L 200 340 L 200 250" stroke="#7C3AED" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#v2)"/>
+  <text x="300" y="362" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">next read is fast</text>
+
+  <defs>
+    <marker id="s2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="g2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#059669"/></marker>
+    <marker id="r2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+    <marker id="v2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/></marker>
+  </defs>
+</svg>

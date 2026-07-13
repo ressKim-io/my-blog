@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="t8 d8" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t8">G1 and ZGC stand on the same corner but settle the bill differently</title>
+  <desc id="d8">Both G1 and ZGC occupy the moving-cost corner of the trade-off triangle, because both relocate objects; Go sits at the opposite corner and pays in fragmentation instead. What separates the two Java collectors is not where they stand but how they pay. G1 pays for relocation in stop-the-world pauses, and when relocation cannot find room the bill arrives all at once as a full collection. ZGC performs the same relocation concurrently, so the pause disappears, but the money does not: it comes back as a load barrier on every pointer read, slowing ordinary execution, and as allocation stalls that block application threads without ever being counted as pause time. Same corner, same physics, different invoice.</desc>
+  <rect x="0" y="0" width="800" height="420" fill="#FFFFFF"/>
+
+  <path d="M 230 70 L 80 320 L 380 320 Z" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+  <text x="230" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">accounting: runtime</text>
+  <text x="66" y="346" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">fragmentation</text>
+  <text x="66" y="368" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">Go</text>
+  <text x="390" y="346" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">moving cost</text>
+
+  <circle cx="352" cy="304" r="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <circle cx="378" cy="304" r="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.4"/>
+  <text x="390" y="382" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">G1 · ZGC both here</text>
+
+  <rect x="450" y="80" width="310" height="110" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.2"/>
+  <text x="605" y="110" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">G1 pays in pauses</text>
+  <text x="475" y="142" font-size="14" font-weight="600" fill="#6D28D9">evacuation pause</text>
+  <text x="475" y="170" font-size="14" font-weight="700" fill="#6D28D9">Full GC cliff when it fails</text>
+
+  <rect x="450" y="215" width="310" height="140" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.2"/>
+  <text x="605" y="245" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">ZGC pays in throughput</text>
+  <text x="475" y="277" font-size="14" font-weight="600" fill="#BE123C">load barrier on every read</text>
+  <text x="475" y="305" font-size="14" font-weight="700" fill="#BE123C">allocation stall when it fails</text>
+  <text x="475" y="333" font-size="13" font-weight="600" fill="#BE123C">invisible to pause metrics</text>
+</svg>

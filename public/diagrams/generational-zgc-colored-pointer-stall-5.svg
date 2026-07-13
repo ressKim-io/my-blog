@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">Pointer chasing is exactly where the load barrier hurts most</title>
+  <desc id="d5">A workload built to be as hostile to the load barrier as possible: a binary tree of about a million nodes, walked over and over for eight seconds, doing nothing but following references. Every single one of those reads goes through the barrier. Run three times on each collector with the same two gigabyte heap, G1 completed between 5,363 and 5,453 walks while ZGC completed between 4,604 and 4,703, roughly fourteen percent fewer. The number is not a figure to carry over to a real service, because a real service spends most of its time doing arithmetic and input and output rather than chasing pointers. What carries over is the direction: the more pointer traffic a workload has, the more of its throughput the load barrier takes.</desc>
+  <rect x="0" y="0" width="800" height="340" fill="#FFFFFF"/>
+
+  <text x="400" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">tree walks in 8 seconds · same 2GB heap</text>
+
+  <line x1="150" y1="270" x2="740" y2="270" stroke="#0A0A0A" stroke-width="1.8"/>
+
+  <text x="115" y="130" text-anchor="end" font-size="15" font-weight="700" fill="#047857">G1</text>
+  <rect x="150" y="102" width="510" height="52" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2.2"/>
+  <text x="680" y="135" font-size="16" font-weight="700" fill="#047857">5,433</text>
+
+  <text x="115" y="222" text-anchor="end" font-size="15" font-weight="700" fill="#BE123C">ZGC</text>
+  <rect x="150" y="194" width="435" height="52" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.2"/>
+  <text x="605" y="227" font-size="16" font-weight="700" fill="#BE123C">4,635</text>
+
+  <path d="M 585 174 L 660 174" stroke="#E11D48" stroke-width="2.4"/>
+  <text x="622" y="166" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">−14%</text>
+
+  <text x="400" y="308" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">a benchmark designed to be worst case for the load barrier</text>
+</svg>

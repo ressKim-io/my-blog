@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">When free pages run out, the allocating thread simply blocks</title>
+  <desc id="d6">ZGC reclaims memory concurrently, but not infinitely fast. When the rate at which the application creates objects runs ahead of the rate at which the collector can hand pages back, the stock of free pages drains. The moment it reaches zero, the next thread that asks for memory cannot be served, and it stops where it stands until a page becomes available. Nothing about this is a garbage collection pause: the world was never stopped, the collector is still running concurrently, and this thread is simply waiting for memory. That is precisely why the delay does not appear anywhere in the pause statistics, even though the user is waiting for it.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <text x="60" y="52" font-size="14" font-weight="700" fill="#334155">allocation rate</text>
+  <rect x="220" y="34" width="470" height="26" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.8"/>
+
+  <text x="60" y="98" font-size="14" font-weight="700" fill="#334155">reclaim rate</text>
+  <rect x="220" y="80" width="250" height="26" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+
+  <path d="M 700 47 L 740 47" stroke="#E11D48" stroke-width="2"/>
+  <text x="700" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">allocation wins</text>
+
+  <path d="M 455 150 L 455 186" stroke="#475569" stroke-width="2.4" marker-end="url(#s6)"/>
+  <rect x="280" y="192" width="350" height="46" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="2.2"/>
+  <text x="455" y="221" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">free pages exhausted</text>
+
+  <text x="60" y="290" font-size="14" font-weight="700" fill="#334155">app thread</text>
+  <rect x="220" y="272" width="150" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <rect x="374" y="272" width="170" height="28" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.6"/>
+  <rect x="548" y="272" width="142" height="28" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="459" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">blocked</text>
+
+  <path d="M 455 244 L 455 266" stroke="#E11D48" stroke-width="2.4" marker-end="url(#r6)"/>
+  <text x="459" y="332" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">not a GC pause — no pause metric records it</text>
+
+  <defs>
+    <marker id="s6" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="r6" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#E11D48"/></marker>
+  </defs>
+</svg>

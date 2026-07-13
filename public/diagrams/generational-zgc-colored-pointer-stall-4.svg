@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Two bitmaps take turns: one is written by the app, one is read by the GC</title>
+  <desc id="d4">Each old-generation region keeps a pair of remembered-set bitmaps rather than one. At any moment one of them is the active bitmap, and application threads running their store barriers record old-to-young references into it. The other is the read-only copy the collector walks while it collects the young generation. When the next young collection begins the two are swapped atomically. The point of the arrangement is that neither side ever waits for the other: the collector can process and clear its copy while the application keeps filling the other one, and because they touch different bitmaps no extra memory barriers are needed between application and collector threads.</desc>
+  <rect x="0" y="0" width="800" height="340" fill="#FFFFFF"/>
+
+  <text x="400" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">remembered set of one old region</text>
+
+  <rect x="70" y="80" width="280" height="120" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2.4"/>
+  <text x="210" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">bitmap A — active</text>
+  <text x="210" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">app threads write here</text>
+  <text x="210" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">via store barrier</text>
+
+  <rect x="450" y="80" width="280" height="120" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <text x="590" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">bitmap B — read-only</text>
+  <text x="590" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#6D28D9">GC reads and clears here</text>
+  <text x="590" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="#6D28D9">young collection</text>
+
+  <path d="M 356 122 L 444 122" stroke="#475569" stroke-width="2.2" marker-end="url(#s4)"/>
+  <path d="M 444 158 L 356 158" stroke="#475569" stroke-width="2.2" marker-end="url(#s4)"/>
+  <text x="400" y="228" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">swapped atomically at each young collection</text>
+  <text x="400" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">neither side ever waits for the other</text>
+
+  <defs>
+    <marker id="s4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+</svg>

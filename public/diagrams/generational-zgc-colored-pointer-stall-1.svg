@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">The pointer carries the object's GC state alongside its address</title>
+  <desc id="d1">Above, an ordinary sixty four bit pointer: every bit of it is address. Below, a coloured pointer: the bits that are not needed to address the heap are used to carry the collector's view of the object it points at. Those bits record whether the object has been marked in this cycle, whether it has already been relocated to a new page, and which generation it belongs to. Because the state travels inside the pointer, a thread that loads the pointer can decide what to do about the object by looking at the pointer alone, without touching the heap or consulting a side table. That single property is what makes concurrent relocation possible.</desc>
+  <rect x="0" y="0" width="800" height="320" fill="#FFFFFF"/>
+
+  <text x="60" y="56" font-size="15" font-weight="700" fill="#334155">ordinary pointer</text>
+  <rect x="60" y="72" width="680" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="400" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">address</text>
+
+  <text x="60" y="176" font-size="15" font-weight="700" fill="#6D28D9">coloured pointer</text>
+  <rect x="60" y="192" width="200" height="52" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.4"/>
+  <text x="160" y="224" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">colour bits</text>
+  <rect x="264" y="192" width="476" height="52" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="502" y="224" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">address</text>
+
+  <path d="M 160 250 L 160 276" stroke="#7C3AED" stroke-width="2"/>
+  <text x="160" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">marked? · relocated? · which generation?</text>
+</svg>
