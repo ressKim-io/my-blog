@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 390" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Fewer arenas held more memory, not less</title>
+  <desc id="d4">Two arrangements of glibc malloc arenas after sixteen threads allocated and then freed everything. On the left, the default, where each thread gets its own arena living in its own mmap-backed region; because one thread owns every chunk in its region, freeing them empties the region completely and glibc can hand the whole region back to the kernel, so resident memory falls to 3 mebibytes. On the right, MALLOC_ARENA_MAX set to two, where eight threads share one arena; their chunks interleave inside a shared region, so after freeing there is no wholly empty region to return and roughly 100 mebibytes stays resident, held by the allocator rather than leaked, as an explicit malloc_trim call releases it immediately.</desc>
+  <rect x="0" y="0" width="800" height="390" fill="#FFFFFF"/>
+
+  <text x="195" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">default — one arena per thread</text>
+  <text x="605" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">MALLOC_ARENA_MAX=2</text>
+
+  <rect x="70" y="66" width="115" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <rect x="205" y="66" width="115" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="127" y="132" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">arena</text>
+  <text x="262" y="132" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">arena</text>
+  <text x="127" y="154" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">1 thread</text>
+  <text x="262" y="154" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">1 thread</text>
+
+  <rect x="480" y="66" width="250" height="120" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="605" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">one shared arena</text>
+  <text x="605" y="134" text-anchor="middle" font-size="13" font-weight="600" fill="#BE123C">8 threads interleave</text>
+  <rect x="500" y="150" width="30" height="20" fill="#E11D48" opacity="0.55"/>
+  <rect x="536" y="150" width="30" height="20" fill="#7C3AED" opacity="0.55"/>
+  <rect x="572" y="150" width="30" height="20" fill="#E11D48" opacity="0.55"/>
+  <rect x="608" y="150" width="30" height="20" fill="#0891B2" opacity="0.55"/>
+  <rect x="644" y="150" width="30" height="20" fill="#7C3AED" opacity="0.55"/>
+  <rect x="680" y="150" width="30" height="20" fill="#0891B2" opacity="0.55"/>
+
+  <path d="M 195 196 L 195 232" stroke="#059669" stroke-width="2.5" marker-end="url(#a4)"/>
+  <path d="M 605 196 L 605 232" stroke="#E11D48" stroke-width="2.5" marker-end="url(#a4r)"/>
+
+  <rect x="70" y="238" width="250" height="72" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="195" y="266" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">region fully empty</text>
+  <text x="195" y="292" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">returned — 3 MiB left</text>
+
+  <rect x="480" y="238" width="250" height="72" rx="7" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="605" y="266" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">nothing wholly empty</text>
+  <text x="605" y="292" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">~100 MiB retained</text>
+
+  <text x="400" y="352" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">both freed all 256 MiB — malloc_trim() then released it, so nothing leaked</text>
+
+  <defs>
+    <marker id="a4" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#059669"/>
+    </marker>
+    <marker id="a4r" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+</svg>

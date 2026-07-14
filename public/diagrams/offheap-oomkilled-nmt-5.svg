@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">The wider the runtime, the more places to die behind a clean log</title>
+  <desc id="d5">Three horizontal bands, one per language, showing how much territory lies outside what the runtime accounts for. Rust's band is narrow: every allocation is explicit in the code, so there is almost nowhere for memory to grow unseen. Go's band is wider, containing goroutine stacks and, crucially, cgo allocations made by C libraries, which GOMEMLIMIT does not count. Java's band is widest, holding Metaspace, the code cache, thread stacks, direct byte buffers, glibc malloc arenas and the collector's own data structures, several of which have no default ceiling at all. A dashed line across each band marks what the runtime itself can see and report; everything to the right of it is invisible to the runtime but fully charged by the kernel.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <text x="130" y="40" text-anchor="end" font-size="16" font-weight="700" fill="#334155">runtime sees</text>
+  <line x1="300" y1="52" x2="300" y2="300" stroke="#475569" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="320" y="40" font-size="16" font-weight="700" fill="#BE123C">kernel charges anyway</text>
+
+  <text x="60" y="98" font-size="16" font-weight="700" fill="#6D28D9">Rust</text>
+  <rect x="140" y="78" width="160" height="34" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <rect x="300" y="78" width="60" height="34" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="372" y="100" font-size="14" font-weight="600" fill="#6D28D9">malloc fragmentation</text>
+
+  <text x="60" y="178" font-size="16" font-weight="700" fill="#047857">Go</text>
+  <rect x="140" y="158" width="160" height="34" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <rect x="300" y="158" width="185" height="34" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="497" y="180" font-size="14" font-weight="600" fill="#047857">cgo / C heap · stacks</text>
+
+  <text x="60" y="258" font-size="16" font-weight="700" fill="#BE123C">Java</text>
+  <rect x="140" y="238" width="160" height="34" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <rect x="300" y="238" width="390" height="34" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="495" y="260" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">Metaspace · code cache · direct · stacks · arena · GC</text>
+
+  <text x="220" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#475569">the heap</text>
+  <text x="500" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">where exit 137 comes from</text>
+</svg>

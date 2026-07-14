@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 370" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Reserved, committed, and what the kernel actually charges</title>
+  <desc id="d3">Three nested rectangles for an idle JVM. The outermost, drawn with a faint dashed outline, is reserved address space at 1.65 gibibytes: address ranges the process has claimed but which hold no physical memory, dominated by the class space reservation of about one gibibyte and the code cache reservation of 244 mebibytes. Inside it sits a smaller solid blue rectangle, committed memory at 334 mebibytes, which is what the JVM has promised the operating system it will use. Inside that sits a smaller red rectangle, the pages actually touched, which is the only thing the kernel charges to memory.current. An arrow points out that Native Memory Tracking reports the outer two but cannot see allocations made outside the JVM, such as C library allocations, which the kernel nonetheless charges.</desc>
+  <rect x="0" y="0" width="800" height="370" fill="#FFFFFF"/>
+
+  <rect x="60" y="60" width="600" height="230" rx="8" fill="#FAFAFA" stroke="#94A3B8" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="80" y="88" font-size="15" font-weight="700" fill="#64748B">reserved  1.65 GiB</text>
+  <text x="80" y="110" font-size="13" font-weight="600" fill="#94A3B8">address space only — no physical memory</text>
+
+  <rect x="110" y="130" width="410" height="135" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <text x="130" y="156" font-size="15" font-weight="700" fill="#0E7490">committed  334 MiB</text>
+
+  <rect x="160" y="176" width="270" height="72" rx="6" fill="#E11D48"/>
+  <text x="295" y="205" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">touched pages</text>
+  <text x="295" y="228" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">memory.current</text>
+
+  <path d="M 680 175 L 545 195" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+  <text x="690" y="160" font-size="14" font-weight="700" fill="#334155">NMT sees</text>
+  <text x="690" y="182" font-size="14" font-weight="700" fill="#334155">these two</text>
+
+  <text x="400" y="330" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">but the kernel also charges what NMT cannot see — C allocations, memfd heaps</text>
+
+  <defs>
+    <marker id="a3" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">Two deaths: one leaves a stack trace, one leaves nothing</title>
+  <desc id="d1">Two columns contrasting the two ways a JVM process dies of memory exhaustion. On the left, the runtime's death: the Java heap fills, the collector cannot free space, and the JVM throws an OutOfMemoryError, which is an ordinary Java exception, so a stack trace is printed and the preceding GC log shows repeated full collections. The cause is visible in the logs. On the right, the kernel's death: the total of heap plus everything outside the heap crosses the cgroup limit, the OOM killer sends SIGKILL, which cannot be caught or ignored, so no exception is thrown, no shutdown hook runs, the GC log stays clean to the last line, and all that remains is exit code 137.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <rect x="50" y="50" width="330" height="290" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <rect x="420" y="50" width="330" height="290" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+
+  <text x="215" y="84" text-anchor="middle" font-size="17" font-weight="700" fill="#0E7490">runtime's death</text>
+  <text x="585" y="84" text-anchor="middle" font-size="17" font-weight="700" fill="#BE123C">kernel's death</text>
+
+  <text x="215" y="116" text-anchor="middle" font-size="14" font-weight="600" fill="#0E7490">heap is full</text>
+  <text x="585" y="116" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">heap + off-heap &gt; memory.max</text>
+
+  <rect x="80" y="136" width="270" height="46" rx="6" fill="#FFFFFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="215" y="165" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">OutOfMemoryError</text>
+
+  <rect x="450" y="136" width="270" height="46" rx="6" fill="#FFFFFF" stroke="#E11D48" stroke-width="2"/>
+  <text x="585" y="165" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">SIGKILL — uncatchable</text>
+
+  <text x="215" y="216" text-anchor="middle" font-size="14" font-weight="600" fill="#0E7490">stack trace</text>
+  <text x="215" y="242" text-anchor="middle" font-size="14" font-weight="600" fill="#0E7490">full GCs in the log</text>
+  <text x="215" y="268" text-anchor="middle" font-size="14" font-weight="600" fill="#0E7490">shutdown hook runs</text>
+
+  <text x="585" y="216" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">no exception</text>
+  <text x="585" y="242" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">GC log stays clean</text>
+  <text x="585" y="268" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">no hook, no trace</text>
+
+  <rect x="120" y="292" width="190" height="34" rx="5" fill="#0891B2"/>
+  <text x="215" y="316" text-anchor="middle" font-size="16" font-weight="700" fill="#FFFFFF">exit 1</text>
+
+  <rect x="490" y="292" width="190" height="34" rx="5" fill="#E11D48"/>
+  <text x="585" y="316" text-anchor="middle" font-size="16" font-weight="700" fill="#FFFFFF">exit 137</text>
+
+  <text x="400" y="374" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">diagnosable  ·  vs  ·  silent</text>
+</svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">The same leak, two endings — the cap decides who kills you</title>
+  <desc id="d2">Two identical memory traces side by side. In both, a thin blue band at the bottom is the Java heap, which stays flat at about one percent of its maximum, and a growing grey band above it is direct buffer memory climbing steadily. The only difference is where a horizontal line is drawn. On the left, the runtime's cap, MaxDirectMemorySize defaulting to the size of the maximum heap at 495 mebibytes, sits below the kernel's kill line at one gibibyte, so the climbing grey band strikes the runtime's cap first and the JVM throws an OutOfMemoryError, exiting with code 1. On the right, the cap has been raised to two gibibytes, above the kernel's line, so the grey band reaches the kernel's line first and the process is killed with SIGKILL, exiting with code 137 and leaving no trace in the GC log.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="200" y="36" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">cap below the limit</text>
+  <text x="600" y="36" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">cap above the limit</text>
+
+  <line x1="70" y1="300" x2="360" y2="300" stroke="#475569" stroke-width="2"/>
+  <line x1="70" y1="300" x2="70" y2="60" stroke="#475569" stroke-width="2"/>
+  <line x1="470" y1="300" x2="760" y2="300" stroke="#475569" stroke-width="2"/>
+  <line x1="470" y1="300" x2="470" y2="60" stroke="#475569" stroke-width="2"/>
+
+  <rect x="70" y="288" width="290" height="12" fill="#0891B2"/>
+  <rect x="470" y="288" width="290" height="12" fill="#0891B2"/>
+
+  <path d="M 70 288 L 230 175 L 230 288 Z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1.5"/>
+  <path d="M 470 288 L 700 110 L 700 288 Z" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1.5"/>
+
+  <line x1="70" y1="175" x2="360" y2="175" stroke="#0891B2" stroke-width="3" stroke-dasharray="7 4"/>
+  <text x="366" y="171" font-size="13" font-weight="700" fill="#0E7490">cap 495 MiB</text>
+  <line x1="70" y1="110" x2="360" y2="110" stroke="#E11D48" stroke-width="3.5"/>
+  <text x="366" y="106" font-size="13" font-weight="700" fill="#BE123C">memory.max</text>
+
+  <line x1="470" y1="110" x2="760" y2="110" stroke="#E11D48" stroke-width="3.5"/>
+  <line x1="470" y1="72" x2="760" y2="72" stroke="#0891B2" stroke-width="3" stroke-dasharray="7 4"/>
+  <text x="474" y="64" font-size="13" font-weight="700" fill="#0E7490">cap 2 GiB — never reached</text>
+
+  <circle cx="230" cy="175" r="8" fill="#0891B2"/>
+  <circle cx="700" cy="110" r="8" fill="#E11D48"/>
+
+  <text x="200" y="336" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">OutOfMemoryError · exit 1</text>
+  <text x="600" y="336" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">SIGKILL · exit 137</text>
+  <text x="400" y="378" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">heap stayed at 1% in both runs</text>
+</svg>
