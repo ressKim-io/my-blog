@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">The scheduler packs by declared requests, not actual usage</title>
+  <desc id="d1">A node drawn as a tall box holds three pods. Each pod is drawn twice: a dashed outer rectangle showing the requests it declared, and a smaller solid rectangle inside showing what it actually uses. The scheduler only ever sees the dashed outer rectangles, so once their sum reaches the node's allocatable capacity it declares the node full and sends the next pod elsewhere, even though a large shaded region of the node, the gap between requested and used, is sitting idle. That gap is the wasted node capacity that turns directly into cloud spend.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <rect x="80" y="60" width="270" height="270" rx="8" fill="#FAFAFA" stroke="#475569" stroke-width="2.5"/>
+  <text x="215" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">node · Allocatable</text>
+
+  <rect x="105" y="80" width="220" height="72" rx="5" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6 4"/>
+  <rect x="105" y="118" width="220" height="34" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+
+  <rect x="105" y="166" width="220" height="72" rx="5" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6 4"/>
+  <rect x="105" y="210" width="220" height="28" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+
+  <rect x="105" y="252" width="220" height="60" rx="5" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6 4"/>
+  <rect x="105" y="286" width="220" height="26" rx="4" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+
+  <text x="215" y="103" text-anchor="middle" font-size="14" font-weight="700" fill="#475569">requests</text>
+  <text x="215" y="139" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">actual use</text>
+
+  <path d="M 360 130 L 430 130" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+
+  <rect x="450" y="80" width="290" height="90" rx="7" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+  <text x="595" y="112" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">scheduler sees</text>
+  <text x="595" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="#475569">the dashed boxes only</text>
+  <text x="595" y="160" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">node is "full"</text>
+
+  <rect x="450" y="205" width="290" height="105" rx="7" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="595" y="240" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">the gap</text>
+  <text x="595" y="266" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">requested but never used</text>
+  <text x="595" y="292" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">= a wasted node</text>
+
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" role="img" aria-labelledby="t6 d6" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t6">CPU awareness landed everywhere; memory awareness did not</title>
+  <desc id="d6">A two-row grid across three languages. The upper row is CPU limit awareness: Java reads cpu.max through UseContainerSupport and derives ActiveProcessorCount, Go reads it since version 1.25 to set GOMAXPROCS, and Rust surfaces it through available_parallelism as a hint that libraries may use. All three are marked as done. The lower row is memory limit awareness: Java reads memory.max and sizes the heap from MaxRAMPercentage, so it is done; Go has no code at all that reads memory.max, so GOMEMLIMIT stays at its unlimited default and must be set by hand, marked as the gap; Rust has no garbage collector and therefore no heap-sizing question to answer. The single red gap in the grid is Go's memory row, which is the most common production trap.</desc>
+  <rect x="0" y="0" width="800" height="350" fill="#FFFFFF"/>
+
+  <text x="290" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">Java</text>
+  <text x="465" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">Go</text>
+  <text x="640" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">Rust</text>
+
+  <text x="180" y="118" text-anchor="end" font-size="16" font-weight="700" fill="#334155">cpu.max</text>
+  <text x="180" y="232" text-anchor="end" font-size="16" font-weight="700" fill="#334155">memory.max</text>
+
+  <rect x="210" y="80" width="160" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="290" y="117" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">automatic</text>
+
+  <rect x="385" y="80" width="160" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="465" y="110" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">automatic</text>
+  <text x="465" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">since 1.25</text>
+
+  <rect x="560" y="80" width="160" height="60" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="640" y="117" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">hint only</text>
+
+  <rect x="210" y="194" width="160" height="60" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <rect x="385" y="194" width="160" height="60" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="3"/>
+  <rect x="560" y="194" width="160" height="60" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+
+  <text x="290" y="231" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">automatic</text>
+  <text x="465" y="224" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">manual</text>
+  <text x="465" y="244" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">no code reads it</text>
+  <text x="640" y="231" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">no heap to size</text>
+
+  <text x="465" y="308" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">the one gap — and the most common trap</text>
+</svg>

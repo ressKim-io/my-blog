@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">The GC's next target sits above the kernel's kill line</title>
+  <desc id="d4">A vertical memory scale for a Go process in a 512 MiB container. At the bottom sits the live set of 300 MiB, the objects actually reachable. Above it, a grey band shows the slack the collector allows before it will run: with GOGC set to 100 the heap is permitted to grow to roughly twice the live set, so the runtime's next collection target lands at 562 MiB. A red horizontal line marks memory.max at 512 MiB, the point at which the kernel sends SIGKILL. The collector's target line lies above the kernel's kill line, which means the heap crosses 512 MiB before the collector ever decides it is time to collect: the process is killed with exit 137 while the GC is still waiting.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="150" y1="345" x2="150" y2="50" stroke="#475569" stroke-width="2"/>
+
+  <rect x="170" y="245" width="330" height="100" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="335" y="302" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">live set 300 MiB</text>
+
+  <rect x="170" y="120" width="330" height="125" fill="#FAFAFA" stroke="#475569" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="335" y="176" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">GOGC=100 slack</text>
+  <text x="335" y="199" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">grow to 2× live</text>
+
+  <line x1="150" y1="120" x2="640" y2="120" stroke="#059669" stroke-width="3" stroke-dasharray="8 4"/>
+  <text x="650" y="118" font-size="15" font-weight="700" fill="#047857">GC target</text>
+  <text x="650" y="139" font-size="15" font-weight="700" fill="#047857">562 MiB</text>
+
+  <line x1="150" y1="175" x2="640" y2="175" stroke="#E11D48" stroke-width="4"/>
+  <text x="650" y="173" font-size="15" font-weight="700" fill="#BE123C">memory.max</text>
+  <text x="650" y="194" font-size="15" font-weight="700" fill="#BE123C">512 MiB</text>
+
+  <path d="M 120 175 L 120 120" stroke="#E11D48" stroke-width="2.5" marker-start="url(#a4)" marker-end="url(#a4)"/>
+  <text x="108" y="152" text-anchor="end" font-size="15" font-weight="700" fill="#BE123C">50 MiB</text>
+
+  <text x="400" y="382" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">kernel kills before the collector ever runs — exit 137</text>
+
+  <defs>
+    <marker id="a4" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 z" fill="#E11D48"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Splitting pods multiplies the per-process fixed cost</title>
+  <desc id="d3">Two arrangements holding the same total heap. On the left, a single large pod: one tall blue heap block with a single small red block of runtime fixed cost stacked beneath it. On the right, the same total heap divided across four small pods; each of the four carries its own red fixed-cost block, so the red area is four times larger while the blue heap area is unchanged. Because the JVM's off-heap fixed cost was measured to be roughly constant regardless of heap size, it behaves as a per-process poll tax rather than a tax proportional to the heap, and so every additional pod pays it again.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">one large pod</text>
+  <text x="580" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">four small pods</text>
+
+  <rect x="115" y="70" width="130" height="185" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <text x="180" y="168" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">heap</text>
+  <rect x="115" y="255" width="130" height="30" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="180" y="276" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">65 MiB</text>
+
+  <rect x="430" y="115" width="70" height="140" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="430" y="255" width="70" height="30" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <rect x="512" y="115" width="70" height="140" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="512" y="255" width="70" height="30" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <rect x="594" y="115" width="70" height="140" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="594" y="255" width="70" height="30" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <rect x="676" y="115" width="70" height="140" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="676" y="255" width="70" height="30" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+
+  <text x="588" y="192" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">same total heap</text>
+  <text x="588" y="276" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">65 × 4 = 260 MiB</text>
+
+  <text x="400" y="336" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">off-heap fixed cost does not shrink with the heap — it is paid per process</text>
+</svg>

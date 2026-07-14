@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">The kernel charges every kind of page to one bill</title>
+  <desc id="d1">A single large box represents memory.current, the total the kernel charges to one cgroup. Inside it stand several vertical columns: anon, which holds anonymous pages such as the heap and thread stacks; file, the page cache holding files and shared libraries; kernel, covering slab, page tables and kernel stacks; sock, the socket send and receive buffers; and shmem, shared memory and tmpfs. The language runtime's heap is drawn as a small shaded region inside the anon column only, showing that what a runtime calls "my heap" is a fraction of a single column, while the kernel sums all of the columns against memory.max.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <rect x="60" y="70" width="680" height="230" rx="8" fill="#FAFAFA" stroke="#475569" stroke-width="2.5"/>
+  <text x="400" y="46" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">memory.current</text>
+
+  <rect x="95" y="110" width="105" height="160" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="147" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">anon</text>
+  <rect x="107" y="185" width="81" height="75" rx="4" fill="#059669" opacity="0.35"/>
+  <text x="147" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="#065F46">heap</text>
+
+  <rect x="228" y="110" width="105" height="160" rx="5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="280" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">file</text>
+
+  <rect x="361" y="110" width="105" height="160" rx="5" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="413" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">kernel</text>
+
+  <rect x="494" y="110" width="105" height="160" rx="5" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="546" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">sock</text>
+
+  <rect x="627" y="110" width="78" height="160" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="666" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">shmem</text>
+
+  <line x1="60" y1="336" x2="740" y2="336" stroke="#E11D48" stroke-width="3"/>
+  <text x="400" y="360" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">memory.max</text>
+</svg>

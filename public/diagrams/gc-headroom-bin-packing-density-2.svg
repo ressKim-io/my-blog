@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">ZGC reserves a vast address space but commits little of it</title>
+  <desc id="d2">Two bar charts side by side, both measured on JDK 25 with a 512 MiB maximum heap in a container, for Serial, Parallel, G1 and ZGC collectors. The left chart shows off-heap memory actually committed, in mebibytes: Serial 24.3, Parallel 44.4, G1 65.0 and ZGC 26.4. G1 commits the most and ZGC commits less than half of what G1 does. The right chart shows total reserved virtual address space, in gibibytes: Serial 1.84, Parallel 1.86 and G1 1.89 are nearly identical short bars, while ZGC towers at 9.35, roughly eighteen times its own maximum heap. The contrast makes the point that ZGC's frightening number is reservation, which the kernel never charges, and not commitment, which it does.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <text x="200" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">off-heap committed (MiB)</text>
+  <text x="600" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">total reserved (GiB)</text>
+
+  <line x1="70" y1="290" x2="345" y2="290" stroke="#475569" stroke-width="2"/>
+  <line x1="470" y1="290" x2="745" y2="290" stroke="#475569" stroke-width="2"/>
+
+  <rect x="90" y="227.5" width="44" height="62.5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="152" y="175.8" width="44" height="114.2" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="214" y="122.9" width="44" height="167.1" fill="#0891B2"/>
+  <rect x="276" y="222.1" width="44" height="67.9" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+
+  <rect x="490" y="256.9" width="44" height="33.1" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="552" y="256.5" width="44" height="33.5" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="614" y="256.0" width="44" height="34.0" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <rect x="676" y="121.7" width="44" height="168.3" fill="#059669"/>
+
+  <text x="112" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Serial</text>
+  <text x="174" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Parallel</text>
+  <text x="236" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">G1</text>
+  <text x="298" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">ZGC</text>
+
+  <text x="512" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Serial</text>
+  <text x="574" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Parallel</text>
+  <text x="636" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#0E7490">G1</text>
+  <text x="698" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">ZGC</text>
+
+  <text x="236" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">65.0</text>
+  <text x="298" y="211" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">26.4</text>
+  <text x="698" y="110" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">9.35</text>
+
+  <text x="400" y="352" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">the kernel charges the left chart, never the right</text>
+</svg>

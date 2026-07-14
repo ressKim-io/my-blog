@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">A heap floor flattens the 25 percent rule</title>
+  <desc id="d3">A line chart with container memory on the horizontal axis and the heap the JVM ergonomically selects on the vertical axis, measured on JDK 25. Three regimes appear. On the left, below roughly 250 MiB of container memory, the heap tracks half of the container, the MinRAMPercentage rule. In the middle, from about 250 MiB up to 512 MiB, the line is completely flat at 128 MiB: the ergonomic default MaxHeapSize of roughly 124.8 MiB acts as a floor and wins over the 25 percent calculation, so containers of very different sizes all receive exactly the same heap. On the right, above 512 MiB, the 25 percent MaxRAMPercentage rule finally exceeds the floor and the heap grows proportionally again. A dashed horizontal line marks the 128 MiB floor across the chart.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <line x1="90" y1="330" x2="750" y2="330" stroke="#475569" stroke-width="2"/>
+  <line x1="90" y1="330" x2="90" y2="65" stroke="#475569" stroke-width="2"/>
+
+  <line x1="90" y1="214.4" x2="750" y2="214.4" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.7"/>
+
+  <polyline points="165.6,272.2 231.8,221.7 237.7,214.4 392.5,214.4 444.5,192.8 503.6,171.1 695.1,98.9"
+            fill="none" stroke="#0891B2" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <circle cx="165.6" cy="272.2" r="5" fill="#0891B2"/>
+  <circle cx="237.7" cy="214.4" r="5" fill="#0891B2"/>
+  <circle cx="392.5" cy="214.4" r="5" fill="#0891B2"/>
+  <circle cx="503.6" cy="171.1" r="5" fill="#0891B2"/>
+  <circle cx="695.1" cy="98.9" r="5" fill="#0891B2"/>
+
+  <rect x="248" y="238" width="130" height="26" rx="4" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="313" y="256" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">128 MiB floor</text>
+
+  <text x="128" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">50%</text>
+  <text x="600" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">25%</text>
+
+  <text x="165" y="352" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">128</text>
+  <text x="238" y="352" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">250</text>
+  <text x="392" y="352" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">512</text>
+  <text x="695" y="352" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">1024</text>
+  <text x="420" y="380" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">container memory (MiB)</text>
+
+  <text x="78" y="277" text-anchor="end" font-size="13" font-weight="600" fill="#475569">64</text>
+  <text x="78" y="219" text-anchor="end" font-size="13" font-weight="600" fill="#475569">128</text>
+  <text x="78" y="103" text-anchor="end" font-size="13" font-weight="600" fill="#475569">256</text>
+  <text x="42" y="60" font-size="14" font-weight="700" fill="#334155">heap (MiB)</text>
+</svg>

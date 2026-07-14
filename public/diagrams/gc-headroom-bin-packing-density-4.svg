@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">The cloud triangle: density, safety margin, latency</title>
+  <desc id="d4">The trade-off triangle from Part 4 translated into cloud terms. The top vertex is latency, and ZGC is placed there: it buys sub-millisecond pauses and pays with density and throughput. The lower-left vertex is density, meaning node cost, and Rust sits closest to it because it carries no runtime headroom, having paid instead in development time; Go sits a little further in, adjusting its position with the GOMEMLIMIT and GOGC dials. The lower-right vertex is safety margin, and a Guaranteed pod, where requests equal limits, sits there: nothing on the node can squeeze it, but the packing is conservative. No approach reaches more than one vertex, which is the point.</desc>
+  <rect x="0" y="0" width="800" height="430" fill="#FFFFFF"/>
+
+  <path d="M 400 80 L 180 330 L 620 330 Z" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+
+  <text x="400" y="46" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">latency</text>
+  <circle cx="400" cy="80" r="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="424" y="76" font-size="15" font-weight="700" fill="#BE123C">Java ZGC</text>
+  <text x="424" y="98" font-size="13" font-weight="600" fill="#BE123C">pays density · throughput</text>
+
+  <text x="150" y="358" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">density</text>
+  <text x="150" y="378" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">node cost</text>
+  <circle cx="180" cy="330" r="12" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <text x="212" y="316" font-size="15" font-weight="700" fill="#0E7490">Rust</text>
+  <text x="212" y="338" font-size="13" font-weight="600" fill="#0E7490">pays dev time</text>
+
+  <circle cx="290" cy="270" r="10" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="310" y="266" font-size="15" font-weight="700" fill="#047857">Go</text>
+  <text x="310" y="288" font-size="13" font-weight="600" fill="#047857">GOMEMLIMIT dial</text>
+
+  <text x="650" y="358" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">safety margin</text>
+  <circle cx="620" cy="330" r="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="588" y="316" text-anchor="end" font-size="15" font-weight="700" fill="#6D28D9">Guaranteed</text>
+  <text x="588" y="338" text-anchor="end" font-size="13" font-weight="600" fill="#6D28D9">requests = limits</text>
+
+  <text x="400" y="410" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">no free density — every dial is paid for elsewhere</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">Only touched pages become physical memory</title>
+  <desc id="d5">Two columns. On the left, the virtual address space a process has reserved: a tall stack of page slots, most of them empty because they have merely been mapped. On the right, physical memory, which is much smaller. Arrows connect only those virtual pages the program actually wrote to; the untouched pages have no arrow and therefore no physical frame behind them. The kernel charges memory.current for the right-hand column only, which is why a Go heap reported as several gigabytes can sit inside a 512 MiB container without being killed, so long as the program never writes into the pages it allocated.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <text x="190" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">virtual address space</text>
+  <text x="610" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">physical memory</text>
+
+  <rect x="90" y="70" width="200" height="250" rx="6" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+  <rect x="510" y="130" width="200" height="130" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+
+  <rect x="108" y="88" width="164" height="30" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <rect x="108" y="126" width="164" height="30" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <rect x="108" y="164" width="164" height="30" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <rect x="108" y="202" width="164" height="30" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <rect x="108" y="240" width="164" height="30" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <rect x="108" y="278" width="164" height="30" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+
+  <text x="190" y="108" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">touched</text>
+  <text x="190" y="146" text-anchor="middle" font-size="14" font-weight="600" fill="#94A3B8">untouched</text>
+  <text x="190" y="184" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">touched</text>
+  <text x="190" y="222" text-anchor="middle" font-size="14" font-weight="600" fill="#94A3B8">untouched</text>
+  <text x="190" y="260" text-anchor="middle" font-size="14" font-weight="600" fill="#94A3B8">untouched</text>
+  <text x="190" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">touched</text>
+
+  <rect x="528" y="148" width="164" height="30" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <rect x="528" y="186" width="164" height="30" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <rect x="528" y="224" width="164" height="30" rx="3" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+
+  <path d="M 275 103 L 525 163" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#a5)"/>
+  <path d="M 275 179 L 525 201" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#a5)"/>
+  <path d="M 275 293 L 525 239" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#a5)"/>
+
+  <text x="610" y="290" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">memory.current counts this</text>
+  <text x="400" y="356" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">allocating is free — writing is what costs</text>
+
+  <defs>
+    <marker id="a5" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#059669"/>
+    </marker>
+  </defs>
+</svg>

@@ -2,13 +2,11 @@
 
 > **세션 재개용 문서**. 새 세션에서 이 작업을 이어갈 때는 이 파일을 먼저 통독한 뒤,
 > §6 상태 표에서 첫 미완료(☐) 편부터 §7 절차대로 진행합니다.
-> 마지막 갱신: 2026-07-13 (**4부 5편 전량 발행 완료 — 1~4부 17편 소진**.
-> 4부는 로컬 툴체인 실측을 전면에 세운 첫 부(Go 1.26.5 · JDK 25.0.3).
-> draft 거짓 복선 2건·사실 오류 9건 교정, draft에 없던 실험 2건 추가.
-> **4부 배치 리뷰 실행 완료(2026-07-13) — P0 0건.** P1 2건(Green Tea span 8KiB 수치·
-> assist ratio 정의가 draft 대비 축약됨) 수정 반영. 리뷰어가 복선 회수 9건·12편 계약 4건
-> 전부 이행 확인.
-> **다음: 5부 draft 도착 대기** — 도착 시 §6 표에 18번부터 행 추가)
+> 마지막 갱신: 2026-07-14 (**5부 draft 5편 도착 → 점검 완료, 18·19편 발행**.
+> **5부는 도커 컨테이너 실측을 도입한 첫 부** — colima로 리눅스 VM(커널 6.8·cgroup v2)을 띄워
+> 진짜 cgroup을 잼. 로컬 macOS로는 cgroup이 없어 불가능했음(§11.2).
+> draft 사실 오류 3건 교정(JVM 힙 바닥 규칙·ZGC 3% 무출처·JDK 11 실측), draft에 없던 실측 5건 추가.
+> **다음: 5.3(20편)부터** — §6 표 20~22번 행)
 > ★ 2026-07-10 SVG 글자 최소화 원칙 확정 — §4.2 하단 참조. **기존 26개 소급 적용 완료(R1~R4)**.
 > 발행된 34개 SVG 전부 폰트 13px 이상
 
@@ -195,6 +193,9 @@ date: "2026-06-25 + order 일"   # order=5 → "2026-06-30", order=12 → "2026-
 | 4.3 | `4부_4.3_JavaG1_region과_왜_가끔_크게_멈추나.md` | `java-g1-region-full-gc-cliff` | 15 | ✅ 발행 (2026-07-10, SVG 7개 — **이 편이 4부 최대 사실 교정**. draft가 기본값을 OpenJDK 11로 뽑고 "JDK 25도 동일"이라 단언한 것을 **로컬 JDK 25.0.3으로 전량 재실측**. 교정 5건: ① **`G1EagerReclaimHumongousObjects` 플래그가 JDK 25에 없음**(Unrecognized VM option) — draft는 "기본 on, 실측 확인"이라 썼음 ② `ParallelGCThreads`/`ConcGCThreads`는 코어 수 파생(8코어 → 8/2), draft의 고정값 "4/1"은 그 샌드박스 값일 뿐 ③ `G1MixedGCLiveThresholdPercent` 85는 맞지만 **experimental 플래그**(UnlockExperimentalVMOptions 필요) ④ **JDK 25의 로그 문자열이 바뀜** — draft가 알람으로 걸라던 `to-space exhausted`가 아니라 **`Evacuation Failure: Allocation`**, Full GC는 **`Pause Full (G1 Compaction Pause)`**(draft의 `Pause Full (Allocation Failure)`도 아님) ⑤ region 에르고노믹을 1g~128g로 실측해 표 작성(힙÷2048, 1~32MB clamp, 대부분 2048개 유지). **새 실험(draft에 없음)**: 같은 2MB humongous를 `byte[]` vs `Object[]`로 3000회 할당 비교 → **byte[]는 동시마킹 0·FullGC 0·919MB→4MB, Object[]는 동시마킹 4·FullGC 2·2043MB→2043MB.** eager reclaim에 **타입 제약**이 있음을 실측으로 확정(JDK 26 JDK-8048180에서 전 타입 확장 예정) → 11편의 "humongous는 이사 대상에서 빠진다"와의 충돌도 이걸로 정리(복사만 안 할 뿐 회수 경로는 별도). GC 원인 문자열 `G1 Humongous Allocation` + `Concurrent Start`로 **11편 복선(humongous → 동시 마킹 트리거) 실측 회수**. Full GC 절벽도 직접 재현(256m→1ms · 1g→4ms · 2g→10ms, 힙 비례) + **이사 실패가 수십 번 나도 Full GC는 안 남**(런타임이 실패를 값싸게 처리 → Preventive GC가 JDK 20에서 제거된 맥락과 일치, 플래그 부재로 확인). 재감사로 SVG 1개 추가(#5 eager reclaim 두 갈래 — 표만으로는 기전이 안 보임). SVG1은 lint의 텍스트 상한(16) 초과로 격자 축소 + 범례를 본문으로 이동) |
 | 4.4 | `4부_4.4_GenerationalZGC_colored포인터와_allocation_stall.md` | `generational-zgc-colored-pointer-stall` | 16 | ✅ 발행 (2026-07-11, SVG 8개 — **거짓 복선 교정**: draft의 "3.4·2.4에서 allocation stall 예고"는 11편·7편 모두 0건 → **이번 편이 처음 꺼내는 개념**으로 서술. 실재하는 복선(11편 "이사를 백그라운드로", 12편 "barrier가 처리량에 상시로 붙는 세금")만 회수. **로컬 JDK 25.0.3 실측이 이 편의 척추**: ① **같은 5초 실행에서 STW 23,031건·누적 23.8ms·최악 0.019ms vs Allocation Stall 1,305건·누적 136.5ms·최악 1.31ms** — 뮤테이터가 멈춤 총합의 **5.7배**를 할당 대기로 날렸고 그게 pause 지표엔 0건. draft의 "pause 지표에 안 잡힌다"를 숫자로 증명(`ConcGCThreads=1`로 회수를 굶겨 재현, 로그의 `Allocation Stall (main)`이 애플리케이션 스레드임을 보여 줌) ② **처리량 세금 직접 측정** — draft의 "G1 대비 5~10%↓"는 출처 없음이라 삭제하고, 포인터 추적 전용 마이크로 벤치마크(100만 노드 트리 8초 순회)를 3회씩 A/B: G1 5,363~5,453 vs ZGC 4,604~4,703 → **약 14% 손해**. "로드 배리어 최악 조건"임을 본문에 명시하고 수치를 그대로 옮기지 말라고 경고 ③ **`UseCompressedOops = false`(ZGC) vs `true`(G1)** 실측 — 11편의 32GB 절벽이 ZGC엔 없다는 사실을 플래그로 증명 ④ `-XX:-ZGenerational` → "support was removed in 24.0" ⑤ ZPage: draft의 "Medium 32MB 고정"은 낡음 — JDK 25는 `ZUseMediumPageSizeRange` 기본 활성(크기 범위). **웹 검증**: JEP 439의 double-buffered 리멤버드 셋(region마다 비트맵 2장, young 수집마다 원자적 교대 → 양쪽이 서로 안 기다림), 세대별 ZGC가 멀티매핑을 버리고 배리어에 명시적 코드를 넣음, store 배리어의 act-once + 중간 경로 버퍼(`ZBufferStoreBarriers` 로컬 확인)) |
 | 4.5 | `4부_4.5_소결_은탄환은없다_비용보존과_세GC의삼각형.md` | `gc-cost-conservation-no-silver-bullet` | 17 | ✅ 발행 (2026-07-12, SVG 5개 — **4부 완결**. 소결이라 표4+SVG5. **13~16편의 실측치를 한 표로 모은 "4부가 직접 잰 숫자들" 섹션이 이 시리즈의 차별점** — draft에 없던 구성. draft 교정: ① draft의 "ZGC O(1) sub-ms(0.1~0.5ms)" → 16편 실측 **최악 0.019ms**로 교체 ② draft의 "ZGC 처리량 G1 대비 5~10%↓"(출처 없음) → 16편 직접 측정 **약 14%**(포인터 추적 최악 조건임을 명시) ③ draft의 "G1 Full GC 수 초" → 15편 실측(256MB→1ms·1GB→4ms·2GB→10ms, 낙관적 하한임을 밝힘)으로 대체. **draft에 없던 실무 섹션 추가**: "대시보드를 GC별로 다르게 봐야 한다"(Go=assist / G1=멈춤 분포 꼬리+Evacuation Failure / ZGC=Allocation Stall+처리량을 멈춤과 같은 화면에) — 4부 실측에서 자연히 도출된 귀결. **12편이 4부에 남긴 계약 4건 전부 이행 확인**: Mark Assist(14편)·Full GC STW(15편)·ZGC barrier 처리량 세금(16편)·삼각형이 뼈대(전편). 5부로 다리(빈패킹·콜드스타트·off-heap OOMKilled — 3·7·11편 복선 수렴)) |
+
+| 5.1 | `5부_5.1_컨테이너속_메모리회계_cgroup합산과_UseContainerSupport.md` | `container-memory-accounting-cgroup` | 18 | ✅ 발행 (2026-07-13, SVG 6개 — **5부 시작. 도커 컨테이너 실측 도입**(colima·커널 6.8·cgroup v2). **draft 최대 교정: JVM 힙 산정 "256MiB 경계" 규칙이 틀림** — draft 표가 4g/2g/1g/512m/200m/128m만 샘플링해 250~512MiB 구간을 통째로 건너뜀. 촘촘히 재면 **그 구간 힙이 전부 128MiB 고정**(에르고노믹 기본 MaxHeapSize ≈96M×1.3=124.8MiB가 바닥). 300MiB 파드 힙 = 25%가 아니라 **42.6%**. `MaxRAMPercentage=75`로 바닥 탈출(300m→232MiB) 확인. **척추 실측: Go OOMKill 재현** — 라이브 300MiB → GC 다음 목표 **562MiB > 한도 512MiB** → GC가 돌기 전에 exit 137·OOMKilled=true. `GOMEMLIMIT=450MiB` 넣으면 생존하되 **GC 7회→435회, CPU 0%→6%**(비용 보존의 컨테이너 판). **Go 소스 결정적 증거**: 1.26.5 `runtime/cgroup_linux.go`에 GOMAXPROCS 함수만, 런타임 전체 `memory.max` **0건**, godebug에 `containermaxprocs`(1.25)만·`cgroupmemlimit` 없음. 제안 #75164는 **Open**(90%·최소 100MB 휴리스틱). GOMEMLIMIT 기본=MaxInt64 실측. **cgroup 회계 실측**: 유휴 컨테이너에서 `anon` 120KiB vs `kernel` 1.08MiB(9배). OOM 실측: exit 137·`memory.events` oom_kill 1. **게으른 할당 함정 발견**: 첫 데모가 힙 8300MiB에도 안 죽음 — Go가 fresh mmap의 memset을 건너뛰어 페이지를 안 만짐 → 8편 연결, 20편 reserved/committed 복선) |
+| 5.2 | `5부_5.2_빈패킹의_경제학_GC헤드룸이_노드밀도가_되는_방식.md` | `gc-headroom-bin-packing-density` | 19 | ✅ 발행 (2026-07-14, SVG 4개 — **draft의 "ZGC 고정 오버헤드 ~3%" 삭제**(출처 불명. 17편에서 이미 무출처 ZGC 수치 "처리량 5~10%↓"를 삭제한 전례 반복). **실측이 통념을 뒤집음**: 컨테이너 안 NMT로 GC별 힙 밖 committed = Serial 24.3 / Parallel 44.4 / **G1 65.0** / **ZGC 26.4** MiB — ZGC가 G1보다 **적게** 커밋. ZGC의 공포스러운 숫자는 **reserved 9.35GiB**(-Xmx512m의 18배)인데 **커널은 예약을 안 셈** → VSZ 착시. ZGC의 진짜 메모리 비용은 compressed oops 미지원(16편 실측)으로 힙 **안** 참조가 8바이트인 것. OpenJDK 공식 입장은 "헤드룸은 할당률·라이브셋 의존, peak working set 대비 15~25%". **draft에 없던 핵심 논거: 힙 밖 고정비가 힙 크기와 무관**(-Xmx 256m→72.6MiB, 4g→73.5MiB, 16배 키워도 1MiB 안 늚) → **프로세스마다 내는 인두세** → **파드를 쪼갤 때마다 곱해진다**(10파드 = 650MiB가 런타임 살림에만). 밀도를 높이려는 행위가 밀도를 갉아먹는 반전. 스케줄러 기본이 `LeastAllocated`(분산)이라 빈패킹은 `MostAllocated` 명시가 필요하다는 점도 유지) |
 
 - slug는 제안값 — 변환 착수 시점에 확정 (SVG 파일명이 slug에 묶이므로 착수 후 변경 금지)
 
@@ -389,3 +390,126 @@ draft 5편(4.1~4.5, 총 134KB)과 `drafts/00_이어가기_브리핑_4부.md`를 
   브룩스 이래 정착된 번역어이고 **4부의 주제어**이므로 유지합니다. `lint:post`가 잡으면 예외 처리
 - draft의 "청구서·환전·징집" 비유는 시리즈 고유 어휘로 이미 12편까지 정착 → 유지
 - "**뮤테이터(mutator)**"는 첫 등장 시 정의부터 (draft 4.1 `:132`에 정의 있음, 살릴 것)
+
+---
+
+## 11. 5부(클라우드 경제학) 착수 메모 (2026-07-14)
+
+draft 5편(5.1~5.5)을 통독하고 발행 17편·로컬 툴체인·**도커 컨테이너**와 대조한 결과입니다.
+
+### 11.1 복선 검증 — 4부와 달리 **거짓 복선 0건**
+
+draft가 `[복선 확인 필요]`로 남긴 4곳을 전부 대조했고 모두 실재합니다.
+
+| draft 표시 | 실제 발행 글 | 조치 |
+|---|---|---|
+| 1.3(3편) Direct Memory | ✅ `:217` `:224` `:352` — `MaxDirectMemorySize` 기본이 `-Xmx`와 같다까지 | 회수 |
+| 2.4(7편) cgroup 합산 | ✅ `:110` `:114` + **`:118` "off-heap OOMKilled의 정밀 해부는 5부에서 다룹니다"** = 명시적 계약 | **20편이 반드시 이행** |
+| 3.2(9편) arena | ✅ `:101` "arena 상한 코어×8 … **이 숫자가 뒤에서 컨테이너 RSS 문제로 돌아옵니다**" | 20편에서 회수 |
+| 3.4(11편) 힙 밖 지형 | ✅ `:335~388` `:543~544` — 표까지 그림 | 20편에서 회수 |
+| 4.5(17편) → 5부 | ✅ `:228` 빈패킹·콜드스타트·off-heap OOMKilled 3종 예고 | 18·19·20편이 각각 이행 |
+
+### 11.2 로컬 환경 — **도커 컨테이너 실측 도입** (5부의 새 관례)
+
+로컬은 macOS라 cgroup이 없습니다. 4부까지의 "로컬 툴체인 실측"으로는 5부를 쓸 수 없습니다.
+
+**해결: colima로 리눅스 VM을 띄우고 그 안 도커에서 잽니다.**
+
+```bash
+brew install colima docker
+colima start --cpu 4 --memory 6     # 커널 6.8 · cgroup v2
+docker run --rm --memory=512m alpine cat /sys/fs/cgroup/memory.max
+```
+
+- 이걸로 **memory.max·memory.stat·memory.events·OOMKilled·JVM 컨테이너 감지 로그**를 전부 실측함
+- macOS에서 `-XX:MaxRAM` 스윕으로 잰 힙 곡선이 **컨테이너 경로와 정확히 일치**함을 교차 확인
+  (512m 컨테이너 → `MaxHeapSize = 134217728` = 128MiB, 스윕 예측과 동일)
+- 세션이 끊겼으면 `colima start`부터. `colima status`로 확인
+
+### 11.3 사실 교정 — draft가 틀린 것
+
+1. **JVM 힙 산정 "256MiB 경계" 규칙이 틀림** (18편에서 교정 완료).
+   draft 표의 샘플링 구멍 때문. 실측 곡선은 §6 18편 행 참조
+2. **ZGC "고정 오버헤드 ~3%" 출처 불명 → 삭제** (19편에서 교정 완료).
+   17편에서 이미 같은 종류(무출처 ZGC 수치)를 삭제한 전례가 **반복됨**.
+   → **5.3~5.5의 ZGC·native-image·SnapStart 수치도 같은 의심으로 볼 것**
+3. **draft 전편이 OpenJDK 11.0.31 샌드박스 실측** → JDK 25.0.3으로 전량 교체 (4부와 동일 문제)
+
+### 11.4 중복 위험 — draft에 경고 없음, 반드시 회피
+
+- **11편이 이미 힙 밖 지형을 표까지 그려 다뤘습니다** (Metaspace 무제한·코드캐시 240MB·
+  다이렉트≈`-Xmx`·`MALLOC_ARENA_MAX`·NMT 사용법). **5.3을 draft대로 옮기면 11편 재탕**.
+  → 20편은 **11편이 안 한 것**으로 차별화: ① 두 죽음의 구분(OOME vs SIGKILL) ②
+  **reserved vs committed** ③ NMT 실제 출력 해부 ④ **cgo가 GOMEMLIMIT 밖**이라는 Go 쪽 대칭
+- **6편이 이미 티어드 임계값을 백엣지(`i + b`) 규칙·동적 스케일링까지 다뤘습니다**.
+  5.4가 "C2는 5000회"만 반복하면 6편 축약. → 21편은 **웜업 곡선 실측 + 세 처방**에 집중
+
+### 11.5 5.3~5.5용 확보 실측 (재측정 불필요)
+
+**JDK 25.0.3 기본값 (macOS·컨테이너 양쪽 확인)**
+- `MaxRAMPercentage=25` · `MinRAMPercentage=50` · `InitialRAMPercentage=1.5625`
+- `MaxMetaspaceSize = 18446744073709551615`(2^64−1, 사실상 무제한) · `CompressedClassSpaceSize = 1GiB`
+- `MaxDirectMemorySize = 0` (0 = "상한을 `-Xmx`에 맞춤") · `ThreadStackSize = 2048`(KB)
+- `ReservedCodeCacheSize = 251674624` (≈240MB, JDK 25는 `{ergonomic}`)
+- `G1ReservePercent = 10`
+- 티어드: `Tier3InvocationThreshold=200` · `Tier4InvocationThreshold=5000` ·
+  `Tier4CompileThreshold=15000` · `Tier3CompileThreshold=2000` · `CompileThreshold=10000`
+
+**NMT (JDK 25, `-Xmx256m`, 유휴 JVM, macOS)** — 20편 척추
+| 범주 | committed | reserved |
+|---|---|---|
+| Java Heap | 256 MiB | 256 MiB |
+| **GC** | **53.4 MiB** | 53.4 MiB |
+| Shared class space (CDS) | 13.6 MiB | 16 MiB |
+| Code | 7.5 MiB | **244 MiB** |
+| Class | 0.19 MiB | **1.02 GiB** |
+| Thread | 0.46 MiB | 26 MiB |
+| Metaspace | 0.20 MiB | 64 MiB |
+- **Total: committed 334 MiB vs reserved 1.65 GiB (5배)** — reserved/committed 대비의 교재
+- **힙 밖 committed ≈ 78 MiB** 중 **GC가 53 MiB로 최대** ("GC가 GC 아닌 메모리를 쓴다")
+
+**GC별 힙 밖 고정비 (리눅스 컨테이너, `-Xmx512m -Xms16m`)** — 19편에서 사용
+Serial 24.3 / Parallel 44.4 / G1 65.0 / ZGC 26.4 MiB · reserved는 ZGC만 9.35 GiB
+**단서**: 기동 직후·유휴 힙 기준. 부하 중 총량 아님 — 20편에서 부하 중 증가를 볼 것
+
+**힙 밖 고정비의 힙 무관성 (macOS)**: `-Xmx` 256m→72.6 / 512m→72.8 / 1g→73.0 / 2g→73.4 / 4g→73.5 MiB
+
+**웜업 계단 (JDK 25, 기본 티어드)** — 21편 척추
+- 인터프리터 **4791 ns** → C1 정착 **~1300 ns** → 최종 **~830 ns** (**5.8배**)
+- `-XX:+PrintCompilation`: `3 Warmup::work` → **`9 % 4 Warmup::work @ 6`(Tier4 OSR, 백엣지)**
+  → `99 4 Warmup::work` → `8 3 ... made not entrant`(역최적화)
+- **승급이 5000회 훨씬 전에 일어남** — 6편의 `i + b` 규칙 실증. "5000회"를 단순 반복하지 말 것
+
+**Leyden AOT 캐시 (JDK 25.0.3에 실재)** — 21편 척추
+- 플래그 확인: `AOTCache` · `AOTCacheOutput` · `AOTMode` · `AOTConfiguration` · `AOTClassLinking`
+- 훈련 실행 1회(`-XX:AOTCacheOutput=app.aot`) → 캐시 **11.5 MB**
+- 기동 중앙값 **77 ms → 68 ms (약 12%↓)**. 단, 클래스 수백 개짜리 장난감 앱이라
+  **실제 프레임워크보다 이득이 과소평가됨**을 반드시 명시할 것
+
+**Go 1.26.5**
+- `GOMEMLIMIT` 기본 = `math.MaxInt64` (9223372036854775807) · `GOGC` = 100
+- `runtime/cgroup_linux.go` = GOMAXPROCS 함수만 · 런타임 전체 `memory.max` **0건**
+- godebug: `containermaxprocs`(Changed: 25)만. `cgroupmemlimit` **없음**
+- 제안 #75164 **Open** (미채택. 한도의 90%·최소 100MB 휴리스틱 논의 중)
+
+**cgroup v2 (컨테이너 실측)**
+- `--memory=512m` → `memory.max = 536870912` · `memory.high = max`(K8s 미사용)
+- 유휴 알파인: `anon` 120KiB vs `kernel` 1.08MiB (**9배**) · slab 344KiB · pagetables 88KiB
+- OOM: `ExitCode=137` · `OOMKilled=true` · `memory.events`에 `max 35 / oom 1 / oom_kill 1`
+- **파이썬이 `MemoryError`를 못 던짐** — SIGKILL이라 런타임에 기회가 없음 (20편 "두 죽음"의 실증)
+
+**웹 검증 완료**
+- JDK-8348566 (커널 6.12 cgroup 컨트롤러 이동으로 JVM이 한도를 못 읽던 버그) → **JDK 25에서 수정**
+- ZGC 헤드룸 공식 입장: "할당률·라이브셋에 따라 크게 다름", peak working set 대비 **15~25%**
+
+### 11.6 5.3~5.5 남은 실측 과제
+
+- **20편**: 부하를 걸어 Metaspace·코드캐시·다이렉트가 실제로 자라는 것 관측 →
+  **GC 로그는 깨끗한데 exit 137** 재현 (이 편의 제목 그 자체).
+  `MALLOC_ARENA_MAX` 유무에 따른 RSS 차이 실측 (9편 복선 회수).
+  Go `cgo`가 `GOMEMLIMIT` 밖이라 OOMKilled 되는 것도 재현 가능하면 할 것
+- **21편**: 컨테이너 안에서 시작 구간 RSS 스파이크 관측(정상 상태보다 높은지).
+  native-image·CRaC/SnapStart 수치는 **draft 인용값이 무출처일 수 있으니** 원문 대조 필수
+  (§11.3 교훈). Leyden만 로컬 실측이 있음
+- **22편**: 새 수치 도입 없음(draft 자체가 그렇게 선언). 18~21편 실측을 한 표로 모으는 것이
+  4부 소결(17편)의 "4부가 직접 잰 숫자들" 섹션과 같은 역할 — **5부의 차별점이 될 것**
