@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">Startup memory climbs and never comes back down</title>
+  <desc id="d2">Resident memory of a JVM inside a container, sampled every 200 milliseconds. The solid red curve is the measurement: memory rises steeply from 4 mebibytes to 282 mebibytes within the first second as classes load, the heap commits and the code cache fills, and then it flattens into a plateau. Crucially, when the program stops doing work at 2.6 seconds the curve does not descend; it holds at 283 mebibytes for the remaining three seconds, because the JVM does not hand committed heap pages back to the operating system and the kernel only ever charges for pages that have been touched. A faint dashed curve shows the shape that was expected beforehand, a transient spike that rises above the steady state and then subsides; no such spike was observed. The practical consequence is that the peak becomes the resident cost, so a container limit sized from typical usage will be too small.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
+
+  <line x1="90" y1="300" x2="750" y2="300" stroke="#475569" stroke-width="2"/>
+  <line x1="90" y1="300" x2="90" y2="60" stroke="#475569" stroke-width="2"/>
+
+  <polyline points="112,296 134,222 156,170 178,122 200,88 244,86 288,87 332,86 376,87 420,86 464,87 508,86 552,87 596,86 640,87 700,86"
+            fill="none" stroke="#E11D48" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <path d="M 112 296 C 160 90, 190 60, 240 62 C 300 65, 330 150, 400 168 L 700 170"
+        fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-dasharray="7 5"/>
+  <text x="470" y="196" font-size="14" font-weight="600" fill="#64748B">expected: a spike that subsides</text>
+
+  <line x1="332" y1="70" x2="332" y2="300" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="340" y="272" font-size="14" font-weight="700" fill="#475569">work stops here</text>
+
+  <text x="205" y="72" font-size="15" font-weight="700" fill="#BE123C">282 MiB — and it stays</text>
+  <text x="118" y="286" font-size="14" font-weight="700" fill="#BE123C">4 MiB</text>
+
+  <text x="420" y="336" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">time</text>
+  <text x="420" y="364" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">the peak is the resident cost — size the limit from it</text>
+</svg>

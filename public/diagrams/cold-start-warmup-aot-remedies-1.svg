@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 390" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">The warmup staircase, measured</title>
+  <desc id="d1">A measured curve of per-call performance against cumulative invocations for a single Java method inside a container on JDK 25. The curve starts at the bottom left, where the interpreter runs the bytecode and each call takes 5578 nanoseconds. It rises in a step to a middle plateau where C1 compiled code with profiling instrumentation runs at roughly 1500 nanoseconds, then rises again to an upper plateau where C2 code settles at about 830 nanoseconds, six point seven times faster than the interpreter. Settling happens near 1200 to 1400 invocations, well before the often quoted 5000 threshold, because the method contains a loop and backedge counts drive the promotion. A dashed horizontal line across the top marks Go and Rust, which are ahead-of-time compiled and therefore run at their peak from the very first call, with no staircase at all.</desc>
+  <rect x="0" y="0" width="800" height="390" fill="#FFFFFF"/>
+
+  <line x1="90" y1="320" x2="740" y2="320" stroke="#475569" stroke-width="2"/>
+  <line x1="90" y1="320" x2="90" y2="70" stroke="#475569" stroke-width="2"/>
+
+  <line x1="90" y1="88" x2="740" y2="88" stroke="#059669" stroke-width="3" stroke-dasharray="9 5"/>
+  <text x="600" y="80" font-size="15" font-weight="700" fill="#047857">Go · Rust — peak from t=0</text>
+
+  <polyline points="143.6,286.7 197.3,200.3 250.9,206.0 304.5,196.7 358.2,163.3 411.8,105.3 465.5,96.0 519.1,113.0 572.7,106.0 626.4,103.0 700,103.0"
+            fill="none" stroke="#E11D48" stroke-width="3.5" stroke-linejoin="round"/>
+  <circle cx="143.6" cy="286.7" r="5.5" fill="#E11D48"/>
+  <circle cx="465.5" cy="96.0" r="5.5" fill="#E11D48"/>
+
+  <text x="150" y="270" font-size="15" font-weight="700" fill="#BE123C">5578 ns</text>
+  <text x="150" y="248" font-size="14" font-weight="600" fill="#BE123C">interpreter</text>
+
+  <text x="268" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">C1 ≈ 1500 ns</text>
+
+  <text x="480" y="72" font-size="15" font-weight="700" fill="#BE123C">830 ns — C2 settled</text>
+
+  <text x="415" y="352" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">cumulative invocations</text>
+  <text x="42" y="60" font-size="14" font-weight="700" fill="#334155">performance</text>
+  <text x="415" y="378" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">6.7× between the first call and the settled one</text>
+</svg>

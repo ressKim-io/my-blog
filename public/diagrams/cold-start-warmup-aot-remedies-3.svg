@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 370" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">New pods arrive at a fraction of their capacity</title>
+  <desc id="d3">A chart over time showing incoming load as a rising blue line and the pods that the horizontal pod autoscaler adds as a green step function beneath it. Because each newly started Java pod begins in the interpreter and needs time to reach its compiled peak, the effective capacity those pods deliver lags behind the step: the shaded red region between the pod count step and the effective capacity curve is the warmup deficit, the interval during which a pod is running and consuming its full resource request while delivering only a fraction of its throughput. Teams close that gap by keeping spare pods warm or by scaling out ahead of the traffic, and both of those are idle resources, which is to say both are money.</desc>
+  <rect x="0" y="0" width="800" height="370" fill="#FFFFFF"/>
+
+  <line x1="80" y1="290" x2="750" y2="290" stroke="#475569" stroke-width="2"/>
+  <line x1="80" y1="290" x2="80" y2="55" stroke="#475569" stroke-width="2"/>
+
+  <polyline points="90,268 200,250 320,190 440,120 560,84 700,72" fill="none" stroke="#0891B2" stroke-width="3.5"/>
+  <text x="600" y="62" font-size="15" font-weight="700" fill="#0E7490">incoming load</text>
+
+  <polyline points="90,272 300,272 300,214 420,214 420,150 540,150 540,102 700,102"
+            fill="none" stroke="#059669" stroke-width="3" stroke-dasharray="8 4"/>
+  <text x="586" y="122" font-size="14" font-weight="700" fill="#047857">pods added</text>
+
+  <path d="M 300 272 L 300 214 L 420 214 L 420 150 L 540 150 L 540 102 L 700 102 L 700 132 L 560 152 L 545 196 L 425 216 L 410 258 L 300 272 Z"
+        fill="#E11D48" opacity="0.2"/>
+  <polyline points="90,272 300,272 360,240 420,232 480,192 540,186 600,142 700,132"
+            fill="none" stroke="#E11D48" stroke-width="3"/>
+  <text x="300" y="252" font-size="14" font-weight="700" fill="#BE123C">effective capacity</text>
+
+  <text x="480" y="336" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">the gap: pods are running and billed, but still warming up</text>
+  <text x="120" y="336" font-size="14" font-weight="700" fill="#334155">time</text>
+</svg>

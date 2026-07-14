@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" role="img" aria-labelledby="t4 d4" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t4">Three remedies, three things given up</title>
+  <desc id="d4">Three columns, one per remedy for JVM warmup, each showing what it keeps and what it surrenders. Leyden's AOT cache keeps both the JIT's peak throughput and the JVM's dynamism, because it merely caches the result of a training run; what it costs is the training run itself and the need to build, ship and version an extra cache artifact. GraalVM native-image eliminates warmup entirely by compiling ahead of time under a closed-world assumption, but it surrenders dynamism, since reflection and dynamic proxies must be declared at build time, and it historically surrenders peak throughput, although profile-guided optimization recovers much of that. CRaC and AWS Lambda SnapStart eliminate warmup by snapshotting an already-warmed process and restoring from it, keeping both peak and dynamism, but they surrender control of external state, since open connections, random seeds and secrets are frozen into the snapshot and must be regenerated on restore.</desc>
+  <rect x="0" y="0" width="800" height="350" fill="#FFFFFF"/>
+
+  <rect x="40" y="50" width="230" height="230" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <rect x="285" y="50" width="230" height="230" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <rect x="530" y="50" width="230" height="230" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+
+  <text x="155" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">Leyden AOT cache</text>
+  <text x="400" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">native-image</text>
+  <text x="645" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">CRaC · SnapStart</text>
+
+  <text x="155" y="122" text-anchor="middle" font-size="14" font-weight="600" fill="#0E7490">cache a training run</text>
+  <text x="400" y="122" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">compile at build time</text>
+  <text x="645" y="122" text-anchor="middle" font-size="14" font-weight="600" fill="#6D28D9">snapshot a warm process</text>
+
+  <text x="155" y="168" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">keeps peak + dynamism</text>
+  <text x="400" y="168" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">no warmup at all</text>
+  <text x="645" y="168" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">keeps peak + dynamism</text>
+
+  <line x1="70" y1="192" x2="240" y2="192" stroke="#0891B2" stroke-width="1.5"/>
+  <line x1="315" y1="192" x2="485" y2="192" stroke="#E11D48" stroke-width="1.5"/>
+  <line x1="560" y1="192" x2="730" y2="192" stroke="#7C3AED" stroke-width="1.5"/>
+
+  <text x="155" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">gives up</text>
+  <text x="400" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">gives up</text>
+  <text x="645" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">gives up</text>
+
+  <text x="155" y="250" text-anchor="middle" font-size="14" font-weight="600" fill="#334155">training run · cache artifact</text>
+  <text x="400" y="250" text-anchor="middle" font-size="14" font-weight="600" fill="#334155">reflection · closed world</text>
+  <text x="645" y="250" text-anchor="middle" font-size="14" font-weight="600" fill="#334155">external state · secrets</text>
+
+  <text x="400" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">none of them removes the cost — each moves it somewhere else</text>
+</svg>

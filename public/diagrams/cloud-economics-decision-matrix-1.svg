@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">The four axes all hang from one choice</title>
+  <desc id="d1">A single vertex at the top, labelled the location of accounting, with the three possible answers beneath it: the programmer, the compiler, or the runtime. From that one vertex, four branches descend, each ending in one of the bills that Part 5 measured. The first is accounting, from episode 18: the kernel sums every kind of page and kills rather than throttles. The second is density, from episode 19: the headroom a collector demands becomes the size of the pod, and the size of the pod becomes the node bill. The third is safety margin, from episode 20: the runtime reports only the heap while the kernel charges everything, and that blind spot is exit 137. The fourth is the startup window, from episode 21: the warmup tax lands on autoscaling and serverless. The diagram's point is that a single decision about who keeps the books determines all four bills at once.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <rect x="255" y="35" width="290" height="66" rx="8" fill="#FAFAFA" stroke="#475569" stroke-width="2.5"/>
+  <text x="400" y="62" text-anchor="middle" font-size="17" font-weight="700" fill="#334155">accounting lives where?</text>
+  <text x="400" y="87" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">programmer · compiler · runtime</text>
+
+  <path d="M 400 101 L 400 132" stroke="#475569" stroke-width="2.5"/>
+  <path d="M 115 132 L 685 132" stroke="#475569" stroke-width="2.5"/>
+  <path d="M 115 132 L 115 168" stroke="#475569" stroke-width="2.5" marker-end="url(#am)"/>
+  <path d="M 305 132 L 305 168" stroke="#475569" stroke-width="2.5" marker-end="url(#am)"/>
+  <path d="M 495 132 L 495 168" stroke="#475569" stroke-width="2.5" marker-end="url(#am)"/>
+  <path d="M 685 132 L 685 168" stroke="#475569" stroke-width="2.5" marker-end="url(#am)"/>
+
+  <rect x="35" y="176" width="160" height="120" rx="7" fill="#ECFEFF" stroke="#0891B2" stroke-width="2.5"/>
+  <rect x="225" y="176" width="160" height="120" rx="7" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <rect x="415" y="176" width="160" height="120" rx="7" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <rect x="605" y="176" width="160" height="120" rx="7" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2.5"/>
+
+  <text x="115" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">accounting</text>
+  <text x="305" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">density</text>
+  <text x="495" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">safety margin</text>
+  <text x="685" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">startup window</text>
+
+  <text x="115" y="242" text-anchor="middle" font-size="14" font-weight="600" fill="#0E7490">kernel sums all</text>
+  <text x="305" y="242" text-anchor="middle" font-size="14" font-weight="600" fill="#047857">headroom = node cost</text>
+  <text x="495" y="242" text-anchor="middle" font-size="14" font-weight="600" fill="#BE123C">off-heap kills</text>
+  <text x="685" y="242" text-anchor="middle" font-size="14" font-weight="600" fill="#6D28D9">warmup tax</text>
+
+  <text x="115" y="278" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">ep. 18</text>
+  <text x="305" y="278" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">ep. 19</text>
+  <text x="495" y="278" text-anchor="middle" font-size="14" font-weight="700" fill="#BE123C">ep. 20</text>
+  <text x="685" y="278" text-anchor="middle" font-size="14" font-weight="700" fill="#6D28D9">ep. 21</text>
+
+  <text x="400" y="352" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">one decision — four bills, all at once</text>
+
+  <defs>
+    <marker id="am" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>

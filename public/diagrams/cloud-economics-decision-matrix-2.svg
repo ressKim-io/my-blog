@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">Pick the corner your workload actually needs</title>
+  <desc id="d2">Two crossed axes forming four quadrants, one for each dominant cost that Part 5 identified. The upper region is peak throughput for long-running services, where the default JVM with its JIT sits, having paid the warmup tax to get there. The left region is fast cold start, where Rust, Go and native-image sit, since they run at their peak from the first call. The right region is memory density, meaning node cost, where Rust and a Go process with GOMEMLIMIT tuned sit, because their idle fixed cost per pod is a few mebibytes rather than tens. The lower region is low tail latency, where Java's ZGC sits, having bought sub-millisecond pauses by surrendering density and throughput. Each approach reaches one region and no approach reaches them all; the workload's dominant cost decides which corner is the right one.</desc>
+  <rect x="0" y="0" width="800" height="430" fill="#FFFFFF"/>
+
+  <line x1="400" y1="55" x2="400" y2="345" stroke="#475569" stroke-width="2.5"/>
+  <line x1="120" y1="200" x2="680" y2="200" stroke="#475569" stroke-width="2.5"/>
+
+  <text x="400" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">peak throughput (long run)</text>
+  <text x="400" y="372" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">low tail latency</text>
+  <text x="112" y="196" text-anchor="end" font-size="16" font-weight="700" fill="#047857">fast cold start</text>
+  <text x="688" y="196" font-size="16" font-weight="700" fill="#0E7490">memory density</text>
+
+  <circle cx="400" cy="92" r="11" fill="#FFF1F2" stroke="#E11D48" stroke-width="3"/>
+  <text x="418" y="88" font-size="15" font-weight="700" fill="#BE123C">default JVM (JIT)</text>
+  <text x="418" y="110" font-size="13" font-weight="600" fill="#BE123C">pays warmup</text>
+
+  <circle cx="400" cy="310" r="11" fill="#F5F3FF" stroke="#7C3AED" stroke-width="3"/>
+  <text x="418" y="306" font-size="15" font-weight="700" fill="#6D28D9">Java ZGC</text>
+  <text x="418" y="328" font-size="13" font-weight="600" fill="#6D28D9">pays density · throughput</text>
+
+  <circle cx="188" cy="200" r="11" fill="#ECFDF5" stroke="#059669" stroke-width="3"/>
+  <text x="188" y="238" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">native-image</text>
+  <text x="188" y="260" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">pays dynamism</text>
+
+  <circle cx="612" cy="200" r="11" fill="#ECFEFF" stroke="#0891B2" stroke-width="3"/>
+  <text x="612" y="238" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Rust · Go</text>
+  <text x="612" y="260" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">2.3 · 4.8 MiB per pod</text>
+
+  <text x="400" y="406" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">no approach reaches two corners — the workload picks one</text>
+</svg>

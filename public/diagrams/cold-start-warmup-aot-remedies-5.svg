@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="t5 d5" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t5">Born warm, or warmed up</title>
+  <desc id="d5">A single axis running from fast cold start on the left to high long-running peak throughput on the right, with the three languages and the three Java remedies placed along it. Rust and Go sit at the left end: compiled ahead of time, they run at their peak from the first call and have no warmup, but they also cannot re-optimize themselves from runtime profiles. The default JVM sits at the right end: it starts in the interpreter, six point seven times slower than its settled code, but given time it reaches the highest peak because C2 compiles using measurements taken from the actual execution. The three remedies are placed between the ends: native-image moves Java toward the Go and Rust side, buying instant startup by giving up runtime re-optimization, while Leyden and CRaC sit nearer the JVM end because they shorten startup while preserving the JIT's peak.</desc>
+  <rect x="0" y="0" width="800" height="360" fill="#FFFFFF"/>
+
+  <line x1="80" y1="180" x2="740" y2="180" stroke="#475569" stroke-width="3"/>
+  <path d="M 80 180 L 96 172 L 96 188 Z" fill="#475569"/>
+  <path d="M 740 180 L 724 172 L 724 188 Z" fill="#475569"/>
+
+  <text x="80" y="60" font-size="16" font-weight="700" fill="#047857">fast cold start</text>
+  <text x="740" y="60" text-anchor="end" font-size="16" font-weight="700" fill="#BE123C">high long-run peak</text>
+  <text x="80" y="84" font-size="14" font-weight="600" fill="#047857">no runtime re-optimization</text>
+  <text x="740" y="84" text-anchor="end" font-size="14" font-weight="600" fill="#BE123C">pays the warmup tax</text>
+
+  <circle cx="120" cy="180" r="11" fill="#F5F3FF" stroke="#7C3AED" stroke-width="3"/>
+  <text x="120" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">Rust</text>
+
+  <circle cx="185" cy="180" r="11" fill="#ECFDF5" stroke="#059669" stroke-width="3"/>
+  <text x="185" y="248" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">Go</text>
+
+  <circle cx="300" cy="180" r="11" fill="#FFF1F2" stroke="#E11D48" stroke-width="3"/>
+  <text x="300" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">native-image</text>
+
+  <circle cx="500" cy="180" r="11" fill="#ECFEFF" stroke="#0891B2" stroke-width="3"/>
+  <text x="500" y="248" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">CRaC · Leyden</text>
+
+  <circle cx="690" cy="180" r="11" fill="#FFF1F2" stroke="#E11D48" stroke-width="3"/>
+  <text x="690" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">default JVM</text>
+
+  <text x="400" y="316" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">the remedies do not escape the axis — they only move Java along it</text>
+</svg>
