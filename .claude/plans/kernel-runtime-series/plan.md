@@ -514,7 +514,7 @@ Serial 24.3 / Parallel 44.4 / G1 65.0 / ZGC 26.4 MiB · reserved는 ZGC만 9.35 
 - JDK-8348566 (커널 6.12 cgroup 컨트롤러 이동으로 JVM이 한도를 못 읽던 버그) → **JDK 25에서 수정**
 - ZGC 헤드룸 공식 입장: "할당률·라이브셋에 따라 크게 다름", peak working set 대비 **15~25%**
 
-### 11.6 5.3~5.5 남은 실측 과제
+### 11.6 5.3~5.5 남은 실측 과제 (전부 완료)
 
 - **20편**: 부하를 걸어 Metaspace·코드캐시·다이렉트가 실제로 자라는 것 관측 →
   **GC 로그는 깨끗한데 exit 137** 재현 (이 편의 제목 그 자체).
@@ -525,3 +525,61 @@ Serial 24.3 / Parallel 44.4 / G1 65.0 / ZGC 26.4 MiB · reserved는 ZGC만 9.35 
   (§11.3 교훈). Leyden만 로컬 실측이 있음
 - **22편**: 새 수치 도입 없음(draft 자체가 그렇게 선언). 18~21편 실측을 한 표로 모으는 것이
   4부 소결(17편)의 "4부가 직접 잰 숫자들" 섹션과 같은 역할 — **5부의 차별점이 될 것**
+
+---
+
+## 12. 6부(K8s) — draft 없이 진행 (2026-07-14 설계 세션)
+
+**6부부터 `drafts/`가 없습니다.** 원본 정리 대신 **K8s 소스와 실측이 1차 자료**입니다.
+설계 문서가 draft의 견제 기능(사람이 한 번 읽고 승인)을 대신합니다.
+
+→ **설계 문서: `.claude/plans/kernel-runtime-series/part6-design.md`** (편 분할·복선 지도·측정 계획·실측 기록)
+
+### 12.1 상시 환경 (5부의 colima에 이어 6부의 표준)
+
+| ID | 환경 | 경로 |
+|---|---|---|
+| E1 | kind 클러스터 **v1.36.1** (colima 안 도커) | `kind create cluster --name rt6 --image kindest/node:v1.36.1@sha256:3489c767…` |
+| E2 | K8s 소스 **v1.36.1** (shallow, 359MB) | `/Users/jun/src/kubernetes` |
+| E3 | client-go 벤치 모듈 (`k8s.io/client-go@v0.36.1`) | `/Users/jun/src/rt6-bench` |
+| E4 | Go 1.26.5 GOROOT (`sync/pool.go`) | `$(go env GOROOT)/src` |
+
+**소스 버전과 클러스터 버전을 v1.36.1로 일치**시킨 것이 핵심.
+세션 재개 시 `colima start` → `kubectl get nodes`로 확인.
+
+### 12.2 6부 편별 진행 상태
+
+| # | slug (제안) | order | 상태 |
+|---|-------------|-------|------|
+| 6.1 | `k8s-control-plane-self-exemption` | 23 | ☐ **설계 승인 대기** (척추 실측은 설계 세션에서 이미 완료) |
+| 6.2 | `kubelet-goroutine-per-pod` | 24 | ☐ |
+| 6.3 | `k8s-sync-pool-serialization` | 25 | ☐ (protobuf/JSON·victim cache 미리보기 측정 완료) |
+| 6.4 | `informer-shared-pointer-cost` | 26 | ☐ |
+| 6.5 | `k8s-go-tradeoffs-summary` | 27 | ☐ 소결 |
+
+### 12.3 설계 세션이 소스에서 찾아낸 것 (draft가 못 했을 것들)
+
+1. **K8s는 Go 런타임을 조정하지 않는다** — `automaxprocs` 의존성 0건,
+   `debug.SetGCPercent`·`debug.SetMemoryLimit` 호출 0건(vendor 포함 전 트리).
+   컴포넌트는 운영자가 넣은 env를 **로그로 찍기만** 함. → 6부 논지가 여기서 확정됨
+2. **컨트롤 플레인의 자기 면제** — kubeadm 스태틱 파드에 메모리 `limits` 없음 →
+   cgroup `memory.max = max`. **18편의 처형선이 이들에겐 없음** (coredns는 170Mi로 있음)
+3. **유휴 apiserver의 고루틴 2,390개**, 스택 총합 17.4 MiB (고루틴당 7.6KB)
+4. **`sync.Pool`의 victim cache가 P별로 인덱싱됨** — P가 갈리면 GC 전에도 못 찾음.
+   10편 `:329`를 더 정확하게 만드는 발견 (데모는 `GOMAXPROCS=1` 고정 필요)
+5. **`AllocatorPool`이 watch 팬아웃 경로에 있음**(`watch.go:138…`) + `cachingObject`가
+   `sync.Once`로 인코딩당 1회만 직렬화 → "N워처 × 1직렬화"
+6. **Informer가 핸들러들에게 같은 포인터를 넘김**(`DeepCopy` 0건) + `pendingNotifications`가
+   **상한 없는 링버퍼**("a failing/stalled listener will have infinite pendingNotifications" — 주석 원문)
+7. **protobuf vs JSON 디코딩: 40 vs 79 allocs/op, 6.9배 시간차** (와이어 크기는 1.14배뿐)
+
+### 12.4 7부 = "만료일" 편으로 재정의 (2026-07-14 사용자 확정)
+
+원안 7부("결론 — 의사결정 매트릭스")는 **17편·22편이 이미 수행**해 중복 → **폐기**.
+
+**새 7부: 시리즈가 세운 트레이드오프에 만료일을 붙이는 단편** (order 28, 1편).
+Valhalla JEP 401(값 타입 → 3·4부 전제 흔듦) · Green Tea GC · Leyden AOT 캐시(21편 웜업 명제) ·
+compact headers JEP 519→534 · 커널 속 Rust. **"이 결론은 언제 무너지는가"**로 시리즈를 미래를 향해 닫음.
+
+→ **27편은 6부만 닫고 7부로 다리를 놓는 톤.** 시리즈 전체를 마무리하려 들지 말 것.
+7부 설계는 27편 발행 후 별도 세션.
