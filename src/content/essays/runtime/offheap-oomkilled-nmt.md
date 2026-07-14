@@ -218,6 +218,10 @@ java -Xmx256m -XX:NativeMemoryTracking=summary \
 
 ### 다이렉트 버퍼 — 앞에서 죽여 봤습니다
 
+[3편](/essays/runtime-weight-zero-cost-vs-fat)에서 이미 경고했던 함정입니다. "`-XX:MaxDirectMemorySize`를 지정하지 않으면 기본 상한이 대략 `-Xmx`와 같아서, 힙을 3GB로 잡으면 다이렉트 메모리가 최대 3GB를 더 쓸 수 있다"고요
+
+앞의 A/B가 그 예고를 물리적으로 회수한 것입니다
+
 기본 상한이 `-Xmx`와 같다는 게 함정입니다. **힙을 크게 잡으면 다이렉트 한도도 같이 커집니다**
 
 `-Xmx`를 3GiB로 올리면 다이렉트도 3GiB까지 쓸 수 있으니, 둘이 합쳐 6GiB가 됩니다. 컨테이너 한도가 4GiB라면 죽죠

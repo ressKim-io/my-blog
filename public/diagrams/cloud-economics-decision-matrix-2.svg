@@ -1,31 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="t2">Pick the corner your workload actually needs</title>
-  <desc id="d2">Two crossed axes forming four quadrants, one for each dominant cost that Part 5 identified. The upper region is peak throughput for long-running services, where the default JVM with its JIT sits, having paid the warmup tax to get there. The left region is fast cold start, where Rust, Go and native-image sit, since they run at their peak from the first call. The right region is memory density, meaning node cost, where Rust and a Go process with GOMEMLIMIT tuned sit, because their idle fixed cost per pod is a few mebibytes rather than tens. The lower region is low tail latency, where Java's ZGC sits, having bought sub-millisecond pauses by surrendering density and throughput. Each approach reaches one region and no approach reaches them all; the workload's dominant cost decides which corner is the right one.</desc>
-  <rect x="0" y="0" width="800" height="430" fill="#FFFFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Cost is conserved — every approach only moves it</title>
+  <desc id="d3">Four approaches, each shown as a box with an arrow leaving it and landing on a different bill, illustrating that none of them removes cost, they only relocate it. Rust takes density, fast startup and a narrow blind spot, and its arrow points to development time, paid up front in ownership and borrow checking. ZGC takes sub-millisecond pauses, and its arrow points to memory footprint and throughput. Native-image takes instant startup, and its arrow points to peak throughput and to dynamism, since reflection must be declared at build time. Go with GOMEMLIMIT tightened takes memory back under the container limit, and its arrow points to GC CPU, measured at six percent in episode 18. The four arrows land on four different bills, and the sum is never zero.</desc>
+  <rect x="0" y="0" width="800" height="380" fill="#FFFFFF"/>
 
-  <line x1="400" y1="55" x2="400" y2="345" stroke="#475569" stroke-width="2.5"/>
-  <line x1="120" y1="200" x2="680" y2="200" stroke="#475569" stroke-width="2.5"/>
+  <text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">what it buys</text>
+  <text x="620" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">what it pays</text>
 
-  <text x="400" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">peak throughput (long run)</text>
-  <text x="400" y="372" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">low tail latency</text>
-  <text x="112" y="196" text-anchor="end" font-size="16" font-weight="700" fill="#047857">fast cold start</text>
-  <text x="688" y="196" font-size="16" font-weight="700" fill="#0E7490">memory density</text>
+  <rect x="60" y="62" width="240" height="52" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="180" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="#6D28D9">Rust — density · startup</text>
+  <path d="M 310 88 L 490 88" stroke="#7C3AED" stroke-width="2.5" marker-end="url(#ac)"/>
+  <rect x="500" y="62" width="240" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="620" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">development time</text>
 
-  <circle cx="400" cy="92" r="11" fill="#FFF1F2" stroke="#E11D48" stroke-width="3"/>
-  <text x="418" y="88" font-size="15" font-weight="700" fill="#BE123C">default JVM (JIT)</text>
-  <text x="418" y="110" font-size="13" font-weight="600" fill="#BE123C">pays warmup</text>
+  <rect x="60" y="132" width="240" height="52" rx="6" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="180" y="164" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">ZGC — sub-ms pauses</text>
+  <path d="M 310 158 L 490 158" stroke="#0891B2" stroke-width="2.5" marker-end="url(#ac)"/>
+  <rect x="500" y="132" width="240" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="620" y="164" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">footprint · throughput</text>
 
-  <circle cx="400" cy="310" r="11" fill="#F5F3FF" stroke="#7C3AED" stroke-width="3"/>
-  <text x="418" y="306" font-size="15" font-weight="700" fill="#6D28D9">Java ZGC</text>
-  <text x="418" y="328" font-size="13" font-weight="600" fill="#6D28D9">pays density · throughput</text>
+  <rect x="60" y="202" width="240" height="52" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="180" y="234" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">native-image — startup</text>
+  <path d="M 310 228 L 490 228" stroke="#059669" stroke-width="2.5" marker-end="url(#ac)"/>
+  <rect x="500" y="202" width="240" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="620" y="234" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">peak · dynamism</text>
 
-  <circle cx="188" cy="200" r="11" fill="#ECFDF5" stroke="#059669" stroke-width="3"/>
-  <text x="188" y="238" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">native-image</text>
-  <text x="188" y="260" text-anchor="middle" font-size="13" font-weight="600" fill="#047857">pays dynamism</text>
+  <rect x="60" y="272" width="240" height="52" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="180" y="304" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309">GOMEMLIMIT — memory</text>
+  <path d="M 310 298 L 490 298" stroke="#D97706" stroke-width="2.5" marker-end="url(#ac)"/>
+  <rect x="500" y="272" width="240" height="52" rx="6" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="620" y="304" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">GC CPU — measured 6%</text>
 
-  <circle cx="612" cy="200" r="11" fill="#ECFEFF" stroke="#0891B2" stroke-width="3"/>
-  <text x="612" y="238" text-anchor="middle" font-size="15" font-weight="700" fill="#0E7490">Rust · Go</text>
-  <text x="612" y="260" text-anchor="middle" font-size="13" font-weight="600" fill="#0E7490">2.3 · 4.8 MiB per pod</text>
+  <text x="400" y="360" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">four different bills — the sum is never zero</text>
 
-  <text x="400" y="406" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">no approach reaches two corners — the workload picks one</text>
+  <defs>
+    <marker id="ac" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#475569"/>
+    </marker>
+  </defs>
 </svg>
