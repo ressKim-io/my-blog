@@ -10,8 +10,8 @@ tags:
   - zgc
   - tail-latency
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 16
+  name: "kernel-runtime-tradeoffs-4"
+  order: 4
 date: "2026-07-11"
 ---
 

@@ -10,8 +10,8 @@ tags:
   - aot
   - tradeoff
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 7
+  name: "kernel-runtime-tradeoffs-2"
+  order: 4
 date: "2026-07-02"
 ---
 

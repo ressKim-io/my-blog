@@ -10,8 +10,8 @@ tags:
   - llvm
   - simd
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 4
+  name: "kernel-runtime-tradeoffs-2"
+  order: 1
 date: "2026-06-29"
 ---
 

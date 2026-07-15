@@ -9,7 +9,7 @@ interface SeriesShowcaseProps {
   all: SeriesWithPosts[];
 }
 
-// 데스크탑: featured 큰 카드 1 + 나머지 6개 그리드.  모바일: 가로 스와이프 레일(7개).
+// 데스크탑: featured 큰 카드 1 + 나머지 그리드(3열).  모바일: 가로 스와이프 레일(전체).
 export default function SeriesShowcase({ featured, rest, all }: SeriesShowcaseProps) {
   return (
     <>

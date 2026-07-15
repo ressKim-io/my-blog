@@ -10,8 +10,8 @@ tags:
   - allocator
   - memory
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 12
+  name: "kernel-runtime-tradeoffs-3"
+  order: 5
 date: "2026-07-07"
 ---
 

@@ -10,8 +10,8 @@ tags:
   - gc
   - memory
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 11
+  name: "kernel-runtime-tradeoffs-3"
+  order: 4
 date: "2026-07-06"
 ---
 

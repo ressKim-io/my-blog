@@ -10,8 +10,8 @@ tags:
   - tail-latency
   - tradeoff
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 17
+  name: "kernel-runtime-tradeoffs-4"
+  order: 5
 date: "2026-07-12"
 ---
 

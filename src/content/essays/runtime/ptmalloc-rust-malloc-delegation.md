@@ -10,8 +10,8 @@ tags:
   - glibc
   - memory
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 9
+  name: "kernel-runtime-tradeoffs-3"
+  order: 2
 date: "2026-07-04"
 ---
 

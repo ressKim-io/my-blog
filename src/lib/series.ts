@@ -72,6 +72,41 @@ export const seriesList: SeriesMeta[] = [
     tagline: 'Latency · CDN · Datacenter',
     blurb: '빛의 속도부터 데이터센터 입지까지 — 패킷이 사용자에게 닿기까지의 지연을 한 줄기로 해부합니다',
   },
+  {
+    id: 'kernel-runtime-tradeoffs-1',
+    seriesName: 'kernel-runtime-tradeoffs-1',
+    title: '시스콜과 스레드',
+    tagline: 'System Call · Thread Model',
+    blurb: '커널 모드 전환 비용부터 스레드의 원가, 런타임 무게까지 — Rust·Go·Java가 하드웨어와 만나는 첫 접점을 해부합니다',
+  },
+  {
+    id: 'kernel-runtime-tradeoffs-2',
+    seriesName: 'kernel-runtime-tradeoffs-2',
+    title: 'AOT와 JIT',
+    tagline: 'Compilation · Codegen',
+    blurb: 'Rust의 단형화 AOT, Go의 자체 SSA 백엔드, Java의 티어드 JIT까지 — 세 언어가 기계어를 만드는 방식과 그 대가를 비교합니다',
+  },
+  {
+    id: 'kernel-runtime-tradeoffs-3',
+    seriesName: 'kernel-runtime-tradeoffs-3',
+    title: '메모리 할당자',
+    tagline: 'Allocator Internals',
+    blurb: '커널의 지연 할당부터 ptmalloc·Go 런타임 할당자·JVM TLAB까지 — 세 할당자가 같은 계층 구조로 수렴하는 이유를 추적합니다',
+  },
+  {
+    id: 'kernel-runtime-tradeoffs-4',
+    seriesName: 'kernel-runtime-tradeoffs-4',
+    title: 'GC 알고리즘',
+    tagline: 'Tricolor · Mark Assist · G1 · ZGC',
+    blurb: '삼색 마킹과 쓰기 배리어부터 Go의 Mark Assist, G1의 Full GC 절벽, ZGC의 colored pointer까지 — GC 비용이 어디로 옮겨 가는지 추적합니다',
+  },
+  {
+    id: 'kernel-runtime-tradeoffs-5',
+    seriesName: 'kernel-runtime-tradeoffs-5',
+    title: '컨테이너 경제학',
+    tagline: 'cgroup · Cloud Cost',
+    blurb: '커널의 메모리 회계 규칙부터 GC 여유 공간이 만드는 노드 밀도, 힙 외부 OOMKilled, 웜업 지연까지 — 런타임 선택이 클라우드 비용으로 이어지는 경로를 추적합니다',
+  },
 ];
 
 // 홈 쇼케이스 featured(큰 카드)로 고정할 시리즈 — 교체는 이 한 줄만 수정
@@ -94,7 +129,7 @@ export function getSeriesById(id: string): SeriesWithPosts | null {
   return { ...meta, posts, count: posts.length, latestDate };
 }
 
-/** 7개 시리즈 전체 (seriesList 순서 유지) */
+/** 시리즈 전체 (seriesList 순서 유지) */
 export function getAllSeries(): SeriesWithPosts[] {
   return seriesList
     .map((s) => getSeriesById(s.id))

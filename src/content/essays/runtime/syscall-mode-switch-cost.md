@@ -10,7 +10,7 @@ tags:
   - kernel
   - kpti
 series:
-  name: "kernel-runtime-tradeoffs"
+  name: "kernel-runtime-tradeoffs-1"
   order: 1
 date: "2026-06-26"
 ---

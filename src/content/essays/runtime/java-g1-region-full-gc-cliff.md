@@ -10,8 +10,8 @@ tags:
   - g1
   - full-gc
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 15
+  name: "kernel-runtime-tradeoffs-4"
+  order: 3
 date: "2026-07-10"
 ---
 

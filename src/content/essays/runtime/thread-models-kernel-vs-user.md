@@ -10,7 +10,7 @@ tags:
   - virtual-thread
   - scheduler
 series:
-  name: "kernel-runtime-tradeoffs"
+  name: "kernel-runtime-tradeoffs-1"
   order: 2
 date: "2026-06-27"
 ---

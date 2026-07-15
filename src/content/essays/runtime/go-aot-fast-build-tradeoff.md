@@ -10,8 +10,8 @@ tags:
   - pgo
   - compiler
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 5
+  name: "kernel-runtime-tradeoffs-2"
+  order: 2
 date: "2026-06-30"
 ---
 

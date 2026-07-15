@@ -10,8 +10,8 @@ tags:
   - goroutine
   - memory
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 10
+  name: "kernel-runtime-tradeoffs-3"
+  order: 3
 date: "2026-07-05"
 ---
 

@@ -15,6 +15,8 @@
 > 리뷰어가 7·9·17편 계약 이행과 22편 19행 표의 편간 수치 일치를 전부 확인.
 > **다음: 6부 draft 도착 대기** — 도착 시 §6 표에 23번부터 행 추가.
 > 6부 주제는 22편이 예고함: "Go의 한계를 다 가진 Go로 쓰인 K8s는 어떻게 도는가")
+> **2026-07-18: 시리즈를 부 단위로 분리** — `series.name`을 `kernel-runtime-tradeoffs-1`~`-5`로 쪼개고
+> `series.order`를 부마다 1부터 재시작. `/series` 페이지에도 5개 시리즈로 신규 등록. 상세는 §2.1.
 > ★ 2026-07-10 SVG 글자 최소화 원칙 확정 — §4.2 하단 참조. **기존 26개 소급 적용 완료(R1~R4)**.
 > 발행된 34개 SVG 전부 폰트 13px 이상
 
@@ -39,11 +41,34 @@
 |------|------|
 | 트랙 | `essays` (다듬은 개념 글) |
 | 카테고리 | **`runtime` 신설**, 표시명 `언어 & 런타임` (사용자: "주제에 맞게 신설, 표시명 길어도 됨") |
-| 시리즈 슬러그 | `kernel-runtime-tradeoffs` |
+| 시리즈 슬러그 | `kernel-runtime-tradeoffs-{부}` (2026-07-18부터 부 단위 분리 — 아래 §2.1 참조) |
 | 시리즈 표시명 | **커널과 런타임으로 톺아보는 Rust · Go · Java** |
-| series.order | 1부터 연속 (1.1=1 … 3.5=12, 4부 이후 13번부터 이어붙임) |
+| series.order | **부 안에서 1부터 재시작** (예: 5부는 18~22편이지만 frontmatter `series.order`는 1~5). 본문·제목의 "N편"(글로벌 순번, 1~22)은 그대로 유지 — §6 표의 `order` 열은 이 글로벌 순번이며 frontmatter `series.order`와 다름 |
 | date | **2026-06-26 기준 편당 하루씩 순차** (2026-07-10 사용자 확정). `date = 06-25 + order` — 1편 06-26, 4편 06-29, 5편 06-30 … 12편 07-07. 실제 변환 작업일과 무관하게 order로 계산 |
 | 제목 스타일 | rust-cs-layer 관례를 따름 — 질문형 후킹 + 부제 (예: "왜 X일까 — Y") |
+
+### 2.1 시리즈 부 단위 분리 (2026-07-18 사용자 결정)
+
+기존에는 22편 전체가 frontmatter `series.name: "kernel-runtime-tradeoffs"` 하나로 묶여 있었으나,
+`/series` 페이지·홈 쇼케이스에는 애초에 노출되지 않는 상태(`src/lib/series.ts`의 `seriesList`에
+미등록)였고, 글 상세 페이지 내부 네비게이션(이전/다음 편·사이드바)만 22편을 하나로 취급했다.
+사용자가 부(1부~5부) 단위로 쪼개기를 요청해 다음과 같이 변경했다.
+
+- **frontmatter**: `series.name`을 부마다 `kernel-runtime-tradeoffs-1` ~ `kernel-runtime-tradeoffs-5`로 분리.
+  `series.order`는 각 부 안에서 1부터 재시작(1부 1~3, 2부 1~4, 3부 1~5, 4부 1~5, 5부 1~5).
+- **`src/lib/series.ts`**: `seriesList`에 5개 `SeriesMeta` 신규 등록(id = seriesName,
+  `kernel-runtime-tradeoffs-1` ~ `-5`) → `/series` 인덱스·홈 쇼케이스에 노출.
+- **`scripts/postbuild.mjs`**: `REGISTERED_PLAIN_SERIES`에 5개 이름 추가 → sitemap에 `/series/{id}/` 반영.
+- **본문 텍스트는 변경하지 않음**: 각 글 제목·블록쿼트의 "N편"(1~22, 글로벌 순번)과 편 간
+  상호 링크(`[18편](/essays/...)` 등)는 전부 그대로 유지. 오직 frontmatter의 `series.name`/`series.order`만
+  달라졌다. **이전/다음 편 네비게이션(`PostDetail.tsx`)은 이제 부 경계를 넘지 않는다** —
+  예: 4부 마지막(17편)에서 "다음 편" 버튼은 더 이상 18편으로 이어지지 않고, 본문 안의
+  수동 링크로만 연결된다. 부와 부 사이는 이렇게 산문 링크로 다리를 놓는 것이 원래 설계 의도였다
+  (각 부 첫 편 블록쿼트가 이전 부를 링크로 되짚는 구조).
+- **6부·7부도 독립 시리즈로**: 아직 미착수인 6부(23~27편)·7부(28편)도 각각
+  `kernel-runtime-tradeoffs-6`·`kernel-runtime-tradeoffs-7`로 등록하고 `series.order`를 1부터 시작한다.
+  §6 표의 `order` 열(글로벌 편 번호 23~28)과 `date = 06-25 + order` 계산 규칙은 그대로 유지 —
+  이 열은 frontmatter `series.order`가 아니라 "N편" 표기용 글로벌 순번이다.
 
 카테고리 표시명을 바꾸고 싶으면 4개 파일의 `categoryLabelMap`만 수정:
 `src/app/page.tsx`, `src/app/essays/page.tsx`, `src/components/PostCard.tsx`,
@@ -149,9 +174,9 @@ excerpt: "(2~3문장, 후킹 + 다루는 범위)"
 category: runtime
 tags: ["rust", "go", "java", "(주제 태그 2~3개)"]
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: N
-date: "2026-06-25 + order 일"   # order=5 → "2026-06-30", order=12 → "2026-07-07"
+  name: "kernel-runtime-tradeoffs-{부}"   # 부 단위 분리, §2.1 참조. 예: 6부 → "kernel-runtime-tradeoffs-6"
+  order: N                                # 부 안에서 1부터 재시작 (글로벌 편 번호 아님)
+date: "2026-06-25 + (글로벌 편 번호) 일"   # 글로벌 편 번호=5 → "2026-06-30", =12 → "2026-07-07"
 ---
 ```
 - tags[0]부터 언어 태그를 넣되 그 편의 주인공 언어를 앞에 (2.1이면 rust 먼저, 2.3이면 java 먼저)

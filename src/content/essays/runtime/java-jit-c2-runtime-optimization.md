@@ -10,8 +10,8 @@ tags:
   - jvm
   - hotspot
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 6
+  name: "kernel-runtime-tradeoffs-2"
+  order: 3
 date: "2026-07-01"
 ---
 

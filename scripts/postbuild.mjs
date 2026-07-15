@@ -45,7 +45,14 @@ function generateSitemap(posts) {
   // deepdive 시리즈 id 를 콘텐츠에서 자동 도출 — series.ts 와 별도 동기화 불필요
   // (id = series.name 에서 'goti-deepdive-' 접두사를 뗀 값)
   // 비-deepdive 등록 시리즈(series.ts seriesList)는 접두사가 없으므로 명시 allowlist 로 포함
-  const REGISTERED_PLAIN_SERIES = ['packet-journey'];
+  const REGISTERED_PLAIN_SERIES = [
+    'packet-journey',
+    'kernel-runtime-tradeoffs-1',
+    'kernel-runtime-tradeoffs-2',
+    'kernel-runtime-tradeoffs-3',
+    'kernel-runtime-tradeoffs-4',
+    'kernel-runtime-tradeoffs-5',
+  ];
   const seriesIds = [
     ...new Set(
       posts

@@ -10,8 +10,8 @@ tags:
   - mark-assist
   - tail-latency
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 14
+  name: "kernel-runtime-tradeoffs-4"
+  order: 2
 date: "2026-07-09"
 ---
 

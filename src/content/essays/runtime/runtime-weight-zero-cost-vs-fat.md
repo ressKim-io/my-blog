@@ -10,7 +10,7 @@ tags:
   - jvm
   - graalvm
 series:
-  name: "kernel-runtime-tradeoffs"
+  name: "kernel-runtime-tradeoffs-1"
   order: 3
 date: "2026-06-28"
 ---

@@ -10,8 +10,8 @@ tags:
   - write-barrier
   - memory
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 13
+  name: "kernel-runtime-tradeoffs-4"
+  order: 1
 date: "2026-07-08"
 ---
 

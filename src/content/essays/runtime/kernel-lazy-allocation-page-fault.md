@@ -10,8 +10,8 @@ tags:
   - memory
   - page-fault
 series:
-  name: "kernel-runtime-tradeoffs"
-  order: 8
+  name: "kernel-runtime-tradeoffs-3"
+  order: 1
 date: "2026-07-03"
 ---
 
