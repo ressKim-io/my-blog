@@ -75,7 +75,7 @@ export const seriesList: SeriesMeta[] = [
   {
     id: 'kernel-runtime-tradeoffs-1',
     seriesName: 'kernel-runtime-tradeoffs-1',
-    title: '시스콜과 스레드',
+    title: '시스템 콜과 스레드',
     tagline: 'System Call · Thread Model',
     blurb: '커널 모드 전환 비용부터 스레드의 원가, 런타임 무게까지 — Rust·Go·Java가 하드웨어와 만나는 첫 접점을 해부합니다',
   },
