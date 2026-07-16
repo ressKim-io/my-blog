@@ -21,6 +21,8 @@ date: "2026-04-12"
 
 > PR #192(`goti-stadium-go` Phase 6.5 prod helm values PoC)를 Claude 3관점 병렬 리뷰와 Gemini Code Assist가 동시에 봤습니다. Claude 11건(Major 5 + Minor 6), Gemini 5건(모두 medium). **양쪽이 같은 라인을 지적했는데 방향이 반대**인 케이스가 2건 나왔고, 최종 결정은 사람이 내려야 했습니다
 
+이 비교는 리뷰 결과를 정량화하는 데서 그치지 않고, 갭을 시스템에 반영하는 후속 작업으로 이어집니다. 프롬프트 개선 사이클은 [리뷰 PR 갭 학습 — Gemini가 잡고 Claude가 놓친 5건에서 12개 체크를 도출하기](/essays/goti-review-pr-gap-learning)에서 다룹니다
+
 ---
 
 ## 🔥 대상: Phase 6.5 prod Helm values PoC PR

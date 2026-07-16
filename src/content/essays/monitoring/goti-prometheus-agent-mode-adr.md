@@ -1,5 +1,5 @@
 ---
-title: "Prometheus Agent Mode 전환 — 4Gi 메모리를 1.2Gi로 줄인 아키텍처 결정"
+title: "Prometheus Agent Mode 전환 — 메모리를 82% 줄인 아키텍처 결정"
 excerpt: "50만 동시 접속 티켓팅 플랫폼에서 노드 rightsizing 중 Prometheus가 메모리 98%를 점유한 문제를 Agent Mode 전환으로 근본 해결한 ADR"
 category: monitoring
 tags:
@@ -14,7 +14,7 @@ date: "2026-03-18"
 
 ## 한 줄 요약
 
-> Go cutover 후 노드를 12대에서 8대로 줄이는 과정에서 Prometheus가 단일 노드 메모리를 98%까지 점유했습니다. 근본 원인은 이미 Mimir가 모든 쿼리를 담당하고 있는데도 Prometheus가 로컬 TSDB를 유지하면서 이중 저장이 이어지던 구조적 문제였습니다. Agent Mode 전환으로 이중 저장을 제거하고 메모리를 70% 절감했습니다
+> Go cutover 후 노드를 12대에서 8대로 줄이는 과정에서 Prometheus가 단일 노드 메모리를 98%까지 점유했습니다. 근본 원인은 이미 Mimir가 모든 쿼리를 담당하고 있는데도 Prometheus가 로컬 TSDB를 유지하면서 이중 저장이 이어지던 구조적 문제였습니다. Agent Mode 전환으로 이중 저장을 제거했고, 실제 전환 후 메모리는 2,770Mi에서 492Mi로 82% 줄었습니다
 
 ---
 
@@ -181,6 +181,19 @@ Agent Mode 전환 후 기대되는 변화를 정리합니다.
 
 - scrape config, ServiceMonitor, PodMonitor 등 기존 설정은 그대로 사용 가능합니다
 - kube-prometheus-stack chart는 계속 사용합니다. mode만 전환합니다
+
+---
+
+## ✅ 실제 결과
+
+전환 직후 노드 CPU 포화로 모니터링 스택 전체가 연쇄 장애를 겪었고, 그 복구 과정에서 Agent Mode 전환 자체의 효과가 실측됐습니다.
+
+| 지표 | 전환 전 (실측) | 전환 후 (실측) | 변화 |
+|---|---|---|---|
+| Prometheus 메모리 | 2,770Mi | **492Mi** | **-82%** |
+| Prometheus CPU request | 500m | 100m | -80% |
+
+위 "예상 효과"에서 추정했던 ~1.2Gi(70% 절감)보다 실제 절감폭이 더 컸습니다. 연쇄 장애 복구 과정 전체는 [Prometheus Agent Mode 전환 — 모니터링 스택 연쇄 장애 복구기](/logs/goti-prometheus-agent-mode-and-monitoring-cascade)에서 다룹니다.
 
 ---
 

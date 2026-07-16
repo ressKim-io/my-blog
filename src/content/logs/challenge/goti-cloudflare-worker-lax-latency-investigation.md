@@ -284,3 +284,9 @@ Smart Placement는 1% 미만 케이스에서 자동 롤백되므로 실질적인
 - 10팀 이상 확장: Worker 커스텀 라우팅이 유연성 측면에서 의미를 가질 수 있으나, 10명 이상 엔지니어를 전제합니다.
 
 소규모 + 단기에는 관리형 GSLB가 우월합니다. 이 기준을 프로젝트 초기부터 명시하지 않으면 기술 선택이 시간이 지날수록 운영 부담으로 돌아옵니다.
+
+---
+
+## 이후 전개
+
+이 글에서는 Option A(Smart Placement)를 채택했습니다. 하지만 후속 세션에서 LAX 라우팅 이슈는 Smart Placement만으로 완전히 해결되지 않는다는 것이 확인됐고, 결국 Cloudflare Proxy를 끄고 origin(GCP LB)에 DNS Only로 직접 붙는 경로로 전환했습니다. 그 결과 지연은 900ms대에서 60ms 수준으로 줄었습니다. 이 전환 과정은 [AWS 전량 Destroy + GCP-Only 지연 최적화 — 900ms에서 60ms로](/logs/goti-aws-full-destroy-gcp-latency-optimization)에서 다룹니다

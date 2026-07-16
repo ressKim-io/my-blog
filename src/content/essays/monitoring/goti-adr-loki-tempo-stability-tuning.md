@@ -31,7 +31,7 @@ date: '2026-02-11'
 
 Loki든 Tempo든, OOM으로 죽으면 재시작됩니다. 그런데 죽어 있던 동안 Kafka에 데이터가 쌓입니다. 재시작하자마자 이 backlog를 한꺼번에 소비하면서 메모리가 폭증합니다. 그리고 또 OOM.
 
-**뭐지? 왜 매번 같은 패턴으로 죽는 거야?**
+동일한 패턴이 반복되는 이유가 무엇인지 확인이 필요했습니다.
 
 원인을 파고들어 보니 3가지 축에서 동시에 문제가 있었습니다.
 
@@ -54,9 +54,7 @@ OTel Collector Back의 Kafka receiver 설정을 살펴봤습니다.
 | `max_processing_time` | 100ms (기본) | tail_sampling 처리 시간 부족 |
 | Loki exporter retry/queue | 미설정 | Loki 장애 시 데이터 유실, back pressure 없음 |
 
-기본 `max_fetch_size`는 1MB지만, Kafka에 backlog가 쌓인 상태에서 consumer가 빠르게 소비하면서 메모리가 급증하는 문제는 여전히 발생합니다. 명시적으로 더 큰 값(5-10MB)을 설정하고 `max_processing_time`을 늘려 처리 여유를 주는 것이 핵심입니다.
-
-**아!** fetch 크기 자체보다, 처리 속도 조절이 관건이었습니다.
+fetch_max 값 자체보다 `max_processing_time`이 핵심이었습니다. 재시작 시 consumer가 backlog를 소비하는 속도가 tail_sampling의 처리 속도를 앞지르면, 처리를 기다리는 데이터가 메모리에 쌓입니다. fetch_max를 5-10MB로 명시하는 것은 fetch 단위를 예측 가능하게 만드는 보조 조치일 뿐이고, 소비와 처리 속도를 맞추는 실제 레버는 `max_processing_time`입니다.
 
 ### 문제 축 2: Loki 청크 — 메모리 과점유
 
