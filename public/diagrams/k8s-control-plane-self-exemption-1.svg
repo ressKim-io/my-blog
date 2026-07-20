@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t1 d1" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t1">Control Plane Memory Exemption vs Regular Pod</title>
+  <desc id="d1">Comparison showing regular pod constrained by memory.max threshold while Kubernetes control plane runs with memory.max equal to max, exempting it from OOMKill.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <!-- Left: Regular Pod -->
+  <rect x="40" y="40" width="340" height="320" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="210" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#334155">Regular Pod (coredns)</text>
+  <text x="210" y="105" text-anchor="middle" font-size="14" fill="#64748B">QoS: Burstable / limits.memory: 170Mi</text>
+
+  <rect x="75" y="140" width="270" height="110" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="210" y="175" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">memory.current</text>
+  <text x="210" y="210" text-anchor="middle" font-size="20" font-weight="700" fill="#0E7490">18.6 MiB</text>
+
+  <!-- OOMKill Threshold -->
+  <line x1="60" y1="290" x2="360" y2="290" stroke="#E11D48" stroke-width="3" stroke-dasharray="6 3"/>
+  <text x="210" y="320" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">memory.max = 170 MiB (OOMKill)</text>
+
+  <!-- Right: Control Plane Exemption -->
+  <rect x="420" y="40" width="340" height="320" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2.5"/>
+  <text x="590" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#B45309">Control Plane (kube-apiserver)</text>
+  <text x="590" y="105" text-anchor="middle" font-size="14" fill="#B45309">QoS: Burstable / No memory limits</text>
+
+  <rect x="455" y="140" width="270" height="110" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+  <text x="590" y="175" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">memory.current</text>
+  <text x="590" y="210" text-anchor="middle" font-size="20" font-weight="700" fill="#047857">189.3 MiB</text>
+
+  <!-- Exemption Box -->
+  <rect x="455" y="275" width="270" height="55" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="590" y="300" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">memory.max = max</text>
+  <text x="590" y="320" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">(Exempt from OOMKill)</text>
+</svg>
