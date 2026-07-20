@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%" role="img" aria-labelledby="title desc" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="title">Control Plane Exemption vs Normal Pod Limits</title>
+  <desc id="desc">Comparison showing why Kubernetes memory bypasses do not apply to normal user applications constrained by container limits and GOMEMLIMIT.</desc>
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-size: 20px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; }
+      .subtitle { font-size: 15px; font-weight: 600; fill: #27272A; text-anchor: middle; }
+      .box-emerald { fill: #ECFDF5; stroke: #059669; stroke-width: 2.5; rx: 12; }
+      .box-rose { fill: #FFF1F2; stroke: #E11D48; stroke-width: 2.5; rx: 12; }
+      .box-violet { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 2.5; rx: 12; }
+      .box-inner { fill: #FFFFFF; stroke: #E4E4E7; stroke-width: 2; rx: 8; }
+      .header { font-size: 17px; font-weight: 700; }
+      .txt-header { font-size: 17px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; }
+      .txt-sub { font-size: 14px; font-weight: 700; fill: #334155; text-anchor: middle; }
+      .txt-body { font-size: 16px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; }
+      .txt-emerald { font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .txt-rose { font-size: 15px; font-weight: 700; fill: #BE123C; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2.5; fill: none; marker-end: url(#arrow-head); }
+    </style>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" class="bg" rx="12"/>
+
+  <!-- Title Section (2 texts) -->
+  <text x="400" y="38" class="title">Control Plane Exemption vs Normal Pod Limits</text>
+  <text x="400" y="62" class="subtitle">Why Kubernetes Bypasses Do Not Apply to Normal User Applications</text>
+
+  <!-- Left Column: K8s Control Plane (5 texts) -->
+  <rect x="35" y="86" width="350" height="254" class="box-emerald"/>
+  <text x="210" y="122" class="txt-header">Kubernetes Control Plane</text>
+  <text x="210" y="144" class="txt-emerald">Exempted from OOMKill</text>
+
+  <rect x="55" y="162" width="310" height="54" class="box-inner" stroke="#059669"/>
+  <text x="210" y="194" class="txt-body" fill="#047857">cgroup memory.max = max</text>
+
+  <path d="M 210 216 L 210 240" class="arrow"/>
+
+  <rect x="55" y="248" width="310" height="68" class="box-inner" stroke="#059669" fill="#ECFDF5"/>
+  <text x="210" y="288" class="txt-body" fill="#047857">Unbounded RingBuffers Allowed</text>
+
+  <!-- Right Column: Normal User Pods (5 texts) -->
+  <rect x="415" y="86" width="350" height="254" class="box-rose"/>
+  <text x="590" y="122" class="txt-header">Normal User Applications</text>
+  <text x="590" y="144" class="txt-rose">Enforced by Container Limits</text>
+
+  <rect x="435" y="162" width="310" height="54" class="box-inner" stroke="#E11D48"/>
+  <text x="590" y="194" class="txt-body" fill="#BE123C">cgroup limits.memory Set</text>
+
+  <path d="M 590 216 L 590 240" class="arrow"/>
+
+  <rect x="435" y="248" width="310" height="68" class="box-inner" stroke="#E11D48" fill="#FFF1F2"/>
+  <text x="590" y="288" class="txt-body" fill="#BE123C">Buffer Growth ➔ OOMKill</text>
+
+  <!-- Defense Line Callout (2 texts) -->
+  <rect x="35" y="356" width="730" height="58" class="box-violet" stroke="#7C3AED" stroke-width="2.5"/>
+  <text x="400" y="382" class="header" fill="#6D28D9" text-anchor="middle">GOMEMLIMIT Defense Line (70~80% Limit)</text>
+  <text x="400" y="404" class="txt-sub" fill="#334155" text-anchor="middle">Triggers GC Before Reaching cgroup OOM Cutoff</text>
+
+  <!-- Footer Callout (2 texts) -->
+  <rect x="150" y="426" width="500" height="38" class="box-inner" stroke="#E4E4E7"/>
+  <text x="260" y="451" class="txt-header">Key Rule:</text>
+  <text x="490" y="451" class="txt-rose">Design App Within Container Limits</text>
+</svg>
