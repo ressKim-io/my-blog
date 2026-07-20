@@ -20,6 +20,7 @@
 set -euo pipefail
 
 DURATION="${1:-30}"
+PHASE="${2:-all}"   # all | host | mirror | guest
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUTDIR="$HERE/results"
@@ -63,6 +64,7 @@ PY
 
 NPROC="$(nproc)"
 
+if [[ "$PHASE" == "all" || "$PHASE" == "host" ]]; then
 echo "== 호스트(L0) 락 경합 측정 — nproc=$NPROC =="
 for MULT in 1 2; do
   THREADS=$((NPROC * MULT))
@@ -75,6 +77,48 @@ for MULT in 1 2; do
     sleep 3
   done
 done
+fi
+
+# 게스트 토폴로지를 L0에서 그대로 흉내 낸 대조군.
+#
+# host-x2(24스레드/락 1개)는 guest-oversub(8스레드 x 락 3개)의 올바른 대조군이 아니다.
+# 프로세스마다 락이 따로이므로 프로세스 3개를 띄워야 락 도메인 수까지 일치한다.
+# 이게 맞아야 "같은 2배 경합에서 가상화가 추가로 무엇을 물리는가"를 물을 수 있다.
+#
+#   host-1x8  프로세스 1개 x 8스레드   <-> guest-solo
+#   host-3x8  프로세스 3개 x 8스레드   <-> guest-oversub
+if [[ "$PHASE" == "all" || "$PHASE" == "mirror" ]]; then
+GT="${GT:-8}"   # 게스트 vCPU 수와 맞춘다
+echo
+echo "== 호스트(L0) 게스트 미러 대조군 — 프로세스당 ${GT}스레드 =="
+for m in "${MODES[@]}"; do
+  echo "-- $m"
+  OUT="$OUTDIR/lock-host-1x${GT}-${m}.json"
+  "$PROBE" --mode "$m" --threads "$GT" --duration "$DURATION" \
+           --label "host-1x${GT}-${m}" --out "$OUT" 2>/dev/null
+  summarize_one "$OUT"
+  sleep 3
+
+  pids=()
+  for i in 1 2 3; do
+    "$PROBE" --mode "$m" --threads "$GT" --duration "$DURATION" \
+             --label "host-3x${GT}-p${i}-${m}" \
+             --out "$OUTDIR/lock-host-3x${GT}-p${i}-${m}.json" 2>/dev/null &
+    pids+=($!)
+  done
+  for p in "${pids[@]}"; do wait "$p"; done
+  for i in 1 2 3; do
+    summarize_one "$OUTDIR/lock-host-3x${GT}-p${i}-${m}.json"
+  done
+  sleep 3
+done
+fi
+
+if [[ "$PHASE" == "host" || "$PHASE" == "mirror" ]]; then
+  echo
+  echo "== 완료(호스트 국면만): $OUTDIR =="
+  exit 0
+fi
 
 # 게스트 IP 확인
 declare -A IP
