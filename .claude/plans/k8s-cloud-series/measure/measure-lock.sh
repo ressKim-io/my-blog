@@ -162,8 +162,8 @@ run_guest() {
 echo
 echo "== 국면 1: guest-solo (게스트 1대만 부하, ${GN}스레드/${GN}vCPU) =="
 for m in "${MODES[@]}"; do
-  run_guest "${PREFIX}1" "$m" "guest-solo-${m}"
-  summarize_one "$OUTDIR/lock-guest-solo-${m}.json"
+  run_guest "${PREFIX}1" "$m" "guest-solo${TAG:-}-${m}"
+  summarize_one "$OUTDIR/lock-guest-solo${TAG:-}-${m}.json"
   sleep 3
 done
 
@@ -172,12 +172,12 @@ echo "== 국면 2: guest-oversub (게스트 ${COUNT}대 동시, 각 ${GN}스레�
 for m in "${MODES[@]}"; do
   pids=()
   for n in $(guest_names); do
-    run_guest "$n" "$m" "guest-oversub-${n}-${m}" &
+    run_guest "$n" "$m" "guest-oversub${TAG:-}-${n}-${m}" &
     pids+=($!)
   done
   for p in "${pids[@]}"; do wait "$p"; done
   for n in $(guest_names); do
-    summarize_one "$OUTDIR/lock-guest-oversub-${n}-${m}.json"
+    summarize_one "$OUTDIR/lock-guest-oversub${TAG:-}-${n}-${m}.json"
   done
   sleep 3
 done

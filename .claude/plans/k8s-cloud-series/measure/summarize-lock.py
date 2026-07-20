@@ -86,7 +86,10 @@ def main():
     l1 = {}
     for m in MODES:
         s = one(f"lock-guest-solo{tag}-{m}.json")
-        o = load(f"lock-guest-oversub{tag}-*-{m}.json")
+        # 게스트 이름 자리를 [0-9]로 좁힌다. `*`를 쓰면 태그가 없는 호출에서
+        # lock-guest-oversub-nopvspin-schedlab1-*.json 까지 빨려 들어와
+        # 두 국면의 평균이 섞인다
+        o = load(f"lock-guest-oversub{tag}-schedlab[0-9]-{m}.json")
         if not (s and o):
             continue
         avg = sum(thr(r) for r in o) / len(o)
