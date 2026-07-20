@@ -114,6 +114,13 @@ export const seriesList: SeriesMeta[] = [
     tagline: 'K8s · Go Runtime Architecture',
     blurb: '컨트롤 플레인의 자기 면제부터 파드당 고루틴 물량, sync.Pool과 Informer 공유 캐시까지 — 쿠버네티스가 Go 런타임의 한계를 아키텍처로 비켜가고 사람에게 남긴 청구서를 추적합니다',
   },
+  {
+    id: 'k8s-cloud-optimization',
+    seriesName: 'k8s-cloud-optimization',
+    title: '클라우드 인프라 물리학',
+    tagline: 'K8s · Cloud Managed · Physics',
+    blurb: '관리형 컨트롤 플레인 은닉부터 예약 인두세, 고밀도 CNI, eBPF 리다이렉트, 가상화 이중 세금까지 — 클라우드가 K8s를 돌리기 위해 최적화한 물리적 계층과 그 대가를 해부합니다',
+  },
 ];
 
 // 홈 쇼케이스 featured(큰 카드)로 고정할 시리즈 — 교체는 이 한 줄만 수정

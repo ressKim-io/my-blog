@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-client { fill: #ECFEFF; stroke: #0891B2; stroke-width: 2; rx: 8; }
+      .box-csp { fill: #FFFBEB; stroke: #D97706; stroke-width: 2; rx: 8; stroke-dasharray: 6 3; }
+      .box-inner { fill: #FFFFFF; stroke: #0A0A0A; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 16px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; }
+      .txt-body { font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 500; fill: #27272A; text-anchor: middle; }
+      .txt-cyan { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; font-weight: 700; fill: #0891B2; text-anchor: middle; }
+      .txt-amber { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; font-weight: 700; fill: #D97706; text-anchor: middle; }
+      .arrow { stroke: #0A0A0A; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .boundary { stroke: #64748B; stroke-width: 2; stroke-dasharray: 8 4; }
+    </style>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#0A0A0A" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" class="bg" rx="12"/>
+
+  <!-- Title Section -->
+  <text x="40" y="42" class="title">Cloud Managed Control Plane &amp; APF Observability Boundary</text>
+  <text x="40" y="66" class="subtitle">User VPC Worker Nodes vs Hidden CSP Master Blackbox ($0.10/hr)</text>
+
+  <!-- Left: User VPC Area (Worker Nodes) -->
+  <rect x="40" y="96" width="320" height="340" class="box-client"/>
+  <text x="200" y="132" class="txt-header">User VPC Boundary (Worker Nodes)</text>
+
+  <rect x="64" y="156" width="272" height="110" class="box-inner"/>
+  <text x="200" y="190" class="txt-header">API Requests</text>
+  <text x="200" y="216" class="txt-body">REST &amp; Watch Streams</text>
+  <text x="200" y="242" class="txt-cyan">kubelet, controller, pods</text>
+
+  <rect x="64" y="296" width="272" height="116" class="box-inner"/>
+  <text x="200" y="330" class="txt-header">Observed Signals (Boundary)</text>
+  <text x="200" y="356" class="txt-body">HTTP 429 &amp; Retry-After: 1..32s</text>
+  <text x="200" y="382" class="txt-cyan">apiserver_flowcontrol_* metrics</text>
+
+  <!-- Boundary Line -->
+  <line x1="400" y1="96" x2="400" y2="436" class="boundary"/>
+  <rect x="380" y="250" width="40" height="28" rx="6" fill="#E2E8F0" stroke="#64748B" stroke-width="1.5"/>
+  <text x="400" y="268" class="txt-body" font-size="12">ENI</text>
+
+  <!-- Right: CSP Hidden Area (Master Node) -->
+  <rect x="440" y="96" width="320" height="340" class="box-csp"/>
+  <text x="600" y="132" class="txt-header">CSP Hidden Blackbox (Master)</text>
+
+  <rect x="464" y="156" width="272" height="110" class="box-inner"/>
+  <text x="600" y="190" class="txt-header">APF Queue &amp; Filter</text>
+  <text x="600" y="216" class="txt-body">priority-and-fairness.go</text>
+  <text x="600" y="242" class="txt-amber">FlowSchema / PriorityLevel</text>
+
+  <rect x="464" y="296" width="272" height="116" class="box-inner"/>
+  <text x="600" y="330" class="txt-header">Exempt &amp; Storage Layer</text>
+  <text x="600" y="356" class="txt-body">Type: Exempt (CSP CNI/Controller)</text>
+  <text x="600" y="382" class="txt-amber">Managed etcd (Zonal / EC2)</text>
+
+  <!-- Arrows -->
+  <path d="M 336 210 L 464 210" class="arrow"/>
+  <path d="M 464 354 L 336 354" class="arrow"/>
+</svg>

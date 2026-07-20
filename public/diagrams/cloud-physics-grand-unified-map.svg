@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-layer { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 8; }
+      .tag-runtime { fill: #EFF6FF; stroke: #3B82F6; stroke-width: 1; rx: 4; }
+      .tag-cloud { fill: #F0FDF4; stroke: #10B981; stroke-width: 1; rx: 4; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: 700; fill: #1E293B; text-anchor: start; }
+      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #475569; text-anchor: start; }
+      .txt-blue { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; fill: #2563EB; text-anchor: middle; }
+      .txt-green { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; fill: #059669; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" class="bg" rx="12"/>
+
+  <!-- Title Section -->
+  <text x="40" y="42" class="title">Grand Unified Map: Kernel Runtime Series &lt;-&gt; Cloud Physics Series</text>
+  <text x="40" y="66" class="subtitle">Mapping Low-Level Kernel Physics to Cloud-Scale Managed Infrastructure Optimization</text>
+
+  <!-- Layer 1: Control Plane -->
+  <rect x="40" y="90" width="720" height="66" class="box-layer"/>
+  <text x="60" y="118" class="txt-header">1. Control Plane &amp; API Concurrency</text>
+  <text x="60" y="140" class="txt-sub">APF PriorityLevelConfigurations &amp; etcd Watcher Disconnection Recovery</text>
+  <rect x="430" y="105" width="160" height="36" class="tag-runtime"/>
+  <text x="510" y="128" class="txt-blue">Runtime #23: Privilege Exemption</text>
+  <rect x="600" y="105" width="140" height="36" class="tag-cloud"/>
+  <text x="670" y="128" class="txt-green">Cloud #1: Managed Hidden APF</text>
+
+  <!-- Layer 2: Node Accounting -->
+  <rect x="40" y="166" width="720" height="66" class="box-layer"/>
+  <text x="60" y="194" class="txt-header">2. Node Memory &amp; CPU Accounting</text>
+  <text x="60" y="216" class="txt-sub">cgroups v2 Hierarchy, Page Cache Reclaim, &amp; kube-reserved Poll Tax</text>
+  <rect x="430" y="181" width="160" height="36" class="tag-runtime"/>
+  <text x="510" y="204" class="txt-blue">Runtime #12·17: cgroup &amp; Cache</text>
+  <rect x="600" y="181" width="140" height="36" class="tag-cloud"/>
+  <text x="670" y="204" class="txt-green">Cloud #2: Reservation Formulas</text>
+
+  <!-- Layer 3: High Density CNI -->
+  <rect x="40" y="242" width="720" height="66" class="box-layer"/>
+  <text x="60" y="270" class="txt-header">3. High Density Pods &amp; Goroutine Scaling</text>
+  <text x="60" y="292" class="txt-sub">MaxPods 250, PLEG sysmon Wakeups, &amp; VPC CNI Prefix Delegation (/28 IP pool)</text>
+  <rect x="430" y="257" width="160" height="36" class="tag-runtime"/>
+  <text x="510" y="280" class="txt-blue">Runtime #22·24: PLEG &amp; Goroutine</text>
+  <rect x="600" y="257" width="140" height="36" class="tag-cloud"/>
+  <text x="670" y="280" class="txt-green">Cloud #3: VPC CNI &amp; MaxPods</text>
+
+  <!-- Layer 4: eBPF Data Plane -->
+  <rect x="40" y="318" width="720" height="66" class="box-layer"/>
+  <text x="60" y="346" class="txt-header">4. Kernel Network I/O &amp; Socket Bypass</text>
+  <text x="60" y="368" class="txt-sub">iptables O(N) -> eBPF sock_hash / sk_msg Direct Socket Redirect (`94.4 Gbps`)</text>
+  <rect x="430" y="333" width="160" height="36" class="tag-runtime"/>
+  <text x="510" y="356" class="txt-blue">Runtime #27: epoll vs io_uring</text>
+  <rect x="600" y="333" width="140" height="36" class="tag-cloud"/>
+  <text x="670" y="356" class="txt-green">Cloud #4: Cilium &amp; Socket LB</text>
+
+  <!-- Layer 5: Virtualization & Hardware -->
+  <rect x="40" y="394" width="720" height="66" class="box-layer"/>
+  <text x="60" y="422" class="txt-header">5. Hypervisor &amp; Hardware Offloading</text>
+  <text x="60" y="444" class="txt-sub">VMEXIT Register Flush @ 500ns, CFS Steal Time, &amp; SR-IOV IOMMU DMA Passthrough</text>
+  <rect x="430" y="409" width="160" height="36" class="tag-runtime"/>
+  <text x="510" y="432" class="txt-blue">Runtime #1: Syscall Mode Switch</text>
+  <rect x="600" y="409" width="140" height="36" class="tag-cloud"/>
+  <text x="670" y="432" class="txt-green">Cloud #5: KVM &amp; SR-IOV Bypass</text>
+</svg>

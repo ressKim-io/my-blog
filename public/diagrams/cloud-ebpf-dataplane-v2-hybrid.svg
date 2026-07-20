@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-kernel { fill: #F0FDF4; stroke: #10B981; stroke-width: 2; rx: 8; }
+      .box-cloud { fill: #EFF6FF; stroke: #3B82F6; stroke-width: 2; rx: 8; }
+      .box-inner { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-green { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #10B981; text-anchor: middle; }
+      .txt-blue { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #3B82F6; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2; marker-end: url(#arrowhead); fill: none; stroke-dasharray: 6 4; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="460" class="bg" rx="12"/>
+
+  <!-- Title Section -->
+  <text x="40" y="42" class="title">Managed Cloud eBPF Hybrid Boundary: Open Source vs CSP Proprietary Stack</text>
+  <text x="40" y="66" class="subtitle">Where Guest Kernel eBPF Ends &amp; Cloud Underlay Hardware Encapsulation Begins</text>
+
+  <!-- Left Column: Open Source Guest Kernel Layer -->
+  <rect x="40" y="96" width="340" height="324" class="box-kernel"/>
+  <text x="210" y="134" class="txt-header">Guest OS Kernel Layer (Open eBPF)</text>
+  <text x="210" y="156" class="txt-green">Exact Causal Scope of Local Benchmarks</text>
+
+  <rect x="64" y="176" width="292" height="74" class="box-inner"/>
+  <text x="210" y="206" class="txt-header">cgroup v2 Socket Hooks</text>
+  <text x="210" y="230" class="txt-sub">BPF_CGROUP_INET4_CONNECT / sockops</text>
+
+  <rect x="64" y="266" width="292" height="134" class="box-inner"/>
+  <text x="210" y="298" class="txt-header">Local Pod-to-Pod Redirection</text>
+  <text x="210" y="324" class="txt-body">bpf_redirect_peer (sk_msg / TC Ingress)</text>
+  <text x="210" y="350" class="txt-body">Direct veth-to-veth Zero-Copy Transfer</text>
+  <text x="210" y="380" class="txt-green">Bypasses Host Netfilter &amp; iptables 100%</text>
+
+  <!-- Middle Arrow -->
+  <path d="M 380 258 L 420 258" class="arrow"/>
+
+  <!-- Right Column: CSP Managed Boundary Layer -->
+  <rect x="420" y="96" width="340" height="324" class="box-cloud"/>
+  <text x="590" y="134" class="txt-header">CSP Managed Cloud Layer (Blackbox)</text>
+  <text x="590" y="156" class="txt-blue">GKE Dataplane V2 / AWS EKS + Cilium</text>
+
+  <rect x="444" y="176" width="292" height="74" class="box-inner"/>
+  <text x="590" y="206" class="txt-header">Proprietary Security &amp; IAM Policy</text>
+  <text x="590" y="230" class="txt-sub">Injected via Managed Cilium Operator / CRDs</text>
+
+  <rect x="444" y="266" width="292" height="134" class="box-inner"/>
+  <text x="590" y="298" class="txt-header">Cross-Node &amp; Underlay Encapsulation</text>
+  <text x="590" y="324" class="txt-body">GCP Andromeda Virtual Switch / GENEVE</text>
+  <text x="590" y="350" class="txt-body">AWS Nitro Card Hardware Offloading</text>
+  <text x="590" y="380" class="txt-blue">Causes Production Latency &amp; Overhead Variances</text>
+</svg>

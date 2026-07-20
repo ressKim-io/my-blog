@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
+      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
+      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2; fill: none; marker-end: url(#arrow-head); }
+    </style>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" class="bg" rx="12"/>
+
+  <!-- Title Section -->
+  <text x="40" y="42" class="title">High-Density Node Physical Bottlenecks (MaxPods = 250)</text>
+  <text x="40" y="66" class="subtitle">From VPC CNI Network Unlocking to Kubelet Reconciliation &amp; PLEG Pressure</text>
+
+  <!-- Box 1: VPC CNI Network Ready -->
+  <rect x="140" y="96" width="520" height="86" class="box-teal"/>
+  <text x="400" y="130" class="txt-header">1. VPC CNI Network Layer Unlocked</text>
+  <text x="400" y="154" class="txt-body">Prefix Delegation (/28 CIDRs) Provides 400+ Available IP Addresses</text>
+  <text x="400" y="174" class="txt-teal">Network Capacity Constraint Eliminated</text>
+
+  <!-- Arrow 1 -->
+  <path d="M 400 182 L 400 216" class="arrow"/>
+  <text x="510" y="204" class="txt-sub">Shift to Kubelet Runtime</text>
+
+  <!-- Box 2: Kubelet Goroutine & Mount Reconciliation -->
+  <rect x="140" y="224" width="520" height="96" class="box-orange"/>
+  <text x="400" y="258" class="txt-header">2. Kubelet Goroutine &amp; cgroup Reconciliation Loop</text>
+  <text x="400" y="282" class="txt-body">250 Pods (~750 Containers) -&gt; 1,500+ cgroup Trees &amp; /proc/mounts Scans</text>
+  <text x="400" y="304" class="txt-orange">Linear Goroutine Proliferation &amp; CPU Polling Overhead</text>
+
+  <!-- Arrow 2 -->
+  <path d="M 400 320 L 400 354" class="arrow"/>
+  <text x="510" y="342" class="txt-sub">CRI gRPC Latency Impact</text>
+
+  <!-- Box 3: PLEG Relist Latency Spike -->
+  <rect x="140" y="362" width="520" height="92" class="box-orange"/>
+  <text x="400" y="396" class="txt-header">3. PLEG (Pod Lifecycle Event Generator) Pressure</text>
+  <text x="400" y="420" class="txt-body">1-Second relistDuration Querying containerd CRI Across 750 Containers</text>
+  <text x="400" y="442" class="txt-orange">Risk of PLEG Timeout &amp; Node NotReady Status Spikes</text>
+</svg>

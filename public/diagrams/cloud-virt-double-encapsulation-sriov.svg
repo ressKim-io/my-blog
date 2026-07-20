@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-virt { fill: #FEF2F2; stroke: #EF4444; stroke-width: 2; rx: 8; }
+      .box-sriov { fill: #F0FDF4; stroke: #10B981; stroke-width: 2; rx: 8; }
+      .box-inner { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-red { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EF4444; text-anchor: middle; }
+      .txt-green { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #10B981; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2; marker-end: url(#arrowhead); fill: none; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="460" class="bg" rx="12"/>
+
+  <!-- Title Section -->
+  <text x="40" y="42" class="title">Virtual Network Double Encapsulation &amp; VM-Exit Tax vs SR-IOV Bypass</text>
+  <text x="40" y="66" class="subtitle">OVS/GENEVE Overlay Bridge Traversal vs PCIe Virtual Function Direct IOMMU Passthrough</text>
+
+  <!-- Left Column: Double Encapsulation Path -->
+  <rect x="40" y="96" width="340" height="324" class="box-virt"/>
+  <text x="210" y="134" class="txt-header">Double Overlay Bridge Path (Default)</text>
+  <text x="210" y="156" class="txt-red">Heavy VM-Exit &amp; Context Flush Overhead</text>
+
+  <rect x="64" y="176" width="292" height="74" class="box-inner"/>
+  <text x="210" y="206" class="txt-header">1. Guest Pod &amp; CNI Overlay</text>
+  <text x="210" y="230" class="txt-sub">Flannel/Cilium VXLAN Encapsulation inside VM</text>
+
+  <path d="M 210 250 L 210 266" class="arrow"/>
+
+  <rect x="64" y="266" width="292" height="134" class="box-inner"/>
+  <text x="210" y="298" class="txt-header">2. VM-Exit to Host Hypervisor</text>
+  <text x="210" y="324" class="txt-body">VMENTER/VMEXIT Pipeline Flush &amp; TLB Eviction</text>
+  <text x="210" y="350" class="txt-body">Host Open vSwitch (OVS) / Linux Bridge Traversal</text>
+  <text x="210" y="380" class="txt-red">Measured Tax: ~4.00x Network Latency Multiplier</text>
+
+  <!-- Right Column: SR-IOV Direct Path -->
+  <rect x="420" y="96" width="340" height="324" class="box-sriov"/>
+  <text x="590" y="134" class="txt-header">SR-IOV Hardware Direct Path</text>
+  <text x="590" y="156" class="txt-green">Zero VM-Exit &amp; IOMMU Passthrough</text>
+
+  <rect x="444" y="176" width="292" height="74" class="box-inner"/>
+  <text x="590" y="206" class="txt-header">1. Guest Pod NIC Driver</text>
+  <text x="590" y="230" class="txt-sub">Direct VF Driver (ENA / ixgbevf / mlx5_core)</text>
+
+  <path d="M 590 250 L 590 266" class="arrow"/>
+
+  <rect x="444" y="266" width="292" height="134" class="box-inner"/>
+  <text x="590" y="298" class="txt-header">2. PCIe Virtual Function (VF)</text>
+  <text x="590" y="324" class="txt-body">IOMMU DMA Direct Transfer to Physical NIC</text>
+  <text x="590" y="350" class="txt-body">Bypasses OVS and Host IP Stack 100%</text>
+  <text x="590" y="380" class="txt-green">Zero Software Switching / Bare-Metal Latency</text>
+</svg>
