@@ -187,9 +187,33 @@ lint 결과 기준:
 - 검증 완료(수정 불요): `setResponseHeaders` UID 의도 주석, 429 `3*retryAfter` 배증·선형 감쇠·
   `maxRetryAfter=32`, Watch `watchInitializationSignal` 좌석 반환 구조 — v1.36 클론과 일치
 
-## 3. 2편 `cloud-node-resource-accounting.md`
+## 3. 2편 `cloud-node-resource-accounting.md` → **7부 1편 (완료 `2026-07-20`)**
 
-- [ ] **P0** L141~158 비교표: "m5.4xlarge 기본 `maxPods` **250**" — 공식값 **234**
+> **[완료] 재집필 완료** — plan.md §0 대체 규칙 적용. 고정 커밋 소스로 전면 재검증했다.
+> - **maxPods 234 교정**: 표 전체 재계산(예약 2,829 MiB / allocatable 62,607 MiB /
+>   GKE 대비 1.98배 / 차이 2.72 GiB). `m5.large` 574 MiB(7.0%)를 추가해 인두세 성격을 대조
+> - **"11 MiB 수렴" 창작 서사 제거**: Karpenter 주석이 가리키는 Bottlerocket PR #1388을
+>   출처로 밝히고 **벤더 휴리스틱**으로 재서술
+> - **"1바이트 오차 없이" 교정 — 이 편의 새 핵심**: `types.go:357` `memory()`가
+>   `VM_MEMORY_OVERHEAD_PERCENT`(기본 `0.075`, `options.go:58`)로 광고 메모리에서 일괄 7.5%를
+>   먼저 깎는다. 64 GiB에서 약 4.9 GiB로 `kube-reserved`보다 크다. 따라서 거울 복제되는 것은
+>   **산식**이지 결과가 아니다. arm64 CMA 64 MiB 예외도 같은 성격으로 함께 인용
+> - **P1 깊이 보강(Karpenter bin-packing·consolidation)**: `nodeclaim.go:562`(DaemonSet
+>   오버헤드를 요청 합계에 가산)·`:624` `fits()`(Allocatable 기준 판정)·
+>   `consolidation.go:159`(삭제 가정 후 재시뮬레이션)·`:216`(현재가보다 싼 후보만 잔류) 인용.
+>   "노드를 잘게 쪼개면 DaemonSet 고정비가 대수만큼 곱해진다"는 실무 함의로 연결
+> - **C1 출처**: GKE 노드 크기 문서 원문 인용 + URL + 접근일자(2026-07-20). 계단식 5구간·
+>   퇴거 100 MiB 모두 문서 원문과 대조
+> - **P2**: `zap.L().Error` 생략을 `/* 로그 생략 */`으로 표기, C4 "6부 19편" 표현 삭제,
+>   C8 유형 태그 `concept`·excerpt 정리
+> - `systemReserved` 확인 결과: 구조체에 `SystemReserved` **필드 자체가 없고**
+>   `SystemReservedCgroup` 경로만 설정한다(`config.go:273`). 기존 서술보다 강한 근거로 교체
+> - SVG 3종 갱신: `-2`는 250/3,005 MiB 오류 박제, `-3`은 "Zero Discrepancy" 거짓 주장이
+>   이미지에 박혀 있어 **둘 다 재작성**. `-1`은 라벨 축소(22 → 16 text)
+> - `npm run lint:post` **error 0**
+
+
+- [x] **P0** L141~158 비교표: "m5.4xlarge 기본 `maxPods` **250**" — 공식값 **234**
   (`misc/eni-max-pods.txt`: `m5.4xlarge 234`. 3편 L58도 234로 서술 → 시리즈 자기모순).
   표 전체 재계산:
   - 예약 메모리: 11×234+255 = **2,829 MiB (≈2.76 GiB)**
@@ -197,21 +221,21 @@ lint 결과 기준:
   - Allocatable: EKS 65,536−2,829−100 = **62,607 MiB**, GKE 59,824.5 MiB → 차이 **≈2.72 GiB**
   - L153 "2.93 GiB만을 공제" → 2.76 GiB, L244 "220개분(약 2.4 GiB)" 문단도 234 기준 재서술
     (234−30=204개분 ≈ 2,244 MiB ≈ 2.2 GiB)
-- [ ] **P0** L79: "파드 1개 오버헤드가 **정확히 약 11 MiB에 수렴**" — 창작 서사. 11 MiB는 AWS가
+- [x] **P0** L79: "파드 1개 오버헤드가 **정확히 약 11 MiB에 수렴**" — 창작 서사. 11 MiB는 AWS가
   정한 휴리스틱 상수(GKE의 255 MiB 기본과 같은 벤더 결정값)임을 명시하는 서술로 교체
-- [ ] **P1** 기획 §3 미이행 — **Karpenter bin-packing·consolidation 로직 소스 해부 부재**.
+- [x] **P1** 기획 §3 미이행 — **Karpenter bin-packing·consolidation 로직 소스 해부 부재**.
   현재는 kubeReserved 거울 복제 확인만 있음. `kubernetes-sigs/karpenter`(a0d5370) 클론을
   근거로 선언(L12)하고 본문 미사용 상태. 스케줄링 시뮬레이션(`pkg/controllers/provisioning/
   scheduling`)·consolidation(`pkg/controllers/disruption`) 핵심 경로 해부 추가 — 깊이 보강 1순위
-- [ ] **P1** L222 "1바이트 오차 없이"·L236 "소수점 이하까지 정확하게 일치" — Karpenter는
+- [x] **P1** L222 "1바이트 오차 없이"·L236 "소수점 이하까지 정확하게 일치" — Karpenter는
   `VM_MEMORY_OVERHEAD_PERCENT`(provider 설정)로 하이퍼바이저 몫을 **추정 보정**하므로 capacity
   자체가 근사치. 과장 완화하고 이 파라미터를 다루면 오히려 깊이가 생김
-- [ ] **P1** L119: "nodeadm은 systemReserved를 비워둡니다" — `nodeadm/internal/kubelet/config.go`
+- [x] **P1** L119: "nodeadm은 systemReserved를 비워둡니다" — `nodeadm/internal/kubelet/config.go`
   에서 SystemReserved 미설정을 grep으로 재확인하고 근거 라인 명시
-- [ ] **P1** L129~136 GKE 계단식 공식 — GKE 문서 URL·접근일 기재 (C1). 수치 자체는 검산 일치
-- [ ] **P2** L89~ 인용 코드: 원본의 `zap.L().Error(...)` 라인을 표기 없이 삭제 — `/* 로그 생략 */`
+- [x] **P1** L129~136 GKE 계단식 공식 — GKE 문서 URL·접근일 기재 (C1). 수치 자체는 검산 일치
+- [x] **P2** L89~ 인용 코드: 원본의 `zap.L().Error(...)` 라인을 표기 없이 삭제 — `/* 로그 생략 */`
   등 생략 표기 추가 (실패 패턴 ② 경미형)
-- [ ] **P2** C4(L240 "6부 19편·22편" → 5부), C7 "대참사"(L182)·"놀랍도록"(L64), C8 tags·excerpt
+- [x] **P2** C4(L240 "6부 19편·22편" → 5부), C7 "대참사"(L182)·"놀랍도록"(L64), C8 tags·excerpt
 - 검증 완료(수정 불요): `getMemoryMebibytesToReserve`·`getCPUMillicoresToReserve`(600/100/50/25
   만분율)·Karpenter `types.go:523~` 산식·`evictionThreshold` 100Mi — 클론과 일치. GKE 64GiB
   검산(1024+819.2+819.2+2949.12=5,611.5) 정확

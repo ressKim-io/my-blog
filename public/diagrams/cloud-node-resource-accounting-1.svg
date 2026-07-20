@@ -30,15 +30,10 @@
   <!-- Left: Physical Capacity -->
   <rect x="40" y="100" width="220" height="310" class="box-slate"/>
   <text x="150" y="140" class="txt-header">Physical Capacity</text>
-  <text x="150" y="162" class="txt-body">Node Hardware Total</text>
 
   <rect x="60" y="184" width="180" height="90" class="box-inner"/>
-  <text x="150" y="218" class="txt-body">Total vCPU Cores</text>
-  <text x="150" y="246" class="txt-sub">EC2 / GCE Instance Spec</text>
 
   <rect x="60" y="294" width="180" height="90" class="box-inner"/>
-  <text x="150" y="328" class="txt-body">Total Physical RAM</text>
-  <text x="150" y="356" class="txt-sub">Raw Memory Capacity</text>
 
   <!-- Arrow 1 -->
   <path d="M 260 255 L 290 255" class="arrow"/>
@@ -46,7 +41,6 @@
   <!-- Middle: System Taxes -->
   <rect x="290" y="100" width="220" height="310" class="box-orange"/>
   <text x="400" y="140" class="txt-header">System Taxes</text>
-  <text x="400" y="162" class="txt-orange">Mandatory Reservations</text>
 
   <rect x="310" y="184" width="180" height="66" class="box-inner"/>
   <text x="400" y="214" class="txt-body">kube-reserved</text>

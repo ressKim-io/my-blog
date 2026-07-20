@@ -1,49 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 450" width="100%" height="100%">
   <defs>
     <style>
-      .bg { fill: #F8FAFC; }
-      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
-      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
-      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
-      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
-      .box-footer { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
-      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
-      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
-      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
-      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
-      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
-      .arrow { stroke: #64748B; stroke-width: 2; fill: none; marker-end: url(#arrow-head); }
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-sim { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 2; rx: 8; }
+      .box-run { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .match { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .gap { fill: #FFF1F2; stroke: #E11D48; stroke-width: 2; rx: 8; }
+      .h-sim { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #6D28D9; text-anchor: middle; }
+      .h-run { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .body { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .h-match { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .h-gap { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #BE123C; text-anchor: middle; }
     </style>
-    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"/>
-    </marker>
   </defs>
 
-  <!-- Background -->
-  <rect width="800" height="480" class="bg" rx="12"/>
+  <rect width="820" height="450" class="bg" rx="12"/>
 
-  <!-- Title Section -->
-  <text x="40" y="42" class="title">Karpenter Dual-Accounting Parity Architecture</text>
-  <text x="40" y="66" class="subtitle">Exact Formula Mirroring Between Pre-Launch Simulation and Runtime Boot</text>
+  <text x="40" y="40" class="title">Karpenter Mirrors the Formula, Estimates the Capacity</text>
+  <text x="40" y="64" class="subtitle">Parity holds where the arithmetic is copied, not where the input is guessed</text>
 
-  <!-- Stage 1: Karpenter Pre-launch Simulation -->
-  <rect x="140" y="96" width="520" height="96" class="box-teal"/>
-  <text x="400" y="130" class="txt-header">1. Pre-Launch Scheduler (karpenter-provider-aws)</text>
-  <text x="400" y="156" class="txt-body">Overhead = kubeReserved(11*pods + 255 MiB) + eviction(100 MiB)</text>
-  <text x="400" y="178" class="txt-teal">Pre-computes Simulated Allocatable Before Instance Provisioning</text>
+  <rect x="40" y="96" width="350" height="132" class="box-sim"/>
+  <text x="215" y="126" class="h-sim">Before launch — Karpenter</text>
+  <text x="215" y="156" class="mono">capacity = advertised x (1 - 0.075)</text>
+  <text x="215" y="184" class="mono">kubeReserved = 11 x pods + 255</text>
 
-  <!-- Arrow -->
-  <path d="M 400 192 L 400 234" class="arrow"/>
-  <text x="510" y="218" class="txt-sub">Exact Formula Synchronization</text>
+  <rect x="430" y="96" width="350" height="132" class="box-run"/>
+  <text x="605" y="126" class="h-run">After boot — kubelet</text>
+  <text x="605" y="156" class="mono">capacity = MemTotal</text>
+  <text x="605" y="184" class="mono">kubeReserved = 11 x maxPods + 255</text>
 
-  <!-- Stage 2: Runtime Nodeadm Boot -->
-  <rect x="140" y="244" width="520" height="96" class="box-teal"/>
-  <text x="400" y="278" class="txt-header">2. Runtime Kubelet Boot (amazon-eks-ami nodeadm)</text>
-  <text x="400" y="304" class="txt-body">KubeReserved = 11*maxPods + 255 MiB -> /etc/kubernetes/kubelet/config.json</text>
-  <text x="400" y="326" class="txt-teal">Kubelet Reports Exact Same Allocatable to API Server</text>
+  <rect x="40" y="262" width="350" height="118" class="match"/>
+  <text x="215" y="292" class="h-match">Identical: the formula</text>
+  <text x="215" y="322" class="mono">11 x pods + 255 MiB</text>
+  <text x="215" y="350" class="mono">0.06 / 0.01 / 0.005 / 0.0025</text>
 
-  <!-- Footer Callout -->
-  <rect x="140" y="366" width="520" height="74" class="box-footer"/>
-  <text x="400" y="396" class="txt-header">Engineering Result: Zero Discrepancy</text>
-  <text x="400" y="420" class="txt-orange">Simulated Allocatable == Runtime Allocatable (No Pod Admission Rejections)</text>
+  <rect x="430" y="262" width="350" height="118" class="gap"/>
+  <text x="605" y="292" class="h-gap">Divergent: the capacity</text>
+  <text x="605" y="322" class="body">7.5% flat haircut vs real VM overhead</text>
+  <text x="605" y="350" class="body">on 64 GiB that is ~4.9 GiB of guesswork</text>
+
+  <text x="410" y="414" class="body">VM_MEMORY_OVERHEAD_PERCENT is a tunable flag — the value is not a constant</text>
 </svg>

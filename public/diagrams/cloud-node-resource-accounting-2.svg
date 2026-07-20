@@ -1,54 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 420" width="100%" height="100%">
   <defs>
     <style>
-      .bg { fill: #F8FAFC; }
-      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
-      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
-      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
-      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
-      .box-inner { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
-      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
-      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
-      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
-      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
-      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-eks { fill: #FFFBEB; stroke: #D97706; stroke-width: 2; rx: 8; }
+      .box-gke { fill: #ECFEFF; stroke: #0891B2; stroke-width: 2; rx: 8; }
+      .inner { fill: #FFFFFF; stroke: #D4D4D8; stroke-width: 1.5; rx: 6; }
+      .h-eks { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #B45309; text-anchor: middle; }
+      .h-gke { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #0E7490; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .body { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .big-eks { font-family: 'Pretendard', system-ui, sans-serif; font-size: 17px; font-weight: 700; fill: #B45309; text-anchor: middle; }
+      .big-gke { font-family: 'Pretendard', system-ui, sans-serif; font-size: 17px; font-weight: 700; fill: #0E7490; text-anchor: middle; }
+      .note { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 600; fill: #334155; text-anchor: middle; }
     </style>
   </defs>
 
-  <!-- Background -->
-  <rect width="800" height="460" class="bg" rx="12"/>
+  <rect width="820" height="420" class="bg" rx="12"/>
 
-  <!-- Title Section (2 texts) -->
-  <text x="40" y="42" class="title">EKS vs GKE Memory Reservation Formula Comparison</text>
-  <text x="40" y="66" class="subtitle">Pod Density-Linked Tax (EKS) vs Stepped RAM Percentage Tax (GKE)</text>
+  <text x="40" y="40" class="title">Memory Reservation: Head Count vs Property Value</text>
+  <text x="40" y="64" class="subtitle">Same 64 GiB node — EKS taxes maxPods, GKE taxes total RAM</text>
 
-  <!-- Left Column: EKS nodeadm -->
-  <rect x="40" y="96" width="340" height="324" class="box-teal"/>
-  <text x="210" y="134" class="txt-header">EKS (nodeadm / AL2023)</text>
-  <text x="210" y="156" class="txt-teal">Density-Linked Formula</text>
+  <!-- EKS -->
+  <rect x="40" y="96" width="360" height="240" class="box-eks"/>
+  <text x="220" y="126" class="h-eks">EKS — nodeadm (AL2023)</text>
 
-  <rect x="64" y="176" width="292" height="74" class="box-inner"/>
-  <text x="210" y="206" class="txt-body">11 MiB * maxPods + 255 MiB</text>
-  <text x="210" y="230" class="txt-sub">Pod Overhead Base + OS Baseline</text>
+  <rect x="66" y="146" width="308" height="46" class="inner"/>
+  <text x="220" y="175" class="mono">11 MiB x maxPods + 255 MiB</text>
 
-  <rect x="64" y="266" width="292" height="134" class="box-inner"/>
-  <text x="210" y="298" class="txt-header">Example: 64 GB RAM Node</text>
-  <text x="210" y="324" class="txt-body">maxPods = 250 (m5.4xlarge)</text>
-  <text x="210" y="350" class="txt-body">11 * 250 + 255 = 3,005 MiB</text>
-  <text x="210" y="380" class="txt-teal">Total Tax: ~3.0 GiB (4.7% of RAM)</text>
+  <rect x="66" y="206" width="308" height="46" class="inner"/>
+  <text x="220" y="235" class="mono">m5.4xlarge: 11 x 234 + 255</text>
 
-  <!-- Right Column: GKE Allocatable -->
-  <rect x="420" y="96" width="340" height="324" class="box-orange"/>
-  <text x="590" y="134" class="txt-header">GKE (Allocatable Formula)</text>
-  <text x="590" y="156" class="txt-orange">Stepped RAM Percentage</text>
+  <text x="220" y="290" class="big-eks">2,829 MiB reserved</text>
+  <text x="220" y="316" class="body">RAM size is absent from the formula</text>
 
-  <rect x="444" y="176" width="292" height="74" class="box-inner"/>
-  <text x="590" y="206" class="txt-body">25% / 20% / 10% / 6% Tiers</text>
-  <text x="590" y="230" class="txt-sub">Proportional to Physical Memory</text>
+  <!-- GKE -->
+  <rect x="430" y="96" width="350" height="240" class="box-gke"/>
+  <text x="605" y="126" class="h-gke">GKE — stepped tiers</text>
 
-  <rect x="444" y="266" width="292" height="134" class="box-inner"/>
-  <text x="590" y="298" class="txt-header">Example: 64 GB RAM Node</text>
-  <text x="590" y="324" class="txt-body">4G*25% + 4G*20% + 8G*10% + 48G*6%</text>
-  <text x="590" y="350" class="txt-body">1024 + 819 + 819 + 2949 MiB</text>
-  <text x="590" y="380" class="txt-orange">Total Tax: ~5.6 GiB (8.8% of RAM)</text>
+  <rect x="456" y="146" width="298" height="46" class="inner"/>
+  <text x="605" y="175" class="mono">25% / 20% / 10% / 6% / 2%</text>
+
+  <rect x="456" y="206" width="298" height="46" class="inner"/>
+  <text x="605" y="235" class="mono">1024 + 819 + 819 + 2949</text>
+
+  <text x="605" y="290" class="big-gke">5,611.5 MiB reserved</text>
+  <text x="605" y="316" class="body">maxPods is absent from the formula</text>
+
+  <text x="410" y="374" class="note">GKE reserves 1.98x more — 2.72 GiB less allocatable for pods</text>
 </svg>

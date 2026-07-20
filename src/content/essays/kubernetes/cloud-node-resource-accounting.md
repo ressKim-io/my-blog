@@ -1,94 +1,76 @@
 ---
 title: "워커 노드의 회계 — 예약 공식과 인두세"
-excerpt: "클라우드 인프라 물리학 시리즈 2편. EKS AMI(nodeadm)와 GKE 공식 문서의 kube-reserved 산식을 대조하고, Karpenter가 노드 부팅 전 가상 용량을 계산할 때 Kubelet과 1바이트 오차 없이 회계를 일치시키는 기전을 소스 수준에서 규명합니다"
+excerpt: "EKS AMI의 nodeadm과 Karpenter 소스를 고정 커밋으로 읽어 워커 노드의 예약 산식을 확정합니다. EKS는 파드 수에, GKE는 메모리 크기에 세금을 매기며, Karpenter는 그 공식을 거울처럼 복제하면서도 용량 자체는 7.5%로 추정합니다"
 category: "kubernetes"
-tags: ["kubernetes", "eks", "gke", "karpenter", "kubelet", "cloud-optimization", "troubleshooting"]
+tags: ["kubernetes", "eks", "gke", "karpenter", "kubelet", "allocatable", "concept"]
 series:
   name: "kernel-runtime-tradeoffs-7"
   order: 1
 date: "2026-07-20"
 ---
 
-> **근거 구성**: 이 글은 AWS EKS 공식 AMI(`awslabs/amazon-eks-ami` commit `b4fffb7`)의 `nodeadm` 소스 코드와 Karpenter(`kubernetes-sigs/karpenter` commit `a0d5370`, `aws/karpenter-provider-aws` commit `a2496cc`)의 용량 산출 소스를 직접 클론하여 검증한 **소스 확정** 등급 수치와, Google Cloud GKE 공식 문서의 노드 자원 예약 기준을 인용한 **문헌** 등급 데이터를 바탕으로 작성되었습니다
+> **이 부(7부)가 답하는 범위**: "클라우드가 무엇을 최적화했나"가 아니라 **"클라우드가 쓰는 오픈소스가 무엇을 하는가"**까지입니다. Nitro 카드 내부나 관리형 컨트롤 플레인은 벤더 자산이라 읽을 수 없고, 읽을 수 없는 것은 쓰지 않습니다
+> **근거**: 모든 기전은 고정 커밋 소스에 앵커를 겁니다 — `awslabs/amazon-eks-ami`(`b4fffb7`), `kubernetes-sigs/karpenter`(`a0d5370`), `aws/karpenter-provider-aws`(`a2496cc`), `aws/amazon-vpc-cni-k8s`(`f3a3374`). 수치는 소스가 말하는 상수이거나 공식 문서가 직접 말하는 값만 씁니다
 
-쿠버네티스 클러스터에서 워커 노드가 새로 부팅되었을 때 사용자가 배포하는 파드가 실제로 사용할 수 있는 자원의 총량은 물리 서버나 가상 머신의 스펙과 결코 같지 않습니다
+노드를 새로 띄우면 파드가 실제로 쓸 수 있는 자원은 인스턴스 스펙보다 항상 적습니다
 
-호스트 운영체제와 쿠버네티스 핵심 에이전트인 Kubelet, 컨테이너 런타임이 안정적으로 동작하려면 일정량의 CPU와 메모리를 반드시 미리 떼어놓아야 하기 때문입니다
-이 세금 계산표가 조금이라도 불명확하거나 스케줄러가 알고 있는 용량과 노드가 보고하는 용량이 어긋날 경우, 클러스터에는 파드 스케줄링 거부와 갑작스러운 OOM(Out Of Memory) 종료가 반복해서 발생합니다
+kubelet과 컨테이너 런타임, 호스트 OS가 먼저 몫을 떼기 때문입니다
 
-이 글에서는 AWS EKS의 노드 초기화 소스 코드와 Google Cloud GKE의 예약 공식을 해부하여 클라우드 관리형 쿠버네티스가 워커 노드의 회계 장부를 작성하는 원리를 증명합니다
+이 계산표가 스케줄러가 아는 값과 어긋나면 파드가 노드에 안착하지 못합니다
+그래서 예약 산식은 취향 문제가 아니라 **회계 규칙**입니다
 
-## 노드 자원의 3중 분할 구조
+이 편에서는 그 규칙을 소스에서 확정합니다
 
-워커 노드의 물리적 하드웨어 용량은 쿠버네티스 제어 평면을 거치면서 크게 세 겹의 경계선으로 분할됩니다
+## 노드 자원의 3중 분할
 
 ![노드 자원의 3중 분할 구조](/diagrams/cloud-node-resource-accounting-1.svg)
 
-위 도식에서 나타나는 세부 청구 항목과 회계 공식은 다음과 같이 정의됩니다
+노드 용량은 세 겹으로 나뉩니다
 
-1. **Capacity (물리적 총량)**
-   EC2 인스턴스나 GCE 가상 머신이 제공하는 하드웨어 원본 스펙입니다
-   `/proc/cpuinfo`와 `/proc/meminfo`에서 조회되는 물리적 vCPU 코어 수와 총 메모리 바이트 수가 여기에 해당합니다
+- **Capacity** — 인스턴스가 광고하는 하드웨어 총량
+- **예약분** — `kube-reserved`(kubelet·런타임), `system-reserved`(OS·systemd), `eviction-hard`(퇴거 발동 버퍼)
+- **Allocatable** — 남은 잔액이며, 스케줄러가 파드 `requests`를 심사할 때 보는 **유일한** 값
 
-2. **System Taxes (시스템 공제 항목)**
-   - **`kube-reserved`**: Kubelet 데몬 자체와 Containerd(또는 CRI-O) 컨테이너 런타임이 안정적으로 실행되기 위해 예약하는 자원입니다
-   - **`system-reserved`**: SSH, Systemd, 네트워크 스택 등 Linux 호스트 커널과 OS 기본 데몬을 위해 남겨두는 자원입니다
-   - **`eviction-hard`**: 노드의 전체 메모리나 디스크가 고갈되어 커널 패닉에 빠지는 현상을 막기 위해 Kubelet이 강제 파드 퇴거(Eviction)를 발동하는 최저 마지노선 버퍼입니다
-
-3. **Allocatable (스케줄링 가능 총량)**
-   물리적 총량에서 공제 항목을 모두 뺀 최종 잔액입니다
-   쿠버네티스 스케줄러는 노드의 `Capacity`가 아닌 **`Allocatable`만을 기준으로 파드의 요청(`requests`)을 심사**합니다
-
-공식으로 표현하면 노드의 회계 장부는 다음 식을 엄격하게 따릅니다
+식으로 쓰면 이렇습니다
 
 ```text
 Allocatable = Capacity - (kube-reserved + system-reserved + eviction-hard)
 ```
 
-이 산식이 어긋나면 어떤 일이 일어나는지 구체적인 코드로 확인해보겠습니다
+## EKS는 파드 머릿수에 세금을 매깁니다
 
-## EKS의 인두세(Poll Tax) 공식 해부
+AL2023 AMI부터 EKS는 기존 `bootstrap.sh` 대신 Go로 작성된 `nodeadm`을 씁니다
 
-AWS EKS는 Amazon Linux 2023 AMI부터 기존의 Bash 쉘 스크립트(`bootstrap.sh`)를 버리고 Go 언어로 작성된 전용 노드 관리자 **`nodeadm`**을 도입했습니다
-`awslabs/amazon-eks-ami` 레포지토리의 `nodeadm/internal/kubelet/config.go`를 조회하면 EKS가 `kube-reserved`를 산출하는 정확한 소스 코드를 확인할 수 있습니다
+메모리 예약 산식은 이것뿐입니다
 
 ```go
-// awslabs/amazon-eks-ami (commit b4fffb7)
-// nodeadm/internal/kubelet/config.go:442-444
-
+// awslabs/amazon-eks-ami (b4fffb7)
+// nodeadm/internal/kubelet/config.go:442
 func getMemoryMebibytesToReserve(maxPods int32) int32 {
 	return 11*maxPods + 255
 }
 ```
 
-소스 코드가 명시하는 EKS의 메모리 예약 공식은 놀랍도록 단순합니다
+**물리 메모리 크기가 식에 들어가지 않습니다**
 
-```text
-Memory KubeReserved = (11 MiB × maxPods) + 255 MiB
-```
+노드가 8 GiB든 256 GiB든 상관없이, 그 인스턴스가 받을 수 있는 파드 최대 개수(`maxPods`)에만 비례합니다
 
-이 공식이 의미하는 엔지니어링 철학을 짚어보겠습니다
+kubelet이 쓰는 메모리의 상당 부분이 파드별 상태 구조체와 동기화 루프에서 나오므로, 파드 수에 연동하는 설계는 합리적입니다
 
-대부분의 엔지니어는 노드의 메모리가 크면 클수록 쿠버네티스 시스템이 더 많은 메모리를 예약할 것이라 막연하게 추측합니다
-하지만 EKS는 노드의 물리적 메모리가 16 GiB이든 256 GiB이든 **물리 RAM 용량 자체는 공식에 반영하지 않습니다**
-오직 해당 인스턴스가 가질 수 있는 파드의 최대 개수(`maxPods`)에 11 MiB를 곱하고, 기본 OS 및 Kubelet 베이스라인으로 255 MiB를 더할 뿐입니다
+다만 **`11 MiB`가 측정으로 수렴한 값이라는 근거는 소스에 없습니다**
 
-왜 물리적 메모리 대신 파드 수에 종속되는 공식을 선택했을까요
+Karpenter가 같은 상수를 복제하면서 남긴 주석이 출처를 밝히고 있는데, Bottlerocket의 예약값 논의(`bottlerocket-os/bottlerocket` PR #1388)를 가리킵니다
+즉 이 값은 자연 상수가 아니라 **벤더가 정한 휴리스틱**입니다 — GKE의 `255 MiB` 기본값과 같은 성격입니다
 
-Kubelet이 소비하는 메모리의 상당 부분은 파드와 컨테이너를 관리하기 위한 인메모리 상태 구조체, cgroup 디렉토리 트리 감시, PLEG(Pod Lifecycle Event Generator) 고루틴 루프에서 발생합니다
-파드 1개가 추가될 때마다 Kubelet 내부 캐시와 상태 동기화 루프가 늘어나며, 이에 필요한 평균 오버헤드가 정확히 약 11 MiB에 수렴합니다
-즉 EKS는 자산의 크기에 세금을 매기는 것이 아니라, **노드에 탑승하는 파드의 머릿수(`maxPods`)에 정확히 비례하여 인두세(Poll Tax)를 부과**합니다
-
-한편 CPU 예약 공식은 메모리와 달리 코어 구간별 계단식 감쇠 비율을 적용합니다
-동일한 파일의 코드를 살펴보겠습니다
+CPU는 다르게 계산합니다
 
 ```go
-// awslabs/amazon-eks-ami (commit b4fffb7)
-// nodeadm/internal/kubelet/config.go:410-428
-
+// awslabs/amazon-eks-ami (b4fffb7)
+// nodeadm/internal/kubelet/config.go:410
 func getCPUMillicoresToReserve(resources system.Resources) int {
 	totalCPUMillicores, err := resources.GetMilliNumCores()
 	if err != nil {
+		/* 로그 생략 */
 		return 0
 	}
 	cpuRanges := []int{0, 1000, 2000, 4000, totalCPUMillicores}
@@ -105,94 +87,110 @@ func getCPUMillicoresToReserve(resources system.Resources) int {
 }
 ```
 
-`cpuPercentageReservedForRanges`가 배열로 정의한 `600, 100, 50, 25`는 10000 분율 기준 수치입니다
-이를 백분율로 환산하면 다음과 같은 계단식 공제율이 도출됩니다
+`600, 100, 50, 25`는 만분율입니다
 
-- **첫 1코어 (`0 ~ 1000m`)**: 6% (`60m`)
-- **두 번째 코어 (`1000m ~ 2000m`)**: 1% (`10m`)
-- **세 번째~네 번째 코어 (`2000m ~ 4000m`)**: 0.5% (`10m`)
-- **4코어 초과 구간 (`4000m+`)**: 0.25%
+| 구간 | 공제율 |
+|---|---|
+| 첫 1코어 (`0~1000m`) | 6% |
+| 두 번째 코어 (`1000~2000m`) | 1% |
+| 3~4번째 코어 (`2000~4000m`) | 0.5% |
+| 4코어 초과 | 0.25% |
 
-코어 수가 늘어날수록 OS 루프와 Kubelet 데몬이 소비하는 CPU 비율은 급격히 감소하므로 대형 인스턴스일수록 더 많은 CPU 비율을 사용자 파드에 넘겨주는 구조입니다
+16 vCPU면 `60 + 10 + 10 + 30 = 110m`입니다
+코어가 늘수록 한계 공제율이 떨어지므로 큰 인스턴스일수록 비율상 유리합니다
 
-여기서 한 가지 중요한 회계적 특징이 발견됩니다
-`nodeadm`은 `kubeReserved`에 메모리와 CPU를 설정하지만, `systemReserved` 항목은 별도로 값을 입력하지 않고 비워둡니다
-AL2023 AMI는 OS 커널과 시스템 데몬이 사용하는 자원을 `kubeReserved`의 `11 × maxPods + 255` 산식 안에 통합하여 한 번에 징수하기 때문입니다
+여기에 회계상 특징이 하나 있습니다
 
-## EKS와 GKE의 메모리 예약 공식 비교
+`nodeadm`의 kubelet 설정 구조체에는 `KubeReserved` 필드는 있지만 **`SystemReserved` 필드 자체가 없습니다**
+설정하는 것은 cgroup 경로뿐입니다
 
-그렇다면 경쟁사인 Google Cloud GKE는 워커 노드의 회계를 어떻게 처리할까요
-EKS의 인두세 공식과 GKE 문서에 공시된 계단식 공제 산식을 직접 비교해보겠습니다
+```go
+// awslabs/amazon-eks-ami (b4fffb7)
+// nodeadm/internal/kubelet/config.go:273
+func (ksc *kubeletConfig) withDefaultReservedResources(cfg *api.NodeConfig, resources system.Resources) {
+	ksc.SystemReservedCgroup = ptr.String("/system")
+	ksc.KubeReservedCgroup = ptr.String("/runtime")
+```
+
+즉 OS 몫을 따로 걷지 않고 `11 × maxPods + 255` 안에 함께 징수합니다
+
+## maxPods가 세금을 정합니다
+
+`maxPods`는 ENI가 붙일 수 있는 보조 IP 수에서 나오며, VPC CNI 레포에 표로 고정돼 있습니다
+
+```text
+# aws/amazon-vpc-cni-k8s (f3a3374) — misc/eni-max-pods.txt
+m5.large    29
+m5.4xlarge  234
+```
+
+이 값을 산식에 넣으면 인두세의 성격이 드러납니다
+
+| 인스턴스 | 메모리 | maxPods | kube-reserved | 비중 |
+|---|---|---|---|---|
+| `m5.large` | 8 GiB | 29 | `11×29+255` = **574 MiB** | 7.0% |
+| `m5.4xlarge` | 64 GiB | 234 | `11×234+255` = **2,829 MiB** | 4.3% |
+
+메모리가 8배인데 예약은 4.9배만 늘어납니다
+**세금이 자산이 아니라 정원에 붙기 때문**입니다
+
+## GKE는 반대로 매깁니다
+
+GKE는 파드 수를 보지 않고 메모리 총량에 계단식으로 매깁니다
+
+> - 255 MiB of memory for machines with less than 1 GiB of memory
+> - 25% of the first 4 GiB of memory
+> - 20% of the next 4 GiB of memory (up to 8 GiB)
+> - 10% of the next 8 GiB of memory (up to 16 GiB)
+> - 6% of the next 112 GiB of memory (up to 128 GiB)
+> - 2% of any memory above 128 GiB
+>
+> — [About node sizes in GKE](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/plan-node-sizes) (접근 2026-07-20)
+
+같은 문서가 퇴거용으로 노드마다 100 MiB를 추가 예약한다고 밝힙니다
+
+64 GiB 노드로 맞대 보겠습니다
 
 ![EKS와 GKE의 메모리 예약 공식 비교](/diagrams/cloud-node-resource-accounting-2.svg)
 
-GKE 공식 문서가 명시하는 메모리 예약(`kube-reserved` + `system-reserved` 합산) 규칙은 EKS와 정반대로 **파드 수와 무관하게 물리적 RAM 총량에 비례하는 계단식 누진세(Property Tax)** 구조를 취합니다
+| 항목 | EKS (`m5.4xlarge`) | GKE (64 GiB 노드) |
+|---|---|---|
+| Capacity | 65,536 MiB | 65,536 MiB |
+| 산식 | `11×234 + 255` | `4G×25% + 4G×20% + 8G×10% + 48G×6%` |
+| 예약 | **2,829 MiB** | **5,611.5 MiB** |
+| eviction | 100 MiB | 100 MiB |
+| Allocatable | **62,607 MiB** | **59,824.5 MiB** |
 
-- **1 GB 미만**: 255 MiB 고정 예약
-- **첫 4 GB (`0 ~ 4 GiB`)**: 25% (`1,024 MiB`)
-- **다음 4 GB (`4 ~ 8 GiB`)**: 20% (`819.2 MiB`)
-- **다음 8 GB (`8 ~ 16 GiB`)**: 10% (`819.2 MiB`)
-- **다음 112 GB (`16 ~ 128 GiB`)**: 6% (`6,717.4 MiB` 최대)
-- **128 GB 초과 구간 (`128 GiB+`)**: 2%
+GKE가 약 **1.98배** 더 걷고, 파드가 쓸 수 있는 양은 약 **2.72 GiB** 차이 납니다
 
-이 두 클라우드의 산식 차이가 실제 물리 인스턴스에서 얼마나 큰 용량 격차를 만들어내는지 정량적으로 계산해보겠습니다
+어느 쪽이 낫다고 단정할 일은 아닙니다
 
-물리 RAM이 **64 GiB**인 16코어 노드(`m5.4xlarge` 및 `e2-standard-16` 급)를 기준으로 대조합니다
-AWS `m5.4xlarge`의 기본 `maxPods`는 ENI IP 할당 한계에 의해 **250개**로 설정됩니다
+EKS는 더 많이 돌려주지만, 노드에 무거운 에이전트를 얹으면 여유가 얇습니다
+GKE는 많이 떼는 대신 커널 버퍼나 데몬 스파이크에 견딥니다
 
-| 회계 항목 | AWS EKS (`nodeadm` / `m5.4xlarge`) | Google Cloud GKE (`e2-standard-16` / 64 GB) | 비교 분석 |
-|---|---|---|---|
-| **물리적 총 용량 (`Capacity`)** | 65,536 MiB (`64.0 GiB`) | 65,536 MiB (`64.0 GiB`) | 동일 물리 스펙 |
-| **메모리 공제 산식** | `(11 MiB × 250) + 255 MiB` | `4G×25% + 4G×20% + 8G×10% + 48G×6%` | 인두세 vs 누진세 |
-| **예약 메모리 (`Reserved`)** | **3,005 MiB (`≈ 2.93 GiB`)** | **5,611.5 MiB (`≈ 5.48 GiB`)** | GKE가 약 **1.86배** 더 징수 |
-| **강제 퇴거 버퍼 (`eviction-hard`)** | 100 MiB | 100 MiB | 공통 쿠버네티스 기본값 |
-| **최종 스케줄링 가능 (`Allocatable`)** | **62,431 MiB (`≈ 60.97 GiB`)** | **59,824.5 MiB (`≈ 58.42 GiB`)** | EKS 파드가 약 **2.55 GiB** 더 사용 가능 |
+설계 철학의 차이이지 우열이 아닙니다
 
-이 숫자가 의미하는 실무적 시사점은 매우 명확합니다
+## Karpenter는 이 공식을 복제합니다 — 그리고 어디서 포기했는가
 
-동일한 64 GiB 노드를 구매하더라도 EKS는 파드 최대 허용 수에 맞춘 2.93 GiB만을 공제하므로 사용자 애플리케이션이 61 GiB 가까운 메모리를 자유롭게 사용할 수 있습니다
-반면 GKE는 물리 메모리 크기에 비례하여 5.48 GiB라는 막대한 메모리를 안전 버퍼로 미리 떼어갑니다
+노드가 아직 없는데 스케줄링을 결정해야 하는 쪽이 있습니다
 
-어느 쪽이 무조건 더 낫다고 단정할 수는 없습니다
-EKS는 자원 효율성을 극대화하여 사용자에게 더 많은 용량을 돌려주지만, 노드에서 Kubelet 이외의 무거운 커스텀 에이전트(예: 타사 보안 도구, 무거운 로깅 데몬)를 Host Network/Host Pid로 돌릴 경우 메모리 부족 위험이 커집니다
-GKE는 5.5 GiB에 달하는 여유분을 확보하므로 커널 버퍼 캐시 급증이나 시스템 데몬의 메모리 스파이크가 발생해도 호스트 노드가 멈추는 커널 패닉을 강력하게 방어합니다
+Karpenter는 대기 중인 파드를 담을 인스턴스 타입을 고르는데, 이때 인스턴스는 아직 부팅되지 않았습니다
+kubelet이 `Allocatable`을 보고할 수가 없습니다
 
-## Karpenter의 듀얼 회계 일치(Dual-Accounting Parity) 기전
+![Karpenter의 회계 복제와 그 한계](/diagrams/cloud-node-resource-accounting-3.svg)
 
-이러한 노드 회계 공식은 단지 Kubelet이 노드 부팅 시 설정 파일로 읽는 데서 끝나지 않습니다
-최근 AWS 생태계의 표준 오토스케일러로 자리 잡은 **Karpenter**의 소스 코드를 열어보면 이 산식이 스케줄러 내부 깊숙한 곳에 그대로 복제되어 있음을 알 수 있습니다
-
-왜 Karpenter는 Kubelet의 회계 공식을 자신 안에 100% 동일하게 구현해야 했을까요
-
-![Karpenter의 듀얼 회계 일치 구조](/diagrams/cloud-node-resource-accounting-3.svg)
-
-Karpenter의 동작 메커니즘을 따라가보겠습니다
-
-Karpenter는 클러스터 내에 대기 중인 파드(`Pending Pods`)들의 자원 요청량(`requests`)을 수집한 뒤, EC2 인스턴스 카탈로그에서 이 파드들을 가장 저렴하게 담을 수 있는 최적의 인스턴스 타입을 골라냅니다(Bin-Packing)
-이때 인스턴스는 아직 물리적으로 생성되기도 전이므로 Kubelet이 실행되어 API 서버에 `Allocatable`을 보고할 수가 없습니다
-
-만약 Karpenter가 가상의 인스턴스 용량을 시뮬레이션할 때 EKS AMI의 공식을 쓰지 않고 단순 추정치(예: 고정 1 GiB 공제)를 적용하면 치명적인 결함이 발생합니다
-
-예를 들어 물리 메모리 16 GiB 인스턴스에서 Karpenter가 공제 항목을 1 GiB로 계산하여 **15 GiB의 파드 집합을 스케줄링하기로 결정**하고 EC2 노드를 생성했다고 가정하겠습니다
-잠시 후 EC2 인스턴스가 부팅되고 AL2023 `nodeadm`이 실행되면서 Kubelet은 `11 × 110 + 255 = 1,465 MiB(약 1.43 GiB)`를 공제한 뒤, API 서버에 실제 `Allocatable`을 **14.57 GiB**로 보고합니다
-
-스케줄러는 15 GiB 파드를 넣으려고 준비했으나 노드의 실용량은 14.57 GiB에 불과하므로, 파드는 노드에 안착하지 못하고 **Out Of memory 스케줄링 거부**를 당합니다
-Karpenter는 파드가 여전히 대기 중인 것을 보고 또 다른 노드를 생성하는 **무한 프로비저닝 루프(Infinite Provisioning Loop)** 장애에 빠지게 됩니다
-
-이 대참사를 원천 차단하기 위해 Karpenter AWS 프로바이더(`aws/karpenter-provider-aws`)는 `nodeadm`의 소스 코드를 문자 그대로 복제하고 있습니다
-`pkg/providers/instancetype/types.go`의 실제 구현을 확인해보겠습니다
+그래서 Karpenter는 `nodeadm`의 산식을 그대로 옮겨 심었습니다
 
 ```go
-// aws/karpenter-provider-aws (commit a2496cc)
-// pkg/providers/instancetype/types.go:523-553
-
+// aws/karpenter-provider-aws (a2496cc)
+// pkg/providers/instancetype/types.go:523
 func kubeReservedResources(cpus, pods *resource.Quantity, kubeReserved map[string]string) corev1.ResourceList {
 	resources := corev1.ResourceList{
 		corev1.ResourceMemory:           resource.MustParse(fmt.Sprintf("%dMi", (11*pods.Value())+255)),
-		corev1.ResourceEphemeralStorage: resource.MustParse("1Gi"), // default kube-reserved ephemeral-storage
+		corev1.ResourceEphemeralStorage: resource.MustParse("1Gi"),
 	}
 	// kube-reserved Computed from
-	// https://github.com/bottlerocket-os/bottlerocket/pull/1388/files#diff-bba9e4e3e46203be2b12f22e0d654ebd270f0b478dd34f40c31d7aa695620f2fR611
+	// https://github.com/bottlerocket-os/bottlerocket/pull/1388/...
 	for _, cpuRange := range []struct {
 		start      int64
 		end        int64
@@ -203,47 +201,147 @@ func kubeReservedResources(cpus, pods *resource.Quantity, kubeReserved map[strin
 		{start: 2000, end: 4000, percentage: 0.005},
 		{start: 4000, end: 1 << 31, percentage: 0.0025},
 	} {
-		if cpu := cpus.MilliValue(); cpu >= cpuRange.start {
-			r := float64(cpuRange.end - cpuRange.start)
-			if cpu < cpuRange.end {
-				r = float64(cpu - cpuRange.start)
-			}
-			cpuOverhead := resources.Cpu()
-			cpuOverhead.Add(*resource.NewMilliQuantity(int64(r*cpuRange.percentage), resource.DecimalSI))
-			resources[corev1.ResourceCPU] = *cpuOverhead
-		}
-	}
-	return lo.Assign(resources, lo.MapEntries(kubeReserved, func(k string, v string) (corev1.ResourceName, resource.Quantity) {
-		return corev1.ResourceName(k), resource.MustParse(v)
-	}))
-}
 ```
 
-Karpenter의 소스 코드는 앞서 살펴본 `nodeadm`의 `getMemoryMebibytesToReserve` 및 `getCPUMillicoresToReserve` 함수와 1바이트 오차 없이 **완벽히 동일한 `(11 * pods) + 255` 산식과 `0.06 / 0.01 / 0.005 / 0.0025` 계단식 CPU 공제율을 수학적으로 거울 복제**하고 있습니다
-또한 퇴거 임계치(`evictionThreshold`) 역시 100 MiB를 정확하게 감산합니다
+`(11 * pods) + 255`와 `0.06 / 0.01 / 0.005 / 0.0025`가 `nodeadm`과 정확히 같습니다
+퇴거 임계치도 마찬가지입니다
 
 ```go
-// aws/karpenter-provider-aws (commit a2496cc)
-// pkg/providers/instancetype/types.go:555-559
-
+// aws/karpenter-provider-aws (a2496cc)
+// pkg/providers/instancetype/types.go:555
 func evictionThreshold(memory *resource.Quantity, storage *resource.Quantity, evictionHard map[string]string) corev1.ResourceList {
 	overhead := corev1.ResourceList{
 		corev1.ResourceMemory:           resource.MustParse("100Mi"),
-		corev1.ResourceEphemeralStorage: resource.MustParse(fmt.Sprint(math.Ceil(float64(storage.Value()) / 100 * 10))),
+```
+
+여기까지만 보면 완전한 일치처럼 보입니다
+
+그런데 **산식을 적용할 대상인 Capacity 자체가 추정값**입니다
+
+```go
+// aws/karpenter-provider-aws (a2496cc)
+// pkg/providers/instancetype/types.go:357
+func memory(ctx context.Context, info ec2types.InstanceTypeInfo) *resource.Quantity {
+	sizeInMib := *info.MemoryInfo.SizeInMiB
+	// Gravitons have an extra 64 MiB of cma reserved memory that we can't use
+	if len(info.ProcessorInfo.SupportedArchitectures) > 0 && info.ProcessorInfo.SupportedArchitectures[0] == "arm64" {
+		sizeInMib -= 64
+	}
+	mem := resources.Quantity(fmt.Sprintf("%dMi", sizeInMib))
+	// Account for VM overhead in calculation
+	mem.Sub(resource.MustParse(fmt.Sprintf("%dMi", int64(math.Ceil(float64(mem.Value())*options.FromContext(ctx).VMMemoryOverheadPercent/1024/1024)))))
+	return mem
+}
+```
+
+EC2 API가 광고하는 메모리에서 **일괄 7.5%를 먼저 깎습니다**
+
+```go
+// aws/karpenter-provider-aws (a2496cc)
+// pkg/operator/options/options.go:58
+fs.Float64Var(&o.VMMemoryOverheadPercent, "vm-memory-overhead-percent",
+	utils.WithDefaultFloat64("VM_MEMORY_OVERHEAD_PERCENT", 0.075), ...)
+```
+
+이유는 분명합니다
+하이퍼바이저와 펌웨어가 가져가는 몫이 있어 게스트 OS가 보는 `MemTotal`은 광고값보다 늘 작습니다
+
+kubelet은 그 값을 **측정**하고, Karpenter는 부팅 전이라 **추정**할 수밖에 없습니다
+
+64 GiB 인스턴스라면 7.5%는 약 4.9 GiB입니다
+`kube-reserved`(2,829 MiB)보다 큽니다
+
+그러므로 정확한 서술은 이렇습니다
+
+**Karpenter가 거울처럼 복제한 것은 예약 *산식*이지 최종 *결과*가 아닙니다**
+
+일치는 공식에서 성립하고, 오차는 용량에서 생깁니다
+`VM_MEMORY_OVERHEAD_PERCENT`가 사용자 조정 가능한 플래그로 열려 있다는 사실 자체가, 이 값이 맞아떨어지는 상수가 아님을 말해 줍니다
+
+arm64에서 CMA용 64 MiB를 따로 빼는 예외 처리도 같은 성격입니다 — 일반 공식으로는 안 맞는 부분을 손으로 보정한 것입니다
+
+## bin-packing — 두 번째 인두세
+
+Karpenter가 인스턴스 타입을 고를 때 파드 요청만 보는 게 아닙니다
+
+```go
+// kubernetes-sigs/karpenter (a0d5370)
+// pkg/controllers/provisioning/scheduling/nodeclaim.go:562
+for _, group := range daemonOverheadGroups {
+	...
+	if len(group.DaemonOverhead) != 0 {
+		err.trackDaemonOverhead(group.DaemonOverhead)
+		totalRequestsForInstanceType = resources.MergeInto(totalRequestsForInstanceType, totalRequests)
+		totalRequestsForInstanceType = resources.MergeInto(totalRequestsForInstanceType, group.DaemonOverhead)
 	}
 ```
 
-이 **듀얼 회계 일치(Dual-Accounting Parity)** 구조 덕분에 Karpenter가 프로비저닝 단계에서 계산한 인스턴스의 가상 `Allocatable`과, 2분 뒤 인스턴스가 부팅되어 Kubelet이 보고하는 실제 `Allocatable`은 소수점 이하까지 정확하게 일치하게 됩니다
+DaemonSet이 요구하는 자원을 파드 요청 합계에 **더한 뒤** 인스턴스에 들어가는지 봅니다
 
-## 클라우드 & 인프라 실전 연결
+그 판정은 `Allocatable` 기준입니다
 
-우리는 앞서 6부 19편(인두세)과 22편(매트릭스)에서 파드 1개가 추가될 때마다 Kubelet 내부 고루틴과 상태 동기화 루프에 가해지는 부담이 어떻게 늘어나는지 분석했습니다
-이번 2편을 통해 그 메모리 오버헤드가 단지 추상적인 개념이 아니라, 실제 EKS와 Karpenter 소스 코드에서 **`11 MiB * maxPods + 255 MiB`라는 엄격한 인두세 공식으로 징수**되고 있음을 소스 수준에서 규명했습니다
+```go
+// kubernetes-sigs/karpenter (a0d5370)
+// pkg/controllers/provisioning/scheduling/nodeclaim.go:624
+func fits(instanceType *cloudprovider.InstanceType, requests corev1.ResourceList, requirements scheduling.Requirements) (itFits bool, hasOffering bool) {
+	for _, group := range instanceType.AllocatableOfferingsList() {
+		resourceFit := resources.Fits(requests, group.Allocatable)
+```
 
-워커 노드의 회계 장부를 정확히 이해하는 것은 클러스터 운영 비용 절감과 직결됩니다
-만약 노드에 탑승하는 파드 수가 평균 30개에 불과한데도 인스턴스의 `maxPods`가 250개로 설정되어 있다면, EKS는 쓰지도 않을 가상 파드 220개분의 인두세(약 2.4 GiB)를 메모리에서 불필요하게 묶어두게 됩니다
+여기서 노드 회계의 실제 무게가 드러납니다
 
-하지만 노드당 파드 허용 수를 함부로 늘리거나 줄이는 작업에는 또 다른 클라우드 인프라의 물리적 한계가 얽혀 있습니다
-AWS EC2는 가상 네트워크 인터페이스(ENI)마다 할당할 수 있는 보조 IPv4 주소 수가 하드웨어 스펙으로 제한되어 있기 때문입니다
+노드 한 대가 늘 때마다 `kube-reserved`만 붙는 게 아니라 **DaemonSet 세트가 통째로 한 벌씩 더 붙습니다**
+로그 수집기, 메트릭 익스포터, CNI, 보안 에이전트가 모든 노드에 상주합니다
 
-다음 3편 **"고밀도 노드의 물리 — VPC CNI와 MaxPods"**에서는 `aws/amazon-vpc-cni-k8s` 소스 코드와 리눅스 커널 ENA 드라이버를 직접 해부하여, 노드당 파드 밀도를 110개에서 250개 이상으로 극대화할 때 VPC CNI가 겪는 ENI 접두사 위임(Prefix Delegation) 메커니즘과 네트워크 회계의 비밀을 파헤칩니다
+작은 노드를 여러 대 쓰면 이 고정비가 대수만큼 곱해집니다
+"노드를 잘게 쪼개면 유연하다"는 직관이 자주 깨지는 이유입니다
+
+## consolidation — 더 싼 조합이 있으면 바꿉니다
+
+Karpenter는 노드를 만들기만 하는 게 아니라 되돌립니다
+
+```go
+// kubernetes-sigs/karpenter (a0d5370)
+// pkg/controllers/disruption/consolidation.go:159
+func (c *consolidation) computeConsolidation(ctx context.Context, candidates ...*Candidate) (Command, error) {
+	results, err := SimulateScheduling(ctx, c.kubeClient, c.cluster, c.provisioner, c.clock, c.recorder,
+		[]pscheduling.Options{pscheduling.IsConsolidationSimulation}, candidates...)
+```
+
+먼저 후보 노드를 없앤다고 가정하고 **스케줄링을 다시 시뮬레이션합니다**
+
+파드가 전부 다른 곳에 들어가면 그 노드는 그냥 없앱니다
+새 노드가 필요하다면 가격을 비교합니다
+
+```go
+// kubernetes-sigs/karpenter (a0d5370)
+// pkg/controllers/disruption/consolidation.go:216
+results.NewNodeClaims[0], err = results.NewNodeClaims[0].RemoveInstanceTypeOptionsByPriceAndMinValues(
+	results.NewNodeClaims[0].Requirements, candidatePrice)
+```
+
+현재 노드보다 싼 후보만 남기고, 하나도 안 남으면 포기합니다
+이때 이벤트로 남기는 문구가 `Can't replace with a cheaper node`입니다
+
+정리하면 consolidation은 "빈 노드 치우기"가 아니라 **같은 파드 집합을 더 싸게 담는 조합 탐색**입니다
+
+그리고 그 탐색이 쓰는 용량 값이 앞 절의 추정 `Allocatable`입니다
+회계가 틀리면 스케줄링만 어긋나는 게 아니라 **비용 최적화 판단도 함께 어긋납니다**
+
+## 실무에서 무엇을 보아야 하는가
+
+- **`maxPods`를 실제 밀도에 맞춥니다** — `m5.4xlarge`에서 파드를 평균 30개만 돌린다면 쓰지 않을 200여 개분의 인두세가 메모리에 묶입니다. `maxPods`는 조정 가능한 값입니다
+- **노드를 잘게 쪼갤 때 DaemonSet 고정비를 함께 셉니다** — 노드 대수만큼 곱해집니다. 큰 노드 소수가 유리한 경우가 흔합니다
+- **Karpenter 용량 오차는 `VM_MEMORY_OVERHEAD_PERCENT`로 조정합니다** — 기본 7.5%가 실제와 어긋나 스케줄링이 반복 실패한다면, 이 값이 원인일 수 있습니다
+- **`Capacity`가 아니라 `Allocatable`을 봅니다** — `kubectl describe node`의 두 값 차이가 그 노드가 내는 세금 전액입니다
+
+## 핵심 요약
+
+- EKS(`nodeadm`)의 메모리 예약은 `11 × maxPods + 255` MiB이며 **물리 메모리 크기가 식에 들어가지 않습니다**. 세금이 자산이 아니라 정원에 붙습니다
+- `11 MiB`는 측정으로 수렴한 값이 아니라 Bottlerocket 논의에서 온 **벤더 휴리스틱**입니다
+- GKE는 반대로 메모리 총량에 계단식(25/20/10/6/2%)으로 매깁니다. 64 GiB 노드에서 GKE가 약 1.98배 더 걷고 파드 가용량이 약 2.72 GiB 적습니다
+- Karpenter는 `nodeadm`의 예약 **산식**을 정확히 복제하지만, 산식을 적용할 **Capacity는 일괄 7.5%로 추정**합니다. 일치는 공식에서 성립하고 오차는 용량에서 생깁니다
+- bin-packing은 파드 요청에 **DaemonSet 오버헤드를 더해** `Allocatable`과 비교합니다. 노드를 늘릴 때마다 이 고정비가 한 벌씩 붙습니다
+- consolidation은 노드를 지운다고 가정하고 스케줄링을 재시뮬레이션한 뒤 **더 싼 조합이 있을 때만** 교체합니다
+
+*다음 편에서는 이 산식의 입력값인 `maxPods`가 어디서 오는지 — VPC CNI와 ENI 접두사 위임을 소스에서 확인합니다*
