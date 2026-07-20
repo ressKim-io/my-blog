@@ -1,11 +1,11 @@
 ---
-title: "클라우드 인프라 물리학 4편: eBPF 데이터플레인과 소켓 리다이렉트 실측"
+title: "eBPF 데이터플레인 — 커널 서비스 경로를 대체한다는 것"
 excerpt: "Cilium 소켓 부하 분산(sockops)과 커널 리다이렉트 구조를 소스 레벨에서 분석하고, kind+Cilium 실측을 통해 kube-proxy 대체 시의 성능 변화와 클라우드 관리형 데이터플레인(GKE Dataplane V2)의 한계를 규명합니다"
 category: "kubernetes"
 tags: ["kubernetes", "ebpf", "cilium", "cni", "dataplane-v2", "networking", "linux", "kernel", "iptables", "sockops"]
 series:
-  name: "k8s-cloud-optimization"
-  order: 4
+  name: "kernel-runtime-tradeoffs-7"
+  order: 3
 date: "2026-07-20"
 ---
 
@@ -218,5 +218,3 @@ GKE Dataplane V2 및 EKS Cilium 환경의 실전 물리적 한계:
 - **관리형 보안 정책 개입에 따른 변동성**: CSP 관리형 데이터플레인은 CRD(Custom Resource Definition)와 자체 오퍼레이터를 통해 클라우드 방화벽 규칙과 IAM 정책을 강제 주입합니다
 
 따라서 오픈소스 로컬 환경에서 측정한 초저지연(`94.4 Gbps`, 제로 `iptables` 오버헤드)은 노드 게스트 커널 내부의 인과율을 입증하는 명백한 물리적 지표이지만, 실제 EKS/GKE 운영 클러스터에서는 CSP의 가상 스위치와 하드웨어 캡슐화 레이어 비용이 합산되어 최종 파드-투-파드 지연 시간이 결정됨을 이해해야 합니다
----
-*시리즈 다음 편에서는 가상화 위에서 작동하는 쿠버네티스가 겪는 이중 스케줄링 지연과 오버레이 오버헤드(OpenStack/KVM 환경 실측)를 분석합니다*

@@ -4,8 +4,8 @@ excerpt: "클라우드 인프라 물리학 시리즈 2편. EKS AMI(nodeadm)와 G
 category: "kubernetes"
 tags: ["kubernetes", "eks", "gke", "karpenter", "kubelet", "cloud-optimization", "troubleshooting"]
 series:
-  name: "k8s-cloud-optimization"
-  order: 2
+  name: "kernel-runtime-tradeoffs-7"
+  order: 1
 date: "2026-07-20"
 ---
 

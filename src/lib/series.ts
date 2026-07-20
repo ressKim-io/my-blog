@@ -115,11 +115,11 @@ export const seriesList: SeriesMeta[] = [
     blurb: '컨트롤 플레인의 자기 면제부터 파드당 고루틴 물량, sync.Pool과 Informer 공유 캐시까지 — 쿠버네티스가 Go 런타임의 한계를 아키텍처로 비켜가고 사람에게 남긴 청구서를 추적합니다',
   },
   {
-    id: 'k8s-cloud-optimization',
-    seriesName: 'k8s-cloud-optimization',
-    title: '클라우드 인프라 물리학',
-    tagline: 'K8s · Cloud Managed · Physics',
-    blurb: '관리형 컨트롤 플레인 은닉부터 예약 인두세, 고밀도 CNI, eBPF 리다이렉트, 가상화 이중 세금까지 — 클라우드가 K8s를 돌리기 위해 최적화한 물리적 계층과 그 대가를 해부합니다',
+    id: 'kernel-runtime-tradeoffs-7',
+    seriesName: 'kernel-runtime-tradeoffs-7',
+    title: '클라우드는 무엇을 대신 정해 두었나',
+    tagline: 'EKS AMI · VPC CNI · Cilium',
+    blurb: '워커 노드의 예약 산식부터 파드 밀도를 정하는 CNI 로직, 커널 서비스 경로를 대체한 eBPF 데이터플레인까지 — 클라우드가 쓰는 오픈소스를 읽어 관리형 쿠버네티스가 사용자 대신 내린 결정을 추적합니다',
   },
 ];
 

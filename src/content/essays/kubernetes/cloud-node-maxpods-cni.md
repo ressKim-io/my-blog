@@ -4,8 +4,8 @@ excerpt: "클라우드 인프라 물리학 시리즈 3편. VPC CNI(amazon-vpc-cn
 category: "kubernetes"
 tags: ["kubernetes", "eks", "vpc-cni", "maxpods", "kubelet", "pleg", "ebpf", "cloud-optimization"]
 series:
-  name: "k8s-cloud-optimization"
-  order: 3
+  name: "kernel-runtime-tradeoffs-7"
+  order: 2
 date: "2026-07-20"
 ---
 
