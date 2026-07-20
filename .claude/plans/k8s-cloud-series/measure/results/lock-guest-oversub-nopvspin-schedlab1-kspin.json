@@ -1,21 +1,22 @@
 {
   "label": "guest-oversub-nopvspin-schedlab1-kspin",
   "probe": "lock-probe",
-  "config": {"mode": "kspin", "threads": 8, "duration_s": 30, "hold": 50, "gap": 200},
+  "config": {"mode": "kspin", "threads": 8, "duration_s": 30, "hold": 50, "gap": 200, "footprint_kb": 0, "hugepage": false},
+  "anon_huge_kb": 0,
   "env": {"hostname": "schedlab1", "kernel": "6.8.0-134-generic", "nproc": 8, "is_guest": true, "cpu_model": "AMD Ryzen 5 7500F 6-Core Processor", "cmdline": "BOOT_IMAGE=/vmlinuz-6.8.0-134-generic root=UUID=6239d00e-fbe6-43e9-89d8-d80643d1e789 ro console=tty1 console=ttyS0 nopvspin"},
-  "cpu_time_jiffies": {"user": 42, "nice": 0, "system": 11666, "idle": 7, "iowait": 0, "irq": 0, "softirq": 0, "steal": 12302, "guest": 0, "guest_nice": 0},
-  "cpu_time_pct": {"user": 0.1749, "nice": 0.0000, "system": 48.5739, "idle": 0.0291, "iowait": 0.0000, "irq": 0.0000, "softirq": 0.0000, "steal": 51.2221, "guest": 0.0000, "guest_nice": 0.0000},
-  "sched": {"total_wall_ns": 239952515234, "total_cpu_ns": 239899461687, "total_run_delay_ns": 120241747, "run_delay_ratio": 0.000501, "cpu_efficiency": 0.999779, "run_delay_p50_ns": 15960281, "run_delay_max_ns": 49079514},
-  "throughput": {"total_iterations": 680244, "iter_per_sec": 22671.2},
+  "cpu_time_jiffies": {"user": 26, "nice": 0, "system": 11958, "idle": 2, "iowait": 0, "irq": 0, "softirq": 1, "steal": 12021, "guest": 0, "guest_nice": 0},
+  "cpu_time_pct": {"user": 0.1083, "nice": 0.0000, "system": 49.8084, "idle": 0.0083, "iowait": 0.0000, "irq": 0.0000, "softirq": 0.0042, "steal": 50.0708, "guest": 0.0000, "guest_nice": 0.0000},
+  "sched": {"total_wall_ns": 240046369005, "total_cpu_ns": 239909423374, "total_run_delay_ns": 124064912, "run_delay_ratio": 0.000517, "cpu_efficiency": 0.999430, "run_delay_p50_ns": 12524628, "run_delay_max_ns": 54207134},
+  "throughput": {"total_iterations": 447121, "iter_per_sec": 14902.5},
   "workers": [
-    {"worker": 0, "wall_ns": 30003408939, "cpu_ns": 30003320319, "run_delay_ns": 1103427, "timeslices": 12, "iterations": 86646},
-    {"worker": 1, "wall_ns": 30001407034, "cpu_ns": 29992595448, "run_delay_ns": 9052703, "timeslices": 71, "iterations": 90926},
-    {"worker": 2, "wall_ns": 30003350776, "cpu_ns": 29987624302, "run_delay_ns": 15960281, "timeslices": 84, "iterations": 84590},
-    {"worker": 3, "wall_ns": 30003277346, "cpu_ns": 29999280828, "run_delay_ns": 4313142, "timeslices": 19, "iterations": 84539},
-    {"worker": 4, "wall_ns": 29943189379, "cpu_ns": 29953313454, "run_delay_ns": 49079514, "timeslices": 300, "iterations": 82931},
-    {"worker": 5, "wall_ns": 29996629563, "cpu_ns": 29983697791, "run_delay_ns": 17873376, "timeslices": 96, "iterations": 83822},
-    {"worker": 6, "wall_ns": 29999953531, "cpu_ns": 29981189153, "run_delay_ns": 19001235, "timeslices": 96, "iterations": 83986},
-    {"worker": 7, "wall_ns": 30001298666, "cpu_ns": 29998440392, "run_delay_ns": 3858069, "timeslices": 26, "iterations": 82804}
+    {"worker": 0, "wall_ns": 30006226649, "cpu_ns": 29999922222, "run_delay_ns": 5059281, "timeslices": 31, "iterations": 58212},
+    {"worker": 1, "wall_ns": 30001356175, "cpu_ns": 29986872898, "run_delay_ns": 12743402, "timeslices": 67, "iterations": 51333},
+    {"worker": 2, "wall_ns": 30006243602, "cpu_ns": 29950843959, "run_delay_ns": 54207134, "timeslices": 395, "iterations": 59699},
+    {"worker": 3, "wall_ns": 30006722317, "cpu_ns": 29992314656, "run_delay_ns": 12715828, "timeslices": 74, "iterations": 59230},
+    {"worker": 4, "wall_ns": 30006727375, "cpu_ns": 29996329399, "run_delay_ns": 8605547, "timeslices": 39, "iterations": 58265},
+    {"worker": 5, "wall_ns": 30006615731, "cpu_ns": 29998064691, "run_delay_ns": 6872478, "timeslices": 51, "iterations": 54686},
+    {"worker": 6, "wall_ns": 30006017107, "cpu_ns": 29992783854, "run_delay_ns": 11336614, "timeslices": 62, "iterations": 53322},
+    {"worker": 7, "wall_ns": 30006460049, "cpu_ns": 29992291695, "run_delay_ns": 12524628, "timeslices": 46, "iterations": 52374}
   ],
-  "wall_elapsed_s": 30.005
+  "wall_elapsed_s": 30.003
 }

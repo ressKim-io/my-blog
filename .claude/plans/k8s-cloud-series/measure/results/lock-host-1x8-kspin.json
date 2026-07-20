@@ -1,21 +1,22 @@
 {
   "label": "host-1x8-kspin",
   "probe": "lock-probe",
-  "config": {"mode": "kspin", "threads": 8, "duration_s": 30, "hold": 50, "gap": 200},
+  "config": {"mode": "kspin", "threads": 8, "duration_s": 30, "hold": 50, "gap": 200, "footprint_kb": 0, "hugepage": false},
+  "anon_huge_kb": 0,
   "env": {"hostname": "ressbe", "kernel": "7.0.0-28-generic", "nproc": 12, "is_guest": false, "cpu_model": "AMD Ryzen 5 7500F 6-Core Processor", "cmdline": "BOOT_IMAGE=/boot/vmlinuz-7.0.0-28-generic root=UUID=21215db2-3bdc-4550-a4c9-d96e2b8f708d ro quiet splash crashkernel=2G-4G:320M,4G-32G:512M,32G-64G:1024M,64G-128G:2048M,128G-:4096M"},
-  "cpu_time_jiffies": {"user": 8123, "nice": 0, "system": 16073, "idle": 11767, "iowait": 0, "irq": 0, "softirq": 0, "steal": 0, "guest": 8, "guest_nice": 0},
-  "cpu_time_pct": {"user": 22.5821, "nice": 0.0000, "system": 44.6832, "idle": 32.7125, "iowait": 0.0000, "irq": 0.0000, "softirq": 0.0000, "steal": 0.0000, "guest": 0.0222, "guest_nice": 0.0000},
-  "sched": {"total_wall_ns": 240000555000, "total_cpu_ns": 239990979328, "total_run_delay_ns": 2568181, "run_delay_ratio": 0.000011, "cpu_efficiency": 0.999960, "run_delay_p50_ns": 284234, "run_delay_max_ns": 802204},
-  "throughput": {"total_iterations": 134854039, "iter_per_sec": 4495080.9},
+  "cpu_time_jiffies": {"user": 8194, "nice": 0, "system": 16014, "idle": 11764, "iowait": 1, "irq": 0, "softirq": 1, "steal": 0, "guest": 6, "guest_nice": 0},
+  "cpu_time_pct": {"user": 22.7738, "nice": 0.0000, "system": 44.5081, "idle": 32.6959, "iowait": 0.0028, "irq": 0.0000, "softirq": 0.0028, "steal": 0.0000, "guest": 0.0167, "guest_nice": 0.0000},
+  "sched": {"total_wall_ns": 240002351007, "total_cpu_ns": 239988635144, "total_run_delay_ns": 3582751, "run_delay_ratio": 0.000015, "cpu_efficiency": 0.999943, "run_delay_p50_ns": 244169, "run_delay_max_ns": 1567491},
+  "throughput": {"total_iterations": 134080482, "iter_per_sec": 4469326.0},
   "workers": [
-    {"worker": 0, "wall_ns": 30000056228, "cpu_ns": 29999046782, "run_delay_ns": 142886, "timeslices": 27, "iterations": 16776343},
-    {"worker": 1, "wall_ns": 30000141029, "cpu_ns": 29999019818, "run_delay_ns": 284234, "timeslices": 44, "iterations": 16718123},
-    {"worker": 2, "wall_ns": 30000068150, "cpu_ns": 29999067902, "run_delay_ns": 109984, "timeslices": 25, "iterations": 16770219},
-    {"worker": 3, "wall_ns": 30000083409, "cpu_ns": 29998392183, "run_delay_ns": 802204, "timeslices": 153, "iterations": 16966419},
-    {"worker": 4, "wall_ns": 30000077969, "cpu_ns": 29998544887, "run_delay_ns": 646604, "timeslices": 174, "iterations": 16985064},
-    {"worker": 5, "wall_ns": 30000092386, "cpu_ns": 29998925911, "run_delay_ns": 304493, "timeslices": 70, "iterations": 16936541},
-    {"worker": 6, "wall_ns": 30000023856, "cpu_ns": 29999079559, "run_delay_ns": 50457, "timeslices": 12, "iterations": 16719941},
-    {"worker": 7, "wall_ns": 30000011973, "cpu_ns": 29998902286, "run_delay_ns": 227319, "timeslices": 45, "iterations": 16981389}
+    {"worker": 0, "wall_ns": 30000201093, "cpu_ns": 29998721152, "run_delay_ns": 139900, "timeslices": 25, "iterations": 16662383},
+    {"worker": 1, "wall_ns": 30000298318, "cpu_ns": 29997414618, "run_delay_ns": 1567491, "timeslices": 243, "iterations": 16855293},
+    {"worker": 2, "wall_ns": 30000299069, "cpu_ns": 29998205980, "run_delay_ns": 749178, "timeslices": 97, "iterations": 16886602},
+    {"worker": 3, "wall_ns": 30000317544, "cpu_ns": 29998876409, "run_delay_ns": 103755, "timeslices": 23, "iterations": 16659361},
+    {"worker": 4, "wall_ns": 30000317815, "cpu_ns": 29998822400, "run_delay_ns": 169307, "timeslices": 25, "iterations": 16618158},
+    {"worker": 5, "wall_ns": 30000317846, "cpu_ns": 29998954258, "run_delay_ns": 43981, "timeslices": 13, "iterations": 16902453},
+    {"worker": 6, "wall_ns": 30000285704, "cpu_ns": 29998390078, "run_delay_ns": 564970, "timeslices": 64, "iterations": 16867550},
+    {"worker": 7, "wall_ns": 30000313618, "cpu_ns": 29999250249, "run_delay_ns": 244169, "timeslices": 29, "iterations": 16628682}
   ],
   "wall_elapsed_s": 30.000
 }

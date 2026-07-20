@@ -1,21 +1,22 @@
 {
   "label": "host-1x8-none",
   "probe": "lock-probe",
-  "config": {"mode": "none", "threads": 8, "duration_s": 30, "hold": 50, "gap": 200},
+  "config": {"mode": "none", "threads": 8, "duration_s": 30, "hold": 50, "gap": 200, "footprint_kb": 0, "hugepage": false},
+  "anon_huge_kb": 0,
   "env": {"hostname": "ressbe", "kernel": "7.0.0-28-generic", "nproc": 12, "is_guest": false, "cpu_model": "AMD Ryzen 5 7500F 6-Core Processor", "cmdline": "BOOT_IMAGE=/boot/vmlinuz-7.0.0-28-generic root=UUID=21215db2-3bdc-4550-a4c9-d96e2b8f708d ro quiet splash crashkernel=2G-4G:320M,4G-32G:512M,32G-64G:1024M,64G-128G:2048M,128G-:4096M"},
-  "cpu_time_jiffies": {"user": 24191, "nice": 0, "system": 50, "idle": 11723, "iowait": 1, "irq": 0, "softirq": 1, "steal": 0, "guest": 2, "guest_nice": 0},
-  "cpu_time_pct": {"user": 67.2570, "nice": 0.0000, "system": 0.1390, "idle": 32.5929, "iowait": 0.0028, "irq": 0.0000, "softirq": 0.0028, "steal": 0.0000, "guest": 0.0056, "guest_nice": 0.0000},
-  "sched": {"total_wall_ns": 240002142488, "total_cpu_ns": 239992697006, "total_run_delay_ns": 2562583, "run_delay_ratio": 0.000011, "cpu_efficiency": 0.999961, "run_delay_p50_ns": 176893, "run_delay_max_ns": 1533655},
-  "throughput": {"total_iterations": 1090685800, "iter_per_sec": 36355563.1},
+  "cpu_time_jiffies": {"user": 24154, "nice": 0, "system": 47, "idle": 11765, "iowait": 0, "irq": 0, "softirq": 0, "steal": 0, "guest": 6, "guest_nice": 0},
+  "cpu_time_pct": {"user": 67.1467, "nice": 0.0000, "system": 0.1307, "idle": 32.7060, "iowait": 0.0000, "irq": 0.0000, "softirq": 0.0000, "steal": 0.0000, "guest": 0.0167, "guest_nice": 0.0000},
+  "sched": {"total_wall_ns": 240001658389, "total_cpu_ns": 239990794426, "total_run_delay_ns": 2757230, "run_delay_ratio": 0.000011, "cpu_efficiency": 0.999955, "run_delay_p50_ns": 346660, "run_delay_max_ns": 1082974},
+  "throughput": {"total_iterations": 1091723276, "iter_per_sec": 36390581.2},
   "workers": [
-    {"worker": 0, "wall_ns": 30000316886, "cpu_ns": 29999244157, "run_delay_ns": 227439, "timeslices": 71, "iterations": 150770065},
-    {"worker": 1, "wall_ns": 30000299132, "cpu_ns": 29997939635, "run_delay_ns": 1533655, "timeslices": 286, "iterations": 150773389},
-    {"worker": 2, "wall_ns": 30000308520, "cpu_ns": 29999358213, "run_delay_ns": 133823, "timeslices": 19, "iterations": 122756100},
-    {"worker": 3, "wall_ns": 30000280406, "cpu_ns": 29999228124, "run_delay_ns": 186836, "timeslices": 56, "iterations": 150801961},
-    {"worker": 4, "wall_ns": 30000273172, "cpu_ns": 29999209673, "run_delay_ns": 176893, "timeslices": 31, "iterations": 121305471},
-    {"worker": 5, "wall_ns": 30000245810, "cpu_ns": 29999162890, "run_delay_ns": 170667, "timeslices": 27, "iterations": 121519009},
-    {"worker": 6, "wall_ns": 30000231473, "cpu_ns": 29999291458, "run_delay_ns": 63079, "timeslices": 13, "iterations": 121955219},
-    {"worker": 7, "wall_ns": 30000187089, "cpu_ns": 29999262856, "run_delay_ns": 70191, "timeslices": 17, "iterations": 150804586}
+    {"worker": 0, "wall_ns": 30000103895, "cpu_ns": 29998003921, "run_delay_ns": 1082974, "timeslices": 192, "iterations": 150796143},
+    {"worker": 1, "wall_ns": 30000289940, "cpu_ns": 29999182361, "run_delay_ns": 91054, "timeslices": 19, "iterations": 122093938},
+    {"worker": 2, "wall_ns": 30000290932, "cpu_ns": 29999179278, "run_delay_ns": 131787, "timeslices": 46, "iterations": 150806985},
+    {"worker": 3, "wall_ns": 30000212863, "cpu_ns": 29998842788, "run_delay_ns": 346660, "timeslices": 48, "iterations": 123507881},
+    {"worker": 4, "wall_ns": 30000108905, "cpu_ns": 29998596662, "run_delay_ns": 482577, "timeslices": 63, "iterations": 121311657},
+    {"worker": 5, "wall_ns": 30000208344, "cpu_ns": 29999100928, "run_delay_ns": 97075, "timeslices": 29, "iterations": 150811161},
+    {"worker": 6, "wall_ns": 30000231889, "cpu_ns": 29999144311, "run_delay_ns": 88478, "timeslices": 29, "iterations": 150789046},
+    {"worker": 7, "wall_ns": 30000211621, "cpu_ns": 29998744177, "run_delay_ns": 436625, "timeslices": 58, "iterations": 121606465}
   ],
-  "wall_elapsed_s": 30.001
+  "wall_elapsed_s": 30.000
 }
