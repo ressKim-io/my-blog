@@ -51,3 +51,6 @@ next-env.d.ts
 
 # npm 산출물 (이 저장소는 pnpm 사용)
 /package-lock.json
+
+# k8s-cloud-series 소스 인용용 로컬 클론 (커밋 대상 아님)
+.claude/plans/k8s-cloud-series/src/

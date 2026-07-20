@@ -1,126 +1,512 @@
 ---
-title: "클라우드 인프라 물리학 5편: 가상화 이중 세금과 하드웨어 오프로딩 해부"
-excerpt: "KVM/OpenStack 가상 머신 위에서 동작하는 쿠버네티스가 치르는 이중 스케줄링 지연(CFS Steal Time)과 이중 캡슐화(VM-Exit) 세금을 커널 레지스터와 IOMMU 수준에서 해부하고, SR-IOV 하드웨어 오프로딩을 통한 극복 원리를 규명합니다"
+title: "가상화 이중 세금을 직접 재봤습니다 — steal이 계량하는 세금과 끝내 못 보는 세금"
+excerpt: "KVM 게스트 3대와 베어메탈 호스트를 같은 프로브로 대조해 가상화 고유의 비용만 분리했습니다. 독립 CPU 부하의 추가 비용은 사실상 0이고, 커널 락 경합에서만 비용이 생기며, 동거 워크로드가 LLC 경계를 넘는 순간의 절벽은 steal에도 run_delay에도 잡히지 않습니다"
 category: "kubernetes"
-tags: ["kubernetes", "virtualization", "kvm", "openstack", "cfs", "steal-time", "sriov", "dpdk", "iommu", "linux"]
+tags: ["kubernetes", "virtualization", "kvm", "steal-time", "qspinlock", "scheduler", "linux", "kernel", "sriov", "concept"]
 series:
   name: "k8s-cloud-optimization"
   order: 5
 date: "2026-07-20"
 ---
 
-> **하드웨어 가상화 체크리스트 및 분석 환경 고지**
-> 이 글의 실측 검증은 로컬 가상화 진단 도구(`check-and-bench-kvm.sh`)를 통해 Apple Silicon 하이퍼바이저 프레임워크(`Darwin arm64`, 커널 `25.5.0`) 및 리눅스 게스트 환경에서 수행되었습니다
-> 진단 결과 중첩 가상화(`Nested Virtualization`)와 PCIe SR-IOV 하드웨어 가상 기능은 미지원(`false`)으로 확인되었습니다
-> 따라서 단일 전용 VM 실측치(`Steal Time 0.00%`)와 다중 임차(`Multi-Tenant`) KVM/OpenStack 클라우드의 오버스크립션(`vCPU:pCPU > 1:1`) 환경에서 발생하는 이중 가상화 파국의 물리적 간극을 리눅스 커널 소스(`kernel/sched/cputime.c`, `qspinlock.c`) 및 Intel VMX 하드웨어 레지스터(`VMCS`, `IOMMU`) 수준에서 대조 규명합니다
+> **근거 구성**: 이 편의 정량 수치는 전부 직접 측정한 **실측**입니다 — Ubuntu 26.04 호스트(커널 `7.0.0-28`, AMD Ryzen 5 7500F 6코어 12스레드, 30 GiB) 위 KVM 게스트 3대(각 8 vCPU, Ubuntu 24.04, 커널 `6.8.0-134`, `--cpu host-passthrough`)
+> 커널 동작 기전은 리눅스 **v6.8 소스**(태그 `v6.8`, `e8f897f`) 인용으로 확정합니다
+> **강등 고지**: 이 시리즈는 원래 공개 소스·문헌 검증 시리즈이며 5편만 예외적으로 실측 중심입니다. 다만 측정 PC의 NIC(Realtek RTL8125)은 SR-IOV를 지원하지 않아 SR-IOV·DPDK 대목은 **문헌 등급**이고, OVS 오버레이 세금은 이번에 재지 못해 수치를 싣지 않습니다
 
-## 6부 24편 및 1편 복선 회수와 가상화 이중 세금
+## 24편 복선의 전제를 먼저 의심합니다
 
-런타임 시리즈 24편([kubelet 고루틴 대물량전](/essays/kubelet-goroutine-per-pod))에서는 노드당 파드 수(`MaxPods`)를 늘릴 때 500개가 넘는 프로브 고루틴과 PLEG 동시성 루프가 유발하는 커널 런큐 부하를 파헤쳤습니다
-만약 이 쿠버네티스 노드가 베어메탈이 아니라 KVM/OpenStack 기반의 가상 머신(VM) 위에서 작동한다면, 커널 스케줄러와 네트워크 데이터플레인은 단순한 소프트웨어 레이어 추가를 넘어 **하드웨어 레지스터 컨텍스트 교체(`VMCS`)와 캐시 라인 대량 파괴로 구성된 이중 세금(`Double Tax`)** 을 지불하게 됩니다
+런타임 시리즈 24편([kubelet 고루틴 대물량전](/essays/kubelet-goroutine-per-pod))을 떠올려 봅니다
+노드당 파드 수를 늘릴 때 커널 런큐가 지는 부하를 다룬 편입니다
 
-게스트 OS 커널이 파드 스레드를 스케줄링하고 패킷을 캡슐화한 뒤, 호스트 하이퍼바이저가 그 게스트 가상 CPU(`vCPU`)를 다시 스케줄링하고 패킷을 이중 캡슐화하는 중첩 구조가 왜 나노초(`ns`) 단위 물리 기전에서 치명적인 지연을 일으키는지 규명합니다
+그때 남긴 복선은 "가상 머신 위라면 세금이 한 겹 더 붙는다"였습니다
 
-## 이중 스케줄링 지연과 락 홀더 선점 (Lock Holder Preemption)
+이번 편은 그 복선을 갚기 전에 **전제 자체를 검증합니다**
 
-![가상화 이중 스케줄링과 락 홀더 선점 아키텍처](/diagrams/cloud-virt-double-scheduling-lhp.svg)
+게스트 커널이 파드 스레드를 스케줄링하고, 호스트 하이퍼바이저가 그 vCPU를 다시 스케줄링합니다
+스케줄러가 두 겹이니 비용도 두 배일 것 같습니다
 
-가상 머신 게스트 OS 내부의 CFS 스케줄러와 호스트 하이퍼바이저 CFS 스케줄러가 중첩될 때 발생하는 락 홀더 선점(`LHP`) 파국 도식입니다
+그런데 두 겹이라는 사실만으로는 비용의 크기를 알 수 없습니다
+"vCPU를 2배로 할당했으니 처리량이 절반"인 것은 가상화 세금이 아니라 산수입니다
+가상화 고유의 비용은 **같은 경합을 베어메탈에서 재현했을 때와의 차이**로만 정의됩니다
 
-가상화 환경에서 쿠버네티스 파드가 겪는 이중 스케줄링 및 스틸 타임의 커널 내부 물리 해부:
-- **pvclock과 스틸 타임(`%st`) 계측 기전 (`kernel/sched/cputime.c`)**: 게스트 OS 커널은 자신이 얼마 동안 하이퍼바이저에 의해 물리 코어를 뺏겼는지 스스로 알 수 없습니다. 이를 해결하기 위해 KVM 하이퍼바이저는 공유 메모리 페이지(`struct pvclock_vcpu_time_info`, `MSR_KVM_WALL_CLOCK_NEW`)에 게스트가 실행되지 못한 누적 시간(`pvclock->steal`)을 계속 기록합니다
-- 게스트 커널의 `account_steal_time()` 함수는 스케줄러 클록(`update_rq_clock()`)이 갱신될 때마다 이 MSR 공유 메모리의 `steal` 변화량을 읽어와 `cfs_rq->exec_clock`에서 차감하고, 이를 `/proc/stat`의 **스틸 타임(`%st`, `run_delay`)** 으로 반영합니다
-- **이중 CFS 런큐의 충돌**: 파드 내부 애플리케이션 스레드가 실행 가능 상태(`TASK_RUNNING`)가 되면 게스트 OS CFS 스케줄러가 이를 가상 프로세서(`vCPU 0`)에 할당합니다. 그러나 물리 호스트 관점에서 `vCPU 0`는 `qemu-system-x86_64` 프로세스 내부에 생성된 단 하나의 POSIX 호스트 유저 스레드에 불과합니다
-- 만약 호스트 CFS 스케줄러가 노이즈 네이버(`Noisy Neighbor`) VM이나 하이퍼바이저 관리 스레드에 CPU를 쪼개주기 위해 `vCPU 0` 호스트 스레드를 물리 코어에서 선점(`schedule()`)해 버리면, 게스트 내부 파드 스레드는 자신의 게스트 타임슬라이스가 남아 있음에도 불구하고 물리적으로 얼어붙게 됩니다
-- **락 홀더 선점 (`Lock Holder Preemption`, LHP) 교착 파국 (`kernel/locking/qspinlock.c`)**: 만약 `vCPU 0`가 게스트 커널 내부에서 쿠버네티스 파드 스케줄링을 위한 CFS 런큐 스핀락(`rq->lock`)이나 네트워크 NAT 연결 추적 표의 락(`nf_conntrack_locks`)을 획득한 직후 물리 코어를 뺏기면 심각한 파국이 일어납니다
-- 해당 락을 획득하려는 다른 가상 프로세서(`vCPU 1`)는 락 소유자(`vCPU 0`)가 하이퍼바이저에 의해 잠들었다는 사실을 인지하지 못한 채 `queued_spin_lock_slowpath()`에 진입합니다. 보통 몇 나노초 내에 풀려야 할 스핀락이 풀리지 않으므로, `vCPU 1`은 자신의 게스트 타임슬라이스(`10ms`)를 100% 소진할 때까지 루프를 돌며 물리 CPU 사이클을 헛되이 태웁니다 (`PLE / Pause Loop Exiting` 기전이 발생할 때까지 CPU 캐시 라인이 무의미한 핑퐁으로 불타오릅니다)
-- 이는 런타임 시리즈 24편에서 파헤친 `pthread` 기반 CFS 런큐 스핀락 경합이 하이퍼바이저 경계와 다중 임차(`Multi-Tenant`) 오버스크립션을 만나 지연 시간이 수천 배 증폭되는 실체입니다
+그래서 측정 설계의 전부는 대조군에 있습니다
+아래 모든 수치는 L0(베어메탈 호스트)와 L1(게스트) 양쪽에서 **같은 바이너리, 같은 인자, 같은 토폴로지**로 잰 결과입니다
 
-## 이중 캡슐화와 VM-Exit 세금 vs SR-IOV 직접 바패스
+## 기준선 — 베어메탈에서 오버스크립션은 산수를 따릅니다
 
-![이중 오버레이 캡슐화 VM-Exit 세금과 SR-IOV 하드웨어 오프로딩 비교](/diagrams/cloud-virt-double-encapsulation-sriov.svg)
+먼저 가상화가 없는 상태의 법칙을 확정합니다
 
-가상 네트워크 브릿지의 이중 캡슐화 경로와 SR-IOV 하드웨어 오프로딩 경로를 물리적으로 비교한 아키텍처입니다
+주 지표는 `/proc/<pid>/schedstat`의 두 번째 필드 `run_delay`입니다
+태스크가 실행 가능 상태로 런큐에서 대기한 누적 나노초이며, CFS가 직접 계상하고 루트 권한이 필요 없습니다
 
-이중 캡슐화 네트워크 경로 (`VMEXIT` 레지스터 컨텍스트 교체 및 캐시 파손 구조):
-- **1차 오버레이 캡슐화 (게스트 내부)**: 파드에서 나간 패킷이 게스트 OS 내부의 CNI(Flannel, Cilium)를 거치며 VXLAN(`UDP 8472`) 또는 GENEVE 헤더가 씌워집니다
-- **가상화 경계 탈출과 `VMEXIT` 하드웨어 인터럽트 (`Intel VMX / VMCS`)**: 게스트 내부 `virtio-net` 가상 NIC가 패킷 전송을 위해 호스트에 인터럽트(`APIC / MSI`)를 보내면 물리 CPU는 즉시 **`VMEXIT` 명령어**를 실행합니다
-- 이때 하이퍼바이저는 범용 레지스터 16개, 명령 포인터(`RIP`), 스택 포인터(`RSP`), 컨트롤 레지스터(`CR0/CR3/CR4`), `EFLAGS`를 물리 RAM의 가상 머신 제어 구조체(**`VMCS / Virtual Machine Control Structure`**, 약 1KB 영역)에 전부 기록합니다. 이 하드웨어 컨텍스트 저장과 파이프라인 플러시(`Pipeline Flush`)만으로 약 **150~200 클록 사이클(`~500ns`)** 이 소모됩니다
-- **캐시 오염과 TLB 무효화**: `VMEXIT`로 하이퍼바이저 호스트 커널 모드로 진입하면, Extended Page Table(`EPT`) 변환이 해제되거나 VPID 태그 교체가 일어나며 TLB 항목이 무효화됩니다. 또한 호스트 Open vSwitch(`OVS`)가 2차 터널링(GENEVE) 룩업 표를 탐색하면서 L1i/L1d 및 L2 데이터 캐시를 호스트 명령어와 OVS 플로우 표로 가득 채웁니다
-- **`VMENTER` 복귀 시의 캐시 콜드(`Cache Cold`) 지연**: 처리가 끝나고 `VMENTER` 명령어로 다시 게스트 OS `vCPU` 컨텍스트가 복원될 때, 게스트 파드의 패킷 수신 루프가 참조하려던 `sk_buff` 포인터나 TCP 소켓 버퍼 데이터는 이미 L1/L2 캐시에서 전부 쫓겨난 상태입니다. 결국 CPU는 메인 메모리(`DRAM`)에서 데이터를 다시 읽어오는 캐시 라인 미스 스톨(`LLC Miss @ 60~80ns`)을 연달아 겪으며 패킷당 나노초 단위 지연이 밀리초(`ms`) 단위로 누적됩니다 (런타임 시리즈 1편([시스템 호출 모드 스위칭 해부](/essays/syscall-mode-switch-cost))의 유저-커널 전환보다 수십 배 치명적인 물리 원가)
+보조 지표는 `/proc/stat`의 여덟 번째 필드 `steal`입니다
+두 값을 함께 읽어야 "이중" 스케줄링이 분리됩니다 — `run_delay`는 게스트 커널 레벨 경합을, `steal`은 하이퍼바이저 레벨 선점을 가리킵니다
 
-SR-IOV (`Single Root I/O Virtualization`) 및 IOMMU DMA 패스스루 물리 기전:
-- **PCIe 가상 기능 (`Virtual Function`, VF) 분할**: 물리 NIC 하드웨어(예: AWS `ENA`, Intel `ixgbe`)가 PCIe SR-IOV 사양을 통해 자신을 1개의 Physical Function(`PF`)과 다수의 독립된 가상 PCIe 하드웨어 장치(`VF`)로 분할합니다
-- **IOMMU (`Intel VT-d / AMD-Vi`) 페이지 테이블 매핑**: 하이퍼바이저의 소프트웨어 스위치(`OVS`)를 완전히 잘라내고, 물리 하드웨어 IOMMU 컨트롤러에 게스트 물리 메모리 주소(`GPA`)와 호스트 물리 메모리 주소(`HPA`) 간의 직접 DMA 매핑 표(`Device-to-Host Page Table`)를 등록합니다
-- **Zero `VMEXIT` 패킷 송수신**: 네트워크 선로로 패킷이 들어오면 NIC 내장 하드웨어 분류기(`MAC/VLAN Classifier`)가 대상 파드의 `VF` 링 버퍼(`sk_buff` 큐)를 직접 찾아냅니다. 그리고 PCIe 버스를 통해 게스트 파드 메모리(`HPA`)로 **Direct Memory Access(`DMA`) 쓰기를 수행한 뒤 게스트 `vCPU`로 직접 MSI-X 하드웨어 인터럽트를 꽂아 넣습니다**
-- 하이퍼바이저 개입(`VMEXIT/VMENTER`)과 OVS 소프트웨어 캡슐화가 **0(`Zero`)** 이 되므로, KVM 가상 머신 안착 파드도 베어메탈 노드와 100% 동일한 L1/L2 캐시 온기(`Cache Warmth`)와 100Gbps 선로 속도(`Line Rate`)를 확보합니다
+워커는 CPU를 소모하는 독립 프로세스이며 각 30초씩 측정했습니다
 
-## check-and-bench-kvm.sh 실측 및 하드웨어 진단 결과
+| 조건 | 워커/nproc | `run_delay_ratio` | `cpu_efficiency` | `steal` | delay p50 |
+|---|---|---|---|---|---|
+| `host-x0.5` | 6 / 12 | 0.000008 | 0.999967 | 0.0% | 0.26 ms |
+| `host-x1` | 12 / 12 | 0.004675 | 0.995318 | 0.0% | 72.1 ms |
+| `host-x2` | 24 / 12 | 1.007084 | 0.498223 | 0.0% | 15.5 s |
+| `host-x3` | 36 / 12 | 2.013169 | 0.331870 | 0.0% | 20.1 s |
 
-사전 제작한 멱등 실측 도구(`check-and-bench-kvm.sh`, 고속 `-c 20 -i 0.05` 모드)를 실행하여 수집한 하드웨어 사양 및 가상화 오버헤드 지표입니다
+오버스크립션 배수 N에 대해 `run_delay_ratio ≈ N−1`, `cpu_efficiency ≈ 1/N`이 **오차 1% 이내로** 성립합니다
 
-### 1. 하드웨어 체크리스트 및 가상화 사양 진단
+2배에서 1.007과 0.498, 3배에서 2.013과 0.332입니다
+CFS가 런큐를 공평 분배한다는 사실의 실측 확인이며, 게스트 측정의 자입니다
 
-로컬 진단 스크립트가 반환한 `kvm-virt-bench.json`의 하드웨어 및 OS 검증 데이터입니다
+여기서 이미 하나가 확정됩니다
 
-```json
+CPU 효율이 1/3까지 떨어지는 극한에서도 베어메탈의 `steal`은 **전 구간 0.0%**입니다
+즉 게스트에서 관측되는 `steal`은 게스트 내부 경합이 아니라 **하이퍼바이저 선점에만** 귀속됩니다
+
+## 게스트에서는 같은 경합이 지표에서 사라집니다
+
+이제 게스트 3대(합계 24 vCPU)를 12 pCPU 위에 올려 하이퍼바이저 레벨 2배 오버스크립션을 만듭니다
+
+**게스트 내부 설정은 두 국면 모두 8워커 / 8 vCPU로 고정**하고 호스트 경합만 바꿨습니다
+게스트 안에서 보이는 조건은 완전히 동일하다는 뜻입니다
+
+| 국면 | 게스트당 처리량 | `run_delay_ratio` | `cpu_efficiency` | `steal` |
+|---|---|---|---|---|
+| `guest-solo` | 323.4 M it/s | 0.000076 | 0.999925 | 0.0% |
+| `guest-oversub` (3대 평균) | 110.4 M it/s | 0.000055 | 1.000000 | 50.3% |
+
+처리량은 34.1%만 남았는데 `run_delay_ratio`는 오히려 **줄었고**(7.6e-05 → 5.5e-05) `cpu_efficiency`는 양쪽 다 1.000입니다
+
+게스트 내부에서만 보면 완벽하게 건강한 시스템입니다
+`steal` 50.3%가 그 격차를 계량한 유일한 값입니다
+
+같은 2배 경합이 L0에서는 `cpu_efficiency` 0.498, `run_delay_ratio` 1.007로 스케줄러 지표에 그대로 나타났습니다
+물리적으로 동일한 경합인데 L1에서만 지표가 침묵합니다
+
+다만 총량은 크게 손실되지 않습니다
+게스트 3대 합산 331.1 M it/s로 `host-x1`(354.3 M it/s)의 93.5%입니다
+
+정확한 서술은 "가상화가 성능을 파괴한다"가 아니라 **"가상화가 분배를 은닉한다"**입니다
+
+## steal은 어떻게 계상되는가 — 커널 소스로 확정합니다
+
+![KVM steal time 계상 경로와 그 계량 범위](/diagrams/cloud-virt-steal-accounting.svg)
+
+하이퍼바이저가 쓰고 게스트가 읽는 공유 페이지 한 장이 `steal`의 전부입니다
+
+게스트 커널은 자신이 얼마나 물리 코어를 받지 못했는지 스스로 알 수 없습니다
+KVM은 vCPU마다 공유 구조체 한 장을 두고 그 값을 채워 줍니다
+
+```c
+/* arch/x86/include/uapi/asm/kvm_para.h:62 (v6.8) */
+struct kvm_steal_time {
+	__u64 steal;
+	__u32 version;
+	__u32 flags;
+	__u8  preempted;
+	__u8  u8_pad[3];
+	__u32 pad[11];
+};
+```
+
+이 구조체의 물리 주소를 게스트가 MSR에 써서 등록합니다
+
+```c
+/* arch/x86/kernel/kvm.c:320 (v6.8) */
+static void kvm_register_steal_time(void)
 {
-  "hardware_checklist": {
-    "os_type": "Darwin",
-    "architecture": "arm64",
-    "kernel_version": "25.5.0",
-    "virtualization_extensions": "Apple_Silicon_Hypervisor_Framework",
-    "nested_virtualization_supported": "false (Darwin Host)",
-    "total_ram_gb": "16.0",
-    "sriov_supported": "false"
-  }
+	int cpu = smp_processor_id();
+	struct kvm_steal_time *st = &per_cpu(steal_time, cpu);
+
+	if (!has_steal_clock)
+		return;
+
+	wrmsrl(MSR_KVM_STEAL_TIME, (slow_virt_to_phys(st) | KVM_MSR_ENABLED));
+```
+
+레지스터 이름은 `MSR_KVM_STEAL_TIME`(`0x4b564d03`)입니다
+벽시계 동기화용 `MSR_KVM_WALL_CLOCK_NEW`와는 다른 레지스터입니다
+
+읽기는 `version` 필드를 이용한 seqlock 패턴입니다 — 하이퍼바이저가 갱신 중인 값을 읽지 않도록 홀수 버전이면 다시 읽습니다
+
+```c
+/* arch/x86/kernel/kvm.c:403 (v6.8) */
+static u64 kvm_steal_clock(int cpu)
+{
+	src = &per_cpu(steal_time, cpu);
+	do {
+		version = src->version;
+		virt_rmb();
+		steal = src->steal;
+		virt_rmb();
+	} while ((version & 1) || (version != src->version));
+
+	return steal;
 }
 ```
 
-- 하이퍼바이저 프레임워크 위 단일 게스트 VM 환경이며, SR-IOV 및 중첩 가상화는 지원되지 않음을 실증적으로 확인했습니다
-- 이는 클라우드 사업자(AWS, GCP)의 인스턴스를 선택할 때도 동일하게 적용되는 물리적 기준표입니다. SR-IOV(`ENA` 하드웨어 오프로딩)가 지원되지 않는 구형 인스턴스나 일반 가상화 타입에서는 네트워크 데이터플레인 성능이 하이퍼바이저 스위치 성능에 종속됩니다
+그리고 스케줄러가 이 값의 증가분을 가져갑니다
 
-### 2. 스틸 타임 및 인터럽트 지표 분석
-
-가상 머신 내부 `/proc/stat`에서 추출한 CPU 스케줄링 실측 데이터입니다
-
-```json
+```c
+/* kernel/sched/cputime.c:253 (v6.8) */
+static __always_inline u64 steal_account_process_time(u64 maxtime)
 {
-  "cpu_scheduling_metrics": {
-    "vm_steal_time_percentage": "0.0000",
-    "vm_total_interrupts": "4130366",
-    "vm_context_switches": "7550846"
-  }
+#ifdef CONFIG_PARAVIRT
+	if (static_key_false(&paravirt_steal_enabled)) {
+		u64 steal;
+
+		steal = paravirt_steal_clock(smp_processor_id());
+		steal -= this_rq()->prev_steal_time;
+		steal = min(steal, maxtime);
+		account_steal_time(steal);
+		this_rq()->prev_steal_time += steal;
+
+		return steal;
+	}
+#endif
+	return 0;
 }
 ```
 
-- **`vm_steal_time_percentage: 0.0000%`**: 단일 전용 게스트(`Single-Tenant`)로 동작하는 VM이므로 호스트 선점이 발생하지 않아 스틸 타임이 0%로 측정되었습니다
-- 그러나 다중 임차(`Multi-Tenant`) OpenStack 클라우드에서 vCPU 오버스크립션(`예: 물리 코어 1개당 vCPU 4개 할당`)이 적용되면, 이 수치가 **5%~15% 이상 폭등**하며 앞서 분석한 락 홀더 선점(`LHP`) 교착 상태를 일으켜 파드의 Liveness 프로브 실패와 `NodeNotReady` 장애를 유발합니다
+중요한 지점은 이 값이 **어디에서 빠지는가**입니다
+런큐의 실행 시간 통계에서 차감되는 것이 아니라, **틱 하나의 길이에서 먼저 떼어 낸 다음** 남은 몫만 user/system/idle로 배분됩니다
 
-### 3. 네트워크 오버레이 지연 시간 대조
-
-호스트 루프백 지연 시간과 가상화 브릿지 내부의 왕복 지연을 고속(`0.05초 간격`)으로 비교한 수치입니다
-
-```json
+```c
+/* kernel/sched/cputime.c:487 (v6.8) */
+void account_process_tick(struct task_struct *p, int user_tick)
 {
-  "network_overlay_metrics": {
-    "host_loopback_latency_avg": "0.175 ms",
-    "virtual_bridge_latency_avg": "0.164 ms",
-    "virtualization_latency_tax_ratio": "0.94x"
-  }
+	cputime = TICK_NSEC;
+	steal = steal_account_process_time(ULONG_MAX);
+
+	if (steal >= cputime)
+		return;
+
+	cputime -= steal;
+```
+
+`steal`의 성질이 여기서 결정됩니다
+
+이 값은 **vCPU가 물리 코어를 받지 못한 시간**만 셉니다
+vCPU가 물리 코어를 받은 다음 그 위에서 무엇을 겪었는지는 정의상 포함되지 않습니다
+
+뒤에서 이 성질이 관측의 커다란 구멍으로 돌아옵니다
+
+## 락이 끼면 그때 가상화 고유 비용이 생깁니다
+
+앞의 워크로드는 공유 상태가 없습니다
+락 홀더 선점(Lock Holder Preemption, LHP)이 원리적으로 관측될 수 없는 설계입니다
+
+그래서 락이 있는 프로브를 따로 만들었습니다
+
+- `none` — 공유 상태 없음, 대조군
+- `mutex` — `pthread_mutex`, futex 파킹
+- `spin` — `pthread_spinlock`, 유저스페이스 순수 스핀
+- `kspin` — `dup()`/`close()`로 커널 스핀락(`files_struct->file_lock`) 경합
+
+대조군 설계에 함정이 하나 있었습니다
+처음에는 호스트 24스레드 단일 프로세스를 게스트 3대(8스레드 × 3)의 대조군으로 삼았는데, **락 도메인 수가 달라 무효**였습니다
+
+교정 후에는 호스트에서도 8스레드 프로세스 3개를 동시 실행해 게스트 토폴로지를 미러링했습니다
+
+| 모드 | L0 유지율 | L1 유지율 | 가상화 고유의 몫 |
+|---|---|---|---|
+| `none` | 55.4% | 55.2% | **−0.2 pp** (3회 반복, 범위 0.2) |
+| `kspin` | 83.9% | 78.6% | −5.3 pp (3회 반복, 범위 1.2) |
+
+독립 CPU 부하의 가상화 추가 비용은 **−0.2 pp로 사실상 0**이며 재현성이 높습니다
+
+게스트당 처리량이 절반이 되는 주된 이유는 가상화 세금이 아닙니다
+CPU를 2배로 요구했으니 절반을 받는 산수입니다
+
+커널 스핀락 경합에서는 추가 비용이 생깁니다
+다만 이 값은 측정 회차마다 −4 pp에서 −12 pp까지 흔들렸으므로 단일 값으로 확정하지 않습니다
+
+`mutex`와 `spin`은 반복 측정을 하지 못해 수치를 싣지 않습니다
+방향만 적자면 `mutex`는 L1에서 불리하고 `spin`은 오히려 유리했는데, 둘 다 기전이 미검증입니다
+
+## LHP는 실재하지만 pv-qspinlock이 막고 있습니다
+
+![락 홀더 선점과 pv-qspinlock 완화 경로](/diagrams/cloud-virt-lhp-pvqspinlock.svg)
+
+게스트 스핀락 대기가 무한 회전으로 가지 않도록 커널이 하이퍼바이저에 양보하는 경로입니다
+
+LHP의 고전적 서사는 이렇습니다
+vCPU 0이 커널 스핀락을 쥔 채 물리 코어를 잃으면, vCPU 1은 소유자가 잠들었다는 사실을 모른 채 계속 회전합니다
+
+그런데 실제 커널은 무한히 회전하지 않습니다
+paravirt qspinlock은 정해진 횟수만 회전한 뒤 포기합니다
+
+```c
+/* arch/x86/include/asm/spinlock.h:25 (v6.8) */
+#define SPIN_THRESHOLD	(1 << 15)
+```
+
+32,768회입니다
+`kernel/locking/qspinlock_paravirt.h`의 두 대기 지점이 이 상한을 씁니다
+`pv_wait_node()`(L301)와 `pv_wait_head_or_lock()`(L434)이 상한만큼 회전한 뒤 `pv_wait()`를 호출합니다
+
+KVM 게스트에서 `pv_wait()`는 결국 CPU를 멈춥니다
+
+```c
+/* arch/x86/kernel/kvm.c:1041 (v6.8) */
+static void kvm_wait(u8 *ptr, u8 val)
+{
+	if (irqs_disabled()) {
+		if (READ_ONCE(*ptr) == val)
+			halt();
+	} else {
+		local_irq_disable();
+
+		/* safe_halt() will enable IRQ */
+		if (READ_ONCE(*ptr) == val)
+			safe_halt();
+```
+
+`HLT`는 가로채이므로 여기서 VM exit이 일어나고 하이퍼바이저는 그 물리 코어를 다른 vCPU에 넘깁니다
+락을 놓은 쪽은 하이퍼콜로 상대를 깨웁니다
+
+```c
+/* arch/x86/kernel/kvm.c:1030 (v6.8) */
+static void kvm_kick_cpu(int cpu)
+{
+	apicid = per_cpu(x86_cpu_to_apicid, cpu);
+	kvm_hypercall2(KVM_HC_KICK_CPU, flags, apicid);
 }
 ```
 
-- 최신 하이퍼바이저 프레임워크와 단일 메모리 버스(`Unified Memory Architecture`) 직결 구조에서는 가상 브릿지 오버헤드가 사실상 0(`0.94x ~ 1.00x`)에 수렴함을 실측했습니다
-- 하지만 실제 다중 NUMA 노드로 분리된 x86 KVM 클라우드에서 SR-IOV 없이 OVS VXLAN 터널링을 거칠 경우, 패킷당 **2회의 `VM-Exit` 컨텍스트 교체(`~1.0µs`) + OVS 플로우 테이블 탐색(`~1.2µs`) + L1/L2 캐시 파괴에 따른 LLC 미스 스톨(`~0.3µs`)** 이 합산되어 패킷 왕복당 2.5µs~4.0µs의 순수 가상화 물리 세금이 발생합니다
-- 마이크로서비스 간 10회의 API 홉(`Hop`)을 거치는 워크로드라면, 애플리케이션 연산이 시작되기도 전에 오직 가상 머신 경계를 넘나드는 하드웨어 컨텍스트 플러시 비용으로만 **25µs~40µs(`~4.00x 지연 증폭`)** 를 허공에 소모하게 됩니다
+앞서 본 `struct kvm_steal_time`의 `preempted` 필드도 여기서 쓰입니다
 
-## 클라우드 인프라 선택의 물리학적 결론
+```c
+/* arch/x86/kernel/kvm.c:784 (v6.8) */
+__visible bool __kvm_vcpu_is_preempted(long cpu)
+{
+	struct kvm_steal_time *src = &per_cpu(steal_time, cpu);
 
-쿠버네티스를 KVM/OpenStack 가상화 환경에 배포할 때는 반드시 다음 세 가지 물리적 원칙을 준수해야 이중 세금을 차단할 수 있습니다:
+	return !!(src->preempted & KVM_VCPU_PREEMPTED);
+}
+```
 
-- **vCPU 오버스크립션 금지 (`1:1 고정`)**: 컨트롤 플레인 및 데이터베이스, 고트래픽 워커 노드의 vCPU는 호스트 물리 코어와 `1:1 Dedicated Pinning`(`CPU Affinity`)을 강제하여 CFS 2차 선점과 락 홀더 선점(`LHP`)을 원천 방지해야 합니다
-- **SR-IOV / DPDK 하드웨어 오프로딩 필수**: 노드 간 트래픽이 높은 워크로드에서는 소프트웨어 OVS 브릿지를 배제하고 PCIe `VF`와 IOMMU 패스스루를 파드 또는 노드에 직결하여 `VM-Exit` 인터럽트 횟수를 0으로 만들어야 합니다
-- **베어메탈 노드(`m5.metal`) 도입 검토**: 4편의 eBPF 소켓 직결(`94.4 Gbps`)과 3편의 고밀도 파드(`MaxPods 250`) 이점을 100% 누리기 위해서는, 하이퍼바이저 컨텍스트 스위칭(`VMCS`) 계층 자체를 소멸시키는 클라우드 베어메탈 인스턴스가 가장 경제적인 아키텍처적 선택이 됩니다
----
-*시리즈 마지막 6편(소결)에서는 1편부터 5편까지 파헤친 모든 인프라 계층(APF, 런타임, CNI, eBPF, 가상화)의 최적화 기법과 물리적 원가를 종합한 클라우드별 최적화 지도를 완성합니다*
+공유 페이지 한 장이 두 가지 일을 합니다 — `steal`은 회계에, `preempted`는 락 경로에 쓰입니다
+
+뮤텍스와 rwsem의 낙관적 스핀도 같은 신호를 봅니다
+
+```c
+/* include/linux/sched.h:2159 (v6.8) */
+static inline bool owner_on_cpu(struct task_struct *owner)
+{
+	/*
+	 * As lock holder preemption issue, we both skip spinning if
+	 * task is not on cpu or its cpu is preempted
+	 */
+	return READ_ONCE(owner->on_cpu) && !vcpu_is_preempted(task_cpu(owner));
+```
+
+소유자의 vCPU가 선점된 상태면 스핀을 포기하고 잠듭니다
+
+하드웨어 쪽에도 방어선이 하나 더 있습니다
+반복되는 `PAUSE` 명령을 감지해 강제로 exit시키는 기능이며, AMD SVM의 기본값은 소스에 상수로 박혀 있습니다
+
+```c
+/* arch/x86/kvm/x86.h:52,58 (v6.8) */
+#define KVM_DEFAULT_PLE_GAP		128
+#define KVM_SVM_DEFAULT_PLE_WINDOW	3000
+```
+
+즉 "게스트 타임슬라이스를 100% 소진할 때까지 회전한다"는 서술은 성립하지 않습니다
+회전 상한은 32,768회이고, 그전에 PAUSE 필터가 개입할 수도 있습니다
+
+그렇다면 완화를 꺼 보면 어떻게 되는지가 남습니다
+
+게스트를 `nopvspin`으로 부팅해(`kvm-guest: PV spinlocks disabled` 확인) 같은 측정을 반복했습니다
+
+| 모드 | pv-qspinlock 켬 | 끔(`nopvspin`) | 배수 |
+|---|---|---|---|
+| `none` | 55.0% | 55.2% | 1.0× |
+| `spin` | 91.9% | 97.7% | 0.9× |
+| `mutex` | 99.2% | 72.2% | 1.4× |
+| `kspin` | **71.5%** | **2.50%** | **28.6×** |
+
+커널 스핀락 경합에서 처리량이 **28.6배** 무너집니다
+
+게스트별 처리량은 14,902 / 20,879 / 341,232 it/s로 **편차 22.9배**이며 공평 분배가 완전히 붕괴합니다
+
+대조군 두 개가 모두 이론과 맞아떨어지는 점이 이 실험의 내적 타당성을 보증합니다
+`none`은 락이 없으니 변화가 없고, `spin`은 유저스페이스 스핀락이라 `CONFIG_PARAVIRT_SPINLOCKS`의 보호 대상이 아니므로 역시 변화가 없습니다
+
+정리하면 LHP 파국은 실재합니다
+다만 기본 설정에서는 **커널이 이미 막고 있으며**, 완화가 없는 세계를 전제한 서술은 조건을 밝히지 않은 과장입니다
+
+그리고 여기서도 게스트 지표는 침묵합니다
+처리량이 28.6배 무너지는 동안 게스트의 `run_delay_ratio`는 0.000504, `cpu_efficiency`는 0.9994입니다
+
+`steal` 50.0%만이 이상을 알리는데, 그 값조차 "절반을 받지 못했다"고 말할 뿐입니다
+처리량이 28.6배 무너졌다는 사실은 전달하지 못합니다
+
+## VM exit 왕복을 직접 잽니다 — 836 ns
+
+VM exit 비용은 흔히 인용되지만 출처를 찾기 어려운 수치입니다
+직접 재는 편이 빠릅니다
+
+`CPUID`는 x86 가상화에서 **항상 가로채이는** 명령입니다
+게스트가 실행하면 반드시 exit → 하이퍼바이저 에뮬레이트 → 복귀가 일어납니다
+
+베어메탈에서는 그냥 직렬화 명령이므로 **게스트 CPUID − 호스트 CPUID = VM exit 왕복**입니다
+
+`RDTSC`는 TSC 오프셋 덕분에 가로채이지 않으므로 대조군으로 함께 쟀습니다
+CPU 고정, 배치 200회 묶음, 표본 2,000개의 중앙값을 사용했습니다
+
+| 라벨 | CPUID p50 | RDTSC p50 (대조군) |
+|---|---|---|
+| `host` | 113.2 cyc | 27.0 cyc |
+| `guest-idle` | 3,200.3 cyc | 27.0 cyc |
+| `guest-under-contention` | 3,200.1 cyc | 27.0 cyc |
+
+차분은 **3,085 사이클 ≈ 836 ns**입니다 (TSC 3,693 MHz)
+
+`RDTSC`가 호스트와 게스트에서 27.0 사이클로 **완전히 일치**하는 것이 방법의 건전성을 보증합니다
+가로채이지 않는 명령은 차이가 없어야 하고, 실제로 없습니다
+
+또 하나 중요한 결과가 있습니다
+
+다른 게스트 2대가 호스트를 포화시킨 상태에서 잰 값이 유휴 시와 동일합니다
+경합이 바꾸는 것은 **vCPU가 스케줄되기까지의 대기**이지 exit 한 번의 단가가 아닙니다
+
+두 비용은 분리해서 이야기해야 합니다
+
+한정 조건도 분명히 해 둡니다
+`CPUID` exit은 KVM 커널 모듈이 처리하고 끝나는 가벼운 부류입니다
+
+장치 MMIO처럼 QEMU 유저스페이스까지 나가는 exit은 이보다 훨씬 비쌉니다
+836 ns는 "VM exit 일반의 비용"이 아니라 **"커널이 처리하는 exit의 비용"**입니다
+
+## vCPU 핀 고정은 어디에 듣습니까
+
+흔한 처방은 vCPU를 물리 코어에 1:1로 고정하라는 것입니다
+얼마나 듣는지 재봤습니다
+
+측정 도중 방법론 함정을 하나 만났습니다
+
+게스트 1대를 물리 6코어에 하나씩 펼친 배치와, 물리 3코어에 SMT 형제까지 채운 배치를 비교했더니 **후자가 더 빨랐습니다**
+
+원인은 SMT가 아니라 주파수였습니다 — 3코어만 쓰면 5,039 MHz까지 부스트되고 6코어를 쓰면 4,444 MHz에 머뭅니다
+
+주파수로 정규화하면 뒤집힙니다
+펼친 배치가 클럭당 8.1% 유리하며, 이것이 SMT 형제가 실행 유닛을 나눠 쓰는 실제 비용입니다
+
+**핀 고정 측정은 주파수를 함께 재지 않으면 결론이 뒤집힙니다**
+
+이 교훈을 반영해 아래 측정은 12개 논리 CPU의 최대 주파수를 고정한 상태에서 수행했습니다
+
+게스트 3대 × 8 vCPU, 총 오버스크립션 2배는 그대로 두고 배치 정책만 바꿉니다
+`free`는 논리 CPU 12개 전체 허용, `pinned`는 게스트마다 논리 4개(물리 2코어)를 배타 할당합니다
+
+| 모드 | `free` 평균 | `pinned` 평균 | 개선 | 게스트 간 편차 |
+|---|---|---|---|---|
+| `none` | 19.86 M it/s | 19.88 M it/s | **+0.1%** | 1.016× → 1.004× |
+| `kspin` | 2.90 M it/s | 3.46 M it/s | **+19.6%** | 1.016× → 1.004× |
+
+독립 CPU 부하에서는 개선이 사실상 0입니다
+커널 스핀락 경합에서만 약 20% 회복되고 게스트 간 공평성이 함께 개선됩니다
+
+기전은 이렇게 추정합니다
+vCPU들이 좁은 집합에 모이면 락 소유자를 선점하는 쪽이 같은 게스트의 다른 vCPU일 확률이 높아집니다
+그러면 pv-qspinlock의 양보와 깨우기가 더 잘 맞물립니다
+
+다만 이는 추정이며 이번에 검증하지 않았습니다
+
+## steal이 원리적으로 못 보는 것 — LLC 절벽
+
+여기까지 보면 가상화 고유 비용은 락 경합에 국한된 것처럼 보입니다
+그런데 앞선 두 프로브의 유지율이 서로 크게 달랐습니다 — 34.1%와 54.4%입니다
+
+같은 조건인데 왜 다른지를 밝히려고 스레드당 작업 집합을 스윕했습니다
+
+방법은 단일 순환 포인터 추적입니다
+다음 주소가 현재 적재 결과에 의존하므로 프리페처가 앞서갈 수 없고 컴파일러도 걷어낼 수 없습니다
+
+하드웨어 임계값이 예측을 만듭니다
+L3 32MB를 논리 12개가 공유하므로, 스레드당 작업 집합 F에 대해 solo 총량은 8F, oversub 총량은 24F입니다
+
+즉 **oversub가 L3를 넘는 지점은 F > 1.33MB, solo가 넘는 지점은 F > 4MB**이며 그 사이가 최대 분기점입니다
+
+| 스레드당 작업 집합 | L0 유지율 | L1 유지율 | 격차 | L1 `steal` |
+|---|---|---|---|---|
+| 16 KB | 46.0% | 45.1% | −0.9 pp | 50.0% |
+| 128 KB | 49.7% | 49.1% | −0.5 pp | 50.0% |
+| 512 KB | 39.6% | 38.3% | −1.3 pp | 50.6% |
+| **2 MB** | **23.7%** | **21.9%** | −1.8 pp | 50.1% |
+| 8 MB | 26.0% | 23.7% | −2.3 pp | 50.1% |
+| 32 MB | 45.2% | 45.2% | −0.0 pp | 50.0% |
+| 128 MB | 47.4% | 47.0% | −0.4 pp | 49.9% |
+
+유지율이 49.1% → 21.9% → 47.0%의 U자 곡선을 그립니다
+
+계층별로 해석이 갈립니다
+
+- 16~128 KB — 코어별 L1d·L2 안에 들어갑니다. 유지율 45~49%로 공평 분배와 일치합니다
+- 2 MB — solo 총량 16MB는 L3에 들어가는데 oversub 총량 48MB는 넘칩니다. 한쪽만 캐시를 잃으므로 격차가 최대가 되고 유지율이 21.9%까지 무너집니다
+- 8 MB — solo 총량 64MB도 L3를 넘기 시작해 solo 역시 나빠지므로 격차가 좁아집니다
+- 32~128 MB — 양쪽 다 DRAM 바운드입니다. 유지율이 45~47%로 공평 분배에 복귀합니다
+
+최악은 자원이 가장 부족할 때가 아니라 **동거인 때문에 캐시 경계를 넘는 순간**입니다
+
+여기서 두 가지가 확정됩니다
+
+첫째, 이것은 가상화 세금이 아닙니다
+**L0 곡선이 L1과 사실상 겹칩니다**(격차 −0.0 ~ −2.3 pp)
+
+같은 일이 베어메탈에서 그대로 일어나므로 중첩 페이징 가설은 이 대조로 기각됩니다
+베어메탈 노드에서 파드끼리도 똑같이 일어난다는 뜻이며, 이는 3편에서 다룬 고밀도 노드 논의와 직결됩니다
+
+둘째, `steal`은 이 전부를 놓칩니다
+
+실제 유지율이 49.1%에서 21.9%까지 **2.2배 요동치는 동안 `steal`은 전 구간 49.9~50.6%로 미동도 하지 않습니다**
+
+2MB 지점에서 `steal`은 "절반을 받지 못했다"고 보고하지만 실제 손실은 78.1%입니다 — **28.1 pp를 놓칩니다**
+
+이유는 앞서 소스로 확인한 그대로입니다
+`steal`은 vCPU가 스케줄되기를 기다린 시간만 세며, 메모리 계층 경합은 **원리적으로 세지 않습니다**
+
+`run_delay`도 `cpu_efficiency`도 마찬가지입니다
+어느 지표에도 이 절벽은 나타나지 않습니다
+
+## SR-IOV와 오버레이 — 이 편에서 재지 못한 것
+
+측정 PC의 NIC은 Realtek RTL8125 온보드 한 개이며 `sriov_totalvfs`를 노출하지 않습니다
+IOMMU(AMD-Vi)는 활성이지만 물리 NIC이 하나뿐이라 전체 디바이스 패스스루도 호스트 네트워크 상실을 뜻합니다
+
+따라서 아래는 **문헌 등급**이며 이 편에 실측이 없습니다
+
+AWS 공식 문서는 향상된 네트워킹이 SR-IOV를 사용한다고 명시합니다
+
+> Enhanced networking uses single root I/O virtualization (SR-IOV) to provide high-performance networking capabilities on supported instance types. SR-IOV is a method of device virtualization that provides higher I/O performance and lower CPU utilization when compared to traditional virtualized network interfaces
+>
+> — [Enhanced networking on Amazon EC2 instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html) (접근 2026-07-20)
+
+같은 문서는 모든 Nitro 기반 인스턴스가 ENA를 사용하며 지원 인스턴스에서 최대 100 Gbps를 낸다고 밝힙니다
+
+이득의 성격은 문서가 말하는 범위까지만 인용합니다 — 대역폭과 PPS가 높아지고 지연이 더 일정해지며 CPU 사용률이 낮아집니다
+
+정량 배수는 출처가 그 숫자를 직접 말하지 않으므로 쓰지 않습니다
+
+OVS GENEVE 오버레이의 왕복 세금도 이번에 측정하지 못했습니다
+호스트 OVS로 게스트 간 터널을 직접 구성해 격리 측정하는 편이 정밀하며, 별도 측정 후 보강하겠습니다
+
+## 그래서 무엇을 해야 합니까
+
+측정 결과가 통념을 상당 부분 교정했으므로 처방도 조건과 함께 적습니다
+
+- **vCPU 오버스크립션 자체는 금지 사항이 아닙니다** — 기본 설정에서 2배 오버스크립션의 가상화 고유 비용은 독립 CPU 부하 기준 −0.2 pp입니다. 처리량이 절반이 되는 것은 세금이 아니라 할당의 결과입니다
+- **락 경합이 큰 워크로드에는 핀 고정이 듭니다** — 커널 스핀락 경합에서 약 20% 회복되고 게스트 간 공평성이 개선됩니다. 독립 CPU 부하에는 이득이 없으므로 워크로드를 보고 결정합니다
+- **`nopvspin` 류로 완화를 끄지 않습니다** — 완화가 꺼지면 같은 조건에서 처리량이 28.6배 무너지고 게스트 간 편차가 22.9배로 벌어집니다. 게스트 커널의 `CONFIG_PARAVIRT_SPINLOCKS` 활성 여부는 확인해 둘 값입니다
+- **`steal`을 유일한 지표로 쓰지 않습니다** — `steal`은 vCPU 대기만 계량합니다. LLC 경합으로 처리량이 절반 이하로 무너져도 이 값은 미동도 하지 않습니다. 처리량이나 지연 같은 **응용 레벨 지표를 반드시 함께** 봅니다
+- **밀도는 용량이 아니라 캐시로 결정합니다** — 동거 워크로드의 작업 집합 합계가 LLC를 넘는 순간 절벽이 있습니다. 이 절벽은 가상화와 무관하므로 베어메탈 노드의 bin-packing에도 그대로 적용됩니다
+
+## 핵심 요약
+
+- 베어메탈에서 오버스크립션 배수 N은 `run_delay_ratio ≈ N−1`, `cpu_efficiency ≈ 1/N`을 오차 1% 이내로 따르며, 이 구간의 `steal`은 전 구간 0.0%입니다 — `steal`은 경합 신호가 아니라 가상화 신호입니다
+- 같은 2배 경합이 게스트 안에서는 지표에서 사라집니다. 처리량이 34.1%로 떨어지는데 `run_delay_ratio`는 오히려 낮아지고 `cpu_efficiency`는 1.000입니다
+- 락 도메인까지 일치시킨 대조군으로 재면 독립 CPU 부하의 가상화 고유 비용은 **−0.2 pp**로 사실상 0입니다. 비용은 커널 락이 낄 때 생깁니다
+- LHP 파국은 실재하지만 pv-qspinlock이 막고 있습니다. `SPIN_THRESHOLD`(32,768회) 후 `pv_wait()` → `HLT` → `KVM_HC_KICK_CPU` 경로이며, 완화를 끄면 처리량이 28.6배 무너집니다
+- 이 환경의 VM exit 왕복은 **3,085 사이클(836 ns)**이며 호스트 경합과 무관합니다. 단 이는 커널이 처리하는 가벼운 exit의 단가입니다
+- 동거 워크로드의 작업 집합이 LLC 경계를 넘는 순간 유지율이 21.9%까지 무너지지만 `steal`은 50% 근처에서 미동도 하지 않습니다 — **28.1 pp를 놓칩니다**. 이 현상은 가상화 고유가 아니라 베어메탈 고밀도 노드에도 같이 적용됩니다
+
+*다음 편(소결)에서는 1편부터 5편까지의 결과를 근거 등급과 함께 종합해, 커널 세금이 하드웨어와 요금으로 치환되는 구조를 정리합니다*

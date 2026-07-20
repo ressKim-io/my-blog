@@ -4,7 +4,7 @@
 > 2026-07-20 1차 발행본)의 전수 감사 결과이자 **수정 세션의 SSOT**.
 > part6-fact-audit.md 방식 승계 — 여기 없는 수정은 하지 않고, 여기 있는 수정은 빠뜨리지 않는다
 > **감사 일자**: 2026-07-20 (발행 당일)
-> **수정 상태: ☐ 전체 미착수**
+> **수정 상태: ▣ 5편 재집필 완료 (`2026-07-20`) — 나머지 5편(1~4·6편) 및 공통 C1~C10 미착수**
 
 ## 0. 감사 방법과 총평
 
@@ -288,12 +288,38 @@ lint 결과 기준:
 **처리 방향 (사용자 확정 2026-07-20): Linux PC에서 KVM/OpenStack 실측 재수행 후 재집필.**
 §8(실측 재설계)의 Linux 세션 절차를 따른다. 재집필 시 아래 P0를 전부 반영한다.
 
-- [ ] **P0** 실측 무효 — 발행본의 "실측"은 Darwin/colima 대체 측정:
+> **[완료] 재집필 완료 (`2026-07-20`)** — plan.md §8.3~8.9 실측 전량 + 커널 v6.8 소스 인용으로
+> 전면 재작성했다. 아래 체크박스 전부 반영. 처리 요약:
+> - 개제: `가상화 이중 세금을 직접 재봤습니다 — steal이 계량하는 세금과 끝내 못 보는 세금`
+>   (C5 — 시리즈명·편 번호 제거)
+> - Darwin 대체 측정 3개 절(L58~116) 전면 삭제 → L0/L1 대조 실측 6개 절로 교체
+> - 창작 수치 전량 삭제(`150~200 사이클`·`2.5~4.0µs`·`25~40µs`·`5~15%`·`10ms 타임슬라이스`·
+>   `LLC Miss 60~80ns`). VM exit은 실측 3,085 cyc(836ns)로 대체, OVS 오버레이는 **미측정이라
+>   수치 자체를 싣지 않음**을 본문에 명시
+> - 사실 오류 교정: `MSR_KVM_STEAL_TIME`(+`struct kvm_steal_time` 인용), 틱에서 차감되는
+>   실제 경로(`account_process_tick()`의 `cputime -= steal`), VM exit은 명령이 아니라 전환 이벤트,
+>   GPR은 VMCS 저장 대상 아님 → 해당 서술 삭제, "Zero VMEXIT" 과장 삭제
+> - **P1 소스 인용 해소**: 리눅스 v6.8 sparse clone(`.claude/plans/k8s-cloud-series/src/linux`,
+>   태그 `v6.8`/`e8f897f`)에서 8개 지점 인용 — `kvm_para.h:62`, `kvm.c:320·403·784·1030·1041`,
+>   `cputime.c:253·487`, `spinlock.h:25`, `qspinlock_paravirt.h:301·434`, `sched.h:2159`,
+>   `x86.h:52·58`(PLE 상수 — "10ms 타임슬라이스" 교정 근거)
+> - **C1 문헌 출처**: AWS Enhanced networking 문서 URL + 접근일자(2026-07-20) 명기, SR-IOV는
+>   NIC 미지원이라 **문헌 등급 강등을 본문에 선언**
+> - C9 시리즈 성격 선언을 근거 블록쿼트에 포함(5편만 예외적으로 실측 중심임을 명시)
+> - SVG 2종 교체: 창작 수치(`Measured Tax: ~4.00x`)가 박힌
+>   `cloud-virt-double-encapsulation-sriov.svg`와 `cloud-virt-double-scheduling-lhp.svg` **삭제**,
+>   `cloud-virt-steal-accounting.svg`·`cloud-virt-lhp-pvqspinlock.svg` 신규 작성(각 16·15 text)
+> - `npm run lint:post` **error 0** (warn: 100자 초과 13곳 — frontmatter·인용문·요약 bullet)
+>
+> **미해결 이월**: OVS GENEVE 오버레이 실측(본문에 "별도 측정 후 보강" 명시함),
+> QEMU 유저스페이스 exit 비용
+
+- [x] **P0** 실측 무효 — 발행본의 "실측"은 Darwin/colima 대체 측정:
   - steal 0% — 단일 전용 게스트에서 당연한 값, 논지(다중 임차 오버스크립션) 검증력 없음
   - "가상 브릿지 0.164ms < 루프백 0.175ms (0.94x)" — 측정 노이즈(브릿지가 루프백보다 빠를 수
     없음). 해당 섹션(L58~116) 전면 교체 대상
   - plan.md §8.2는 "무효" 처리 (본 문서 §9와 함께 반영)
-- [ ] **P0** 무출처 창작 수치 전면 삭제 또는 출처 제시 (실패 패턴 ①):
+- [x] **P0** 무출처 창작 수치 전면 삭제 또는 출처 제시 (실패 패턴 ①):
   - L48 "150~200 클록 사이클(`~500ns`)" — 내부 모순까지(200cycle@3GHz≈67ns)
   - L115 "VM-Exit 2회(~1.0µs) + OVS 탐색(~1.2µs) + LLC 스톨(~0.3µs) = 왕복당 2.5µs~4.0µs"
   - L116 "25µs~40µs(~4.00x 지연 증폭)"
@@ -301,7 +327,7 @@ lint 결과 기준:
   - L36 "게스트 타임슬라이스(10ms)" — CFS에 고정 타임슬라이스 없음
   - L50 "LLC Miss @ 60~80ns"·"수십 배 치명적인 물리 원가"
   - 대체 원칙: Linux 실측으로 얻은 수치(§8 append분)와, 출처가 그 숫자를 직접 말하는 문헌만 사용
-- [ ] **P0** 사실 오류 교정:
+- [x] **P0** 사실 오류 교정:
   - L31: steal time MSR은 `MSR_KVM_WALL_CLOCK_NEW`가 아니라 **`MSR_KVM_STEAL_TIME`**
     (`struct kvm_steal_time`). "`cfs_rq->exec_clock`에서 차감" — 부정확.
     `CONFIG_PARAVIRT_TIME_ACCOUNTING`·`steal_account_process_time()` 경로를 커널 클론에서
@@ -312,10 +338,10 @@ lint 결과 기준:
     소프트웨어가 저장). VMCS에 저장되는 것(RIP/RSP/RFLAGS/CR/세그먼트 상태)과 구분
   - L55-56: "Zero `VMEXIT` 패킷 송수신"·"베어메탈과 100% 동일한 캐시 온기와 100Gbps" —
     posted interrupt 전제 없이는 인터럽트 경로에 exit 존재. 과장 완화
-- [ ] **P1** 소스 인용 0건 — `kernel/sched/cputime.c`·`kernel/locking/qspinlock.c`·VMCS를 이름만
+- [x] **P1** 소스 인용 0건 — `kernel/sched/cputime.c`·`kernel/locking/qspinlock.c`·VMCS를 이름만
   나열. 소스 확정 등급을 표방하려면 커널 클론에서 실제 코드 인용(steal 계상 경로, qspinlock
   paravirt 경로 등) 추가. 6편 중 소스 깊이 격차가 가장 큰 편
-- [ ] **P2** C6(L124-125 setext `---`), C7("불타오릅니다"·"캐시 온기"·"노이즈 네이버"·"파국"),
+- [x] **P2** C6(L124-125 setext `---`), C7("불타오릅니다"·"캐시 온기"·"노이즈 네이버"·"파국"),
   C5(제목 개제·근거 블록쿼트 형식), C8(유형 태그)
 - 유지 가능한 골격: 이중 스케줄링·LHP·PLE 개념 서술 방향 자체는 타당. steal time 관측법,
   SR-IOV/IOMMU 구조 설명도 소스·문헌 보강 전제로 유지
