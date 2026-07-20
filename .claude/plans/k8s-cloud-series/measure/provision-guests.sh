@@ -47,7 +47,8 @@ ensure_network() {
 }
 
 make_seed() {
-  local name="$1" seeddir="$LAB/seed/$name"
+  local name="$1"
+  local seeddir="$LAB/seed/$name"
   mkdir -p "$seeddir"
   cat > "$seeddir/user-data" <<EOF
 #cloud-config
@@ -71,7 +72,8 @@ EOF
 }
 
 create_guest() {
-  local name="$1" disk="$LAB/images/${name}.qcow2"
+  local name="$1"
+  local disk="$LAB/images/${name}.qcow2"
 
   if vsh dominfo "$name" >/dev/null 2>&1; then
     echo "-- $name 이미 존재, 건너뜀"
