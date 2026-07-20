@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #1e293b; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; fill: #334155; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; fill: #475569; }
+      .box-green { fill: #ecfdf5; stroke: #059669; stroke-width: 2.5; rx: 12; }
+      .box-green-hdr { fill: #d1fae5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .box-rose { fill: #fff1f2; stroke: #e11d48; stroke-width: 2.5; rx: 12; }
+      .box-rose-hdr { fill: #ffe4e6; stroke: #e11d48; stroke-width: 2; rx: 8; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arr-g" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    </marker>
+    <marker id="arr-r" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#e11d48" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="360" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">kubelet: Goroutine per Pod vs Worker Pool</text>
+
+  <!-- Left: K8s Goroutine per Pod -->
+  <rect x="30" y="65" width="355" height="270" class="box-green" />
+  <rect x="50" y="80" width="315" height="36" class="box-green-hdr" />
+  <text x="207" y="104" text-anchor="middle" class="header" fill="#065f46">Goroutine per Pod (1:1)</text>
+
+  <rect x="50" y="130" width="115" height="48" class="card" stroke="#cbd5e1" />
+  <text x="107" y="159" text-anchor="middle" class="label">Pod 1</text>
+  <path d="M 168 154 L 208 154" stroke="#059669" stroke-width="3" marker-end="url(#arr-g)" />
+  <rect x="215" y="130" width="150" height="48" class="card" stroke="#059669" />
+  <text x="290" y="150" text-anchor="middle" class="label" fill="#059669">Goroutine #1</text>
+  <text x="290" y="169" text-anchor="middle" class="sub">15.8 KB Stack</text>
+
+  <rect x="50" y="195" width="115" height="48" class="card" stroke="#cbd5e1" />
+  <text x="107" y="224" text-anchor="middle" class="label">Pod 2~N</text>
+  <path d="M 168 219 L 208 219" stroke="#059669" stroke-width="3" marker-end="url(#arr-g)" />
+  <rect x="215" y="195" width="150" height="48" class="card" stroke="#059669" />
+  <text x="290" y="215" text-anchor="middle" class="label" fill="#059669">Goroutine #2~N</text>
+  <text x="290" y="234" text-anchor="middle" class="sub">15.8 KB Stack</text>
+
+  <rect x="50" y="260" width="315" height="55" class="card" stroke="#059669" fill="#ecfdf5" />
+  <text x="207" y="284" text-anchor="middle" class="header" fill="#059669">Isolated &amp; Fast</text>
+  <text x="207" y="304" text-anchor="middle" class="sub" fill="#065f46">Zero Starvation</text>
+
+  <!-- Right: Traditional Worker Pool -->
+  <rect x="415" y="65" width="355" height="270" class="box-rose" />
+  <rect x="435" y="80" width="315" height="36" class="box-rose-hdr" />
+  <text x="592" y="104" text-anchor="middle" class="header" fill="#9f1239">Fixed Worker Thread Pool</text>
+
+  <rect x="435" y="130" width="315" height="45" class="card" stroke="#e11d48" />
+  <text x="592" y="158" text-anchor="middle" class="label" fill="#9f1239">Shared Event Queue</text>
+  <path d="M 592 178 L 592 188" stroke="#e11d48" stroke-width="3" marker-end="url(#arr-r)" />
+
+  <rect x="435" y="195" width="315" height="52" class="card" stroke="#e11d48" />
+  <text x="592" y="217" text-anchor="middle" class="label" fill="#9f1239">Worker Pool (8 OS Threads)</text>
+  <text x="592" y="237" text-anchor="middle" class="sub" fill="#475569">Blocked on Slow I/O</text>
+
+  <rect x="435" y="260" width="315" height="55" class="card" stroke="#e11d48" fill="#fff1f2" />
+  <text x="592" y="284" text-anchor="middle" class="header" fill="#9f1239">Shared Bottleneck</text>
+  <text x="592" y="304" text-anchor="middle" class="sub" fill="#9f1239">Starvation Risk</text>
+</svg>
