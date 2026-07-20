@@ -167,6 +167,64 @@
   - `host_loopback_latency_avg`: `0.175 ms`
   - `virtual_bridge_latency_avg`: `0.164 ms` (`0.94x`)
 
+### 8.3 5편 재실측 — Linux PC 사전 체크리스트 (`2026-07-20` 확인)
+
+> §5.2 사전 체크리스트 실행 결과. Darwin 대체 측정(§8.2 무효)을 대체하는 Linux 세션의 환경 확정 기록
+
+- **호스트**: Ubuntu 26.04 LTS (`resolute`), 커널 `7.0.0-28-generic`, x86_64
+- **CPU**: AMD Ryzen 5 7500F 6-Core (12 스레드, 1 소켓, NUMA 노드 1개)
+- **[x] CPU 가상화 + nested virtualization**: `egrep -c '(vmx|svm)' /proc/cpuinfo` = **12**,
+  AMD-V 활성. `/sys/module/kvm_amd/parameters/nested` = **1** → 중첩 가상화 지원.
+  `kvm_amd`·`kvm` 모듈 적재됨, `/dev/kvm` 존재(`root:kvm`, `660`)
+- **[x] RAM**: **30 GiB** (권장 32GB에 근접, swap 8GiB). 디스크 여유 219 GB
+- **[ ] NIC SR-IOV**: **미지원**. NIC은 Realtek RTL8125 2.5GbE(`r8169`) 온보드 1개뿐이며
+  `sriov_totalvfs` 노출 0건 → **SR-IOV/DPDK 대목은 문헌 등급으로 강등하고 본문에 명시**
+  (§5.2 체크리스트가 규정한 처리). IOMMU(AMD-Vi)는 활성(그룹 35개)이나 물리 NIC이 1개라
+  전체 디바이스 패스스루도 호스트 네트워크 상실로 비현실적
+- **[x] 배포판·커널**: 위 기재. 측정 스크립트는 Ubuntu 26.04 / 커널 7.0 기준으로 작성
+- **설치 필요 도구** (미설치 확인): `qemu-system-x86_64`, `virsh`/`virt-install`,
+  `cloud-localds`, `iperf3`, `stress-ng`, `ovs-vsctl`, `kind`, `sysstat`
+  (기설치: `docker`, `kubectl`, `perf`, `mpstat`, `numactl`, `jq`, `python3`)
+- **권한**: 사용자 `ressbe`가 `kvm` 그룹 **미소속** → libvirt 사용 전 `kvm`·`libvirt` 그룹 추가 필요
+
+### 8.4 5편 재실측 — 호스트(L0) 스케줄링 지연 베이스라인 (`2026-07-20` 측정)
+
+> **측정 도구**: `.claude/plans/k8s-cloud-series/measure/sched-probe.py` (호스트·게스트 공용,
+> 동일 바이너리·동일 인자로 실행해야 사과 대 사과 비교가 성립).
+> 드라이버 `run-baseline.sh <tier> [duration]`, 원자료 `measure/results/sched-host-x*.json`
+
+**지표 선정 근거**: 주 지표는 `/proc/<pid>/schedstat` 2번째 필드(`run_delay`) — 태스크가
+실행 가능 상태로 **런큐에서 대기한** 누적 나노초. 커널 CFS가 직접 계상하고 루트 권한이 필요 없다
+(cyclictest는 RT 우선순위에 루트가 필요하고 일반 워크로드를 대변하지도 않아 배제).
+보조 지표는 `/proc/stat` 8번째 필드(`steal`). **두 값을 함께 읽어야 "이중" 스케줄링이 분리된다** —
+`run_delay` 상승은 게스트 커널 레벨 경합, `steal` 상승은 호스트(하이퍼바이저) 레벨 선점
+
+**환경**: L0 호스트 Ubuntu 26.04 / 커널 7.0.0-28 / Ryzen 7500F 12스레드 / 30GiB.
+워커 = CPU를 태우는 독립 프로세스, 각 30초, 측정 간 3초 간격
+
+| 조건 | 워커/nproc | `run_delay_ratio` | `cpu_efficiency` | `steal` | delay p50 | delay max |
+|---|---|---|---|---|---|---|
+| `host-x0.5` | 6 / 12 | 0.000008 | 0.999967 | 0.0% | 0.26 ms | 0.48 ms |
+| `host-x1` | 12 / 12 | 0.004675 | 0.995318 | 0.0% | 72.1 ms | 424.6 ms |
+| `host-x2` | 24 / 12 | 1.007084 | 0.498223 | 0.0% | 15.5 s | 16.1 s |
+| `host-x3` | 36 / 12 | 2.013169 | 0.331870 | 0.0% | 20.1 s | 20.5 s |
+
+**확정 사실 1 — 단일 계층 스케줄러의 선형 법칙**: 오버스크립션 배수 N에 대해
+`run_delay_ratio ≈ N−1`, `cpu_efficiency ≈ 1/N`이 **오차 1% 이내로** 성립한다
+(2배: 1.007 vs 1, 0.498 vs 0.5 / 3배: 2.013 vs 2, 0.332 vs 0.333).
+CFS가 런큐를 공평 분배한다는 것의 실측 확인이며, **게스트 측정의 기준선**이다.
+가상화 계층이 붙었을 때 이 법칙에서 벗어나는 정도가 곧 이중 스케줄링의 추가 비용
+
+**확정 사실 2 — steal은 경합 신호가 아니라 가상화 신호**: 3배 오버스크립션으로
+CPU 효율이 1/3까지 떨어지는 극한에서도 베어메탈의 `steal`은 **전 구간 0.0%**.
+따라서 게스트에서 관측되는 `steal`은 게스트 내부 경합이 아니라 하이퍼바이저 선점에만 귀속된다.
+5편이 "게스트에게 보이지 않는 세금"을 주장하려면 이 대조군이 필수 (§8.2 Darwin 측정의
+"steal 0%"는 단일 전용 게스트라 이 대조 구실을 못 했음)
+
+**미측정 (다음 단계)**: 게스트(L1) 동일 스윕 및 solo vs oversub 대조 —
+`provision-guests.sh up` (게스트 3개 × 8 vCPU = 24 vCPU on 12 pCPU) → `measure-guests.sh`.
+libvirt 그룹 반영(재로그인) 후 착수
+
 ## 9. 진행 상태
 
 | 항목 | 상태 |
