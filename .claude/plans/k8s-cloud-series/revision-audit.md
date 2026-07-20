@@ -313,9 +313,40 @@ lint 결과 기준:
   234 산수, `GetIPv4Limit`(`ipamd.go:2569`), `/28`·16개(`data_store.go:1552`),
   `ena_netdev.c:2034` — 전부 클론과 일치. PLEG 3분 임계도 사실
 
-## 5. 4편 `cloud-ebpf-dataplane.md`
+## 5. 4편 `cloud-ebpf-dataplane.md` → **7부 3편 (완료 `2026-07-20`)**
 
-- [ ] **P0** §5-1 **sockops/sock_hash/sk_msg 혼동 — 최대 오류**. Cilium 클론 `bpf/`에서
+> **[완료] 재집필 완료** — plan.md §0 대체 규칙 적용. **본문에 성능 수치 0건**.
+> - **P0 sockops/sk_msg/sock_hash 오류 교정**: Cilium **v1.19.5**(`20eaccf`)로 버전 고정 후
+>   재확인 결과 `bpf/`에서 벤더링된 커널 헤더(`bpf/include/linux/bpf.h`의 헬퍼 주석)를 제외하면
+>   **자체 코드 0건**. 글의 축을 `cgroup/connect4`(`bpf/bpf_sock.c:434`)와
+>   `bpf_redirect_peer`(`bpf/lib/local_delivery.h:82`)로 전면 교체. excerpt·tags·SVG 파일명까지
+>   오염 제거(`cloud-ebpf-sockops-routing.svg` → `cloud-ebpf-socketlb-routing.svg`)
+> - **P0 실측 설계 결함 해소 — 재측정 없이**: 대체 규칙 2조("직접 잰 수치는 주장 근거로 쓰지
+>   않는다")에 따라 `94.4 Gbps`·`89줄`·초당 iperf 로그를 **전량 삭제**. kube-proxy baseline
+>   재측정 자체가 불필요해졌다. 대신 "직접 재려면 대조군을 만들라"를 실무 항목으로 남김
+> - **P1 Per-CPU 락프리 주장 교정 — 이 편의 새 핵심**: `bpf/lib/lb.h:262`·`:271` 확인 결과
+>   `cilium_lb4_services_v2`·`cilium_lb4_backends_v3` **둘 다 `BPF_MAP_TYPE_HASH`이며 Per-CPU가
+>   아니다**(Per-CPU는 `metrics.h`·`nat.h` 등 다른 용도). 이득의 근거를 "Per-CPU라 락프리"가 아니라
+>   **연결마다 쓰는 conntrack vs 읽기만 하는 서비스 맵**이라는 접근 성격 차이로 재서술하고 표로 대조
+> - **P0 GKE GENEVE 주장 삭제**: GKE Dataplane V2 공식 문서에 캡슐화 방식 언급이 **없음**을 확인.
+>   "GENEVE 터널링을 거친다"·Andromeda 서술 삭제하고 "공개 문서가 밝히지 않으므로 단정하지
+>   않는다"로 대체. 대신 문서가 실제로 밝히는 한계(**새 Service 기능이 kube-proxy에 먼저 구현됨**)를
+>   URL·접근일과 함께 인용 — 관리형의 진짜 대가로 훨씬 유효
+> - **P0 C4 교차참조**: "런타임 27편(epoll vs io_uring)" → rust 시리즈 글로 귀속 교정
+> - **P1 무출처 수치 삭제**: "서비스 1,000개 기준 5,000~10,000줄", "수천 개로 확장돼도 89줄 고정",
+>   "베어메탈 메모리 대역폭 한계 도달" 전량 제거
+> - **P1 24편 오귀속 교정**: "24편 세금이 똑같이 재현되는 파국" 삭제(24편 논지는 그 세금의 회피).
+>   `bpf_redirect_peer`는 "제로 카피" 단정 대신 소유권 이전 성격으로 완화하고 미측정 명시
+> - **P1 Cilium 버전 고정**: master HEAD → **v1.19.5 태그**(`20eaccf`) 재클론. 인용 4곳 라인 재검증.
+>   `redirect_ep` 인자가 발행본의 `use_redirect_peer`가 아니라 `use_fast_redirect`임도 교정
+> - **P2**: C6(`$\to$` 3곳·"커널 연구현"·setext `---`) 제거, C5 개제·핵심 요약 추가,
+>   C8 tags에서 `sockops` 제거·유형 태그 `concept`
+> - SVG 2종 재작성 — 구 `-sockops-routing`은 `sk_msg_redirect_hash`·`94.4 Gbps`가,
+>   `-dataplane-v2-hybrid`는 `sockops`·`GENEVE`·`Andromeda`가 이미지에 박혀 있었다
+> - `npm run lint:post` **error 0**
+
+
+- [x] **P0** §5-1 **sockops/sock_hash/sk_msg 혼동 — 최대 오류**. Cilium 클론 `bpf/`에서
   `grep -r "sk_msg\|sock_hash"` **0건** (sockops 기반 sockmap 리다이렉트는 구버전에서 제거된
   기능). 현행 기전은 두 가지뿐:
   1. **Socket LB** — `cgroup/connect4` 훅(`cil_sock4_connect` → `__sock4_xlate_fwd`)의
@@ -325,31 +356,31 @@ lint 결과 기준:
   (서로 다른 계층 헬퍼를 한 문장에 융합), L26 SVG 파일명 `cloud-ebpf-sockops-routing.svg`,
   tags "sockops"(L5), 6편 매트릭스 L45, **plan.md §8.1 실측 기록의 해석 문장**("소켓 간 직결
   전송(`sock_hash`/`sk_msg_redirect_hash`)됨을 확인" — 측정으로 확인한 적 없는 기전) → 일괄 교정
-- [ ] **P0** 실측 설계 결함 — **kube-proxy baseline 부재**. 기획 §5.1은 "리다이렉트 **on/off**
+- [x] **P0** 실측 설계 결함 — **kube-proxy baseline 부재**. 기획 §5.1은 "리다이렉트 **on/off**
   경로 비교"인데 Cilium-on 단독 측정뿐. 94.4Gbps는 비교값 없이 의미 없음.
   → 재실측: 동일 kind 스펙에서 kube-proxy(iptables) 모드 클러스터로 ① 동일 iperf3 ② 서비스
   N개(예: 0/100/1,000) 생성 시 iptables 룰 수 스케일 측정. 결과는 **plan.md §8에 append 후**
   본문 반영 (§8에 없는 실측치 본문 금지 재확인)
-- [ ] **P0** L163~171 초당 iperf 로그(Retr·Cwnd 포함) — plan.md §8.1에는 합계(54.9GB·94.4·95.4)만
+- [x] **P0** L163~171 초당 iperf 로그(Retr·Cwnd 포함) — plan.md §8.1에는 합계(54.9GB·94.4·95.4)만
   기록됨. 원본 로그 파일 확인, 없으면 재구성 로그로 간주(실패 패턴 ②)하고 재실측 로그로 교체
-- [ ] **P0** L216: GKE Dataplane V2 "GENEVE 터널링을 거치게 됩니다" — GKE는 VPC 네이티브(alias IP)
+- [x] **P0** L216: GKE Dataplane V2 "GENEVE 터널링을 거치게 됩니다" — GKE는 VPC 네이티브(alias IP)
   라우팅이 기본. DPv2의 GENEVE 사용 여부 문헌 확인 후 교정, 무근거면 삭제
-- [ ] **P0** L203: "런타임 시리즈 27편(epoll vs io_uring)" — `network-io-epoll-iouring`은 rust
+- [x] **P0** L203: "런타임 시리즈 27편(epoll vs io_uring)" — `network-io-epoll-iouring`은 rust
   시리즈 글 (C4). "rust CS 레이어 시리즈의 epoll vs io_uring 편"으로 귀속 교정 (27편 =
   `k8s-go-tradeoffs-summary`)
-- [ ] **P1** L191~195: "Per-CPU BPF 맵(`BPF_MAP_TYPE_PERCPU_HASH`) 조회 ... 락 경합 **0** ...
+- [x] **P1** L191~195: "Per-CPU BPF 맵(`BPF_MAP_TYPE_PERCPU_HASH`) 조회 ... 락 경합 **0** ...
   캐시 라인이 무효화되지 않고 락프리" — Cilium LB 서비스/백엔드 맵의 실제 맵 타입을 소스에서
   확인 후 재서술 (일반 HASH 계열이면 "락프리·경합 0" 단정 불가. RCU 기반 lookup의 실제 특성으로)
-- [ ] **P1** L148~155: `Socket LB Coverage: Full` 출력 라인·"5개 훅 100% 부착" 해석 —
+- [x] **P1** L148~155: `Socket LB Coverage: Full` 출력 라인·"5개 훅 100% 부착" 해석 —
   cilium-dbg 실제 출력으로 재검증 (재실측 시 캡처 원문 사용)
-- [ ] **P1** 무출처/외삽 수치: L32 "서비스 1,000개 기준 규칙 5,000~10,000줄", L140 "수천 개로
+- [x] **P1** 무출처/외삽 수치: L32 "서비스 1,000개 기준 규칙 5,000~10,000줄", L140 "수천 개로
   확장되어도 89줄로 고정" — baseline 재실측의 서비스 스케일 측정치로 교체 또는 삭제
-- [ ] **P1** L174 "거의 베어메탈 메모리 대역폭 한계에 도달" — 삭제(메모리 대역폭과 무관).
+- [x] **P1** L174 "거의 베어메탈 메모리 대역폭 한계에 도달" — 삭제(메모리 대역폭과 무관).
   L187 "24편 세금이 정확히 똑같이 재현되는 구조적 파국" — 24편 논지는 그 세금의 **회피**;
   "같은 계열의 경합이 커널 데이터플레인에도 존재" 수준으로 교정
-- [ ] **P1** Cilium 클론 버전 미고정 — 현재 master HEAD(`0eb3f068`). **v1.19.5 태그로 재체크아웃**
+- [x] **P1** Cilium 클론 버전 미고정 — 현재 master HEAD(`0eb3f068`). **v1.19.5 태그로 재체크아웃**
   후 인용 4곳(bpf_sock.c·local_delivery.h) 라인 재검증, plan.md §4 표에 커밋 기록
-- [ ] **P2** C6(L186·L201·L203 `$\to$`, L201 "커널 연구현", L220-221 setext `---`),
+- [x] **P2** C6(L186·L201·L203 `$\to$`, L201 "커널 연구현", L220-221 setext `---`),
   C5(제목 개제·핵심 요약 섹션 추가), C8(tags "sockops" 정리·유형 태그 `concept`)
 - 검증 완료(수정 불요): `cgroup/connect4`(`bpf_sock.c:466`)·`redirect_ep`(`local_delivery.h:90`)
   실존, iptables 89줄·KUBE-* 체인 0개는 §8.1 기록과 일치
