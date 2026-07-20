@@ -2,6 +2,12 @@
 
 > **세션 재개용 문서**. 새 세션에서 이 작업을 이어갈 때는 이 파일을 먼저 통독한 뒤,
 > §6 상태 표에서 첫 미완료(☐) 편부터 §7 절차대로 진행합니다.
+> **2026-07-20: 6부(23~27편) 독립 사실 검증 완료 — P0 오류 다수 확인, 수정 미착수.**
+> 발행본 5편에서 창작 스니펫·무출처 수치·소스 오류를 확인 (예: PLEG 임계값 3초→실제
+> 3분, oom_score_adj -998→실제 -997, Evented PLEG·CBOR "도입"→실제 알파·기본 비활성,
+> 27편 깨진 링크 4건). 수정 지침·깊이 보강 계획의 SSOT는 **`part6-fact-audit.md`**
+> (part6-review.md·part6-deepdive-blueprint.md는 무효화됨). §6의 23~27편 ✅ 표기는
+> "1차 발행"일 뿐 검증 통과가 아님 — fact-audit §7 진행 표 참조.
 > 마지막 갱신: 2026-07-14 (**5부 5편 전량 발행 완료 — 1~5부 22편 소진**.
 > **5부는 도커 컨테이너 실측을 도입한 첫 부** — colima로 리눅스 VM(커널 6.8·cgroup v2)을 띄워
 > 진짜 cgroup을 잼. 로컬 macOS로는 cgroup이 없어 불가능했음(§11.2).
@@ -233,6 +239,11 @@ date: "2026-06-25 + (글로벌 편 번호) 일"   # 글로벌 편 번호=5 → "
 | 5.3 | `5부_5.3_offheap_OOMKilled의물리_GC로그는깨끗한데_파드가죽는다.md` | `offheap-oomkilled-nmt` | 20 | ✅ 발행 (2026-07-15, SVG 5개 — **7편 `:118` 계약("off-heap OOMKilled의 정밀 해부는 5부에서") 이행**. **척추 = 제목의 A/B 재현**: 같은 코드·같은 힙에 `MaxDirectMemorySize`만 바꿈 → 기본값(=`-Xmx`)이면 `OutOfMemoryError` + 스택 트레이스 + **exit 1**(진단 가능), 컨테이너 한도 위(`=2g`)로 올리면 **GC 로그 0건 · 힙 사용률 1% · exit 137**. "캡을 씌워 커널의 죽음을 런타임의 죽음으로"를 실측으로 증명. **draft 교정: `MALLOC_ARENA_MAX=2` 만능론이 뒤집힘** — 16스레드×256×64KiB를 전부 free 후 기본은 3MiB 잔류인데 **`ARENA_MAX=2`가 96~113MiB 잔류**(thread arena는 mmap 구획을 통째 반납 가능, 2개로 묶으면 스레드 할당이 뒤섞여 불가). `malloc_trim(0)`이 즉시 1MiB로 → 누수 아님. 단서: 특정 패턴 결과임을 명시. **9편 `:101` arena 복선 회수**. **Go cgo 사각지대 재현**: `GOMEMLIMIT=700MiB`인데 C 힙 960MiB → exit 137, 그동안 **Go 힙 0 MiB · GC 0회**. NMT reserved 1.65GiB vs committed 334MiB. 11편 중복 회피(11편이 이미 지형도를 그림 → 여기선 두 죽음·reserved/committed·cgo로 차별화)) |
 | 5.4 | `5부_5.4_콜드스타트와_웜업의청구서_시작구간의물리와_AOT처방.md` | `cold-start-warmup-aot-remedies` | 21 | ✅ 발행 (2026-07-16, SVG 5개 — **웜업 계단 실측**: 인터프리터 **5578ns** → C1 ~1550ns → 정착 **830ns** = **6.7배**. `PrintCompilation`으로 티어3 → **티어4 OSR(`%`, 백엣지 `@6`)** → 티어4 → 옛 코드 `made not entrant`(역최적화) 관찰. **정착이 1200~1400회** — "C2는 5000회"라는 요약이 루프 있는 메서드엔 안 맞음을 실증(6편 `i+b` 규칙). **컨테이너 고리**: CPU 한도가 `CICompilerCount`를 정함(4코어→3, 2코어→2). 호출 횟수 임계값은 안 변하지만 컴파일 큐가 늦게 빠지고 컴파일러 스레드가 앱과 같은 쿼터를 나눠 씀 → 작은 파드일수록 웜업이 비쌈. **draft 교정 ①: "시작 시 RSS 스파이크"를 관찰 못 함** — 1초 만에 282MiB까지 오른 뒤 일을 멈춰도 **안 내려옴**(피크가 곧 상주 비용). draft의 "튀었다 내려온다" 서술 폐기. **draft 교정 ②: native-image 피크 열세**를 PGO가 만회 — 오라클 벤치 13,075 vs C2 12,488 req/s(벤더 수치임을 명시). "AOT는 무조건 피크가 낮다" 도식 폐기, 7편 역전 명제의 경계가 흐려짐을 언급. **draft 교정 ③: SnapStart "94%↓"는 근거 못 찾음** → AWS 공식 표현 "최대 10배"만 사용. **Leyden AOT 캐시 실측**(JDK 25에 실재): 훈련 실행 1회로 기동 **42ms → 35ms(17%)**, 캐시 11.8MB. **정직 단서: 기준선도 이미 기본 CDS로 958개 중 931개를 shared file에서 읽고 있었고, 장난감 앱이라 실제 프레임워크에 17%를 대입하면 안 됨**) |
 | 5.5 | `5부_5.5_소결_클라우드경제_네축과_의사결정매트릭스.md` | `cloud-economics-decision-matrix` | 22 | ✅ 발행 (2026-07-17, SVG 4개 — **5부 완결**. 소결이라 표3+SVG4. **"5부가 직접 잰 숫자들" 19행 표가 이 편의 차별점**(17편의 "4부가 직접 잰 숫자들"과 같은 역할, draft엔 없는 구성). 그 표에서 **원본 정리의 통념 4건이 실측으로 무너졌음을 명시**: 힙 산정 256MiB 경계 · ZGC 고정 3% · `MALLOC_ARENA_MAX=2` 만능성 · 시작 구간 스파이크. 비용 보존 표를 클라우드 축까지 확장(유휴 고정비 행 추가). 의사결정 매트릭스에 **사이드카 행 신설**(19편 인두세 실측의 귀결 — Java 41.2 vs Go 4.8 MiB). **draft에 없던 "대시보드를 런타임별로 다르게" 섹션**: Go=GC CPU 병행 / G1=`memory.current`−NMT 격차 / ZGC=`anon` 말고 **`shmem`** / 웜업 파드=readiness를 "데워졌다"에. 6부로 다리 — Go의 한계를 다 가진 Go로 쓰인 K8s의 역설) |
+| 6.1 | `k8s-control-plane-self-exemption.md` (`part6-design.md` 실측 원본) | `k8s-control-plane-self-exemption` | 23 | ✅ 발행 (2026-07-18, SVG 5개 — **6부 시작**. K8s 제어 평면 파드(`apiserver`, `etcd`, `controller-manager`)의 cgroup `memory.max = max`(무제한) 및 limits 부재 실측으로 18편 처형선 면제 증명. GOGC/GOMEMLIMIT/automaxprocs 등 런타임 손잡이 부재(`debug.SetMemoryLimit` 0건) 및 env 로그 출력용 역할 소스 확인. 유휴 apiserver 2,390개 고루틴 유저 스택 17.4 MiB(개당 7.6KB) vs 1:1 OS 스레드 가정 시 상주 커널 스택(`task_struct`+16KB)만 38.2 MiB 소모 및 런큐 스케줄링 폭탄 대조. 다이어그램 내부 영문/간결화 원칙 적용) |
+| 6.2 | `kubelet-goroutine-per-pod.md` (`part6-design.md` 실측 원본) | `kubelet-goroutine-per-pod` | 24 | ✅ 발행 (2026-07-19, `podWorkers` 고루틴 1:1 파드 배정 구조 및 Evented PLEG 본문/SVG 5개 간결화 완료) |
+| 6.3 | (draft 없음 — `part6-design.md` 실측 원본) | `k8s-sync-pool-serialization` | 25 | ✅ 발행 (2026-07-19, `cachingObject`와 `sync.Pool` 2주기 victim cache 해부 및 protobuf/JSON 직렬화 벤치 완료) |
+| 6.4 | (draft 없음 — `part6-design.md` 실측 원본) | `informer-shared-pointer-cost` | 26 | ✅ 발행 (2026-07-20, SharedInformer `%p` 0-Copy 포인터 공유 실증 및 Slow Consumer `RingGrowing` 무한 링 버퍼 OOM 실측 해부) |
+| 6.5 | (draft 없음 — `part6-design.md` 실측 원본) | `k8s-go-tradeoffs-summary` | 27 | ✅ 발행 (2026-07-22, 6부 완결 소결: 23~26편 실측 4중 우회 종합표 및 '당신 앱은 K8s가 아니다' 비용 보존 결론) |
 
 - slug는 제안값 — 변환 착수 시점에 확정 (SVG 파일명이 slug에 묶이므로 착수 후 변경 금지)
 
@@ -576,11 +587,11 @@ Serial 24.3 / Parallel 44.4 / G1 65.0 / ZGC 26.4 MiB · reserved는 ZGC만 9.35 
 
 | # | slug (제안) | order | 상태 |
 |---|-------------|-------|------|
-| 6.1 | `k8s-control-plane-self-exemption` | 23 | ☐ **설계 승인 대기** (척추 실측은 설계 세션에서 이미 완료) |
-| 6.2 | `kubelet-goroutine-per-pod` | 24 | ☐ |
-| 6.3 | `k8s-sync-pool-serialization` | 25 | ☐ (protobuf/JSON·victim cache 미리보기 측정 완료) |
-| 6.4 | `informer-shared-pointer-cost` | 26 | ☐ |
-| 6.5 | `k8s-go-tradeoffs-summary` | 27 | ☐ 소결 |
+| 6.1 | `k8s-control-plane-self-exemption` | 23 | ✅ **발행** (2026-07-18, SVG 5개 영문/간결화 준수) |
+| 6.2 | `kubelet-goroutine-per-pod` | 24 | ✅ **발행** (2026-07-19, podWorkers 고루틴 1:1 구조 및 Evented PLEG 본문/SVG 5개 간결화 완료) |
+| 6.3 | `k8s-sync-pool-serialization` | 25 | ✅ **발행** (2026-07-19, protobuf/JSON·sync.Pool victim cache 직렬화 방어선) |
+| 6.4 | `informer-shared-pointer-cost` | 26 | ✅ **발행** (2026-07-20, SharedInformer 0-Copy 포인터 공유 및 RingGrowing 무한 링 버퍼 OOM) |
+| 6.5 | `k8s-go-tradeoffs-summary` | 27 | ✅ **발행** (2026-07-22, 6부 소결: K8s 4중 우회와 '당신 앱은 K8s가 아니다' 결론) |
 
 ### 12.3 설계 세션이 소스에서 찾아낸 것 (draft가 못 했을 것들)
 
