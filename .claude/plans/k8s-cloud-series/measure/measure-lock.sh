@@ -28,7 +28,9 @@ PROBE="$HERE/lock-probe"
 PREFIX="${PREFIX:-schedlab}"
 COUNT="${COUNT:-3}"
 URI="qemu:///system"
-MODES=(none mutex spin kspin)
+# MODES_LIST 로 좁혀서 반복 측정할 수 있다 (예: MODES_LIST="none kspin")
+# shellcheck disable=SC2206
+MODES=(${MODES_LIST:-none mutex spin kspin})
 
 SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
           -o ConnectTimeout=5 -o BatchMode=yes -o LogLevel=ERROR)
@@ -93,7 +95,7 @@ echo
 echo "== 호스트(L0) 게스트 미러 대조군 — 프로세스당 ${GT}스레드 =="
 for m in "${MODES[@]}"; do
   echo "-- $m"
-  OUT="$OUTDIR/lock-host-1x${GT}-${m}.json"
+  OUT="$OUTDIR/lock-host-1x${GT}${TAG:-}-${m}.json"
   "$PROBE" --mode "$m" --threads "$GT" --duration "$DURATION" \
            --label "host-1x${GT}-${m}" --out "$OUT" 2>/dev/null
   summarize_one "$OUT"
@@ -103,12 +105,12 @@ for m in "${MODES[@]}"; do
   for i in 1 2 3; do
     "$PROBE" --mode "$m" --threads "$GT" --duration "$DURATION" \
              --label "host-3x${GT}-p${i}-${m}" \
-             --out "$OUTDIR/lock-host-3x${GT}-p${i}-${m}.json" 2>/dev/null &
+             --out "$OUTDIR/lock-host-3x${GT}${TAG:-}-p${i}-${m}.json" 2>/dev/null &
     pids+=($!)
   done
   for p in "${pids[@]}"; do wait "$p"; done
   for i in 1 2 3; do
-    summarize_one "$OUTDIR/lock-host-3x${GT}-p${i}-${m}.json"
+    summarize_one "$OUTDIR/lock-host-3x${GT}${TAG:-}-p${i}-${m}.json"
   done
   sleep 3
 done
@@ -139,6 +141,23 @@ done
 # 게스트 스레드 수 = 게스트 nproc. 두 국면 모두 이 값으로 고정한다(게스트 관점 1배)
 GN="$(ssh "${SSH_OPTS[@]}" "ubuntu@${IP[${PREFIX}1]}" nproc)"
 echo "   게스트 nproc=$GN (스레드 수로 고정)"
+
+# ── vCPU 핀 해제 확인 (fail-fast) ──────────────────────────────
+#
+# measure-pin.sh partition 은 게스트마다 배타적인 논리 CPU 4개를 할당한 채 끝난다.
+# 그 상태로 이 측정을 돌리면 oversub 국면에서 게스트끼리 아예 경쟁하지 않아
+# 유지율이 100%로 나온다 — 오버스크립션을 측정한 게 아니라 격리를 측정한 셈이다.
+# 실제로 한 번 당했으므로 매번 확인한다.
+for n in $(guest_names); do
+  bad="$(virsh -c "$URI" vcpupin "$n" | sed -n '3,$p' \
+         | awk 'NF && $2 != "0-11" {print $1"->"$2}')"
+  [[ -z "$bad" ]] || {
+    echo "오류: $n 의 vCPU가 핀에 묶여 있습니다: $bad" >&2
+    echo "해제: for v in \$(seq 0 $((GN-1))); do virsh vcpupin $n \$v 0-11; done" >&2
+    exit 1
+  }
+done
+echo "   vCPU 핀 해제 확인됨 (전 게스트 0-11)"
 
 # pvspinlock 활성 여부를 기록 — nopvspin 대조 때 근거가 된다
 echo

@@ -130,6 +130,15 @@ prepare_guests() {
     np="$(ssh "${SSH_OPTS[@]}" "ubuntu@$ip" nproc)"
     # §8.8 smt 국면이 vCPU를 6으로 바꿨다가 되돌린 이력이 있어 매번 확인한다
     [[ "$np" == 8 ]] || { echo "$n nproc=$np (8이어야 함)" >&2; exit 1; }
+    # measure-pin.sh partition 이 남긴 핀이 살아 있으면 게스트끼리 경쟁하지 않아
+    # 유지율이 100%로 나온다. 실제로 한 번 당했으므로 매번 확인한다
+    local bad
+    bad="$(virsh -c "$URI" vcpupin "$n" | sed -n '3,$p' \
+           | awk 'NF && $2 != "0-11" {print $1"->"$2}')"
+    [[ -z "$bad" ]] || {
+      echo "$n vCPU가 핀에 묶여 있습니다: $bad" >&2
+      echo "해제: for v in \$(seq 0 7); do virsh vcpupin $n \$v 0-11; done" >&2
+      exit 1; }
     # 최대 작업 집합이 들어가는지 사전 확인
     local avail
     avail="$(ssh "${SSH_OPTS[@]}" "ubuntu@$ip" \
