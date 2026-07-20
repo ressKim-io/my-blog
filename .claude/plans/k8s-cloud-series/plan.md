@@ -553,7 +553,55 @@ VMA도 2MB 정렬·8MB 크기이며 `hugepages-2048kB/enabled`도 `inherit`(→ 
 | 6부 수정 완료 (선행 조건) | [x] 완료 |
 | 자료 클론 + 버전 고정 (§4 — VPC CNI, ENA 드라이버, Cilium 소스 완료) | [x] 1~4편 소스 클론 완료 |
 | Cilium 스모크 테스트 (§5.1) | [x] 완료 (커널 6.8 + Socket LB + 94.4Gbps — 단, kube-proxy baseline 미측정, 감사 §5 참조) |
-| Linux PC / KVM 체크리스트 및 실측 (§5.2) | [x] **재실측 완료** (`2026-07-20`) — §8.3~8.8. 게스트 solo/oversub, LHP·pv-qspinlock, VM exit 비용, 핀 고정·SMT·주파수. 네트워크 오버레이는 미수행 |
+| Linux PC / KVM 체크리스트 및 실측 (§5.2) | [x] **재실측 완료** (`2026-07-20`) — §8.3~8.9. 게스트 solo/oversub, LHP·pv-qspinlock, VM exit 비용, 핀 고정·SMT·주파수, 작업 집합 스윕. 네트워크 오버레이는 미수행 |
 | 1~6편 집필 | [x] 1차 발행본 (`2026-07-20`) — 감사 결과 P0 다수, 수정 필요 |
 | **1차 발행본 전수 감사** | [x] 완료 (`2026-07-20`) — **수정 SSOT: `revision-audit.md`** (사실 오류·창작 수치·깊이 결손 전수 기록) |
 | 감사 반영 수정 (P0·실측 보완·P1·P2) | [ ] 미착수 — revision-audit.md §10 순서대로 |
+
+### 9.1 다음 세션 시작 지점 (`2026-07-20` 세션 종료 시점)
+
+**측정 랩의 살아 있는 상태 — 새 세션은 먼저 이것부터 확인할 것**
+
+| 항목 | 상태 | 조치 |
+|---|---|---|
+| 게스트 `schedlab1~3` | 기동 중, 각 8 vCPU, 핀 해제(`0-11`) | 그대로 쓰거나 `provision-guests.sh destroy` |
+| **호스트 CPU 주파수** | **`2997505 kHz`로 고정된 채** | 복원 필요 시 `measure/freq-off.sh` (**별도 터미널**, sudo 암호) |
+| 홈 디렉토리 권한 | `751`(libvirt 통과용으로 `o+x` 부여) | 되돌리려면 `chmod o-x /home/ressbe` |
+
+주파수 고정을 모르고 다른 측정을 하면 절대 성능이 낮게 나온다.
+`measure/pin-frequency.sh status`로 언제든 확인할 수 있다(읽기만 하므로 sudo 불필요).
+
+**측정 도구 사용법 요약** (전부 `measure/`, 멱등·원커맨드)
+
+| 스크립트 | 용도 |
+|---|---|
+| `provision-guests.sh [up\|destroy\|status\|ips]` | 게스트 3대 프로비저닝 |
+| `run-baseline.sh <tier> [dur]` · `measure-guests.sh [dur]` | §8.4·8.5 스케줄링 지연 |
+| `measure-lock.sh [dur] [all\|host\|mirror\|guest]` | §8.6 락 행렬 (`MODES_LIST`·`TAG` 환경변수) |
+| `set-guest-cmdline.sh <add\|remove> <param>` | §8.6 `nopvspin` 대조 |
+| `vmexit-probe` | §8.7 VM exit 비용 |
+| `measure-pin.sh <smt\|partition> [dur]` | §8.8 핀·SMT (**끝나면 핀이 남으니 해제할 것**) |
+| `pin-frequency.sh <on\|off\|status>` · `freq-on.sh` · `freq-off.sh` | 주파수 고정 |
+| `measure-footprint.sh <l1\|l0\|thp> [dur]` | §8.9 작업 집합 스윕 |
+| `summarize-lock.py` · `summarize-footprint.py` · `summarize.py` | 요약 |
+
+**다음 작업 후보 (우선순위)**
+
+1. **5편 재집필** — §8.3~8.9와 `revision-audit.md` §6의 P0를 함께 반영.
+   근거가 충분히 쌓였으므로 지금이 적기
+2. **OVS GENEVE 오버레이 실측** — 발행본 창작 수치(`2.5~4.0µs`·`25~40µs`) 대체.
+   DevStack 없이 호스트 OVS로 게스트 간 터널을 구성하는 편이 격리가 깨끗하다
+3. **DevStack VM** — OpenStack 학습 목적(측정 정밀도 목적이 아님)
+4. **3편·6편 보강** — §8.9의 LLC 절벽은 가상화가 아니라 노드 밀도 주제이므로 이쪽에 연결
+
+**이 세션에서 얻은 측정 방법론 교훈 (재발 방지)**
+
+- 스레드별 쓰기 구조체는 **캐시 라인 정렬 필수**. `lock-probe` 초판이 56바이트라 거짓 공유로
+  `spin` 처리량이 3.4배 왜곡됐다
+- **단일 실행으로 원인을 귀속하지 말 것**. 이 세션에서 두 번 틀렸다(SMT 귀속, 오염 진단).
+  핵심 수치는 3회 이상 반복하고 변동폭을 함께 기록한다
+- **측정 전 환경 상태를 코드로 검사할 것**. `measure-pin.sh`가 남긴 vCPU 핀 때문에
+  게스트끼리 경쟁하지 않는 무효 측정을 했다. 지금은 `measure-lock.sh`·`measure-footprint.sh`가
+  진입 전 `vcpupin`을 검사해 중단한다
+- **SMT·핀 측정은 주파수를 함께 재거나 고정할 것**. 부스트 클럭이 §8.8 결론을 뒤집었다
+- 대조군은 **토폴로지(락 도메인 수·프로세스 수)까지 일치**시켜야 한다
