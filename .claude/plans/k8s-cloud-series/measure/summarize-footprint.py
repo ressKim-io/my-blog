@@ -57,9 +57,10 @@ def retention(tag, layer, kb):
         o = load(f"fp-{tag}-l0-3x8-p[0-9]-{fpad(kb)}.json")
     if not s or not o:
         return None
+    solo = thr(s[0])
     avg = sum(thr(r) for r in o) / len(o)
     steal = sum(r["cpu_time_pct"].get("steal", 0.0) for r in o) / len(o)
-    return avg / thr(s), thr(s), avg, steal
+    return avg / solo, solo, avg, steal
 
 
 def sweep_table(tag, footprints):
