@@ -1,54 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" width="100%" height="100%">
   <defs>
     <style>
-      .bg { fill: #F8FAFC; }
-      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
-      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
-      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
-      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
-      .box-inner { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
-      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
-      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
-      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
-      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
-      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-many { fill: #FFFBEB; stroke: #D97706; stroke-width: 2; rx: 8; }
+      .box-few { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .inner { fill: #FFFFFF; stroke: #D4D4D8; stroke-width: 1.5; rx: 6; }
+      .h-many { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #B45309; text-anchor: middle; }
+      .h-few { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .big-many { font-family: 'Pretendard', system-ui, sans-serif; font-size: 17px; font-weight: 700; fill: #B45309; text-anchor: middle; }
+      .big-few { font-family: 'Pretendard', system-ui, sans-serif; font-size: 17px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .note { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
     </style>
   </defs>
 
-  <!-- Background -->
-  <rect width="800" height="460" class="bg" rx="12"/>
+  <rect width="820" height="400" class="bg" rx="12"/>
 
-  <!-- Title Section -->
-  <text x="40" y="42" class="title">Linux Kernel ENA Driver PCI Queues &amp; MSI-X Fragmentation</text>
-  <text x="40" y="66" class="subtitle">Multi-ENI IRQ Explosion vs Prefix Delegation Queue Concentration</text>
+  <text x="40" y="40" class="title">MSI-X Vectors Scale With ENI Count</text>
+  <text x="40" y="64" class="subtitle">m5.4xlarge, 16 vCPU — queues per ENI = MIN(8, 16) = 8, plus 1 admin vector</text>
 
-  <!-- Left Column: Multi-ENI Fragmentation -->
-  <rect x="40" y="96" width="340" height="324" class="box-orange"/>
-  <text x="210" y="134" class="txt-header">Multi-ENI Attachment (8 ENIs)</text>
-  <text x="210" y="156" class="txt-orange">High PCI Device Proliferation</text>
+  <rect x="40" y="96" width="360" height="200" class="box-many"/>
+  <text x="220" y="126" class="h-many">Secondary IP mode — 8 ENIs</text>
 
-  <rect x="64" y="176" width="292" height="74" class="box-inner"/>
-  <text x="210" y="206" class="txt-body">8 ENIs * 16 Queues = 128 Ring Buffers</text>
-  <text x="210" y="230" class="txt-sub">ena_enable_msix Allocates 128 MSI-X Vectors</text>
+  <rect x="66" y="146" width="308" height="44" class="inner"/>
+  <text x="220" y="174" class="mono">8 x (8 queues + 1 admin)</text>
 
-  <rect x="64" y="266" width="292" height="134" class="box-inner"/>
-  <text x="210" y="298" class="txt-header">Kernel Softirq Impact</text>
-  <text x="210" y="324" class="txt-body">Scattered NAPI Polling Across vCPUs</text>
-  <text x="210" y="350" class="txt-body">native_queued_spin_lock_slowpath Spikes</text>
-  <text x="210" y="380" class="txt-orange">Heavy ksoftirqd CPU Lock Contention</text>
+  <text x="220" y="228" class="big-many">72 MSI-X vectors</text>
+  <text x="220" y="262" class="mono">8 netdevs, 8 PCI devices</text>
 
-  <!-- Right Column: Prefix Delegation Concentration -->
-  <rect x="420" y="96" width="340" height="324" class="box-teal"/>
-  <text x="590" y="134" class="txt-header">Prefix Delegation (1~2 ENIs)</text>
-  <text x="590" y="156" class="txt-teal">Concentrated PCI Architecture</text>
+  <rect x="430" y="96" width="350" height="200" class="box-few"/>
+  <text x="605" y="126" class="h-few">Prefix delegation — 2 ENIs</text>
 
-  <rect x="444" y="176" width="292" height="74" class="box-inner"/>
-  <text x="590" y="206" class="txt-body">1~2 ENIs * 16 Queues = 16~32 Ring Buffers</text>
-  <text x="590" y="230" class="txt-sub">Minimal MSI-X Vector Allocation</text>
+  <rect x="456" y="146" width="298" height="44" class="inner"/>
+  <text x="605" y="174" class="mono">2 x (8 queues + 1 admin)</text>
 
-  <rect x="444" y="266" width="292" height="134" class="box-inner"/>
-  <text x="590" y="298" class="txt-header">Kernel Softirq Efficiency</text>
-  <text x="590" y="324" class="txt-body">Focused NAPI Polling (ena_napi_poll)</text>
-  <text x="590" y="350" class="txt-body">Zero Multi-ENI Queue Spinlock Contention</text>
-  <text x="590" y="380" class="txt-teal">Optimized CPU Cycle Preservation</text>
+  <text x="605" y="228" class="big-few">18 MSI-X vectors</text>
+  <text x="605" y="262" class="mono">2 netdevs, 2 PCI devices</text>
+
+  <text x="410" y="344" class="note">Source confirms the vector count only — the workload cost of that difference was not measured</text>
 </svg>

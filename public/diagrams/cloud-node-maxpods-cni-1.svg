@@ -35,7 +35,6 @@
   <text x="210" y="298" class="txt-header">Example: m5.large (3 ENIs)</text>
   <text x="210" y="324" class="txt-body">3 * (10 - 1) + 2 = 29 Pods Max</text>
   <text x="210" y="350" class="txt-body">All 3 Physical ENIs Exhausted</text>
-  <text x="210" y="380" class="txt-teal">High ENI Attachment &amp; IRQ Cost</text>
 
   <!-- Right Column: Prefix Delegation Mode -->
   <rect x="420" y="96" width="340" height="324" class="box-orange"/>
@@ -50,5 +49,4 @@
   <text x="590" y="298" class="txt-header">Example: m5.large (3 ENIs)</text>
   <text x="590" y="324" class="txt-body">3 * 9 * 16 + 2 = 434 IP Capacity</text>
   <text x="590" y="350" class="txt-body">Single ENI (eth0) Supports 144 IPs</text>
-  <text x="590" y="380" class="txt-orange">Minimal ENI Attachment &amp; Low IRQ Cost</text>
 </svg>

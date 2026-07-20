@@ -240,9 +240,48 @@ lint 결과 기준:
   만분율)·Karpenter `types.go:523~` 산식·`evictionThreshold` 100Mi — 클론과 일치. GKE 64GiB
   검산(1024+819.2+819.2+2949.12=5,611.5) 정확
 
-## 4. 3편 `cloud-node-maxpods-cni.md`
+## 4. 3편 `cloud-node-maxpods-cni.md` → **7부 2편 (완료 `2026-07-20`)**
 
-- [ ] **P0** L143~151 ENA MSI-X 파편화 인과 사슬 — **창작 물리**:
+> **[완료] 재집필 완료** — plan.md §0 대체 규칙 적용. 직접 잰 수치 0건.
+> - **P0 ENA MSI-X 창작 물리 삭제**: "여러 vCPU가 ENI 큐 스핀락 경쟁 →
+>   `native_queued_spin_lock_slowpath` 급증"·"소프트 인터럽트 세금 75% 이상 제거" 전량 제거.
+>   대체는 소스가 말하는 것까지만 — `ena_netdev.h:56` `ENA_ADMIN_MSIX_VEC 1` +
+>   `ENA_MAX_MSIX_VEC(io_queues)`로 **ENI당 벡터 = 큐 수 + 1**을 확정하고,
+>   `m5.4xlarge` 기준 ENI 8장 72개 vs 2장 18개까지만 서술. **"그 차이가 실제로 얼마나
+>   손해인지는 재지 않았으므로 쓰지 않는다"를 본문에 명시**. 큐마다 독립 NAPI·독립 IRQ라는
+>   문서 서술을 근거로 공유 스핀락 가정에 근거가 없음도 함께 적음
+> - **P0 ENA 문서 인용 왜곡 교정**: 원문은 "up to 32 for **network accelerated instances**"인데
+>   "larger instances"로 바꾸고 다른 Q&A의 "one IRQ for each ENA queue"를 이어 붙여 한 인용처럼
+>   제시했다. **두 Q&A를 각각 원문 그대로** 분리 인용하고 "IRQ는 같은 큐의 Tx/Rx 완료 링이
+>   공유한다"는 뒷문장까지 살림
+> - **추가 발견 (감사 미기재)**: 발행본이 인용한 C 코드(`vzalloc` + `msix_entries` 루프)는
+>   `#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 8, 0)` **레거시 분기**다. EKS 커널에서는
+>   실행되지 않는 죽은 경로를 현행처럼 인용했다. 현대 경로
+>   `pci_alloc_irq_vectors(..., PCI_IRQ_MSIX)`로 교체. `netif_dbg`의 인자도 `ifup`이 아니라 `probe`
+> - **접두사 위임 동기를 문헌 근거로 교체**: "IP 가뭄 해소" 서사 대신 `docs/eni-and-ip-target.md`
+>   (`WARM_ENI_TARGET=1`이 ENI 한 장 분량 IP를 늘 놀림 — `p3dn.24xlarge`에서 파드 3개에 IP 98개 중
+>   **95개 유휴**)와 `docs/prefix-and-ip-target.md`(ENI 부착 + IMDS 동기화가 파드 기동 지연을 키움,
+>   여분 EC2 호출 회피)를 인용. **P1 warm pool 소스 해부 부재도 이것으로 해소**
+> - **P1 L102 이론상 434 vs 권장 상한 구분**: 434는 IP 주소 공간 크기일 뿐 `maxPods` 권장값이
+>   아님을 명시. 더불어 `nodeadm/internal/kubelet/eni_max_pods.go:28` `defaultMaxPods = 110`이
+>   **권장 상한이 아니라 조회 실패 시 폴백**임을 소스로 확정
+> - **P1 L52-53 `+2` 근거 확보**: 추정이 아니라 `gen_vpc_ip_limits.go:571` 생성 표 머리말 주석이
+>   "First IP on each ENI is not used for pods / +2 for the pods that use host-networking
+>   (AWS CNI and kube-proxy)"로 명시. 주석 그대로 인용
+> - **P1 24편 수치 재인용**: 파드 0/30/50 → 고루틴 251/382/471, 스택 3.78/6.01/7.44 MiB 표와
+>   파드당 약 4.4 고루틴·15.8 KB를 인용하고 링크 연결
+> - **P1 L171 과장 교정**: "모든 서비스 트래픽을 차단" → `NotReady` 전환 시 서비스 엔드포인트에서
+>   제외된다로 정정. 24편이 다룬 `genericPlegRelistThreshold` 3분과 **Evented PLEG가 v1.36.1까지
+>   기본 비활성 알파**임을 함께 적어 퇴행 서술 해소. PLEG 기전 자체는 24편에 위임
+> - **P2**: ⚠️ 이모지·"정밀한 물리적 인과율" 자화자찬 서두 제거, "IP 가뭄"·"생체 주기 엔진"·
+>   "댓가"·"스пин락"(키릴) 정리, C8 유형 태그 `concept`
+> - SVG: `-2`에 `native_queued_spin_lock_slowpath Spikes`·`Zero Multi-ENI Queue Spinlock
+>   Contention`·틀린 큐 수(16)가 박혀 있어 **재작성**. `-1`은 근거 없는 IRQ 비용 문구 제거
+>   (18 → 16 text). `-3`(PLEG 병목)은 PLEG를 24편에 위임하면서 **미참조가 되어 삭제**
+> - `npm run lint:post` **error 0**
+
+
+- [x] **P0** L143~151 ENA MSI-X 파편화 인과 사슬 — **창작 물리**:
   - "여러 vCPU가 서로 다른 ENI 큐의 스핀락을 획득하려고 경쟁 → `native_queued_spin_lock_slowpath`
     급증" — 각 큐는 독립 NAPI 컨텍스트·독립 인터럽트로 처리되며 큐 간 공유 스핀락 경합이라는
     근거 없음
@@ -250,24 +289,24 @@ lint 결과 기준:
   - 재작성 방향: Prefix Delegation의 실제 동기(IP 밀도 확보, ENI attach 지연·warm pool API 호출
     절약 — 공식 문서 근거)로 교체. MSI-X 개수 산수(8 ENI×8큐=64 vs 2 ENI=16)는 소스·문서 근거가
     있으므로 유지 가능하되 성능 효과 단정은 제거
-- [ ] **P0** L133~139 ENA 문서 인용 왜곡 — 원문(`ENA_Linux_Best_Practices.rst:76-78`):
+- [x] **P0** L133~139 ENA 문서 인용 왜곡 — 원문(`ENA_Linux_Best_Practices.rst:76-78`):
   "MAX_NUM_QUEUES_PER_ENI is 8 for most of the instance types and up to 32 for **network
   accelerated instances**." 발행본은 "(and up to 32 on larger instances) and one IRQ for each
   ENA queue."로 변조·접합. 원문 그대로 재인용 (실패 패턴 ②)
-- [ ] **P1** 기획 §3 미이행 3건:
+- [x] **P1** 기획 §3 미이행 3건:
   1. **ENI warm pool 소스 해부 부재** — `WARM_ENI_TARGET`/`WARM_IP_TARGET`/`MINIMUM_IP_TARGET`
      처리 로직(`pkg/ipamd/ipamd.go`) 추가
   2. **24편 수치 재인용 부재** — 구체 수치 0건. 24편의 "노드당 동시성 주체 약 500개" 등
      실존 수치 인용·링크
   3. **Nitro 문헌 연결 0건** — re:Invent/공식 문서 링크 (C1)
-- [ ] **P1** L102: 이론상 IP 434개와 EKS 권장 max-pods 상한(110/250 — max-pods-calculator 로직)의
+- [x] **P1** L102: 이론상 IP 434개와 EKS 권장 max-pods 상한(110/250 — max-pods-calculator 로직)의
   구분 서술 추가. "IP 공간"과 "권장 maxPods"는 다른 값
-- [ ] **P1** L171: "모든 서비스 트래픽을 차단해버립니다" — 과장. NotReady 전환 → 서비스
+- [x] **P1** L171: "모든 서비스 트래픽을 차단해버립니다" — 과장. NotReady 전환 → 서비스
   endpoints에서 제외되는 경로로 정정. 24편이 이미 다룬 **Evented PLEG** 해결책과 정합 필요
   (현재 3편은 구식 relist 서술만 있어 24편 독자에게 퇴행으로 읽힘)
-- [ ] **P1** L52-53: "+2" 보정 해석(hostNetwork 파드 2개, ENI 슬롯 미소모) — 공식 문서/스크립트
+- [x] **P1** L52-53: "+2" 보정 해석(hostNetwork 파드 2개, ENI 슬롯 미소모) — 공식 문서/스크립트
   주석 근거 확인 후 명시
-- [ ] **P2** L12~15 서두 고지 간결화(⚠️ 이모지·자화자찬 제거, C5), L182 "스пин락"(C6),
+- [x] **P2** L12~15 서두 고지 간결화(⚠️ 이모지·자화자찬 제거, C5), L182 "스пин락"(C6),
   L173 "댓가"(C6), "IP 가뭄"·"생체 주기 엔진"(C7), L164 "750개"는 "파드당 컨테이너 3개(앱 2+pause)
   가정" 명시
 - 검증 완료(수정 불요): `printPodLimit` 산식(`gen_vpc_ip_limits.go:44`), m5.large 29·m5.4xlarge
