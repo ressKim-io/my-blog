@@ -1,0 +1,31 @@
+{
+  "label": "l1-bridge-s1400-r3",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "schedlab1",
+    "release": "6.8.0-134-generic"
+  },
+  "config": {
+    "target": "192.168.122.100",
+    "port": 9911,
+    "size": 1400,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 28.474,
+    "p50": 31.71,
+    "p90": 34.445,
+    "p99": 40.116,
+    "max": 690.675,
+    "mean": 32.263
+  },
+  "host_mhz": {
+    "before": 4167.0,
+    "after": 4311.0
+  }
+}

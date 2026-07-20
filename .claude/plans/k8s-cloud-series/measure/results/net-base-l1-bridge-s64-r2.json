@@ -1,0 +1,31 @@
+{
+  "label": "l1-bridge-s64-r2",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "schedlab1",
+    "release": "6.8.0-134-generic"
+  },
+  "config": {
+    "target": "192.168.122.100",
+    "port": 9911,
+    "size": 64,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 28.775,
+    "p50": 31.871,
+    "p90": 34.766,
+    "p99": 40.357,
+    "max": 140.047,
+    "mean": 32.429
+  },
+  "host_mhz": {
+    "before": 3949.0,
+    "after": 4511.0
+  }
+}
