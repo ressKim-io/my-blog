@@ -65,12 +65,12 @@
 
 | 자료 | 형태 | 쓰는 편 | 확보 방법 |
 |---|---|---|---|
-| `aws/amazon-vpc-cni-k8s` | 소스 | 3 | git clone (태그 고정) |
-| `awslabs/amazon-eks-ami` | 소스 (kube-reserved 산식) | 2 | git clone |
-| `kubernetes-sigs/karpenter` + `aws/karpenter-provider-aws` | 소스 | 2 | git clone |
+| `aws/amazon-vpc-cni-k8s` (`f3a3374`) | 소스 | 3 | git clone (`/Users/jun/src/amazon-vpc-cni-k8s`) |
+| `awslabs/amazon-eks-ami` (`b4fffb7`) | 소스 (kube-reserved 산식) | 2 | git clone (`/Users/jun/src/amazon-eks-ami`) |
+| `kubernetes-sigs/karpenter` (`a0d5370`) + `aws/karpenter-provider-aws` (`a2496cc`) | 소스 | 2 | git clone (`/Users/jun/src/karpenter`, `/Users/jun/src/karpenter-provider-aws`) |
 | `cilium/cilium` | 소스 (bpf/ 디렉토리) | 4 | git clone |
-| 리눅스 커널 `drivers/net/ethernet/amazon/ena` | 소스 | 3 | 커널 트리 (colima VM 커널 6.8 소스 또는 kernel.org) |
-| K8s APF (`staging/src/k8s.io/apiserver/pkg/util/flowcontrol`) | 소스 | 1 | 기존 E2 트리 재사용 |
+| 리눅스 커널 ENA 드라이버 `amzn/amzn-drivers` (`acddbf2`) | 소스 | 3 | git clone (`/Users/jun/src/amzn-drivers`) |
+| K8s APF (`staging/src/k8s.io/apiserver/pkg/util/flowcontrol`) (`v1.36.1-alpha.0`) | 소스 | 1 | 기존 E2 트리 재사용 (`/Users/jun/src/kubernetes`) |
 | GKE 문서 (노드 예약 공식·Dataplane V2) | 문헌 | 1·2·4 | 공식 문서, 접근 일자 기록 |
 | EKS Best Practices Guide·re:Invent Nitro 딥다이브 | 문헌 | 1·3 | 출처 링크 수집 |
 | OpenStack (DevStack 또는 kolla-ansible) | 실측 환경 | 5 | Linux PC (§5.2) |
@@ -129,15 +129,53 @@
 
 ## 8. 실측 결과 기록 (착수 후 append)
 
-> 실측 등급 수치는 반드시 여기 먼저 기록한 뒤 본문에 반영한다. 현재 없음.
+> 실측 등급 수치는 반드시 여기 먼저 기록한 뒤 본문에 반영한다.
+
+### 8.1 4편 로컬 실측 — kind + Cilium eBPF Socket LB (`2026-07-20` 측정)
+- **환경**: colima VM (`aarch64`, Linux 커널 `6.8.0-117-generic`) 위 `kind` 클러스터 (`kind-cilium-test`, `disableDefaultCNI: true`, `kubeProxyMode: none`)
+- **Cilium 버전**: `v1.19.5` (`kubeProxyReplacement=true`, `socketLB.enabled=true`)
+- **실측 항목 및 측정치**:
+  1. **kube-proxy 대체 전후 iptables 룰 수**:
+     - 노드(`cilium-test-control-plane`) 내부 `iptables-save -c | wc -l`: **89줄** (`conntrack -L | wc -l`: 354개)
+     - `kube-proxy`의 `KUBE-SERVICES`, `KUBE-SVC-*`, `KUBE-SEP-*` 체인이 **0개**로 완전히 소멸하여 `O(N)` 선형 탐색 체인이 커널 네트워크 스택에서 사라짐을 실측 검증.
+  2. **Socket LB (`BPF_CGROUP_INET4_CONNECT`) 기동 및 커버리지 확인**:
+     - `cilium-agent -- cilium-dbg status --verbose`: `KubeProxyReplacement: True [Direct Routing]`, `Socket LB: Enabled`, `Socket LB Coverage: Full` 확인.
+  3. **ClusterIP Service 경유 파드 간 TCP 대역폭 (`iperf3`)**:
+     - `cilium-bench` 네임스페이스 내 동일 노드(`cilium-test-worker`) 안착 파드 간(`iperf3-client` `10.244.1.13` → Service VIP `10.96.79.10:5201` → `iperf3-server` `10.244.1.66`):
+     - 5초간 54.9 GBytes 전송, **평균 94.4 Gbits/sec** (최고 95.4 Gbits/sec) 달성.
+     - 클라이언트 파드의 `connect()` 호출 순간 cgroup v2 훅(`cil_sock4_connect` → `__sock4_xlate_fwd`)이 소켓 목적지 주소(`bpf_sock_addr->user_ip4`)를 서비스 VIP에서 백엔드 파드 IP로 즉시 인플레이스 변환하므로, L3/L4 네트워크 인터페이스나 conntrack NAT 표를 거치지 않고 소켓 간 직결 전송(`sock_hash`/`sk_msg_redirect_hash`)됨을 확인.
+- **⚠️ 해석 오류 정정 (2026-07-20 감사)**: 위 3번 마지막 문장의 `sock_hash`/`sk_msg_redirect_hash` 기전은 **측정으로 확인한 적 없고 현행 Cilium에 존재하지 않는 제거된 기능** (클론 `bpf/`에 해당 코드 0건). 유효한 측정 사실은 iptables 89줄·KUBE-* 체인 0개·iperf3 94.4Gbps까지이며, 기전 해석은 `revision-audit.md` §5 참조
+
+### 8.2 [무효] 5편 실측 — 하드웨어 가상화 체크리스트 및 가상화 지연 지표 (`2026-07-20` 측정)
+
+> **⚠️ 무효 처리 (2026-07-20 감사)**: §5.2가 요구한 Linux PC KVM/OpenStack이 아닌 **Darwin/colima
+> 대체 측정**이며 논지 검증력이 없음 — steal 0%는 단일 전용 게스트에서 당연한 값이고, "가상
+> 브릿지(0.164ms) < 루프백(0.175ms)"은 측정 노이즈. 본문 인용 금지. Linux PC 재실측으로 대체
+> 예정 (`revision-audit.md` §8.2 절차)
+- **실측 도구**: `check-and-bench-kvm.sh` (멱등 원커맨드, 고속 `-c 20 -i 0.05` 실측, `kvm-virt-bench.json` 저장 완료)
+- **체크리스트 확인 결과 (`hardware_checklist`)**:
+  - `os_type`: `Darwin`, `architecture`: `arm64`, `kernel_version`: `25.5.0`
+  - `virtualization_extensions`: `Apple_Silicon_Hypervisor_Framework` (`qemu/colima` 하이퍼바이저 기반)
+  - `nested_virtualization_supported`: `false (Darwin Host)` (중첩 가상화 미지원 확인)
+  - `total_ram_gb`: `16.0 GB`
+  - `sriov_supported`: `false` (SR-IOV 하드웨어 가상 기능 미지원 $\to$ 본문에서 문헌 및 소스 레벨 규명으로 명확 고지)
+- **가상화 CPU 스케줄링 및 인터럽트 지표 (`cpu_scheduling_metrics`)**:
+  - `vm_steal_time_percentage`: `0.0000%` (단일 전용 게스트 안착)
+  - `vm_total_interrupts`: `4,130,366` (`/proc/stat` 기준 누적 인터럽트)
+  - `vm_context_switches`: `7,550,846` (누적 문맥 교환 횟수)
+- **가상 브릿지 네트워크 지연 (`network_overlay_metrics`)**:
+  - `host_loopback_latency_avg`: `0.175 ms`
+  - `virtual_bridge_latency_avg`: `0.164 ms` (`0.94x`)
 
 ## 9. 진행 상태
 
 | 항목 | 상태 |
 |---|---|
-| 편 구성·시리즈명 사용자 확정 | ☐ |
-| 6부 수정 완료 (선행 조건) | ☐ |
-| 자료 클론 + 버전 고정 (§4) | ☐ |
-| Cilium 스모크 테스트 (§5.1) | ☐ |
-| Linux PC 체크리스트 (§5.2) | ☐ |
-| 1~6편 집필 | ☐ 미착수 |
+| 편 구성·시리즈명 사용자 확정 (`k8s-cloud-optimization` / 클라우드 인프라 물리학) | [x] 완료 |
+| 6부 수정 완료 (선행 조건) | [x] 완료 |
+| 자료 클론 + 버전 고정 (§4 — VPC CNI, ENA 드라이버, Cilium 소스 완료) | [x] 1~4편 소스 클론 완료 |
+| Cilium 스모크 테스트 (§5.1) | [x] 완료 (커널 6.8 + Socket LB + 94.4Gbps — 단, kube-proxy baseline 미측정, 감사 §5 참조) |
+| Linux PC / KVM 체크리스트 및 실측 (§5.2) | [ ] **무효 → 재수행 필요** (Darwin 대체 측정은 §8.2 무효 처리. Linux PC에서 재실측 확정) |
+| 1~6편 집필 | [x] 1차 발행본 (`2026-07-20`) — 감사 결과 P0 다수, 수정 필요 |
+| **1차 발행본 전수 감사** | [x] 완료 (`2026-07-20`) — **수정 SSOT: `revision-audit.md`** (사실 오류·창작 수치·깊이 결손 전수 기록) |
+| 감사 반영 수정 (P0·실측 보완·P1·P2) | [ ] 미착수 — revision-audit.md §10 순서대로 |
