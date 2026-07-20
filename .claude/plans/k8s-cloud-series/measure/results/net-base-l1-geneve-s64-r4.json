@@ -1,0 +1,31 @@
+{
+  "label": "l1-geneve-s64-r4",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "schedlab1",
+    "release": "6.8.0-134-generic"
+  },
+  "config": {
+    "target": "10.90.0.2",
+    "port": 9911,
+    "size": 64,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 31.681,
+    "p50": 35.307,
+    "p90": 38.844,
+    "p99": 45.466,
+    "max": 259.224,
+    "mean": 35.895
+  },
+  "host_mhz": {
+    "before": 3924.0,
+    "after": 4429.0
+  }
+}

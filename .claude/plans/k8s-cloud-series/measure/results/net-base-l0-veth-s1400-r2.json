@@ -1,0 +1,31 @@
+{
+  "label": "l0-veth-s1400-r2",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "ressbe",
+    "release": "7.0.0-28-generic"
+  },
+  "config": {
+    "target": "10.90.0.2",
+    "port": 9911,
+    "size": 1400,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 6.202,
+    "p50": 7.354,
+    "p90": 7.394,
+    "p99": 8.436,
+    "max": 26.25,
+    "mean": 7.328
+  },
+  "host_mhz": {
+    "before": 3488.0,
+    "after": 3769.0
+  }
+}

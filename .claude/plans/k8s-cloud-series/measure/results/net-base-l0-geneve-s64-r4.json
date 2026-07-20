@@ -1,0 +1,31 @@
+{
+  "label": "l0-geneve-s64-r4",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "ressbe",
+    "release": "7.0.0-28-generic"
+  },
+  "config": {
+    "target": "10.90.0.2",
+    "port": 9911,
+    "size": 64,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 8.195,
+    "p50": 8.577,
+    "p90": 8.667,
+    "p99": 9.899,
+    "max": 31.19,
+    "mean": 8.502
+  },
+  "host_mhz": {
+    "before": 3678.0,
+    "after": 3690.0
+  }
+}

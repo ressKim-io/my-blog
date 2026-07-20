@@ -146,6 +146,10 @@ l0_run_tier() {
   local tier=$1 dst=$2
   local NSA=nt-nsa NSB=nt-nsb
   ip netns list | grep -qw "$NSA" || die "netns 없음 — sudo ./net-setup.sh up $tier 먼저"
+  # 측정 전 경로 증명 — 도달성이 아니라 "의도한 장치를 지나는가"를 확인한다.
+  # l0-geneve 1차 측정이 ping은 통과했는데 터널을 타지 않아 무효였던 전례가 있다
+  msg "== $tier 경로 검증 =="
+  "$HERE/net-setup.sh" verify "$tier" || die "경로 검증 실패 — 측정을 중단합니다"
   msg "== $tier =="
   ip netns exec "$NSB" "$HERE/net-probe" --server --cpu 1 >/dev/null 2>&1 &
   local srv=$!; sleep 0.3

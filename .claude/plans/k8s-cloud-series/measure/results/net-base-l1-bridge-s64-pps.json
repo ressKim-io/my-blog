@@ -4,8 +4,8 @@
   "mode": "pps",
   "host": {"nodename": "schedlab1", "release": "6.8.0-134-generic"},
   "config": {"target": "192.168.122.100", "port": 9911, "size": 64, "duration_s": 5.0, "cpu": 5},
-  "sent": 1599360,
+  "sent": 1567232,
   "elapsed_s": 5.000,
-  "pps": 319863,
-  "mbps": 163.8
+  "pps": 313446,
+  "mbps": 160.5
 }

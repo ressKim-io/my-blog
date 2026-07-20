@@ -1,0 +1,11 @@
+{
+  "label": "l0-veth-s1400-pps",
+  "probe": "net-probe",
+  "mode": "pps",
+  "host": {"nodename": "ressbe", "release": "7.0.0-28-generic"},
+  "config": {"target": "10.90.0.2", "port": 9911, "size": 1400, "duration_s": 5.0, "cpu": 5},
+  "sent": 1637440,
+  "elapsed_s": 5.000,
+  "pps": 327476,
+  "mbps": 3667.7
+}

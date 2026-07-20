@@ -62,6 +62,29 @@ ns_del()   { assert_ours "$1"; ip netns del "$1" 2>/dev/null || true; }
 
 ensure_ns() { ip netns list | grep -qw "$1" || ip netns add "$1"; }
 
+# ── 티어 격리 ────────────────────────────────────────────────────────
+# 티어를 바꿀 때 이전 티어의 경로가 남아 있으면 **같은 서브넷에 경로가 둘**이 되고,
+# 라우팅이 의도하지 않은 장치를 골라도 ping은 그대로 통과한다.
+# 실제로 l0-geneve 1차 측정이 이 때문에 무효였다(터널을 타지 않고 브리지로 흘렀다).
+# 그래서 모든 up은 이 리셋을 먼저 통과한다.
+reset_l0_paths() {
+    for ns in "$NS_A" "$NS_B"; do
+        ip netns list | grep -qw "$ns" || continue
+        ip -n "$ns" link del "${P}-gnv" 2>/dev/null || true
+        for dev in "${P}-pa" "${P}-pb"; do
+            ip -n "$ns" addr flush dev "$dev" 2>/dev/null || true
+        done
+    done
+    for tag in a b; do
+        ip link set "${P}-h${tag}" nomaster 2>/dev/null || true
+    done
+    if have ovs-vsctl; then
+        for tag in a b; do
+            ovs-vsctl --if-exists del-port "$OVS_L0" "${P}-h${tag}" 2>/dev/null || true
+        done
+    fi
+}
+
 # ── L0 공통: netns 두 개 + veth 두 쌍 ────────────────────────────────
 setup_l0_endpoints() {
     ensure_ns "$NS_A"; ensure_ns "$NS_B"
@@ -95,7 +118,7 @@ detach_l0_endpoints() {
 }
 
 up_l0_veth() {
-    setup_l0_endpoints; detach_l0_endpoints
+    reset_l0_paths; setup_l0_endpoints
     ip link show "$BR_L0" >/dev/null 2>&1 || ip link add "$BR_L0" type bridge
     ip link set "$BR_L0" up
     for tag in a b; do ip link set "${P}-h${tag}" master "$BR_L0"; done
@@ -103,7 +126,7 @@ up_l0_veth() {
 
 up_l0_ovs() {
     have ovs-vsctl || die "ovs-vsctl 없음 — sudo apt install openvswitch-switch"
-    setup_l0_endpoints; detach_l0_endpoints
+    reset_l0_paths; setup_l0_endpoints
     ovs-vsctl --may-exist add-br "$OVS_L0"
     for tag in a b; do ovs-vsctl --may-exist add-port "$OVS_L0" "${P}-h${tag}"; done
     ip link set "$OVS_L0" up
@@ -112,6 +135,7 @@ up_l0_ovs() {
 # 커널 GENEVE — 언더레이는 netns를 직접 잇는 veth 쌍, 오버레이 주소는 gnv0에 붙는다
 up_l0_geneve() {
     ensure_ns "$NS_A"; ensure_ns "$NS_B"
+    reset_l0_paths   # veth 경로(10.90.0.0/24)를 반드시 먼저 걷어낸다
     if ! ip -n "$NS_A" link show "${P}-ula" >/dev/null 2>&1; then
         ip link add "${P}-ula" type veth peer name "${P}-ulb"
         ip link set "${P}-ula" netns "$NS_A"
@@ -202,16 +226,63 @@ down_l1() {
 }
 
 # ── verify ───────────────────────────────────────────────────────────
-verify_tier() {
+# 도달성(ping)만으로는 부족하다. l0-geneve 1차 측정은 ping이 통과했는데도
+# 터널을 타지 않았다 — 같은 서브넷에 경로가 둘이라 브리지로 흘렀기 때문이다.
+# 그래서 ① 경로 조회가 의도한 장치를 가리키는지 ② 그 장치의 패킷 카운터가
+# 실제로 증가하는지 **둘 다** 확인한다. 하나라도 어긋나면 측정을 막는다.
+expected_dev() {
     case "$1" in
-        l0-*)
-            echo -n "  $NS_A -> $OVL_B : "
-            ip netns exec "$NS_A" ping -c2 -W2 -q "$OVL_B" >/dev/null 2>&1 \
-                && echo OK || { echo FAIL; return 1; }
-            ;;
-        l1-*)
-            echo "  게스트 간 확인은 게스트 안에서: ping -c2 ${G2_IP}"
-            ;;
+        l0-veth|l0-ovs) echo "${P}-pa" ;;
+        l0-geneve)      echo "${P}-gnv" ;;
+        *)              echo "" ;;
+    esac
+}
+
+verify_tier() {
+    local tier=$1
+    case "$tier" in
+      l0-*)
+        local dev; dev="$(expected_dev "$tier")"
+        [ -n "$dev" ] || die "verify 대상 아님: $tier"
+
+        # ① 경로 조회가 의도한 장치를 고르는가
+        local via
+        via="$(ip netns exec "$NS_A" ip -o route get "$OVL_B" 2>/dev/null \
+               | grep -o 'dev [^ ]*' | awk '{print $2}')"
+        echo -n "  경로: $OVL_B -> dev $via "
+        if [ "$via" != "$dev" ]; then
+            echo "[FAIL — $dev 를 기대했습니다]"
+            echo "  같은 서브넷에 경로가 둘 있을 수 있습니다. 'sudo $0 up $tier' 를 다시 실행하십시오" >&2
+            return 1
+        fi
+        echo "[OK]"
+
+        # ② 그 장치의 카운터가 실제로 증가하는가
+        local c0 c1
+        c0="$(ip netns exec "$NS_A" cat /sys/class/net/"$dev"/statistics/tx_packets)"
+        ip netns exec "$NS_A" ping -c3 -i0.2 -W2 -q "$OVL_B" >/dev/null 2>&1 || {
+            echo "  도달 실패"; return 1; }
+        c1="$(ip netns exec "$NS_A" cat /sys/class/net/"$dev"/statistics/tx_packets)"
+        echo -n "  카운터: $dev tx_packets +$((c1 - c0)) "
+        if [ "$((c1 - c0))" -lt 3 ]; then
+            echo "[FAIL — 이 장치를 지나지 않았습니다]"; return 1
+        fi
+        echo "[OK]"
+
+        # ③ geneve 티어는 언더레이에도 캡슐화된 트래픽이 흘러야 한다
+        if [ "$tier" = l0-geneve ]; then
+            local u0 u1
+            u0="$(ip netns exec "$NS_A" cat /sys/class/net/"${P}-ula"/statistics/tx_packets)"
+            ip netns exec "$NS_A" ping -c3 -i0.2 -W2 -q "$OVL_B" >/dev/null 2>&1 || true
+            u1="$(ip netns exec "$NS_A" cat /sys/class/net/"${P}-ula"/statistics/tx_packets)"
+            echo -n "  언더레이: ${P}-ula tx_packets +$((u1 - u0)) "
+            [ "$((u1 - u0))" -ge 3 ] && echo "[OK — 캡슐화 확인]" \
+                                     || { echo "[FAIL]"; return 1; }
+        fi
+        ;;
+      l1-*)
+        echo "  게스트 간 확인은 게스트 안에서: ping -c2 ${G2_IP}"
+        ;;
     esac
 }
 

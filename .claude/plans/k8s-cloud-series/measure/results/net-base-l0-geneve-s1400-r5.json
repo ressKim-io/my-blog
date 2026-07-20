@@ -1,0 +1,31 @@
+{
+  "label": "l0-geneve-s1400-r5",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "ressbe",
+    "release": "7.0.0-28-generic"
+  },
+  "config": {
+    "target": "10.90.0.2",
+    "port": 9911,
+    "size": 1400,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 8.346,
+    "p50": 9.538,
+    "p90": 9.588,
+    "p99": 11.341,
+    "max": 21.121,
+    "mean": 9.577
+  },
+  "host_mhz": {
+    "before": 3565.0,
+    "after": 3355.0
+  }
+}
