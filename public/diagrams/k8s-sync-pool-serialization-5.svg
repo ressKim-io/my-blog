@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540" width="100%" height="100%" role="img" aria-labelledby="title desc" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="title">Serialization Execution Pipelines: Protobuf vs JSON Reflection</title>
+  <desc id="desc">Comparison between Protobuf direct mapping fast pipeline and JSON dynamic reflection pipeline with CBOR binary alternative.</desc>
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-size: 20px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; }
+      .header { font-size: 17px; font-weight: 700; text-anchor: middle; }
+      .label { font-size: 16px; font-weight: 700; text-anchor: middle; }
+      .sub { font-size: 15px; font-weight: 700; text-anchor: middle; }
+      .box-emerald { fill: #ECFDF5; stroke: #059669; stroke-width: 2.5; rx: 12; }
+      .box-emerald-hdr { fill: #D1FAE5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .box-rose { fill: #FFF1F2; stroke: #E11D48; stroke-width: 2.5; rx: 12; }
+      .box-rose-hdr { fill: #FFE4E6; stroke: #E11D48; stroke-width: 2; rx: 8; }
+      .box-violet { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 2.5; rx: 10; }
+      .card { fill: #FFFFFF; stroke-width: 2; rx: 8; }
+    </style>
+    <marker id="arr-g" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    </marker>
+    <marker id="arr-r" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#E11D48" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="540" class="bg" rx="12" />
+  <text x="400" y="38" class="title">Serialization Execution Pipelines: Protobuf vs JSON Reflection</text>
+
+  <!-- LEFT COLUMN: Protobuf Direct Mapping Pipeline -->
+  <rect x="35" y="68" width="350" height="370" class="box-emerald" />
+  <rect x="55" y="86" width="310" height="38" class="box-emerald-hdr" />
+  <text x="210" y="112" class="header" fill="#047857">Protobuf Direct Mapping Pipeline</text>
+
+  <rect x="55" y="140" width="310" height="52" class="card" stroke="#059669" />
+  <text x="210" y="172" class="label" fill="#047857">1. Static Struct Layout (*.pb.go)</text>
+
+  <path d="M 210 192 L 210 214" stroke="#059669" stroke-width="3" marker-end="url(#arr-g)" />
+
+  <rect x="55" y="218" width="310" height="52" class="card" stroke="#059669" />
+  <text x="210" y="250" class="label" fill="#047857">2. Direct Memory Copy (Zero Reflect)</text>
+
+  <path d="M 210 270 L 210 292" stroke="#059669" stroke-width="3" marker-end="url(#arr-g)" />
+
+  <rect x="55" y="296" width="310" height="52" class="card" stroke="#059669" />
+  <text x="210" y="328" class="label" fill="#047857">3. Write to Socket Buffer</text>
+
+  <rect x="55" y="364" width="310" height="58" class="card" stroke="#059669" fill="#ECFDF5" />
+  <text x="210" y="400" class="label" fill="#047857">8 µs / 40 Allocs (Zero Schema Tax)</text>
+
+
+  <!-- RIGHT COLUMN: JSON Reflection Pipeline -->
+  <rect x="415" y="68" width="350" height="370" class="box-rose" />
+  <rect x="435" y="86" width="310" height="38" class="box-rose-hdr" />
+  <text x="590" y="112" class="header" fill="#BE123C">JSON Reflection Pipeline (CRD Tax)</text>
+
+  <rect x="435" y="140" width="310" height="52" class="card" stroke="#E11D48" />
+  <text x="590" y="172" class="label" fill="#BE123C">1. Dynamic Unstructured Map</text>
+
+  <path d="M 590 192 L 590 214" stroke="#E11D48" stroke-width="3" marker-end="url(#arr-r)" />
+
+  <rect x="435" y="218" width="310" height="52" class="card" stroke="#E11D48" />
+  <text x="590" y="250" class="label" fill="#BE123C">2. reflect.Value Type Inspection</text>
+
+  <path d="M 590 270 L 590 292" stroke="#E11D48" stroke-width="3" marker-end="url(#arr-r)" />
+
+  <rect x="435" y="296" width="310" height="52" class="card" stroke="#E11D48" />
+  <text x="590" y="328" class="label" fill="#BE123C">3. String Key Match &amp; Heap Alloc</text>
+
+  <rect x="435" y="364" width="310" height="58" class="card" stroke="#E11D48" fill="#FFF1F2" />
+  <text x="590" y="400" class="label" fill="#BE123C">58 µs / 312 Allocs (7.8x CPU Tax)</text>
+
+  <!-- BOTTOM BRIDGE: K8s v1.30+ CBOR Binary JSON Solution -->
+  <rect x="35" y="454" width="730" height="66" class="box-violet" />
+  <text x="400" y="482" class="header" fill="#6D28D9">K8s v1.30+ Alternative: CBOR Binary JSON</text>
+  <text x="400" y="506" class="sub" fill="#334155">Zero String Reflection &amp; Map Allocs (CRD Optimization)</text>
+</svg>

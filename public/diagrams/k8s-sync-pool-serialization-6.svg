@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; }
+      .box-teal { fill: #f0fdf4; stroke: #0d9488; stroke-width: 2.5; rx: 12; }
+      .box-teal-hdr { fill: #ccfbf1; stroke: #0d9488; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 2.5; rx: 12; }
+      .box-orange-hdr { fill: #ffedd5; stroke: #ea580c; stroke-width: 2; rx: 8; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arr-o" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#ea580c" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="360" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">Cost Conservation: Serialization Defense to Informer Cache</text>
+
+  <!-- Left Box: Post 25 (Deep Teal) -->
+  <rect x="25" y="65" width="335" height="270" class="box-teal" />
+  <rect x="45" y="80" width="295" height="36" class="box-teal-hdr" />
+  <text x="192" y="104" text-anchor="middle" class="header" fill="#0f766e">Post 25: Watch Defense</text>
+
+  <rect x="45" y="128" width="295" height="52" class="card" stroke="#0d9488" />
+  <text x="192" y="150" text-anchor="middle" class="label" fill="#0f766e">Bypassed Bottleneck</text>
+  <text x="192" y="170" text-anchor="middle" class="sub" fill="#475569">O(N) Fan-Out &amp; Alloc Spikes</text>
+
+  <rect x="45" y="190" width="295" height="52" class="card" stroke="#0d9488" />
+  <text x="192" y="212" text-anchor="middle" class="label" fill="#0f766e">Bill Paid by Architecture</text>
+  <text x="192" y="232" text-anchor="middle" class="sub" fill="#475569">Victim RAM &amp; JSON Tax</text>
+
+  <rect x="45" y="252" width="295" height="65" class="card" stroke="#0d9488" fill="#f0fdf4" />
+  <text x="192" y="290" text-anchor="middle" class="label" fill="#0f766e">Remaining: N Polling Streams</text>
+
+  <!-- Center Transition Gap (clean gap with stacked text & arrow) -->
+  <text x="400" y="178" text-anchor="middle" class="sub" fill="#c2410c">Next</text>
+  <text x="400" y="196" text-anchor="middle" class="sub" fill="#c2410c">Bypass</text>
+  <path d="M 363 215 L 437 215" stroke="#ea580c" stroke-width="3.5" marker-end="url(#arr-o)" />
+
+  <!-- Right Box: Post 26 (Warm Orange) -->
+  <rect x="440" y="65" width="335" height="270" class="box-orange" />
+  <rect x="460" y="80" width="295" height="36" class="box-orange-hdr" />
+  <text x="607" y="104" text-anchor="middle" class="header" fill="#c2410c">Post 26: Informer Cache</text>
+
+  <rect x="460" y="128" width="295" height="52" class="card" stroke="#ea580c" />
+  <text x="607" y="150" text-anchor="middle" class="label" fill="#c2410c">Next Bypass Mechanism</text>
+  <text x="607" y="170" text-anchor="middle" class="sub" fill="#475569">SharedInformer Pointer (%p)</text>
+
+  <rect x="460" y="190" width="295" height="52" class="card" stroke="#ea580c" />
+  <text x="607" y="212" text-anchor="middle" class="label" fill="#c2410c">Eliminated Request Load</text>
+  <text x="607" y="232" text-anchor="middle" class="sub" fill="#475569">0-Copy In-Memory Share</text>
+
+  <rect x="460" y="252" width="295" height="65" class="card" stroke="#ea580c" fill="#fff7ed" />
+  <text x="607" y="290" text-anchor="middle" class="label" fill="#c2410c">New Threat: Ring Buffer OOM</text>
+</svg>
