@@ -1,6 +1,6 @@
 ---
 title: "쿠버네티스는 Go에게서 무엇을 사고 무엇을 냈는가 — 4중 우회 전략과 실측 대조표"
-excerpt: "23~27편에서 직접 실측한 4중 우회 메커니즘과 청구서 수치를 종합하고 1~5부(시스템 콜, 할당자, GC, JIT vs AOT, cgroup v2)의 물리 기전과 연결합니다. 컨트롤 플레인의 마스터 Static Pod 면제 및 분리 호스팅 OOM 엣지 케이스, 그리고 일반 Go 애플리케이션을 위한 GOMEMLIMIT 70~80% 설정 실전 지침을 통해 '당신의 애플리케이션은 쿠버네티스가 아니다'라는 최종 결론을 제시합니다"
+excerpt: "24~28편에서 직접 실측한 4중 우회 메커니즘과 청구서 수치를 종합하고 1~5부(시스템 콜, 할당자, GC, JIT vs AOT, cgroup v2)의 물리 기전과 연결합니다. 컨트롤 플레인의 마스터 Static Pod 면제 및 분리 호스팅 OOM 엣지 케이스, 그리고 일반 Go 애플리케이션을 위한 GOMEMLIMIT 70~80% 설정 실전 지침을 통해 '당신의 애플리케이션은 쿠버네티스가 아니다'라는 최종 결론을 제시합니다"
 category: runtime
 tags:
   - go
@@ -14,9 +14,9 @@ series:
 date: "2026-07-22"
 ---
 
-> **시리즈 "커널과 런타임으로 톺아보는 Rust · Go · Java"의 28편 — 6부 5편 (최종 대미)**
-> [27편](/essays/informer-shared-pointer-cost)에서 `SharedInformer`가 단 하나의 Watch 스트림으로 수집한 객체를 메모리 복사 없이 동일한 포인터(`%p`)로 N개 핸들러와 중앙 캐시(`Indexer`)에 공유하는 0-Copy 아키텍처와, 그 이면에서 상한 없이 팽창하는 링 버퍼(`RingGrowing`)가 유발하는 OOM 파국을 톺아보았습니다
-> 6부의 대미를 장식하는 6편에서는 **24편(`cgroup` 면제)부터 27편(`SharedInformer` 0-Copy)까지 직접 실측한 4중 우회 메커니즘과 지불한 청구서를 단 한 장의 대조표로 집계하고, 이를 1~5부에서 규명한 커널 및 런타임의 물리 법칙들과 입체적으로 연결**합니다
+> **시리즈 "커널과 런타임으로 톺아보는 Rust · Go · Java"의 29편 — 6부 5편 (최종 대미)**
+> [28편](/essays/informer-shared-pointer-cost)에서 `SharedInformer`가 단 하나의 Watch 스트림으로 수집한 객체를 메모리 복사 없이 동일한 포인터(`%p`)로 N개 핸들러와 중앙 캐시(`Indexer`)에 공유하는 0-Copy 아키텍처와, 그 이면에서 상한 없이 팽창하는 링 버퍼(`RingGrowing`)가 유발하는 OOM 파국을 톺아보았습니다
+> 6부의 대미를 장식하는 6편에서는 **25편(`cgroup` 면제)부터 28편(`SharedInformer` 0-Copy)까지 직접 실측한 4중 우회 메커니즘과 지불한 청구서를 단 한 장의 대조표로 집계하고, 이를 1~5부에서 규명한 커널 및 런타임의 물리 법칙들과 입체적으로 연결**합니다
 > 나아가 마스터 노드의 `Static Pod` 면제 특권이 클라우드 외부 분리 호스팅(`External Hosting`) 환경에서 무너질 때의 치명적 OOMKill 엣지 케이스를 규명하고, 일반 Go 백엔드 애플리케이션이 반드시 실천해야 할 **Go 1.19+ `GOMEMLIMIT` 70~80% 설정 실전 지침**을 통해 시리즈 전체를 관통하는 최종 소결을 짓습니다
 
 이번 편의 수치와 소스 분석은 쿠버네티스 v1.36.1 소스 트리 및 Go 1.26.5 런타임 커널 6.8 환경에서 실측한 `rt6-bench` 계측 데이터를 종합한 결과입니다
@@ -25,7 +25,7 @@ date: "2026-07-22"
 
 ## 바이너리 튜닝 손잡이 부재와 4중 우회 아키텍처
 
-우리는 6부의 첫 장([24편: 컨트롤 플레인의 cgroup v2 특권 면제](/essays/k8s-control-plane-self-exemption))을 열며 쿠버네티스 제어 평면 바이너리가 Go 런타임 환경변수(`GOGC`, `GOMAXPROCS`, `GOMEMLIMIT`)를 대하는 소스코드의 태도를 바닥부터 확인했습니다
+우리는 6부의 첫 장([25편: 컨트롤 플레인의 cgroup v2 특권 면제](/essays/k8s-control-plane-self-exemption))을 열며 쿠버네티스 제어 평면 바이너리가 Go 런타임 환경변수(`GOGC`, `GOMAXPROCS`, `GOMEMLIMIT`)를 대하는 소스코드의 태도를 바닥부터 확인했습니다
 놀랍게도 전 세계 수백만 클러스터의 마스터 노드를 지배하는 `kube-apiserver`와 `kubelet` 바이너리 내부에는 가비지 컬렉터나 힙 할당 상한을 동적으로 조율하는 **제어 루프용 런타임 손잡이가 단 하나도 존재하지 않았습니다**
 소스코드 조사 결과, 환경변수들은 오직 가동 초기 감사(`Audit`) 목적의 로그(`klog.InfoS`)로 한 번 출력될 뿐 Go 런타임 커널의 가비지 수집 페이스나 논리 프로세서(`P`) 스케줄링에는 어떠한 튜닝도 가하지 않습니다
 
@@ -50,10 +50,10 @@ date: "2026-07-22"
 
 | 편 / 6부 핵심 주제 | 검증 대상 및 실측 벤치마크 항목 | 계측 수치 및 소스 규명 결과 | 시스템이 얻은 아키텍처적 이득 (산 것) | 사람/앱이 지불한 기술적 청구서 (낸 것) |
 | :--- | :--- | :--- | :--- | :--- |
-| **[24편](/essays/k8s-control-plane-self-exemption)**<br/>컨트롤 플레인 자기 면제 | • 마스터 노드 `kubepods.slice` 배치<br/>• 유휴 `kube-apiserver` 고루틴 및 힙 | • `memory.max = max` (처형선 면제 확정)<br/>• `oom_score_adj -997 (-999)` / 힙 189.3 MiB | • OS OOM Killer 대상에서 완전 제외<br/>• 고루틴당 7.6 KB 초경량 제어 루프 유지 | • 일반 사용자 파드에는 절대 적용 불가<br/>• 1:1 OS 스레드 가정 대비 커널 스택 38 MiB |
-| **[25편](/essays/kubelet-goroutine-per-pod)**<br/>파드당 1:1 고루틴 배정 | • `podWorkers` 고루틴 스폰 매핑 구조<br/>• PLEG 상태 폴링 주기 및 CPU 점유 | • 파드 1개당 고루틴 정확히 1:1 분할<br/>• `Generic PLEG` = 1초마다 전수 폴링 | • 워커 풀 뮤텍스 락 병목 원천 제거<br/>• 파드별 동시성 격리 및 채널 제어 보장 | • 파드 수 비례 상태 조회 I/O 폭풍 유발<br/>• `Evented PLEG`(300초) 복잡도 및 억제선 필요 |
-| **[26편](/essays/k8s-sync-pool-serialization)**<br/>직렬화 캐시와 2주기 풀 | • `Protobuf vs JSON` 디코딩 비용 비교<br/>• `sync.Pool` 2주기 회수 수명과 P 샤딩 | • JSON 79 allocs vs Protobuf 40 allocs<br/>• GC 2주기 동안 Victim Cache 상주 유예 | • `cachingObject`(`sync.Once`)로 1회 직렬화<br/>• API Server 힙 복제 `O(N) ➔ O(1)` 압축 | • CRD의 JSON 강제 및 2배 힙 할당 건수 세금<br/>• CPU 프로세서(`P`) 교체 시 적중 실패 스파이크 |
-| **[27편](/essays/informer-shared-pointer-cost)**<br/>SharedInformer 0-Copy | • `distribute()` 전달 포인터(`%p`) 동일성<br/>• Slow Consumer `RingGrowing` 팽창 | • 100% 동일 힙 주소(`0xa7e...`) 공유 증명<br/>• 10만 이벤트 적재 시 160.1 MiB 힙 폭증 | • 클라이언트 메모리 복사 및 직렬화 0<br/>• 단일 Watch 스트림 네트워크 다중화 | • 수동 `DeepCopy()` 필수 상호배제 규약 강제<br/>• 백프레셔 없는 링 버퍼 지수 팽창 OOM 위협 |
+| **[25편](/essays/k8s-control-plane-self-exemption)**<br/>컨트롤 플레인 자기 면제 | • 마스터 노드 `kubepods.slice` 배치<br/>• 유휴 `kube-apiserver` 고루틴 및 힙 | • `memory.max = max` (처형선 면제 확정)<br/>• `oom_score_adj -997 (-999)` / 힙 189.3 MiB | • OS OOM Killer 대상에서 완전 제외<br/>• 고루틴당 7.6 KB 초경량 제어 루프 유지 | • 일반 사용자 파드에는 절대 적용 불가<br/>• 1:1 OS 스레드 가정 대비 커널 스택 38 MiB |
+| **[26편](/essays/kubelet-goroutine-per-pod)**<br/>파드당 1:1 고루틴 배정 | • `podWorkers` 고루틴 스폰 매핑 구조<br/>• PLEG 상태 폴링 주기 및 CPU 점유 | • 파드 1개당 고루틴 정확히 1:1 분할<br/>• `Generic PLEG` = 1초마다 전수 폴링 | • 워커 풀 뮤텍스 락 병목 원천 제거<br/>• 파드별 동시성 격리 및 채널 제어 보장 | • 파드 수 비례 상태 조회 I/O 폭풍 유발<br/>• `Evented PLEG`(300초) 복잡도 및 억제선 필요 |
+| **[27편](/essays/k8s-sync-pool-serialization)**<br/>직렬화 캐시와 2주기 풀 | • `Protobuf vs JSON` 디코딩 비용 비교<br/>• `sync.Pool` 2주기 회수 수명과 P 샤딩 | • JSON 79 allocs vs Protobuf 40 allocs<br/>• GC 2주기 동안 Victim Cache 상주 유예 | • `cachingObject`(`sync.Once`)로 1회 직렬화<br/>• API Server 힙 복제 `O(N) ➔ O(1)` 압축 | • CRD의 JSON 강제 및 2배 힙 할당 건수 세금<br/>• CPU 프로세서(`P`) 교체 시 적중 실패 스파이크 |
+| **[28편](/essays/informer-shared-pointer-cost)**<br/>SharedInformer 0-Copy | • `distribute()` 전달 포인터(`%p`) 동일성<br/>• Slow Consumer `RingGrowing` 팽창 | • 100% 동일 힙 주소(`0xa7e...`) 공유 증명<br/>• 10만 이벤트 적재 시 160.1 MiB 힙 폭증 | • 클라이언트 메모리 복사 및 직렬화 0<br/>• 단일 Watch 스트림 네트워크 다중화 | • 수동 `DeepCopy()` 필수 상호배제 규약 강제<br/>• 백프레셔 없는 링 버퍼 지수 팽창 OOM 위협 |
 
 이 종합 대조표에 축약된 4개의 우회 메커니즘은, 1부부터 5부까지 우리가 끈질기게 추적했던 시스템 커널 및 런타임 코어 원리들과 완벽한 인과적 조각을 맞춥니다
 
@@ -63,14 +63,14 @@ date: "2026-07-22"
 이 1:1 OS 스레드 모델 위에서 110개의 워커를 띄우면 순수 스택 주소 공간만 880 MB가 소모되고, 컨텍스트 스위칭 때마다 페이지 테이블(`CR3` 레지스터) 확인과 TLB 무효화(`TLB Flush`)라는 엄청난 CPU 오버헤드를 치러야 합니다
 
 반면 Go 고루틴은 `runtime.newproc`을 통해 사용자 공간(`User Space`)에서 단 `2 KB` 크기의 초기 스택(`stack.lo ~ stack.hi`)을 런타임 로컬 스택 캐시(`stackcache`)로부터 즉시 할당받습니다
-25편의 `podWorkers`가 노드 상의 파드가 110개일 때 OS 스레드 풀 뮤텍스 락을 쓰지 않고 고루틴 110개를 비동기로 즉시 스폰할 수 있었던 물리적 동력은 바로 1부에서 톺아본 **초경량 스택과 Go M:N 런타임 스케줄러의 유효 로드밸런싱 및 워크 스틸링(`Work Stealing`)** 메커니즘에 빚지고 있습니다
+26편의 `podWorkers`가 노드 상의 파드가 110개일 때 OS 스레드 풀 뮤텍스 락을 쓰지 않고 고루틴 110개를 비동기로 즉시 스폰할 수 있었던 물리적 동력은 바로 1부에서 톺아본 **초경량 스택과 Go M:N 런타임 스케줄러의 유효 로드밸런싱 및 워크 스틸링(`Work Stealing`)** 메커니즘에 빚지고 있습니다
 
 ### [2부 연결: Go 힙 할당자와 mspan/mcache 사이즈 클래스]
 
 [2부](/essays/allocator-tcmalloc-go-mcache)에서 해부한 Go 힙 할당자(`tcmalloc` 파생 구조)는 67개의 사이즈 클래스(`size class`)로 분할된 스레드 전용 캐시(`mcache.alloc[67]`), 중앙 스팬(`mcentral`), 그리고 전역 페이지 할당자(`mheap`)로 계층화되어 있습니다
 `mallocgc(size, typ, needzero)`가 호출될 때 `size <= 32KB` 이하의 소형 객체는 각 논리 프로세서(`P`)에 바인딩된 `mcache`에서 락-프리로 스팬 슬롯(`mspan.freeindex`)을 얻지만, 스팬 슬롯이 고갈되면 `mcentral` 락(`mcentral.lock`)을 걸고 새 스팬을 인출해야 하며 최종적으로 `mheap.alloc()`이 호출될 때 커널 페이지 할당(`sys_mmap`)까지 트리거됩니다
 
-26편의 `cachingObject`가 직렬화 인코딩 바이트 스트림(`[]byte`)을 `sync.Once`로 단 한 번만 생성해 캐싱하고, `sync.Pool`이 인코딩 스크래치 바이트 배열 버퍼를 링 버퍼로 무한 순환시키는 물리적 이유는 명백합니다
+27편의 `cachingObject`가 직렬화 인코딩 바이트 스트림(`[]byte`)을 `sync.Once`로 단 한 번만 생성해 캐싱하고, `sync.Pool`이 인코딩 스크래치 바이트 배열 버퍼를 링 버퍼로 무한 순환시키는 물리적 이유는 명백합니다
 만약 Watcher 1,000명에게 파드 1개를 전송할 때마다 매번 Protobuf 나 JSON 인코딩이 새로운 바이트 슬라이스를 `make([]byte, size)`로 생성한다면, 초당 십만 번의 `mallocgc`가 호출되어 `mcache`의 특정 크기 클래스 스팬(`mspan`)을 순식간에 소진시키고 `mcentral` 뮤텍스 락 경합 폭풍을 일으켰을 것입니다
 `sync.Pool`과 `cachingObject`는 이 **할당자의 계층적 락 경합과 `mheap` 페이지 요청 사이클 자체를 완전히 우회**해 낸 방어선입니다
 
@@ -79,7 +79,7 @@ date: "2026-07-22"
 [3부](/essays/gc-tricolor-marking-write-barrier)에서 증명했듯, Go 런타임 가비지 컬렉터(`src/runtime/mgc.go`)는 STW 지연을 줄이기 위해 애플리케이션 고루틴과 동시에 동작하는 동시 마크(`Concurrent Mark`) 단계를 운용하며 힙 객체를 흰색(`White`), 회색(`Grey`), 검은색(`Black`)의 삼색 상태로 분리합니다
 동시 마크 도중 이미 검사를 마친 검은색 객체가 아직 마킹되지 않은 흰색 포인터를 참조할 때 발생하는 고아 힙 객체 소멸(`Pointer Lost`)을 막기 위해, Go 컴파일러는 포인터 변형이 일어나는 모든 쓰기 지점에 **하이브리드 쓰기 장벽(`Hybrid Write Barrier`, `Dijkstra` + `Yuasa` 장벽)** 어셈블리 명령(`CALL runtime.gcWriteBarrier`)을 삽입합니다
 
-27편의 `SharedInformer`가 단 하나의 파드 포인터(`%p`)를 `ThreadSafeStore`(`items map[string]interface{}`) 인덱서 맵에 안착시키고 이를 수많은 핸들러에 공유할 때 일어나는 커널 간섭이 3부의 메커니즘과 정확히 닿아 있습니다
+28편의 `SharedInformer`가 단 하나의 파드 포인터(`%p`)를 `ThreadSafeStore`(`items map[string]interface{}`) 인덱서 맵에 안착시키고 이를 수많은 핸들러에 공유할 때 일어나는 커널 간섭이 3부의 메커니즘과 정확히 닿아 있습니다
 `HandleDeltas`가 1초에 수천 번 `s.indexer.Update(d.Object)`를 호출해 맵 슬롯 포인터를 교체할 때마다, 동시 마크 단계의 `runtime.gcWriteBarrier`는 삭제되는 구형 포인터(`Yuasa` 삭제 장벽)와 유입되는 신규 포인터(`Dijkstra` 삽입 장벽)를 모두 현재 `P`의 GC 작업 버퍼(`wbBuf`)로 쏟아냅니다
 나아가 인덱서 맵 안에 장기 생존 루트(`Root Set`)로 고정 안착한 50,000개의 파드 포인터와 그 내부의 수십만 개 중첩 슬라이스/맵 포인터 그래프는, GC 사이클이 돌 때마다 **단 1 바이트의 신규 할당이 없어도 매번 빠짐없이 트리 순회 마킹(`markroot` 및 `scanobject`)을 거쳐야 하는 막대한 스캐닝 부채(`Scan Tax`)** 로 변모합니다
 
@@ -100,7 +100,7 @@ date: "2026-07-22"
 points = [(rss + pagetable + swap) / total_pages] × 1,000 + oom_score_adj
 ```
 
-24편에서 마스터 노드의 `kube-apiserver`(`oom_score_adj = -997`)와 `kubelet`(`oom_score_adj = -999`)이 일반 파드의 `kubepods-burstable.slice`를 피하고 루트 계층(`kubepods.slice` 상단 혹은 host cgroup)에 안착하여 `memory.max = max`(무제한)를 획득한 이유가 바로 이 5부의 물리 공식에 있습니다
+25편에서 마스터 노드의 `kube-apiserver`(`oom_score_adj = -997`)와 `kubelet`(`oom_score_adj = -999`)이 일반 파드의 `kubepods-burstable.slice`를 피하고 루트 계층(`kubepods.slice` 상단 혹은 host cgroup)에 안착하여 `memory.max = max`(무제한)를 획득한 이유가 바로 이 5부의 물리 공식에 있습니다
 `oom_score_adj = -997`이나 `-999`가 더해지면 프로세스의 `oom_badness` 최종 산출 점수는 항상 0점 이하(`<= 0`)로 수렴하여 커널 `select_bad_process()` 루프에서 처형 대상으로 절대 선정되지 않는 법제적 불사신(`OOM Immune`) 상태를 획득하게 됩니다
 
 ---
@@ -136,7 +136,7 @@ points = [(rss + pagetable + swap) / total_pages] × 1,000 + oom_score_adj
 
 ## 컨트롤 플레인 분리 호스팅(`External Control Plane Hosting`) 시의 OOMKill 엣지 케이스
 
-24편에서 다룬 컨트롤 플레인의 특권적 면제(`memory.max = max`, `oom_score_adj = -997 ~ -999`)는 모든 배포 형태에서 보장되는 영구 불변의 자연 법칙이 아닙니다
+25편에서 다룬 컨트롤 플레인의 특권적 면제(`memory.max = max`, `oom_score_adj = -997 ~ -999`)는 모든 배포 형태에서 보장되는 영구 불변의 자연 법칙이 아닙니다
 이 면제 혜택은 오직 `kubelet`이 마스터 노드의 로컬 호스트 경로(`/etc/kubernetes/manifests`)를 직렬로 읽어 구동하는 **`Static Pod` (`kubepods.slice` 루트 계층 안착 혹은 호스트 네트워크/cgroup 특권 획득)** 로 배포될 때 유효한 특권입니다
 
 그렇다면 최신 클라우드 인프라 운영 동향에서 주목받고 있는 **외부 컨트롤 플레인 분리 호스팅(`External Control Plane Hosting`)** 환경에서는 어떤 커널 변화가 발생할까요
@@ -151,12 +151,12 @@ points = [(rss + pagetable + swap) / total_pages] × 1,000 + oom_score_adj
 
 이 외부 분리 호스팅 아키텍처에서 `kube-apiserver` 파드는 일반 워커 노드의 `kubepods-burstable.slice` 또는 `kubepods-besteffort.slice` 하위 컨테이너로 편입되며, 필연적으로 메모리 제한(`limits.memory = 8GiB`)이 타이트하게 씌워집니다
 그 순간 커널 cgroup v2 컨트롤러는 컨테이너 디렉토리에 `memory.max = 8589934592` 바이트를 기록하며, `oom_score_adj`는 특권 점수 `-997`이 아닌 일반 버스트 가능 파드 점수(`+200 ~ +998`)로 상향 조정됩니다
-24편에서 누렸던 컨트롤 플레인 불사신 면제 특권이 완벽하게 박탈되고 일반 사용자 파드와 똑같이 **엄격한 커널 OOM Killer(`oom_kill.c`) 처형 1순위 후보로 전락**하는 순간입니다
+25편에서 누렸던 컨트롤 플레인 불사신 면제 특권이 완벽하게 박탈되고 일반 사용자 파드와 똑같이 **엄격한 커널 OOM Killer(`oom_kill.c`) 처형 1순위 후보로 전락**하는 순간입니다
 
 ### 분리 호스팅 환경에서 링 버퍼와 gcController의 Target Heap 충돌 기전
 
 만약 이 외부 호스팅된 `kube-apiserver` 파드에서 대규모 CRD Controller Watch 팬아웃 트래픽이나 Slow Consumer 장애가 발생하면 어떤 커널-런타임 충돌이 터질까요
-우리가 26편과 27편에서 살펴봤듯, `cachingObject`는 인코딩 결과를 `sync.Pool`에 임시 보관하고 `SharedInformer`의 `processorListener`는 Slow Consumer 발생 시 `RingGrowing.Write`를 통해 2배수 지수 팽창(`make([]interface{}, len*2)`)으로 힙을 급격히 점유합니다
+우리가 27편과 28편에서 살펴봤듯, `cachingObject`는 인코딩 결과를 `sync.Pool`에 임시 보관하고 `SharedInformer`의 `processorListener`는 Slow Consumer 발생 시 `RingGrowing.Write`를 통해 2배수 지수 팽창(`make([]interface{}, len*2)`)으로 힙을 급격히 점유합니다
 
 `kube-apiserver` 바이너리 내부에는 앞서 확인했듯 `GOMEMLIMIT` 등 동적 힙 회수를 강제하는 손잡이가 전혀 없습니다
 이 상황에서 Go 런타임의 가비지 컬렉터 페이싱 컨트롤러(`gcController`)가 다음 GC 사이클 트리거 시점을 결정하는 **`gcControllerState.heapGoalInternal` (`src/runtime/mgcpacer.go`)** 궤적을 해부해 보면 왜 OOM 처형이 필연적인지 증명됩니다
@@ -325,11 +325,11 @@ spec:
 
 ## 최종 소결: 은탄환 없는 커널과 런타임의 세계
 
-우리는 이로써 Rust, Go, Java의 커널과 런타임을 톺아보는 대장정의 6부(24편~28편)를 완결하고, 시리즈 전체를 통틀어 가장 거대한 아키텍처적 거울 앞에 섰습니다
+우리는 이로써 Rust, Go, Java의 커널과 런타임을 톺아보는 대장정의 6부(25편~29편)를 완결하고, 시리즈 전체를 통틀어 가장 거대한 아키텍처적 거울 앞에 섰습니다
 쿠버네티스가 Go 언어를 품고 클라우드 인프라의 표준으로 거듭난 역사는, 언어가 제공하는 고루틴의 가벼움과 가비지 컬렉터의 편의성이 OS 커널과 맞물려 어떻게 **빛나는 최적화와 뼈아픈 트레이드오프**를 동시에 남기는지를 보여주는 가장 생생한 교본이었습니다
 
 시스템 엔지니어링의 세계에 단 하나의 완벽한 은탄환(`Silver Bullet`)은 결코 존재하지 않습니다
-우리가 28편에 걸쳐 소스코드를 파헤치고 실측치를 계측하며 확인한 진리는 단 하나, **"모든 훌륭한 아키텍처는 자신이 서 있는 커널과 런타임의 물리적 한계를 깊이 이해하고, 무엇을 얻기 위해 무엇을 희생할 것인지를 냉정하게 타협한 산물"**이라는 사실입니다
+우리가 29편에 걸쳐 소스코드를 파헤치고 실측치를 계측하며 확인한 진리는 단 하나, **"모든 훌륭한 아키텍처는 자신이 서 있는 커널과 런타임의 물리적 한계를 깊이 이해하고, 무엇을 얻기 위해 무엇을 희생할 것인지를 냉정하게 타협한 산물"**이라는 사실입니다
 
 여러분의 다음 애플리케이션이 Go 고루틴의 가벼움을 빌리든, Rust의 소유권 불변성을 빌리든, 혹은 Java 가상 머신의 강력한 JIT 컴파일러를 빌리든, 이 시리즈에서 규명한 **비용 보존의 법칙과 커널 메모리의 렉시콘**이 여러분의 코드를 견고하게 지탱하는 굳건한 기초 대지가 되기를 기원합니다
 
