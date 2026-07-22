@@ -15,8 +15,8 @@ series:
 date: "2026-07-21"
 ---
 
-> **시리즈 "커널과 런타임으로 톺아보는 Rust · Go · Java"의 26편 — 6부 4편**
-> [25편](/essays/k8s-sync-pool-serialization)에서 `kube-apiserver`가 N명의 Watcher에게 변경 이벤트를 브로드캐스팅할 때 발생하는 직렬화 및 힙 할당 폭발을 `cachingObject`(`sync.Once`)와 `sync.Pool` Victim Cache로 압축해 낸 서버 사이드 방어선을 확인했습니다
+> **시리즈 "커널과 런타임으로 톺아보는 Rust · Go · Java"의 27편 — 6부 4편**
+> [26편](/essays/k8s-sync-pool-serialization)에서 `kube-apiserver`가 N명의 Watcher에게 변경 이벤트를 브로드캐스팅할 때 발생하는 직렬화 및 힙 할당 폭발을 `cachingObject`(`sync.Once`)와 `sync.Pool` Victim Cache로 압축해 낸 서버 사이드 방어선을 확인했습니다
 > 6부 4편에서는 시선을 서버(`kube-apiserver`)에서 클라이언트(`client-go` 기반 컨트롤러 및 오퍼레이터) 쪽으로 돌려, **단 하나의 Watch 스트림으로 수집한 객체를 메모리 복사 없이 동일한 포인터(`%p`)로 N개 핸들러와 중앙 캐시(`Indexer`)에 공유하는 `SharedInformer`의 0-Copy 아키텍처와 그 이면의 물리적 위협**을 파헤칩니다
 > 핵심 질문은 명확합니다. **`SharedInformer`는 어떻게 네트워크 조회 비용을 O(0)으로, 인메모리 복제 비용을 0-Copy로 억제해 냈으며, 이 극단의 최적화가 왜 개발자에게 `DeepCopy()` 수동 호출 규약을 강제하고 Slow Consumer 상황에서 상한 없는 링 버퍼(`RingGrowing`)를 통한 OOM 파국을 불러오게 되었을까요**
 
@@ -350,14 +350,14 @@ informer.SetTransform(func(obj interface{}) (interface{}, error) {
 ## 0-Copy 공유 그래프와 Go GC 삼색 마킹 쓰기 장벽 간섭
 
 `SharedInformer`가 단 하나의 힙 주소(`0xa7e38469408`)를 `ThreadSafeStore` 인덱서 맵에 꽂아 두고, 이를 N개의 이벤트 핸들러와 비동기 링 버퍼에 동시 전파하면서 인메모리 상에는 복잡하고 방대한 **다 대 일(`N:1`) 포인터 참조 그래프**가 형성됩니다
-이처럼 수만 개의 파드 포인터가 로컬 맵과 수많은 고루틴 스택, 그리고 전파 버퍼를 넘나드는 환경은 [13편](/essays/gc-tricolor-marking-write-barrier)에서 톺아본 Go 런타임 가비지 컬렉터(`GC`)의 **삼색 마킹(`Tricolor Marking`)과 쓰기 장벽(`Write Barrier`)** 메커니즘에 직접적인 물리적 간섭을 일으킵니다
+이처럼 수만 개의 파드 포인터가 로컬 맵과 수많은 고루틴 스택, 그리고 전파 버퍼를 넘나드는 환경은 [14편](/essays/gc-tricolor-marking-write-barrier)에서 톺아본 Go 런타임 가비지 컬렉터(`GC`)의 **삼색 마킹(`Tricolor Marking`)과 쓰기 장벽(`Write Barrier`)** 메커니즘에 직접적인 물리적 간섭을 일으킵니다
 
 ### GC 쓰기 장벽(Dijkstra/Yuasa gcWriteBarrier) 개입 기전과 레지스터 어셈블리
 
 Go GC는 STW(`Stop-The-World`) 지연을 최소화하기 위해 애플리케이션 고루틴이 실행되는 동시에 힙을 순회하며 마킹을 진행하는 동시 마크(`Concurrent Mark`) 단계를 운용합니다
 이 동시 마크 단계(`src/runtime/mgcmark.go`의 `markroot` 및 `scanobject`)가 작동하는 동안, `SharedInformer`의 `ThreadSafeStore`에서 오래된 파드 포인터가 새로운 파드 갱신 이벤트로 교체(`s.indexer.Update(d.Object)`)되거나 핸들러가 포인터 변수를 다룰 때 어떤 커널 연산이 발생할까요
 
-[13편](/essays/gc-tricolor-marking-write-barrier)에서 증명했듯, 동시 마크 도중 이미 검사를 마친 검은색(`Black`) 객체가 아직 마킹되지 않은 흰색(`White`) 포인터를 참조하게 되면 대상 객체가 살아있음에도 GC에 의해 부당하게 수집되는 힙 파괴 사고가 발생합니다
+[14편](/essays/gc-tricolor-marking-write-barrier)에서 증명했듯, 동시 마크 도중 이미 검사를 마친 검은색(`Black`) 객체가 아직 마킹되지 않은 흰색(`White`) 포인터를 참조하게 되면 대상 객체가 살아있음에도 GC에 의해 부당하게 수집되는 힙 파괴 사고가 발생합니다
 Go 런타임(`src/runtime/mgc.go`의 제어 루프, `src/runtime/mgcmark.go`의 삼색 마킹 엔진, 그리고 `src/runtime/mwbbuf.go`의 `wbBuf` 버퍼 플러시)은 이를 막기 위해 포인터 갱신이 일어나는 모든 쓰기 지점에 **하이브리드 쓰기 장벽(`Hybrid Write Barrier`, `Dijkstra` + `Yuasa` 장벽)** 어셈블리 명령(`runtime.gcWriteBarrier`)을 컴파일러 단에서 삽입합니다
 
 `HandleDeltas`가 `s.indexer.Update(d.Object)`를 호출해 `threadSafeMap.items` 맵의 기존 포인터 주소를 덮어쓸 때 컴파일러가 생성하는 레지스터 수준 어셈블리 궤적입니다
@@ -543,7 +543,7 @@ API Server와 메인 디스패처를 보호하기 위해 고안된 비동기 상
 
 ## 비용 보존 법칙 — 0-Copy 최적화가 남긴 청구서와 6부 소결로의 연결
 
-우리는 23편(`cgroup` 면제와 고루틴 스케줄링)부터 26편(`SharedInformer`의 0-Copy 공유)까지, 쿠버네티스 컨트롤 플레인이 O(N)의 물리적 한계를 돌파하기 위해 구사한 다층적인 방어선과 우회 메커니즘을 파고들었습니다
+우리는 24편(`cgroup` 면제와 고루틴 스케줄링)부터 27편(`SharedInformer`의 0-Copy 공유)까지, 쿠버네티스 컨트롤 플레인이 O(N)의 물리적 한계를 돌파하기 위해 구사한 다층적인 방어선과 우회 메커니즘을 파고들었습니다
 그리고 모든 훌륭한 시스템 최적화는 예외 없이 **비용 보존 법칙**에 따라 또 다른 영역으로 청구서를 이전했음을 확인했습니다
 
 ![비용 보존 법칙: 0-Copy 포인터 공유가 남긴 DeepCopy 규약과 링 버퍼 OOM 대조표](/diagrams/informer-shared-pointer-cost-5.svg)
@@ -590,4 +590,4 @@ API Server와 메인 디스패처를 보호하기 위해 고안된 비동기 상
 이제 남은 질문은 하나입니다
 **그렇다면 쿠버네티스는 Go 언어를 선택하여 구체적으로 어떤 아키텍처적 승리(산 것)를 거두었으며, 반대로 가비지 컬렉터와 고루틴 런타임의 한계를 극복하기 위해 어떤 눈물겨운 시스템 공학적 대가(낸 것)를 치러야만 했을까요**
 
-다음 편([27편: K8s가 Go에게서 산 것과 낸 것 — 6부 종합 소결](/essays/k8s-go-tradeoffs-summary))에서는 6부 전체를 관통하는 4중 방어선의 비용 보존 법칙을 1~5부의 핵심 메커니즘과 종합 연결하고, 컨트롤 플레인 분리 호스팅 시의 OOM 엣지 케이스 및 일반 Go 애플리케이션을 위한 실전 `GOMEMLIMIT` 가이드라인과 함께 최종 소결을 짓겠습니다
+다음 편([28편: K8s가 Go에게서 산 것과 낸 것 — 6부 종합 소결](/essays/k8s-go-tradeoffs-summary))에서는 6부 전체를 관통하는 4중 방어선의 비용 보존 법칙을 1~5부의 핵심 메커니즘과 종합 연결하고, 컨트롤 플레인 분리 호스팅 시의 OOM 엣지 케이스 및 일반 Go 애플리케이션을 위한 실전 `GOMEMLIMIT` 가이드라인과 함께 최종 소결을 짓겠습니다

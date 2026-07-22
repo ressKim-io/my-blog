@@ -2,6 +2,19 @@
 
 > **세션 재개용 문서**. 새 세션에서 이 작업을 이어갈 때는 이 파일을 먼저 통독한 뒤,
 > §6 상태 표에서 첫 미완료(☐) 편부터 §7 절차대로 진행합니다.
+> **2026-07-22: 가독성 개정 착수 — 팀원 피드백("배경지식 전제 없이 시작·논리 비약·
+> 문장 과압축·예시 부족")으로 1부 전면 개정.** 1.2(스레드 모델)를 이론편(기존 슬러그
+> 유지)과 언어구현편(`mn-scheduler-go-java-rust`, 신규 3편)으로 분할해 1부가 3편→4편으로
+> 늘었고, 이에 따라 2~6부 전역 "N편" 번호가 전부 +1 밀렸다(구 4~27편 → 신규 5~28편).
+> frontmatter `series.order`는 부-로컬이라 1부만 변경(2~6부는 그대로). `date` 필드는
+> 소급 변경하지 않아 `date = 06-25+N` 공식이 이 시점부터 깨짐. 방법론·절차 SSOT는
+> **`readability-revision.md`** — 2~6부의 "깊이 개정"(같은 방식 풀어쓰기)은 미착수이며
+> 그 문서의 추적 표에 부 단위로 남아 있음. **부수 발견**: k8s-go-tradeoffs-summary.md·
+> k8s-sync-pool-serialization.md에 이번 개정과 무관한 기존 깨진 링크 5건 존재
+> (`allocator-tcmalloc-go-mcache`·`cgroup-v2-memory-qos-ebpf`·`gc-mark-assist-preempt-p-pacing`·
+> `java-jit-c2-escape-analysis-scalar-replacement`·`thread-vs-goroutine-vs-virtual-thread`
+> — 전부 실제 슬러그와 불일치, part6-fact-audit.md §1-16이 이미 지적했던 것과 동일 계열.
+> 수정 미착수, 별도 세션 필요)
 > **2026-07-20: 6부(23~27편) 독립 사실 검증 완료 — P0 오류 다수 확인, 수정 미착수.**
 > 발행본 5편에서 창작 스니펫·무출처 수치·소스 오류를 확인 (예: PLEG 임계값 3초→실제
 > 3분, oom_score_adj -998→실제 -997, Evented PLEG·CBOR "도입"→실제 알파·기본 비활성,
@@ -215,10 +228,11 @@ date: "2026-06-25 + (글로벌 편 번호) 일"   # 글로벌 편 번호=5 → "
 
 | # | draft | slug (제안) | order | 상태 |
 |---|-------|-------------|-------|------|
-| 1.1 | `1부_1.1_유저모드_커널모드_syscall비용.md` | `syscall-mode-switch-cost` | 1 | ✅ 발행 (2026-06-26, 파일럿 — 피드백 2라운드 반영, SVG 7개) |
-| 1.2 | `1부_1.2_스레드모델_1대1_vs_유저레벨스케줄링.md` | `thread-models-kernel-vs-user` | 2 | ✅ 발행 (2026-06-27, 새 문체 첫 적용·SVG 6개·tokio cgroup 사실 교정) |
-| 1.3 | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 3 | ✅ 발행 (2026-06-28, SVG 5개·Go 1.26 기준 교정·리뷰어 P0 0건 — 1부 완결) |
-| 2.1 | `2부_2.1_Rust_AOT_컴파일러엄격함과_하드웨어직거래.md` | `rust-aot-zero-cost-codegen` | 4 | ✅ 발행 (2026-06-29, SVG 8개 — 2부 시작, Opus 4.8 첫 변환·리뷰어 P0 0건) |
+| 1.1 | `1부_1.1_유저모드_커널모드_syscall비용.md` | `syscall-mode-switch-cost` | 1 | ✅ 발행 (2026-06-26, 파일럿 — 피드백 2라운드 반영, SVG 7개. **2026-07-22 가독성 개정**: 배경 프라이밍·비유·브릿지 문장 보강, 다음 편 예고 갱신) |
+| 1.2 | `1부_1.2_스레드모델_1대1_vs_유저레벨스케줄링.md` | `thread-models-kernel-vs-user` | 2 | ✅ 발행 (2026-06-27, 새 문체 첫 적용·SVG 6개·tokio cgroup 사실 교정). **2026-07-22 가독성 개정 — 이론편으로 재편**: 언어별 구현부(GMP·가상 스레드·tokio)를 `mn-scheduler-go-java-rust`(신규 3편)로 분리하고, 이 글은 C10K·1:1 모델 원가·M:N 개념·2축 분류만 남김. SVG1~3 유지, 병원(전담 의사/간호사) 비유 도입 |
+| **1.3 (신규)** | (draft 없음 — 1.2 분할본) | `mn-scheduler-go-java-rust` | 3 | ✅ 신규 발행 (2026-07-22, SVG 3개 — 기존 1.2의 SVG4~6을 이관·재번호. Go GMP·Java 가상 스레드·Rust tokio + 3언어 수렴 비교·소결·질문·요약) |
+| 1.4 (구 1.3) | `1부_1.3_런타임의_무게_ZeroCost_vs_FatRuntime.md` | `runtime-weight-zero-cost-vs-fat` | 4 (구 3) | ✅ 발행 (2026-06-28, SVG 5개·Go 1.26 기준 교정·리뷰어 P0 0건 — 1부 완결). **2026-07-22**: order 3→4, 교차참조 "2편"→"3편"(언어 구현 인용분) 재배선 |
+| 2.1 | `2부_2.1_Rust_AOT_컴파일러엄격함과_하드웨어직거래.md` | `rust-aot-zero-cost-codegen` | 5 (구 4) | ✅ 발행 (2026-06-29, SVG 8개 — 2부 시작, Opus 4.8 첫 변환·리뷰어 P0 0건) |
 | 2.2 | `2부_2.2_Go_AOT_빠른빌드의대가와_정적기계어의한계.md` | `go-aot-fast-build-tradeoff` | 5 | ✅ 발행 (2026-06-30, SVG 8개 — 글자 최소화 원칙 첫 적용, itab·simd 사실 교정, 리뷰어 P0 0건) |
 | 2.3 | `2부_2.3_Java_JIT_웜업의반전과_C2런타임최적화.md` | `java-jit-c2-runtime-optimization` | 6 | ✅ 발행 (2026-07-01, SVG 9개 — 복선 8건 전부 회수, 재감사로 스칼라 치환 SVG 추가, JEP 401·코드캐시 사실 교정, 리뷰어 P0 1건 수정) |
 | 2.4 | `2부_2.4_소결_롱런서버에서_Java가_CPU효율을_역전하는_조건.md` | `java-jit-inversion-conditions` | 7 | ✅ 발행 (2026-07-02, SVG 4개 — 2부 완결. 소결이라 표 위주 draft를 표3+SVG4로 평탄화. 역전 4조건/3열세축/스펙트럼/두세계, GraalNN·Go1.25 GOMAXPROCS 웹 검증, JEP401 6편과 정정 통일) |
