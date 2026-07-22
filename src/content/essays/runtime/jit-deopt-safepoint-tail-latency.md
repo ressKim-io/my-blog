@@ -30,7 +30,7 @@ C2의 최적화는 전부 **낙관적 도박**입니다
 
 그 기계어는 그 순간 틀린 코드가 됩니다. 실행을 계속하면 안 됩니다
 
-여기서 진짜 질문은 이것입니다. **이미 그 기계어를 실행하고 있던 스레드를 물리적으로 어떻게 인터프리터로 되돌리는가**
+여기서 진짜 질문은 이것입니다. **이미 그 기계어를 실행하고 있던 스레드를 어떻게 인터프리터로 되돌리는가**
 
 ![Deoptimization rebuilds an interpreter frame from the scope descriptor](/diagrams/jit-deopt-safepoint-tail-latency-1.svg)
 

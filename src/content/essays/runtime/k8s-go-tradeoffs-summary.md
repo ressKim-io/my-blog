@@ -173,7 +173,7 @@ func (c *gcControllerState) heapGoalInternal() (goal, minTrigger uint64) {
 Go 런타임(`GOGC=100` 기본 설정)은 현재 살아있는 힙(`Live Heap = 4.5 GiB`)을 기준으로 다음 가비지 수집이 작동할 목표 힙(`Target Heap`)을 정확히 2배인 **`9.0 GiB`** (`4.5 GiB × (1 + 100/100)`)로 산출합니다
 런타임 백그라운드 모니터링 고루틴(`sysmon`)은 힙 할당량(`HeapAlloc`)이 이 목표치(`9.0 GiB`)에 도달할 때까지 GC 동시 마크(`Concurrent Mark`) 고루틴(`gcBgMarkWorker`)을 단 1도 깨우지 않고 대기 상태를 유지합니다
 
-문제는 컨테이너에 부여된 커널 cgroup 메모리 상한선(`memory.max`)이 물리적으로 **`8 GiB`** 에 그어진 상태라는 점입니다
+문제는 컨테이너에 부여된 커널 cgroup 메모리 상한선(`memory.max`)이 이미 **`8 GiB`** 에 그어진 상태라는 점입니다
 
 ```text
 [External Hosted kube-apiserver OOMKill 트리거 타임라인]
@@ -339,7 +339,7 @@ spec:
 
 6부 전체에서 확인한 물리 법칙을 자신의 클러스터와 서비스에서 직접 입증해 볼 수 있는 6가지 심화 검증 질문입니다
 
-1. **`oom_score_adj` 커널 처형 점수 실측**: 운영 중인 쿠버네티스 노드에서 호스트 셸에 접속한 뒤 `cat /proc/$(pgrep kube-apiserver)/oom_score_adj`와 `cat /proc/$(pgrep -u root -f "kubelet")/oom_score_adj`를 실행했을 때 각각 -997과 -999가 정상 부여되어 있는지, 일반 워커 파드의 점수(`+200 ~ +998`)와 물리적으로 어떻게 대비되는지 직접 비교해 보았는가?
+1. **`oom_score_adj` 커널 처형 점수 실측**: 운영 중인 쿠버네티스 노드에서 호스트 셸에 접속한 뒤 `cat /proc/$(pgrep kube-apiserver)/oom_score_adj`와 `cat /proc/$(pgrep -u root -f "kubelet")/oom_score_adj`를 실행했을 때 각각 -997과 -999가 정상 부여되어 있는지, 일반 워커 파드의 점수(`+200 ~ +998`)와 실제로 얼마나 차이 나는지 직접 비교해 보았는가?
 2. **`podWorkers` 고루틴 수와 PLEG 폴링 비용 상관 계측**: `kubectl get nodes`로 파드 밀집도가 높은 노드를 고른 후 `/debug/pprof/goroutine?debug=1` 프로파일을 내려받아 `podWorkers` 및 PLEG 상태 폴링 고루틴의 실제 상주 수를 세어 보았는가? 파드 수가 100개를 넘어설 때 `kubelet_cpu_seconds_total`의 기울기가 어떻게 가파라지는지 Prometheus 메트릭으로 관측하였는가?
 3. **Protobuf vs JSON 리플렉션 힙 할당 건수 검증**: `client-go`를 사용하여 API Server와 통신할 때 Protobuf 와이어 포맷(`application/vnd.kubernetes.protobuf`)과 JSON 와이어 포맷으로 동일한 대규모 오브젝트 목록을 조회할 때, Go 프로파일러(`runtime/pprof`)의 `alloc_objects` 수가 실제로 79 allocs 대 40 allocs 수준의 격차로 벌어지는지 직접 계측해 보았는가?
 4. **`SharedInformer` 0-Copy 주소 동일성 실험**: 커스텀 오퍼레이터나 로컬 `client-go` Watcher 코드 작성 시, `AddEventHandler`의 `OnAdd(obj interface{})` 콜백으로 수신한 오브젝트 포인터 주소(`fmt.Sprintf("%p", obj)`)와 인덱서 `Lister.Get()`으로 꺼낸 주소가 100% 일치하는지 계측하고, 비즈니스 로직 내부에서 수동 `obj.DeepCopy()` 없이 필드를 수정했을 때 중앙 캐시가 오염되는 현상을 직접 재현해 보았는가?
