@@ -52,6 +52,7 @@ function generateSitemap(posts) {
     'kernel-runtime-tradeoffs-3',
     'kernel-runtime-tradeoffs-4',
     'kernel-runtime-tradeoffs-5',
+    'kernel-runtime-tradeoffs-6',
   ];
   const seriesIds = [
     ...new Set(

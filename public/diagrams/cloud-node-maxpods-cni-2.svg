@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-many { fill: #FFFBEB; stroke: #D97706; stroke-width: 2; rx: 8; }
+      .box-few { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .inner { fill: #FFFFFF; stroke: #D4D4D8; stroke-width: 1.5; rx: 6; }
+      .h-many { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #B45309; text-anchor: middle; }
+      .h-few { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .big-many { font-family: 'Pretendard', system-ui, sans-serif; font-size: 17px; font-weight: 700; fill: #B45309; text-anchor: middle; }
+      .big-few { font-family: 'Pretendard', system-ui, sans-serif; font-size: 17px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .note { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="820" height="400" class="bg" rx="12"/>
+
+  <text x="40" y="40" class="title">MSI-X Vectors Scale With ENI Count</text>
+  <text x="40" y="64" class="subtitle">m5.4xlarge, 16 vCPU — queues per ENI = MIN(8, 16) = 8, plus 1 admin vector</text>
+
+  <rect x="40" y="96" width="360" height="200" class="box-many"/>
+  <text x="220" y="126" class="h-many">Secondary IP mode — 8 ENIs</text>
+
+  <rect x="66" y="146" width="308" height="44" class="inner"/>
+  <text x="220" y="174" class="mono">8 x (8 queues + 1 admin)</text>
+
+  <text x="220" y="228" class="big-many">72 MSI-X vectors</text>
+  <text x="220" y="262" class="mono">8 netdevs, 8 PCI devices</text>
+
+  <rect x="430" y="96" width="350" height="200" class="box-few"/>
+  <text x="605" y="126" class="h-few">Prefix delegation — 2 ENIs</text>
+
+  <rect x="456" y="146" width="298" height="44" class="inner"/>
+  <text x="605" y="174" class="mono">2 x (8 queues + 1 admin)</text>
+
+  <text x="605" y="228" class="big-few">18 MSI-X vectors</text>
+  <text x="605" y="262" class="mono">2 netdevs, 2 PCI devices</text>
+
+  <text x="410" y="344" class="note">Source confirms the vector count only — the workload cost of that difference was not measured</text>
+</svg>

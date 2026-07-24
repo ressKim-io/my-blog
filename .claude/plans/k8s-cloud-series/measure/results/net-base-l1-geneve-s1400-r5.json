@@ -1,0 +1,31 @@
+{
+  "label": "l1-geneve-s1400-r5",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "schedlab1",
+    "release": "6.8.0-134-generic"
+  },
+  "config": {
+    "target": "10.90.0.2",
+    "port": 9911,
+    "size": 1400,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 32.532,
+    "p50": 35.578,
+    "p90": 38.954,
+    "p99": 44.815,
+    "max": 487.829,
+    "mean": 36.234
+  },
+  "host_mhz": {
+    "before": 4255.0,
+    "after": 4151.0
+  }
+}

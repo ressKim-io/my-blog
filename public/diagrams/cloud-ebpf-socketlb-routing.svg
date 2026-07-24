@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 430" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-kp { fill: #FFF1F2; stroke: #E11D48; stroke-width: 2; rx: 8; }
+      .box-lb { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .step-kp { fill: #FFFFFF; stroke: #FDA4AF; stroke-width: 1.5; rx: 6; }
+      .step-lb { fill: #FFFFFF; stroke: #6EE7B7; stroke-width: 1.5; rx: 6; }
+      .h-kp { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #BE123C; text-anchor: middle; }
+      .h-lb { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .body { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .res-kp { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #BE123C; text-anchor: middle; }
+      .res-lb { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .flow { stroke: #64748B; stroke-width: 2; marker-end: url(#ah3); fill: none; }
+    </style>
+    <marker id="ah3" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <rect width="820" height="430" class="bg" rx="12"/>
+
+  <text x="40" y="40" class="title">Where the Service VIP Is Resolved</text>
+  <text x="40" y="64" class="subtitle">kube-proxy rewrites in the stack; Cilium rewrites before the stack sees it</text>
+
+  <rect x="40" y="92" width="350" height="252" class="box-kp"/>
+  <text x="215" y="122" class="h-kp">kube-proxy — DNAT in the stack</text>
+
+  <rect x="66" y="142" width="298" height="46" class="step-kp"/>
+  <text x="215" y="171" class="mono">connect(ClusterIP)</text>
+
+  <rect x="66" y="210" width="298" height="46" class="step-kp"/>
+  <text x="215" y="239" class="body">Netfilter chains pick a backend</text>
+
+  <rect x="66" y="278" width="298" height="46" class="step-kp"/>
+  <text x="215" y="307" class="body">conntrack entry written per connection</text>
+
+  <line x1="215" y1="190" x2="215" y2="206" class="flow"/>
+  <line x1="215" y1="258" x2="215" y2="274" class="flow"/>
+
+  <rect x="430" y="92" width="350" height="252" class="box-lb"/>
+  <text x="605" y="122" class="h-lb">Cilium Socket LB — rewrite at connect</text>
+
+  <rect x="456" y="142" width="298" height="46" class="step-lb"/>
+  <text x="605" y="171" class="mono">cgroup/connect4 hook fires</text>
+
+  <rect x="456" y="210" width="298" height="46" class="step-lb"/>
+  <text x="605" y="239" class="mono">__sock4_xlate_fwd rewrites dst</text>
+
+  <rect x="456" y="278" width="298" height="46" class="step-lb"/>
+  <text x="605" y="307" class="body">stack never sees the VIP — no conntrack</text>
+
+  <line x1="605" y1="190" x2="605" y2="206" class="flow"/>
+  <line x1="605" y1="258" x2="605" y2="274" class="flow"/>
+
+  <text x="410" y="392" class="body">Maps are read per connect; conntrack is written per connection — that is the difference</text>
+</svg>

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; }
+      .box-slate { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2.5; rx: 12; }
+      .box-slate-hdr { fill: #e2e8f0; stroke: #94a3b8; stroke-width: 2; rx: 8; }
+      .box-teal { fill: #f0fdf4; stroke: #0d9488; stroke-width: 2.5; rx: 12; }
+      .box-teal-hdr { fill: #ccfbf1; stroke: #0d9488; stroke-width: 2; rx: 8; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arr-s" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+    </marker>
+    <marker id="arr-t" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0d9488" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="480" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">sync.Pool Multi-Core Architecture: Private Slot vs Work Stealing</text>
+
+  <!-- LEFT COLUMN: Local Processor P0 (Slate Neutral) -->
+  <rect x="30" y="65" width="355" height="390" class="box-slate" />
+  <rect x="50" y="82" width="315" height="38" class="box-slate-hdr" />
+  <text x="207" y="107" text-anchor="middle" class="header" fill="#334155">Processor P0: Local Get() Request</text>
+
+  <rect x="50" y="136" width="315" height="56" class="card" stroke="#94a3b8" />
+  <text x="207" y="170" text-anchor="middle" class="label" fill="#334155">1. Check poolLocal.private Slot</text>
+
+  <path d="M 207 196 L 207 215" stroke="#64748b" stroke-width="3" marker-end="url(#arr-s)" />
+
+  <rect x="50" y="222" width="315" height="56" class="card" stroke="#94a3b8" />
+  <text x="207" y="256" text-anchor="middle" class="label" fill="#334155">2. Buffer Found in Private</text>
+
+  <path d="M 207 282 L 207 301" stroke="#64748b" stroke-width="3" marker-end="url(#arr-s)" />
+
+  <rect x="50" y="308" width="315" height="56" class="card" stroke="#94a3b8" />
+  <text x="207" y="342" text-anchor="middle" class="label" fill="#334155">3. Immediate Return to Caller</text>
+
+  <rect x="50" y="380" width="315" height="60" class="card" stroke="#94a3b8" fill="#f8fafc" />
+  <text x="207" y="405" text-anchor="middle" class="label" fill="#334155">0 µs / Zero Mutex Lock</text>
+  <text x="207" y="427" text-anchor="middle" class="sub" fill="#64748b">Exclusive Core Access Without CAS</text>
+
+
+  <!-- RIGHT COLUMN: Work Stealing Processor P1 (Deep Teal) -->
+  <rect x="415" y="65" width="355" height="390" class="box-teal" />
+  <rect x="435" y="82" width="315" height="38" class="box-teal-hdr" />
+  <text x="592" y="107" text-anchor="middle" class="header" fill="#0f766e">Processor P1: Work Stealing Path</text>
+
+  <rect x="435" y="136" width="315" height="56" class="card" stroke="#0d9488" />
+  <text x="592" y="170" text-anchor="middle" class="label" fill="#0f766e">1. Private &amp; Shared Slots Empty</text>
+
+  <path d="M 592 196 L 592 215" stroke="#0d9488" stroke-width="3" marker-end="url(#arr-t)" />
+
+  <rect x="435" y="222" width="315" height="56" class="card" stroke="#0d9488" />
+  <text x="592" y="256" text-anchor="middle" class="label" fill="#0f766e">2. Target P0's poolChain Ring Buffer</text>
+
+  <path d="M 592 282 L 592 301" stroke="#0d9488" stroke-width="3" marker-end="url(#arr-t)" />
+
+  <rect x="435" y="308" width="315" height="56" class="card" stroke="#0d9488" />
+  <text x="592" y="342" text-anchor="middle" class="label" fill="#0f766e">3. Atomic CAS Steal From Tail</text>
+
+  <rect x="435" y="380" width="315" height="60" class="card" stroke="#0d9488" fill="#f0fdf4" />
+  <text x="592" y="405" text-anchor="middle" class="label" fill="#0f766e">Lock-Free Cross-Core Share</text>
+  <text x="592" y="427" text-anchor="middle" class="sub" fill="#115e59">Prevents Heap Allocation Spikes</text>
+</svg>

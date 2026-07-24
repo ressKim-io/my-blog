@@ -1,0 +1,31 @@
+{
+  "label": "l0-geneve-s64-r7",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "ressbe",
+    "release": "7.0.0-28-generic"
+  },
+  "config": {
+    "target": "10.90.0.2",
+    "port": 9911,
+    "size": 64,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 8.146,
+    "p50": 8.396,
+    "p90": 9.508,
+    "p99": 10.099,
+    "max": 21.511,
+    "mean": 8.676
+  },
+  "host_mhz": {
+    "before": 3569.0,
+    "after": 3541.0
+  }
+}

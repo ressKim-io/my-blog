@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
+      .box-slate { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
+      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2; fill: none; marker-end: url(#arrow-head); }
+    </style>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" class="bg" rx="12"/>
+
+  <!-- Title Section (2 texts) -->
+  <text x="40" y="42" class="title">Cost Conservation: Zero-Copy Pointer Share to Unbounded Buffer Tax</text>
+  <text x="40" y="66" class="subtitle">Summary of Post 26 Tradeoffs and Bridge to Part 6 Final Synthesis (Post 27)</text>
+
+  <!-- Left Box: SharedInformer Optimization (3 texts) -->
+  <rect x="40" y="96" width="330" height="180" class="box-teal"/>
+  <text x="205" y="142" class="txt-header">Post 26 Optimization</text>
+  <text x="205" y="180" class="txt-body">0-Copy Pointer Share &amp; Single Watch</text>
+  <text x="205" y="224" class="txt-teal">Result: Minimal CPU &amp; Memory</text>
+
+  <!-- Arrow (1 text) -->
+  <path d="M 370 186 L 430 186" class="arrow"/>
+  <text x="400" y="172" class="txt-body">Tradeoff Enforced</text>
+
+  <!-- Right Box: Paid Bill & Consequences (3 texts) -->
+  <rect x="430" y="96" width="330" height="180" class="box-orange"/>
+  <text x="595" y="142" class="txt-header">Paid Bill &amp; Consequences</text>
+  <text x="595" y="180" class="txt-body">1. DeepCopy Mandatory by Convention</text>
+  <text x="595" y="224" class="txt-orange">2. Slow Consumer RingBuffer OOM</text>
+
+  <!-- Footer Box 1: Post 27 Summary (2 texts) -->
+  <rect x="40" y="300" width="350" height="144" class="box-slate"/>
+  <text x="215" y="356" class="txt-header">Post 27 Preview:</text>
+  <text x="215" y="396" class="txt-teal">All 4 Bypasses &amp; Synthesis Table</text>
+
+  <!-- Footer Box 2: Series Conclusion (3 texts) -->
+  <rect x="410" y="300" width="350" height="144" class="box-slate"/>
+  <text x="585" y="344" class="txt-header">Part 6 Synthesis:</text>
+  <text x="585" y="380" class="txt-body">Why Control Plane Exemption Rules</text>
+  <text x="585" y="416" class="txt-orange">Do Not Apply to User Pods</text>
+</svg>

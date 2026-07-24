@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 17px; font-weight: 700; fill: #b45309; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; fill: #475569; }
+      .box-amber { fill: #fffbeb; stroke: #d97706; stroke-width: 2.5; rx: 10; }
+      .box-green { fill: #ecfdf5; stroke: #059669; stroke-width: 2; rx: 10; }
+      .box-cyan { fill: #ecfeff; stroke: #0891b2; stroke-width: 2; rx: 10; }
+      .box-violet { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; rx: 10; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+  </defs>
+
+  <rect width="800" height="340" fill="#ffffff" rx="12" />
+
+  <!-- Top: Post 23 Base -->
+  <rect x="50" y="25" width="700" height="55" class="box-amber" />
+  <text x="400" y="58" text-anchor="middle" class="title">Post 23 Base: Self-Exemption &amp; No Tuning Knobs</text>
+
+  <!-- Arrows -->
+  <line x1="400" y1="80" x2="160" y2="120" stroke="#64748b" stroke-width="2.5" />
+  <line x1="400" y1="80" x2="400" y2="120" stroke="#64748b" stroke-width="2.5" />
+  <line x1="400" y1="80" x2="640" y2="120" stroke="#64748b" stroke-width="2.5" />
+
+  <!-- Bypass 1: Post 24 -->
+  <rect x="35" y="120" width="230" height="195" class="box-green" />
+  <text x="150" y="152" text-anchor="middle" class="header" fill="#047857">Bypass 1: Concurrency</text>
+  
+  <rect x="50" y="175" width="200" height="115" class="card" stroke="#059669" />
+  <text x="150" y="210" text-anchor="middle" class="label" fill="#047857">Goroutine per Pod</text>
+  <text x="150" y="238" text-anchor="middle" class="sub">15.8 KB Stack Footprint</text>
+  <text x="150" y="262" text-anchor="middle" class="sub" fill="#065f46">Evented PLEG (300s)</text>
+
+  <!-- Bypass 2: Post 25 -->
+  <rect x="285" y="120" width="230" height="195" class="box-cyan" />
+  <text x="400" y="152" text-anchor="middle" class="header" fill="#0e7490">Bypass 2: Zero-Alloc</text>
+
+  <rect x="300" y="175" width="200" height="115" class="card" stroke="#0891b2" />
+  <text x="400" y="210" text-anchor="middle" class="label" fill="#0e7490">Watch Fan-Out Cache</text>
+  <text x="400" y="238" text-anchor="middle" class="sub">sync.Pool Victim Cache</text>
+  <text x="400" y="262" text-anchor="middle" class="sub" fill="#0891b2">cachingObject Stream</text>
+
+  <!-- Bypass 3: Post 26 -->
+  <rect x="535" y="120" width="230" height="195" class="box-violet" />
+  <text x="650" y="152" text-anchor="middle" class="header" fill="#6d28d9">Bypass 3: Shared Cache</text>
+
+  <rect x="550" y="175" width="200" height="115" class="card" stroke="#7c3aed" />
+  <text x="650" y="210" text-anchor="middle" class="label" fill="#6d28d9">Informer Pointers</text>
+  <text x="650" y="238" text-anchor="middle" class="sub">Zero DeepCopy Copies</text>
+  <text x="650" y="262" text-anchor="middle" class="sub" fill="#6d28d9">Zero apiserver Polling</text>
+</svg>

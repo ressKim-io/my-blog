@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #1e293b; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; }
+      .box-rose { fill: #fff1f2; stroke: #e11d48; stroke-width: 2.5; rx: 12; }
+      .box-rose-hdr { fill: #ffe4e6; stroke: #e11d48; stroke-width: 2; rx: 8; }
+      .box-green { fill: #ecfdf5; stroke: #059669; stroke-width: 2.5; rx: 12; }
+      .box-green-hdr { fill: #d1fae5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arr-r" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#e11d48" />
+    </marker>
+    <marker id="arr-g" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="500" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">Generic PLEG vs Evented PLEG: Vertical Flow Comparison</text>
+
+  <!-- LEFT COLUMN: Generic PLEG (1s Polling) -->
+  <rect x="30" y="65" width="355" height="410" class="box-rose" />
+  <rect x="50" y="82" width="315" height="38" class="box-rose-hdr" />
+  <text x="207" y="107" text-anchor="middle" class="header" fill="#9f1239">Generic PLEG (1s Polling Loop)</text>
+
+  <!-- Step 1: kubelet (y=136..192) -->
+  <rect x="50" y="136" width="315" height="56" class="card" stroke="#e11d48" />
+  <text x="207" y="170" text-anchor="middle" class="label" fill="#9f1239">1. kubelet Timer (Every 1.0s)</text>
+
+  <!-- Arrow down to Step 2 (top y=222) -->
+  <path d="M 207 196 L 207 215" stroke="#e11d48" stroke-width="3" marker-end="url(#arr-r)" />
+
+  <!-- Step 2: containerd (y=222..278) -->
+  <rect x="50" y="222" width="315" height="56" class="card" stroke="#e11d48" />
+  <text x="207" y="256" text-anchor="middle" class="label" fill="#9f1239">2. containerd (Iterates 110 Pods)</text>
+
+  <!-- Arrow down to Step 3 (top y=308) -->
+  <path d="M 207 282 L 207 301" stroke="#e11d48" stroke-width="3" marker-end="url(#arr-r)" />
+
+  <!-- Step 3: Kernel (y=308..364) -->
+  <rect x="50" y="308" width="315" height="56" class="card" stroke="#e11d48" />
+  <text x="207" y="342" text-anchor="middle" class="label" fill="#9f1239">3. Kernel cgroups (/sys/.../pids)</text>
+
+  <!-- Result Box (y=380..458) -->
+  <rect x="50" y="380" width="315" height="78" class="card" stroke="#e11d48" fill="#fff1f2" />
+  <text x="207" y="412" text-anchor="middle" class="label" fill="#9f1239">Continuous Runqueue Contention</text>
+  <text x="207" y="438" text-anchor="middle" class="sub" fill="#9f1239">Constant GC Churn Even When 100% IDLE</text>
+
+
+  <!-- RIGHT COLUMN: Evented PLEG (300s + Push) -->
+  <rect x="415" y="65" width="355" height="410" class="box-green" />
+  <rect x="435" y="82" width="315" height="38" class="box-green-hdr" />
+  <text x="592" y="107" text-anchor="middle" class="header" fill="#065f46">Evented PLEG (300s + Async CRI Push)</text>
+
+  <!-- Step 1: Kernel Notifications (y=136..192) -->
+  <rect x="435" y="136" width="315" height="56" class="card" stroke="#059669" />
+  <text x="592" y="170" text-anchor="middle" class="label" fill="#059669">1. Kernel Notifications (exit / cgroup)</text>
+
+  <!-- Arrow down to Step 2 (top y=222) -->
+  <path d="M 592 196 L 592 215" stroke="#059669" stroke-width="3" marker-end="url(#arr-g)" />
+
+  <!-- Step 2: containerd stream (y=222..278) -->
+  <rect x="435" y="222" width="315" height="56" class="card" stroke="#059669" />
+  <text x="592" y="256" text-anchor="middle" class="label" fill="#059669">2. containerd Event Stream (gRPC)</text>
+
+  <!-- Arrow down to Step 3 (top y=308) -->
+  <path d="M 592 282 L 592 301" stroke="#059669" stroke-width="3" marker-end="url(#arr-g)" />
+
+  <!-- Step 3: kubelet worker (y=308..364) -->
+  <rect x="435" y="308" width="315" height="56" class="card" stroke="#059669" />
+  <text x="592" y="342" text-anchor="middle" class="label" fill="#059669">3. kubelet PLEG Worker (Wakes 1 Pod)</text>
+
+  <!-- Result Box (y=380..458) -->
+  <rect x="435" y="380" width="315" height="78" class="card" stroke="#059669" fill="#ecfdf5" />
+  <text x="592" y="412" text-anchor="middle" class="label" fill="#059669">Polling Frequency Delayed 300x</text>
+  <text x="592" y="438" text-anchor="middle" class="sub" fill="#065f46">Near-Zero CPU Baseline &amp; 0 Idle Churn</text>
+</svg>

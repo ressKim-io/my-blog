@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 420" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-open { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .box-csp { fill: #F8FAFC; stroke: #475569; stroke-width: 2; stroke-dasharray: 6 4; rx: 8; }
+      .inner { fill: #FFFFFF; stroke: #D4D4D8; stroke-width: 1.5; rx: 6; }
+      .h-open { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .h-csp { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #334155; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .body { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .note { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 600; fill: #334155; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="820" height="420" class="bg" rx="12"/>
+
+  <text x="40" y="40" class="title">What the Source Shows, and Where It Stops</text>
+  <text x="40" y="64" class="subtitle">Open eBPF code is readable; the managed layer below it is not</text>
+
+  <rect x="40" y="96" width="740" height="128" class="box-open"/>
+  <text x="410" y="126" class="h-open">Readable — open source Cilium (v1.19.5)</text>
+
+  <rect x="66" y="146" width="340" height="56" class="inner"/>
+  <text x="236" y="180" class="mono">cgroup/connect4 — dst rewrite</text>
+
+  <rect x="426" y="146" width="328" height="56" class="inner"/>
+  <text x="590" y="180" class="mono">bpf_redirect_peer — same node</text>
+
+  <rect x="40" y="252" width="740" height="112" class="box-csp"/>
+  <text x="410" y="282" class="h-csp">Not readable — managed layer (vendor)</text>
+  <text x="410" y="312" class="body">Cross-node path, virtual switch, hardware offload</text>
+  <text x="410" y="340" class="body">Encapsulation method is not stated in public docs</text>
+
+  <text x="410" y="398" class="note">GKE documents the tradeoff: new Service features land in kube-proxy first</text>
+</svg>

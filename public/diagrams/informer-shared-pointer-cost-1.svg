@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
+      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
+      .box-inner { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2; fill: none; marker-end: url(#arrow-head); }
+    </style>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="460" class="bg" rx="12"/>
+
+  <!-- Title Section (2 texts) -->
+  <text x="40" y="42" class="title">SharedInformer vs Individual Informer Architecture</text>
+  <text x="40" y="66" class="subtitle">Comparison of N-Copy Memory Redundancy versus Zero-Copy Pointer Broadcast</text>
+
+  <!-- Left Column: Individual Informers (N-Copy) -->
+  <rect x="40" y="96" width="340" height="324" class="box-orange"/>
+  <text x="210" y="134" class="txt-header">Individual Informers</text>
+  <text x="210" y="156" class="txt-orange">N Watches + N Local Caches</text>
+
+  <rect x="64" y="176" width="292" height="64" class="box-inner"/>
+  <text x="210" y="204" class="txt-body">10 Independent HTTP/2 Streams</text>
+  <text x="210" y="226" class="txt-sub">Duplicate Deserialization Loops</text>
+
+  <path d="M 210 248 L 210 274" class="arrow"/>
+
+  <rect x="64" y="286" width="292" height="110" class="box-inner"/>
+  <text x="210" y="322" class="txt-body">10x Duplicate Heap Footprint</text>
+  <text x="210" y="362" class="txt-orange">Result: Severe GC Pressure</text>
+
+  <!-- Right Column: SharedInformer (0-Copy) -->
+  <rect x="420" y="96" width="340" height="324" class="box-teal"/>
+  <text x="590" y="134" class="txt-header">SharedInformer</text>
+  <text x="590" y="156" class="txt-teal">1 Central Watch + 0-Copy Share</text>
+
+  <rect x="444" y="176" width="292" height="64" class="box-inner"/>
+  <text x="590" y="204" class="txt-body">Single API Server Stream</text>
+  <text x="590" y="226" class="txt-sub">1 Local Indexer Store Shared</text>
+
+  <path d="M 590 248 L 590 274" class="arrow"/>
+
+  <rect x="444" y="286" width="292" height="110" class="box-inner"/>
+  <text x="590" y="322" class="txt-body">Pointer 0xa7e3... Shared directly</text>
+  <text x="590" y="362" class="txt-teal">Result: Minimal Heap Overhead</text>
+</svg>

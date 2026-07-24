@@ -317,6 +317,18 @@ kind create cluster --name rt6 \
 - 이건 kind 특유가 아니라 **kubeadm 표준 스태틱 파드 매니페스트**. 다만 관리형(EKS/GKE)은
   다를 수 있으니 본문에서 "kubeadm 기준"이라고 못 박을 것
 
+**oom_score_adj 실측 및 소스 확정 (M23-5)** — kind/colima 실측 및 `pkg/kubelet/qos/policy.go`
+| 대상 | 배포 형태 | cgroup `memory.max` | `/proc/<pid>/oom_score_adj` 실측 | 소스 근거 (`pkg/kubelet/qos/policy.go`) |
+|---|---|---|---|---|
+| `kubelet` | 호스트 systemd | `max` | **-999** | `KubeletOOMScoreAdj int = -999` (`:30`) |
+| `kube-proxy` | **DaemonSet** (`system-node-critical`) | `max` | **-999** | `KubeProxyOOMScoreAdj int = -999` (`:32` / `--oom-score-adj=-999` 플래그) |
+| `kube-apiserver` | Static Pod (`system-node-critical`) | `max` | **-997** | `guaranteedOOMScoreAdj int = -997` (`:33` / `GetContainerOOMScoreAdjust` `:48`) |
+| `etcd` / `controller-manager` | Static Pod (`system-node-critical`) | `max` | **-997** | `guaranteedOOMScoreAdj int = -997` (`:33` / `GetContainerOOMScoreAdjust` `:48`) |
+| `coredns` | Deployment (`Burstable`, `170Mi`) | `178257920` | **989** | Burstable 휴리스틱 (`1000 - (req * 1000 / cap)`) |
+
+- **핵심 소스 인과율**: 정적 파드(`kube-apiserver`, `etcd`, `controller-manager`)는 QoS가 `Burstable`이어도 `priorityClassName: system-node-critical`로 인해 `types.IsNodeCriticalPod(pod)` 분기를 타서 `guaranteedOOMScoreAdj`인 **`-997`**을 받음. `-999`는 `kubelet` 자신 및 `kube-proxy` 전용 플래그 값.
+
+
 **런타임 손잡이 부재 (M23-3·M23-4) — 확정**
 ```text
 I0714 04:31:18.339344  1 server.go:152] "Golang settings" GOGC="" GOMAXPROCS="" GOTRACEBACK=""
@@ -342,6 +354,13 @@ I0714 04:31:18.339344  1 server.go:152] "Golang settings" GOGC="" GOMAXPROCS="" 
   **커널 메모리만 ≈ 38 MiB**, 이것만으로 Go의 전체 유저 스택(17.4 MiB)을 넘어섬
   ② 가상 주소공간 19GB는 64비트에선 실질 부담이 아님 — 이 점을 숨기지 말 것
   ③ 진짜 비용은 스케줄러 런큐·문맥 전환(1편)
+
+**파드당 4~4.5개 고루틴 분해 실측 (M24-1·M24-2 pprof 검증)**
+`kubelet` `/debug/pprof/goroutine?debug=1` 프로파일 실측 결과 (파드 9개 구동 시 총 235개 고루틴 중):
+1. `podWorkers.podWorkerLoop` (**파드 1개당 정확히 1개 1:1 배정**, 9개 실측 확인)
+2. `prober.(*worker).run` (**컨테이너별 설정된 liveness/readiness/startup 프로브마다 독립 고루틴**, 15개 실측 확인)
+3. `statusManager` / `volumeManager` / `callback_serializer.run` / `cadvisor.housekeepingTick` 등 보조 및 CRI 콜백 고루틴이 파드 증가에 비례하여 동반 스폰
+이로 인해 파드 1개당 평균 4~4.5개(`go_goroutines` 기울기)의 고루틴이 증가하며, 고루틴 1개당 평균 실효 연속 스택은 약 15.8 KB로 수렴함.
 
 ### 8.3 25편 척추 — 미리보기 측정됨
 
@@ -372,5 +391,46 @@ Go 1.26.5 `$(go env GOROOT)/src/sync/pool.go` 정독 결과, `getSlow`가 victim
 - **10편 `:329`("GC 시점에 비워질 수 있다")를 더 정확하게 만듦.** 진실은 두 겹 —
   ① GC가 비운다(수명 2주기) ② **P가 갈리면 애초에 못 찾는다**
 - 그리고 그 P별 private 슬롯은 **10편의 mcache와 똑같은 설계**(무락을 위한 P 샤딩).
-  25편에서 이 대응을 명시적으로 그릴 것
 - ⚠️ 집필 시 데모는 `GOMAXPROCS=1`로 고정해야 재현됨. 기본값이면 결과가 흔들림
+
+**`sync.Pool` 활성화 vs 비활성화 직렬화 버퍼 실측 (M25-1)** — `rt6-bench` (`BenchmarkNoPool` vs `BenchmarkWithPool`, Go 1.26.5 / Apple M3)
+
+| 버퍼 할당 방식 | ns/op | B/op | **allocs/op** | 힙 할당 절감율 |
+|---|---|---|---|---|
+| `NoPool` (매번 `new(bytes.Buffer)`) | 926.4 | 1,616 | **4** | — |
+| `WithPool` (`sync.Pool` 재활용) | 815.1 | 864 | **2** | **46.5% 절감** |
+
+- **핵심**: `sync.Pool`은 단일 직렬화 루프에서도 힙 할당 바이트를 46.5%, 할당 횟수를 50% 절감하며 실행 시간까지 12% 단축함. 이 절감분이 GC `markroot` 마킹 부하와 Write Barrier 호출 빈도를 억제하는 제어 평면의 1차 방어선.
+
+**Watcher 팬아웃 N=1 vs N=50 단 1회 0-Copy 직렬화 (`cachingObject`) 실측 (M25-4)** — `rt6-bench` (`BenchmarkWatchFanout_*`, Go 1.26.5 / Apple M3)
+
+| 팬아웃 규모 | 직렬화 방식 | ns/op | B/op | **allocs/op** | N=50 대비 속도/할당 차이 |
+|---|---|---|---|---|---|
+| **N=1** | `Direct` (매번 개별 인코딩) | 951.6 | 1,616 | 4 | 기준점 |
+| **N=50** | `Direct` (매번 개별 인코딩) | 47,090 | 80,800 | **200** | **정확히 50배 선형 폭증** |
+| **N=1** | `Cached` (`cachingObject` 1회) | 1,057 | 1,704 | 6 | `sync.Once` 초기 래퍼 비용 (+105ns) |
+| **N=50** | `Cached` (`cachingObject` 1회) | 1,105 | 1,704 | **6** | **시간 42.6배 고속, 할당 47.4배 절감 (O(1) 불변)** |
+
+- **핵심**: 50명의 Watcher가 동일 파드 변경 이벤트를 수신할 때, `Direct`는 정확히 N배(`80.8 KB`, `200 allocs`, `47 µs`)로 CPU와 힙을 소진함. 반면 `cachingObject`는 첫 Watcher가 직렬화한 바이트(`1.7 KB`, `6 allocs`)를 `atomic.Value`에 캐싱하여 나머지 49명에게 `0-Copy` 포인터만 전달하므로 팬아웃 규모와 무관하게 할당량이 O(1)로 수렴함.
+
+### 8.4 26편 척추 — 실측 완료 (`informer-shared-pointer-cost`)
+
+**SharedInformer 포인터 0-Copy 공유 및 인-플레이스 변형 오염 (M26-3)** — `staging/src/k8s.io/client-go/tools/cache/shared_informer.go:965` `distribute()` 실증
+
+| 핸들러 | 수신한 객체 포인터 주소 (`%p`) | 목격한 `pod.Labels["env"]` 값 |
+|---|---|---|
+| **Handler A** (수신 직후 라벨 수정) | `0xa7e38469408` | `"COMPROMISED_BY_HANDLER_A"` (직접 변형) |
+| **Handler B** (A 이후 수신) | **`0xa7e38469408` (정확히 동일)** | **`"COMPROMISED_BY_HANDLER_A"` (오염된 상태 그대로 읽음)** |
+
+- **물리적 규명**: `shared_informer.go`의 `distribute()`는 각 리스너에게 `addNotification{newObj: obj}`를 보낼 때 `DeepCopy`를 단 1번도 호출하지 않고 포인터 주소 그대로 넘김.
+- 이로 인해 **복사 비용 0 (Zero-Copy)**이라는 극도의 메모리/CPU 절약을 달성하지만, 그 청구서는 **"리스너에서 수정하려면 반드시 수동으로 `DeepCopy()`를 호출해야 한다"는 사람(개발자)의 규약**으로 전가됨. 만약 실수로 인-플레이스 수정 시 클러스터 전체 컨트롤러의 캐시가 조용히 오염되는 치명적 레이스 컨디션 발생.
+
+**Slow Consumer 및 무한 링 버퍼 (`RingGrowing`) OOM 위협 (M26-4)** — `shared_informer.go:1223~1224` 주석 원문 실증
+
+| 누적 이벤트 수 | 링 버퍼 `capacity` (`buffer.RingGrowing`) | 힙 메모리 할당량 증가 (`HeapAlloc`) |
+|---|---|---|
+| 0 | 1,024 | 0 MiB |
+| 100,000 | **119,808** (무제한 지수 확장) | **+160.14 MiB** |
+
+- **K8s 소스 주석 자백**: *"pendingNotifications is an unbounded ring buffer that holds all notifications not yet distributed. There is one per listener, but a failing/stalled listener will have infinite pendingNotifications added until we OOM the client."* (`shared_informer.go:1223~1224`)
+- **물리적 기전**: 리스너(`processorListener`)의 핸들러 고루틴이 DB I/O나 락 등으로 인해 처리 속도가 느려지면(Slow Consumer), API Server로부터 쏟아지는 이벤트는 백프레셔 없이 `pendingNotifications` (`NewRingGrowing`)에 무제한 적재됨. 이 링 버퍼는 상한(`limit`)이 없으므로 컨트롤러 프로세스가 힙을 모두 소모하고 커널 OOM Killer에 의해 처형될 때까지 계속 팽창함.

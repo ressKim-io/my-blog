@@ -1,0 +1,19 @@
+{
+  "label": "smt-packed-kspin",
+  "probe": "lock-probe",
+  "config": {"mode": "kspin", "threads": 6, "duration_s": 30, "hold": 50, "gap": 200},
+  "env": {"hostname": "schedlab1", "kernel": "6.8.0-134-generic", "nproc": 6, "is_guest": true, "cpu_model": "AMD Ryzen 5 7500F 6-Core Processor", "cmdline": "BOOT_IMAGE=/vmlinuz-6.8.0-134-generic root=UUID=6239d00e-fbe6-43e9-89d8-d80643d1e789 ro console=tty1 console=ttyS0"},
+  "cpu_time_jiffies": {"user": 8672, "nice": 0, "system": 9328, "idle": 0, "iowait": 0, "irq": 0, "softirq": 0, "steal": 0, "guest": 0, "guest_nice": 0},
+  "cpu_time_pct": {"user": 48.1778, "nice": 0.0000, "system": 51.8222, "idle": 0.0000, "iowait": 0.0000, "irq": 0.0000, "softirq": 0.0000, "steal": 0.0000, "guest": 0.0000, "guest_nice": 0.0000},
+  "sched": {"total_wall_ns": 180010682200, "total_cpu_ns": 180001099000, "total_run_delay_ns": 5314760, "run_delay_ratio": 0.000030, "cpu_efficiency": 0.999947, "run_delay_p50_ns": 928743, "run_delay_max_ns": 1791181},
+  "throughput": {"total_iterations": 129581977, "iter_per_sec": 4319088.8},
+  "workers": [
+    {"worker": 0, "wall_ns": 30001922062, "cpu_ns": 30000614592, "run_delay_ns": 641033, "timeslices": 59, "iterations": 21613051},
+    {"worker": 1, "wall_ns": 30001812348, "cpu_ns": 30000379682, "run_delay_ns": 725110, "timeslices": 71, "iterations": 21577721},
+    {"worker": 2, "wall_ns": 30001759482, "cpu_ns": 30000111499, "run_delay_ns": 928743, "timeslices": 91, "iterations": 21582935},
+    {"worker": 3, "wall_ns": 30001734505, "cpu_ns": 30000808473, "run_delay_ns": 198947, "timeslices": 42, "iterations": 21601314},
+    {"worker": 4, "wall_ns": 30001734365, "cpu_ns": 29999976040, "run_delay_ns": 1029746, "timeslices": 112, "iterations": 21601712},
+    {"worker": 5, "wall_ns": 30001719438, "cpu_ns": 29999208714, "run_delay_ns": 1791181, "timeslices": 135, "iterations": 21605244}
+  ],
+  "wall_elapsed_s": 30.002
+}

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #1e293b; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; }
+      .box-rose { fill: #fff1f2; stroke: #e11d48; stroke-width: 2.5; rx: 12; }
+      .box-rose-hdr { fill: #ffe4e6; stroke: #e11d48; stroke-width: 2; rx: 8; }
+      .box-green { fill: #ecfdf5; stroke: #059669; stroke-width: 2.5; rx: 12; }
+      .box-green-hdr { fill: #d1fae5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+  </defs>
+
+  <rect width="800" height="360" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">500 Pods: 1:1 OS Threads vs Go Goroutines</text>
+
+  <!-- Left: 1:1 OS Threads -->
+  <rect x="30" y="65" width="355" height="270" class="box-rose" />
+  <rect x="50" y="80" width="315" height="36" class="box-rose-hdr" />
+  <text x="207" y="104" text-anchor="middle" class="header" fill="#9f1239">1:1 OS Threads (Traditional)</text>
+
+  <rect x="50" y="128" width="315" height="52" class="card" stroke="#e11d48" />
+  <text x="207" y="150" text-anchor="middle" class="label" fill="#9f1239">Kernel Stack RAM</text>
+  <text x="207" y="170" text-anchor="middle" class="sub" fill="#475569">8 MiB Unswappable</text>
+
+  <rect x="50" y="190" width="315" height="52" class="card" stroke="#e11d48" />
+  <text x="207" y="212" text-anchor="middle" class="label" fill="#9f1239">VMA &amp; PTE Metadata</text>
+  <text x="207" y="232" text-anchor="middle" class="sub" fill="#475569">TLB Miss &amp; Fragmentation</text>
+
+  <rect x="50" y="252" width="315" height="65" class="card" stroke="#e11d48" fill="#fff1f2" />
+  <text x="207" y="276" text-anchor="middle" class="label" fill="#9f1239">CFS Runqueue Bomb</text>
+  <text x="207" y="298" text-anchor="middle" class="sub" fill="#9f1239">Spinlock Contention</text>
+
+  <!-- Right: K8s Go Goroutines -->
+  <rect x="415" y="65" width="355" height="270" class="box-green" />
+  <rect x="435" y="80" width="315" height="36" class="box-green-hdr" />
+  <text x="592" y="104" text-anchor="middle" class="header" fill="#065f46">Go Goroutines (kubelet)</text>
+
+  <rect x="435" y="128" width="315" height="52" class="card" stroke="#059669" />
+  <text x="592" y="150" text-anchor="middle" class="label" fill="#059669">User Stack Only</text>
+  <text x="592" y="170" text-anchor="middle" class="sub" fill="#475569">7.9 MiB User RAM</text>
+
+  <rect x="435" y="190" width="315" height="52" class="card" stroke="#059669" />
+  <text x="592" y="212" text-anchor="middle" class="label" fill="#059669">Unified Heap Arena</text>
+  <text x="592" y="232" text-anchor="middle" class="sub" fill="#475569">Zero VMA or PTE Tax</text>
+
+  <rect x="435" y="252" width="315" height="65" class="card" stroke="#059669" fill="#ecfdf5" />
+  <text x="592" y="276" text-anchor="middle" class="label" fill="#059669">M:N User Switching</text>
+  <text x="592" y="298" text-anchor="middle" class="sub" fill="#065f46">Zero Runqueue Lock</text>
+</svg>

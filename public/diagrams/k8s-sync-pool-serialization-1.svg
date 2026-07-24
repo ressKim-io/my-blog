@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 2.5; rx: 12; }
+      .box-orange-hdr { fill: #ffedd5; stroke: #ea580c; stroke-width: 2; rx: 8; }
+      .box-teal { fill: #f0fdf4; stroke: #0d9488; stroke-width: 2.5; rx: 12; }
+      .box-teal-hdr { fill: #ccfbf1; stroke: #0d9488; stroke-width: 2; rx: 8; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arr-o" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#ea580c" />
+    </marker>
+    <marker id="arr-t" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0d9488" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="480" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">Watch Fan-Out: Naive O(N) vs cachingObject O(1)</text>
+
+  <!-- LEFT COLUMN: Naive O(N) Fan-Out (Warm Orange) -->
+  <rect x="30" y="65" width="355" height="390" class="box-orange" />
+  <rect x="50" y="82" width="315" height="38" class="box-orange-hdr" />
+  <text x="207" y="107" text-anchor="middle" class="header" fill="#c2410c">Naive O(N) Fan-Out</text>
+
+  <rect x="50" y="136" width="315" height="56" class="card" stroke="#ea580c" />
+  <text x="207" y="170" text-anchor="middle" class="label" fill="#c2410c">1. Event Arrival (1 Pod Update)</text>
+
+  <path d="M 207 196 L 207 215" stroke="#ea580c" stroke-width="3" marker-end="url(#arr-o)" />
+
+  <rect x="50" y="222" width="315" height="56" class="card" stroke="#ea580c" />
+  <text x="207" y="256" text-anchor="middle" class="label" fill="#c2410c">2. N Watchers Loop (50 Clients)</text>
+
+  <path d="M 207 282 L 207 301" stroke="#ea580c" stroke-width="3" marker-end="url(#arr-o)" />
+
+  <rect x="50" y="308" width="315" height="56" class="card" stroke="#ea580c" />
+  <text x="207" y="342" text-anchor="middle" class="label" fill="#c2410c">3. N Serializations (50x Encode)</text>
+
+  <rect x="50" y="380" width="315" height="60" class="card" stroke="#ea580c" fill="#fff7ed" />
+  <text x="207" y="405" text-anchor="middle" class="label" fill="#c2410c">Heap OOM &amp; GC Stall</text>
+  <text x="207" y="427" text-anchor="middle" class="sub" fill="#9a3412">5 MB Short-Lived Garbage / Event</text>
+
+
+  <!-- RIGHT COLUMN: cachingObject O(1) (Deep Teal) -->
+  <rect x="415" y="65" width="355" height="390" class="box-teal" />
+  <rect x="435" y="82" width="315" height="38" class="box-teal-hdr" />
+  <text x="592" y="107" text-anchor="middle" class="header" fill="#0f766e">cachingObject O(1) Defense</text>
+
+  <rect x="435" y="136" width="315" height="56" class="card" stroke="#0d9488" />
+  <text x="592" y="170" text-anchor="middle" class="label" fill="#0f766e">1. Event Arrival (1 Pod Update)</text>
+
+  <path d="M 592 196 L 592 215" stroke="#0d9488" stroke-width="3" marker-end="url(#arr-t)" />
+
+  <rect x="435" y="222" width="315" height="56" class="card" stroke="#0d9488" />
+  <text x="592" y="256" text-anchor="middle" class="label" fill="#0f766e">2. cachingObject (sync.Once Lock)</text>
+
+  <path d="M 592 282 L 592 301" stroke="#0d9488" stroke-width="3" marker-end="url(#arr-t)" />
+
+  <rect x="435" y="308" width="315" height="56" class="card" stroke="#0d9488" />
+  <text x="592" y="342" text-anchor="middle" class="label" fill="#0f766e">3. 1x Serialization (Cache raw[])</text>
+
+  <rect x="435" y="380" width="315" height="60" class="card" stroke="#0d9488" fill="#f0fdf4" />
+  <text x="592" y="405" text-anchor="middle" class="label" fill="#0f766e">Zero Copy Fan-Out</text>
+  <text x="592" y="427" text-anchor="middle" class="sub" fill="#115e59">N Watchers Share 1 Byte Slice</text>
+</svg>

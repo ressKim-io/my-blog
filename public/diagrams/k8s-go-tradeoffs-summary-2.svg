@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
+      .box-footer { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
+      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2; fill: none; marker-end: url(#arrow-head); }
+    </style>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" class="bg" rx="12"/>
+
+  <!-- Title Section (2 texts) -->
+  <text x="40" y="42" class="title">Bypass vs Paid Tax Flowchart in Kubernetes Control Plane</text>
+  <text x="40" y="66" class="subtitle">How Avoiding Go Runtime Tuning Creates Architectural Technical Debt</text>
+
+  <!-- Stage 1: Runtime Tuning Abandoned (2 texts) -->
+  <rect x="140" y="96" width="520" height="74" class="box-teal"/>
+  <text x="400" y="130" class="txt-header">1. Runtime Tuning Abandoned</text>
+  <text x="400" y="154" class="txt-teal">GOGC="" / GOMAXPROCS="" / GOMEMLIMIT="" Logs Only</text>
+
+  <!-- Arrow 1 (1 text) -->
+  <path d="M 400 178 L 400 204" class="arrow"/>
+  <text x="490" y="195" class="txt-body">Bypass Applied</text>
+
+  <!-- Stage 2: Architectural Workarounds (3 texts) -->
+  <rect x="140" y="214" width="520" height="84" class="box-teal"/>
+  <text x="400" y="244" class="txt-header">2. Architectural Workarounds Enforced</text>
+  <text x="400" y="268" class="txt-body">Informer 0-Copy + podWorkers 1:1 + cachingObject</text>
+  <text x="400" y="288" class="txt-teal">Result: Memory Copy &amp; GC Pressure Reduced</text>
+
+  <!-- Arrow 2 (1 text) -->
+  <path d="M 400 306 L 400 332" class="arrow"/>
+  <text x="490" y="323" class="txt-body">Cost Transferred</text>
+
+  <!-- Stage 3: Paid Tax & Consequences (3 texts) -->
+  <rect x="140" y="342" width="520" height="84" class="box-orange"/>
+  <text x="400" y="372" class="txt-header">3. Paid Tax &amp; Consequences</text>
+  <text x="400" y="396" class="txt-body">DeepCopy Rule + RingBuffer OOM + PLEG Storm</text>
+  <text x="400" y="416" class="txt-orange">Result: Developer Burden &amp; Polling Overhead</text>
+
+  <!-- Footer Callout (2 texts) -->
+  <rect x="140" y="442" width="520" height="42" class="box-footer"/>
+  <text x="250" y="468" class="txt-header">Key Takeaway:</text>
+  <text x="490" y="468" class="txt-orange">Optimization Transferred to Human Burden</text>
+</svg>

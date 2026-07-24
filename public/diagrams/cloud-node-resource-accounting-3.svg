@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 450" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-sim { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 2; rx: 8; }
+      .box-run { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .match { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .gap { fill: #FFF1F2; stroke: #E11D48; stroke-width: 2; rx: 8; }
+      .h-sim { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #6D28D9; text-anchor: middle; }
+      .h-run { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .body { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .h-match { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .h-gap { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #BE123C; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="820" height="450" class="bg" rx="12"/>
+
+  <text x="40" y="40" class="title">Karpenter Mirrors the Formula, Estimates the Capacity</text>
+  <text x="40" y="64" class="subtitle">Parity holds where the arithmetic is copied, not where the input is guessed</text>
+
+  <rect x="40" y="96" width="350" height="132" class="box-sim"/>
+  <text x="215" y="126" class="h-sim">Before launch — Karpenter</text>
+  <text x="215" y="156" class="mono">capacity = advertised x (1 - 0.075)</text>
+  <text x="215" y="184" class="mono">kubeReserved = 11 x pods + 255</text>
+
+  <rect x="430" y="96" width="350" height="132" class="box-run"/>
+  <text x="605" y="126" class="h-run">After boot — kubelet</text>
+  <text x="605" y="156" class="mono">capacity = MemTotal</text>
+  <text x="605" y="184" class="mono">kubeReserved = 11 x maxPods + 255</text>
+
+  <rect x="40" y="262" width="350" height="118" class="match"/>
+  <text x="215" y="292" class="h-match">Identical: the formula</text>
+  <text x="215" y="322" class="mono">11 x pods + 255 MiB</text>
+  <text x="215" y="350" class="mono">0.06 / 0.01 / 0.005 / 0.0025</text>
+
+  <rect x="430" y="262" width="350" height="118" class="gap"/>
+  <text x="605" y="292" class="h-gap">Divergent: the capacity</text>
+  <text x="605" y="322" class="body">7.5% flat haircut vs real VM overhead</text>
+  <text x="605" y="350" class="body">on 64 GiB that is ~4.9 GiB of guesswork</text>
+
+  <text x="410" y="414" class="body">VM_MEMORY_OVERHEAD_PERCENT is a tunable flag — the value is not a constant</text>
+</svg>

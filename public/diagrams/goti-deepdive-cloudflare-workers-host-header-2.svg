@@ -63,7 +63,7 @@
   <text x="666" y="224" font-size="10" fill="#FCA5A5" font-family="'Geist Mono', monospace">  resshome.iptime.org</text>
   <text x="666" y="242" font-size="10" fill="#A1A1AA" font-family="'Geist Mono', monospace">Accept: */*</text>
   <text x="666" y="258" font-size="10" fill="#A1A1AA" font-family="'Geist Mono', monospace">...</text>
-  <text x="666" y="280" font-size="10" fill="#6B7280" font-family="'Geist Mono', monospace">// ❌ Istio 매칭 실패</text>
+  <text x="666" y="280" font-size="10" fill="#6B7280" font-family="'Geist Mono', monospace">// [불일치] Istio 매칭 실패</text>
   <text x="666" y="294" font-size="10" fill="#6B7280" font-family="'Geist Mono', monospace">//    → 404</text>
 
   <!-- ───────── 보안 정책 노트 ───────── -->

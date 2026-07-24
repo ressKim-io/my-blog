@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" width="100%" height="100%" role="img" aria-labelledby="title desc" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="title">Goroutine State Transition: managePodLoop</title>
+  <desc id="desc">Goroutine state transition between _Grunning, _Gwaiting parked in sudog queue, and _Grunnable inserted into _P_.runnext.</desc>
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-size: 20px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; }
+      .header { font-size: 17px; font-weight: 700; text-anchor: middle; }
+      .label { font-size: 16px; font-weight: 700; text-anchor: middle; }
+      .sub { font-size: 15px; font-weight: 700; text-anchor: middle; }
+      .box-emerald { fill: #ECFDF5; stroke: #059669; stroke-width: 2.5; rx: 12; }
+      .box-amber { fill: #FFFBEB; stroke: #D97706; stroke-width: 2.5; rx: 12; }
+      .box-violet { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 2.5; rx: 12; }
+      .card { fill: #FFFFFF; stroke-width: 2; rx: 8; }
+    </style>
+    <marker id="arr-o" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#D97706" />
+    </marker>
+    <marker id="arr-v" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7C3AED" />
+    </marker>
+    <marker id="arr-t" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="440" class="bg" rx="12" />
+  <text x="400" y="38" class="title">Goroutine State Transition: managePodLoop</text>
+
+  <!-- STATE 1: _Grunning (Top Center) -->
+  <rect x="250" y="65" width="300" height="74" class="box-emerald" />
+  <text x="400" y="96" class="header" fill="#047857">State: _Grunning (Active)</text>
+  <text x="400" y="123" class="label" fill="#047857">Processing Pod Event</text>
+
+  <!-- STATE 2: _Gwaiting (Bottom Right) -->
+  <rect x="480" y="250" width="280" height="74" class="box-amber" />
+  <text x="620" y="281" class="header" fill="#B45309">State: _Gwaiting (Parked)</text>
+  <text x="620" y="308" class="label" fill="#B45309">Linked to sudog Queue</text>
+
+  <!-- STATE 3: _Grunnable (Bottom Left) -->
+  <rect x="40" y="250" width="280" height="74" class="box-violet" />
+  <text x="180" y="281" class="header" fill="#6D28D9">State: _Grunnable (Ready)</text>
+  <text x="180" y="308" class="label" fill="#6D28D9">Inserted into _P_.runnext</text>
+
+  <!-- Transition 1: _Grunning -> _Gwaiting (Down Right Curve) -->
+  <path d="M 530 139 C 580 165, 620 200, 620 238" fill="none" stroke="#D97706" stroke-width="3" marker-end="url(#arr-o)" />
+  <rect x="540" y="172" width="200" height="36" class="card" stroke="#D97706" />
+  <text x="640" y="196" class="sub" fill="#B45309">1. Channel Empty (gopark)</text>
+
+  <!-- Transition 2: _Gwaiting -> _Grunnable (Left Straight Arrow) -->
+  <path d="M 480 287 L 332 287" fill="none" stroke="#7C3AED" stroke-width="3" marker-end="url(#arr-v)" />
+  <rect x="310" y="336" width="180" height="36" class="card" stroke="#7C3AED" />
+  <text x="400" y="360" class="sub" fill="#6D28D9">2. CRI Event (goready)</text>
+
+  <!-- Transition 3: _Grunnable -> _Grunning (Up Right Curve) -->
+  <path d="M 180 238 C 180 200, 220 165, 270 139" fill="none" stroke="#059669" stroke-width="3" marker-end="url(#arr-t)" />
+  <rect x="60" y="172" width="180" height="36" class="card" stroke="#059669" />
+  <text x="150" y="196" class="sub" fill="#047857">3. Scheduler Pick</text>
+
+  <!-- Footer Note -->
+  <rect x="150" y="388" width="500" height="38" class="card" stroke="#E4E4E7" fill="#F8FAFC" />
+  <text x="400" y="413" class="label" fill="#334155">Zero Kernel Thread Overhead — User-Space Switching</text>
+</svg>

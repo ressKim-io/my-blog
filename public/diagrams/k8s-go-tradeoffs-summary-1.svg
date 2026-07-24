@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
+      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" class="bg" rx="12"/>
+
+  <!-- Title Section (2 texts) -->
+  <text x="40" y="42" class="title">4 Pillars of K8s Runtime Bypasses &amp; Paid Taxes</text>
+  <text x="40" y="66" class="subtitle">Summary of Empirical Measurements from Post 23 to Post 26</text>
+
+  <!-- Top-Left Box: Post 23 Exemption (3 texts) -->
+  <rect x="40" y="96" width="340" height="166" class="box-teal"/>
+  <text x="210" y="140" class="txt-header">Post 23: Control Plane Exemption</text>
+  <text x="210" y="180" class="txt-body">Bypass: cgroup memory.max = max</text>
+  <text x="210" y="224" class="txt-teal">Benefit: Avoids 18-Post OOMKill Limit</text>
+
+  <!-- Top-Right Box: Post 24 Goroutines (3 texts) -->
+  <rect x="420" y="96" width="340" height="166" class="box-orange"/>
+  <text x="590" y="140" class="txt-header">Post 24: Goroutine per Pod</text>
+  <text x="590" y="180" class="txt-body">Bypass: podWorkers 1:1 Goroutine</text>
+  <text x="590" y="224" class="txt-orange">Tax: Generic PLEG 1s Polling Storm</text>
+
+  <!-- Bottom-Left Box: Post 25 sync.Pool (3 texts) -->
+  <rect x="40" y="284" width="340" height="166" class="box-orange"/>
+  <text x="210" y="328" class="txt-header">Post 25: sync.Pool &amp; Cache</text>
+  <text x="210" y="368" class="txt-body">Bypass: cachingObject 1x Encode</text>
+  <text x="210" y="412" class="txt-orange">Tax: CRD JSON 2x Alloc &amp; Victim Loss</text>
+
+  <!-- Bottom-Right Box: Post 26 SharedInformer (3 texts) -->
+  <rect x="420" y="284" width="340" height="166" class="box-teal"/>
+  <text x="590" y="328" class="txt-header">Post 26: SharedInformer 0-Copy</text>
+  <text x="590" y="368" class="txt-body">Bypass: %p Pointer Broadcast</text>
+  <text x="590" y="412" class="txt-teal">Tax: DeepCopy Rule &amp; RingBuffer OOM</text>
+</svg>

@@ -107,6 +107,20 @@ export const seriesList: SeriesMeta[] = [
     tagline: 'cgroup · Cloud Cost',
     blurb: '커널의 메모리 회계 규칙부터 GC 여유 공간이 만드는 노드 밀도, 힙 외부 OOMKilled, 웜업 지연까지 — 런타임 선택이 클라우드 비용으로 이어지는 경로를 추적합니다',
   },
+  {
+    id: 'kernel-runtime-tradeoffs-6',
+    seriesName: 'kernel-runtime-tradeoffs-6',
+    title: 'K8s는 Go의 한계를 어떻게 우회했나',
+    tagline: 'K8s · Go Runtime Architecture',
+    blurb: '컨트롤 플레인의 자기 면제부터 파드당 고루틴 물량, sync.Pool과 Informer 공유 캐시까지 — 쿠버네티스가 Go 런타임의 한계를 아키텍처로 비켜가고 사람에게 남긴 청구서를 추적합니다',
+  },
+  {
+    id: 'kernel-runtime-tradeoffs-7',
+    seriesName: 'kernel-runtime-tradeoffs-7',
+    title: '클라우드는 무엇을 대신 정해 두었나',
+    tagline: 'EKS AMI · VPC CNI · Cilium',
+    blurb: '워커 노드의 예약 산식부터 파드 밀도를 정하는 CNI 로직, 커널 서비스 경로를 대체한 eBPF 데이터플레인까지 — 클라우드가 쓰는 오픈소스를 읽어 관리형 쿠버네티스가 사용자 대신 내린 결정을 추적합니다',
+  },
 ];
 
 // 홈 쇼케이스 featured(큰 카드)로 고정할 시리즈 — 교체는 이 한 줄만 수정

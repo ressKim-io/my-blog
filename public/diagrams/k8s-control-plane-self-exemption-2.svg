@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t2 d2" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t2">No Go Runtime Knobs vs Architecture Bypass</title>
+  <desc id="d2">Standard Go servers use tuning knobs while Kubernetes avoids runtime knobs and relies on architectural bypasses.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <!-- Left: Standard Go Server -->
+  <rect x="40" y="40" width="340" height="320" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+  <text x="210" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#334155">Standard Go Server</text>
+  <text x="210" y="105" text-anchor="middle" font-size="14" fill="#64748B">Runtime Knobs Tuning</text>
+
+  <rect x="75" y="135" width="270" height="60" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+  <text x="210" y="162" text-anchor="middle" font-size="16" font-weight="700" fill="#BE123C">GOMEMLIMIT</text>
+  <text x="210" y="183" text-anchor="middle" font-size="13" fill="#BE123C">Force GC near memory threshold</text>
+
+  <rect x="75" y="210" width="270" height="60" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+  <text x="210" y="237" text-anchor="middle" font-size="16" font-weight="700" fill="#0E7490">automaxprocs</text>
+  <text x="210" y="258" text-anchor="middle" font-size="13" fill="#0E7490">Sync container CPU limit</text>
+
+  <rect x="75" y="285" width="270" height="55" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="210" y="310" text-anchor="middle" font-size="16" font-weight="700" fill="#6D28D9">GOGC / SetMemoryLimit</text>
+  <text x="210" y="330" text-anchor="middle" font-size="13" fill="#6D28D9">Manual runtime adjustments</text>
+
+  <!-- Right: Kubernetes Control Plane -->
+  <rect x="420" y="40" width="340" height="320" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="590" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#047857">Kubernetes Control Plane</text>
+  <text x="590" y="105" text-anchor="middle" font-size="14" fill="#047857">Architecture Bypass</text>
+
+  <rect x="455" y="135" width="270" height="60" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="2"/>
+  <text x="590" y="162" text-anchor="middle" font-size="16" font-weight="700" fill="#047857">GOGC / GOMAXPROCS = ""</text>
+  <text x="590" y="183" text-anchor="middle" font-size="13" fill="#047857">0 calls to automaxprocs</text>
+
+  <rect x="455" y="210" width="270" height="60" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="590" y="237" text-anchor="middle" font-size="16" font-weight="700" fill="#B45309">sync.Pool / cachingObject</text>
+  <text x="590" y="258" text-anchor="middle" font-size="13" fill="#B45309">1x serialization on fan-out</text>
+
+  <rect x="455" y="285" width="270" height="55" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+  <text x="590" y="310" text-anchor="middle" font-size="16" font-weight="700" fill="#B45309">Informer Shared Cache</text>
+  <text x="590" y="330" text-anchor="middle" font-size="13" fill="#B45309">Zero DeepCopy &amp; 0 polling</text>
+</svg>

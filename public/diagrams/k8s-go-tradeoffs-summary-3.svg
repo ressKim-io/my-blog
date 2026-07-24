@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
+      .box-slate { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
+      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+      .arrow { stroke: #64748B; stroke-width: 2; fill: none; marker-end: url(#arrow-head); }
+    </style>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" class="bg" rx="12"/>
+
+  <!-- Title Section (2 texts) -->
+  <text x="40" y="42" class="title">Cost Conservation Triangle in Kubernetes Control Plane</text>
+  <text x="40" y="66" class="subtitle">How Optimization Shifts Burden Between Hardware, Runtime, and Developer</text>
+
+  <!-- Top Apex Box: Hardware Efficiency (2 texts) -->
+  <rect x="230" y="96" width="340" height="80" class="box-teal"/>
+  <text x="400" y="132" class="txt-header">1. Hardware &amp; Memory Efficiency</text>
+  <text x="400" y="158" class="txt-teal">Zero-Copy, Single Watch &amp; Object Pool</text>
+
+  <!-- Left Arrow & Label (1 text) -->
+  <path d="M 340 184 L 250 262" class="arrow"/>
+  <text x="270" y="210" class="txt-body">0-Copy &amp; sync.Pool</text>
+
+  <!-- Right Arrow & Label (1 text) -->
+  <path d="M 460 184 L 550 262" class="arrow"/>
+  <text x="530" y="210" class="txt-body">memory.max = max</text>
+
+  <!-- Bottom-Left Apex: Go Runtime (3 texts) -->
+  <rect x="40" y="270" width="340" height="96" class="box-slate"/>
+  <text x="210" y="304" class="txt-header">2. Go Runtime &amp; GC Workload</text>
+  <text x="210" y="330" class="txt-body">Minimal Allocation &amp; Fast Relist</text>
+  <text x="210" y="352" class="txt-teal">Result: Sub-ms GC Pause</text>
+
+  <!-- Bottom-Right Apex: Developer Burden (3 texts) -->
+  <rect x="420" y="270" width="340" height="96" class="box-orange"/>
+  <text x="590" y="304" class="txt-header">3. Developer &amp; Polling Tax</text>
+  <text x="590" y="330" class="txt-body">Mandatory DeepCopy Rule &amp; PLEG I/O</text>
+  <text x="590" y="352" class="txt-orange">Result: Human Safety Responsibility</text>
+
+  <!-- Footer Box (2 texts) -->
+  <rect x="140" y="400" width="520" height="52" class="box-slate"/>
+  <text x="250" y="432" class="txt-header">Law of Conservation:</text>
+  <text x="490" y="432" class="txt-orange">Savings in Hardware/GC Shift to Human Convention</text>
+</svg>

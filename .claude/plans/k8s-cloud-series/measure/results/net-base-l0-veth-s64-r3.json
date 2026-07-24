@@ -1,0 +1,31 @@
+{
+  "label": "l0-veth-s64-r3",
+  "probe": "net-probe",
+  "mode": "rtt",
+  "host": {
+    "nodename": "ressbe",
+    "release": "7.0.0-28-generic"
+  },
+  "config": {
+    "target": "10.90.0.2",
+    "port": 9911,
+    "size": 64,
+    "samples": 20000,
+    "warmup": 2000,
+    "cpu": 5
+  },
+  "kept": 20000,
+  "lost": 0,
+  "rtt_us": {
+    "min": 6.091,
+    "p50": 6.503,
+    "p90": 7.224,
+    "p99": 8.325,
+    "max": 20.509,
+    "mean": 6.624
+  },
+  "host_mhz": {
+    "before": 3561.0,
+    "after": 3705.0
+  }
+}

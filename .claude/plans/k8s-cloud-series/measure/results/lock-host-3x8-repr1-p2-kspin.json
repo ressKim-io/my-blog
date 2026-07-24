@@ -1,0 +1,22 @@
+{
+  "label": "host-3x8-p2-kspin",
+  "probe": "lock-probe",
+  "config": {"mode": "kspin", "threads": 8, "duration_s": 30, "hold": 50, "gap": 200, "footprint_kb": 0, "hugepage": false},
+  "anon_huge_kb": 0,
+  "env": {"hostname": "ressbe", "kernel": "7.0.0-28-generic", "nproc": 12, "is_guest": false, "cpu_model": "AMD Ryzen 5 7500F 6-Core Processor", "cmdline": "BOOT_IMAGE=/boot/vmlinuz-7.0.0-28-generic root=UUID=21215db2-3bdc-4550-a4c9-d96e2b8f708d ro quiet splash crashkernel=2G-4G:320M,4G-32G:512M,32G-64G:1024M,64G-128G:2048M,128G-:4096M"},
+  "cpu_time_jiffies": {"user": 23911, "nice": 0, "system": 12093, "idle": 1, "iowait": 0, "irq": 0, "softirq": 0, "steal": 0, "guest": 46, "guest_nice": 0},
+  "cpu_time_pct": {"user": 66.3255, "nice": 0.0000, "system": 33.5441, "idle": 0.0028, "iowait": 0.0000, "irq": 0.0000, "softirq": 0.0000, "steal": 0.0000, "guest": 0.1276, "guest_nice": 0.0000},
+  "sched": {"total_wall_ns": 239997645168, "total_cpu_ns": 120252596076, "total_run_delay_ns": 119737951965, "run_delay_ratio": 0.995720, "cpu_efficiency": 0.501057, "run_delay_p50_ns": 15041960363, "run_delay_max_ns": 15161504249},
+  "throughput": {"total_iterations": 113268082, "iter_per_sec": 3775094.1},
+  "workers": [
+    {"worker": 0, "wall_ns": 29997994189, "cpu_ns": 14874373553, "run_delay_ns": 15122714626, "timeslices": 5101, "iterations": 13901214},
+    {"worker": 1, "wall_ns": 29999031265, "cpu_ns": 14956175779, "run_delay_ns": 15041960363, "timeslices": 5065, "iterations": 14290433},
+    {"worker": 2, "wall_ns": 29998293509, "cpu_ns": 15246765275, "run_delay_ns": 14750643674, "timeslices": 5071, "iterations": 14431922},
+    {"worker": 3, "wall_ns": 29997965173, "cpu_ns": 14841178668, "run_delay_ns": 15155902275, "timeslices": 4986, "iterations": 13874978},
+    {"worker": 4, "wall_ns": 30002618159, "cpu_ns": 15090270918, "run_delay_ns": 14911465276, "timeslices": 5059, "iterations": 14384175},
+    {"worker": 5, "wall_ns": 29999962630, "cpu_ns": 15156415024, "run_delay_ns": 14842678002, "timeslices": 5092, "iterations": 14385423},
+    {"worker": 6, "wall_ns": 30002719382, "cpu_ns": 15250757592, "run_delay_ns": 14751083500, "timeslices": 5163, "iterations": 14172234},
+    {"worker": 7, "wall_ns": 29999060861, "cpu_ns": 14836659267, "run_delay_ns": 15161504249, "timeslices": 5094, "iterations": 13827703}
+  ],
+  "wall_elapsed_s": 30.004
+}

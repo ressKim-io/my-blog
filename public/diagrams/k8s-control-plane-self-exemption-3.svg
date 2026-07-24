@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="t3 d3" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="t3">Idle apiserver Concurrency Footprint (2,390 Units)</title>
+  <desc id="d3">Comparison of 2,390 Go goroutines using 17.4 MiB user stack versus 2,390 OS threads requiring 38.2 MiB kernel stack.</desc>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="400" y="38" text-anchor="middle" font-size="18" font-weight="700" fill="#0A0A0A">Concurrency Footprint: 2,390 Execution Units</text>
+  <text x="400" y="60" text-anchor="middle" font-size="14" fill="#64748B">Measured on Idle kube-apiserver (go_goroutines = 2,390)</text>
+
+  <!-- Left: Go Goroutine Model -->
+  <rect x="40" y="80" width="340" height="290" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
+  <text x="210" y="115" text-anchor="middle" font-size="17" font-weight="700" fill="#047857">Go Goroutines (M:N)</text>
+  <text x="210" y="138" text-anchor="middle" font-size="14" fill="#047857">≈ 7.6 KB per goroutine</text>
+
+  <rect x="75" y="160" width="270" height="90" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="2"/>
+  <text x="210" y="195" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">User Stack Total</text>
+  <text x="210" y="228" text-anchor="middle" font-size="22" font-weight="700" fill="#047857">17.4 MiB</text>
+
+  <rect x="75" y="265" width="270" height="85" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="2"/>
+  <text x="210" y="295" text-anchor="middle" font-size="15" font-weight="700" fill="#047857">User-Space Scheduling</text>
+  <text x="210" y="318" text-anchor="middle" font-size="13" fill="#047857">0 Syscall Mode Switches</text>
+  <text x="210" y="338" text-anchor="middle" font-size="13" font-weight="700" fill="#047857">GC STW (p99): 0.86 ms</text>
+
+  <!-- Right: 1:1 OS Thread Model -->
+  <rect x="420" y="80" width="340" height="290" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2.5"/>
+  <text x="590" y="115" text-anchor="middle" font-size="17" font-weight="700" fill="#BE123C">1:1 OS Threads (Hypothetical)</text>
+  <text x="590" y="138" text-anchor="middle" font-size="14" fill="#BE123C">16 KB Resident Kernel Stack</text>
+
+  <rect x="455" y="160" width="270" height="90" rx="8" fill="#FFFFFF" stroke="#E11D48" stroke-width="2"/>
+  <text x="590" y="195" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">Kernel Stack Only</text>
+  <text x="590" y="228" text-anchor="middle" font-size="22" font-weight="700" fill="#BE123C">≈ 38.2 MiB</text>
+
+  <rect x="455" y="265" width="270" height="85" rx="8" fill="#FFFFFF" stroke="#E11D48" stroke-width="2"/>
+  <text x="590" y="295" text-anchor="middle" font-size="15" font-weight="700" fill="#BE123C">Kernel Runqueue Thrashing</text>
+  <text x="590" y="318" text-anchor="middle" font-size="13" fill="#BE123C">High Context Switch Cost</text>
+  <text x="590" y="338" text-anchor="middle" font-size="13" fill="#64748B">* 8MB Virtual Stack = Lazy Alloc</text>
+</svg>

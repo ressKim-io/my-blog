@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; fill: #64748b; }
+      .box-teal { fill: #f0fdf4; stroke: #0d9488; stroke-width: 2.5; rx: 12; }
+      .box-slate { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2.5; rx: 12; }
+      .box-orange { fill: #fff7ed; stroke: #ea580c; stroke-width: 2.5; rx: 12; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arr-s" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+    </marker>
+    <marker id="arr-o" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#ea580c" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="500" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">sync.Pool &amp; Victim Cache: 3-Stage Reclamation Flowchart</text>
+
+  <!-- Stage 1: Active Pool (Deep Teal) -->
+  <rect x="130" y="65" width="540" height="95" class="box-teal" />
+  <rect x="150" y="80" width="500" height="32" fill="#ccfbf1" rx="6" />
+  <text x="400" y="102" text-anchor="middle" class="header" fill="#0f766e">Stage 1: Active Pool (poolLocal.private / shared)</text>
+  <rect x="150" y="118" width="500" height="34" class="card" stroke="#0d9488" />
+  <text x="400" y="141" text-anchor="middle" class="label" fill="#0f766e">Get() / Put() Active Buffers (0 Lock Immediate Reuse)</text>
+
+  <!-- Split Arrow 1 & Clean Text -->
+  <path d="M 400 160 L 400 174" stroke="#64748b" stroke-width="3" />
+  <text x="400" y="190" text-anchor="middle" class="sub" fill="#334155">1st GC Cycle: poolCleanup Sweep</text>
+  <path d="M 400 198 L 400 210" stroke="#64748b" stroke-width="3" marker-end="url(#arr-s)" />
+
+  <!-- Stage 2: Victim Cache (Slate Neutral) -->
+  <rect x="130" y="212" width="540" height="95" class="box-slate" />
+  <rect x="150" y="227" width="500" height="32" fill="#e2e8f0" rx="6" />
+  <text x="400" y="249" text-anchor="middle" class="header" fill="#334155">Stage 2: Victim Cache (poolLocal.victim)</text>
+  <rect x="150" y="265" width="500" height="34" class="card" stroke="#94a3b8" />
+  <text x="400" y="288" text-anchor="middle" class="label" fill="#334155">Survivor Buffers: Secondary Fallback if Active Empty</text>
+
+  <!-- Split Arrow 2 & Clean Text -->
+  <path d="M 400 307 L 400 321" stroke="#ea580c" stroke-width="3" />
+  <text x="400" y="337" text-anchor="middle" class="sub" fill="#c2410c">2nd GC Cycle: If Still Untouched</text>
+  <path d="M 400 345 L 400 357" stroke="#ea580c" stroke-width="3" marker-end="url(#arr-o)" />
+
+  <!-- Stage 3: Reclaimed (Warm Orange) -->
+  <rect x="130" y="359" width="540" height="105" class="box-orange" />
+  <rect x="150" y="374" width="500" height="32" fill="#ffedd5" rx="6" />
+  <text x="400" y="396" text-anchor="middle" class="header" fill="#c2410c">Stage 3: Complete Eviction &amp; Reclamation</text>
+  <rect x="150" y="412" width="500" height="42" class="card" stroke="#ea580c" />
+  <text x="400" y="439" text-anchor="middle" class="label" fill="#c2410c">Victim Cleared ➔ Memory Returned to GC Heap</text>
+</svg>

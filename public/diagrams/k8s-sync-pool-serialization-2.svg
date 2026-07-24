@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .header { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 700; }
+      .label { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; }
+      .sub { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; fill: #64748b; }
+      .box-slate { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2.5; rx: 12; }
+      .box-teal { fill: #f0fdf4; stroke: #0d9488; stroke-width: 2.5; rx: 12; }
+      .card { fill: #ffffff; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arr-t" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0d9488" />
+    </marker>
+    <marker id="arr-s" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="520" fill="#ffffff" rx="12" />
+  <text x="400" y="35" text-anchor="middle" class="title">Watch Stream Framing: cacher Dispatch to HTTP/2 Socket</text>
+
+  <!-- Stage 1: Cacher Dispatch (Slate Neutral) -->
+  <rect x="70" y="65" width="660" height="95" class="box-slate" />
+  <rect x="90" y="80" width="620" height="32" fill="#e2e8f0" rx="6" />
+  <text x="400" y="102" text-anchor="middle" class="header" fill="#334155">1. Cacher watchCache &amp; Dispatch Loop</text>
+  <rect x="90" y="118" width="620" height="34" class="card" stroke="#94a3b8" />
+  <text x="400" y="141" text-anchor="middle" class="label" fill="#334155">Pod Update Arrives ➔ Broadcast to N Watchers</text>
+
+  <!-- Split Arrow 1 & Clean Text -->
+  <path d="M 400 160 L 400 174" stroke="#0d9488" stroke-width="3" />
+  <text x="400" y="190" text-anchor="middle" class="sub" fill="#0f766e">N Watchers Request Event Encoding</text>
+  <path d="M 400 198 L 400 210" stroke="#0d9488" stroke-width="3" marker-end="url(#arr-t)" />
+
+  <!-- Stage 2: cachingObject Defense (Deep Teal) -->
+  <rect x="70" y="212" width="660" height="95" class="box-teal" />
+  <rect x="90" y="227" width="620" height="32" fill="#ccfbf1" rx="6" />
+  <text x="400" y="249" text-anchor="middle" class="header" fill="#0f766e">2. cachingObject.serializationsCache (sync.Once)</text>
+  <rect x="90" y="265" width="620" height="34" class="card" stroke="#0d9488" />
+  <text x="400" y="288" text-anchor="middle" class="label" fill="#0f766e">1x Encode Lock ➔ Store Shared raw[] Pointer</text>
+
+  <!-- Split Arrow 2 & Clean Text -->
+  <path d="M 400 307 L 400 321" stroke="#64748b" stroke-width="3" />
+  <text x="400" y="337" text-anchor="middle" class="sub" fill="#334155">0-Copy Pointer Share (Bypasses mallocgc)</text>
+  <path d="M 400 345 L 400 357" stroke="#64748b" stroke-width="3" marker-end="url(#arr-s)" />
+
+  <!-- Stage 3: Socket Fan-Out (Slate Neutral) -->
+  <rect x="70" y="359" width="660" height="125" class="box-slate" />
+  <rect x="90" y="374" width="620" height="32" fill="#e2e8f0" rx="6" />
+  <text x="400" y="396" text-anchor="middle" class="header" fill="#334155">3. HTTP/2 Chunked Response Socket Fan-Out</text>
+  <rect x="90" y="412" width="620" height="58" class="card" stroke="#94a3b8" />
+  <text x="400" y="436" text-anchor="middle" class="label" fill="#334155">Write raw[] Direct to N Client Stream Sockets</text>
+  <text x="400" y="458" text-anchor="middle" class="sub" fill="#64748b">(Transfer-Encoding: chunked / HTTP/2 Stream)</text>
+</svg>

@@ -1,0 +1,10 @@
+{
+  "label": "guest-schedlab2",
+  "probe": "vmexit-probe",
+  "config": {"batch": 200, "samples": 2000, "cpu": 0},
+  "env": {"kernel": "6.8.0-134-generic", "is_guest": true, "cpu_model": "AMD Ryzen 5 7500F 6-Core Processor", "ns_per_cycle": 0.270724, "tsc_mhz": 3693.8},
+  "cpuid_cycles": {"p10": 3186.1, "p50": 3190.3, "p90": 3280.1, "p99": 3414.2},
+  "cpuid_ns": {"p50": 863.7, "p90": 888.0},
+  "rdtsc_cycles": {"p50": 27.0, "p90": 27.2},
+  "rdtsc_ns": {"p50": 7.3}
+}

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="100%" height="100%" role="img" aria-labelledby="title desc" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="title">processorListener Dual Goroutine Architecture (pop vs run)</title>
+  <desc id="desc">Dual goroutines separated by pendingNotifications ring buffer prevent slow consumers from blocking API Server watch streams.</desc>
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-size: 20px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; }
+      .header { font-size: 17px; font-weight: 700; text-anchor: middle; }
+      .label { font-size: 16px; font-weight: 700; text-anchor: middle; }
+      .sub { font-size: 14px; font-weight: 600; text-anchor: middle; }
+      .box-emerald { fill: #ECFDF5; stroke: #059669; stroke-width: 2.5; rx: 12; }
+      .box-amber { fill: #FFFBEB; stroke: #D97706; stroke-width: 2.5; rx: 12; }
+      .box-violet { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 2.5; rx: 12; }
+      .card { fill: #FFFFFF; stroke-width: 2; rx: 8; }
+    </style>
+    <marker id="arr-t" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+    </marker>
+    <marker id="arr-o" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#D97706" />
+    </marker>
+    <marker id="arr-v" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7C3AED" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="380" class="bg" rx="12" />
+  <text x="400" y="38" class="title">processorListener Dual Goroutine Architecture (pop vs run)</text>
+
+  <!-- LEFT: pop() Goroutine -->
+  <rect x="30" y="65" width="230" height="240" class="box-emerald" />
+  <text x="145" y="98" class="header" fill="#047857">1. pop() Goroutine</text>
+  <rect x="50" y="118" width="190" height="48" class="card" stroke="#059669" />
+  <text x="145" y="148" class="label" fill="#047857">Receive from addCh</text>
+
+  <path d="M 145 166 L 145 190" stroke="#059669" stroke-width="3" marker-end="url(#arr-t)" />
+
+  <rect x="50" y="194" width="190" height="88" class="card" stroke="#059669" fill="#ECFDF5" />
+  <text x="145" y="226" class="label" fill="#047857">Fast Path (nextCh)</text>
+  <text x="145" y="258" class="sub" fill="#BE123C">If Blocked ➔ Ring Buffer</text>
+
+  <!-- CENTER: pendingNotifications RingBuffer -->
+  <path d="M 240 238 L 285 238" stroke="#D97706" stroke-width="3" marker-end="url(#arr-o)" />
+  
+  <rect x="285" y="130" width="230" height="152" class="box-amber" />
+  <text x="400" y="166" class="header" fill="#B45309">pendingNotifications</text>
+  <rect x="305" y="186" width="190" height="76" class="card" stroke="#D97706" fill="#FFFBEB" />
+  <text x="400" y="218" class="label" fill="#B45309">RingGrowing Buffer</text>
+  <text x="400" y="244" class="sub" fill="#B45309">2x Exponential Growth</text>
+
+  <path d="M 515 238 L 560 238" stroke="#7C3AED" stroke-width="3" marker-end="url(#arr-v)" />
+
+  <!-- RIGHT: run() Goroutine -->
+  <rect x="560" y="65" width="210" height="240" class="box-violet" />
+  <text x="665" y="98" class="header" fill="#6D28D9">2. run() Goroutine</text>
+  <rect x="580" y="118" width="170" height="48" class="card" stroke="#7C3AED" />
+  <text x="665" y="148" class="label" fill="#6D28D9">ReadOne() Buffer</text>
+
+  <path d="M 665 166 L 665 190" stroke="#7C3AED" stroke-width="3" marker-end="url(#arr-v)" />
+
+  <rect x="580" y="194" width="170" height="88" class="card" stroke="#7C3AED" fill="#F5F3FF" />
+  <text x="665" y="238" class="label" fill="#6D28D9">Execute Callback</text>
+  <text x="665" y="264" class="sub" fill="#6D28D9">(User Business Logic)</text>
+
+  <!-- Footer Note -->
+  <rect x="70" y="324" width="660" height="38" class="card" stroke="#E4E4E7" fill="#F8FAFC" />
+  <text x="400" y="349" class="label" fill="#334155">Dual Goroutines Prevent Slow Consumers from Blocking Watch Stream</text>
+</svg>

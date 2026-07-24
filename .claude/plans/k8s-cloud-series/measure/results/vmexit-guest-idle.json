@@ -1,0 +1,10 @@
+{
+  "label": "guest-idle",
+  "probe": "vmexit-probe",
+  "config": {"batch": 200, "samples": 2000, "cpu": 0},
+  "env": {"kernel": "6.8.0-134-generic", "is_guest": true, "cpu_model": "AMD Ryzen 5 7500F 6-Core Processor", "ns_per_cycle": 0.270751, "tsc_mhz": 3693.4},
+  "cpuid_cycles": {"p10": 3188.5, "p50": 3200.3, "p90": 3285.4, "p99": 3501.9},
+  "cpuid_ns": {"p50": 866.5, "p90": 889.5},
+  "rdtsc_cycles": {"p50": 27.0, "p90": 27.2},
+  "rdtsc_ns": {"p50": 7.3}
+}

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 430" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #FAFAFA; }
+      .title { font-family: 'Pretendard', system-ui, sans-serif; font-size: 18px; font-weight: 700; fill: #0A0A0A; }
+      .subtitle { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-host { fill: #FFFBEB; stroke: #D97706; stroke-width: 2; rx: 8; }
+      .box-guest { fill: #F5F3FF; stroke: #7C3AED; stroke-width: 2; rx: 8; }
+      .box-share { fill: #FFFFFF; stroke: #475569; stroke-width: 2; rx: 8; }
+      .box-ok { fill: #ECFDF5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .box-miss { fill: #FFF1F2; stroke: #E11D48; stroke-width: 2; rx: 8; }
+      .h-host { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #B45309; text-anchor: middle; }
+      .h-guest { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #6D28D9; text-anchor: middle; }
+      .h-share { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #334155; text-anchor: middle; }
+      .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .body { font-family: 'Pretendard', system-ui, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .h-ok { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #047857; text-anchor: middle; }
+      .h-miss { font-family: 'Pretendard', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #BE123C; text-anchor: middle; }
+      .flow { stroke: #475569; stroke-width: 2; marker-end: url(#ah); fill: none; }
+      .edge-label { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; font-weight: 600; fill: #B45309; text-anchor: middle; }
+    </style>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect width="820" height="430" class="bg" rx="12"/>
+
+  <text x="40" y="40" class="title">KVM Steal Time: One Shared Page, and What It Cannot Count</text>
+  <text x="40" y="64" class="subtitle">Measured on Ryzen 7500F, 3 guests x 8 vCPU over 12 pCPU (kernel v6.8 source paths)</text>
+
+  <!-- L0 host -->
+  <rect x="40" y="96" width="210" height="110" class="box-host"/>
+  <text x="145" y="128" class="h-host">KVM Host (L0)</text>
+  <text x="145" y="168" class="mono">writes st-&gt;steal, st-&gt;preempted</text>
+
+  <!-- shared page -->
+  <rect x="305" y="96" width="210" height="110" class="box-share"/>
+  <text x="410" y="128" class="h-share">Shared Page per vCPU</text>
+  <text x="410" y="168" class="mono">struct kvm_steal_time</text>
+
+  <!-- L1 guest -->
+  <rect x="570" y="96" width="210" height="110" class="box-guest"/>
+  <text x="675" y="128" class="h-guest">Guest Kernel (L1)</text>
+  <text x="675" y="156" class="mono">account_process_tick()</text>
+  <text x="675" y="180" class="mono">cputime -= steal</text>
+
+  <line x1="250" y1="151" x2="298" y2="151" class="flow"/>
+  <line x1="515" y1="151" x2="563" y2="151" class="flow"/>
+  <text x="410" y="222" class="edge-label">MSR_KVM_STEAL_TIME</text>
+
+  <!-- counted -->
+  <rect x="40" y="266" width="350" height="126" class="box-ok"/>
+  <text x="215" y="298" class="h-ok">Counted by %st</text>
+  <text x="215" y="328" class="body">Time the vCPU waited to be scheduled</text>
+  <text x="215" y="356" class="body">Reports 50.3% under 2x oversubscription</text>
+
+  <!-- not counted -->
+  <rect x="430" y="266" width="350" height="126" class="box-miss"/>
+  <text x="605" y="298" class="h-miss">Never Counted by %st</text>
+  <text x="605" y="328" class="body">LLC contention while the vCPU is running</text>
+  <text x="605" y="356" class="body">Measured blind spot: 28.1 pp at 2 MB set</text>
+</svg>

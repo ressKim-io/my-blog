@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #F8FAFC; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .box-teal { fill: #F0FDF4; stroke: #0D9488; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #FFF7ED; stroke: #EA580C; stroke-width: 2; rx: 8; }
+      .box-inner { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 6; }
+      .txt-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+      .txt-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #64748B; text-anchor: middle; }
+      .txt-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .txt-teal { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #0D9488; text-anchor: middle; }
+      .txt-orange { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #EA580C; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="460" class="bg" rx="12"/>
+
+  <!-- Title Section -->
+  <text x="40" y="42" class="title">VPC CNI IP Allocation Modes: Secondary IP vs Prefix Delegation</text>
+  <text x="40" y="66" class="subtitle">Pod Density Capacity Boundary &amp; ENI Slot Utilization Efficiency</text>
+
+  <!-- Left Column: Secondary IP Mode -->
+  <rect x="40" y="96" width="340" height="324" class="box-teal"/>
+  <text x="210" y="134" class="txt-header">Secondary IP Mode (Default)</text>
+  <text x="210" y="156" class="txt-teal">1 Slot = 1 Pod IP Address</text>
+
+  <rect x="64" y="176" width="292" height="74" class="box-inner"/>
+  <text x="210" y="206" class="txt-body">ENI * (IPv4Limit - 1) + 2</text>
+  <text x="210" y="230" class="txt-sub">Standard MaxPods Formula</text>
+
+  <rect x="64" y="266" width="292" height="134" class="box-inner"/>
+  <text x="210" y="298" class="txt-header">Example: m5.large (3 ENIs)</text>
+  <text x="210" y="324" class="txt-body">3 * (10 - 1) + 2 = 29 Pods Max</text>
+  <text x="210" y="350" class="txt-body">All 3 Physical ENIs Exhausted</text>
+
+  <!-- Right Column: Prefix Delegation Mode -->
+  <rect x="420" y="96" width="340" height="324" class="box-orange"/>
+  <text x="590" y="134" class="txt-header">Prefix Delegation Mode</text>
+  <text x="590" y="156" class="txt-orange">1 Slot = /28 Prefix (16 Pod IPs)</text>
+
+  <rect x="444" y="176" width="292" height="74" class="box-inner"/>
+  <text x="590" y="206" class="txt-body">ENI * (IPv4Limit - 1) * 16 + 2</text>
+  <text x="590" y="230" class="txt-sub">Prefix Delegation IP Capacity Formula</text>
+
+  <rect x="444" y="266" width="292" height="134" class="box-inner"/>
+  <text x="590" y="298" class="txt-header">Example: m5.large (3 ENIs)</text>
+  <text x="590" y="324" class="txt-body">3 * 9 * 16 + 2 = 434 IP Capacity</text>
+  <text x="590" y="350" class="txt-body">Single ENI (eth0) Supports 144 IPs</text>
+</svg>
