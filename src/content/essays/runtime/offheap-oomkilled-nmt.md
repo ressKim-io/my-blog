@@ -1,5 +1,5 @@
 ---
-title: "GC 로그는 정상인데 파드가 종료되는 현상 — 힙 외부 OOMKilled의 물리적 해석"
+title: "GC 로그는 정상인데 파드가 종료되는 현상 — 힙 외부 OOMKilled의 실체"
 excerpt: "힙 사용률 1%, Full GC 0건으로 GC 로그상 아무런 징후가 없음에도 파드가 exit 137로 강제 종료되는 장애 상황을 다룹니다. 동일한 애플리케이션 코드라도 설정 플래그 하나에 따라 커널 수준의 강제 종료와 런타임 수준의 예외 발생이 갈립니다. 이번 편에서는 다이렉트 버퍼, Metaspace, glibc arena, cgo 영역을 컨테이너 환경에서 개별적으로 확인하고, MALLOC_ARENA_MAX 환경 변수에 대한 통념을 실측으로 검증합니다"
 category: runtime
 tags:
