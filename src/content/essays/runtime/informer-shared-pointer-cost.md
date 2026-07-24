@@ -17,8 +17,8 @@ date: "2026-07-21"
 
 > **시리즈 "커널과 런타임으로 톺아보는 Rust · Go · Java"의 28편 — 6부 4편**
 > [27편](/essays/k8s-sync-pool-serialization)에서 `kube-apiserver`가 N명의 Watcher에게 변경 이벤트를 브로드캐스팅할 때 발생하는 직렬화 및 힙 할당 폭발을 `cachingObject`(`sync.Once`)와 `sync.Pool` Victim Cache로 압축해 낸 서버 사이드 방어선을 확인했습니다
-> 6부 4편에서는 시선을 서버(`kube-apiserver`)에서 클라이언트(`client-go` 기반 컨트롤러 및 오퍼레이터) 쪽으로 돌려, **단 하나의 Watch 스트림으로 수집한 객체를 메모리 복사 없이 동일한 포인터(`%p`)로 N개 핸들러와 중앙 캐시(`Indexer`)에 공유하는 `SharedInformer`의 0-Copy 아키텍처와 그 이면의 물리적 위협**을 파헤칩니다
-> 핵심 질문은 명확합니다. **`SharedInformer`는 어떻게 네트워크 조회 비용을 O(0)으로, 인메모리 복제 비용을 0-Copy로 억제해 냈으며, 이 극단의 최적화가 왜 개발자에게 `DeepCopy()` 수동 호출 규약을 강제하고 Slow Consumer 상황에서 상한 없는 링 버퍼(`RingGrowing`)를 통한 OOM 파국을 불러오게 되었을까요**
+> 6부 4편에서는 시선을 서버(`kube-apiserver`)에서 클라이언트(`client-go` 기반 컨트롤러 및 오퍼레이터) 쪽으로 돌려, **단 하나의 Watch 스트림으로 수집한 객체를 메모리 복사 없이 동일한 포인터(`%p`)로 N개 핸들러와 중앙 캐시(`Indexer`)에 공유하는 `SharedInformer`의 0-Copy 아키텍처와 그 이면의 위협**을 파헤칩니다
+> 핵심 질문은 명확합니다. **`SharedInformer`는 어떻게 네트워크 조회 비용을 O(0)으로, 인메모리 복제 비용을 0-Copy로 억제해 냈으며, 이 극단의 최적화가 왜 개발자에게 `DeepCopy()` 수동 호출 규약을 강제하고 Slow Consumer 상황에서 상한 없는 링 버퍼(`RingGrowing`)를 통한 OOM 위협을 불러오게 되었을까요**
 
 이번 편의 수치와 소스 분석은 쿠버네티스 v1.36.1 (`staging/src/k8s.io/client-go/tools/cache/shared_informer.go`, `delta_fifo.go`, `controller.go`, `k8s.io/utils/buffer/ring_growing.go`) 및 Go 1.26.5 런타임(`src/runtime/mgc.go`) 커널 6.8 환경에서 계측한 결과를 바탕으로 합니다
 
@@ -29,9 +29,9 @@ date: "2026-07-21"
 쿠버네티스 생태계가 팽창하면서 하나의 클러스터 안에서 구동되는 컨트롤러(`Controller`)와 사용자 정의 오퍼레이터(`Custom Controller`)의 수는 급격히 늘어났습니다
 디플로이먼트(`Deployment`) 컨트롤러, 레플리카셋(`ReplicaSet`) 컨트롤러, 엔드포인트슬라이스(`EndpointSlice`) 컨트롤러는 물론, Istio, ArgoCD, Prometheus, Cert-Manager 등 수많은 외부 오퍼레이터가 파드(`Pod`)나 노드(`Node`) 리소스의 상태 변화를 실시간으로 추적해야 합니다
 
-만약 10개의 독립적인 컨트롤러 프로세스나 고루틴이 각자 자신만의 `Reflector`를 생성하여 `API Server`를 향해 개별적인 `ListAndWatch` 요청을 연다면 어떤 물리적 재앙이 벌어질까요
+만약 10개의 독립적인 컨트롤러 프로세스나 고루틴이 각자 자신만의 `Reflector`를 생성하여 `API Server`를 향해 개별적인 `ListAndWatch` 요청을 연다면 어떤 문제가 벌어질까요
 API Server 입장에서는 동일한 파드 목록을 전송하기 위해 10개의 HTTP/2 Watch 스트림을 유지하고, 매 이벤트마다 10번의 소켓 I/O 및 직렬화 연산을 중복 수행해야 합니다
-클라이언트 쪽은 더욱 비극적입니다. 10개의 컨트롤러가 소켓을 통해 넘어온 JSON이나 Protobuf 바이트 스트림을 각자의 힙 메모리에 독립적으로 역직렬화(`Deserialization`)하고 구조체 인스턴스로 생성합니다
+클라이언트 쪽 부담은 더욱 큽니다. 10개의 컨트롤러가 소켓을 통해 넘어온 JSON이나 Protobuf 바이트 스트림을 각자의 힙 메모리에 독립적으로 역직렬화(`Deserialization`)하고 구조체 인스턴스로 생성합니다
 클러스터에 50,000개의 파드가 존재하고 각 파드의 Go 구조체(`*corev1.Pod`) 메모리 크기가 평균 5 KB라고 할 때, 10개의 컨트롤러는 똑같은 데이터를 유지하기 위해 무려 **2.5 GB**(`50,000 × 5 KB × 10`)의 힙 메모리를 중복해서 점유하게 됩니다
 
 쿠버네티스 클라이언트 라이브러리인 **`client-go`** 는 이 막대한 네트워크 대역폭 낭비와 인메모리 중복 복제를 원천 봉쇄하기 위해 **`SharedInformer`(공유 인포머)** 아키텍처를 전면 도입했습니다
@@ -125,9 +125,9 @@ struct eface {
 `for _, listener := range p.listeners` 루프를 돌며 N개의 리스너 고루틴으로 이 인터페이스 헤더가 전달될 때, 스택 위에서 오직 16 바이트 헤더만 값 복사됩니다
 **실제 힙 공간에 상주하는 파드 구조체(`*corev1.Pod`)의 5 KB 메모리 주소(`0xa7e38469408`)는 단 1 바이트의 본문 복사 없이 그대로 유지되어 N개 핸들러 고루틴 전체에 0-Copy로 공유**됩니다
 
-### Indexer 로컬 스토어(`ThreadSafeStore`) 내부 물리 메모리 구조
+### Indexer 로컬 스토어(`ThreadSafeStore`) 내부 메모리 구조
 
-이 0-Copy 공유의 심장부인 **`Indexer` (`ThreadSafeStore`)** 구조체가 메모리에서 어떻게 이 포인터들을 관리하는지 바닥까지 해부해 보겠습니다
+이 0-Copy 공유의 핵심인 **`Indexer` (`ThreadSafeStore`)** 구조체가 메모리에서 어떻게 이 포인터들을 관리하는지 바닥까지 해부해 보겠습니다
 `ThreadSafeStore` (`staging/src/k8s.io/client-go/tools/cache/thread_safe_store.go`)는 단지 리스트 목록을 배열로 보관하는 곳이 아니라, 고속 검색을 위해 다중 인덱싱을 지원하는 스레드 안전 인메모리 데이터베이스입니다
 
 ```go
@@ -146,7 +146,7 @@ type threadSafeMap struct {
 
 ### 계측 증명: Handler A와 Handler B의 포인터 동일성
 
-이 물리적 구조를 Go 1.26.5 및 client-go `v0.36.1` 계측 도구(`rt6-bench/informer_test.go`)를 통해 직접 검증해 보겠습니다
+이 구조를 Go 1.26.5 및 client-go `v0.36.1` 계측 도구(`rt6-bench/informer_test.go`)를 통해 직접 검증해 보겠습니다
 동일한 `SharedInformer` 인스턴스에 서로 다른 비즈니스 로직을 처리하는 이벤트 핸들러 A(`Handler A`)와 핸들러 B(`Handler B`)를 등록하고, 콜백 함수로 인입된 파드 객체 포인터 주소를 `fmt.Sprintf("%p")`로 출력했습니다
 
 ```go
@@ -183,14 +183,14 @@ Handler A가 넘겨받은 `*corev1.Pod`의 힙 메모리 주소(`0xa7e38469408`)
 `SharedInformer`가 단 8 바이트의 포인터 주소를 N개 핸들러 고루틴에게 0-Copy로 브로드캐스팅하여 힙 복제 비용을 절감했지만, 이 선택은 Go 런타임 환경에서 극도로 위험한 아키텍처적 부작용을 잉태합니다
 컴파일 타임에 소유권(`Ownership`)과 불변 참조(`&` vs `&mut`) 규칙을 강제하여 메모리 동시 접근을 통제하는 Rust와 달리, Go 언어는 포인터를 전달받은 수신자가 구조체 내부 필드를 직접 변형하는 행위(`In-Place Mutation`)를 컴파일러 단에서 차단하지 못합니다
 
-더욱 치명적인 사실은, 핸들러 콜백으로 넘어온 포인터(`0xa7e38469408`)가 단지 이벤트 전달용 임시 객체가 아니라 **`SharedInformer`의 심장부이자 중앙 인메모리 로컬 스토어인 `Indexer`(`ThreadSafeStore`)가 보관하고 있는 원본 캐시 주소와 물리적으로 100% 일치한다**는 점입니다
+더욱 치명적인 사실은, 핸들러 콜백으로 넘어온 포인터(`0xa7e38469408`)가 단지 이벤트 전달용 임시 객체가 아니라 **`SharedInformer`의 핵심이자 중앙 인메모리 로컬 스토어인 `Indexer`(`ThreadSafeStore`)가 보관하고 있는 원본 캐시 주소와 100% 일치한다**는 점입니다
 
 ![SharedInformer In-Place Mutation Contamination](/diagrams/informer-shared-pointer-cost-2.svg)
 
 ### processDeltas 호출 선후관계: Indexer.Add(obj) 직후 0-copy distribute(obj)
 
 핸들러에서 무심코 실행한 필드 수정이 왜 클러스터 전체 캐시를 파괴하는지 정확히 규명하기 위해, `Reflector`가 수신한 변경 이벤트를 처리하는 **`Controller.processDeltas`** (`staging/src/k8s.io/client-go/tools/cache/controller.go:607`) 고루틴의 실행 흐름을 단계별로 분해합니다
-(참고로 쿠버네티스 v1.36.1 `client-go`에는 이벤트 묶음 처리를 위한 고성능 신설 경로인 `processDeltasInBatch`(`controller.go:676`)가 추가되었으나, 두 경로 모두 스토어 안착 후 동일 포인터 전송이라는 물리적 인과율은 완전히 일치합니다.)
+(참고로 쿠버네티스 v1.36.1 `client-go`에는 이벤트 묶음 처리를 위한 고성능 신설 경로인 `processDeltasInBatch`(`controller.go:676`)가 추가되었으나, 두 경로 모두 스토어 안착 후 동일 포인터 전송이라는 인과 관계는 완전히 일치합니다.)
 
 ```go
 // staging/src/k8s.io/client-go/tools/cache/controller.go:607 (processDeltas 단건 처리 경로, K8s v1.36.1 기준)
@@ -229,7 +229,7 @@ func processDeltas(handler ResourceEventHandler, clientState Store, transformer 
 }
 ```
 
-위 소스코드의 호출 선후관계(`Causal Chain`)는 명확한 물리적 인과율을 보여줍니다
+위 소스코드의 호출 선후관계(`Causal Chain`)는 명확한 인과 관계를 보여줍니다
 
 1. **`clientState`(`ThreadSafeStore` Indexer) 원본 캐시 갱신 (`clientState.Add/Update`)**: `processDeltas` 고루틴은 `DeltaFIFO`에서 Pop한 이벤트 객체 포인터 `obj`를 가장 먼저 중앙 로컬 스토어인 `clientState`(`staging/src/k8s.io/client-go/tools/cache/thread_safe_store.go`)에 저장합니다. 이때 `ThreadSafeStore` 내부의 `items map[string]interface{}` 맵에는 `obj`의 힙 메모리 주소(`0xa7e38469408`)가 직접 매핑됩니다
 2. **동일 포인터의 `handler.OnAdd/OnUpdate`(`distribute`) 즉시 전송**: `clientState`에 원본 포인터를 안착시킨 직후, `processDeltas`는 **단 한 번의 복사도 수행하지 않고 바로 그 `obj` 포인터(`0xa7e38469408`)를 `handler.OnAdd/OnUpdate`를 통해 `sharedProcessor.distribute()`로 디스패치**합니다
@@ -260,7 +260,7 @@ informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
     informer_test.go:92: Handler B가 목격한 pod.Labels["env"]: "COMPROMISED_BY_HANDLER_A"
 ```
 
-계측 결과는 재앙적입니다
+계측 결과는 심각합니다
 Handler A가 바꾼 라벨 값 `"COMPROMISED_BY_HANDLER_A"`가 이후 비동기로 호출된 Handler B에게 그대로 노출될 뿐만 아니라, **`s.indexer`(`ThreadSafeStore`) 내부에 저장된 클러스터 원본 캐시의 힙 데이터까지 통째로 오염**시켰습니다
 
 ### Lister 조회(`GetByKey`) 우회 오염과 DeepCopy 수동 호출 세금 해부
@@ -284,7 +284,7 @@ Reconcile 루프 (Lister.Pods().Get() 호출) ────┘ (오염된 0xa7e..
 
 ### DeepCopy() 호출이 유발하는 지하 2층 mcache/mcentral 할당 폭증 기전
 
-여기서 우리가 치러야 하는 `DeepCopy()`의 물리적 원가를 지하 2층 Go 메모리 할당자(`src/runtime/malloc.go`) 수준에서 정밀 해부해 보겠습니다
+여기서 우리가 치러야 하는 `DeepCopy()`의 실제 원가를 지하 2층 Go 메모리 할당자(`src/runtime/malloc.go`) 수준에서 정밀 해부해 보겠습니다
 쿠버네티스의 `DeepCopy()` 메서드는 단순한 Go 얕은 복사(`*newPod = *oldPod`)나 C 메모리 복사(`memcpy`)가 아닙니다
 파드 구조체(`*corev1.Pod`)는 그 내부에 수많은 동적 크기 슬라이스와 중첩 맵, 그리고 중첩 구조체(`PodSpec.Containers[]`, `Container.Env[]`, `VolumeMounts[]`, `Labels map[string]string`, `Tolerations[]`)를 거느리고 있습니다
 
@@ -343,14 +343,14 @@ informer.SetTransform(func(obj interface{}) (interface{}, error) {
 
 실측 수치는 명확한 통찰을 제시합니다
 `ConfigMap`이나 `Pod` 내부 구조체가 커질수록 `Indexer` 로컬 맵이 소모하는 힙 메모리는 선형 폭증하며, 10,000개 파드 기준 `SetTransform`으로 단지 `ManagedFields`를 소거하는 것만으로도 **9.6% (`3.17 MiB`)** 의 힙 영구 상주량을 덜어낼 수 있습니다
-0-Copy 포인터 공유 환경에서는 인덱서에 들어간 단 하나의 객체 구조가 N개 고루틴과 GC 스캐너 전체의 물리적 짐이 되므로, 진입 관문(`SetTransform`)에서 경량화하는 것이 오퍼레이터 메모리 최적화의 첫단추입니다
+0-Copy 포인터 공유 환경에서는 인덱서에 들어간 단 하나의 객체 구조가 N개 고루틴과 GC 스캐너 전체의 부담이 되므로, 진입 관문(`SetTransform`)에서 경량화하는 것이 오퍼레이터 메모리 최적화의 첫단추입니다
 
 ---
 
 ## 0-Copy 공유 그래프와 Go GC 삼색 마킹 쓰기 장벽 간섭
 
 `SharedInformer`가 단 하나의 힙 주소(`0xa7e38469408`)를 `ThreadSafeStore` 인덱서 맵에 꽂아 두고, 이를 N개의 이벤트 핸들러와 비동기 링 버퍼에 동시 전파하면서 인메모리 상에는 복잡하고 방대한 **다 대 일(`N:1`) 포인터 참조 그래프**가 형성됩니다
-이처럼 수만 개의 파드 포인터가 로컬 맵과 수많은 고루틴 스택, 그리고 전파 버퍼를 넘나드는 환경은 [15편](/essays/gc-tricolor-marking-write-barrier)에서 톺아본 Go 런타임 가비지 컬렉터(`GC`)의 **삼색 마킹(`Tricolor Marking`)과 쓰기 장벽(`Write Barrier`)** 메커니즘에 직접적인 물리적 간섭을 일으킵니다
+이처럼 수만 개의 파드 포인터가 로컬 맵과 수많은 고루틴 스택, 그리고 전파 버퍼를 넘나드는 환경은 [15편](/essays/gc-tricolor-marking-write-barrier)에서 톺아본 Go 런타임 가비지 컬렉터(`GC`)의 **삼색 마킹(`Tricolor Marking`)과 쓰기 장벽(`Write Barrier`)** 메커니즘에 직접적인 간섭을 일으킵니다
 
 ### GC 쓰기 장벽(Dijkstra/Yuasa gcWriteBarrier) 개입 기전과 레지스터 어셈블리
 
@@ -395,7 +395,7 @@ func wbBufFlush(dst *gcWork, src *wbBuf) {
 }
 ```
 
-이 물리적 구조를 살펴보면 왜 고빈도 Watch 갱신이 컨트롤 플레인 성능을 갉아먹는지 명확히 이해할 수 있습니다
+이 구조를 살펴보면 왜 고빈도 Watch 갱신이 컨트롤 플레인 성능을 갉아먹는지 명확히 이해할 수 있습니다
 `s.indexer.Update(d.Object)`가 호출될 때마다 기존 `Old Pod` 주소(`DI`)와 신규 `New Pod` 주소(`SI`)가 모두 `wbBuf`에 적재되며, 256번의 포인터 교체만으로도 512개 버퍼(`wbBufEntries`)가 가득 차게 됩니다
 버퍼가 찰 때마다 `wbBufFlush`가 강제 호출되어 포인터들을 마킹 대기열(`gcWork`)로 플러시하고, 대기하던 백그라운드 마킹 워커(`gcBgMarkWorker`)를 활성화해 CPU 사이클을 가로챕니다
 
@@ -466,9 +466,9 @@ type processorListener struct {
 이 `pop` vs `run` 고루틴 이원화 설계 덕분에 핸들러 콜백이 아무리 멈춰 있어도 중앙 `distribute()` 루프와 API Server 수신 스트림은 절대 지연되지 않습니다
 하지만 이 완충막이 뚫릴 때, 링 버퍼 내부에서는 상상하기 힘든 지수적 메모리 팽창과 커널 메모리 경합이 시작됩니다
 
-### RingGrowing.Write의 지수적 팽창 메커니즘과 OOM 파국
+### RingGrowing.Write의 지수적 팽창 메커니즘과 OOM 위협
 
-`pendingNotifications`에 장착된 **`buffer.RingGrowing`** (`staging/src/k8s.io/client-go/tools/cache/buffer/ring_growing.go:72`) 구조체의 `Write` 메서드가 버퍼를 증설하는 물리적 규칙을 추적합니다
+`pendingNotifications`에 장착된 **`buffer.RingGrowing`** (`staging/src/k8s.io/client-go/tools/cache/buffer/ring_growing.go:72`) 구조체의 `Write` 메서드가 버퍼를 증설하는 규칙을 추적합니다
 
 ```go
 // staging/src/k8s.io/client-go/tools/cache/buffer/ring_growing.go:72 (K8s v1.36.1 기준)
@@ -514,7 +514,7 @@ Go 런타임 sysAlloc (mmap 시스템 콜) ────┘
 리눅스 커널 Direct Reclaim (try_to_free_pages) 발동 (동기식 페이지 회수 지연)
   │
   ├─> 페이지 회수 성공 시: 수백 ms~수 초 간 고루틴 멈춤 (Latency Spike)
-  └─> 페이지 회수 실패 시: OOM Killer 발동 (`SIGKILL 9`) ➔ 마스터 파드 즉각 처형!
+  └─> 페이지 회수 실패 시: OOM Killer 발동 (`SIGKILL 9`) ➔ 마스터 파드 즉각 종료!
 ```
 
 커널은 즉시 메모리를 내어주지 못하고, 현재 요청을 보낸 고루틴의 실행 컨텍스트를 동기식으로 붙잡은 채 **`try_to_free_pages()` 함수를 호출하여 Direct Reclaim(직접 페이지 회수)** 에 돌입합니다
@@ -522,39 +522,39 @@ Direct Reclaim이 작동하는 동안 컨트롤러 고루틴은 수백 ms에서 
 
 ### 실측 계측: Slow Consumer 적재에 따른 링 버퍼 용량과 힙 폭발
 
-이 링 버퍼 지수 팽창이 컨트롤러 프로세스의 힙 메모리와 커널에 미치는 물리적 폭발 과정을 실측 계측 도구(`rt6-bench/informer_test.go`)에서 고의로 Slow Consumer를 유발하여 계측했습니다
+이 링 버퍼 지수 팽창이 컨트롤러 프로세스의 힙 메모리와 커널에 미치는 폭증 과정을 실측 계측 도구(`rt6-bench/informer_test.go`)에서 고의로 Slow Consumer를 유발하여 계측했습니다
 
-| 누적 대기 이벤트 수 (`Pending Notifications`) | 링 버퍼 슬라이스 용량 (`capacity`) | 힙 메모리 할당 증가량 (`HeapAlloc`) | 물리적 시스템 상태 및 파괴 시나리오 |
+| 누적 대기 이벤트 수 (`Pending Notifications`) | 링 버퍼 슬라이스 용량 (`capacity`) | 힙 메모리 할당 증가량 (`HeapAlloc`) | 시스템 상태 및 장애 시나리오 |
 | :--- | :---: | :---: | :--- |
 | **0개 (초기 가동 상태)** | **1,024 슬롯** | **0 MiB** | 정상 비동기 디스패치 (`pop` ➔ `nextCh` 즉시 전송) |
 | **10,000개 누적 적재** | **16,384 슬롯** | **+15.8 MiB** | 2배수 증설 4회 반복 (`1,024 -> 2,048 -> 4,096 -> 8,192 -> 16,384`) |
 | **50,000개 누적 적재** | **65,536 슬롯** | **+78.4 MiB** | GC 쓰기 장벽 및 `markroot` 스캐닝 부하 급증 구간 |
-| **100,000개 누적 적재** | **119,808 슬롯 (상한 없음)** | **+160.14 MiB** | **cgroup `limits.memory` 도달 시 커널 Direct Reclaim 실패 ➔ OOM Killer 처형 (`SIGKILL 9`)** |
+| **100,000개 누적 적재** | **119,808 슬롯 (상한 없음)** | **+160.14 MiB** | **cgroup `limits.memory` 도달 시 커널 Direct Reclaim 실패 ➔ OOM Killer 강제 종료 (`SIGKILL 9`)** |
 
 계측 결과는 소스코드 주석의 자백을 그대로 입증합니다
 단 하나의 핸들러 고루틴이 정체된 사이 100,000개의 이벤트가 누적되자, `RingGrowing` 슬라이스는 119,808 슬롯까지 팽창했고 컨트롤러 프로세스의 순수 힙 메모리는 **160.14 MiB**가 폭증했습니다
 더 심각한 문제는 **`RingGrowing` 버퍼가 한번 지수적으로 팽창하여 힙을 차지하고 나면, 이후 Slow Consumer가 복구되어 큐를 모두 비우더라도 슬라이스 용량을 자동으로 축소(`Shrink` 또는 `ShrinkToFit`)하는 회수 코드가 소스코드상에 아예 존재하지 않는다**는 사실입니다
 
 만약 이 메모리 팽창 상태에서 대규모 파드 롤링 업데이트나 클러스터 장애로 이벤트가 한 차례 더 몰아친다면, 파드에 설정된 cgroup v2 메모리 제한(`limits.memory`)을 돌파하게 됩니다
-리눅스 커널 메모리 관리자(`mm/oom_kill.c`)는 가차 없이 `SIGKILL (9)` 시그널을 발송하여 컨트롤러 파드를 즉각 처형(`OOMKill`)합니다
-API Server와 메인 디스패처를 보호하기 위해 고안된 비동기 상한 없는 링 버퍼가, 부메랑이 되어 클라이언트 마스터 프로세스를 메모리 폭발의 제물로 바치는 극한의 트레이드오프입니다
+리눅스 커널 메모리 관리자(`mm/oom_kill.c`)는 가차 없이 `SIGKILL (9)` 시그널을 발송하여 컨트롤러 파드를 즉각 종료(`OOMKill`)합니다
+API Server와 메인 디스패처를 보호하기 위해 고안된 비동기 상한 없는 링 버퍼가, 오히려 클라이언트 마스터 프로세스의 메모리를 폭발시키는 극한의 트레이드오프입니다
 
 ---
 
 ## 비용 보존 법칙 — 0-Copy 최적화가 남긴 청구서와 6부 소결로의 연결
 
-우리는 25편(`cgroup` 면제와 고루틴 스케줄링)부터 28편(`SharedInformer`의 0-Copy 공유)까지, 쿠버네티스 컨트롤 플레인이 O(N)의 물리적 한계를 돌파하기 위해 구사한 다층적인 방어선과 우회 메커니즘을 파고들었습니다
+우리는 25편(`cgroup` 면제와 고루틴 스케줄링)부터 28편(`SharedInformer`의 0-Copy 공유)까지, 쿠버네티스 컨트롤 플레인이 O(N)의 한계를 돌파하기 위해 구사한 다층적인 방어선과 우회 메커니즘을 파고들었습니다
 그리고 모든 훌륭한 시스템 최적화는 예외 없이 **비용 보존 법칙**에 따라 또 다른 영역으로 청구서를 이전했음을 확인했습니다
 
 ![비용 보존 법칙: 0-Copy 포인터 공유가 남긴 DeepCopy 규약과 링 버퍼 OOM 대조표](/diagrams/informer-shared-pointer-cost-5.svg)
 
 이번 편에서 규명한 `SharedInformer` 0-Copy 포인터 공유 파이프라인의 득과 실을 총정리해 보겠습니다
 
-- **비켜 간 물리적 한계 (`Reflector` + `Indexer` 0-Copy 공유)**: N개의 컨트롤러가 API Server를 개별 조회할 때 발생하는 O(N) HTTP/2 Watch 스트림 폭증, 소켓 대역폭 고갈, 그리고 각 프로세스마다 수십 GB에 달하는 인메모리 역직렬화 중복 힙 할당을 **단일 Watch 스트림과 `ThreadSafeStore` 포인터(`%p`) 공유**로 완벽하게 0으로 압축했습니다
+- **비켜 간 한계 (`Reflector` + `Indexer` 0-Copy 공유)**: N개의 컨트롤러가 API Server를 개별 조회할 때 발생하는 O(N) HTTP/2 Watch 스트림 폭증, 소켓 대역폭 고갈, 그리고 각 프로세스마다 수십 GB에 달하는 인메모리 역직렬화 중복 힙 할당을 **단일 Watch 스트림과 `ThreadSafeStore` 포인터(`%p`) 공유**로 완벽하게 0으로 압축했습니다
 - **지불한 새로운 청구서 (개발자 복사 규약 전가 및 링 버퍼 OOM 위협)**:
   1. **`DeepCopy` 수동 호출 불문율 강제**: 불변 참조를 지원하지 않는 Go 언어 위에서 포인터 단일 사본을 유지하기 위해, 인-플레이스 변형(`In-Place Mutation`)에 따른 `Indexer` 원본 캐시 파괴를 막는 모든 복사(`DeepCopy()`) 책임을 개발자의 인지적 주의력으로 전가했습니다
   2. **GC 삼색 마킹 스캐닝 세금 (`Scan Tax`)**: `ThreadSafeStore` 안에 장기 생존 루트로 고정된 수만 개의 파드 포인터 그래프는 매 GC 주기마다 삼색 마킹(`Dijkstra/Yuasa gcWriteBarrier`)의 탐색 부하(`markroot`)를 가중시킵니다
-  3. **Slow Consumer와 상한 없는 링 버퍼(`RingGrowing`) OOM 위험**: 고루틴 간 처리 속도 차이를 완충하기 위해 장착한 링 버퍼는 백프레셔 없이 2배수 지수 팽창(`1,024 -> 131,072 슬롯`)을 허용함으로써, 단 하나의 늦은 핸들러만으로도 컨트롤러 전체를 커널 OOM Killer(`+160 MiB`)의 칼날 앞으로 내몰게 되었습니다
+  3. **Slow Consumer와 상한 없는 링 버퍼(`RingGrowing`) OOM 위험**: 고루틴 간 처리 속도 차이를 완충하기 위해 장착한 링 버퍼는 백프레셔 없이 2배수 지수 팽창(`1,024 -> 131,072 슬롯`)을 허용함으로써, 단 하나의 늦은 핸들러만으로도 컨트롤러 전체를 커널 OOM Killer(`+160 MiB`) 위험에 노출시키게 되었습니다
 
 ---
 
@@ -578,14 +578,14 @@ API Server와 메인 디스패처를 보호하기 위해 고안된 비동기 상
 ## 핵심 요약
 
 - **0-Copy 포인터 공유와 네트워크/힙 압축**: `SharedInformer`는 단일 `Reflector` Watch 스트림으로 수집한 객체를 16 바이트 인터페이스 헤더(`eface`) 값 복사만으로 N개 핸들러와 `ThreadSafeStore`에 0-Copy 공유하여 역직렬화 및 힙 점유를 O(1)로 억제했습니다
-- **인-플레이스 변형 오염과 `DeepCopy()` 규약**: 전달받은 포인터(`%p`)가 `Indexer` 원본 캐시 주소와 물리적으로 일치하므로, 핸들러에서 직접 필드 수정 시 클러스터 전체 조회(`Lister`) 상태가 오염되어 `DeepCopy()` 수동 호출이 필수 규약으로 전가되었습니다
+- **인-플레이스 변형 오염과 `DeepCopy()` 규약**: 전달받은 포인터(`%p`)가 `Indexer` 원본 캐시 주소와 정확히 일치하므로, 핸들러에서 직접 필드 수정 시 클러스터 전체 조회(`Lister`) 상태가 오염되어 `DeepCopy()` 수동 호출이 필수 규약으로 전가되었습니다
 - **중첩 복사 세금과 `SetTransform` 경량화**: `pod.DeepCopy()` 1회당 30여 맵/슬라이스 개별 할당으로 `513.5 ns`와 `7 allocs`가 발생하며, 인덱서 진입 전 `SetTransform`으로 `ManagedFields`를 소거해 힙 상주량을 `9.6%` 절감하는 것이 오퍼레이터 실전 표준입니다
 - **GC 삼색 마킹 스캐닝 세금 (`Scan Tax`)**: 인덱서 맵에 장기 생존 루트로 고정된 수십만 개의 파드 포인터 그래프는 매 GC 주기마다 `markroot` 순회와 하이브리드 쓰기 장벽(`gcWriteBarrier`) 버퍼 플러시(`wbBufFlush`)를 쉼 없이 유발합니다
-- **`RingGrowing` 2배수 지수 팽창과 Slow Consumer OOM**: 핸들러 처리 속도가 지연될 때 완충역을 맡는 링 버퍼(`k8s.io/utils/buffer/ring_growing.go`)는 백프레셔 없이 초기 `1,024`에서 2배수(`2^k`)로 상한 없이 팽창(`131,072 슬롯`)하여 커널 `SIGKILL (9)` OOM 처형을 초래합니다
+- **`RingGrowing` 2배수 지수 팽창과 Slow Consumer OOM**: 핸들러 처리 속도가 지연될 때 완충역을 맡는 링 버퍼(`k8s.io/utils/buffer/ring_growing.go`)는 백프레셔 없이 초기 `1,024`에서 2배수(`2^k`)로 상한 없이 팽창(`131,072 슬롯`)하여 커널 `SIGKILL (9)` OOM 강제 종료를 초래합니다
 
 ---
 
-이로써 쿠버네티스 제어 평면의 심장부인 `kube-apiserver`, `kubelet`, 그리고 `client-go` 기반 컨트롤러들이 Go 런타임 및 리눅스 커널과 맞물려 어떻게 CPU, 메모리, 네트워크의 극한을 타협해 왔는지에 대한 깊이 있는 기술적 탐험이 모두 마무리되었습니다
+이로써 쿠버네티스 제어 평면의 핵심인 `kube-apiserver`, `kubelet`, 그리고 `client-go` 기반 컨트롤러들이 Go 런타임 및 리눅스 커널과 맞물려 어떻게 CPU, 메모리, 네트워크의 극한을 타협해 왔는지에 대한 깊이 있는 기술적 탐험이 모두 마무리되었습니다
 
 이제 남은 질문은 하나입니다
 **그렇다면 쿠버네티스는 Go 언어를 선택하여 구체적으로 어떤 아키텍처적 승리(산 것)를 거두었으며, 반대로 가비지 컬렉터와 고루틴 런타임의 한계를 극복하기 위해 어떤 눈물겨운 시스템 공학적 대가(낸 것)를 치러야만 했을까요**
