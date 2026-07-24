@@ -18,7 +18,7 @@ date: "2026-07-06"
 > **시리즈 "커널과 런타임으로 깊이 파헤치는 Rust · Go · Java"의 13편**
 > [11편](/essays/ptmalloc-rust-malloc-delegation)의 Rust는 malloc의 bin에서 맞는 조각을 찾아 왔고, [12편](/essays/go-allocator-mcache-contiguous-stack)의 Go는 span의 빈 슬롯을 비트맵으로 짚었습니다
 > JVM은 여기서 한 걸음 더 나아갑니다. 할당을 **포인터를 한 번 미는 것**으로 줄여 버립니다
-> 이번 편은 그게 어떻게 가능하고 무엇을 대가로 치르는지를 봅니다. 그리고 [9편](/essays/java-jit-inversion-conditions)에서 "힙은 60%인데 OOMKilled"라 불렀던 그 현상의 물리적 토대를 끝까지 파냅니다
+> 이번 편은 그게 어떻게 가능하고 무엇을 대가로 치르는지를 봅니다. 그리고 [9편](/essays/java-jit-inversion-conditions)에서 "힙은 60%인데 OOMKilled"라 불렀던 그 현상의 근거를 끝까지 파냅니다
 
 > 이 글의 수치는 **JDK 25에서 직접 확인한 값**입니다. `-XX:+PrintFlagsFinal`로 읽은 기본값과 `-Xlog:gc+tlab`로 뽑은 실제 로그를 그대로 씁니다
 
