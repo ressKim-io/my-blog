@@ -46,7 +46,9 @@ GET http://localhost:8080/api/v1/orders/{id}/payment-order → 401
 
 **첫째, game-seats 경로 누락입니다.** 새로 추가된 엔드포인트가 ticketing VirtualService의 prefix 목록에 들어가지 않아 Istio Gateway가 404를 반환하고 있었습니다
 
-**둘째, payment→ticketing 내부 통신 URL이 localhost로 고정된 상태였습니다.** `TICKETING_BASE_URL` 환경변수가 설정되지 않아 Spring 애플리케이션이 기본값 `localhost:8080`을 사용했습니다. MSA 구조에서 localhost는 자기 자신을 가리키므로, payment 서비스가 자기 자신의 `/api/v1/orders/{id}/payment-order`를 호출해 401이 반환된 것입니다
+**둘째, payment→ticketing 내부 통신 URL이 localhost로 고정돼 있었습니다.** `TICKETING_BASE_URL` 환경변수가 없어 Spring 애플리케이션이 기본값 `localhost:8080`을 그대로 썼습니다
+
+MSA에서 localhost는 자기 자신을 가리킵니다. payment 서비스가 자기 자신의 `/api/v1/orders/{id}/payment-order`를 호출했고, 그래서 401이 돌아왔습니다
 
 **셋째, AuthorizationPolicy의 경로 매칭을 잘못 이해하고 있었습니다.** Istio의 `*` glob은 **단일 경로 세그먼트만 매칭**합니다. `/api/v1/orders/*`는 `/api/v1/orders/{id}`까지는 잡지만, `/api/v1/orders/{id}/payment-order`는 하위 세그먼트가 더 있어 매칭되지 않습니다. deny-all 기반 정책에서 매칭 실패는 곧 거부이므로 403이 됩니다
 

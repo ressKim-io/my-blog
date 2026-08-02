@@ -1,6 +1,6 @@
 ---
 title: "수신 140만 건, 생성 0건 — 에러 없이 사라진 spanmetrics"
-excerpt: "OOM을 막으려 넣은 Kafka 버퍼의 지연이 Tempo의 ingestion slack을 넘기면서 span 140만 건이 전량 폐기됐습니다. 에러 로그도 알림도 없이 대시보드만 No Data였던 침묵 실패를 가설 네 개를 세워 좁혀간 기록입니다"
+excerpt: "OOM을 막으려 넣은 Kafka 버퍼의 지연이 Tempo의 ingestion slack을 넘기면서 span 140만 건이 전량 폐기됐습니다. 에러 로그도 알림도 없이 대시보드만 No Data였고, 실패한 컴포넌트가 하나도 없는 상태에서 가설 네 개로 원인을 좁혀간 기록입니다"
 category: monitoring
 tags:
   - go-ti

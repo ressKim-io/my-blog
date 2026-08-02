@@ -59,7 +59,7 @@ than the maximum allowed size of 15983616 bytes
 3. distributor가 복구되자 Alloy가 backlog를 일괄 push했습니다
 4. 단일 Kafka record가 Mimir 기본 제한 15MB를 초과해 거부되었습니다
 
-**복구 자체가 2차 장애의 방아쇠였다는 점이 핵심입니다.** 백엔드가 살아나는 순간이 가장 위험한 구간인데, 그 구간을 보호하는 장치가 없었습니다
+**복구 자체가 2차 장애의 방아쇠였습니다.** 백엔드가 살아나는 순간이 가장 위험한데, 정작 그 구간을 보호하는 장치가 없었습니다
 
 여기서 수습을 시도하다 3차 사고가 났습니다. `max_write_request_data_item_size` 값을 Mimir `structuredConfig.limits`에 추가했는데, **Mimir 3.0.1에는 해당 config key가 존재하지 않았습니다**
 
