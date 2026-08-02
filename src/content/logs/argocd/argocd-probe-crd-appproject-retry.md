@@ -206,7 +206,7 @@ Synced   Healthy   Succeeded
 |------|------|-----------|
 | 빈 커밋 push | 새 리비전 → retry 초기화 | ✅ 가장 안전 |
 | Hard refresh | 캐시 새로고침만, retry 카운트 미초기화 | ❌ 효과 없음 |
-| Force sync | 강제 sync 시도 | ⚠️ SSA 환경에서는 [위험](/blog/argocd-ssa-sync-pitfalls) |
+| Force sync | 강제 sync 시도 | ⚠️ SSA 환경에서는 [위험](/logs/argocd-ssa-sync-pitfalls/) |
 | Application 삭제 후 재생성 | 전체 초기화 | ⚠️ 과도한 조치 |
 | `kubectl patch`로 operationState 초기화 | retry 카운트 우회 | ⚠️ 내부 상태 직접 수정 |
 

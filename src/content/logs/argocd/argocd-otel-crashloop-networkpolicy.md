@@ -349,7 +349,7 @@ spec:
 
 NetworkPolicy를 수정해서 git push하고 ArgoCD가 sync했는데, **policyTypes에 Egress가 추가되지 않았습니다**.
 
-이것은 [이전 글](/blog/argocd-ssa-sync-pitfalls)에서 다룬 SSA의 또 다른 함정입니다. SSA merge 시 array 필드 변경이 제대로 반영되지 않는 경우가 있습니다.
+이것은 [이전 글](/logs/argocd-ssa-sync-pitfalls/)에서 다룬 SSA의 또 다른 함정입니다. SSA merge 시 array 필드 변경이 제대로 반영되지 않는 경우가 있습니다.
 
 ```bash
 # hard refresh로 강제 re-sync

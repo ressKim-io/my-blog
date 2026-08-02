@@ -272,7 +272,7 @@ Kafka 버퍼 없이 Alloy → Tempo 직접 전송 구조에서 5,000 VU 부하�
 CrashLoopBackOff가 85회까지 올라갔습니다.
 
 Kafka 버퍼를 도입하고 tail sampling을 10%로 설정한 뒤에야 안정화됐습니다.
-이 내용은 [시리즈 다음 글](/blog/goti-tempo-oom-kafka-buffer-sampling)에서 자세히 다룹니다.
+이 내용은 [시리즈 다음 글](/logs/goti-tempo-oom-kafka-buffer-sampling/)에서 자세히 다룹니다.
 
 ---
 
