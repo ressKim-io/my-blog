@@ -80,7 +80,7 @@ curl에서는 정상이었던 이유도 설명됩니다 — 정상 응답(200, 4
 | **Cloudflare Pages + Workers로 전환** | SPA fallback이 Pages에 내장, API는 Workers로 완전 분리 |
 
 CloudFront 안에서 해결하려면 Lambda@Edge나 CloudFront Functions로 우회해야 하는데, 이것은 근본적인 해결이 아닙니다.
-[이전 글](/blog/goti-cloudflare-migration-adr)에서 결정한 대로 Cloudflare 전환을 진행했습니다.
+[이전 글](/logs/goti-cloudflare-migration-adr/)에서 결정한 대로 Cloudflare 전환을 진행했습니다.
 
 ---
 

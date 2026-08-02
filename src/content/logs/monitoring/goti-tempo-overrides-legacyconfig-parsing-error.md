@@ -138,3 +138,9 @@ overrides:
 - **CrashLoopBackOff 상태에서는 ConfigMap 업데이트가 파드에 즉시 반영되지 않는 경우가 있습니다**. sync 후에도 파드가 계속 죽는다면 `kubectl delete pod`로 강제 재스케줄링을 시도합니다.
 - **strict YAML 파서는 빈 맵 하나에 민감합니다**. `defaults: {}` 단독일 때는 통과하다가 다른 unknown 키가 붙는 순간 터지는 패턴은 재현 난도가 높으므로, unknown 필드 경고를 항상 의심합니다.
 - **재발 방지 체크리스트에 등록**: "Tempo chart v1.x에서 `overrides.defaults` 사용 금지, `per_tenant_overrides` 사용"을 monitoring rule에 고정해, 같은 경로로 다시 들어가지 않도록 했습니다.
+
+---
+
+## 관련 글
+
+이 파싱 에러는 Tempo가 OOM으로 115회 재시작하던 상황을 수습하는 과정에서 만났습니다. 그 OOM 자체의 원인과 대응은 [Tempo OOM 115회 — monolithic mode의 메모리 경합과 block duration](/logs/goti-tempo-monolithic-oom-block-duration-tuning/)에 정리했습니다

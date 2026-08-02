@@ -1,6 +1,6 @@
 ---
-title: "OTel spec 준수 보정 — 단위 ms→s + 표준 attribute 보강"
-excerpt: "계측 완료 직후 외부 검증에서 발견된 Critical: Milliseconds() int64 truncation으로 sub-ms 값이 모두 0 bucket에 압축. 단위를 s로 교정하고 server.address/db.namespace 표준 attribute를 일괄 보강했습니다"
+title: "대시보드는 초록불인데 p95가 거짓이었다 — 단위 ms와 int64 절삭"
+excerpt: "패널은 정상으로 보였지만 표시되는 p95 값 자체가 틀려 있었습니다. Milliseconds() int64 절삭으로 수십 마이크로초 단위 값이 전부 0 bucket에 압축된 것을 OTel 공식 spec과 대조해 찾아내고 단위를 교정한 기록입니다"
 type: troubleshooting
 category: monitoring
 tags:
@@ -18,59 +18,63 @@ date: "2026-04-25"
 
 ## 한 줄 요약
 
-> redis/http/pgxpool OTel 계측 완료 직후 외부 검증(code-reviewer agent + OTel 공식 spec)을 통해 `Milliseconds()` int64 truncation이 p95 패널 값을 거짓으로 만들고 있음을 발견했습니다. 단위를 `ms`→`s`로 교정하고, 표준 attribute를 일괄 보강했습니다
+> 데이터가 끊긴 것도, 패널이 빈 것도 아니었습니다. 값은 들어오는데 그 값이 틀렸습니다. `Milliseconds()`가 int64를 돌려주는 바람에 마이크로초 단위 대기 시간이 전부 0으로 뭉개졌고, p95 패널은 그 0을 정상 응답으로 보여 주고 있었습니다
 
 ---
 
-## 🔥 문제: sub-ms DB 대기 시간이 모두 0으로 압축
+## 🔥 문제: 마이크로초 단위 DB 대기 시간이 전부 0으로
 
 ### 직전 작업 배경
 
-직전 작업에서 redis/http/pgxpool 클라이언트에 OTel 계측을 대량 추가했습니다 (커밋 `Goti-go@98e8ab0`, `dff3c77`).
+바로 앞 작업에서 redis와 http, pgxpool 클라이언트에 OTel 계측을 대량으로 넣었습니다 (커밋 `Goti-go@98e8ab0`, `dff3c77`)
 
-계측 자체는 정상 동작하는 것으로 보였습니다. 그러나 팀 내에서 "OTel 스펙에 맞지 않는 부분이 있는지 외부 검토로 확인"을 요청했습니다.
+계측은 겉보기에 잘 도는 것 같았습니다. 그래도 스펙에 어긋난 부분이 있는지 외부 검토를 한 번 받아 보기로 했습니다
 
-### 발견된 문제 목록
+### 나온 문제 목록
 
-code-reviewer agent와 OTel 공식 spec WebFetch/WebSearch를 종합한 결과 다음 항목이 식별됐습니다.
+code-reviewer agent와 OTel 공식 spec을 대조한 결과입니다
 
 | 등급 | 항목 | 영향 |
 |------|------|------|
-| **Critical** | 단위 `ms` + `Milliseconds()` int64 truncation | sub-ms (수십 µs) 값이 모두 0 bucket 압축 → p95 use_time 패널 거짓 정보 |
-| Major | 표준 attribute 누락 (`server.address`, `server.port`, `db.namespace`) | multi-host/replica 추가 시 host 분리 불가 |
-| Major | `measuredRow.Scan` 미호출 시 connection leak 가능성 | godoc 미명시 |
-| Major | `otelpgx.RecordStats` 표준 라이브러리 미활용 | 별도 task로 spike 예정 |
-| Minor | `otelhttp` span name `"HTTP GET"`만 → endpoint별 분리 안됨 | 외부 호출 dashboard panel UX |
+| **Critical** | 단위 `ms` + `Milliseconds()` int64 절삭 | 수십 µs 값이 전부 0 bucket에 압축 → p95 use_time 패널이 거짓값 표시 |
+| Major | 표준 attribute 누락 (`server.address`, `server.port`, `db.namespace`) | multi-host·replica 추가 시 host 구분 불가 |
+| Major | `measuredRow.Scan` 미호출 시 connection 누수 가능 | godoc에 경고 없음 |
+| Major | `otelpgx.RecordStats` 표준 함수 미사용 | 별도 task로 분리 |
+| Minor | `otelhttp` span name이 `"HTTP GET"`뿐 | endpoint별 구분 불가 |
 | Minor | `MeasuredPool.Pool()` 데드코드 | 호출자 0건 |
 | Minor | `Querier.Begin` godoc 경고 부재 | nested savepoint 위험 |
 
+가장 위 항목이 이번 글의 핵심입니다. 나머지는 불편함이지만 이건 **틀린 숫자를 보여 주고 있던** 문제입니다
+
 ---
 
-## 🤔 원인: OTel spec에서 time metric 단위는 s(float64)
+## 🤔 원인: spec에서 시간 메트릭 단위는 초(float64)
 
-### OTel 공식 spec 핵심
+### OTel 공식 spec
 
-[OTel Database Semconv](https://opentelemetry.io/docs/specs/semconv/database/database-metrics/)에 따르면:
+[OTel Database Semconv](https://opentelemetry.io/docs/specs/semconv/database/database-metrics/)는 이렇게 정합니다
 
-- **단위**: time-based metric은 `s` (seconds, **float64**). `ms`는 incubating 잔재
+- **단위**: 시간 기반 메트릭은 `s`(초, **float64**). `ms`는 incubating 시절 잔재
 - **메트릭 이름**: stable name은 단수형 `db.client.connection.*`
-- **권장 attribute**: `db.system`, `db.client.connection.pool.name`, 선택적으로 `server.address`/`server.port`/`db.namespace`
+- **권장 attribute**: `db.system`, `db.client.connection.pool.name`, 선택적으로 `server.address`·`server.port`·`db.namespace`
 
-### Critical 상세: `Milliseconds()` int64 truncation
+### int64 절삭이 만든 거짓 p95
 
-Go의 `time.Duration.Milliseconds()`는 `int64`를 반환합니다.
+Go의 `time.Duration.Milliseconds()`는 `int64`를 돌려줍니다
 
-DB 커넥션 wait/use time은 대부분 수십 microsecond 수준입니다. 이를 `Milliseconds()`로 변환하면 `0`이 됩니다.
+DB 커넥션의 wait·use time은 대개 수십 마이크로초입니다. 이걸 `Milliseconds()`로 바꾸면 그냥 `0`이 됩니다
 
 ```go
-// Before — int64 truncation 발생
+// Before — int64 절삭 발생
 waitMs := time.Since(start).Milliseconds()  // µs 단위 대기 → 0
 metric.WithUnit("ms")
 ```
 
-OTel histogram bucket에서 0 bucket에 모든 값이 쌓이므로, p95 패널은 `0ms`를 정상 응답으로 표시합니다. **실제 대기 시간이 측정되지 않는 상태**였습니다.
+histogram의 모든 값이 0 bucket에 쌓이니 p95 패널은 `0ms`를 띄웁니다
 
-올바른 접근은 `Seconds()`를 사용해 `float64`로 유지하는 것입니다.
+여기가 이 문제의 고약한 점입니다. 패널이 비어 있으면 누구나 이상하다고 여기지만, `0ms`는 **아주 빠른 정상 상태처럼 보입니다**. 측정이 안 되고 있다는 사실을 숫자만 봐서는 알 수 없습니다
+
+`Seconds()`를 써서 `float64`를 유지하면 해결됩니다
 
 ```go
 // After — float64, sub-ms 정밀도 유지
@@ -80,29 +84,22 @@ metric.WithUnit("s")
 
 ---
 
-## ✅ 해결: Phase A / B / C 3단계 일괄 적용
+## ✅ 해결: Phase A / B / C 일괄 적용
 
-3개 Phase로 분리해 1 build cycle 내에서 통합 진행했습니다.
+세 단계로 나눠 한 번의 빌드 주기 안에서 처리했습니다
 
 ### Phase A — Critical: 단위 ms→s
 
-#### `pkg/database/measured_pool.go`
+`pkg/database/measured_pool.go`에서 이렇게 고쳤습니다
 
 - `metric.WithUnit("ms")` → `"s"` (2건)
-- `time.Since(...).Milliseconds()` → `.Seconds()` (8건). `int64` cast 제거, `float64` 그대로 유지
-- 변수명 `waitMs`/`useMs` → `waitS`/`useS`
-- doc comment: `_milliseconds_` → `_seconds_`
+- `time.Since(...).Milliseconds()` → `.Seconds()` (8건). `int64` 캐스팅을 없애고 `float64`를 그대로 둡니다
+- 변수명 `waitMs`·`useMs` → `waitS`·`useS`
+- doc comment의 `_milliseconds_` → `_seconds_`
 
-#### Grafana 대시보드 + Mimir 동기화
-
-`charts/goti-monitoring/dashboards/developer/db-health.json` 수정:
-
-- `db_client_connections_wait_time_milliseconds_bucket` → `_seconds_bucket`
-- panel `unit: "ms"` → `"s"` (Grafana가 적절 단위 자동 표시)
+Grafana 쪽도 같이 맞췄습니다. `charts/goti-monitoring/dashboards/developer/db-health.json`에서 `db_client_connections_wait_time_milliseconds_bucket`을 `_seconds_bucket`으로 바꾸고, panel의 `unit`도 `"ms"`에서 `"s"`로 옮겼습니다. 단위를 `s`로 두면 Grafana가 크기에 맞춰 알아서 표시해 줍니다
 
 ### Phase B — Major: 표준 attribute 보강 + 데드코드 제거
-
-#### `pkg/database/measured_pool.go`
 
 ```go
 cc := pool.Config().ConnConfig
@@ -116,23 +113,17 @@ attrs: metric.WithAttributes(
 ),
 ```
 
-`MeasuredPool.Pool()` 메서드를 제거했습니다. 호출자가 0건인 데드코드였고, instrumentation 우회 경로가 될 위험이 있었습니다.
+`MeasuredPool.Pool()`은 지웠습니다. 호출자가 하나도 없는 데드코드였고, 남겨 두면 계측을 우회하는 통로가 될 수 있었습니다
 
-`measuredRow` godoc에 "Scan 미호출 시 connection 누수" 경고를 명시했습니다. Go finalizer는 GC 타이밍에 의존하므로 미사용 결정.
+`measuredRow` godoc에는 Scan을 부르지 않으면 connection이 샐 수 있다는 경고를 넣었습니다. Go finalizer는 GC 타이밍에 기대야 해서 쓰지 않기로 했습니다
 
-`measuredTx` godoc에 "Commit/Rollback 필수" + "WithTx helper 사용 권장"을 추가했습니다.
+`measuredTx` godoc에는 Commit이나 Rollback이 필수이고 `WithTx` helper를 쓰는 편이 낫다는 안내를 넣었습니다
 
-#### `pkg/database/otel_metrics.go`
-
-동일 5개 attribute로 `poolAttrs`를 확장했습니다.
-
-#### `pkg/database/tx.go`
-
-`Querier.Begin` godoc에 "외부 코드 직접 호출 금지. WithTx만 사용. pgx.Tx의 Begin은 nested savepoint"를 명시했습니다.
+`pkg/database/otel_metrics.go`의 `poolAttrs`도 같은 5개 attribute로 넓혔고, `pkg/database/tx.go`의 `Querier.Begin` godoc에는 외부에서 직접 부르지 말고 `WithTx`만 쓰라는 문구를 명시했습니다. pgx.Tx의 Begin은 nested savepoint를 만들기 때문입니다
 
 ### Phase C — Minor: otelhttp endpoint span + redis godoc
 
-`pkg/httpclient` 및 관련 서비스 파일에 span name formatter를 적용했습니다.
+`pkg/httpclient`와 관련 서비스에 span name formatter를 붙였습니다
 
 ```go
 otelhttp.NewTransport(
@@ -143,17 +134,17 @@ otelhttp.NewTransport(
 )
 ```
 
-적용 효과: span name이 `HTTP GET` → `GET coolsms.co.kr/messages/v4/send` 처럼 endpoint별로 분리됩니다.
+span name이 `HTTP GET` 하나로 뭉쳐 있던 것이 `GET coolsms.co.kr/messages/v4/send`처럼 endpoint별로 갈라집니다
 
-PII 안전성을 검증했습니다. OAuth `code`, SMS `to`/`code`는 path가 아닌 POST body에 담기므로 span name에 노출되지 않습니다.
+PII가 새지 않는지도 확인했습니다. OAuth의 `code`와 SMS의 `to`·`code`는 path가 아니라 POST body에 담기므로 span name에 드러나지 않습니다
 
-`pkg/redis/client.go`에 godoc을 추가했습니다. redisotel이 동일 메트릭 이름을 export하므로 dashboard에서 항상 `db_system="postgresql"|"redis"` 명시 필터가 필수라는 내용입니다.
+`pkg/redis/client.go`에는 godoc을 하나 추가했습니다. redisotel이 같은 이름의 메트릭을 내보내기 때문에, 대시보드에서 `db_system="postgresql"|"redis"` 필터를 항상 명시해야 한다는 내용입니다
 
 ---
 
 ## 검증 결과
 
-Mimir에 직접 쿼리해 교정된 메트릭을 확인했습니다.
+Mimir에 직접 쿼리해서 교정된 메트릭을 확인했습니다
 
 ```text
 $ count(db_client_connections_wait_time_seconds_count)
@@ -171,9 +162,9 @@ $ count(db_client_connections_wait_time_milliseconds_count)
   → 7 series (구 stale, 곧 expire 예정)
 ```
 
-구 `_milliseconds_*` 시리즈가 7건 남아있으나 retention 이후 자동 소멸됩니다.
+옛 `_milliseconds_*` 시리즈가 7건 남아 있지만 retention이 지나면 알아서 사라집니다
 
-테스트 결과 변화:
+검증 스크립트 결과는 이렇게 움직였습니다
 
 | 항목 | 직전 | 현재 | 변화 |
 |------|------|------|------|
@@ -181,13 +172,15 @@ $ count(db_client_connections_wait_time_milliseconds_count)
 | LABEL_MISMATCH | 95 | 94 | -1 |
 | ERROR | 0 | 0 | — |
 
-OK 카운트 변화는 작지만, 핵심 가치는 **sub-ms 해상도 회복 + spec 준수 + 향후 multi-host 확장 시 dashboard host별 분리 가능**입니다.
+숫자만 보면 초라합니다. 그런데 이번 작업의 값어치는 통과 건수가 아니라 **원래 통과로 잡히던 패널의 값이 이제 맞다**는 데 있습니다
 
-### 결정 보류 — Phase D / E
+검증기는 쿼리가 데이터를 돌려주는지만 봅니다. 돌아온 값이 진짜인지는 보지 않습니다. 이번 문제가 정확히 그 사각지대에 있었습니다
 
-**Phase D (메트릭 이름 단/복수)**: OTel spec stable name은 단수형 `db.client.connection.*`이지만 현재 구현 및 redisotel 생태계는 복수형 `db.client.connections.*`을 사용합니다. 변경 시 dashboard 전 panel 영향 및 redisotel 호환성 재검증이 필요해 별도 task로 분리했습니다.
+### 보류한 항목
 
-**Phase E (`otelpgx.RecordStats` 도입)**: `RecordStats(pool, ...)` 표준 함수로 현재 약 100줄의 커스텀 코드를 대체할 수 있습니다. 단, wait_time/use_time histogram 지원 여부를 먼저 확인해야 합니다. spike 별도 task로 분리했습니다.
+**Phase D (메트릭 이름 단수·복수)**: spec의 stable name은 단수형 `db.client.connection.*`인데, 현재 구현과 redisotel 생태계는 복수형 `db.client.connections.*`을 씁니다. 바꾸면 대시보드 전 패널이 영향을 받고 redisotel 호환성도 다시 봐야 해서 별도 task로 뺐습니다
+
+**Phase E (`otelpgx.RecordStats` 도입)**: 표준 함수로 지금의 커스텀 코드 약 100줄을 대체할 수 있습니다. 다만 wait_time과 use_time histogram을 지원하는지 먼저 확인해야 해서 따로 잡았습니다
 
 ---
 
@@ -202,27 +195,27 @@ OK 카운트 변화는 작지만, 핵심 가치는 **sub-ms 해상도 회복 + s
 
 ## 📚 배운 점
 
-**1. Histogram 단위는 항상 base unit**
+**1. 시간 메트릭 단위는 언제나 base unit으로**
 
-`WithUnit("ms")`는 spec 위반이면서 동시에 `Milliseconds()` API와 결합 시 정밀도를 손실시킵니다. time metric은 항상 `s` + `Seconds()` float64 조합을 씁니다.
+`WithUnit("ms")`는 spec 위반인 동시에 `Milliseconds()` API와 만나면 정밀도를 잃습니다. 시간 메트릭은 `s`와 `Seconds()` float64 조합으로 고정합니다
 
-정밀도 문제는 대부분 값이 `0`으로 보여 바로 눈에 띄지 않습니다. 정상처럼 보이는 `0ms` 값이 실은 측정 자체가 안 되고 있는 상태일 수 있습니다.
+이 유형이 위험한 이유는 결과가 `0`으로 나온다는 데 있습니다. 비어 있는 게 아니라 아주 빠른 것처럼 보이니 아무도 의심하지 않습니다
 
-**2. OTel SDK incubating ↔ stable 라이프사이클 추적**
+**2. incubating과 stable 사이를 계속 추적한다**
 
-OTel spec은 `experimental` → `incubating` → `stable` 단계를 거칩니다. incubating 단계 문서를 참조해 작성한 코드는 stable 전환 시 단위/이름이 바뀔 수 있습니다. 새 계측 코드 작성 시 [OTel semconv spec 페이지](https://opentelemetry.io/docs/specs/semconv/)를 직접 확인하고, "spec 준수 검증" 검토를 패턴화하는 것이 필요합니다.
+OTel spec은 experimental에서 incubating을 거쳐 stable로 갑니다. incubating 문서를 보고 쓴 코드는 stable로 넘어갈 때 단위나 이름이 바뀔 수 있습니다
 
-**3. 표준 라이브러리 우선 탐색**
+새 계측을 넣을 때는 [semconv spec 페이지](https://opentelemetry.io/docs/specs/semconv/)를 직접 확인하고, spec 준수 검토를 절차로 만들어 두는 편이 낫습니다
 
-직접 instrumentation 코드를 작성하기 전에 생태계 표준 함수(`otelpgx`, `otelhttp` 등)를 먼저 탐색합니다. 재발명은 spec 변경을 놓칠 위험을 높입니다.
+**3. 표준 라이브러리를 먼저 뒤진다**
 
-**4. 실패 패턴 분류**
+계측 코드를 직접 쓰기 전에 `otelpgx`나 `otelhttp` 같은 생태계 표준 함수가 있는지 먼저 봅니다. 직접 만들면 spec이 바뀔 때 그 변화를 놓치기 쉽습니다
 
-이번 이슈를 실패 유형으로 정리하면 다음과 같습니다.
+**4. 실패 유형으로 정리하면**
 
 | 항목 | 유형 | 설명 |
 |------|------|------|
 | 단위 ms 사용 | context-missing | spec stable 변경을 추적하지 못함 |
-| `Milliseconds()` int64 truncation | wrong-layer | Go API 선택이 metric 정확도와 trade-off |
-| 표준 attribute 누락 | dependency-unknown | spec 권장 attribute 카탈로그 미참조 |
-| `otelpgx.RecordStats` 미활용 | wrong-layer | 표준 라이브러리 탐색 전 커스텀 코드 우선 작성 |
+| `Milliseconds()` int64 절삭 | wrong-layer | Go API 선택이 메트릭 정확도와 맞바꿔짐 |
+| 표준 attribute 누락 | dependency-unknown | spec 권장 attribute 목록을 참조하지 않음 |
+| `otelpgx.RecordStats` 미사용 | wrong-layer | 표준 함수를 찾기 전에 커스텀 코드를 먼저 씀 |
