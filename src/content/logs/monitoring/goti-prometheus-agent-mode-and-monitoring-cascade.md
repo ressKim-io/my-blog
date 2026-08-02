@@ -1,5 +1,5 @@
 ---
-title: "Prometheus Agent Mode 전환 — 모니터링 스택 연쇄 장애 복구기"
+title: "Prometheus 메모리 82% 감축 — 부하테스트 직전 무너진 관측 스택 6단계 복구"
 excerpt: "core 노드 CPU 포화로 monitoring pod 5개가 Pending 상태에 빠진 상황에서 OTel 라벨 수정 → Agent mode 전환 → operator 데드락 → OOMKill → Grafana 변수 parse error까지 연쇄로 터진 트러블을 복구한 기록입니다"
 category: monitoring
 tags:

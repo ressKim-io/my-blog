@@ -1,6 +1,6 @@
 ---
-title: "Prometheus job 레이블에 namespace가 붙는다고?"
-excerpt: "OTel service.namespace 설정으로 job 레이블이 goti/goti-server로 바뀌면서 alert가 false positive로 firing된 트러블슈팅"
+title: "정상 서비스에 알림이 울렸다 — job 레이블 스키마 변경이 만든 false positive"
+excerpt: "OTel에 service.namespace를 넣자 Prometheus job 레이블이 goti/goti-server 형태로 바뀌었습니다. 서비스는 멀쩡한데 MetricsNotReceived가 critical로 발화하고 recording rule은 전부 No Data가 된 원인을 추적한 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -17,7 +17,7 @@ date: "2026-03-09"
 
 ## 🎯 한 줄 요약
 
-> OTel에 `service.namespace`를 설정하면 Prometheus `job` 레이블이 `<namespace>/<service.name>` 형태로 바뀝니다. 그 결과 기존 rules와 대시보드가 모두 깨집니다
+> OTel에 `service.namespace`를 설정하면 Prometheus `job` 레이블이 `<namespace>/<service.name>` 형태로 바뀝니다. 셀렉터가 옛 이름을 가리킨 채 남아 기존 rules와 대시보드가 모두 깨졌고, 서비스는 정상인데 `MetricsNotReceived`가 critical로 발화했습니다. 알림이 거짓말을 하면 그 뒤의 모든 판단이 흔들립니다
 
 ## 📊 Impact
 

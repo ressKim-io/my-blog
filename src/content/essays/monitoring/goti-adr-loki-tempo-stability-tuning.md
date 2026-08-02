@@ -1,6 +1,6 @@
 ---
-title: "Loki/Tempo OOM과의 전쟁: Kafka Consumer Throttling과 GOMEMLIMIT"
-excerpt: "재시작 시 Kafka backlog 폭주로 반복 OOM이 발생하는 악순환을 3가지 축으로 끊은 기록"
+title: "OOM은 메모리 부족이 아니라 유입 제어 부재였다 — 재시작 악순환 끊기"
+excerpt: "죽으면 재시작되고, 재시작하면 그동안 쌓인 backlog가 한꺼번에 밀려들어 또 죽었습니다. 메모리를 올려도 반복되던 이 고리를 consumer throttling과 sending_queue, GOMEMLIMIT 세 축으로 동시에 끊은 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -12,7 +12,7 @@ tags:
   - Observability
   - Performance-Tuning
   - adr
-date: '2026-02-11'
+date: "2026-03-31"
 ---
 
 ## 🎯 한 줄 요약

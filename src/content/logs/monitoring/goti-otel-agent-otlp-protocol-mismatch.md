@@ -1,5 +1,5 @@
 ---
-title: "OTel Java Agent 2.25.0 OTLP 프로토콜 불일치 — gRPC와 http/protobuf의 포트 함정"
+title: "버전을 올리자 텔레메트리가 조용히 끊겼다 — WARN 한 줄과 40분의 공백"
 excerpt: "에이전트를 2.25.0으로 올렸더니 기본 OTLP 프로토콜이 http/protobuf로 바뀌었는데 엔드포인트는 4317(gRPC)이라서, WARN 한 줄만 남기고 JVM 대시보드 전체가 40분 뒤 끊긴 사건입니다"
 category: monitoring
 tags:

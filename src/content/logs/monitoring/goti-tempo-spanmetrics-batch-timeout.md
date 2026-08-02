@@ -1,6 +1,6 @@
 ---
-title: "Tempo spanmetrics 전량 폐기 — batch timeout과 ingestion slack의 함정"
-excerpt: "140만 span이 수신됐지만 전량 폐기됐습니다. Alloy Kafka consumer의 batch timeout이 Tempo의 ingestion slack을 초과해서 모든 spanmetrics가 생성되지 않은 문제입니다"
+title: "수신 140만 건, 생성 0건 — 에러 없이 사라진 spanmetrics"
+excerpt: "OOM을 막으려 넣은 Kafka 버퍼의 지연이 Tempo의 ingestion slack을 넘기면서 span 140만 건이 전량 폐기됐습니다. 에러 로그도 알림도 없이 대시보드만 No Data였던 침묵 실패를 가설 네 개를 세워 좁혀간 기록입니다"
 category: monitoring
 tags:
   - go-ti
@@ -18,7 +18,7 @@ date: "2026-03-26"
 
 ## 한 줄 요약
 
-> Tempo가 140만 span을 수신했지만 전량 `outside_metrics_ingestion_slack`으로 폐기했습니다. Alloy Kafka consumer의 batch timeout(10s)이 dev 환경의 저트래픽에서 항상 최악 케이스로 작동해서, 전체 파이프라인 지연이 Tempo의 30초 slack을 넘긴 것이 원인이었습니다.
+> Tempo가 140만 span을 수신하고 전량 `outside_metrics_ingestion_slack`으로 버렸습니다. 실패한 컴포넌트는 없었고 로그도 깨끗했습니다. 원인은 각 단계의 지연이 합산돼 Tempo의 30초 slack을 넘긴 것이었고, 특히 batch timeout은 트래픽이 적을수록 커진다는 역설이 있었습니다
 
 ## Impact
 

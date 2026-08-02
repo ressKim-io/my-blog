@@ -1,6 +1,6 @@
 ---
-title: "Mimir Ingester OOM — 카디널리티 폭발과 webhook 교착"
-excerpt: "Envoy 메트릭 수백 개가 필터 없이 Mimir에 유입되면서 Ingester가 OOMKilled됐고, rollout-operator webhook이 복구를 막는 교착까지 발생한 트러블슈팅"
+title: "Mimir ingester OOM 47시간 — 카디널리티 폭증과 webhook 교착"
+excerpt: "relabeling 규칙 하나가 빠져 Envoy 메트릭 수백 개가 통째로 Mimir에 유입됐고, series 상한도 없어 ingester가 OOM에 빠졌습니다. 복구하려는데 rollout-operator webhook이 StatefulSet 변경을 막는 교착까지 겹친 47시간의 기록입니다"
 category: monitoring
 tags:
   - go-ti

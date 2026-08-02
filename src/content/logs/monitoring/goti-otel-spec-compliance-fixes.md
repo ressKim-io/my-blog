@@ -1,6 +1,6 @@
 ---
-title: "OTel spec 준수 보정 — 단위 ms→s + 표준 attribute 보강"
-excerpt: "계측 완료 직후 외부 검증에서 발견된 Critical: Milliseconds() int64 truncation으로 sub-ms 값이 모두 0 bucket에 압축. 단위를 s로 교정하고 server.address/db.namespace 표준 attribute를 일괄 보강했습니다"
+title: "대시보드는 초록불인데 p95가 거짓이었다 — 단위 ms와 int64 절삭"
+excerpt: "패널은 정상으로 보였지만 표시되는 p95 값 자체가 틀려 있었습니다. Milliseconds() int64 절삭으로 수십 마이크로초 단위 값이 전부 0 bucket에 압축된 것을 OTel 공식 spec과 대조해 찾아내고 단위를 교정한 기록입니다"
 type: troubleshooting
 category: monitoring
 tags:
@@ -18,7 +18,7 @@ date: "2026-04-25"
 
 ## 한 줄 요약
 
-> redis/http/pgxpool OTel 계측 완료 직후 외부 검증(code-reviewer agent + OTel 공식 spec)을 통해 `Milliseconds()` int64 truncation이 p95 패널 값을 거짓으로 만들고 있음을 발견했습니다. 단위를 `ms`→`s`로 교정하고, 표준 attribute를 일괄 보강했습니다
+> 데이터가 끊긴 것도, 패널이 비어 있는 것도 아니었습니다. 값이 들어오는데 그 값이 틀린 경우였습니다. `Milliseconds()` int64 절삭으로 sub-ms 구간이 전부 0으로 뭉개져 p95 패널이 거짓을 표시하고 있었고, OTel 공식 spec과 대조해 단위를 `ms`에서 `s`로 교정하고 표준 attribute를 일괄 보강했습니다
 
 ---
 
