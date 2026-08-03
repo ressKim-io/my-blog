@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="rl-t rl-d" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <title id="rl-t">측정 경로를 하나로 두었을 때와 둘로 나눴을 때</title>
+  <desc id="rl-d">위쪽은 signup과 polling이 모두 Cloudflare edge를 지나 origin으로 가는 구조입니다. edge에 하루 10만 요청 한도가 걸려 있어 signup이 막히면 대기열 지표까지 함께 무너집니다. 아래쪽은 signup을 ALB 직접 경로로 빼고 polling만 Cloudflare를 지나게 한 구조입니다. 한도에 걸리는 요청과 성능을 재려는 요청이 서로 다른 경로를 씁니다.</desc>
+  <defs>
+    <marker id="rl-a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="800" height="400" fill="#FFFFFF"/>
+
+  <text x="132" y="107" text-anchor="end" font-size="13" font-weight="700" fill="#334155">한 경로</text>
+
+  <rect x="150" y="80" width="80" height="44" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="190" y="108" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">k6</text>
+
+  <line x1="230" y1="102" x2="262" y2="102" stroke="#334155" stroke-width="1.8" marker-end="url(#rl-a)"/>
+
+  <rect x="270" y="80" width="160" height="44" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="350" y="108" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">Cloudflare edge</text>
+
+  <rect x="270" y="134" width="160" height="28" rx="7" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+  <text x="350" y="153" text-anchor="middle" font-size="13" font-weight="700" fill="#BE123C">100K req/day</text>
+
+  <line x1="430" y1="102" x2="462" y2="102" stroke="#334155" stroke-width="1.8" marker-end="url(#rl-a)"/>
+
+  <rect x="470" y="80" width="110" height="44" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="525" y="108" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">origin</text>
+
+  <text x="604" y="107" font-size="13" fill="#334155">signup · polling</text>
+
+  <line x1="40" y1="196" x2="760" y2="196" stroke="#E4E4E7" stroke-width="1.5"/>
+
+  <text x="132" y="295" text-anchor="end" font-size="13" font-weight="700" fill="#334155">경로 분리 후</text>
+
+  <rect x="150" y="258" width="80" height="64" rx="9" fill="#F8FAFC" stroke="#475569" stroke-width="1.8"/>
+  <text x="190" y="296" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">k6</text>
+
+  <line x1="230" y1="280" x2="282" y2="254" stroke="#334155" stroke-width="1.8" marker-end="url(#rl-a)"/>
+  <line x1="230" y1="300" x2="282" y2="326" stroke="#334155" stroke-width="1.8" marker-end="url(#rl-a)"/>
+
+  <text x="370" y="216" text-anchor="middle" font-size="13" fill="#334155">signup</text>
+  <rect x="290" y="228" width="160" height="44" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="370" y="256" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">ALB 직접</text>
+
+  <rect x="290" y="308" width="160" height="44" rx="9" fill="#FFFBEB" stroke="#D97706" stroke-width="1.8"/>
+  <text x="370" y="336" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">Cloudflare edge</text>
+  <text x="370" y="372" text-anchor="middle" font-size="13" fill="#334155">polling</text>
+
+  <line x1="450" y1="250" x2="502" y2="276" stroke="#334155" stroke-width="1.8" marker-end="url(#rl-a)"/>
+  <line x1="450" y1="330" x2="502" y2="304" stroke="#334155" stroke-width="1.8" marker-end="url(#rl-a)"/>
+
+  <rect x="510" y="258" width="110" height="64" rx="9" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+  <text x="565" y="296" text-anchor="middle" font-size="14" font-weight="700" fill="#047857">origin</text>
+</svg>

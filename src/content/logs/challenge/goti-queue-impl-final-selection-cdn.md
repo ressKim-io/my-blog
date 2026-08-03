@@ -129,7 +129,7 @@ Redis 효율도 A 대비 약 1/3 부하입니다.
 | 처리량 | **1,044 req/s** |
 | CDN 캐싱 | `cf-cache-status: HIT`, `max-age=1` |
 
-> \* pass_rate 악화와 timeout 급증은 Cloudflare Free plan의 rate limit으로 인해 signup 단계가 연쇄 실패한 영향입니다. CDN 자체 성능은 status avg에서 4.2배 개선되었습니다.
+> \* pass_rate 악화와 timeout 급증은 Cloudflare Free plan의 rate limit으로 인해 signup 단계가 연쇄 실패한 영향입니다. CDN 자체 성능은 status avg에서 4.2배 개선되었습니다. 이 오염을 어떻게 분리했는지는 [통과율 40%인데 응답 속도는 1위였다](/essays/goti-loadtest-cdn-rate-limit-contamination/)에 따로 정리했습니다.
 
 ALB 직접 구간에서는 POC C가 가장 좋은 숫자는 아니었습니다.
 status avg 926ms, p95 1.98s로 B보다 느리고, timeout도 157건 발생했습니다.
