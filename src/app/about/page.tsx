@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import Link from '@/components/Link';
 import { getEssays, getLogs, getSearchIndex } from '@/lib/posts';
 import { projects } from '@/lib/projects';
+import { withBasePath } from '@/lib/basePath';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -114,7 +115,7 @@ export default function AboutPage() {
               </li>
               <li>
                 <a
-                  href="/feed.xml"
+                  href={withBasePath('/feed.xml')}
                   className="text-[var(--accent)] hover:opacity-70 transition-opacity"
                 >
                   RSS →

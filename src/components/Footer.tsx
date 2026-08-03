@@ -1,4 +1,5 @@
 import Link from './Link';
+import { withBasePath } from '@/lib/basePath';
 
 export default function Footer() {
   return (
@@ -21,7 +22,7 @@ export default function Footer() {
             GitHub
           </a>
           <a
-            href="/feed.xml"
+            href={withBasePath('/feed.xml')}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[var(--muted)] hover:text-[var(--text)] transition-colors"

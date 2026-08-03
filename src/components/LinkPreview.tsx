@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type AnchorHTMLAttributes } from 'react';
 import { usePostMeta } from './PostsIndexProvider';
 import { slugFromHref } from '@/lib/slug';
+import { withBasePath } from '@/lib/basePath';
 
 const trackLabel = {
   essays: 'Essay',
@@ -31,7 +32,9 @@ export default function LinkPreview({
   children,
   ...props
 }: AnchorHTMLAttributes<HTMLAnchorElement>) {
+  // 슬러그 추출은 basePath가 없는 원본 href 기준, 렌더링되는 href만 basePath를 붙입니다
   const slug = slugFromHref(href);
+  const resolvedHref = withBasePath(href);
   const meta = usePostMeta(slug);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,7 +53,7 @@ export default function LinkPreview({
   // 미리보기 데이터가 없으면 일반 a로
   if (!meta) {
     return (
-      <a href={href} {...props}>
+      <a href={resolvedHref} {...props}>
         {children}
       </a>
     );
@@ -97,7 +100,7 @@ export default function LinkPreview({
     <>
       <a
         ref={linkRef}
-        href={href}
+        href={resolvedHref}
         onMouseEnter={scheduleShow}
         onMouseLeave={scheduleHide}
         onFocus={scheduleShow}

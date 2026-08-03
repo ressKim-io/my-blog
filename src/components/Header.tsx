@@ -5,6 +5,7 @@ import Link from './Link';
 import { usePathname } from 'next/navigation';
 import Search from './Search';
 import type { SearchPost } from '@/lib/posts';
+import { withBasePath } from '@/lib/basePath';
 
 interface HeaderProps {
   posts?: SearchPost[];
@@ -70,7 +71,7 @@ export default function Header({ posts = [] }: HeaderProps) {
           <div className="flex items-center gap-1.5">
             <Search posts={searchablePosts} />
             <a
-              href="/feed.xml"
+              href={withBasePath('/feed.xml')}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex w-9 h-9 items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface)] transition-colors"
@@ -130,7 +131,7 @@ export default function Header({ posts = [] }: HeaderProps) {
                 );
               })}
               <a
-                href="/feed.xml"
+                href={withBasePath('/feed.xml')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block px-4 py-3 text-[15px] rounded-lg text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface)]"

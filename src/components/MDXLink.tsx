@@ -1,6 +1,7 @@
 import type { AnchorHTMLAttributes } from 'react';
 import LinkPreview from './LinkPreview';
 import { slugFromHref } from '@/lib/slug';
+import { withBasePath } from '@/lib/basePath';
 
 /**
  * MDX 본문의 a 태그.
@@ -26,7 +27,7 @@ export default function MDXLink({
 
   return (
     <a
-      href={href}
+      href={withBasePath(href)}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
       {...props}

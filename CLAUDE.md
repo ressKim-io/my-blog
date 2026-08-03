@@ -99,7 +99,7 @@ logs 트랙(트러블슈팅 거친 노트)은 **URL을 직접 알아야만 접�
 
 <!-- STATS:START -->
 <!-- 자동 생성: scripts/update-stats.mjs (prebuild 훅), 수동 편집 금지 -->
-## Blog Content Stats (2026-08-02 기준, 자동 생성)
+## Blog Content Stats (2026-08-03 기준, 자동 생성)
 
 - **총 글 수**: 353개 (go-ti 프로젝트 실전 기록 213편 포함)
 - **카테고리 (9개)**:

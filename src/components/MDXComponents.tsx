@@ -1,12 +1,11 @@
 import CodeBlock from './CodeBlock';
 import MDXLink from './MDXLink';
+import { basePath } from '@/lib/basePath';
 
 interface CodeProps {
   className?: string;
   children?: React.ReactNode;
 }
-
-const basePath = process.env.NODE_ENV === 'production' ? '/my-blog' : '';
 
 function slugify(children: React.ReactNode): string {
   if (typeof children !== 'string') {
