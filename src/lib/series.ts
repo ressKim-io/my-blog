@@ -14,7 +14,8 @@ export interface SeriesMeta {
   blurb: string;
 }
 
-// 표시 순서 = 이 배열 순서 (편 수 내림차순으로 고정)
+// 이 배열은 등록 목록일 뿐 표시 순서가 아닙니다.
+// 표시 순서는 getAllSeries()가 최신순으로 계산합니다
 export const seriesList: SeriesMeta[] = [
   {
     id: 'redis',
@@ -123,13 +124,11 @@ export const seriesList: SeriesMeta[] = [
   },
 ];
 
-// 홈 쇼케이스 featured(큰 카드)로 고정할 시리즈 — 교체는 이 한 줄만 수정
-export const FEATURED_SERIES_ID = 'redis';
-
 export interface SeriesWithPosts extends SeriesMeta {
   posts: PostData[]; // order 1→N 정렬됨 (getSeriesPosts)
   count: number;
   latestDate: string;
+  firstDate: string;
 }
 
 /** 단일 시리즈 + 소속 글. 글이 0편이면 null (라우트·카드에서 자동 제외) */
@@ -139,15 +138,29 @@ export function getSeriesById(id: string): SeriesWithPosts | null {
   // deepdive 시리즈는 essays 트랙 전용 — logs 글이 섞여도 배제(링크·격리 안전장치)
   const posts = getSeriesPosts(meta.seriesName).filter((p) => p.track === 'essays');
   if (posts.length === 0) return null;
-  const latestDate = posts.reduce((max, p) => (p.date > max ? p.date : max), '');
-  return { ...meta, posts, count: posts.length, latestDate };
+  const dates = posts.map((p) => p.date);
+  const latestDate = dates.reduce((max, d) => (d > max ? d : max));
+  const firstDate = dates.reduce((min, d) => (d < min ? d : min));
+  return { ...meta, posts, count: posts.length, latestDate, firstDate };
 }
 
-/** 시리즈 전체 (seriesList 순서 유지) */
+/**
+ * 시리즈 전체 — 최신순 정렬.
+ *
+ * 최신일이 같으면 시작일이 늦은 쪽을 앞에 둡니다. 오래된 시리즈에 개정 글
+ * 하나가 뒤늦게 붙었다고 해서 그 시리즈가 맨 앞으로 올라오지 않게 하려는 것입니다.
+ * 그래도 같으면 편 수가 많은 쪽을 앞에 둡니다
+ */
 export function getAllSeries(): SeriesWithPosts[] {
   return seriesList
     .map((s) => getSeriesById(s.id))
-    .filter((s): s is SeriesWithPosts => s !== null);
+    .filter((s): s is SeriesWithPosts => s !== null)
+    .sort(
+      (a, b) =>
+        b.latestDate.localeCompare(a.latestDate) ||
+        b.firstDate.localeCompare(a.firstDate) ||
+        b.count - a.count,
+    );
 }
 
 /** generateStaticParams 전용 — 시리즈 id 목록 */
@@ -155,7 +168,7 @@ export function getSeriesIds(): string[] {
   return seriesList.map((s) => s.id);
 }
 
-/** 홈 쇼케이스 featured 시리즈 선정 */
+/** 홈 쇼케이스 featured 시리즈 — getAllSeries가 최신순이므로 맨 앞이 가장 최근 시리즈 */
 export function pickFeatured(all: SeriesWithPosts[]): SeriesWithPosts {
-  return all.find((s) => s.id === FEATURED_SERIES_ID) ?? all[0];
+  return all[0];
 }
