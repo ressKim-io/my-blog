@@ -11,7 +11,7 @@ tags:
   - CDN
   - Observability
   - troubleshooting
-date: "2026-08-03"
+date: "2026-04-04"
 ---
 
 ## 한 줄 요약
