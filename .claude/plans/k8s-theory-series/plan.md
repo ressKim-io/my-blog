@@ -1,7 +1,7 @@
 # ☸️ k8s-theory 시리즈 변환 계획
 
 > Obsidian vault의 Kubernetes 이론 노트를 한국어 `essays` 글로 변환하는 계획
-> **2026-10-22 갱신: Batch 04까지 16편 작성·검수 완료. 한 번에 5편씩 변환하며 에이전트 분담 허용, 다음은 Batch 05의 5편**
+> **2026-10-23 갱신: Batch 06까지 26편 작성·검수 완료. 한 번에 5편씩 변환하며 에이전트 분담 허용, 다음은 Batch 07의 5편**
 > 9월 조사 당시 50편, 2026-10-21에 확인한 `sessions/*.md`는 71개. 파일 존재를 확인한 수이며 내용 검수 완료 수가 아님
 
 관련 문서 — `README.md`(진입점) · `inventory.md`(원본 전수) · `source-format.md`(변환 지침)
@@ -228,9 +228,9 @@ Codex와 Claude 모두 같은 문서를 읽고 아래처럼 이론 해설에 적
 
 ## 7. 진행 상태와 다음 배치
 
-2026-10-22: Batch 04의 글 5편과 SVG 11장 작성·검수 완료
-누적 `k8s-theory-` 글 16편과 SVG 32장이다
-로컬 저장과 정적 export 검증까지 수행했으며 commit·push·배포는 하지 않았다
+2026-10-23: Batch 06의 글 5편과 SVG 12장 작성·검수 완료
+누적 `k8s-theory-` 글 26편과 SVG 55장이다
+로컬 저장·정적 export 검증과 커밋까지 수행했으며 push·배포는 하지 않았다
 71개 원본의 존재 확인을 본문 전수 검수나 블로그 발행으로 기록하지 않는다
 
 ### Batch 01 — 검수 완료
@@ -256,6 +256,8 @@ slug와 order는 전역 충돌을 확인하고 실제 적용했다
 | 02 | 1-3.1, 1-3.2, 1-4.1 | 검수 완료 | post lint error 0 / warn 3, 전체 lint error 0 / warn 1, 최종 build 성공(540 pages) | 1-4.2, 1-5.1, 1-5.2 — 파일 존재 확인 |
 | 03 | 1-4.2, 1-5.1, 1-5.2, 1-6.1, 1-6.2 | 검수 완료 | post lint error 0 / warn 8, 전체 lint error 0 / warn 1, 최종 build 성공(550 pages) | 1-7.1, 1-7.2, 1-8, 1-9, 1-10 — 파일 존재 확인 |
 | 04 | 1-7.1, 1-7.2, 1-8, 1-9, 1-10 | 검수 완료 | post lint error 0 / warn 5, 전체 lint error 0 / warn 1, 최종 build 성공(560 pages) | 1-11, 1-12, 1-13, 1-14, 1-15 — 파일 존재 확인 |
+| 05 | 1-11, 1-12, 1-13, 1-14, 1-15 | 검수 완료 | post lint error 0 / warn 5, 전체 lint error 0 / warn 1, 최종 build 성공(570 pages) | 1-16, 1-17, 2-1, 2-2, 2-3 — 파일 존재 확인 |
+| 06 | 1-16, 1-17, 2-1, 2-2, 2-3 | 검수 완료 | post lint error 0 / warn 5, 전체 lint error 0 / warn 1, 최종 build 성공(580 pages) | 2-4, 2-5, 2-6, 2-7, 2-8.1 — 파일 존재 확인 |
 
 편별 상태는 `미착수 → 작성 중 → 검수 대기 → 검수 완료`로 기록한다
 막힌 편은 `보류`와 구체적인 이유를 남긴다. 부분 성공은 배치 완료로 표시하지 않는다
@@ -660,15 +662,269 @@ API 확장은 원본의 CRD/aggregation 선택 기준을 보존했으며 개인�
 - `git diff --check` 통과
 - commit·push·배포, Kubernetes 클러스터 실습·통합 테스트는 실행 안 함
 
-### Batch 05 — 다음 5편
+### Batch 05 — 검수 완료 (2026-10-23)
 
 정확한 원본 파일의 존재와 예정 slug 비충돌을 2026-10-22에 확인했다
-아직 본문을 변환·검수하지 않았다. 다음 배치 시작 시 최신 전문·progress·source-map과 hash를 확인한다
+2026-10-23 최신 원본과 progress·source-map을 확인하고 SHA-256을 `/tmp/k8s-batch05/sources.json`에 기록했다
+작성 에이전트 3명이 인증서·kubelet 접속·버전 호환·저장 변환을 분담하고 주 담당자가 이중화와 통합 검증을 맡았다
+별도 reviewer가 원본·공식 소스·문체·SVG를 대조했다. 최종 저장본의 lint·독립 검토·빌드를 마쳤으며 보류한 편은 없다
 
 | 좌표 | 정확한 원본 파일명 | 예정 slug | series / order | 상태 |
 |---|---|---|---|---|
-| 1-11 | `Phase 1-11 · 인증서 발급과 위임 · 없는 리소스에 권한을 건다.md` | `k8s-theory-certificate-signing-delegation` | `k8s-theory-api` / 17 | 미착수 |
-| 1-12 | `Phase 1-12 · kubelet 접속과 되묻기 · 인가가 두 번 돌고 주체가 바뀐다.md` | `k8s-theory-kubelet-access` | `k8s-theory-api` / 18 | 미착수 |
-| 1-13 | `Phase 1-13 · 버전 셋과 롤백 · 되돌아갈 자리를 남기면 기능이 늦게 켜진다.md` | `k8s-theory-version-emulation-rollback` | `k8s-theory-api` / 19 | 미착수 |
-| 1-14 | `Phase 1-14 · 컨트롤 플레인 이중화 · 합의하는 층은 하나뿐이다.md` | `k8s-theory-control-plane-high-availability` | `k8s-theory-api` / 20 | 미착수 |
-| 1-15 | `Phase 1-15 · 저장 경로의 변환 층 · 읽기는 목록을 훑고 쓰기는 첫 칸만 쓴다.md` | `k8s-theory-storage-transformations` | `k8s-theory-api` / 21 | 미착수 |
+| 1-11 | `Phase 1-11 · 인증서 발급과 위임 · 없는 리소스에 권한을 건다.md` | `k8s-theory-certificate-signing-delegation` | `k8s-theory-api` / 17 | 검수 완료 |
+| 1-12 | `Phase 1-12 · kubelet 접속과 되묻기 · 인가가 두 번 돌고 주체가 바뀐다.md` | `k8s-theory-kubelet-access` | `k8s-theory-api` / 18 | 검수 완료 |
+| 1-13 | `Phase 1-13 · 버전 셋과 롤백 · 되돌아갈 자리를 남기면 기능이 늦게 켜진다.md` | `k8s-theory-version-emulation-rollback` | `k8s-theory-api` / 19 | 검수 완료 |
+| 1-14 | `Phase 1-14 · 컨트롤 플레인 이중화 · 합의하는 층은 하나뿐이다.md` | `k8s-theory-control-plane-high-availability` | `k8s-theory-api` / 20 | 검수 완료 |
+| 1-15 | `Phase 1-15 · 저장 경로의 변환 층 · 읽기는 목록을 훑고 쓰기는 첫 칸만 쓴다.md` | `k8s-theory-storage-transformations` | `k8s-theory-api` / 21 | 검수 완료 |
+
+
+### Batch 05 인계 — 2026-10-23
+
+#### 원본 대응과 저장 결과
+
+원본 루트는 `/Users/jun/Documents/Obsidian Vault/☸️ k8s-theory/sessions/`다
+5편의 최신 전문과 관련 progress·source-map을 읽고 Vault는 읽기 전용으로 사용했다
+작성 기준일은 2026-10-23이며 원본 학습일이나 실제 배포일을 뜻하지 않는다
+인증서·kubelet·버전 호환은 작성 에이전트가 분담하고, 버전 담당자가 저장 변환도 이어서 맡았다
+주 담당자는 이중화를 작성하고 공통 기록·통합 검증을 관리했다. 별도 reviewer가 5편을 독립 검토했다
+
+| 좌표 | 원본 파일 | 줄 수 | SHA-256 |
+|---|---|---:|---|
+| 1-11 | `Phase 1-11 · 인증서 발급과 위임 · 없는 리소스에 권한을 건다.md` | 650 | `9ede13004aef70da772b22fc8547aee8e2d9d3c17d1e2004bd1bb6aeb94f142d` |
+| 1-12 | `Phase 1-12 · kubelet 접속과 되묻기 · 인가가 두 번 돌고 주체가 바뀐다.md` | 780 | `a964c31462bd424a517788c09b0a22ffea726e3a776b8e056232eae6f8953bfe` |
+| 1-13 | `Phase 1-13 · 버전 셋과 롤백 · 되돌아갈 자리를 남기면 기능이 늦게 켜진다.md` | 570 | `ac89fbdb98ef4c68e03969c1db11cef18e4515f617ceb31e2602ef46d6d6c9af` |
+| 1-14 | `Phase 1-14 · 컨트롤 플레인 이중화 · 합의하는 층은 하나뿐이다.md` | 618 | `b2fcd03c935463fa939d570049458892c91843becc6487c8a8f5fc336eb56686` |
+| 1-15 | `Phase 1-15 · 저장 경로의 변환 층 · 읽기는 목록을 훑고 쓰기는 첫 칸만 쓴다.md` | 557 | `dc7ce843c3cd3207e7d52c5f98b8147e8709e539789692cb8b020048afb95858` |
+
+위 적용 slug로 `src/content/essays/kubernetes/`에 저장했다
+5편은 `k8s-theory-api` order 17~21이며, 전체 시리즈 order 1~21의 중복·누락과 트랙 분리 없음도 확인했다
+원본 파일은 작업 전후 hash가 같고, 기존 사용자 수정 파일 12개도 작업 시작 저장본과 같다
+
+| 글 | SVG 구성 |
+|---|---|
+| 인증서·사칭 | 1: 첫 kubelet 인증서 발급, 2: 사칭 권한과 실제 작업 인가의 주체 |
+| kubelet 접속 | 1: logs 요청의 신원 전환, 2: 좁은 권한과 proxy 폴백 |
+| 버전·롤백 | 1: 세 버전의 역할, 2: 저장 버전의 두 차례 탐색 |
+| 이중화 | 1: 한 호스트 장애와 세 역할, 2: 최신 LIST 기준 revision과 캐시 진행 |
+| 저장 변환 | 1: codec·변환기의 양방향 경계, 2: stale 갱신 분기, 3: 재적재 성공·실패 |
+
+SVG 11장은 `public/diagrams/{slug}-{n}.svg`로 저장했다
+작성 담당자가 XML·sharp PNG 렌더링과 육안 검사를 수행했고 reviewer도 본문 의미·렌더링을 확인했다
+그림 수를 맞추지 않고 기전·구조는 SVG, 수치·설정·조건 비교는 표, 인과 설명은 산문으로 구성했다
+
+#### 근거 버전과 원본에서 달라진 설명
+
+- [Kubernetes v1.37.1 tag target](https://github.com/kubernetes/kubernetes/commit/f78e722310e50bcaca9276be22276d9e91d91308)과 [website 고정 저장본](https://github.com/kubernetes/website/commit/7fde177e22dc98390a6d55d215dd0301b5f6d0bb)의 실제 함수·분기를 읽었다
+- KEP-4330은 [enhancements 고정 ref](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-architecture/4330-compatibility-versions/README.md)를 사용했고, [초기 문서 삭제 커밋](https://github.com/kubernetes/website/commit/f0ca297ac692c70f20a0519a3e2d345707e4639d)의 diff를 읽었다
+- HA의 etcd 의미는 [v3.6 FAQ](https://etcd.io/docs/v3.6/faq/), [learner 설계](https://etcd.io/docs/v3.6/learning/design-learner/), [progress 요청 이슈](https://github.com/etcd-io/etcd/issues/9855)를 대조했다. 배포된 etcd 버전을 실측한 것이 아니다
+- metrics-server RBAC은 [v0.9.0 태그](https://github.com/kubernetes-sigs/metrics-server/blob/v0.9.0/manifests/base/rbac.yaml)를 읽은 범위이며 설치 버전으로 주장하지 않았다
+- 자료·manifest·편별 report는 `/tmp/k8s-batch05/{certificate,kubelet,version,ha,storage}/`에 있다. 영구 재확인 경로는 각 글의 고정 소스 링크다
+- 기본 sandbox의 DNS 제한은 공식 소스 읽기 권한으로 해결했다. 실제 트리·import로 확인한 경로만 인용했고 실패한 404 경로를 근거로 사용하지 않았다
+
+| 글 | 정정하거나 분명히 한 조건 |
+|---|---|
+| 인증서·사칭 | CTB/Projection/PCR의 v1.37 GA/on, CTB attest와 PCR sign 구분. 현행 constrained 사칭의 신원+작업 범위 검사·legacy 폴백·성공 캐시·헤더 제거 시점. 생성/자동 승인/서명 주체, self→node 승인 후보, 정상 갱신 70~90%와 예외 보존 |
+| kubelet | FineGrainedAuthz의 v1.36 GA·잠김, Deny/NoOpinion 폴백과 오류 500. nodes/proxy 주소 검사와 logs 별도 경로, CA 서명과 self-signed 구분. `--kubelet-timeout` 5초를 실제 TCP 다이얼 상한으로 단정하지 않음 |
+| 버전·롤백 | DRA gate의 실제 min compat 조건, 비 Alpha/min compat 우선과 Alpha 포함/emulated 재탐색·override. statusz 두 API 타입과 문서 예시 차이, OpenAPI info.version과 전체 과거 스키마의 동일 보장을 구분 |
+| 이중화 | 최신 LIST는 getCurrentRV의 linearizable etcd 읽기가 필요하므로 frozen cache만으로 quorum 상실을 우회하지 않음. identity Lease의 현행 proxy 소비, storage prefix+masterleases baseKey, 3 election timeout·liveness 설정을 정확한 전환 시한으로 일반화하지 않음 |
+| 저장 변환 | 안쪽 키 순서와 KMS 키 자료 유형까지 stale에 반영. KMSv1 기본 off와 구현 제거를 구분. 다중 API 서버의 새 키 읽기 후보 선배포, 손상 LIST 최대100 집계 뒤 실패, cache TTL과 AllowExpiredGet 조건 보존 |
+
+보류하거나 새로 확인 필요로 남긴 기술 주장은 없다
+실제 클러스터 설정 적용·권한 전파·statusz 응답·장애 전환 시간·키 회전·KMS 호출·손상 응답은 실행하지 않았다
+본문은 소스와 문서 기반 설명이며, 예제·오류 문구를 실측 출력이나 개인 경험으로 바꾸지 않았다
+
+#### 문체·의미 검수와 대표 문장
+
+독립 reviewer가 원본 5편·본문 5편 전문과 공식 근거를 직접 읽었다
+필수 수정 0건·확인 필요 0건이며, 초기 권장 4건을 반영한 뒤 미반영 권장도 0건이다
+GC·CRD 첫 풀이, workqueue/expectations의 역할과 기존 글 연결, 저장 변환 재시도 문장을 보완했다
+‘원본 노트는…’ 같은 편집 경위는 덜어내고 독자가 바로 읽을 수 있는 버전별 설명으로 정리했다
+reviewer가 변경 구간을 다시 읽었으며, 보고서는 `/tmp/k8s-batch05/review.md`와 `review-hashes.json`에 있다
+
+| 원문 | 변환 후 |
+|---|---|
+| “CSR 요청 기능과 승인 기능은 따로 갖춰야 한다” | “요청 기능과 승인 기능을 각각 마련해야 합니다” |
+| “낡았으면 내용이 같아도 지름길을 안 탄다” | “stale이 true이면 내용이 같아도 이 조건을 통과하지 않습니다” |
+| “컨트롤 플레인이 이중화돼 있다는 한 문장인데 층마다 다른 보장을 가리킨다” | “컨트롤 플레인을 여러 인스턴스로 구성했다고 해서 모든 구성요소가 같은 방식으로 장애를 견디는 것은 아닙니다” |
+
+#### 실제 검사 결과
+
+- `npm run lint:post -- <5개 파일>` — 최종 저장본 exit 0, error 0 / warn 5
+  - 편별 긴 줄 경고 1개씩이며 100자 초과 줄은 23·26·23·31·22곳이다. 고정 URL·표·조건을 문맥으로 확인했고 길이만 맞추려고 근거를 삭제하지 않았다
+- `npm run lint` — exit 0, error 0 / warn 1
+  - 기존 `src/app/layout.tsx:80`의 `@next/next/no-page-custom-font` 경고는 요청 밖이므로 수정하지 않았다
+- `npm run build` — 최종 저장본 exit 0, TypeScript·정적 생성·postbuild 성공, 570 pages
+  - 권장 용어·문장 보완 후 재빌드했고 최종 문장 출력까지 확인했다. Turbopack 로컬 포트 권한으로 실행했으며 Node의 `DEP0205 module.register()` 경고는 남아 있다
+- essays HTML 5개, `/my-blog/diagrams/` 이미지 11개 참조와 export SVG 바이트 일치, 내부 링크 실존, sitemap·RSS·llms.txt의 5개 slug 반영 확인
+- `git diff --check` 성공. 원본 hash·기존 수정 12개·AGENTS.md 보존 확인. 빌드 훅이 바꾼 CLAUDE.md는 STATS 바깥이 동일함을 확인한 뒤 이번 자동 통계 변경만 복원
+- 검수 hash와 현재 글·SVG·원본 hash 일치. 등록은 로컬 콘텐츠 저장과 export 검증까지이며 commit·push·배포는 실행 안 함
+- Kubernetes 클러스터 실습·통합 테스트·런타임 실측은 실행 안 함
+
+최종 검수 저장본:
+
+| 글 | 줄 수 | SHA-256 |
+|---|---:|---|
+| `k8s-theory-certificate-signing-delegation.md` | 380 | `727d31f584a3cafbd0b82851b4c4d7e90b7bffc7a61482c7fa82044c8ca9257d` |
+| `k8s-theory-kubelet-access.md` | 368 | `49627c838d59647692b0b54c19cc93787a76294ce3af64c4a07fece5eb551fb7` |
+| `k8s-theory-version-emulation-rollback.md` | 273 | `4abdf6192bd99e21aec8660cc456aa8c49ffa8de6dfe8a5d486c87822b63a94e` |
+| `k8s-theory-control-plane-high-availability.md` | 286 | `01ae8d1457afdefa96bace808663c6a314bc07fedf5e3f02af752b5aa3906400` |
+| `k8s-theory-storage-transformations.md` | 289 | `fc837e40aeb09d4c407799f8ae3df2ca32d6be47dede8dc8049e5b1d68fbbf5d` |
+
+### Batch 06 — 검수 완료 (2026-10-23)
+
+정확한 원본 파일의 존재와 예정 slug 비충돌을 2026-10-23에 확인했다
+2026-10-23 최신 원본과 관련 progress·source-map을 확인하고 SHA-256을 `/tmp/k8s-batch06/sources.json`에 기록했다
+작성 에이전트 3명이 이벤트·분산 추적·스케줄링·preemption/PDB를 분담하고 주 담당자가 배치 제약과 통합 검증을 맡았다
+별도 reviewer가 원본·공식 근거·문체·SVG를 독립 검토했고 최종 저장본의 lint·빌드·export 검증을 마쳤다
+Phase 1 마지막 두 편 뒤 Phase 2로 넘어가며, 새 시리즈 `k8s-theory-node`의 order는 1부터 시작한다
+
+| 좌표 | 정확한 원본 파일명 | 예정 slug | series / order | 상태 |
+|---|---|---|---|---|
+| 1-16 | `Phase 1-16 · 이벤트 압축과 두 그룹 · 한쪽은 눌러서 보내고 한쪽은 안 보낸다.md` | `k8s-theory-event-compression` | `k8s-theory-api` / 22 | 검수 완료 |
+| 1-17 | `Phase 1-17 · 분산 추적과 계측 지점 · 스위치는 둘인데 출구는 셋이다.md` | `k8s-theory-distributed-tracing` | `k8s-theory-api` / 23 | 검수 완료 |
+| 2-1 | `Phase 2-1 · 스케줄링 사이클과 바인딩 사이클.md` | `k8s-theory-scheduling-binding-cycles` | `k8s-theory-node` / 1 | 검수 완료 |
+| 2-2 | `Phase 2-2 · 배치 제약의 표현 방식.md` | `k8s-theory-scheduling-constraints` | `k8s-theory-node` / 2 | 검수 완료 |
+| 2-3 | `Phase 2-3 · preemption 과 PDB · 자리를 빼앗는 쪽과 지키는 쪽.md` | `k8s-theory-preemption-pdb` | `k8s-theory-node` / 3 | 검수 완료 |
+
+
+### Batch 06 인계 — 2026-10-23
+
+#### 원본 대응과 저장 결과
+
+원본 루트는 `/Users/jun/Documents/Obsidian Vault/☸️ k8s-theory/sessions/`다
+최신 원본 5편 전문과 관련 progress·source-map을 읽었으며 Vault는 읽기 전용으로 사용했다
+작성 기준일 2026-10-23은 학습일이나 실제 배포일을 뜻하지 않는다
+원본 관리 메타·종료 판정·미실행 LAB TODO·중복 glossary는 빼고 질문·기전·조건·예외를 남겼다
+원본에 없는 실습·개인 경험·감정·실측 결과는 추가하지 않았다
+
+| 좌표 | 정확한 원본 파일명 | 줄 수 | SHA-256 |
+|---|---|---:|---|
+| 1-16 | `Phase 1-16 · 이벤트 압축과 두 그룹 · 한쪽은 눌러서 보내고 한쪽은 안 보낸다.md` | 523 | `23736e0d099d9b6faaf67e81a196926f0fedd6d8aeaec2aeb18722ccae99ff44` |
+| 1-17 | `Phase 1-17 · 분산 추적과 계측 지점 · 스위치는 둘인데 출구는 셋이다.md` | 567 | `648dd9aabf6494261464647d39cb46b230c71361ac558f183204772840ef9692` |
+| 2-1 | `Phase 2-1 · 스케줄링 사이클과 바인딩 사이클.md` | 685 | `b22dc67e429968fb98f68ad86c5ef839f5bae0703351cee6c76b6284c667b7ac` |
+| 2-2 | `Phase 2-2 · 배치 제약의 표현 방식.md` | 589 | `0e893091212f3b2a70fc26c87f372e377a969bc65686faf630a5f8a492a5fa42` |
+| 2-3 | `Phase 2-3 · preemption 과 PDB · 자리를 빼앗는 쪽과 지키는 쪽.md` | 684 | `402c0b2bdb92d33bc186776adf608dae82b948b7c864fbcc37143f415026c203` |
+
+위 slug로 `src/content/essays/kubernetes/`에 저장했다
+앞 두 편은 `k8s-theory-api` order 22~23, 뒤 세 편은 새 `k8s-theory-node` order 1~3이다
+두 시리즈의 전체 order 1~23·1~3에 중복·누락·트랙 분리가 없는지 검사했다
+
+| 글 | SVG 구성 |
+|---|---|
+| Event | 1: 두 기록기의 큐·집계·시리즈·서버 저장 경로 |
+| 분산 추적 | 1: 세 기록과 span 내보내기, 2: 필터 메트릭·span 시간 경계, 3: 외부 문맥의 부모·link 판정 |
+| 스케줄링·바인딩 | 1: 직렬 결정과 비동기 바인딩, 2: 큐·재시도 관계, 3: 두 Pod의 결정·바인딩 중첩 |
+| 배치 제약 | 1: Filter와 Score 역할, 2: zone·node domain의 차이 |
+| preemption·PDB | 1: 기본 Pod preemption 흐름, 2: 제거 후보의 되돌림, 3: DELETE와 Eviction API의 PDB 경계 |
+
+SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
+
+작성자가 XML 파싱·sharp 렌더링·육안 검사를 수행했고 독립 reviewer가 의미·참조·렌더링을 대조했다
+그림 수를 맞추지 않고 흐름·시간 관계·분기에는 SVG, 수치·설정·조건 비교에는 표, 판단 이유에는 산문을 사용했다
+
+#### 근거 버전과 정정한 설명
+
+- [Kubernetes v1.37.1 tag target](https://github.com/kubernetes/kubernetes/commit/f78e722310e50bcaca9276be22276d9e91d91308)과 [website 저장본](https://github.com/kubernetes/website/commit/7fde177e22dc98390a6d55d215dd0301b5f6d0bb)의 실제 함수·설정·기본값을 읽었다
+- Event 설계는 [KEP-383 고정본](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-instrumentation/383-new-event-api-ga-graduation/README.md)을 대조했다
+- 추적 SDK는 Kubernetes의 go.mod·vendor/modules.txt에서 OTel v1.44.0을 확인하고 포함된 구현을 읽었다. 현재 head/tail sampling은 [OpenTelemetry 공식 문서](https://opentelemetry.io/docs/concepts/sampling/)에서 확인했다
+- QueueingHints의 GA 이력만 [v1.36.0 등록부](https://github.com/kubernetes/kubernetes/blob/v1.36.0/pkg/features/kube_features.go)를 별도로 읽었다. 현행 registry에 gate가 없다는 사실과 기능 제거를 구분했다
+- 편별 근거·URL·SHA·대표 문장·검사 보고서는 `/tmp/k8s-batch06/{events,tracing,scheduling,constraints,preemption}/`에 있다. 재확인할 영구 경로는 각 글에 인용한 고정 소스 링크다
+- 404 경로는 근거로 사용하지 않았다. 실제 tree·import에서 현행 파일을 찾아 다시 읽었다. 기본 sandbox의 DNS 제한은 공식 소스 읽기 권한으로 해결했다
+
+| 글 | 정정하거나 분명히 한 조건 |
+|---|---|
+| Event | 집계는 저장된 개별 Event를 삭제하지 않으며 기본 600초는 마지막 관측 후의 간격이다. 반복키·집계키·spam키를 구분했다. 시리즈 종료 쓰기 성공과 최대 반영 지연을 보장하지 않으며 컴포넌트별 adapter·leader election 경로, 큐 입구·처리기 채널, 전송 제한·저장 TTL을 구분했다 |
+| 분산 추적 | 필터 메트릭은 다음 TrackCompleted 진입까지, span은 하위 핸들러 반환까지다. 완료 지점에 도달해야 메트릭이 남는다. APIServerTracing gate 제거와 설정 필요를 구분했고, sampled 부모·무헤더 특권 요청의 기존 인증 부모, SDK TLS credentials 우선순위, BSP 30초·exporter 10초 제한을 실제 분기로 설명했다 |
+| 스케줄링·바인딩 | unschedulableEntities와 두 backoff 힙, 기본 on인 조기 pop 예외를 반영했다. 0/N의 N은 Filter 호출 횟수가 아니며 0/1만으로 실패 단계를 확정하지 않는다. Permit 이후에도 플러그인 반환 코드에 따라 배치 거절로 분류될 수 있고 Unreserve는 성공한 API 쓰기 전체를 원복하지 않는다 |
+| 배치 제약 | nodeSelector·required affinity·addedAffinity의 AND 관계와 self-affinity 첫 Pod 예외를 남겼다. 기본 spread는 selector 구성 조건이 있으며 minDomains는 domain을 생성하지 않는다. hostname fast path·집계 정책·admission 조건, NoExecute 삭제 주체와 300초·DaemonSet 예외, 현행 feature gate 조건을 분리했다 |
+| preemption·PDB | PriorityClass.value는 immutable이며 기존 Pod의 priority는 클래스 재생성으로 자동 갱신되지 않는다. 기본 preemption은 같은 노드의 낮은 우선순위 Pod를 대상으로 한다. Permit 대기·PreBind 메모리 취소와 일반 DELETE, PDB best effort와 Eviction API의 강제 검사, PDB 계산 보정·nominatedNodeName의 한계를 구분했다 |
+
+클러스터의 실제 전송·드롭·추적 계보·TLS 통신·큐 지연·바인딩·배치·제거·PDB 예산 동작은 실행하지 않았다
+소스에서 확인한 조건을 실측이나 통합 테스트 실행으로 보고하지 않았다
+
+#### 문체·의미 검수와 대표 문장
+
+독립 reviewer가 원본 5편·본문 5편·SVG 12개와 주요 정정의 고정 소스를 대조했다
+필수 수정 0건·확인 필요 0건이며 권장 2건을 반영한 뒤 해당 문맥을 재검토했다
+한 번만 쓰는 preemptor를 한국어로 풀고, Ready=False로 한정한 문장을 Ready가 아닌 Pod로 보완했다
+
+검토 보고서와 최종 hash는 `/tmp/k8s-batch06/review.md`·`review-hashes.json`에 있다
+본문은 독자가 바로 읽을 수 있도록 편집 경위 표현을 덜고 정의·기전·조건을 연결했다
+
+| 원문 | 변환 후 |
+|---|---|
+| “같은 저장 Event를 다른 API 그룹의 스키마로 조회하는 것만으로, 보내는 쪽에서 버린 관측이 복원되지는 않는다” | “같은 저장 Event를 다른 API 그룹으로 읽어도 보내는 쪽에서 버린 관측을 복원하지는 못합니다” |
+| “minDomains가 새 도메인을 만들어 주지는 않는다” | “두 번째 설정은 부족한 domain을 생성하는 대신, 최소값을 0으로 보고 조건을 엄격하게 계산합니다” |
+| “셋은 같은 필터 구간을 재지만, 각각의 기록 조건과 코드 경로는 다르다” | “이름이 authorization인 span의 전체 길이를 인가 함수만의 실행 시간으로 읽으면 안 됩니다” |
+
+#### 실제 검사 결과
+
+- `npm run lint:post -- <5개 파일>` — 최종 저장본 exit 0, error 0 / warn 5
+  - 긴 줄 경고만 편별 1개이며 100자 초과 줄은 원본 대응 순서대로 16·19·22·23·18곳이다. 고정 URL·표·조건을 문맥 검토했고 길이만 맞추려고 근거를 삭제하지 않았다
+- `npm run lint` — exit 0, error 0 / warn 1
+  - 기존 `src/app/layout.tsx:80`의 `@next/next/no-page-custom-font` 경고는 요청 밖이므로 수정하지 않았다
+- `npm run build` — 최종 저장본 exit 0, TypeScript·정적 생성·postbuild 성공, 580 pages
+
+  - Turbopack 로컬 포트 권한으로 실행했다. Node의 `DEP0205 module.register()` 경고는 남아 있다
+- essays HTML 5개와 `/my-blog/diagrams/` 이미지 12개 참조·export SVG 바이트 일치, 내부 링크 실존, sitemap·RSS·llms.txt의 5개 slug 반영 확인
+
+- 최종 글·SVG가 검수 및 성공한 빌드 시점 hash와 같고, 원본 SHA-256 5개도 작업 전후 같다
+- 기존 변경·직전 배치 결과·AGENTS.md 등 보호한 30개 파일의 hash가 작업 전과 같다. prebuild가 바꾼 CLAUDE.md는 STATS 바깥이 같은지 확인한 뒤 이번 자동 통계 변경만 복원했다
+- `git diff --check` 성공
+- 로컬 콘텐츠 저장과 정적 export 검증까지 수행했으며 commit·push·배포는 실행 안 함
+- Kubernetes 클러스터 실습·통합 테스트·성능 실측은 실행 안 함
+
+최종 검수 저장본:
+
+| 글 | 줄 수 | SHA-256 |
+|---|---:|---|
+| `k8s-theory-event-compression.md` | 296 | `7d5f67458a633f1dc85a417f73da541bda558168fd103209f3ccb27baf613590` |
+| `k8s-theory-distributed-tracing.md` | 324 | `20ccc63408be9c258aa6bae7b55356bb8edd5b4d3ebb1d434aa31c7d8d05d9bf` |
+| `k8s-theory-scheduling-binding-cycles.md` | 318 | `9421ec09919b5860fb5b9afe10c6fb4883c303e4b7c923213a192be974aedad0` |
+| `k8s-theory-scheduling-constraints.md` | 322 | `1127a1ee05434754c359c449de47a6a94450b9866d5fd2fef2c6ac510dd141ea` |
+| `k8s-theory-preemption-pdb.md` | 334 | `b48b361a6ec6f808023d44e526a30289ad567b7db275284671b18d529fb165ef` |
+
+### Batch 07 — 다음 대상
+
+정확한 원본 파일의 존재와 예정 slug 비충돌을 2026-10-23에 확인했다
+아직 본문·근거를 검수하지 않았다. 다음 요청에서 최신 원본·progress·source-map과 hash를 다시 확인한다
+
+| 좌표 | 정확한 원본 파일명 | 예정 slug | series / order | 상태 |
+|---|---|---|---|---|
+| 2-4 | `Phase 2-4 · kubelet 과 Pod 수명주기 · 노드 위에서 살아 있다는 판정.md` | `k8s-theory-kubelet-pod-lifecycle` | `k8s-theory-node` / 4 | 미착수 |
+| 2-5 | `Phase 2-5 · QoS 와 cgroup · 장부가 되는 숫자와 울타리가 되는 숫자.md` | `k8s-theory-qos-cgroups` | `k8s-theory-node` / 5 | 미착수 |
+| 2-6 | `Phase 2-6 · eviction 과 OOM · 죽이는 쪽이 셋이다.md` | `k8s-theory-eviction-oom` | `k8s-theory-node` / 6 | 미착수 |
+| 2-7 | `Phase 2-7 · 관측 세 소스 · 같은 것을 묻는 세 개의 창구.md` | `k8s-theory-node-observability-sources` | `k8s-theory-node` / 7 | 미착수 |
+| 2-8.1 | `Phase 2-8.1 · Deployment 와 DaemonSet (1) · 되돌리기는 앞으로 간다.md` | `k8s-theory-workload-rollout-revisions` | `k8s-theory-node` / 8 | 미착수 |
+
+### 커밋·등록 점검 — 2026-10-23
+
+사용자의 추가 요청으로 기존 수정과 Batch 05·06 결과를 목적별로 나눠 커밋했다
+앞선 배치 기록의 ‘commit 실행 안 함’은 각 검수 시점의 상태다
+
+| 커밋 | 범위 |
+|---|---|
+| `5806f9c` | 기존 Kubernetes·Go 해설 12편의 표현과 조건 명확화 |
+| `b22f593` | API 시리즈 17~21편과 SVG 11장 |
+| `e53bad0` | Event·분산 추적 22~23편과 SVG 4장 |
+| `754fbd7` | 노드 시리즈 1~3편과 SVG 8장 |
+| 이 기록을 반영한 별도 docs 커밋 | Batch 05·06 검수 인계와 등록 상태, 다음 5편 |
+
+글 자체의 등록 누락은 발견하지 못했다
+완료 목록의 26편이 모두 `src/content/essays/kubernetes/`에 있고, 실제 `getAllPosts`·`getEssaysList`·`getSearchIndex` 실행 결과에 포함된다
+26편의 개별 HTML·목록 payload·sitemap·llms 반영도 확인했다
+전체 콘텐츠 380편(essays 174·logs 206)도 정적 출력의 개별 HTML 누락이 없다
+다른 완료 계획의 kernel-runtime slug 28개와 tech-explainer 59편도 실존한다
+미착수 draft, 통합·이동된 과거 글, 정책상 숨긴 logs를 등록 누락으로 세지 않았다
+
+다만 시리즈 전용 노출과 공개 배포는 다음 상태다
+
+- `src/lib/series.ts`의 `seriesList`에는 `k8s-theory-api`·`k8s-theory-node`가 없다. 홈 시리즈 카드·`/series/` 카드·전용 상세 페이지는 미등록이며 이번 커밋 작업에서 UI나 메타를 추가하지 않았다
+- 본문 시리즈 목차·이전/다음 링크는 front matter를 사용하므로 두 시리즈에서도 작동한다
+- [공개 sitemap](https://resskim-io.github.io/my-blog/sitemap.xml)을 실제 조회했으며 k8s-theory URL은 0개다. [첫 편](https://resskim-io.github.io/my-blog/essays/k8s-theory-api-request-path/)과 [마지막 편](https://resskim-io.github.io/my-blog/essays/k8s-theory-preemption-pdb/)은 모두 HTTP 404였다
+- 공개 GitHub API로 확인한 원격 main은 `908f49c227a67f95102ffd2377d3e2ab7b6d26a5`다. 앞선 16편을 담은 `a5d6e83`도 원격에 반영되지 않았다. 이번 로컬 커밋까지 포함해 push·GitHub Pages 배포는 실행하지 않았다
+
+커밋 직전 변경 글 22편의 post lint는 error 0 / warn 25였다
+긴 줄 경고 22개와 기존 SVG 텍스트 수 권장 초과 경고 3개를 확인했으며 요청 밖의 그림 재구성은 하지 않았다
+글·SVG 바이트는 직전 성공한 580 pages 빌드 저장본과 같으며, 등록 조사나 커밋을 위해 콘텐츠를 추가 수정하지 않았다
+근거·원시 결과는 `/tmp/k8s-commit-audit/`와 독립 조사 결과에 보존했다
