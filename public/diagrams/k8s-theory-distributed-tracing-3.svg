@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title-3 desc-3">
+  <title id="title-3">외부 추적 문맥의 신뢰와 표본 선택</title>
+  <desc id="desc-3">실제 추적기를 사용하는 API 서버는 system:masters 또는 system:monitoring 그룹의 유효한 원격 문맥을 부모로 이어받습니다. 다른 요청자는 새 루트를 만들고 외부 문맥을 link로 연결하여 서버의 루트 표본 비율을 적용합니다. 유효한 외부 문맥이 없는 경우에는 기존 로컬 부모의 유무도 확인해야 합니다.</desc>
+  <defs><marker id="arrow-3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="600" rx="16" fill="#FAFAFA"/>
+  <g fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow-3)">
+    <path d="M400 144 V176 H208 V216"/>
+    <path d="M400 176 H592 V216"/>
+    <path d="M208 328 V400"/>
+    <path d="M592 328 V400"/>
+  </g>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="40" y="44" text-anchor="start" font-size="23" font-weight="700">외부 문맥을 부모로 쓸지는 신원으로 정합니다</text>
+    <rect x="184" y="80" width="432" height="64" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="400" y="119" font-size="18" fill="#334155" font-weight="600">인증된 신원 · 유효한 원격 traceparent</text>
+    <rect x="48" y="216" width="320" height="112" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+    <text x="208" y="248" font-size="18" fill="#BE123C" font-weight="600"><tspan x="208">특권 그룹에 속함</tspan><tspan x="208" dy="27" font-size="17" font-weight="400">system:masters 또는</tspan><tspan x="208" dy="27" font-size="17" font-weight="400">system:monitoring</tspan></text>
+    <rect x="432" y="216" width="320" height="112" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="592" y="260" font-size="18" fill="#334155" font-weight="600"><tspan x="592">그 밖의 요청자</tspan><tspan x="592" dy="30" font-size="17" font-weight="400">외부 sampled 표시를 부모로 신뢰 안 함</tspan></text>
+    <rect x="152" y="348" width="112" height="32" fill="#FAFAFA"/>
+    <text x="208" y="371" font-size="16" fill="#334155">부모로 연결</text>
+    <rect x="496" y="348" width="192" height="32" fill="#FAFAFA"/>
+    <text x="592" y="371" font-size="16" fill="#334155">새 루트 · link로 연결</text>
+    <rect x="48" y="400" width="320" height="104" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="208" y="439" font-size="18" fill="#047857" font-weight="600"><tspan x="208">부모의 표본 결정 적용</tspan><tspan x="208" dy="31" font-size="16" font-weight="400">sampled면 선택 · 아니면 미선택</tspan></text>
+    <rect x="432" y="400" width="320" height="104" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="592" y="439" font-size="18" fill="#6D28D9" font-weight="600"><tspan x="592">서버의 루트 비율 적용</tspan><tspan x="592" dy="31" font-size="16" font-weight="400">link는 관계만 남김</tspan></text>
+    <text x="400" y="549" font-size="15" fill="#475569">실제 추적기의 HTTP 문맥 판정 · noop 상태의 전파와 구분합니다</text>
+    <text x="400" y="579" font-size="14" fill="#475569">유효한 외부 문맥이 없다면 기존 로컬 부모의 유무도 확인합니다</text>
+  </g>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 608" role="img" aria-labelledby="title-1 desc-1">
+  <title id="title-1">API 요청에서 갈라지는 세 가지 기록</title>
+  <desc id="desc-1">API 서버의 요청 처리 계측은 필터별 집계 메트릭, 조건부 느린 로그, 표본 span을 남깁니다. 표본 span만 배치 내보내기 경로로 갑니다. 메트릭과 로그도 해당 측정·로그 조건을 만족해야 하며 기록들의 시간 경계가 모두 같지는 않습니다.</desc>
+  <defs><marker id="arrow-1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="608" rx="16" fill="#FAFAFA"/>
+  <g fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow-1)">
+    <path d="M400 136 V208"/>
+    <path d="M400 288 V328 H144 V368"/>
+    <path d="M400 288 V368"/>
+    <path d="M400 328 H656 V368"/>
+    <path d="M656 464 V512" stroke-dasharray="5 3"/>
+  </g>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="40" y="44" text-anchor="start" font-size="23" font-weight="700">같은 요청도 기록마다 남는 단위가 다릅니다</text>
+    <rect x="248" y="80" width="304" height="56" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="400" y="115" font-size="18" fill="#334155" font-weight="600">API 요청</text>
+    <text x="544" y="179" font-size="16" fill="#334155">인증 · 문맥 신뢰 판정</text>
+    <rect x="248" y="208" width="304" height="80" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="400" y="240" font-size="18" fill="#047857" font-weight="600"><tspan x="400">API 서버 · 처리 계측</tspan><tspan x="400" dy="28" font-size="16" font-weight="400">필터 · 핸들러 · 저장 계층</tspan></text>
+    <rect x="32" y="368" width="224" height="96" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="144" y="399" font-size="18" fill="#6D28D9" font-weight="600"><tspan x="144">메트릭</tspan><tspan x="144" dy="25" font-size="16" font-weight="400">필터별 히스토그램</tspan><tspan x="144" dy="24" font-size="16" font-weight="400">측정 완료 지점 도달 시</tspan></text>
+    <rect x="288" y="368" width="224" height="96" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="400" y="399" font-size="18" fill="#334155" font-weight="600"><tspan x="400">느린 구간 로그</tspan><tspan x="400" dy="25" font-size="16" font-weight="400">fl_ 또는 utiltrace</tspan><tspan x="400" dy="24" font-size="16" font-weight="400">구간 · 시간 · 로그 설정</tspan></text>
+    <rect x="544" y="368" width="224" height="96" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="656" y="399" font-size="18" fill="#047857" font-weight="600"><tspan x="656">표본 span</tspan><tspan x="656" dy="25" font-size="16" font-weight="400">실제 추적기 · 표본 선택</tspan><tspan x="656" dy="24" font-size="16" font-weight="400">처리 관계와 시간</tspan></text>
+    <rect x="544" y="512" width="224" height="56" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="656" y="548" font-size="17" fill="#334155" font-weight="600">별도 배치 내보내기</text>
+    <text x="400" y="591" font-size="14" fill="#475569">세 기록은 남기는 조건과 측정 경계가 다릅니다</text>
+  </g>
+</svg>

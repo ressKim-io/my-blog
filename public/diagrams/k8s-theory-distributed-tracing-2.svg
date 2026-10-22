@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 432" role="img" aria-labelledby="title-2 desc-2">
+  <title id="title-2">필터 메트릭과 span의 시간 경계 차이</title>
+  <desc id="desc-2">TrackStarted가 시작한 필터 지연 측정은 다음 TrackCompleted에 진입할 때 기록됩니다. OpenTelemetry filter span은 defer End를 사용하므로 하위 핸들러가 반환할 때 끝납니다. 표시한 너비는 실제 측정 시간이 아니라 경계 관계를 나타냅니다.</desc>
+  <defs><marker id="arrow-2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="432" rx="16" fill="#FAFAFA"/>
+  <path d="M64 144 H752" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow-2)"/>
+  <g fill="none" stroke="#D4D4D8" stroke-width="1.5" stroke-dasharray="4 3">
+    <path d="M128 144 V384"/>
+    <path d="M368 144 V384"/>
+    <path d="M720 144 V384"/>
+  </g>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="40" y="44" text-anchor="start" font-size="23" font-weight="700">같은 필터 이름이어도 끝나는 시점은 다릅니다</text>
+    <text x="128" y="104" font-size="17" fill="#334155"><tspan x="128">TrackStarted</tspan><tspan x="128" dy="26" font-size="15">측정 · span 시작</tspan></text>
+    <text x="368" y="104" font-size="17" fill="#334155"><tspan x="368">TrackCompleted</tspan><tspan x="368" dy="26" font-size="15">다음 단계 진입</tspan></text>
+    <text x="720" y="104" font-size="17" fill="#334155"><tspan x="720">반환</tspan><tspan x="720" dy="26" font-size="15">span 종료</tspan></text>
+    <rect x="128" y="176" width="240" height="56" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="248" y="211" font-size="17" fill="#334155">다음 단계 호출 전까지</text>
+    <rect x="368" y="176" width="352" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="544" y="211" font-size="17" fill="#047857">하위 필터 · 핸들러 처리</text>
+    <text x="128" y="276" text-anchor="start" font-size="16" fill="#6D28D9">필터 지연 메트릭 · fl_의 측정 구간</text>
+    <rect x="128" y="288" width="240" height="24" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="128" y="348" text-anchor="start" font-size="16" fill="#047857">OpenTelemetry filter span의 구간</text>
+    <rect x="128" y="360" width="592" height="24" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="400" y="415" font-size="14" fill="#475569">너비는 실측 시간이 아니라 시작 · 종료 경계의 관계를 나타냅니다</text>
+  </g>
+</svg>

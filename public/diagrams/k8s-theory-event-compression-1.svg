@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 864" role="img" aria-labelledby="title-1 desc-1">
+  <title id="title-1">client-go의 두 Event 기록 경로</title>
+  <desc id="desc-1">core 기록기는 가득 찬 입구에서 관측을 버리며 집계, 카운트, spam filter를 거쳐 전송합니다. events 기록기는 별도 고루틴이 입구 공간을 기다리고 같은 키의 반복을 로컬 시리즈에 모아 전송합니다. 양쪽 모두 처리기 채널에서 관측을 버릴 수 있고, 성공한 서버 쓰기는 같은 Event 저장소에 도달합니다</desc>
+  <defs><marker id="arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#0A0A0A"/></marker></defs>
+  <rect width="800" height="864" rx="16" fill="#FAFAFA"/>
+  <g font-family="'Pretendard', system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="400" y="40" font-size="22" font-weight="700">서버에 도착하기 전에 관측이 줄어듭니다</text>
+    <g fill="none" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-1)">
+      <path d="M400 136V160H208V192"/><path d="M400 136V160H592V192"/>
+      <path d="M208 288V328"/><path d="M592 288V328"/>
+      <path d="M208 424V464"/><path d="M592 424V464"/>
+      <path d="M208 600V640"/><path d="M592 600V640"/>
+      <path d="M208 712V744H400V768"/><path d="M592 712V744H400V768"/>
+    </g>
+    <rect x="224" y="72" width="352" height="64" rx="12" stroke="#0891B2" fill="#ECFEFF"/>
+    <text x="400" y="111" font-size="18" font-weight="700" fill="#0E7490">컴포넌트의 Eventf 호출</text>
+    <rect x="40" y="192" width="336" height="96" rx="12" stroke="#059669" fill="#ECFDF5"/>
+    <text x="208" y="224" font-size="15"><tspan x="208" font-size="17" font-weight="700" fill="#047857">core v1 · 입구 큐 1,000칸</tspan><tspan x="208" dy="29">호출자에서 ActionOrDrop</tspan><tspan x="208" dy="22">가득 차면 버리고 로그 기록</tspan></text>
+    <rect x="424" y="192" width="336" height="96" rx="12" stroke="#059669" fill="#ECFDF5"/>
+    <text x="592" y="224" font-size="15"><tspan x="592" font-size="16" font-weight="700" fill="#047857">events.k8s.io/v1 · 입구 25칸</tspan><tspan x="592" dy="29">별도 고루틴에서 Action</tspan><tspan x="592" dy="22">가득 차면 그 고루틴이 대기</tspan></text>
+    <rect x="40" y="328" width="336" height="96" rx="12" stroke="#475569" fill="#F8FAFC"/>
+    <rect x="424" y="328" width="336" height="96" rx="12" stroke="#475569" fill="#F8FAFC"/>
+    <text x="208" y="360" font-size="16" font-weight="700" fill="#334155">처리기 채널 1,000칸</text>
+    <text x="208" y="391" font-size="15">채널이 차면 조용히 버림</text>
+    <text x="592" y="360" font-size="16" font-weight="700" fill="#334155">처리기 채널 1,000칸</text>
+    <text x="592" y="391" font-size="15">채널이 차면 조용히 버림</text>
+    <rect x="40" y="464" width="336" height="136" rx="12" stroke="#059669" fill="#ECFDF5"/>
+    <text x="208" y="496" font-size="17" font-weight="700" fill="#047857">EventCorrelator</text>
+    <text x="208" y="527" font-size="15"><tspan x="208">메시지가 다른 관측 집계</tspan><tspan x="208" dy="24">그 결과의 count 증가</tspan><tspan x="208" dy="24">spam filter: 토큰 없으면 버림</tspan></text>
+    <rect x="424" y="464" width="336" height="136" rx="12" stroke="#059669" fill="#ECFDF5"/>
+    <text x="592" y="496" font-size="17" font-weight="700" fill="#047857">키별 로컬 시리즈 캐시</text>
+    <text x="592" y="527" font-size="15"><tspan x="592">첫째·둘째 관측은 전송 시도</tspan><tspan x="592" dy="24">셋째부터 로컬 count 증가</tspan><tspan x="592" dy="24">주기 갱신·종료 검사에서 전송</tspan></text>
+    <rect x="40" y="640" width="336" height="72" rx="12" stroke="#0891B2" fill="#ECFEFF"/>
+    <rect x="424" y="640" width="336" height="72" rx="12" stroke="#0891B2" fill="#ECFEFF"/>
+    <text x="208" y="683" font-size="16" font-weight="700" fill="#0E7490">core Event 전송 시도</text>
+    <text x="592" y="683" font-size="16" font-weight="700" fill="#0E7490">events Event 전송 시도</text>
+    <rect x="176" y="768" width="448" height="64" rx="12" stroke="#7C3AED" fill="#F5F3FF"/>
+    <text x="400" y="807" font-size="18" font-weight="700" fill="#6D28D9">API 서버 · 같은 Event 저장소</text>
+  </g>
+</svg>
