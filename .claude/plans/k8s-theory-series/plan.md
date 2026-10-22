@@ -1,7 +1,7 @@
 # ☸️ k8s-theory 시리즈 변환 계획
 
 > Obsidian vault의 Kubernetes 이론 노트를 한국어 `essays` 글로 변환하는 계획
-> **2026-10-23 갱신: Batch 06까지 26편 작성·검수 완료. 한 번에 5편씩 변환하며 에이전트 분담 허용, 다음은 Batch 07의 5편**
+> **2026-10-23 갱신: Batch 06까지 26편 검수 완료. 이번 요청은 Batch 07~16, 3편씩 10개 배치·총 30편이며 다음은 Batch 07의 3편**
 > 9월 조사 당시 50편, 2026-10-21에 확인한 `sessions/*.md`는 71개. 파일 존재를 확인한 수이며 내용 검수 완료 수가 아님
 
 관련 문서 — `README.md`(진입점) · `inventory.md`(원본 전수) · `source-format.md`(변환 지침)
@@ -15,8 +15,11 @@
 3. 이 계획의 절대 제약·변환 절차와 [원본 변환 지침](source-format.md)을 읽고, 7절의 다음 배치를 진행한다
 
 문체는 공통 기준을 우선한다. 과거 계획의 문단 수·SVG 개수·고정 맺음말 요구는 적용하지 않는다
-**사용자의 2026-10-22 후속 요청으로 Batch 03부터 5편 단위로 진행하고 에이전트에 분담할 수 있다**
-Batch 01·02는 3편씩 진행한 이력이며, 현재 절차는 편별 확인·검수·최종 빌드를 유지한 채 5편에 적용한다
+**사용자의 2026-10-23 후속 요청으로 Batch 07부터 3편 단위로 10개 배치·총 30편을 연속 진행한다**
+Batch 01·02는 3편, Batch 03~06은 5편씩 진행한 이력이다
+각 배치는 blog-writer 3명 분담 → 별도 blog-reviewer 검수 → 지적 수정 → post lint·전체 lint·build·정적 출력 검증 → 로컬 커밋 순서로 진행한다
+배치마다 승인 대기를 하지 않는다. 보류 편은 이유를 기록하고 완료 수에서 제외하며 독립 작업은 계속한다
+push·배포·시리즈 카드 등록은 범위 밖이다
 작성자는 자기 글과 해당 slug의 SVG만 수정하고, 공통 진행표와 최종 검증은 주 담당자가 관리한다
 이미 요청된 범위의 문체·slug·편집 선택은 진행하면서 기록한다
 
@@ -69,7 +72,7 @@ Batch 01·02는 3편씩 진행한 이력이며, 현재 절차는 편별 확인·
 | 원본 취급 | vault는 **읽기 전용**, 블로그 저장소로 복사해 변환 | 노트의 `종료 조건 판정`·`LAB TODO`·`SOURCE DIVE`는 학습 도구로서 가치가 있다. 블로그용으로 고치면 망가진다 |
 | ASCII 처리 | **선별 평탄화** — 표/인라인/` ```text `로 내리고 시각화가 필요한 흐름은 SVG | 현행 AGENTS.md·CLAUDE.md ASCII 정책 적용. `source-format.md` 5절은 과거 원본의 분류 사례 |
 | 다이어그램 라벨 | **한글**, 기술 용어(authn·APF·GVR 등)는 원어 유지 | 본문이 한글이라 영어 라벨은 이질적. 원본의 영어는 학습용 표기였다 |
-| 진행 순서 | **Phase 1부터 원본 좌표 순서로 5편씩**, Phase별 시리즈 6개 | 한 배치에서 원본 확인·작성·검수·진행 기록까지 마친다 |
+| 진행 순서 | **Phase 1부터 원본 좌표 순서로 3편씩**, Phase별 시리즈 6개 | 한 배치에서 원본 확인·작성·검수·진행 기록까지 마친다 |
 | 트랙 | `essays` | 다듬은 개념 해설이다. 트러블슈팅 노트가 아니다 |
 
 ---
@@ -96,7 +99,7 @@ Vault의 `2026-10-05 세부 학습 글 편집 계획과 인계.md`도 확인한�
 여기에 과거 검수 이력, 독자 관점의 보완 기준, 오래된 v1.35 고정을 현재 기준으로 가져오지 말라는 주의가 있다
 Vault 원본 편집 작업과 이 블로그 변환 작업은 별개다. 원본의 완료 표시를 블로그 검수 완료로 옮기지 않는다
 
-매 배치 시작 시 대상 5편의 최신 저장본과 관련 progress·source-map을 확인한다
+매 배치 시작 시 대상 3편의 최신 저장본과 관련 progress·source-map을 확인한다
 기록한 원본 hash와 다르면 변경 구간을 먼저 읽는다. 대상 밖의 원본을 매번 전수 재분석하지 않는다
 
 ---
@@ -143,14 +146,14 @@ Codex와 Claude 모두 같은 문서를 읽고 아래처럼 이론 해설에 적
 
 ---
 
-## 5. 5편 단위 변환 절차
+## 5. 3편 단위 변환 절차
 
 ### 배치 시작
 
-1. 7절의 진행표에서 **검수 완료되지 않은 다음 5편**을 고른다. 마지막에 1~4편만 남으면 남은 편수로 진행한다
+1. 7절의 진행표에서 **검수 완료되지 않은 다음 3편**을 고른다. 마지막에 1~2편만 남으면 남은 편수로 진행한다
 2. 대상 파일·예상 SVG·이 계획의 진행 기록을 수정할 범위와 검증 계획으로 알린다. 매 편 승인 대기를 추가하지 않는다
 3. Vault 원본은 읽기 전용으로 읽는다. 파일명·좌표·읽은 날짜·SHA-256과 대응 slug·series/order를 진행 기록에 남긴다
-4. 각 편에서 핵심 질문, 보존할 기전·조건·출처, 미확인 주장을 추린다. 5편이 나눠 설명할 경계를 정해 같은 도입을 반복하지 않는다
+4. 각 편에서 핵심 질문, 보존할 기전·조건·출처, 미확인 주장을 추린다. 3편이 나눠 설명할 경계를 정해 같은 도입을 반복하지 않는다
 
 ### 한 편씩 작성
 
@@ -165,20 +168,21 @@ Codex와 Claude 모두 같은 문서를 읽고 아래처럼 이론 해설에 적
 첫 편에서 얻은 용어·문체 선택을 같은 배치의 나머지 글에도 적용한다
 원본 파일 누락이나 핵심 근거 충돌이 있으면 해당 편을 보류하고 이유를 기록한다
 진행 가능한 다른 편은 계속 처리하되, 보류한 글을 완료 처리하거나 별도 글로 몰래 대체하지 않는다
-5편은 처리 단위다. 사용자 승인에 따라 작성 에이전트에 분담할 수 있으며, 공통 파일과 최종 통합 검증은 주 담당자가 맡는다
+3편은 처리 단위다. blog-writer 에이전트 3명이 분담하고 별도 blog-reviewer가 검수한다
+공통 파일과 최종 통합 검증은 주 담당자가 맡는다
 
 ### 배치 마감
 
-- 5편 사이 용어·설명 범위·시리즈 순서와 중복을 확인한다
+- 3편 사이 용어·설명 범위·시리즈 순서와 중복을 확인한다
 - front matter, 이미지 참조·SVG 표시, 내부 링크와 코드블록 언어를 확인한다
 - 형식 lint와 별도로 사실·문체 검토를 한다. 검토 항목은 `원문 → 문제 이유 → 최소 수정안`으로 정리한다
 - `npm run build`를 실행한다. 못 실행했거나 실패한 검사는 그대로 보고하고 검수 완료로 처리하지 않는다
 - 빌드 훅이 통계 등 다른 파일을 바꾸면 이번 작업에서 생긴 자동 변경만 확인해 정리한다. 기존 사용자 변경은 보존한다
-- 7절의 배치·편별 상태, 실제 검사 결과, 보류 이유, 다음 5편을 갱신한다
+- 7절의 배치·편별 상태, 실제 검사 결과, 보류 이유, 다음 3편을 갱신한다
 - 사용자에게 완성 글 경로, 대표 문장 전후 비교, 확인이 남은 주장, 검사 결과와 다음 대상을 전달한다
-- 한 번의 요청은 기본적으로 **5편까지** 처리한다. “다음 글” 요청은 이 기록에서 이어가며 사용자가 편수를 지정하면 그 수를 우선한다
+- 이번 요청은 **3편씩 10개 배치, 총 30편**을 처리한다. 배치 검증·커밋 뒤 다음 3편으로 계속한다
 
-로컬 글 저장과 배포는 구분한다. 별도 요청 없는 `git commit`·`git push`·사이트 배포는 하지 않는다
+이번 요청은 검증을 통과한 콘텐츠·SVG·진행 기록의 `git commit`까지 승인됐다. `git push`·사이트 배포·시리즈 카드 등록은 하지 않는다
 
 ### 코드블록 분류 기준
 
@@ -268,13 +272,13 @@ slug와 order는 전역 충돌을 확인하고 실제 적용했다
 - **원본 대응**: 파일명·좌표·읽은 날짜·SHA-256, 생성한 글·SVG 경로, series/order
 - **근거 확인**: 소스 ref·문서 버전·확인 URL, 원본과 달라진 주장 및 근거, 미확인 항목
 - **검수 결과**: lint 명령·결과, 빌드 결과, 문체·사실 대조 결과, 남은 문제
-- **다음 작업**: 미완료 편을 우선하고 다음 5편의 정확한 원본 파일명·예정 slug를 적는다
+- **다음 작업**: 미완료 편을 우선하고 다음 3편의 정확한 원본 파일명·예정 slug를 적는다
 
 다음 채팅 요청 예시:
 
 ```text
 .claude/plans/k8s-theory-series/README.md와 plan.md를 읽고
-진행표의 다음 5편을 Obsidian 원본에서 블로그 글로 변환해줘
+진행표의 다음 3편을 Obsidian 원본에서 블로그 글로 변환해줘
 공통 말투 기준을 적용하고, 사실 확인·문체 검수·lint·빌드까지 진행해줘
 완성 글 경로와 대표 문장 전후 비교를 보여주고 진행표도 갱신해줘
 ```
@@ -884,7 +888,7 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 | `k8s-theory-scheduling-constraints.md` | 322 | `1127a1ee05434754c359c449de47a6a94450b9866d5fd2fef2c6ac510dd141ea` |
 | `k8s-theory-preemption-pdb.md` | 334 | `b48b361a6ec6f808023d44e526a30289ad567b7db275284671b18d529fb165ef` |
 
-### Batch 07 — 다음 대상
+### Batch 07 — 기존 5편 예정표 (아래 3편 배치 진행표로 대체)
 
 정확한 원본 파일의 존재와 예정 slug 비충돌을 2026-10-23에 확인했다
 아직 본문·근거를 검수하지 않았다. 다음 요청에서 최신 원본·progress·source-map과 hash를 다시 확인한다
@@ -928,3 +932,63 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 긴 줄 경고 22개와 기존 SVG 텍스트 수 권장 초과 경고 3개를 확인했으며 요청 밖의 그림 재구성은 하지 않았다
 글·SVG 바이트는 직전 성공한 580 pages 빌드 저장본과 같으며, 등록 조사나 커밋을 위해 콘텐츠를 추가 수정하지 않았다
 근거·원시 결과는 `/tmp/k8s-commit-audit/`와 독립 조사 결과에 보존했다
+
+## 2026-10-23 연속 변환 — Batch 07~16
+
+현재 요청이 이전 5편 규칙을 대체한다. 완료 목표는 추가 30편이며 작성·검수·lint·build·정적 출력 검증을 모두 통과한 글만 센다
+원본 파일 존재와 최초 SHA-256은 시작 시 확인했으며 전문·공식 근거 검수는 배치별로 수행한다
+
+| 배치 | 좌표 | 예정 series / order | 상태 | 검증 | 콘텐츠 커밋 | 다음 대상 |
+|---|---|---|---|---|---|---|
+| 07 | 2-4, 2-5, 2-6 | k8s-theory-node / 4; k8s-theory-node / 5; k8s-theory-node / 6 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 586, export 통과; [근거·검수](batches/batch-07.md) | `cc7ff41` | 2-7, 2-8.1, 2-8.2 |
+| 08 | 2-7, 2-8.1, 2-8.2 | k8s-theory-node / 7; k8s-theory-node / 8; k8s-theory-node / 9 | 미착수 | 실행 안 함 | — | 2-9, 2-10, 2-11 |
+| 09 | 2-9, 2-10, 2-11 | k8s-theory-node / 10; k8s-theory-node / 11; k8s-theory-node / 12 | 미착수 | 실행 안 함 | — | 2-12, 2-13, 2-14 |
+| 10 | 2-12, 2-13, 2-14 | k8s-theory-node / 13; k8s-theory-node / 14; k8s-theory-node / 15 | 미착수 | 실행 안 함 | — | 2-15, 2-16, 2-17 |
+| 11 | 2-15, 2-16, 2-17 | k8s-theory-node / 16; k8s-theory-node / 17; k8s-theory-node / 18 | 미착수 | 실행 안 함 | — | 2-18, 3-1, 3-2.1 |
+| 12 | 2-18, 3-1, 3-2.1 | k8s-theory-node / 19; k8s-theory-network / 1; k8s-theory-network / 2 | 미착수 | 실행 안 함 | — | 3-2.2, 3-3, 3-4 |
+| 13 | 3-2.2, 3-3, 3-4 | k8s-theory-network / 3; k8s-theory-network / 4; k8s-theory-network / 5 | 미착수 | 실행 안 함 | — | 3-5, 3-6, 3-7 |
+| 14 | 3-5, 3-6, 3-7 | k8s-theory-network / 6; k8s-theory-network / 7; k8s-theory-network / 8 | 미착수 | 실행 안 함 | — | 3-8, 3-9, 3-10 |
+| 15 | 3-8, 3-9, 3-10 | k8s-theory-network / 9; k8s-theory-network / 10; k8s-theory-network / 11 | 미착수 | 실행 안 함 | — | 4-1, 4-2, 4-3 |
+| 16 | 4-1, 4-2, 4-3 | k8s-theory-storage / 1; k8s-theory-storage / 2; k8s-theory-storage / 3 | 미착수 | 실행 안 함 | — | 4-4, 4-5, 4-6 |
+
+### 확정한 원본·slug·시리즈 대응
+
+| 배치 | 좌표 | 정확한 원본 파일명 | slug | series / order | 상태 |
+|---|---|---|---|---|---|
+| 07 | 2-4 | `Phase 2-4 · kubelet 과 Pod 수명주기 · 노드 위에서 살아 있다는 판정.md` | `k8s-theory-kubelet-pod-lifecycle` | `k8s-theory-node` / 4 | 검수 완료 |
+| 07 | 2-5 | `Phase 2-5 · QoS 와 cgroup · 장부가 되는 숫자와 울타리가 되는 숫자.md` | `k8s-theory-qos-cgroups` | `k8s-theory-node` / 5 | 검수 완료 |
+| 07 | 2-6 | `Phase 2-6 · eviction 과 OOM · 죽이는 쪽이 셋이다.md` | `k8s-theory-eviction-oom` | `k8s-theory-node` / 6 | 검수 완료 |
+| 08 | 2-7 | `Phase 2-7 · 관측 세 소스 · 같은 것을 묻는 세 개의 창구.md` | `k8s-theory-node-observability-sources` | `k8s-theory-node` / 7 | 미착수 |
+| 08 | 2-8.1 | `Phase 2-8.1 · Deployment 와 DaemonSet (1) · 되돌리기는 앞으로 간다.md` | `k8s-theory-workload-rollout-revisions` | `k8s-theory-node` / 8 | 미착수 |
+| 08 | 2-8.2 | `Phase 2-8.2 · Job 과 CronJob (2) · 끝은 상태가 아니라 개수다.md` | `k8s-theory-job-cronjob-completion` | `k8s-theory-node` / 9 | 미착수 |
+| 09 | 2-9 | `Phase 2-9 · 노드 하트비트와 taint 축출 · 죽었다는 말은 노드가 하지 않는다.md` | `k8s-theory-node-heartbeat-taint-eviction` | `k8s-theory-node` / 10 | 미착수 |
+| 09 | 2-10 | `Phase 2-10 · ConfigMap 과 Secret 전달 경로 · 복사한 값은 늙는다.md` | `k8s-theory-configmap-secret-delivery` | `k8s-theory-node` / 11 | 미착수 |
+| 09 | 2-11 | `Phase 2-11 · CRI 와 OCI 경계 · 두 번째 계약은 API 가 아니라 파일이다.md` | `k8s-theory-cri-oci-boundary` | `k8s-theory-node` / 12 | 미착수 |
+| 10 | 2-12 | `Phase 2-12 · 장치 자원 · 개수는 어느 것인지를 말하지 못한다.md` | `k8s-theory-device-resource-allocation` | `k8s-theory-node` / 13 | 미착수 |
+| 10 | 2-13 | `Phase 2-13 · 런타임 격리 · 지정하지 않았다는 말이 필드마다 다르다.md` | `k8s-theory-runtime-isolation` | `k8s-theory-node` / 14 | 미착수 |
+| 10 | 2-14 | `Phase 2-14 · 자원 회계와 점수 전략 · 세는 쪽도 고르는 쪽도 Pod 밖에 있다.md` | `k8s-theory-resource-accounting-scoring` | `k8s-theory-node` / 15 | 미착수 |
+| 11 | 2-15 | `Phase 2-15 · 노드의 swap · 나눠주는 쪽만 알고 세는 쪽은 모른다.md` | `k8s-theory-node-swap` | `k8s-theory-node` / 16 | 미착수 |
+| 11 | 2-16 | `Phase 2-16 · 컨테이너 로그 파일 · 경로를 정한 쪽은 그 파일을 안 쓴다.md` | `k8s-theory-container-log-files` | `k8s-theory-node` / 17 | 미착수 |
+| 11 | 2-17 | `Phase 2-17 · HPA 와 scale subresource · 같은 칸을 다른 문으로 쓴다.md` | `k8s-theory-hpa-scale-subresource` | `k8s-theory-node` / 18 | 미착수 |
+| 12 | 2-18 | `Phase 2-18 · 임시 컨테이너와 ephemeralcontainers · 더하기만 되는 문은 아무것도 바꾸지 못한다.md` | `k8s-theory-ephemeral-containers` | `k8s-theory-node` / 19 | 미착수 |
+| 12 | 3-1 | `Phase 3-1 · CNI spec · 만들지 않고 요구만 한다.md` | `k8s-theory-cni-contract` | `k8s-theory-network` / 1 | 미착수 |
+| 12 | 3-2.1 | `Phase 3-2.1 · sandbox 와 pause (1) · 주소는 컨테이너가 아니라 그 옆에 붙는다.md` | `k8s-theory-pod-sandbox-pause` | `k8s-theory-network` / 2 | 미착수 |
+| 13 | 3-2.2 | `Phase 3-2.2 · overlay 와 native routing (2) · 노드를 넘는 순간 k8s 는 말이 없다.md` | `k8s-theory-overlay-native-routing` | `k8s-theory-network` / 3 | 미착수 |
+| 13 | 3-3 | `Phase 3-3 · Service 와 kube-proxy · 주소가 아니라 규칙이다.md` | `k8s-theory-service-kube-proxy` | `k8s-theory-network` / 4 | 미착수 |
+| 13 | 3-4 | `Phase 3-4 · DNS 와 ndots · 이름 하나에 패킷 여덟 개.md` | `k8s-theory-dns-ndots` | `k8s-theory-network` / 5 | 미착수 |
+| 14 | 3-5 | `Phase 3-5 · Ingress 와 Gateway API · 한 오브젝트에 세 사람이 있었다.md` | `k8s-theory-ingress-gateway-api` | `k8s-theory-network` / 6 | 미착수 |
+| 14 | 3-6 | `Phase 3-6 · NetworkPolicy · 기본값을 뒤집는 스위치.md` | `k8s-theory-network-policy` | `k8s-theory-network` / 7 | 미착수 |
+| 14 | 3-7 | `Phase 3-7 · ANP 와 BANP · 정하지 않겠다고 적는 칸이 필요했다.md` | `k8s-theory-admin-network-policy` | `k8s-theory-network` / 8 | 미착수 |
+| 15 | 3-8 | `Phase 3-8 · CCM 과 클라우드 경계 · 밖이 채울 칸은 안에서 먼저 잠근다.md` | `k8s-theory-cloud-controller-boundary` | `k8s-theory-network` / 9 | 미착수 |
+| 15 | 3-9 | `Phase 3-9 · 트래픽 지역성과 dual-stack · 앞자리가 비면 떨어뜨리거나 되돌아간다.md` | `k8s-theory-traffic-locality-dual-stack` | `k8s-theory-network` / 10 | 미착수 |
+| 15 | 3-10 | `Phase 3-10 · ServiceCIDR 와 IPAddress · 이름이 곧 자물쇠다.md` | `k8s-theory-service-cidr-ip-address` | `k8s-theory-network` / 11 | 미착수 |
+| 16 | 4-1 | `Phase 4-1 · PVC 바인딩과 StorageClass · claimRef 를 먼저 쓰는 쪽이 정한다.md` | `k8s-theory-pvc-storageclass-binding` | `k8s-theory-storage` / 1 | 미착수 |
+| 16 | 4-2 | `Phase 4-2 · CSI 구조 · 코어는 노드 쪽 절반만 부른다.md` | `k8s-theory-csi-architecture` | `k8s-theory-storage` / 2 | 미착수 |
+| 16 | 4-3 | `Phase 4-3 · attach 와 stage 와 publish · 한 번씩이 서로 다른 한 번이다.md` | `k8s-theory-volume-attach-stage-publish` | `k8s-theory-storage` / 3 | 미착수 |
+
+### Batch 07 검수·커밋 완료 — 2026-10-23
+
+좌표 2-4, 2-5, 2-6, 글 3편·SVG 6장 검수 완료. 콘텐츠 커밋 `cc7ff41`
+근거·원본 hash·정정·별도 검수·검증 상세는 [배치 인계](batches/batch-07.md)에 보존한다
+post lint error 0/warn 3, 전체 lint error 0/warn 1, build 586 pages 및 로컬 등록·정적 출력 검증 통과
+이번 요청 누적 3/30편, 보류 0편. 다음 대상: 2-7, 2-8.1, 2-8.2
