@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580" role="img" aria-labelledby="title desc">
+<title id="title">topologyKey에 따른 같은 영역의 차이</title><desc id="desc">예시에서 cache Pod는 zone a의 node1에 있습니다. 노드별 hostname 값이 다르다고 가정합니다. zone을 기준으로 하면 node1과 node2가 같은 영역이며 hostname 기준이면 node1만 같은 영역입니다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+<rect width="800" height="580" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif">
+<text x="400" y="43" font-size="22" fill="#0A0A0A" font-weight="700" text-anchor="middle">같은 Pod를 기준으로 해도 영역의 크기가 달라집니다</text>
+<rect x="32" y="85" width="352" height="270" rx="14" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="208" y="122" font-size="21" fill="#334155" font-weight="600" text-anchor="middle">zone=a</text>
+<rect x="416" y="85" width="352" height="270" rx="14" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="592" y="122" font-size="21" fill="#334155" font-weight="600" text-anchor="middle">zone=b</text>
+<rect x="56" y="153" width="304" height="76" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="208.0" y="185.0" font-size="17" fill="#6D28D9" font-weight="600" text-anchor="middle">node1</text>
+<text x="208.0" y="210.0" font-size="17" fill="#6D28D9" font-weight="600" text-anchor="middle">cache Pod</text>
+<rect x="56" y="253" width="304" height="66" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="208.0" y="292.0" font-size="17" fill="#334155" font-weight="600" text-anchor="middle">node2</text>
+<rect x="440" y="153" width="304" height="76" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="592.0" y="197.0" font-size="17" fill="#334155" font-weight="600" text-anchor="middle">node3</text>
+<rect x="440" y="253" width="304" height="66" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="592.0" y="292.0" font-size="17" fill="#334155" font-weight="600" text-anchor="middle">node4</text>
+<rect x="32" y="400" width="352" height="100" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="208.0" y="444.0" font-size="17" fill="#6D28D9" font-weight="600" text-anchor="middle">topology.kubernetes.io/zone</text>
+<text x="208.0" y="469.0" font-size="17" fill="#6D28D9" font-weight="600" text-anchor="middle">cache와 같은 영역: node1·node2</text>
+<rect x="416" y="400" width="352" height="100" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="592.0" y="444.0" font-size="17" fill="#047857" font-weight="600" text-anchor="middle">kubernetes.io/hostname</text>
+<text x="592.0" y="469.0" font-size="17" fill="#047857" font-weight="600" text-anchor="middle">cache와 같은 영역: node1</text>
+<text x="400" y="548" font-size="15" fill="#475569" font-weight="400" text-anchor="middle">affinity는 같은 영역을 요구하고, anti-affinity는 그 영역을 피합니다</text>
+</g>
+</svg>
