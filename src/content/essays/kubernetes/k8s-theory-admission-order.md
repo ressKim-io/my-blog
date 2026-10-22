@@ -147,7 +147,7 @@ Node authorizer가 쓰기 API를 허용했더라도 요청 본문의 모든 변�
 Pod CREATE에서는 mutating 단계가 먼저 끝나고 validating 단계에서 PodSecurity를 실행합니다
 
 mutating 단계 안에서도 앞선 판단이 최종 결과를 보장하지는 못합니다
-가정으로, 앞의 mutator가 모든 컨테이너에 limit을 채운 뒤 뒤의 webhook이 새 sidecar를 추가했다고 해보겠습니다
+앞의 mutator가 모든 컨테이너에 limit을 채운 다음, 뒤의 webhook이 새 sidecar를 추가했다고 가정하겠습니다
 앞의 mutator가 처음 본 오브젝트에는 그 sidecar가 없었습니다
 
 ![뒤 webhook이 추가한 컨테이너를 조건부 재호출로 다시 살피고 최종 검증하는 흐름](/diagrams/k8s-theory-admission-order-2.svg)

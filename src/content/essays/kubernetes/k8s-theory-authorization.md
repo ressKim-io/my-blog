@@ -148,7 +148,7 @@ authorizer는 Decision과 별도로 오류도 반환하며, 인가 필터는 `Al
 
 ### resourceNames가 제한하는 것은 요청의 이름이다
 
-`resourceNames: ["web-0"]`은 이름이 `web-0`인 요청을 제한합니다
+`resourceNames: ["web-0"]`을 지정하면 이 규칙이 허용하는 요청의 대상 이름을 `web-0`으로 좁힙니다
 `/pods/web-0`에는 이름이 있지만 보통의 `/pods` 목록 요청에는 이름이 없어 이 규칙과 맞지 않습니다
 
 다만 list·watch에 정확한 `metadata.name=web-0` field selector를 붙이면 API 서버가 이름을 추출하므로 해당 이름의 규칙으로 허용할 수 있습니다

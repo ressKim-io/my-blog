@@ -207,7 +207,7 @@ v1.37.1 구현은 발견한 삭제 대상에 Pod가 포함돼 있으면 Pod를 �
 Pod가 남았다고 확인되면 다른 리소스 삭제로 넘어가지 않습니다
 이 동작은 현재 소스에서 `OrderedNamespaceDeletion` feature gate 분기 없이 적용됩니다
 
-발견한 내용의 삭제가 끝나고 잔존 내용과 오류가 없으면 `/finalize`로 자기 token인 `kubernetes`를 제거합니다
+발견한 내용의 삭제가 끝나고 잔존 내용과 오류가 없으면 `/finalize`로 자신이 관리하는 `kubernetes` finalizer를 제거합니다
 다른 `spec.finalizers` 항목은 지우지 않습니다
 Namespace는 두 finalizer 필드를 모두 가질 수 있으므로 `kubernetes`가 없어졌다는 것만으로 삭제 완료를 판단할 수는 없습니다
 

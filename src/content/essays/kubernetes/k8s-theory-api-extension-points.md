@@ -159,7 +159,7 @@ kubectl의 다른 요청이 오래된 discovery 캐시를 사용하는 동안 `a
 ## API 버전이 올라가면 호환성 약속도 달라집니다
 
 `v1alpha1`, `v1beta1`, `v1`은 각각 alpha·beta·GA 안정도에 속하는 API 버전 이름입니다
-같은 문자열의 등급이 내부에서 바뀌는 것이 아니라 새 버전을 제공하며 API를 발전시킵니다
+예를 들어 `v1beta1`이 같은 이름으로 GA가 되는 것이 아니라, `v1` 같은 새 버전을 제공합니다
 
 [Kubernetes API 폐기 정책](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/deprecation-policy.md)은 다음 경계를 정합니다
 

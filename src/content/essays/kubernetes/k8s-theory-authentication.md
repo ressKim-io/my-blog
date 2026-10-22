@@ -53,7 +53,8 @@ Pod와 ServiceAccount에 모두 설정돼 있으면 Pod 설정이 우선합니�
 자동 주입을 꺼도 ServiceAccount 자체나 이미 발급된 토큰의 권한을 폐기하는 것은 아닙니다
 
 projected token에는 만료 시각이 있으므로 kubelet token manager가 새 토큰을 요청합니다
-확인한 구현에서는 수명의 약 80%가 지났거나 24시간이 지나기 전에 갱신을 요구하며, 동시 갱신을 분산하는 jitter가 있습니다
+확인한 구현에서는 토큰 수명의 약 80%가 되는 시점과 발급 후 24시간이 되는 시점 중 먼저 오는 쪽을 기준으로 갱신을 요구합니다
+동시 갱신을 분산하기 위해 jitter만큼 이 기준 시점을 조금 앞당깁니다
 
 갱신에 실패했어도 manager가 가진 토큰이 아직 유효하면 기존 토큰을 반환하고 오류를 기록합니다
 TokenRequest 응답의 `status.expirationTimestamp`까지 지났다면 오류를 반환합니다

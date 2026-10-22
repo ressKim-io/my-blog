@@ -183,7 +183,7 @@ client-side apply, 줄여서 CSA와 SSA는 기본 매니저 이름이 다릅니�
 v1.37.1 kubectl은 첫 SSA 요청이 성공한 뒤에도 CSA의 `managedFields`를 옮기는 별도 경로를 실행합니다
 
 1. `last-applied-configuration`을 소유한 Update 매니저를 찾습니다
-2. 그 관리 필드를 선택한 SSA 매니저로 옮기는 JSON Patch를 만듭니다
+2. 그 Update 매니저가 소유한 필드 집합을 선택한 SSA 매니저로 옮기는 JSON Patch를 만듭니다
 3. 이전이 이루어졌다면 원래 SSA 내용을 다시 Apply해 제외한 필드의 제거까지 반영합니다
 
 이 kubectl의 `migrateToSSAIfNecessary`에는 대상 이름이 `kubectl`이어야 한다는 검사가 없습니다

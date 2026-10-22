@@ -177,7 +177,6 @@ API 규칙은 [공식 SSA 문서](https://github.com/kubernetes/website/blob/7fd
 키는 여러 개일 수 있습니다
 컨테이너의 `ports`는 `containerPort`와 `protocol`을 함께 사용하므로 포트 번호만으로 원소를 구분하지 않습니다
 
-`set`을 스칼라 값만 가능한 형식으로 한정하면 CRD의 정의보다 좁아집니다
 v1.37.1의 `JSONSchemaProps`는 스칼라뿐 아니라 atomic 객체와 atomic 배열도 set의 원소로 허용한다고 명시합니다
 같은 값의 원소가 중복되면 안 된다는 조건은 유지됩니다
 
