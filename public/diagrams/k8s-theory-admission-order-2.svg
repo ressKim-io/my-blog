@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title desc"><title id="title">재호출은 최종 검사를 대신하지 않습니다</title><desc id="desc">먼저 limit을 채운 뒤 webhook이 sidecar를 추가하면 재호출이 필요한 참여자가 변경된 오브젝트를 다시 볼 수 있다. 최종 조건은 validating 단계에서 검사한다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="520" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">재호출은 최종 검사를 대신하지 않습니다</text>
+<path d="M 248 160 H 312" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 552 160 H 616" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 672 200 V 312 H 400 V 344" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 432 200 V 256 H 136 V 200" fill="none" stroke="#BE123C" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#rose-arrow)"/>
+<rect x="40" y="120" width="208" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="144.0" y="156.0" font-size="19" fill="#047857" text-anchor="middle">먼저 자원 값 채움</text><text x="144.0" y="182.0" font-size="16" fill="#047857" text-anchor="middle">현재 컨테이너 기준</text>
+<rect x="312" y="120" width="240" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="432.0" y="156.0" font-size="19" fill="#047857" text-anchor="middle">뒤 webhook의 변경</text><text x="432.0" y="182.0" font-size="16" fill="#047857" text-anchor="middle">새 sidecar 추가</text>
+<rect x="616" y="120" width="144" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="688.0" y="166.0" font-size="19" fill="#334155" text-anchor="middle">변경된 객체</text>
+<text x="280" y="284" font-size="17" fill="#BE123C" text-anchor="middle">조건부 재호출: 필요한 참여자를 다시 평가</text>
+<rect x="192" y="344" width="416" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="400.0" y="380.0" font-size="19" fill="#047857" text-anchor="middle">validating admission</text><text x="400.0" y="406.0" font-size="16" fill="#047857" text-anchor="middle">필수 조건을 최종 객체에서 확인</text>
+<text x="400" y="472" font-size="17" fill="#27272A" text-anchor="middle">추가 호출 횟수나 변경의 수렴을 보장하지 않습니다</text>
+</g></svg>

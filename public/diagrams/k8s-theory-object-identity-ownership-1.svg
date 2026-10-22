@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 458" role="img" aria-labelledby="title-1 desc-1">
+<title id="title-1">같은 이름으로 다시 만든 ReplicaSet의 UID 비교</title>
+<desc id="desc-1">ReplicaSet web의 UID aaa를 기록한 Pod는 부모가 삭제되고 UID bbb로 다시 생성된 뒤에도 aaa를 가리킵니다. GC는 이름으로 찾은 부모와 참조의 UID가 다르면 이전 소유자가 없는 것으로 분류합니다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#475569"/></marker></defs>
+<rect width="900" height="458" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+<text x="36" y="38" font-size="22" fill="#0A0A0A" font-weight="600" text-anchor="start">이름을 다시 써도 UID는 이어지지 않습니다</text>
+<path d="M282 119 H336" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<path d="M550 119 H604" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<path d="M174 171 V242" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<path d="M714 171 V232 H610 V248" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<path d="M306 290 H354" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<rect x="36" y="76" width="246" height="95" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="159.0" y="107" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">기존 ReplicaSet</text>
+<text x="159.0" y="134" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">name: web · UID: aaa</text>
+<rect x="338" y="76" width="212" height="95" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="444.0" y="107" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">기존 객체 삭제</text>
+<text x="444.0" y="134" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">UID aaa의 수명 종료</text>
+<rect x="606" y="76" width="258" height="95" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="735.0" y="107" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">새 ReplicaSet</text>
+<text x="735.0" y="134" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">name: web · UID: bbb</text>
+<rect x="36" y="248" width="270" height="92" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="171.0" y="279" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">남아 있는 Pod</text>
+<text x="171.0" y="306" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">ownerRef: web · UID: aaa</text>
+<rect x="356" y="248" width="508" height="92" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+<text x="610.0" y="279" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">GC가 이름으로 조회한 뒤 UID 비교</text>
+<text x="610.0" y="306" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">참조 aaa ≠ 현재 bbb</text>
+<text x="175" y="218" font-size="15" fill="#0A0A0A" font-weight="400" text-anchor="middle">참조는 그대로 남음</text>
+<text x="672" y="218" font-size="15" fill="#0A0A0A" font-weight="400" text-anchor="middle">현재 객체</text>
+<text x="450" y="390" font-size="20" fill="#BE123C" font-weight="600" text-anchor="middle">이전 소유자 부재로 분류</text>
+<text x="450" y="424" font-size="17" fill="#0A0A0A" font-weight="400" text-anchor="middle">같은 이름의 새 객체가 이전 소유자를 대신하지 않습니다</text>
+<!-- UID aaa와 bbb는 설명을 위한 축약값 -->
+</g></svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc"><title id="title">생성 응답과 생성 관찰 사이를 expectations가 기억합니다</title><desc id="desc">Pod 세 개를 생성한다는 가정이다. 생성 전에 기대 수를 3으로 기록하고 API 서버에 요청한다. 생성 응답이 와도 watch 관찰 전에는 기대가 남는다. 생성 이벤트 세 개를 관찰하면 수가 0이 된다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="600" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">생성 응답과 생성 관찰 사이를 expectations가 기억합니다</text>
+<path d="M 400 144 V 192" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 272 V 320" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 400 V 448" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 584 232 H 648 V 352" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="144" y="64" width="440" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="364.0" y="100.0" font-size="19" fill="#6D28D9" text-anchor="middle">ExpectCreations(3)</text><text x="364.0" y="126.0" font-size="16" fill="#6D28D9" text-anchor="middle">API 요청 전에 기대 수 기록</text>
+<rect x="144" y="192" width="440" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="364.0" y="228.0" font-size="19" fill="#047857" text-anchor="middle">API 서버에 생성 요청 · 성공 응답</text><text x="364.0" y="254.0" font-size="16" fill="#047857" text-anchor="middle">watch 관찰은 아직 도착하지 않을 수 있음</text>
+<rect x="144" y="320" width="440" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="364.0" y="356.0" font-size="19" fill="#0E7490" text-anchor="middle">addPod에서 생성 3개 관찰</text><text x="364.0" y="382.0" font-size="16" fill="#0E7490" text-anchor="middle">CreationObserved로 기대 수 감소</text>
+<rect x="144" y="448" width="440" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="364.0" y="484.0" font-size="19" fill="#6D28D9" text-anchor="middle">기대 수 0: 관찰 충족</text><text x="364.0" y="510.0" font-size="16" fill="#6D28D9" text-anchor="middle">다음 수 조정의 조건 하나를 통과</text>
+<rect x="608" y="352" width="168" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="692.0" y="388.0" font-size="19" fill="#334155" text-anchor="middle">기대가 남음</text><text x="692.0" y="414.0" font-size="16" fill="#334155" text-anchor="middle">수 조정 보류</text>
+<text x="400" y="572" font-size="17" fill="#27272A" text-anchor="middle">쓰기 버전 확인·삭제 상태 등 다른 검사도 통과해야 조정합니다</text>
+</g></svg>

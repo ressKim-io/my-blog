@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title desc"><title id="title">변경은 차례로, 원격 검증은 병렬로</title><desc id="desc">Mutating webhook은 변경된 객체를 다음 호출에 전달한다. ValidatingAdmissionWebhook은 최종 객체를 대상으로 매칭된 webhook을 병렬 호출하고 모두 끝날 때까지 기다린다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="520" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">변경은 차례로, 원격 검증은 병렬로</text>
+<path d="M 200 144 H 264" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 448 144 H 512" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 192 368 H 232 V 272 H 280" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 232 368 H 280" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 232 368 V 464 H 280" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 456 272 H 504 V 368 H 552" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 456 368 H 552" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 456 464 H 504 V 368" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="32" y="104" width="168" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="116.0" y="150.0" font-size="19" fill="#334155" text-anchor="middle">입력 객체</text>
+<rect x="264" y="104" width="184" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="356.0" y="140.0" font-size="19" fill="#047857" text-anchor="middle">mutating M1</text><text x="356.0" y="166.0" font-size="16" fill="#047857" text-anchor="middle">객체 변경</text>
+<rect x="512" y="104" width="240" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="632.0" y="140.0" font-size="19" fill="#047857" text-anchor="middle">mutating M2</text><text x="632.0" y="166.0" font-size="16" fill="#047857" text-anchor="middle">M1 결과를 받아 변경</text>
+<text x="32" y="80" font-size="17" fill="#27272A" text-anchor="start">mutating: 앞 호출의 대기가 뒤 호출에 더해집니다</text>
+<rect x="32" y="328" width="160" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="112.0" y="374.0" font-size="19" fill="#334155" text-anchor="middle">최종 객체</text>
+<rect x="280" y="240" width="176" height="64" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="368.0" y="278.0" font-size="19" fill="#047857" text-anchor="middle">검증 V1</text>
+<rect x="280" y="336" width="176" height="64" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="368.0" y="374.0" font-size="19" fill="#047857" text-anchor="middle">검증 V2</text>
+<rect x="280" y="432" width="176" height="64" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="368.0" y="470.0" font-size="19" fill="#047857" text-anchor="middle">검증 V3</text>
+<rect x="552" y="328" width="200" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="652.0" y="364.0" font-size="19" fill="#334155" text-anchor="middle">결과 수집</text><text x="652.0" y="390.0" font-size="16" fill="#334155" text-anchor="middle">시작한 호출 완료 대기</text>
+</g></svg>

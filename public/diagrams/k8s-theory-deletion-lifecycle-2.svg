@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 864 650" role="img" aria-labelledby="title desc">
+<title id="title">Namespace 안의 내용을 확인하고 finalizer를 제거하는 순서</title><desc id="desc">namespace controller는 discovery로 삭제 대상을 찾고 Pod부터 정리한다. 발견한 내용이 남거나 discovery를 포함한 오류가 있으면 자신의 kubernetes finalizer를 제거하지 않는다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#475569"/></marker></defs>
+<style>text{font-family:'Pretendard',system-ui,sans-serif;fill:#0A0A0A}.title{font-size:23px;font-weight:700}.label{font-size:16px}.small{font-size:14px;fill:#27272A}.node-title{font-size:17px;font-weight:650}.arrow{fill:none;stroke:#475569;stroke-width:1.8;marker-end:url(#arrow)}</style>
+<rect width="864" height="650" rx="16" fill="#FAFAFA"/>
+<text x="28" y="40" class="title" text-anchor="start">Namespace 삭제를 맡은 controller의 처리 순서</text>
+<text x="28" y="71" class="small" text-anchor="start">Namespace의 deletionTimestamp가 설정된 뒤 시작합니다</text>
+<path d="M257.0 188 L257.0 245" class="arrow"/>
+<path d="M257.0 333 L257.0 390" class="arrow"/>
+<path d="M257.0 478 L257.0 535" class="arrow"/>
+<path d="M482 144 L546 144" class="arrow" stroke-dasharray="5 4"/>
+<path d="M482 289 L546 289" class="arrow" stroke-dasharray="5 4"/>
+<rect x="32" y="100" width="450" height="88" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="257.0" y="129" class="node-title" text-anchor="middle">Discovery로 삭제 대상 확인</text>
+<text x="257.0" y="157" class="small" text-anchor="middle">group · version · resource와 지원 동작 조회</text>
+<rect x="32" y="245" width="450" height="88" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+<text x="257.0" y="274" class="node-title" text-anchor="middle">발견된 대상에 Pod가 있으면 먼저 삭제</text>
+<text x="257.0" y="302" class="small" text-anchor="middle">Pod가 남았다고 확인되면 여기서 반환</text>
+<rect x="32" y="390" width="450" height="88" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+<text x="257.0" y="419" class="node-title" text-anchor="middle">나머지 리소스 삭제와 잔존 내용 확인</text>
+<text x="257.0" y="447" class="small" text-anchor="middle">객체 · finalizer · 처리 오류를 모아 확인</text>
+<rect x="32" y="535" width="450" height="88" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="257.0" y="564" class="node-title" text-anchor="middle">PUT /api/v1/namespaces/{name}/finalize</text>
+<text x="257.0" y="592" class="small" text-anchor="middle">spec.finalizers에서 자기 kubernetes 항목만 제거</text>
+<rect x="137" y="201" width="240" height="25" fill="#FAFAFA"/>
+<text x="257" y="220" class="small" text-anchor="middle">발견한 대상부터 처리</text>
+<rect x="137" y="346" width="240" height="25" fill="#FAFAFA"/>
+<text x="257" y="365" class="small" text-anchor="middle">Pod가 남지 않았을 때</text>
+<rect x="137" y="491" width="240" height="25" fill="#FAFAFA"/>
+<text x="257" y="510" class="small" text-anchor="middle">오류도 잔존 내용도 없을 때</text>
+<rect x="552" y="100" width="280" height="112" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="692.0" y="129" class="node-title" text-anchor="middle">Discovery 오류</text>
+<text x="692.0" y="157" class="small" text-anchor="middle">확인된 대상은 처리 가능</text>
+<text x="692.0" y="181" class="small" text-anchor="middle">오류가 남으면 finalize 보류</text>
+<rect x="552" y="245" width="280" height="112" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="692.0" y="274" class="node-title" text-anchor="middle">Pod가 남은 경우</text>
+<text x="692.0" y="302" class="small" text-anchor="middle">다른 종류의 리소스 삭제를</text>
+<text x="692.0" y="326" class="small" text-anchor="middle">다음 처리로 미룸</text>
+<text x="554" y="429" class="node-title" text-anchor="start">마지막 조건도 구분합니다</text>
+<text x="554" y="462" class="small" text-anchor="start">다른 spec.finalizers 항목과</text>
+<text x="554" y="486" class="small" text-anchor="start">metadata.finalizers는</text>
+<text x="554" y="510" class="small" text-anchor="start">이 요청만으로 비워지지 않습니다</text>
+</svg>

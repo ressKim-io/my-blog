@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title desc"><title id="title">서버 상태를 캐시에 반영한 뒤 핸들러에 알립니다</title><desc id="desc">Reflector가 API 서버의 초기 snapshot과 watch 변경을 큐에 넣는다. 큐의 소비자가 Indexer를 갱신하고, 리스너별 버퍼를 통해 핸들러에 비동기 알림을 보낸다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="520" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">서버 상태를 캐시에 반영한 뒤 핸들러에 알립니다</text>
+<path d="M 248 128 H 328" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 436 168 V 232" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 436 312 V 376" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 544 416 H 592" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="32" y="88" width="216" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="140.0" y="124.0" font-size="19" fill="#047857" text-anchor="middle">API 서버</text><text x="140.0" y="150.0" font-size="16" fill="#047857" text-anchor="middle">초기 상태 · 변경</text>
+<rect x="328" y="88" width="216" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="436.0" y="124.0" font-size="19" fill="#0E7490" text-anchor="middle">Reflector</text><text x="436.0" y="150.0" font-size="16" fill="#0E7490" text-anchor="middle">snapshot · watch 수신</text>
+<rect x="328" y="232" width="216" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="436.0" y="268.0" font-size="19" fill="#334155" text-anchor="middle">변경 큐</text><text x="436.0" y="294.0" font-size="16" fill="#334155" text-anchor="middle">기본 RealFIFO</text>
+<rect x="328" y="376" width="216" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="436.0" y="412.0" font-size="19" fill="#6D28D9" text-anchor="middle">Indexer</text><text x="436.0" y="438.0" font-size="16" fill="#6D28D9" text-anchor="middle">반영된 로컬 사본</text>
+<rect x="592" y="376" width="176" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="680.0" y="412.0" font-size="19" fill="#0E7490" text-anchor="middle">등록 핸들러</text><text x="680.0" y="438.0" font-size="16" fill="#0E7490" text-anchor="middle">리스너별 버퍼</text>
+<text x="456" y="208" font-size="16" fill="#27272A" text-anchor="start">Replace · 변경</text>
+<text x="456" y="352" font-size="16" fill="#27272A" text-anchor="start">소비 · 반영</text>
+<text x="592" y="352" font-size="16" fill="#27272A" text-anchor="start">비동기 알림</text>
+<text x="32" y="488" font-size="17" fill="#27272A" text-anchor="start">기본 AtomicFIFO는 전체 snapshot 교체도 큐의 소비 단계에서 처리합니다</text>
+</g></svg>

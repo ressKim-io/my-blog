@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 504" role="img" aria-labelledby="title desc">
+<title id="title">Node authorizer의 관계 그래프</title>
+<desc id="desc">Node에 배치된 Pod가 참조하는 Secret, ConfigMap, PVC 및 PV의 관계다. API 요청 처리의 실행 순서가 아니다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#334155"/></marker></defs>
+<rect width="760" height="504" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" font-size="18" fill="#0A0A0A">
+<text x="380" y="40" text-anchor="middle" font-size="22" fill="#0A0A0A" font-weight="600"><tspan x="380" dy="0">배치와 참조로 연결되는 객체</tspan></text>
+<rect x="40" y="88" width="240" height="64" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="160.0" y="126.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="160.0" dy="0">Node / node3</tspan></text>
+<rect x="420" y="88" width="280" height="64" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="560.0" y="126.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="560.0" dy="0">Pod / web-0</tspan></text>
+<path d="M420 120 L280 120" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="350" y="108" text-anchor="middle" font-size="16" fill="#334155"><tspan x="350" dy="0">배치</tspan></text>
+<path d="M560 152 L560 200 L152 200 L152 256" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M560 200 L380 200 L380 256" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M560 200 L608 200 L608 256" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="492" y="235" text-anchor="middle" font-size="17" fill="#334155"><tspan x="492" dy="0">Pod의 객체 참조</tspan></text>
+<rect x="40" y="256" width="224" height="64" rx="10" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF"/>
+<text x="152.0" y="294.0" text-anchor="middle" font-size="18" fill="#6D28D9"><tspan x="152.0" dy="0">Secret / db-cred</tspan></text>
+<rect x="280" y="256" width="200" height="64" rx="10" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF"/>
+<text x="380.0" y="294.0" text-anchor="middle" font-size="18" fill="#6D28D9"><tspan x="380.0" dy="0">ConfigMap / app</tspan></text>
+<rect x="496" y="256" width="224" height="64" rx="10" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF"/>
+<text x="608.0" y="294.0" text-anchor="middle" font-size="18" fill="#6D28D9"><tspan x="608.0" dy="0">PVC / data</tspan></text>
+<path d="M608 320 L608 376" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="496" y="376" width="224" height="64" rx="10" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF"/>
+<text x="608.0" y="414.0" text-anchor="middle" font-size="18" fill="#6D28D9"><tspan x="608.0" dy="0">PV</tspan></text>
+<text x="292" y="418" text-anchor="middle" font-size="17" fill="#334155"><tspan x="292" dy="0">관계도 · 실행 순서 아님</tspan></text>
+</g>
+</svg>

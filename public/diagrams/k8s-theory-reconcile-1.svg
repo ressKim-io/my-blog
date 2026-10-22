@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc"><title id="title">같은 키의 변경은 처리 중에 한 번 더 표시합니다</title><desc id="desc">Get으로 키 X를 처리하는 동안 Add가 여러 번 들어오면 dirty에 X를 한 번 표시한다. Done에서 처리 중 표시를 지운 뒤 X를 큐에 한 번 다시 넣는다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="600" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">같은 키의 변경은 처리 중에 한 번 더 표시합니다</text>
+<path d="M 400 144 V 192" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 272 V 320" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 400 V 448" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="152" y="64" width="496" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="400.0" y="100.0" font-size="19" fill="#0E7490" text-anchor="middle">Get(X): 처리 시작</text><text x="400.0" y="126.0" font-size="16" fill="#0E7490" text-anchor="middle">processing에 X · dirty에서는 제거</text>
+<rect x="152" y="192" width="496" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="400.0" y="228.0" font-size="19" fill="#6D28D9" text-anchor="middle">처리 중 Add(X)가 여러 번 도착</text><text x="400.0" y="254.0" font-size="16" fill="#6D28D9" text-anchor="middle">dirty에 X를 한 번 표시</text>
+<rect x="152" y="320" width="496" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="400.0" y="356.0" font-size="19" fill="#047857" text-anchor="middle">Done(X): 이번 처리 종료</text><text x="400.0" y="382.0" font-size="16" fill="#047857" text-anchor="middle">processing에서 제거 · dirty이면 재큐잉</text>
+<rect x="152" y="448" width="496" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="400.0" y="484.0" font-size="19" fill="#0E7490" text-anchor="middle">다음 Get(X): 현재 상태를 다시 읽음</text><text x="400.0" y="510.0" font-size="16" fill="#0E7490" text-anchor="middle">같은 처리 구간의 Add는 한 번으로 합쳐짐</text>
+<text x="400" y="576" font-size="17" fill="#27272A" text-anchor="middle">같은 큐의 워커끼리 적용되며 다른 큐·프로세스까지 직렬화하지 않습니다</text>
+</g></svg>

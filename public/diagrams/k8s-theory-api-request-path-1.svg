@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 936" role="img" aria-labelledby="title desc">
+<title id="title">내장 resource의 CREATE 경로</title>
+<desc id="desc">인증, APF, 인가 뒤 요청 본문을 디코딩한다. mutating admission, 저장 전략 검증, validating admission을 거쳐 저장을 시도한다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#334155"/></marker></defs>
+<rect width="640" height="936" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" font-size="18" fill="#0A0A0A">
+<text x="320" y="40" text-anchor="middle" font-size="22" fill="#0A0A0A" font-weight="600"><tspan x="320" dy="0">내장 resource의 일반 CREATE 한 건</tspan></text>
+<rect x="64" y="80" width="512" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="320.0" y="109.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="320.0" dy="0">인증기</tspan><tspan x="320.0" dy="26">자격증명 → user.Info</tspan></text>
+<path d="M320 152 L320 184" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="64" y="184" width="512" height="72" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="320.0" y="213.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="320.0" dy="0">APF (설정 시)</tspan><tspan x="320.0" dy="26">신원·요청 속성 → 처리 자리</tspan></text>
+<path d="M320 256 L320 288" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="64" y="288" width="512" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="320.0" y="317.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="320.0" dy="0">인가</tspan><tspan x="320.0" dy="26">신원·동작·대상 → 허용?</tspan></text>
+<path d="M320 360 L320 392" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="64" y="392" width="512" height="72" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="320.0" y="421.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="320.0" dy="0">디코더·defaulter</tspan><tspan x="320.0" dy="26">본문 → 타입 있는 오브젝트·기본값</tspan></text>
+<path d="M320 464 L320 496" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="64" y="496" width="512" height="72" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="320.0" y="525.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="320.0" dy="0">mutating admission</tspan><tspan x="320.0" dy="26">디코딩된 오브젝트 → 정책에 따른 변경</tspan></text>
+<path d="M320 568 L320 600" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="64" y="600" width="512" height="72" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="320.0" y="629.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="320.0" dy="0">저장 전략</tspan><tspan x="320.0" dy="26">PrepareForCreate → 타입별 값 검증</tspan></text>
+<path d="M320 672 L320 704" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="64" y="704" width="512" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="320.0" y="733.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="320.0" dy="0">validating admission</tspan><tspan x="320.0" dy="26">변경 결과의 정책 검사</tspan></text>
+<path d="M320 776 L320 808" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="64" y="808" width="512" height="72" rx="10" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF"/>
+<text x="320.0" y="837.0" text-anchor="middle" font-size="18" fill="#6D28D9"><tspan x="320.0" dy="0">저장소</tspan><tspan x="320.0" dy="26">검사 통과한 오브젝트 → 쓰기 시도</tspan></text>
+<text x="320" y="910" text-anchor="middle" font-size="17" fill="#334155"><tspan x="320" dy="0">개별 단계의 거부·오류로 중단 가능</tspan></text>
+</g>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 648" role="img" aria-labelledby="title desc">
+<title id="title">Deployment 저장과 후속 생성 요청</title>
+<desc id="desc">Deployment 저장 뒤 별도 controller가 ReplicaSet 생성 요청을 보내고, ReplicaSet controller가 Pod 생성 요청을 보낸다. 각 요청은 다시 심사받는다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#334155"/></marker></defs>
+<rect width="720" height="648" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" font-size="18" fill="#0A0A0A">
+<text x="360" y="40" text-anchor="middle" font-size="22" fill="#0A0A0A" font-weight="600"><tspan x="360" dy="0">저장 성공과 후속 오브젝트 생성은 별개</tspan></text>
+<rect x="144" y="80" width="432" height="64" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="360.0" y="118.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="360.0" dy="0">첫 요청: CREATE Deployment</tspan></text>
+<path d="M360 144 L360 184" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="144" y="184" width="432" height="64" rx="10" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF"/>
+<text x="360.0" y="222.0" text-anchor="middle" font-size="18" fill="#6D28D9"><tspan x="360.0" dy="0">Deployment 저장 · 첫 요청 응답</tspan></text>
+<path d="M360 248 L360 300" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5 4"/>
+<rect x="104" y="300" width="512" height="72" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="360.0" y="329.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="360.0" dy="0">Deployment controller</tspan><tspan x="360.0" dy="26">저장 상태 관측 → CREATE ReplicaSet</tspan></text>
+<path d="M360 372 L360 412" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="144" y="412" width="432" height="64" rx="10" stroke="#7C3AED" stroke-width="1.5" fill="#F5F3FF"/>
+<text x="360.0" y="450.0" text-anchor="middle" font-size="18" fill="#6D28D9"><tspan x="360.0" dy="0">ReplicaSet 요청 재심사 · 저장</tspan></text>
+<path d="M360 476 L360 528" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5 4"/>
+<rect x="104" y="528" width="512" height="72" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="360.0" y="557.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="360.0" dy="0">ReplicaSet controller → CREATE Pod</tspan><tspan x="360.0" dy="26">별도 요청: admission에서 거부 가능</tspan></text>
+<text x="360" y="630" text-anchor="middle" font-size="16" fill="#334155"><tspan x="360" dy="0">점선: 저장 상태를 관측한 뒤 수행하는 비동기 작업</tspan></text>
+</g>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/lint-post-hook.mjs\"",
+            "timeout": 30,
+            "statusMessage": "lint-post 검사 중"
+          }
+        ]
+      }
+    ]
+  }
+}

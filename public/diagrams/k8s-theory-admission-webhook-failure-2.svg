@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title desc"><title id="title">webhook 복구에 webhook의 허용이 필요한 경우</title><desc id="desc">정상 endpoint가 없는 webhook W를 복구하려고 controller가 Pod 생성을 요청하지만, 같은 W의 Fail 정책이 그 요청을 거부해 복구를 막는다. 새 Pod 생성이 필요한 경우의 가정이다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="520" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">webhook 복구에 webhook의 허용이 필요한 경우</text>
+<path d="M 248 152 H 328" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 568 152 H 624 V 272 H 568" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 328 312 H 248" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 128 272 V 192" fill="none" stroke="#BE123C" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#rose-arrow)"/>
+<rect x="32" y="112" width="216" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="140.0" y="148.0" font-size="19" fill="#BE123C" text-anchor="middle">W 응답 불가</text><text x="140.0" y="174.0" font-size="16" fill="#BE123C" text-anchor="middle">정상 endpoint 없음</text>
+<rect x="328" y="112" width="240" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="448.0" y="148.0" font-size="19" fill="#334155" text-anchor="middle">controller의 복구</text><text x="448.0" y="174.0" font-size="16" fill="#334155" text-anchor="middle">새 Pod CREATE</text>
+<rect x="328" y="272" width="240" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="448.0" y="308.0" font-size="19" fill="#BE123C" text-anchor="middle">admission이 W 호출</text><text x="448.0" y="334.0" font-size="16" fill="#BE123C" text-anchor="middle">호출 실패 + Fail</text>
+<rect x="32" y="272" width="216" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="140.0" y="308.0" font-size="19" fill="#BE123C" text-anchor="middle">복구 Pod 생성 거부</text><text x="140.0" y="334.0" font-size="16" fill="#BE123C" text-anchor="middle">W를 복구하지 못함</text>
+<text x="72" y="240" font-size="16" fill="#BE123C" text-anchor="start">복구 차단</text>
+<text x="400" y="416" font-size="18" fill="#27272A" text-anchor="middle">조건: 정상 endpoint가 없고 새 Pod 생성이 필요함</text>
+<text x="400" y="456" font-size="16" fill="#27272A" text-anchor="middle">정상 endpoint · 검사 제외 · 다른 복구 경로가 있으면 달라집니다</text>
+</g></svg>

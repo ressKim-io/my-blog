@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 542" role="img" aria-labelledby="title-2 desc-2">
+<title id="title-2">GC 소유 그래프와 두 작업 큐</title>
+<desc id="desc-2">리소스별 list와 watch 이벤트를 GraphBuilder가 받아 UID 기반 소유 그래프를 갱신합니다. 삭제 판정 큐는 소유자를 확인하고 orphan 큐는 자식의 부모 참조를 제거한 뒤 부모의 orphan finalizer를 제거합니다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#475569"/></marker></defs>
+<rect width="900" height="542" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+<text x="36" y="38" font-size="22" fill="#0A0A0A" font-weight="600" text-anchor="start">관찰한 관계를 그래프로 유지하고 작업을 나눕니다</text>
+<path d="M266 128 H332" fill="none" stroke="#475569" stroke-width="1.7" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<path d="M564 128 H630" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<path d="M748 184 V244 H244 V286" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<path d="M748 244 H660 V286" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"/>
+<rect x="36" y="82" width="230" height="102" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="151.0" y="113" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">리소스별 monitor</text>
+<text x="151.0" y="140" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">list / watch 이벤트</text>
+<rect x="334" y="82" width="230" height="102" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="449.0" y="113" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">GraphBuilder</text>
+<text x="449.0" y="140" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">관계·삭제 상태 갱신</text>
+<rect x="632" y="82" width="232" height="102" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="748.0" y="113" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">메모리 소유 그래프</text>
+<text x="748.0" y="140" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">UID → node / dependents</text>
+<text x="450" y="224" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">그래프 변경에 따라 큐에 등록</text>
+<rect x="36" y="288" width="410" height="126" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="241.0" y="319" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">attemptToDelete</text>
+<text x="241.0" y="346" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">현재 소유자 존재·UID·삭제 상태 확인</text>
+<text x="241.0" y="373" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">참조 분류 후 삭제 여부 판단</text>
+<rect x="484" y="288" width="380" height="126" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="674.0" y="319" font-size="18" fill="#0A0A0A" font-weight="600" text-anchor="middle">attemptToOrphan</text>
+<text x="674.0" y="346" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">자식에서 부모 ownerRef 제거</text>
+<text x="674.0" y="373" font-size="16" fill="#0A0A0A" font-weight="400" text-anchor="middle">부모의 orphan finalizer 제거</text>
+<text x="450" y="465" font-size="18" fill="#0A0A0A" font-weight="400" text-anchor="middle">virtual 노드: 소유자 이벤트를 아직 관찰하지 못한 자리</text>
+<text x="450" y="501" font-size="17" fill="#334155" font-weight="400" text-anchor="middle">이벤트 미관찰과 API 조회로 확인한 부재는 다릅니다</text>
+</g></svg>

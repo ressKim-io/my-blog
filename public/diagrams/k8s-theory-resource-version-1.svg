@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title desc"><title id="title">같은 번호를 읽은 두 작성자의 갱신</title><desc id="desc">가정 예시다. A와 B가 같은 Deployment의 resourceVersion 100을 읽는다. A의 저장 뒤 번호가 104가 되면 B가 100으로 보낸 갱신은 409 Conflict로 거부된다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="520" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">같은 번호를 읽은 두 작성자의 갱신</text>
+<path d="M 248 152 H 304" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 544 152 H 600" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 248 344 H 304" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 544 344 H 600" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 680 192 V 304" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="32" y="112" width="216" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="140.0" y="148.0" font-size="19" fill="#0E7490" text-anchor="middle">A: GET</text><text x="140.0" y="174.0" font-size="16" fill="#0E7490" text-anchor="middle">rv = 100</text>
+<rect x="304" y="112" width="240" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="424.0" y="148.0" font-size="19" fill="#0E7490" text-anchor="middle">A: 수정 후 PUT</text><text x="424.0" y="174.0" font-size="16" fill="#0E7490" text-anchor="middle">읽었던 rv = 100</text>
+<rect x="600" y="112" width="160" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="680.0" y="148.0" font-size="19" fill="#6D28D9" text-anchor="middle">저장 성공</text><text x="680.0" y="174.0" font-size="16" fill="#6D28D9" text-anchor="middle">새 rv = 104</text>
+<rect x="32" y="304" width="216" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="140.0" y="340.0" font-size="19" fill="#0E7490" text-anchor="middle">B: GET</text><text x="140.0" y="366.0" font-size="16" fill="#0E7490" text-anchor="middle">rv = 100</text>
+<rect x="304" y="304" width="240" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="424.0" y="340.0" font-size="19" fill="#0E7490" text-anchor="middle">B: 수정 후 PUT</text><text x="424.0" y="366.0" font-size="16" fill="#0E7490" text-anchor="middle">이전 rv = 100</text>
+<rect x="600" y="304" width="160" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="680.0" y="340.0" font-size="19" fill="#BE123C" text-anchor="middle">409 Conflict</text><text x="680.0" y="366.0" font-size="16" fill="#BE123C" text-anchor="middle">현재 104 ≠ 100</text>
+<text x="32" y="248" font-size="17" fill="#27272A" text-anchor="start">A와 B는 A의 저장 전에 같은 버전을 읽었습니다</text>
+<text x="400" y="456" font-size="18" fill="#27272A" text-anchor="middle">B는 현재 상태를 다시 읽고 자기 변경을 다시 계산합니다</text>
+</g></svg>

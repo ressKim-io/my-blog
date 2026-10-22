@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 536" role="img" aria-labelledby="title-3 desc-3">
+<title id="title-3">흐름별 큐 후보와 최소 작업량 선택</title>
+<desc id="desc-3">구조 설명용 예시에서 흐름 A는 큐 1·2·3을, 흐름 B는 큐 3·4·5를 후보로 사용합니다. 큐 3은 공유되므로 완전한 격리가 아니며, 각 요청은 자기 후보 중 대기 작업량 합이 가장 작은 큐로 갑니다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+<rect width="800" height="536" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+<text x="40" y="42" font-size="23" text-anchor="start" fill="#0A0A0A" font-weight="700"><tspan x="40" dy="0">흐름마다 일부 큐만 후보로 사용합니다</tspan></text>
+<text x="40" y="72" font-size="15" text-anchor="start" fill="#475569" font-weight="400"><tspan x="40" dy="0">후보 3개씩을 고른 구조 설명용 예시입니다</tspan></text>
+<rect x="48" y="108" width="304" height="64" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="200.0" y="146.0" font-size="18" text-anchor="middle" fill="#047857" font-weight="600"><tspan x="200.0" dy="0">흐름 A의 해시</tspan></text>
+<rect x="448" y="108" width="304" height="64" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="600.0" y="146.0" font-size="18" text-anchor="middle" fill="#047857" font-weight="600"><tspan x="600.0" dy="0">흐름 B의 해시</tspan></text>
+<path d="M200 172 V216" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M600 172 V216" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="48" y="220" width="304" height="112" rx="12" fill="#F8FAFC" stroke="#D4D4D8"/>
+<rect x="448" y="220" width="304" height="112" rx="12" fill="#F8FAFC" stroke="#D4D4D8"/>
+<rect x="64" y="244" width="80" height="64" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="104.0" y="282.0" font-size="16" text-anchor="middle" fill="#334155" font-weight="600"><tspan x="104.0" dy="0">큐 1</tspan></text>
+<rect x="160" y="244" width="80" height="64" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="200.0" y="282.0" font-size="16" text-anchor="middle" fill="#334155" font-weight="600"><tspan x="200.0" dy="0">큐 2</tspan></text>
+<rect x="256" y="244" width="80" height="64" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="296.0" y="282.0" font-size="16" text-anchor="middle" fill="#6D28D9" font-weight="600"><tspan x="296.0" dy="0">큐 3</tspan></text>
+<rect x="464" y="244" width="80" height="64" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="504.0" y="282.0" font-size="16" text-anchor="middle" fill="#6D28D9" font-weight="600"><tspan x="504.0" dy="0">큐 3</tspan></text>
+<rect x="560" y="244" width="80" height="64" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="600.0" y="282.0" font-size="16" text-anchor="middle" fill="#334155" font-weight="600"><tspan x="600.0" dy="0">큐 4</tspan></text>
+<rect x="656" y="244" width="80" height="64" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="696.0" y="282.0" font-size="16" text-anchor="middle" fill="#334155" font-weight="600"><tspan x="696.0" dy="0">큐 5</tspan></text>
+<path d="M336 276 H464" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="400" y="236" font-size="14" text-anchor="middle" fill="#6D28D9" font-weight="400"><tspan x="400" dy="0">공유 큐</tspan></text>
+<path d="M200 332 V380" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M600 332 V380" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="48" y="384" width="304" height="80" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="200.0" y="419.0" font-size="16" text-anchor="middle" fill="#047857" font-weight="600"><tspan x="200.0" dy="0">후보 안에서 선택</tspan><tspan x="200.0" dy="23">대기 작업량 합이 가장 작은 큐</tspan></text>
+<rect x="448" y="384" width="304" height="80" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="600.0" y="419.0" font-size="16" text-anchor="middle" fill="#047857" font-weight="600"><tspan x="600.0" dy="0">후보 안에서 선택</tspan><tspan x="600.0" dy="23">대기 작업량 합이 가장 작은 큐</tspan></text>
+<text x="400" y="508" font-size="15" text-anchor="middle" fill="#475569" font-weight="400"><tspan x="400" dy="0">일부 후보가 겹칠 수 있으며, 요청 개수만으로 큐를 고르지 않습니다</tspan></text>
+</g>
+</svg>

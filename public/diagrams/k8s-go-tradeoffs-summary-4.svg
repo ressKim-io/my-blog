@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%" role="img" aria-labelledby="title desc" font-family="Pretendard, ui-sans-serif, system-ui, -apple-system, sans-serif">
-  <title id="title">Control Plane Exemption vs Normal Pod Limits</title>
-  <desc id="desc">Comparison showing why Kubernetes memory bypasses do not apply to normal user applications constrained by container limits and GOMEMLIMIT.</desc>
+  <title id="title">Container and Runtime Memory Limits</title>
+  <desc id="desc">A local cgroup limit does not describe all memory constraints. Parent limits and node OOM still matter, and GOMEMLIMIT is a soft runtime limit.</desc>
   <defs>
     <style>
       .bg { fill: #FAFAFA; }
@@ -27,13 +27,13 @@
   <rect width="800" height="480" class="bg" rx="12"/>
 
   <!-- Title Section (2 texts) -->
-  <text x="400" y="38" class="title">Control Plane Exemption vs Normal Pod Limits</text>
-  <text x="400" y="62" class="subtitle">Why Kubernetes Bypasses Do Not Apply to Normal User Applications</text>
+  <text x="400" y="38" class="title">Container and Runtime Memory Limits</text>
+  <text x="400" y="62" class="subtitle">Memory limits depend on deployment settings</text>
 
   <!-- Left Column: K8s Control Plane (5 texts) -->
   <rect x="35" y="86" width="350" height="254" class="box-emerald"/>
-  <text x="210" y="122" class="txt-header">Kubernetes Control Plane</text>
-  <text x="210" y="144" class="txt-emerald">Exempted from OOMKill</text>
+  <text x="210" y="122" class="txt-header">No Local Memory Limit</text>
+  <text x="210" y="144" class="txt-emerald">Parent limits may still apply</text>
 
   <rect x="55" y="162" width="310" height="54" class="box-inner" stroke="#059669"/>
   <text x="210" y="194" class="txt-body" fill="#047857">cgroup memory.max = max</text>
@@ -41,28 +41,28 @@
   <path d="M 210 216 L 210 240" class="arrow"/>
 
   <rect x="55" y="248" width="310" height="68" class="box-inner" stroke="#059669" fill="#ECFDF5"/>
-  <text x="210" y="288" class="txt-body" fill="#047857">Unbounded RingBuffers Allowed</text>
+  <text x="210" y="288" class="txt-body" fill="#047857">Node OOM Still Possible</text>
 
   <!-- Right Column: Normal User Pods (5 texts) -->
   <rect x="415" y="86" width="350" height="254" class="box-rose"/>
-  <text x="590" y="122" class="txt-header">Normal User Applications</text>
-  <text x="590" y="144" class="txt-rose">Enforced by Container Limits</text>
+  <text x="590" y="122" class="txt-header">With a Local Memory Limit</text>
+  <text x="590" y="144" class="txt-rose">Memory charged to this cgroup</text>
 
   <rect x="435" y="162" width="310" height="54" class="box-inner" stroke="#E11D48"/>
-  <text x="590" y="194" class="txt-body" fill="#BE123C">cgroup limits.memory Set</text>
+  <text x="590" y="194" class="txt-body" fill="#BE123C">Example: memory.max = 2 GiB</text>
 
   <path d="M 590 216 L 590 240" class="arrow"/>
 
   <rect x="435" y="248" width="310" height="68" class="box-inner" stroke="#E11D48" fill="#FFF1F2"/>
-  <text x="590" y="288" class="txt-body" fill="#BE123C">Buffer Growth ➔ OOMKill</text>
+  <text x="590" y="288" class="txt-body" fill="#BE123C">Reclaim Fails: OOM Risk</text>
 
   <!-- Defense Line Callout (2 texts) -->
   <rect x="35" y="356" width="730" height="58" class="box-violet" stroke="#7C3AED" stroke-width="2.5"/>
-  <text x="400" y="382" class="header" fill="#6D28D9" text-anchor="middle">GOMEMLIMIT Defense Line (70~80% Limit)</text>
-  <text x="400" y="404" class="txt-sub" fill="#334155" text-anchor="middle">Triggers GC Before Reaching cgroup OOM Cutoff</text>
+  <text x="400" y="382" class="header" fill="#6D28D9" text-anchor="middle">GOMEMLIMIT: A Soft Runtime Limit</text>
+  <text x="400" y="404" class="txt-sub" fill="#334155" text-anchor="middle">Not an OOM guarantee; leave room for memory outside Go</text>
 
   <!-- Footer Callout (2 texts) -->
   <rect x="150" y="426" width="500" height="38" class="box-inner" stroke="#E4E4E7"/>
-  <text x="260" y="451" class="txt-header">Key Rule:</text>
-  <text x="490" y="451" class="txt-rose">Design App Within Container Limits</text>
+  <text x="260" y="451" class="txt-header">Check:</text>
+  <text x="490" y="451" class="txt-rose">Memory, GC CPU and Latency</text>
 </svg>

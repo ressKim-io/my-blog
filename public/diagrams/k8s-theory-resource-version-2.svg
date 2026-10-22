@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc"><title id="title">API 버전 검사와 저장소의 조건부 쓰기</title><desc id="desc">API 층은 클라이언트 번호를 검사하고, etcd는 서버가 읽은 ModRevision으로 조건부 쓰기를 수행한다. 저장소 충돌 시 현재 상태로 갱신 함수를 재실행하며 클라이언트의 오래된 번호는 409가 될 수 있다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="600" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">API 버전 검사와 저장소의 조건부 쓰기</text>
+<path d="M 304 144 V 184" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 304 264 V 344" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 304 424 V 496" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 512 224 H 592" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 96 384 H 40 V 104 H 96" fill="none" stroke="#BE123C" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#rose-arrow)"/>
+<rect x="96" y="64" width="416" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="304.0" y="100.0" font-size="19" fill="#334155" text-anchor="middle">현재 상태로 갱신 함수 실행</text><text x="304.0" y="126.0" font-size="16" fill="#334155" text-anchor="middle">클라이언트의 요청 번호는 그대로</text>
+<rect x="96" y="184" width="416" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="304.0" y="220.0" font-size="19" fill="#047857" text-anchor="middle">API: 요청 번호 = 현재 번호?</text><text x="304.0" y="246.0" font-size="16" fill="#047857" text-anchor="middle">클라이언트가 읽은 뒤의 변경 검사</text>
+<rect x="592" y="192" width="176" height="64" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="680.0" y="230.0" font-size="19" fill="#BE123C" text-anchor="middle">다르면 409</text>
+<rect x="96" y="344" width="416" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="304.0" y="380.0" font-size="19" fill="#6D28D9" text-anchor="middle">etcd: ModRevision 조건부 쓰기</text><text x="304.0" y="406.0" font-size="16" fill="#6D28D9" text-anchor="middle">서버가 읽은 뒤의 변경 검사</text>
+<rect x="96" y="496" width="416" height="64" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="304.0" y="534.0" font-size="19" fill="#6D28D9" text-anchor="middle">저장 성공</text>
+<text x="320" y="308" font-size="16" fill="#27272A" text-anchor="start">버전 검사 통과 · 나머지 검증</text>
+<text x="560" y="360" font-size="16" fill="#BE123C" text-anchor="start">etcd 조건 불일치 시</text>
+<text x="560" y="388" font-size="16" fill="#BE123C" text-anchor="start">현재 상태로 재시도</text>
+</g></svg>

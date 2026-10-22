@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="568" viewBox="0 0 800 568" role="img" aria-labelledby="title desc">
+  <title id="title">LIST와 watch의 연결, 410 뒤의 상태 재구성</title>
+  <desc id="desc">클라이언트는 LIST의 100번 snapshot을 만든 뒤 watch의 변경을 반영합니다. 105번 이후 이력이 없어 410을 받으면 140번으로 커서만 옮기는 대신 전체 snapshot을 다시 받아 로컬 사본을 교체합니다. 숫자는 가정입니다.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker></defs>
+  <rect width="800" height="568" rx="16" fill="#FAFAFA"/>
+  <g font-family="'Pretendard', system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="400" y="34" font-size="20" font-weight="700">상태를 먼저 받고, 그 이후 변경을 이어 받습니다</text>
+    <text x="400" y="58" font-size="13" fill="#475569">같은 리소스 범위·selector를 사용하는 경우 · 번호는 가정</text>
+    <g stroke="#475569" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+      <path d="M244 144H292"/><path d="M508 144H556"/>
+      <path d="M668 184V228H400V260"/>
+      <path d="M400 340V390"/>
+      <path d="M508 432H556"/>
+    </g>
+    <rect x="28" y="104" width="216" height="80" rx="10" fill="#ECFDF5" stroke="#059669"/>
+    <text x="136" y="133" font-size="17" font-weight="700" fill="#047857">LIST 응답</text>
+    <text x="136" y="160" font-size="14">목록 snapshot · rv=100</text>
+    <rect x="292" y="104" width="216" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2"/>
+    <text x="400" y="133" font-size="17" font-weight="700" fill="#0E7490">클라이언트 로컬 사본</text>
+    <text x="400" y="160" font-size="14">100 시점의 상태로 시작</text>
+    <rect x="556" y="104" width="216" height="80" rx="10" fill="#ECFDF5" stroke="#059669"/>
+    <text x="664" y="133" font-size="17" font-weight="700" fill="#047857">WATCH · rv=100</text>
+    <text x="664" y="160" font-size="14">101, 105… 변경을 반영</text>
+    <text x="560" y="218" font-size="13" fill="#475569">연결이 끊긴 뒤 105부터 재개 요청</text>
+    <rect x="248" y="260" width="304" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48"/>
+    <text x="400" y="289" font-size="18" font-weight="700" fill="#BE123C">410 Gone</text>
+    <text x="400" y="316" font-size="14">105 이후에 필요한 이력이 없음</text>
+    <text x="488" y="368" font-size="13" fill="#475569">현재 상태를 다시 요청</text>
+    <rect x="292" y="390" width="216" height="84" rx="10" fill="#ECFDF5" stroke="#059669"/>
+    <text x="400" y="419" font-size="16" font-weight="700" fill="#047857">LIST / streaming list</text>
+    <text x="400" y="447" font-size="14">새 전체 snapshot · rv=140</text>
+    <rect x="556" y="390" width="216" height="84" rx="10" fill="#ECFEFF" stroke="#0891B2"/>
+    <text x="664" y="419" font-size="17" font-weight="700" fill="#0E7490">로컬 사본 재구성</text>
+    <text x="664" y="447" font-size="14">새 상태 이후의 변경을 수신</text>
+    <rect x="28" y="496" width="744" height="48" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="400" y="526" font-size="14">새 snapshot은 현재 상태를 바로잡습니다 · 놓친 과거 이벤트를 모두 복원하지는 않습니다</text>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc"><title id="title">replicas를 빼기 전에 다음 소유자가 있는지 확인합니다</title><desc id="desc">사람이 replicas를 유일하게 소유한다는 가정이다. HPA가 값을 바꿔 소유한 뒤 사람이 필드를 제외하면 값을 유지하지만, HPA가 아직 쓰지 않았고 다른 소유자도 없으면 prune 뒤 기본값 1이 채워질 수 있다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="600" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">replicas를 빼기 전에 다음 소유자가 있는지 확인합니다</text>
+<path d="M 400 144 V 192" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 272 V 312 H 216 V 344" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 312 H 584 V 344" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 216 424 V 472" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 584 424 V 472" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="216" y="64" width="368" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="400.0" y="100.0" font-size="19" fill="#334155" text-anchor="middle">사람이 replicas = 3 소유</text><text x="400.0" y="126.0" font-size="16" fill="#334155" text-anchor="middle">HPA 설정 생성</text>
+<rect x="216" y="192" width="368" height="80" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="400.0" y="228.0" font-size="19" fill="#0E7490" text-anchor="middle">사람이 필드를 빼고 Apply</text><text x="400.0" y="254.0" font-size="16" fill="#0E7490" text-anchor="middle">그 시점의 소유권 확인</text>
+<rect x="48" y="344" width="336" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="216.0" y="380.0" font-size="19" fill="#047857" text-anchor="middle">HPA가 이미 소유</text><text x="216.0" y="406.0" font-size="16" fill="#047857" text-anchor="middle">값 변경 Update가 먼저 이루어짐</text>
+<rect x="416" y="344" width="336" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="584.0" y="380.0" font-size="19" fill="#BE123C" text-anchor="middle">HPA가 아직 쓰지 않음</text><text x="584.0" y="406.0" font-size="16" fill="#BE123C" text-anchor="middle">다른 소유자도 없음</text>
+<rect x="48" y="472" width="336" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="216.0" y="508.0" font-size="19" fill="#047857" text-anchor="middle">HPA 값 유지</text><text x="216.0" y="534.0" font-size="16" fill="#047857" text-anchor="middle">다른 소유자의 필드는 보존</text>
+<rect x="416" y="472" width="336" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="584.0" y="508.0" font-size="19" fill="#BE123C" text-anchor="middle">prune 뒤 기본값 1</text><text x="584.0" y="534.0" font-size="16" fill="#BE123C" text-anchor="middle">충돌 없이 값이 바뀔 수 있음</text>
+</g></svg>

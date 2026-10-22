@@ -99,29 +99,29 @@ logs 트랙(트러블슈팅 거친 노트)은 **URL을 직접 알아야만 접�
 
 <!-- STATS:START -->
 <!-- 자동 생성: scripts/update-stats.mjs (prebuild 훅), 수동 편집 금지 -->
-## Blog Content Stats (2026-08-03 기준, 자동 생성)
+## Blog Content Stats (2026-10-22 기준, 자동 생성)
 
-- **총 글 수**: 354개 (go-ti 프로젝트 실전 기록 213편 포함)
+- **총 글 수**: 370개 (go-ti 프로젝트 실전 기록 213편 포함)
 - **카테고리 (9개)**:
   - `challenge` (119): 게임서버/POC/부하테스트/AI 워크플로우 경험 시리즈
+  - `kubernetes` (71): K8s 기본, EKS, Helm, KEDA, Karpenter, 스케일링
   - `monitoring` (67): Prometheus, OpenTelemetry, Grafana, Loki, Tempo, Mimir
-  - `kubernetes` (55): K8s 기본, EKS, Helm, KEDA, Karpenter, 스케일링
   - `istio` (41): Service Mesh, Traffic/Security/Observability/Ambient, JWT
   - `runtime` (29)
   - `argocd` (15): ArgoCD, SSA, ApplicationSet
   - `cicd` (15): CI/CD, ArgoCD GitOps, EC2 CD 파이프라인
   - `rust` (7)
   - `network` (6)
-- **유형 메타 태그**: `troubleshooting` (111) / `adr` (40) / `concept` (88) / `retrospective` (12)
+- **유형 메타 태그**: `troubleshooting` (111) / `adr` (40) / `concept` (104) / `retrospective` (12)
   - `/blog?tag=adr` — 의사결정 서사 글만 모아보기
   - `/blog?tag=troubleshooting` — 단순 트러블슈팅 모아보기
   - `/blog?tag=concept` — 개념·학습 글
   - `/blog?tag=retrospective` — 메타 회고
-- **태그**: 고유 태그 726개 (유형 메타 태그 4종 포함)
+- **태그**: 고유 태그 757개 (유형 메타 태그 4종 포함)
 - **주요 시리즈** (편수 순):
   - go-ti 프로젝트 (37개 시리즈): goti-observability-ops (16), goti-multicloud (15), goti-queue-poc (12), goti-deepdive-database (11), goti-deepdive-observability (11), goti-deepdive-redis (11), goti-deepdive-platform (9), goti-auth (7), goti-java-to-go (7), goti-multicloud-db (7), goti-redis-sot (7), goti-deepdive-edge (6), goti-deepdive-runtime (6), goti-argocd (5), goti-deepdive-istio (5), goti-ec2-deploy (5), goti-meta (5), goti-observability-stack (5), goti-portfolio-meta (5), goti-resale (5), goti-ticketing-phase (5), goti-cloudfront-alb (4), goti-istio-ops (4), goti-kind-dev-bootstrap (4), goti-loadtest (4), goti-otel-prometheus (4), goti-scaling (4), goti-eks (3), goti-kafka (3), goti-kind-monitoring (3), goti-otel-instrumentation (3), goti-ai-review-comparison (2), goti-argocd-gitops (2), goti-cloudflare-migration (2), goti-metrics-collector (2), goti-pgbouncer (2), goti-spring-otel (2)
-  - 기존 시리즈 (22개): eks-troubleshooting (9), game-server (7), istio-ambient (7), rust-cs-layer (7), packet-journey (6), argocd-troubleshooting (5), challenge-2-wealist-migration (5), istio-traffic (5), kernel-runtime-tradeoffs-2 (5), kernel-runtime-tradeoffs-3 (5), kernel-runtime-tradeoffs-4 (5), kernel-runtime-tradeoffs-5 (5), kernel-runtime-tradeoffs-6 (5), istio-observability (4), istio-security (4), kernel-runtime-tradeoffs-1 (4), istio-intro (3), kernel-runtime-tradeoffs-7 (3), queue-poc-loadtest (3), eks-security (2), observability (2), eks-infra (1)
-- **월별 분포**: 2025-10: 15 / 2025-11: 1 / 2025-12: 33 / 2026-01: 9 / 2026-02: 28 / 2026-03: 81 / 2026-04: 141 / 2026-06: 19 / 2026-07: 27
+  - 기존 시리즈 (23개): k8s-theory-api (16), eks-troubleshooting (9), game-server (7), istio-ambient (7), rust-cs-layer (7), packet-journey (6), argocd-troubleshooting (5), challenge-2-wealist-migration (5), istio-traffic (5), kernel-runtime-tradeoffs-2 (5), kernel-runtime-tradeoffs-3 (5), kernel-runtime-tradeoffs-4 (5), kernel-runtime-tradeoffs-5 (5), kernel-runtime-tradeoffs-6 (5), istio-observability (4), istio-security (4), kernel-runtime-tradeoffs-1 (4), istio-intro (3), kernel-runtime-tradeoffs-7 (3), queue-poc-loadtest (3), eks-security (2), observability (2), eks-infra (1)
+- **월별 분포**: 2025-10: 15 / 2025-11: 1 / 2025-12: 33 / 2026-01: 9 / 2026-02: 28 / 2026-03: 81 / 2026-04: 141 / 2026-06: 19 / 2026-07: 27 / 2026-10: 16
 - **go-ti 태그 필터**: 모든 goti 글은 `tags[0] == "go-ti"`로 `/blog?tag=go-ti` 한 번에 조회 가능
 <!-- STATS:END -->
 
@@ -169,13 +169,23 @@ date: "2025-01-01"
 
 # 블로그 글 작성 핵심 규칙
 
-> 모든 글에 항상 적용되는 절대 규칙. 변환 절차·섹션 템플릿·설명 분량 가이드 등 상세는 `.claude/skills/draft-to-post/SKILL.md` 참조.
+> 글을 작성·변환·검토하기 전에 [공통 말투·편집 기준](docs/writing-voice.md)을 반드시 읽습니다
+> Codex의 AGENTS.md와 같은 문서를 참조합니다. 문체·설명 분량은 이 공통 문서가 기존 스킬·시리즈 plan의 문체 예시보다 우선합니다
+> 변환 절차는 `.claude/skills/draft-to-post/SKILL.md`, 검토는 `.claude/agents/blog-reviewer.md`를 따릅니다
+
+## 말투 보존과 편집
+
+- 원본의 상황·의문·확인 결과·선택 이유를 살립니다. `저는`, `저희는`, `~하다 보니`, `~해봤습니다`를 보고서식 명사형으로 바꾸지 않습니다
+- 원본에 없는 경험·감정·실패·대안·수치를 만들지 않습니다. 개념 글에 개인 서사를 강제하지 않습니다
+- 과장·직역·근거 없는 단정·반복 안내·설명 없는 내부 용어를 점검합니다. 기술 용어·기전·조건은 정확하게 보존합니다
+- 표 아래 문단 수, 도입·마무리 문장, 요약·교훈 개수를 강제하지 않습니다. 독자가 놓칠 조건과 관계를 설명하고 중복은 덜어냅니다
+- 검토 결과는 원문·문제 이유·최소 수정안으로 제시합니다. AI 작성 여부나 사용 비율을 추정하지 않습니다
 
 ## 절대 규칙
 
-- **격식체 100%**: ~합니다, ~입니다, ~했습니다 (해요체·반말체 0건)
+- **본문 서술은 격식체**: ~합니다, ~입니다, ~했습니다. 원본의 짧은 독백·질문은 인용으로 보존할 수 있습니다
 - **문장·문단·bullet 끝 마침표(.) 생략** — URL/버전/소수점/약어/코드블록 내부는 예외, `?`/`!`는 유지
-- **한 문장 50자 이내 권장**, 간결하게
+- **한 문장 50자는 참고치**. 짧은 문장과 이유를 설명하는 문장을 섞고, 길이를 맞추려고 조건·인과관계를 자르지 않습니다
 - **모든 코드 블록에 언어 명시**: ` ```bash`, ` ```yaml`, ` ```python`, 로그/에러는 ` ```text`
 - **요청 없는 장황한 서론/결론 금지**
 
@@ -201,4 +211,4 @@ date: "2025-01-01"
 
 ---
 
-*버전: 2.0 | 디렉토리 SSOT 도입(2026-05-08) — 어조·어휘·ASCII 정책 압축, 상세 절차는 skill로 이동*
+*버전: 2.1 | 최종 수정: 2026-10-21 — Codex·Claude 공통 말투·편집 기준 연결*

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" role="img" aria-labelledby="title desc"><title id="title">관리 단위를 바꾸면 기존 기록의 의미도 바뀝니다</title><desc id="desc">필드별 관리에서 atomic으로 바꾸면 기존 일부 필드 소유자가 전체를 소유한다. 반대로 atomic 맵을 granular로 바꾸면 맵 자체 소유는 남아도 내부 키의 소유권을 복원하지 못할 수 있다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="560" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">관리 단위를 바꾸면 기존 기록의 의미도 바뀝니다</text>
+<path d="M 344 160 H 456" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 344 376 H 456" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="40" y="104" width="304" height="112" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="192.0" y="156.0" font-size="19" fill="#6D28D9" text-anchor="middle">필드별 관리</text><text x="192.0" y="182.0" font-size="16" fill="#6D28D9" text-anchor="middle">A가 내부 key1 소유</text>
+<rect x="456" y="104" width="304" height="112" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="608.0" y="156.0" font-size="19" fill="#6D28D9" text-anchor="middle">전체를 atomic으로 관리</text><text x="608.0" y="182.0" font-size="16" fill="#6D28D9" text-anchor="middle">A의 소유 범위가 전체로 확대</text>
+<text x="400" y="256" font-size="18" fill="#BE123C" text-anchor="middle">전에 따로 바꾸던 부분도 충돌할 수 있습니다</text>
+<rect x="40" y="320" width="304" height="112" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="192.0" y="372.0" font-size="19" fill="#6D28D9" text-anchor="middle">전체를 atomic으로 관리</text><text x="192.0" y="398.0" font-size="16" fill="#6D28D9" text-anchor="middle">A가 data 전체 소유</text>
+<rect x="456" y="320" width="304" height="112" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="608.0" y="372.0" font-size="19" fill="#BE123C" text-anchor="middle">필드별 granular 관리</text><text x="608.0" y="398.0" font-size="16" fill="#BE123C" text-anchor="middle">내부 key1 · key2 소유는 추론 못 함</text>
+<text x="400" y="480" font-size="17" fill="#27272A" text-anchor="middle">맵 자체 소유는 남더라도 내부 키는 충돌 없이 바뀔 수 있습니다</text>
+<text x="400" y="520" font-size="17" fill="#27272A" text-anchor="middle">충돌이 없다는 사실만으로 소유권 보존을 판단하지 않습니다</text>
+</g></svg>

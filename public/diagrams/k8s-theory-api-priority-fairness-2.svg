@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title-2 desc-2">
+<title id="title-2">쓰기 후속 비용의 폭과 시간 조정</title>
+<desc id="desc-2">관심 watcher 1000개, 요청당 상한 10자리를 가정합니다. 초기 후속 추정 100자리 곱하기 5밀리초는 상한 적용 뒤 10자리 곱하기 50밀리초가 되어 500 seat-ms를 유지합니다. 두 사각형은 같은 척도로 그렸습니다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+<rect width="800" height="480" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+<text x="40" y="42" font-size="23" text-anchor="start" fill="#0A0A0A" font-weight="700"><tspan x="40" dy="0">자리를 줄여도 후속 작업량은 유지합니다</tspan></text>
+<text x="40" y="72" font-size="15" text-anchor="start" fill="#475569" font-weight="400"><tspan x="40" dy="0">계산 예시: 관심 watcher 1000개 · 요청당 상한 10자리</tspan></text>
+<rect x="48" y="104" width="336" height="312" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="72" y="136" font-size="18" text-anchor="start" fill="#6D28D9" font-weight="600"><tspan x="72" dy="0">상한 적용 전</tspan></text>
+<path d="M80 374 H380" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="416" y="104" width="336" height="312" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="440" y="136" font-size="18" text-anchor="start" fill="#047857" font-weight="600"><tspan x="440" dy="0">상한 적용 후</tspan></text>
+<path d="M448 374 H748" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="184" y="193" font-size="20" text-anchor="middle" fill="#6D28D9" font-weight="600"><tspan x="184" dy="0">100자리</tspan><tspan x="184" dy="23">× 5ms</tspan></text>
+<rect x="80" y="166" width="30" height="200" fill="#7C3AED"/>
+<text x="584" y="272" font-size="20" text-anchor="middle" fill="#047857" font-weight="600"><tspan x="584" dy="0">10자리</tspan><tspan x="584" dy="23">× 50ms</tspan></text>
+<rect x="448" y="346" width="300" height="20" fill="#059669"/>
+<text x="80" y="399" font-size="14" text-anchor="start" fill="#475569" font-weight="400"><tspan x="80" dy="0">후속 시간</tspan></text>
+<text x="448" y="399" font-size="14" text-anchor="start" fill="#475569" font-weight="400"><tspan x="448" dy="0">후속 시간</tspan></text>
+<text x="400" y="451" font-size="18" text-anchor="middle" fill="#0A0A0A" font-weight="600"><tspan x="400" dy="0">두 면적은 모두 500 seat-ms입니다</tspan></text>
+</g>
+</svg>

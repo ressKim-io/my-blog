@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 536" role="img" aria-labelledby="title desc">
+<title id="title">삭제를 늦추는 두 경로</title><desc id="desc">finalizer를 관리하는 컨트롤러의 정리와 Pod 유예 종료를 처리하는 kubelet은 서로 다른 주체다. 각각 후속 API 요청이 저장소 삭제로 이어지며 다른 보류 조건도 충족해야 한다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#475569"/></marker></defs>
+<style>text{font-family:'Pretendard',system-ui,sans-serif;fill:#0A0A0A}.title{font-size:23px;font-weight:700}.label{font-size:16px}.small{font-size:14px;fill:#27272A}.node-title{font-size:17px;font-weight:650}.arrow{fill:none;stroke:#475569;stroke-width:1.8;marker-end:url(#arrow)}</style>
+<rect width="960" height="536" rx="16" fill="#FAFAFA"/>
+<text x="28" y="39" class="title" text-anchor="start">DELETE 요청 뒤에도 객체를 남기는 두 경로</text>
+<text x="28" y="78" class="node-title" text-anchor="start">finalizer 경로</text>
+<path d="M228 164 L260 164" class="arrow"/>
+<path d="M464 164 L496 164" class="arrow"/>
+<path d="M700 164 L732 164" class="arrow"/>
+<rect x="24" y="108" width="204" height="112" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="126.0" y="137" class="node-title" text-anchor="middle">API 서버</text>
+<text x="126.0" y="165" class="small" text-anchor="middle">삭제 시작을 기록</text>
+<text x="126.0" y="189" class="small" text-anchor="middle">deletionTimestamp 설정</text>
+<rect x="260" y="108" width="204" height="112" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="362.0" y="137" class="node-title" text-anchor="middle">API에 남은 객체</text>
+<text x="362.0" y="165" class="small" text-anchor="middle">finalizers가 남아</text>
+<text x="362.0" y="189" class="small" text-anchor="middle">저장소 삭제 보류</text>
+<rect x="496" y="108" width="204" height="112" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+<text x="598.0" y="137" class="node-title" text-anchor="middle">정리 담당 컨트롤러</text>
+<text x="598.0" y="165" class="small" text-anchor="middle">맡은 자원을 정리</text>
+<text x="598.0" y="189" class="small" text-anchor="middle">자기 finalizer 제거 요청</text>
+<rect x="732" y="108" width="204" height="112" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="834.0" y="137" class="node-title" text-anchor="middle">API 서버</text>
+<text x="834.0" y="165" class="small" text-anchor="middle">다른 보류 조건도 해소</text>
+<text x="834.0" y="189" class="small" text-anchor="middle">저장소에서 삭제</text>
+<text x="28" y="277" class="node-title" text-anchor="start">Pod 유예 종료 경로</text>
+<path d="M228 363 L260 363" class="arrow"/>
+<path d="M464 363 L496 363" class="arrow"/>
+<path d="M700 363 L732 363" class="arrow"/>
+<rect x="24" y="307" width="204" height="112" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="126.0" y="336" class="node-title" text-anchor="middle">API 서버</text>
+<text x="126.0" y="364" class="small" text-anchor="middle">종료 예정 시각과</text>
+<text x="126.0" y="388" class="small" text-anchor="middle">유예 기간을 기록</text>
+<rect x="260" y="307" width="204" height="112" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="362.0" y="336" class="node-title" text-anchor="middle">API에 남은 Pod</text>
+<text x="362.0" y="364" class="small" text-anchor="middle">kubelet이 변경을 관찰</text>
+<text x="362.0" y="388" class="small" text-anchor="middle">종료 처리를 시작</text>
+<rect x="496" y="307" width="204" height="112" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+<text x="598.0" y="336" class="node-title" text-anchor="middle">kubelet</text>
+<text x="598.0" y="364" class="small" text-anchor="middle">종료 완료 확인 후 DELETE</text>
+<text x="598.0" y="388" class="small" text-anchor="middle">grace=0 + UID 조건</text>
+<rect x="732" y="307" width="204" height="112" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="834.0" y="336" class="node-title" text-anchor="middle">API 서버</text>
+<text x="834.0" y="364" class="small" text-anchor="middle">검증·보류 조건 확인</text>
+<text x="834.0" y="388" class="small" text-anchor="middle">저장소에서 삭제</text>
+<text x="28" y="469" class="node-title" text-anchor="start">두 경로는 함께 적용될 수 있습니다</text>
+<text x="28" y="499" class="small" text-anchor="start">유예 기간이 0이어도 finalizer가 남으면 보류될 수 있으며, 시각이 지났다는 것만으로 삭제되지는 않습니다</text>
+</svg>

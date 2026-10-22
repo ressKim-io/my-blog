@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 704" role="img" aria-labelledby="title desc">
+<title id="title">Pod의 토큰 발급과 인증</title>
+<desc id="desc">ServiceAccount admission은 Pod 명세를 바꾸고 kubelet은 TokenRequest로 토큰을 받아 파일을 쓴다. 앱이 읽어 보낸 토큰을 인증기가 user.Info로 바꾼다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#334155"/></marker></defs>
+<rect width="720" height="704" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" font-size="18" fill="#0A0A0A">
+<text x="360" y="40" text-anchor="middle" font-size="22" fill="#0A0A0A" font-weight="600"><tspan x="360" dy="0">명세·파일·HTTP 요청·신원을 만드는 주체</tspan></text>
+<rect x="120" y="80" width="480" height="68" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="360.0" y="107.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="360.0" dy="0">ServiceAccount admission</tspan><tspan x="360.0" dy="26">Pod에 projected volume 명세 추가</tspan></text>
+<path d="M360 148 L360 196" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5 4"/>
+<rect x="120" y="196" width="480" height="72" rx="10" stroke="#059669" stroke-width="1.5" fill="#ECFDF5"/>
+<text x="360.0" y="225.0" text-anchor="middle" font-size="18" fill="#047857"><tspan x="360.0" dy="0">kubelet ↔ API 서버 TokenRequest</tspan><tspan x="360.0" dy="26">발급받은 토큰을 파일에 투영·갱신</tspan></text>
+<path d="M360 268 L360 324" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="482" y="306" text-anchor="middle" font-size="17" fill="#334155"><tspan x="482" dy="0">토큰 파일</tspan></text>
+<rect x="120" y="324" width="480" height="72" rx="10" stroke="#475569" stroke-width="1.5" fill="#F8FAFC"/>
+<text x="360.0" y="353.0" text-anchor="middle" font-size="18" fill="#334155"><tspan x="360.0" dy="0">애플리케이션</tspan><tspan x="360.0" dy="26">파일 재읽기 → Authorization: Bearer</tspan></text>
+<path d="M360 396 L360 452" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="478" y="432" text-anchor="middle" font-size="17" fill="#334155"><tspan x="478" dy="0">API 요청</tspan></text>
+<rect x="120" y="452" width="480" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="360.0" y="481.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="360.0" dy="0">API 서버 인증기</tspan><tspan x="360.0" dy="26">JWT 조건·bound object 상태 확인</tspan></text>
+<path d="M360 524 L360 580" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="462" y="560" text-anchor="middle" font-size="17" fill="#334155"><tspan x="462" dy="0">user.Info</tspan></text>
+<rect x="120" y="580" width="480" height="64" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="360.0" y="618.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="360.0" dy="0">인가: 이 신원으로 요청을 허용할까?</tspan></text>
+<text x="360" y="680" text-anchor="middle" font-size="16" fill="#334155"><tspan x="360" dy="0">점선: Pod 명세가 실제 실행에 반영되는 후속 과정</tspan></text>
+</g>
+</svg>

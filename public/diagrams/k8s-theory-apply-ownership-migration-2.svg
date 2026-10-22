@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc"><title id="title">같은 매니페스트와 같은 최종 상태는 다릅니다</title><desc id="desc">반복 Apply에서도 공동 소유나 admission 결과가 달라지면 쓰기가 생길 수 있다. 값과 소유권이 같고 시각만 다르면 기존 시각을 복구하며, 저장소는 직렬화 데이터와 현재 상태를 확인해 쓰기를 생략할 수 있다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="600" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">같은 매니페스트와 같은 최종 상태는 다릅니다</text>
+<path d="M 304 136 V 176" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 304 256 V 320" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 304 400 V 464" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 512 216 H 584" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="96" y="64" width="416" height="72" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="304.0" y="96.0" font-size="19" fill="#0E7490" text-anchor="middle">같은 설정으로 Apply</text><text x="304.0" y="122.0" font-size="16" fill="#0E7490" text-anchor="middle">병합 · 소유권 · admission 결과 계산</text>
+<rect x="96" y="176" width="416" height="80" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="304.0" y="212.0" font-size="19" fill="#334155" text-anchor="middle">값과 소유권이 같은가?</text><text x="304.0" y="238.0" font-size="16" fill="#334155" text-anchor="middle">시각만 바뀐 경우</text>
+<rect x="584" y="176" width="176" height="80" rx="10" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/><text x="672.0" y="212.0" font-size="19" fill="#BE123C" text-anchor="middle">다른 변화 있음</text><text x="672.0" y="238.0" font-size="16" fill="#BE123C" text-anchor="middle">쓰기가 생길 수 있음</text>
+<rect x="96" y="320" width="416" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="304.0" y="356.0" font-size="19" fill="#047857" text-anchor="middle">기존 managedFields 시각 복구</text><text x="304.0" y="382.0" font-size="16" fill="#047857" text-anchor="middle">기본 최적화 경로</text>
+<rect x="96" y="464" width="416" height="80" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="304.0" y="500.0" font-size="19" fill="#6D28D9" text-anchor="middle">저장소 동일성 검사</text><text x="304.0" y="526.0" font-size="16" fill="#6D28D9" text-anchor="middle">조건이 맞으면 etcd 쓰기 생략</text>
+<text x="424" y="292" font-size="16" fill="#047857" text-anchor="start">같음</text>
+<text x="552" y="152" font-size="16" fill="#BE123C" text-anchor="start">다름</text>
+<text x="584" y="368" font-size="15" fill="#27272A" text-anchor="start">저장 데이터와 현재 상태도</text>
+<text x="584" y="394" font-size="15" fill="#27272A" text-anchor="start">같아야 생략할 수 있습니다</text>
+</g></svg>

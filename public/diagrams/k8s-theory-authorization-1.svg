@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" role="img" aria-labelledby="title desc">
+<title id="title">authorizer 체인의 첫 결론</title>
+<desc id="desc">일반 Authorize 경로에서 Allow와 Deny는 체인을 멈추고 NoOpinion만 다음 authorizer로 넘긴다. Decision과 별도의 오류는 본문 표로 설명한다.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#334155"/></marker></defs>
+<rect width="720" height="640" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" font-size="18" fill="#0A0A0A">
+<text x="360" y="40" text-anchor="middle" font-size="22" fill="#0A0A0A" font-weight="600"><tspan x="360" dy="0">첫 Allow·Deny에서 종료</tspan></text>
+<rect x="64" y="88" width="592" height="64" rx="10" stroke="#475569" stroke-width="1.5" fill="#F8FAFC"/>
+<text x="360.0" y="126.0" text-anchor="middle" font-size="18" fill="#334155"><tspan x="360.0" dy="0">인증된 user.Info + 요청 속성</tspan></text>
+<path d="M360 152 L360 176 L216 176 L216 200" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="80" y="200" width="272" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="216.0" y="242.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="216.0" dy="0">authorizer A</tspan></text>
+<path d="M352 236 L416 236" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="416" y="200" width="224" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="528.0" y="229.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="528.0" dy="0">Allow / Deny</tspan><tspan x="528.0" dy="26">체인 종료</tspan></text>
+<path d="M216 272 L216 352" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="310" y="316" text-anchor="middle" font-size="17" fill="#334155"><tspan x="310" dy="0">NoOpinion</tspan></text>
+<rect x="80" y="352" width="272" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="216.0" y="394.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="216.0" dy="0">authorizer B</tspan></text>
+<path d="M352 388 L416 388" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="416" y="352" width="224" height="72" rx="10" stroke="#E11D48" stroke-width="1.5" fill="#FFF1F2"/>
+<text x="528.0" y="381.0" text-anchor="middle" font-size="18" fill="#BE123C"><tspan x="528.0" dy="0">Allow / Deny</tspan><tspan x="528.0" dy="26">체인 종료</tspan></text>
+<path d="M216 424 L216 504" fill="none" stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="310" y="468" text-anchor="middle" font-size="17" fill="#334155"><tspan x="310" dy="0">NoOpinion</tspan></text>
+<rect x="80" y="504" width="560" height="72" rx="10" stroke="#475569" stroke-width="1.5" fill="#F8FAFC"/>
+<text x="360.0" y="533.0" text-anchor="middle" font-size="18" fill="#334155"><tspan x="360.0" dy="0">다음 authorizer 또는 체인 끝</tspan><tspan x="360.0" dy="26">끝까지 NoOpinion: 오류 유무에 따라 403·500</tspan></text>
+<text x="360" y="615" text-anchor="middle" font-size="17" fill="#334155"><tspan x="360" dy="0">Decision과 호출 오류는 별도 반환값</tspan></text>
+</g>
+</svg>

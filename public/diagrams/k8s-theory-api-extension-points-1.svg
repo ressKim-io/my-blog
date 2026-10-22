@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 624" role="img" aria-labelledby="title desc"><title id="title">새 API를 누가 저장하고 응답하는가</title><desc id="desc">클라이언트가 같은 kube-apiserver 주소로 요청해도 CRD는 일반 저장과 서빙 구현이 맡고 aggregated API는 aggregation layer가 별도 확장 서버로 전달한다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker><marker id="rose-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#BE123C"/></marker></defs>
+<rect width="800" height="624" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="32" y="40" font-size="23" fill="#0A0A0A" text-anchor="start">새 API를 누가 저장하고 응답하는가</text>
+<path d="M 400 136 V 192" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 264 V 304 H 200 V 352" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 400 304 H 600 V 352" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 200 432 V 496" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<path d="M 600 432 V 496" fill="none" stroke="#334155" stroke-width="2"  marker-end="url(#arrow)"/>
+<rect x="256" y="72" width="288" height="64" rx="10" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/><text x="400.0" y="100.0" font-size="19" fill="#0E7490" text-anchor="middle">클라이언트</text><text x="400.0" y="126.0" font-size="16" fill="#0E7490" text-anchor="middle">새 리소스 요청</text>
+<rect x="256" y="192" width="288" height="72" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="400.0" y="224.0" font-size="19" fill="#047857" text-anchor="middle">kube-apiserver</text><text x="400.0" y="250.0" font-size="16" fill="#047857" text-anchor="middle">요청 경로로 처리 주체 결정</text>
+<rect x="40" y="352" width="320" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="200.0" y="388.0" font-size="19" fill="#047857" text-anchor="middle">CRD로 정의한 타입</text><text x="200.0" y="414.0" font-size="16" fill="#047857" text-anchor="middle">일반 저장 · 서빙 구현</text>
+<rect x="440" y="352" width="320" height="80" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/><text x="600.0" y="388.0" font-size="19" fill="#047857" text-anchor="middle">APIService로 등록한 타입</text><text x="600.0" y="414.0" font-size="16" fill="#047857" text-anchor="middle">aggregation layer가 프록시</text>
+<rect x="40" y="496" width="320" height="72" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/><text x="200.0" y="528.0" font-size="19" fill="#6D28D9" text-anchor="middle">클러스터의 일반 저장소</text><text x="200.0" y="554.0" font-size="16" fill="#6D28D9" text-anchor="middle">객체 저장</text>
+<rect x="440" y="496" width="320" height="72" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/><text x="600.0" y="528.0" font-size="19" fill="#334155" text-anchor="middle">별도 확장 API 서버</text><text x="600.0" y="554.0" font-size="16" fill="#334155" text-anchor="middle">직접 구현한 동작 · 저장 방식</text>
+<text x="400" y="608" font-size="17" fill="#27272A" text-anchor="middle">타입 등록과 그 상태에 반응하는 controller 구현은 별개입니다</text>
+</g></svg>
