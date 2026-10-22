@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 456" role="img" aria-labelledby="title desc">
+  <title id="title">Deployment의 템플릿별 ReplicaSet과 Pod 집합</title>
+  <desc id="desc">Deployment의 공통 selector 아래 해시 라벨이 다른 두 ReplicaSet이 있습니다. Deployment는 각 집합의 목표 수를 조정하고 ReplicaSet은 자기 Pod 수를 유지합니다. 해시 A와 B는 설명을 위한 기호입니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="456" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+    <text x="32" y="40" font-size="22" font-weight="700">템플릿별 집합을 나누고 목표 수를 조정합니다</text>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M400 144V168H200V216"/><path d="M400 168H600V216"/>
+      <path d="M200 304V344"/><path d="M600 304V344"/>
+    </g>
+    <rect x="248" y="72" width="304" height="72" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="400" y="102" text-anchor="middle" font-size="19" font-weight="700">Deployment</text>
+    <text x="400" y="128" text-anchor="middle" font-size="16">selector: app=web</text>
+    <text x="56" y="196" font-size="15" fill="#334155">목표 수 축소</text>
+    <text x="624" y="196" font-size="15" fill="#334155">목표 수 증설</text>
+    <rect x="40" y="216" width="320" height="88" rx="12" fill="#F8FAFC" stroke="#475569"/>
+    <rect x="440" y="216" width="320" height="88" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="200" y="248" text-anchor="middle" font-size="19" font-weight="700">기존 ReplicaSet</text>
+    <text x="600" y="248" text-anchor="middle" font-size="19" font-weight="700">새 ReplicaSet</text>
+    <text x="200" y="278" text-anchor="middle" font-size="15">app=web + pod-template-hash=A</text>
+    <text x="600" y="278" text-anchor="middle" font-size="15">app=web + pod-template-hash=B</text>
+    <rect x="40" y="344" width="320" height="64" rx="12" fill="#F8FAFC" stroke="#475569"/>
+    <rect x="440" y="344" width="320" height="64" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="200" y="383" text-anchor="middle" font-size="17">템플릿 A의 Pod 집합</text>
+    <text x="600" y="383" text-anchor="middle" font-size="17">템플릿 B의 Pod 집합</text>
+    <text x="32" y="438" font-size="15" fill="#334155">ReplicaSet은 자기 집합의 수를 유지합니다 · A/B는 해시를 나타내는 예시 기호입니다</text>
+  </g>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 376" role="img" aria-labelledby="title desc">
+  <title id="title">undo 뒤 revision은 이전 번호로 돌아가지 않습니다</title>
+  <desc id="desc">예시에서 템플릿 A revision 1을 B revision 2로 갱신합니다. undo는 A를 현재 템플릿으로 적용하고 새 revision 3으로 진행합니다. A의 기존 ReplicaSet이 남아 있으면 재사용할 수 있습니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="376" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+    <text x="32" y="40" font-size="22" font-weight="700">이전 템플릿을 적용해도 revision은 앞으로 갑니다</text>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M240 168H288"/><path d="M512 168H560"/>
+    </g>
+    <rect x="32" y="104" width="208" height="128" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <rect x="288" y="104" width="224" height="128" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <rect x="560" y="104" width="208" height="128" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <g text-anchor="middle">
+      <text x="136" y="143" font-size="20" font-weight="700">템플릿 A</text>
+      <text x="400" y="143" font-size="20" font-weight="700">템플릿 B</text>
+      <text x="664" y="143" font-size="20" font-weight="700">템플릿 A</text>
+      <text x="136" y="182" font-size="18">revision 1</text>
+      <text x="400" y="182" font-size="18">revision 2</text>
+      <text x="664" y="182" font-size="18">revision 3</text>
+      <text x="264" y="88" font-size="15">갱신</text>
+      <text x="536" y="88" font-size="15">undo</text>
+    </g>
+    <text x="32" y="282" font-size="16">undo가 바꾸는 것: 현재 spec.template과 복원 대상 annotation</text>
+    <text x="32" y="314" font-size="16">현재 replicas·strategy는 유지 · A의 ReplicaSet이 남아 있으면 재사용 가능</text>
+    <text x="32" y="352" font-size="15" fill="#334155">revision 1·2·3은 동작을 설명하는 예시입니다</text>
+  </g>
+</svg>

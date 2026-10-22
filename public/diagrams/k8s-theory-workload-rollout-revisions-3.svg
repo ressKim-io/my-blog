@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 584" role="img" aria-labelledby="title desc">
+  <title id="title">DaemonSet의 대상 노드 결정과 스케줄러 검사의 분리</title>
+  <desc id="desc">DaemonSet 컨트롤러는 원래 배치 조건으로 대상 노드를 고르고 필수 affinity를 그 노드 이름으로 대체한 Pod를 만듭니다. 스케줄러가 해당 노드의 자원 적합성 등을 검사하므로 노드가 부족하면 Pod가 Pending에 남을 수 있습니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="584" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+    <text x="32" y="40" font-size="22" font-weight="700">대상 노드를 골라도 자원 적합성 검사는 남습니다</text>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M400 176V248"/><path d="M400 344V416"/>
+    </g>
+    <rect x="104" y="72" width="592" height="104" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="128" y="104" font-size="19" font-weight="700">DaemonSet 컨트롤러: 대상 노드 판정</text>
+    <text x="128" y="137" font-size="16">nodeName · nodeSelector / 필수 affinity · taint / toleration</text>
+    <text x="128" y="162" font-size="15">CPU·메모리 여유는 이 판정에서 검사하지 않음</text>
+    <rect x="416" y="196" width="216" height="32" rx="4" fill="#FAFAFA"/>
+    <text x="424" y="218" font-size="15">대상 노드용 Pod 생성</text>
+    <rect x="104" y="248" width="592" height="96" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="128" y="280" font-size="19" font-weight="700">생성 Pod: 필수 affinity를 노드 이름으로 대체</text>
+    <text x="128" y="315" font-size="16">matchFields: metadata.name In [node-3]</text>
+    <rect x="416" y="364" width="216" height="32" rx="4" fill="#FAFAFA"/>
+    <text x="424" y="386" font-size="15">스케줄링 큐에서 처리</text>
+    <rect x="104" y="416" width="592" height="96" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="128" y="448" font-size="19" font-weight="700">스케줄러: 지정된 노드에서 배치 조건 검사</text>
+    <text x="128" y="483" font-size="16">조건 충족 → 바인딩 / 자원 부족 등 → Pending 가능</text>
+    <text x="32" y="554" font-size="15" fill="#334155">노드 이름 affinity가 대상을 한정하므로 자리가 없어도 다른 노드로 옮기지 않습니다</text>
+  </g>
+</svg>
