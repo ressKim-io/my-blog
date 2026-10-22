@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 552" role="img" aria-labelledby="title desc">
+  <title id="title">QoS 부모와 Pod·컨테이너 cgroup의 제어 범위</title>
+  <desc id="desc">kubepods 루트 아래 Guaranteed Pod는 바로 놓입니다. Burstable과 BestEffort는 별도 QoS 부모 아래 Pod cgroup을 놓고, 각 Pod 안의 컨테이너는 개별 cgroup을 가집니다. 상위 제어는 하위에도 적용됩니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="552" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A">
+    <text x="32" y="40" font-size="22" font-weight="700">부모의 제약은 하위 범위에도 적용합니다</text>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M400 136V168H152V280"/>
+      <path d="M400 136V192"/>
+      <path d="M400 168H648V192"/>
+      <path d="M400 248V280"/>
+      <path d="M648 248V280"/>
+    </g>
+    <rect x="280" y="72" width="240" height="64" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="400" y="112" text-anchor="middle" font-size="20" font-weight="700">kubepods 루트</text>
+    <text x="32" y="208" font-size="15" fill="#334155">별도 QoS<tspan x="32" dy="24">부모 없음</tspan></text>
+    <rect x="288" y="192" width="224" height="56" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="400" y="227" text-anchor="middle" font-size="19" font-weight="700">Burstable 부모</text>
+    <rect x="536" y="192" width="224" height="56" rx="12" fill="#F8FAFC" stroke="#475569"/>
+    <text x="648" y="227" text-anchor="middle" font-size="19" font-weight="700">BestEffort 부모</text>
+    <g fill="#ECFDF5" stroke="#059669">
+      <rect x="40" y="280" width="224" height="176" rx="12"/>
+      <rect x="288" y="280" width="224" height="176" rx="12"/>
+      <rect x="536" y="280" width="224" height="176" rx="12"/>
+    </g>
+    <g text-anchor="middle" font-size="18" font-weight="700">
+      <text x="152" y="315">Guaranteed Pod</text>
+      <text x="400" y="315">Burstable Pod</text>
+      <text x="648" y="315">BestEffort Pod</text>
+    </g>
+    <g fill="#FAFAFA" stroke="#059669">
+      <rect x="56" y="344" width="192" height="80" rx="8"/>
+      <rect x="304" y="344" width="192" height="80" rx="8"/>
+      <rect x="552" y="344" width="192" height="80" rx="8"/>
+    </g>
+    <g text-anchor="middle" font-size="16">
+      <text x="152" y="376">컨테이너별 cgroup</text><text x="152" y="403">개별 자원 제어</text>
+      <text x="400" y="376">컨테이너별 cgroup</text><text x="400" y="403">개별 자원 제어</text>
+      <text x="648" y="376">컨테이너별 cgroup</text><text x="648" y="403">개별 자원 제어</text>
+    </g>
+    <text x="32" y="496" font-size="15" fill="#334155">Pod 범위와 컨테이너 범위는 다릅니다 · 그림은 systemd의 실제 slice 경로가 아닙니다</text>
+    <text x="32" y="525" font-size="15" fill="#334155">BestEffort 부모의 CPU 가중치: shares 2 → 이 Pod cgroup v2 변환에서는 weight 1</text>
+  </g>
+</svg>
