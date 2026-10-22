@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 736" role="img" aria-labelledby="title-1 desc-1">
+  <title id="title-1">kubelet의 첫 클라이언트 인증서 발급</title>
+  <desc id="desc-1">kubelet은 bootstrap token으로 인증하고 CSR 생성 권한을 사용합니다. 자동 승인 컨트롤러는 CSR 요청자의 nodeclient 자격을 되묻고 승인 결과를 기록합니다. 서명 컨트롤러가 발급 결과를 기록하면 kubelet이 인증서를 사용합니다</desc>
+  <defs><marker id="arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#0A0A0A"/></marker></defs>
+  <rect width="800" height="736" rx="16" fill="#FAFAFA"/>
+  <g font-family="'Pretendard', system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="400" y="40" font-size="21" font-weight="700">kubelet의 첫 인증서: 생성 · 승인 · 서명</text>
+    <g fill="none" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-1)">
+      <path d="M400 160V208"/><path d="M400 288V336"/><path d="M400 432V480"/><path d="M400 560V608"/>
+    </g>
+    <g font-size="14" fill="#27272A" text-anchor="start">
+      <text x="416" y="191">bootstrap token으로 CSR 생성 요청</text>
+      <text x="416" y="319">저장된 CSR을 읽음</text>
+      <text x="416" y="463">/approval에 Approved 기록</text>
+      <text x="416" y="591">/status에 발급 인증서 기록</text>
+    </g>
+    <rect x="160" y="80" width="480" height="80" rx="12" stroke="#0891B2" fill="#ECFEFF"/>
+    <text x="400" y="111" font-size="18" font-weight="700" fill="#0E7490">kubelet</text>
+    <text x="400" y="140" font-size="15">첫 인증서 전의 자격증명: bootstrap token</text>
+    <rect x="160" y="208" width="480" height="80" rx="12" stroke="#E11D48" fill="#FFF1F2"/>
+    <text x="400" y="239" font-size="18" font-weight="700" fill="#BE123C">API 서버</text>
+    <text x="400" y="268" font-size="15">인증 + 실제 CSR의 create 인가</text>
+    <rect x="160" y="336" width="480" height="96" rx="12" stroke="#E11D48" fill="#FFF1F2"/>
+    <text x="400" y="367" font-size="18" font-weight="700" fill="#BE123C">자동 승인 컨트롤러</text>
+    <text x="400" y="396" font-size="15"><tspan x="400">CSR 요청자의 nodeclient 권한을 SAR로 확인</tspan><tspan x="400" dy="22">컨트롤러의 approve 권한으로 승인 기록</tspan></text>
+    <rect x="160" y="480" width="480" height="80" rx="12" stroke="#E11D48" fill="#FFF1F2"/>
+    <text x="400" y="511" font-size="18" font-weight="700" fill="#BE123C">서명 컨트롤러</text>
+    <text x="400" y="540" font-size="15">승인된 요청에 CA 서명 · sign 권한 필요</text>
+    <rect x="160" y="608" width="480" height="80" rx="12" stroke="#0891B2" fill="#ECFEFF"/>
+    <text x="400" y="639" font-size="18" font-weight="700" fill="#0E7490">kubelet</text>
+    <text x="400" y="668" font-size="15">발급받은 클라이언트 인증서로 API에 접속</text>
+  </g>
+</svg>

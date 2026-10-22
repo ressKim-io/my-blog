@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title desc">
+<title id="title">같은 호스트 장애가 세 역할에 미치는 영향</title><desc id="desc">etcd와 컨트롤 플레인을 함께 둔 호스트가 멈추면 저장 합의, 요청 분배, 조정 리더를 각각 확인합니다</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+<rect width="800" height="520" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif">
+<text x="400" y="44" text-anchor="middle" font-size="23" font-weight="700" fill="#0A0A0A"><tspan x="400" dy="0">노드 하나가 멈추면 세 역할을 따로 확인합니다</tspan></text>
+<rect x="216" y="82" width="368" height="66" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+<text x="400.0" y="121.0" text-anchor="middle" font-size="17" font-weight="600" fill="#334155"><tspan x="400.0" dy="0">etcd와 제어 구성요소가 함께 있던 호스트</tspan></text>
+<path d="M400 148 V180 H145 V212" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M400 180 V212" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M400 180 H655 V212" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="32" y="216" width="226" height="84" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="145.0" y="252.0" text-anchor="middle" font-size="17" font-weight="600" fill="#6D28D9"><tspan x="145.0" dy="0">etcd 멤버 상실</tspan><tspan x="145.0" dy="25">저장 합의</tspan></text>
+<rect x="287" y="216" width="226" height="84" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="400.0" y="252.0" text-anchor="middle" font-size="17" font-weight="600" fill="#047857"><tspan x="400.0" dy="0">API 서버 상실</tspan><tspan x="400.0" dy="25">요청 처리</tspan></text>
+<rect x="542" y="216" width="226" height="84" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+<text x="655.0" y="252.0" text-anchor="middle" font-size="17" font-weight="600" fill="#B45309"><tspan x="655.0" dy="0">컨트롤러 리더 상실</tspan><tspan x="655.0" dy="25">반복 조정</tspan></text>
+<path d="M145 300 V348" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M400 300 V348" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M655 300 V348" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="32" y="352" width="226" height="100" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="145.0" y="396.0" text-anchor="middle" font-size="17" font-weight="600" fill="#6D28D9"><tspan x="145.0" dy="0">투표 멤버의 과반이</tspan><tspan x="145.0" dy="25">남아 있는가?</tspan></text>
+<rect x="287" y="352" width="226" height="100" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+<text x="400.0" y="396.0" text-anchor="middle" font-size="17" font-weight="600" fill="#047857"><tspan x="400.0" dy="0">다른 인스턴스로</tspan><tspan x="400.0" dy="25">요청이 도달하는가?</tspan></text>
+<rect x="542" y="352" width="226" height="100" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+<text x="655.0" y="396.0" text-anchor="middle" font-size="17" font-weight="600" fill="#B45309"><tspan x="655.0" dy="0">Lease 갱신 중단 뒤</tspan><tspan x="655.0" dy="25">후보가 역할을 잇는가?</tspan></text>
+<text x="400" y="492" text-anchor="middle" font-size="15" font-weight="400" fill="#475569"><tspan x="400" dy="0">API 요청 성공에는 공유 etcd의 응답 조건도 필요합니다</tspan></text>
+</g>
+</svg>

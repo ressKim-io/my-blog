@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 704" role="img" aria-labelledby="title-1 desc-1">
+  <title id="title-1">logs 요청에서 바뀌는 인가 대상</title>
+  <desc id="desc-1">사용자가 API 서버에 logs를 요청하면 사용자에 대해 pods/log를 인가합니다. API 서버는 자기 클라이언트 인증서로 kubelet에 접속합니다. Webhook 인가를 사용하는 kubelet은 API 서버 클라이언트의 nodes/proxy 권한을 SubjectAccessReview로 묻습니다.</desc>
+  <defs><marker id="arrow-1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="704" rx="16" fill="#FAFAFA"/>
+  <g fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow-1)">
+    <path d="M216 144 V208"/>
+    <path d="M216 312 V400"/>
+    <path d="M368 440 H480"/>
+    <path d="M616 512 V552 H328 V592"/>
+    <path d="M216 512 V592"/>
+  </g>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="40" y="44" text-anchor="start" font-size="23" font-weight="700">같은 로그 요청에서 인가 대상이 바뀝니다</text>
+    <rect x="64" y="80" width="304" height="64" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="216" y="119" font-size="18" fill="#334155" font-weight="600">사용자 · kubectl logs</text>
+    <text x="328" y="184" font-size="15" fill="#334155">사용자 자격 증명</text>
+    <rect x="64" y="208" width="304" height="104" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="216" y="239" font-size="18" fill="#047857" font-weight="600">API 서버</text>
+    <text x="216" y="268" font-size="16" fill="#047857"><tspan x="216">① 사용자: get pods/log</tspan><tspan x="216" dy="25">Node status에서 주소 · 포트 조회</tspan></text>
+    <text x="400" y="350" font-size="16" fill="#334155">HTTPS /containerLogs/...</text>
+    <text x="400" y="375" font-size="15" fill="#334155">API 서버의 kubelet 클라이언트 인증서</text>
+    <rect x="64" y="400" width="304" height="112" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="216" y="431" font-size="18" fill="#047857" font-weight="600">kubelet</text>
+    <text x="216" y="460" font-size="16" fill="#047857"><tspan x="216">② 접속한 클라이언트 인증</tspan><tspan x="216" dy="28">경로를 nodes/proxy로 변환</tspan></text>
+    <text x="424" y="419" font-size="15" fill="#334155">SAR</text>
+    <rect x="480" y="400" width="272" height="112" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+    <text x="616" y="431" font-size="18" fill="#BE123C" font-weight="600">API 서버 · 인가 판정</text>
+    <text x="616" y="460" font-size="16" fill="#BE123C">③ 대상: API 서버 클라이언트</text>
+    <text x="616" y="488" font-size="16" fill="#BE123C">get nodes/proxy</text>
+    <text x="624" y="579" font-size="15" fill="#334155">판정 결과 반환</text>
+    <rect x="64" y="592" width="304" height="64" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="216" y="631" font-size="17" fill="#334155" font-weight="600">허용되면 로그 핸들러 실행</text>
+    <text x="400" y="685" font-size="14" fill="#475569">Webhook 인가 모드의 흐름 · 결과 캐시가 없을 때 API 서버에 질의합니다</text>
+  </g>
+</svg>

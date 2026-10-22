@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 736" role="img" aria-labelledby="title-2 desc-2">
+  <title id="title-2">사칭 권한 검사와 실제 작업 인가의 신원</title>
+  <desc id="desc-2">원래 호출자를 인증한 뒤 사칭 권한을 검사합니다. 기존 impersonate 경로나 신원과 작업을 제한하는 constrained 경로가 허용하면 사용자 정보를 교체합니다. APF와 실제 작업 인가, admission은 사칭된 신원으로 처리합니다</desc>
+  <defs><marker id="arrow-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#0A0A0A"/></marker></defs>
+  <rect width="800" height="736" rx="16" fill="#FAFAFA"/>
+  <g font-family="'Pretendard', system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="400" y="40" font-size="21" font-weight="700">사칭할 권한은 원래 호출자에게 묻습니다</text>
+    <g fill="none" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arrow-2)">
+      <path d="M400 152V200"/><path d="M400 320V368"/><path d="M400 448V496"/><path d="M400 576V624"/>
+    </g>
+    <g font-size="14" fill="#27272A" text-anchor="start">
+      <text x="416" y="183">인증된 원래 호출자 + 사칭할 신원</text>
+      <text x="416" y="351">허용 후 요청 context의 사용자 교체</text>
+      <text x="416" y="479">사칭된 신원으로 처리 용량 사용</text>
+      <text x="416" y="607">실제 작업 인가도 허용돼야 진행</text>
+    </g>
+    <rect x="160" y="72" width="480" height="80" rx="12" stroke="#E11D48" fill="#FFF1F2"/>
+    <text x="400" y="103" font-size="18" font-weight="700" fill="#BE123C">API 서버 인증 필터</text>
+    <text x="400" y="132" font-size="15">자기 자격증명으로 원래 호출자 인증</text>
+    <rect x="160" y="200" width="480" height="120" rx="12" stroke="#E11D48" fill="#FFF1F2"/>
+    <text x="400" y="231" font-size="18" font-weight="700" fill="#BE123C">사칭 필터 · 원래 호출자의 권한 검사</text>
+    <text x="400" y="260" font-size="15"><tspan x="400">기존: 대상별 impersonate</tspan><tspan x="400" dy="22">제한 방식: impersonate:&lt;모드&gt;</tspan><tspan x="400" dy="22">+ 실제 작업의 impersonate-on:&lt;모드&gt;:&lt;동사&gt;</tspan></text>
+    <rect x="160" y="368" width="480" height="80" rx="12" stroke="#059669" fill="#ECFDF5"/>
+    <text x="400" y="399" font-size="18" font-weight="700" fill="#047857">APF</text>
+    <text x="400" y="428" font-size="15">사칭된 신원으로 분류 · 동시 처리 용량 배정</text>
+    <rect x="160" y="496" width="480" height="80" rx="12" stroke="#E11D48" fill="#FFF1F2"/>
+    <text x="400" y="527" font-size="18" font-weight="700" fill="#BE123C">실제 작업의 인가</text>
+    <text x="400" y="556" font-size="15">사칭된 신원이 해당 작업을 할 수 있는가?</text>
+    <rect x="160" y="624" width="480" height="80" rx="12" stroke="#059669" fill="#ECFDF5"/>
+    <text x="400" y="655" font-size="18" font-weight="700" fill="#047857">admission과 요청 처리</text>
+    <text x="400" y="684" font-size="15">사칭된 userInfo 전달 · 사칭 헤더는 제거됨</text>
+  </g>
+</svg>

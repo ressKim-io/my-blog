@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title-2 desc-2">
+  <title id="title-2">좁은 kubelet 권한과 proxy 폴백</title>
+  <desc id="desc-2">pods 요청은 nodes/pods를 먼저 확인하고 오류 없이 허용되지 않으면 nodes/proxy를 확인합니다. 어느 하나가 Allow이면 통과하고 둘 다 허용되지 않으면 403입니다. 인가 호출 오류는 어느 단계에서든 즉시 500으로 끝납니다.</desc>
+  <defs><marker id="arrow-2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+  <rect width="800" height="600" rx="16" fill="#FAFAFA"/>
+  <g fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow-2)">
+    <path d="M216 128 V184"/>
+    <path d="M368 224 H560"/>
+    <path d="M216 264 V360"/>
+    <path d="M368 400 H464 V264 H560"/>
+    <path d="M216 440 V504"/>
+  </g>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="40" y="44" text-anchor="start" font-size="23" font-weight="700">좁은 이름 뒤에 기존 proxy 권한도 확인합니다</text>
+    <rect x="64" y="72" width="304" height="56" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="216" y="107" font-size="18" fill="#334155" font-weight="600">GET /pods</text>
+    <rect x="64" y="184" width="304" height="80" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+    <text x="216" y="216" font-size="18" fill="#BE123C" font-weight="600">먼저 nodes/pods</text>
+    <text x="216" y="244" font-size="16" fill="#BE123C">같은 요청자 · get · Node 이름</text>
+    <text x="456" y="209" font-size="16" fill="#047857">Allow</text>
+    <text x="272" y="302" font-size="15" fill="#334155"><tspan x="272">오류 없이</tspan><tspan x="272" dy="26">Deny / NoOpinion</tspan></text>
+    <rect x="64" y="360" width="304" height="80" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+    <text x="216" y="392" font-size="18" fill="#BE123C" font-weight="600">그다음 nodes/proxy</text>
+    <text x="216" y="420" font-size="16" fill="#BE123C">기존 넓은 권한을 계속 인정</text>
+    <text x="416" y="385" font-size="16" fill="#047857">Allow</text>
+    <rect x="560" y="200" width="176" height="88" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="648" y="236" font-size="18" fill="#047857" font-weight="600">인가 통과</text>
+    <text x="648" y="264" font-size="16" fill="#047857">첫 Allow에서 종료</text>
+    <text x="320" y="482" font-size="15" fill="#334155">둘 다 허용되지 않음</text>
+    <rect x="64" y="504" width="304" height="56" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="216" y="540" font-size="18" fill="#334155" font-weight="600">403 Forbidden</text>
+    <rect x="512" y="448" width="248" height="112" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <text x="636" y="480" font-size="17" fill="#BE123C" font-weight="600">인가 호출 오류</text>
+    <text x="636" y="509" font-size="16" fill="#BE123C"><tspan x="636">어느 단계에서든 즉시 500</tspan><tspan x="636" dy="28" font-size="15">다음 이름으로 넘어가지 않음</tspan></text>
+    <text x="400" y="586" font-size="14" fill="#475569">v1.37.1: KubeletFineGrainedAuthz는 GA · 기본 활성 상태로 잠겨 있습니다</text>
+  </g>
+</svg>
