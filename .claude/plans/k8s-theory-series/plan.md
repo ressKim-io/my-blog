@@ -1135,3 +1135,7 @@ post lint error 0/warn 4, 전체 lint error 0/warn 1, build 664 pages와 로컬 
 원본 hash·공식 근거·정정·별도 검수·실제 검증은 [배치 인계](batches/batch-21.md)에 보존한다
 post lint error 0/warn 3, 전체 lint error 0/warn 1, build 670 pages와 로컬 등록·정적 출력 검증 통과
 다음 대상: 없음 (현재 원본 목록 기준)
+
+## 잔여 15편 최종 인계
+
+[배치별 커밋·검증·미확인 항목·현재 남은 원본](batches/summary-15.md)
