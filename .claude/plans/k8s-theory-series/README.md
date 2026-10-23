@@ -7,7 +7,7 @@
 ## 한 줄 요약
 
 Obsidian vault의 Kubernetes 이론 노트를 **한 번에 3편씩** 한국어 `essays` 글로 변환한다
-**2026-10-24 누적 65편 검수 완료. 현재 후속 요청 9/15편 완료·보류 0편**
+**2026-10-24 누적 68편 검수 완료. 현재 후속 요청 12/15편 완료·보류 0편**
 로컬 콘텐츠 등록·정적 빌드·커밋까지 마쳤다. 공개 사이트 반영과 k8s-theory 시리즈의 전용 카드 등록은 별도 상태이며 [등록 점검 기록](plan.md#커밋등록-점검--2026-10-23)을 참고한다
 이전 30편 요청은 완료했다. 현재 사용자가 같은 조건으로 남은 15편도 에이전트로 진행하도록 요청했으며 3편씩 5개 배치로 계속한다
 2026-10-21에 확인한 원본 파일은 71개다. 9월 조사 당시의 50편 목록은 과거 기록으로 보존한다
@@ -79,12 +79,12 @@ vault의 다른 참고 파일 (같은 `☸️ k8s-theory/` 아래).
 
 ## 다음에 할 일
 
-**Batch 20: 5-6, kernel-1, kernel-2 미착수**
+**Batch 21: kernel-3, kernel-4, kernel-5 미착수**
 
 ```text
-Phase 5-6 · 통합 · 한 칸 올라갈 때마다 죽을 수 있는 것이 하나 는다.md
-커널 하강 1 · cgroup v2 인터페이스와 CFS quota.md
-커널 하강 2 · netfilter hook 과 conntrack.md
+커널 하강 3 · mount 와 bind mount.md
+커널 하강 4 · 페이지 캐시 회수와 OOM.md
+커널 하강 5 · namespace 수명.md
 ```
 
 예정 slug·series/order·잔여 대상 전체는 [plan의 Batch 17~21 진행표](plan.md#2026-10-23-잔여-15편-변환--batch-1721)를 따른다
@@ -135,5 +135,5 @@ push·배포·시리즈 카드 등록은 실행하지 않았다
 | 17 | 4-4, 4-5, 4-6 | 검수 완료 | post lint 0/5, lint 0/1, build 646·export 통과; [근거·검수](batches/batch-17.md) | `87fe769` | 4-7, 5-1, 5-2 |
 | 18 | 4-7, 5-1, 5-2 | 검수 완료 | post lint 0/4, lint 0/1, build 652·export 통과; [근거·검수](batches/batch-18.md) | `7b3ab8b` | 5-3, 5-4, 5-5 |
 | 19 | 5-3, 5-4, 5-5 | 검수 완료 | post lint 0/5, lint 0/1, build 658·export 통과; [근거·검수](batches/batch-19.md) | `6cff167` | 5-6, kernel-1, kernel-2 |
-| 20 | 5-6, kernel-1, kernel-2 | 미착수 | 실행 안 함 (통합 검증 전) | — | kernel-3, kernel-4, kernel-5 |
+| 20 | 5-6, kernel-1, kernel-2 | 검수 완료 | post lint 0/4, lint 0/1, build 664·export 통과; [근거·검수](batches/batch-20.md) | `9e22fbf` | kernel-3, kernel-4, kernel-5 |
 | 21 | kernel-3, kernel-4, kernel-5 | 미착수 | 실행 안 함 (통합 검증 전) | — | 없음 (현재 원본 목록 기준) |
