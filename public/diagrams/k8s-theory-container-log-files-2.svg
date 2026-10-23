@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 752" role="img" aria-labelledby="log-rotate-title log-rotate-desc">
+  <title id="log-rotate-title">로그 회전의 rename과 런타임 재열기</title>
+  <desc id="log-rotate-desc">현재 파일의 이름을 바꿔도 런타임의 열린 파일 식별자는 기존 파일을 가리킵니다. kubelet이 ReopenContainerLog를 요청하면 런타임이 현재 경로를 새로 열어 기록합니다. 실패하면 kubelet이 이름 복구를 시도합니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="752" fill="#FAFAFA" rx="16"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="280" y="40" font-size="24" font-weight="700">이름 변경만으로 기록 대상은 바뀌지 않습니다</text>
+    <g stroke="#475569" stroke-width="2" marker-end="url(#arrow)" fill="none"><path d="M280 176V240"/><path d="M280 384V448"/><path d="M280 584V648"/></g>
+    <rect x="40" y="72" width="480" height="104" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="110" font-size="22" font-weight="700">현재 파일: 0.log</text>
+    <text x="280" y="146" font-size="20">런타임은 열린 fd로 기록 중입니다</text>
+    <rect x="128" y="196" width="304" height="28" fill="#FAFAFA"/>
+    <text x="280" y="216" font-size="20">크기 확인 뒤 kubelet이 rename</text>
+    <rect x="40" y="240" width="480" height="144" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="278" font-size="22" font-weight="700">회전본: 0.log.&lt;시각&gt;</text>
+    <text x="280" y="314" font-size="20">열린 fd는 이 기존 파일을 가리킵니다</text>
+    <text x="280" y="350" font-size="20">이번 회전본은 아직 압축하지 않습니다</text>
+    <rect x="128" y="404" width="304" height="28" fill="#FAFAFA"/>
+    <text x="280" y="424" font-size="20">CRI ReopenContainerLog 요청</text>
+    <rect x="40" y="448" width="480" height="136" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="486" font-size="22" font-weight="700">런타임이 새 0.log를 엽니다</text>
+    <text x="280" y="522" font-size="20">이후 출력은 새 현재 파일에 기록합니다</text>
+    <text x="280" y="558" font-size="20">RPC 실패 시 kubelet은 이름 복구를 시도</text>
+    <rect x="136" y="604" width="288" height="28" fill="#FAFAFA"/>
+    <text x="280" y="624" font-size="20">성공한 회전의 보존 결과</text>
+    <rect x="40" y="648" width="480" height="72" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="679" font-size="20">새 현재 파일 + 회전본 최대 maxFiles - 1개</text>
+    <text x="280" y="707" font-size="20">재시작 횟수와 인스턴스는 그대로입니다</text>
+  </g>
+</svg>
