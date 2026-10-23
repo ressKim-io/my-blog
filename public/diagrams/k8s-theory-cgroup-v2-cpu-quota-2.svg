@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="736" viewBox="0 0 560 736" role="img" aria-labelledby="title desc">
+<title id="title">낮은 1초 평균과 한 기간의 throttling이 함께 성립하는 가정</title><desc id="desc">한 CPU, period 100밀리초, quota 20밀리초이며 burst·잔여 runtime·부모 제한·다른 경합이 없는 단순 모델입니다. 첫 기간에 20밀리초 실행 후 80밀리초 기다리고 둘째 기간에 1밀리초를 실행해 끝나면 1초 전체 CPU 사용량은 21밀리초, 평균은 2.1퍼센트입니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#27272A"/></marker></defs>
+<rect width="560" height="736" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+
+<text x="280" y="40" font-size="24" font-weight="700">긴 평균은 짧은 기간의 소진을 가립니다</text>
+<text x="280" y="83" font-size="20">가정: 한 CPU · period 100ms · quota 20ms</text>
+<text x="280" y="122" font-size="20">burst · 잔여 runtime · 부모 제한 · 경합 없음</text>
+<text x="280" y="187" font-size="22" font-weight="700">첫 기간: 20ms 실행 뒤 80ms 대기</text>
+<rect x="56" y="218" width="88" height="56" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<rect x="144" y="218" width="352" height="56" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+<text x="100" y="253" font-size="20">20ms</text>
+<text x="320" y="253" font-size="20">다음 예산 보충까지 throttle</text>
+<text x="56" y="310" font-size="20">0ms</text>
+<text x="496" y="310" font-size="20">100ms</text>
+<text x="280" y="374" font-size="22" font-weight="700">둘째 기간: 1ms 실행 뒤 작업 완료</text>
+<rect x="56" y="406" width="440" height="56" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+<rect x="56" y="406" width="4.4" height="56" fill="#059669"/>
+<text x="280" y="441" font-size="20">남은 시간과 뒤 여덟 기간은 유휴</text>
+<rect x="56" y="526" width="448" height="120" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="280" y="571" font-size="22">1초간 CPU 시간 21ms → 평균 2.1%</text>
+<text x="280" y="613" font-size="20">첫 기간의 throttling과 동시에 성립</text>
+<text x="280" y="699" font-size="20">개념 계산 예시 · 실측 타임라인 아님</text>
+</g></svg>

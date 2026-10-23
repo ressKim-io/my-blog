@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="816" viewBox="0 0 560 816" role="img" aria-labelledby="title desc">
+<title id="title">하나의 cgroup 예산을 CPU별 runtime으로 전달</title><desc id="desc">기간마다 보충되는 그룹의 전역 예산을 각 CPU의 실행 큐가 필요할 때 가져갑니다. 기본 slice 목표는 5밀리초이며 CPU마다 quota 전체가 새로 생기는 구조가 아닙니다. 부모 예산이 소진되어도 자식 실행이 막힐 수 있습니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#27272A"/></marker></defs>
+<rect width="560" height="816" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+
+<text x="280" y="40" font-size="24" font-weight="700">공유 예산과 CPU별 실행 시간</text>
+<rect x="56" y="88" width="448" height="112" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="280" y="130" font-size="22">그룹의 전역 bandwidth 예산</text>
+<text x="280" y="170" font-size="20">기간마다 quota 보충 · burst 상한 적용</text>
+<path d="M280 200 V256 H154 V312 M280 256 H406 V312" fill="none" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M154 270 V312" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="126" y="225" width="308" height="30" fill="#FAFAFA"/>
+<text x="280" y="248" font-size="20">필요할 때 전달 · 기본 slice 목표 5ms</text>
+<rect x="40" y="336" width="228" height="112" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="154" y="379" font-size="22">CPU 0의 runtime</text>
+<text x="154" y="419" font-size="20">실행 시간만큼 차감</text>
+<rect x="292" y="336" width="228" height="112" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="406" y="379" font-size="22">CPU 1의 runtime</text>
+<text x="406" y="419" font-size="20">실행 시간만큼 차감</text>
+<text x="280" y="510" font-size="20">CPU마다 quota 전체를 따로 받지 않음</text>
+<text x="280" y="552" font-size="20">실행 큐가 비면 잔여 일부를 반환할 수 있음</text>
+<rect x="56" y="610" width="448" height="112" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+<text x="280" y="652" font-size="22">실행에 필요한 runtime 공급 실패</text>
+<text x="280" y="692" font-size="20">해당 실행 큐 throttle · 보충 뒤 재개</text>
+<text x="280" y="780" font-size="20">부모 예산의 소진도 자식 실행을 제한</text>
+</g></svg>
