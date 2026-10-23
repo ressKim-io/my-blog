@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="1016" viewBox="0 0 560 1016" role="img" aria-labelledby="title desc">
+<title id="title">커널의 메모리 수용 경로와 kubelet의 별도 축출 판단</title><desc id="desc">커널은 할당과 charge 요청을 수용할 수 있는지 판단하며 필요한 조건에서 회수·compaction·재시도를 진행합니다. 결과는 진행·실패 또는 OOM 처리일 수 있고 대기는 압박 신호에 나타납니다. kubelet은 별도로 Summary 통계를 보고 정책에 따라 축출을 판단하므로 고정된 종료 순서가 아닙니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#27272A"/></marker></defs>
+<rect width="560" height="1016" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+
+<text x="280" y="40" font-size="24" font-weight="700">메모리를 확보하는 경로와 축출 정책</text>
+<text x="280" y="94" font-size="22">커널: 할당과 charge를 수용할 수 있는가</text>
+<rect x="56" y="120" width="448" height="96" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="280" y="176" font-size="22">할당 · charge 요청</text>
+<path d="M280 216 V262" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="56" y="280" width="448" height="108" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="280" y="321" font-size="22">필요한 회수 · compaction · 재시도</text>
+<text x="280" y="360" font-size="20">할당 종류 · 압박 범위 · 허용 조건에 따라</text>
+<path d="M280 388 V412 H154 M280 412 H406" fill="none" stroke="#27272A" stroke-width="2"/>
+<path d="M154 412 V434 M406 412 V434" fill="none" stroke="#27272A" stroke-width="2"/>
+<path d="M154 412 V434" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M406 412 V434" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="452" width="228" height="88" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="154" y="504" font-size="22">진행 가능</text>
+<rect x="292" y="452" width="228" height="88" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+<text x="406" y="504" font-size="20">할당 실패 · OOM 가능</text>
+<text x="280" y="592" font-size="20">회수 중 대기는 PSI 등 압박 신호로 관측</text>
+<rect x="32" y="644" width="496" height="296" rx="16" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+<text x="280" y="688" font-size="22" font-weight="700">kubelet: 별도의 관측 · 정책 루프</text>
+<rect x="56" y="718" width="448" height="72" rx="10" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+<text x="280" y="761" font-size="22">Summary 통계 관측</text>
+<path d="M280 790 V830" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="56" y="848" width="448" height="72" rx="10" fill="#FAFAFA" stroke="#475569" stroke-width="2"/>
+<text x="280" y="892" font-size="20">임계값 · 정책에 따라 Pod 축출</text>
+<text x="280" y="988" font-size="20">두 경로 사이의 고정된 선후 순서는 없음</text>
+</g></svg>

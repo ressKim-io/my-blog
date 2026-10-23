@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="704" viewBox="0 0 560 704" role="img" aria-labelledby="title desc">
+<title id="title">자식의 한도와 부모 cgroup의 메모리 경계</title><desc id="desc">부모 memory.current는 자손의 사용량을 포함합니다. 자식들이 각자의 memory.max 아래에 있더라도 부모가 한도에 도달하면 그 부모의 하위 계층이 회수와 OOM 후보의 범위가 될 수 있습니다. 모든 자식이 반드시 종료된다는 뜻은 아닙니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#27272A"/></marker></defs>
+<rect width="560" height="704" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+
+<text x="280" y="40" font-size="24" font-weight="700">자식과 부모의 한도는 함께 적용됩니다</text>
+<rect x="32" y="96" width="496" height="448" rx="16" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+<text x="280" y="145" font-size="22" font-weight="700">부모 cgroup의 max 경계</text>
+<text x="280" y="190" font-size="20">부모 current에는 자손 사용량이 포함됨</text>
+<path d="M280 216 V256 H160 M280 256 H400" fill="none" stroke="#27272A" stroke-width="2"/>
+<path d="M160 256 V296" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M400 256 V296" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="56" y="314" width="208" height="120" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="160" y="360" font-size="22">자식 cgroup A</text>
+<text x="160" y="401" font-size="20">자기 max 아래</text>
+<rect x="296" y="314" width="208" height="120" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="400" y="360" font-size="22">자식 cgroup B</text>
+<text x="400" y="401" font-size="20">자기 max 아래</text>
+<text x="280" y="495" font-size="20">부모 한도에서 하위 계층의 회수 · OOM 가능</text>
+<text x="280" y="594" font-size="20">모든 자식을 반드시 종료한다는 뜻은 아님</text>
+<text x="280" y="638" font-size="20">부모와 자식 current를 더하면 중복 회계</text>
+<text x="280" y="679" font-size="20">실제 OOM 범위 · 후보 선택 · group 설정 확인</text>
+</g></svg>

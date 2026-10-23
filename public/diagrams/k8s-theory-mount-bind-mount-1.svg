@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 800" width="760" height="800" role="img" aria-labelledby="title desc">
+  <title id="title">staging mount를 Pod별 bind mount로 제공하는 예시</title>
+  <desc id="desc">파일시스템을 노드의 staging 경로에 mount한 다음 같은 트리를 Pod A와 Pod B의 publish target에 각각 bind합니다. 이 가정에서는 staging 하나와 bind 둘이며 전파와 런타임 mount는 세지 않습니다</desc>
+  <defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="#475569"/></marker></defs>
+  <rect width="760" height="800" rx="20" fill="#FAFAFA"/>
+  <g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="380" y="50" font-size="28" font-weight="700">한 번 준비한 트리를 여러 경로에 연결</text>
+    <rect x="120" y="85" width="520" height="100" rx="14" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+    <text x="380" y="128" font-size="27" font-weight="700" fill="#6D28D9">장치·네트워크 볼륨의 파일시스템</text>
+    <text x="380" y="165" font-size="25">준비 방식은 드라이버 구현에 따름</text>
+    <path d="M380 185 V279" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <rect x="256" y="213" width="248" height="40" rx="8" fill="#FAFAFA"/>
+    <text x="380" y="241" font-size="25">stage에서 mount</text>
+    <rect x="110" y="293" width="540" height="110" rx="14" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="380" y="338" font-size="27" font-weight="700" fill="#047857">노드 공용 staging target</text>
+    <text x="380" y="378" font-size="25">준비된 트리 · staging mount 하나</text>
+    <path d="M300 403 V449 H196 V530" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <path d="M460 403 V449 H564 V530" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <rect x="106" y="472" width="180" height="39" rx="8" fill="#FAFAFA"/>
+    <rect x="474" y="472" width="180" height="39" rx="8" fill="#FAFAFA"/>
+    <text x="196" y="500" font-size="25">publish: bind</text>
+    <text x="564" y="500" font-size="25">publish: bind</text>
+    <rect x="45" y="544" width="302" height="110" rx="14" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="413" y="544" width="302" height="110" rx="14" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="196" y="589" font-size="27" font-weight="700" fill="#047857">Pod A target</text>
+    <text x="196" y="629" font-size="25">bind mount 하나</text>
+    <text x="564" y="589" font-size="27" font-weight="700" fill="#047857">Pod B target</text>
+    <text x="564" y="629" font-size="25">bind mount 하나</text>
+    <text x="380" y="710" font-size="25">같은 트리 재사용 · 서로 다른 mount 객체</text>
+    <text x="380" y="754" font-size="24" fill="#334155">구현 예시의 1 + 2 · 전파·런타임 mount 제외</text>
+  </g>
+</svg>
