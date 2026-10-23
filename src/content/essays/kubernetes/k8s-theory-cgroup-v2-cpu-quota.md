@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Linux", "cgroup", "CPU", "Throttling", "concept"]
 series:
   name: "k8s-theory-kernel"
   order: 1
-date: "2026-10-24"
+date: "2026-11-09"
 ---
 
 CPU limit에 닿은 프로세스는 그 이유만으로 종료되지 않습니다

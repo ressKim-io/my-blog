@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Job", "CronJob", "Controller", "concept"]
 series:
   name: "k8s-theory-node"
   order: 9
-date: "2026-10-23"
+date: "2026-09-12"
 ---
 
 Deployment와 달리 Job은 필요한 성공을 채우면 Pod를 더 만들 필요가 없는 워크로드입니다

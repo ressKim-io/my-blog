@@ -6,7 +6,7 @@ tags: ["Kubernetes", "EncryptionAtRest", "etcd", "KMS", "StorageTransformer", "c
 series:
   name: "k8s-theory-api"
   order: 21
-date: "2026-10-23"
+date: "2026-08-22"
 ---
 
 저장 암호화를 켜도 이미 저장한 오브젝트가 즉시 암호문으로 바뀌지는 않습니다

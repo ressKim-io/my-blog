@@ -6,7 +6,7 @@ tags: [Kubernetes, Watch, resourceVersion, etcd, concept]
 series:
   name: "k8s-theory-api"
   order: 7
-date: "2026-10-22"
+date: "2026-08-02"
 ---
 
 컨트롤러가 Pod 목록을 한 번 읽었다고 현재 상태를 계속 아는 것은 아닙니다

@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CRD", "Conversion", "API", "concept"]
 series:
   name: "k8s-theory-extension"
   order: 2
-date: "2026-10-23"
+date: "2026-11-02"
 ---
 
 같은 커스텀 리소스(CR)를 v1alpha1으로 쓰고 v1으로 읽을 수 있어도, 버전마다 별개의 CR을 저장하는 것은 아닙니다

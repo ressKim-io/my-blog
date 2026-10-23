@@ -6,7 +6,7 @@ tags: ["kubernetes", "authorization", "rbac", "concept"]
 series:
   name: "k8s-theory-api"
   order: 3
-date: "2026-10-21"
+date: "2026-07-25"
 ---
 
 [인증](/essays/k8s-theory-authentication)이 자격증명을 `user.Info`로 바꿨다면, 인가는 그 신원으로 어떤 요청을 허용할지 판단합니다

@@ -6,7 +6,7 @@ tags: ["Kubernetes", "etcd", "HighAvailability", "LeaderElection", "APF", "conce
 series:
   name: "k8s-theory-api"
   order: 20
-date: "2026-10-23"
+date: "2026-08-22"
 ---
 
 컨트롤 플레인을 여러 인스턴스로 구성했다고 해서 모든 구성요소가 같은 방식으로 장애를 견디는 것은 아닙니다

@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Linux", "Memory", "cgroup", "OOM", "PSI", "concept"]
 series:
   name: "k8s-theory-kernel"
   order: 4
-date: "2026-10-24"
+date: "2026-11-15"
 ---
 
 working set은 사용량을 가공한 관측값입니다

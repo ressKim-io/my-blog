@@ -6,7 +6,7 @@ tags: ["kubernetes", "events", "client-go", "observability", "concept"]
 series:
   name: "k8s-theory-api"
   order: 22
-date: "2026-10-23"
+date: "2026-08-24"
 ---
 
 같은 실패가 반복되는데 Event는 하나만 보이거나, 한동안 새 기록이 나타나지 않을 수 있습니다

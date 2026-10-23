@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CNI", "Routing", "Cilium", "IPAM", "MTU", "concept"]
 series:
   name: "k8s-theory-network"
   order: 3
-date: "2026-10-23"
+date: "2026-10-05"
 ---
 
 다른 노드의 Pod로 패킷을 보내려면 Pod 안의 인터페이스만 준비해서는 부족합니다

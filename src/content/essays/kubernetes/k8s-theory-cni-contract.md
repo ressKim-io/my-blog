@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CNI", "containerd", "IPAM", "Networking", "concept"]
 series:
   name: "k8s-theory-network"
   order: 1
-date: "2026-10-23"
+date: "2026-10-01"
 ---
 
 Pod에 노드가 배정됐다고 해서 IP까지 준비된 것은 아닙니다

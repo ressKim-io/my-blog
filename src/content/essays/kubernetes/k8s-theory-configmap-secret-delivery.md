@@ -6,7 +6,7 @@ tags: ["Kubernetes", "ConfigMap", "Secret", "Volume", "EnvironmentVariables", "c
 series:
   name: "k8s-theory-node"
   order: 11
-date: "2026-10-23"
+date: "2026-09-16"
 ---
 
 ConfigMap을 바꿨는데 애플리케이션이 이전 값을 사용한다면 먼저 전달 경로를 확인해야 합니다

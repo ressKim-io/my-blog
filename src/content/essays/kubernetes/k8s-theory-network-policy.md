@@ -6,7 +6,7 @@ tags: ["Kubernetes", "NetworkPolicy", "CNI", "Security", "Networking", "concept"
 series:
   name: "k8s-theory-network"
   order: 7
-date: "2026-10-23"
+date: "2026-10-12"
 ---
 
 NetworkPolicy를 하나 만들었다고 namespace 전체의 모든 통신이 제한되는 것은 아닙니다

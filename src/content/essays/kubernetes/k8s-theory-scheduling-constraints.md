@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Scheduling", "Affinity", "Taints", "TopologySpread", "conc
 series:
   name: "k8s-theory-node"
   order: 2
-date: "2026-10-23"
+date: "2026-08-31"
 ---
 
 Pod에 배치 조건을 넣었는데도 원하는 노드에 가지 않거나 Pending에 남는다면, 먼저 그 조건이 필수인지 선호인지 구분해야 합니다

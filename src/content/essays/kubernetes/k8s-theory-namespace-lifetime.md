@@ -6,7 +6,7 @@ tags: ["kubernetes", "linux", "namespace", "containerd", "cni", "concept"]
 series:
   name: "k8s-theory-kernel"
   order: 5
-date: "2026-10-24"
+date: "2026-11-15"
 ---
 
 Pod 삭제를 요청한 뒤 앱과 pause 프로세스는 사라졌는데 namespace나 IP 할당 기록이 남았다고 가정하겠습니다

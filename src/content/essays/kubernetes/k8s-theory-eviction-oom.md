@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Eviction", "OOM", "kubelet", "cgroup", "concept"]
 series:
   name: "k8s-theory-node"
   order: 6
-date: "2026-10-23"
+date: "2026-09-09"
 ---
 
 컨테이너가 종료됐다는 사실과 Pod가 삭제됐다는 사실은 다릅니다

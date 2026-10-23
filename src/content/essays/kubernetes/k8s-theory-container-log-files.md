@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CRI", "kubelet", "Logging", "containerd", "concept"]
 series:
   name: "k8s-theory-node"
   order: 17
-date: "2026-10-23"
+date: "2026-09-25"
 ---
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다

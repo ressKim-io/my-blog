@@ -6,7 +6,7 @@ tags: ["kubernetes", "api-aggregation", "apiservice", "metrics-server", "concept
 series:
   name: "k8s-theory-extension"
   order: 5
-date: "2026-10-23"
+date: "2026-11-07"
 ---
 
 Kubernetes에 새 API를 추가하는 방법은 CRD만 있는 것이 아닙니다

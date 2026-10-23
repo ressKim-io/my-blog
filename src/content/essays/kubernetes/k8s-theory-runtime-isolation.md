@@ -6,7 +6,7 @@ tags: ["Kubernetes", "SecurityContext", "PodSecurityAdmission", "UserNamespace",
 series:
   name: "k8s-theory-node"
   order: 14
-date: "2026-10-23"
+date: "2026-09-20"
 ---
 
 Pod의 보안 필드를 생략했다고 모든 제한이 꺼지거나 같은 기본값이 적용되지는 않습니다

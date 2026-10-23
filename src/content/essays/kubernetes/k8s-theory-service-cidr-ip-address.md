@@ -6,7 +6,7 @@ tags: ["Kubernetes", "ServiceCIDR", "IPAddress", "ClusterIP", "concept"]
 series:
   name: "k8s-theory-network"
   order: 11
-date: "2026-10-23"
+date: "2026-10-18"
 ---
 
 Service 하나가 받는 ClusterIP는 누가 어디서 고르고, 같은 주소를 다른 Service에 주지 못하도록 무엇이 지킬까요?

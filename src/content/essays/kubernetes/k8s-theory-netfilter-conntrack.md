@@ -6,7 +6,7 @@ tags: ["kubernetes", "linux", "netfilter", "conntrack", "nat", "concept"]
 series:
   name: "k8s-theory-kernel"
   order: 2
-date: "2026-10-24"
+date: "2026-11-11"
 ---
 
 [Service와 kube-proxy](/essays/k8s-theory-service-kube-proxy)에서는 노드의 규칙이 Service 주소를 백엔드 주소로 바꾼다는 흐름을 살펴봤습니다

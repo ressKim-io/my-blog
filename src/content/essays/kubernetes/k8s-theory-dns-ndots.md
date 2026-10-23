@@ -6,7 +6,7 @@ tags: ["Kubernetes", "DNS", "CoreDNS", "ndots", "Resolver", "concept"]
 series:
   name: "k8s-theory-network"
   order: 5
-date: "2026-10-23"
+date: "2026-10-09"
 ---
 
 애플리케이션이 이름 하나를 넘겨도 DNS 서버에는 여러 질의가 갈 수 있습니다

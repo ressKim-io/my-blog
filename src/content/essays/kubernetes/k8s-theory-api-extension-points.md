@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CRD", "APIService", "Discovery", "FeatureGate", "concept"]
 series:
   name: "k8s-theory-api"
   order: 14
-date: "2026-10-22"
+date: "2026-08-11"
 ---
 
 내장 API로 표현하기 어려운 요구가 있으면 새 API 타입을 정의할 수 있습니다

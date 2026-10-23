@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CRD", "Schema", "CEL", "Server-Side Apply", "concept"]
 series:
   name: "k8s-theory-extension"
   order: 1
-date: "2026-10-23"
+date: "2026-11-01"
 ---
 
 CRD를 등록하면 API 서버가 새 종류의 오브젝트를 받아들일 수 있습니다

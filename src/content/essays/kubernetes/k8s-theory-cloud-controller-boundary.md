@@ -6,7 +6,7 @@ tags: [kubernetes, cloud-controller-manager, cloud-provider, networking, loadbal
 series:
   name: "k8s-theory-network"
   order: 9
-date: "2026-10-23"
+date: "2026-10-16"
 ---
 
 새 Node가 등록됐다고 클라우드 인스턴스 정보까지 준비된 것은 아닙니다

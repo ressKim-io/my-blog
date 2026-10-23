@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Scheduler", "SchedulingFramework", "Binding", "QueueingHin
 series:
   name: "k8s-theory-node"
   order: 1
-date: "2026-10-23"
+date: "2026-08-29"
 ---
 
 Pod를 배치할 노드를 골랐다고 해서 API 서버의 `spec.nodeName`이 바로 채워지는 것은 아닙니다

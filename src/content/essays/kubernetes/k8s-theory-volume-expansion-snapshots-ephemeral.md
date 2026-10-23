@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CSI", "Storage", "VolumeExpansion", "VolumeSnapshot", "Eph
 series:
   name: "k8s-theory-storage"
   order: 5
-date: "2026-10-23"
+date: "2026-10-25"
 ---
 
 PVC의 요청 용량을 늘리는 API 갱신이 성공해도 애플리케이션이 바로 그 공간을 쓸 수 있는 것은 아닙니다

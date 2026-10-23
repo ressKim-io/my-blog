@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Scheduler", "RuntimeClass", "PodOverhead", "ResourceManage
 series:
   name: "k8s-theory-node"
   order: 15
-date: "2026-10-23"
+date: "2026-09-20"
 ---
 
 스케줄러가 세는 Pod의 요청은 컨테이너에 적은 `requests`의 단순 합계가 아닙니다

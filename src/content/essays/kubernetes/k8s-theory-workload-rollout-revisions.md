@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Deployment", "DaemonSet", "ReplicaSet", "Rollout", "concep
 series:
   name: "k8s-theory-node"
   order: 8
-date: "2026-10-23"
+date: "2026-09-12"
 ---
 
 Deployment의 `spec.template`을 수정하면 컨트롤러는 기존 Pod를 새 템플릿의 Pod로 교체합니다

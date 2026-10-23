@@ -6,7 +6,7 @@ tags: ["Kubernetes", "API", "Serialization", "VersionConversion", "CRD", "concep
 series:
   name: "k8s-theory-api"
   order: 16
-date: "2026-10-22"
+date: "2026-08-15"
 ---
 
 API 서버가 요청을 디코딩한다고 하면 JSON을 Go 구조체로 읽는 과정부터 떠올리기 쉽습니다

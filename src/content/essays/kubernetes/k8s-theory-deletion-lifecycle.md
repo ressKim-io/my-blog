@@ -6,7 +6,7 @@ tags: [Kubernetes, Finalizer, Garbage Collection, Namespace, concept]
 series:
   name: "k8s-theory-api"
   order: 9
-date: "2026-10-22"
+date: "2026-08-04"
 ---
 
 DELETE 요청이 성공해도 객체가 API에서 바로 사라지는 것은 아닙니다

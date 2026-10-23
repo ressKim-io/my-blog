@@ -6,7 +6,7 @@ tags: [kubernetes, ingress, gateway-api, networking, rbac, concept]
 series:
   name: "k8s-theory-network"
   order: 6
-date: "2026-10-23"
+date: "2026-10-10"
 ---
 
 Ingress에는 처리할 컨트롤러 선택, 인증서 설정, 요청을 보낼 백엔드가 함께 들어 있습니다

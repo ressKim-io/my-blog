@@ -6,7 +6,7 @@ tags: [Kubernetes, Informer, client-go, Controller, concept]
 series:
   name: "k8s-theory-api"
   order: 12
-date: "2026-10-22"
+date: "2026-08-09"
 ---
 
 컨트롤러는 판단할 때마다 API 서버에 같은 목록을 요청하지 않습니다

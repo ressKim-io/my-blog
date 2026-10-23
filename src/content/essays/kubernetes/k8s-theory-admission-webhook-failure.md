@@ -6,7 +6,7 @@ tags: [Kubernetes, Admission, Webhook, CEL, ValidatingAdmissionPolicy, concept]
 series:
   name: "k8s-theory-api"
   order: 5
-date: "2026-10-22"
+date: "2026-07-29"
 ---
 
 [앞선 글](/essays/k8s-theory-admission-order)에서는 저장 전에 값을 바꾸고 검사하는 순서를 살펴봤습니다

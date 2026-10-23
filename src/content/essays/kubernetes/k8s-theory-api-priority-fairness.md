@@ -6,7 +6,7 @@ tags: ["kubernetes", "APF", "kube-apiserver", "FlowSchema", "concept"]
 series:
   name: "k8s-theory-api"
   order: 15
-date: "2026-10-22"
+date: "2026-08-13"
 ---
 
 Pod 하나를 읽는 GET과 Pod 수만 개를 읽는 LIST는 모두 요청 한 건입니다

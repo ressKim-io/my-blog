@@ -6,7 +6,7 @@ tags: ["Kubernetes", "NetworkPolicy", "ClusterNetworkPolicy", "Security", "conce
 series:
   name: "k8s-theory-network"
   order: 8
-date: "2026-10-23"
+date: "2026-10-14"
 ---
 
 NetworkPolicy의 허용 규칙보다 먼저 적용할 관리자 거부 규칙은 어디에 둘 수 있을까요?

@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Server-Side Apply", "managedFields", "CRD", "concept"]
 series:
   name: "k8s-theory-api"
   order: 10
-date: "2026-10-22"
+date: "2026-08-06"
 ---
 
 하나의 Deployment를 여러 도구가 관리할 수 있습니다

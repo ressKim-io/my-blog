@@ -6,7 +6,7 @@ tags: ["Kubernetes", "kubelet", "Pod", "Probe", "Sidecar", "concept"]
 series:
   name: "k8s-theory-node"
   order: 4
-date: "2026-10-23"
+date: "2026-09-05"
 ---
 
 Pod의 phase가 `Running`이어도 모든 컨테이너가 요청을 받을 준비를 마쳤다는 뜻은 아닙니다

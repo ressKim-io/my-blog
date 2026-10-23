@@ -6,7 +6,7 @@ tags: [kubernetes, storage, pvc, pv, storageclass, scheduling, concept]
 series:
   name: "k8s-theory-storage"
   order: 1
-date: "2026-10-23"
+date: "2026-10-19"
 ---
 
 PVC를 생성하면 앱이 필요한 저장소를 요청한 것이며, 사용할 볼륨까지 정해진 것은 아닙니다

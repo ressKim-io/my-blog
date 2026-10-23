@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CSI", "Storage", "Kubelet", "Sidecar", "concept"]
 series:
   name: "k8s-theory-storage"
   order: 2
-date: "2026-10-23"
+date: "2026-10-21"
 ---
 
 스토리지 드라이버가 볼륨 생성과 노드의 사용 경로 준비를 모두 구현하더라도, 두 작업을 같은 프로그램이 부르는 것은 아닙니다

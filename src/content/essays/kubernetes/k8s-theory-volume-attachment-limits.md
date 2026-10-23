@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CSI", "Storage", "Scheduling", "concept"]
 series:
   name: "k8s-theory-storage"
   order: 6
-date: "2026-10-23"
+date: "2026-10-28"
 ---
 
 노드에 볼륨을 몇 개까지 붙일 수 있는지는 CSI(Container Storage Interface) 드라이버가 선언합니다

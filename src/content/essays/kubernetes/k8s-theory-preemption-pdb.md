@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Preemption", "PodDisruptionBudget", "PriorityClass", "Evic
 series:
   name: "k8s-theory-node"
   order: 3
-date: "2026-10-23"
+date: "2026-09-02"
 ---
 
 높은 우선순위 Pod를 배치할 자리가 없으면 스케줄러는 다른 Pod를 제거해 자리를 만들 수 있는지 살펴봅니다

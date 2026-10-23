@@ -6,7 +6,7 @@ tags: [Kubernetes, etcd, resourceVersion, Concurrency, concept]
 series:
   name: "k8s-theory-api"
   order: 6
-date: "2026-10-22"
+date: "2026-07-31"
 ---
 
 같은 Deployment를 두 작성자가 읽고 각각 수정하면, 나중에 저장한 내용이 앞의 변경을 덮을 수 있습니다

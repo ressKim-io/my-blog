@@ -6,7 +6,7 @@ tags: [Kubernetes, UID, ownerReferences, GarbageCollection, concept]
 series:
   name: "k8s-theory-api"
   order: 8
-date: "2026-10-22"
+date: "2026-08-03"
 ---
 
 이름이 `web`인 ReplicaSet을 지웠다가 같은 이름으로 다시 만들었다고 가정하겠습니다

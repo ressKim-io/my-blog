@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CompatibilityVersion", "FeatureGate", "CEL", "Upgrade", "c
 series:
   name: "k8s-theory-api"
   order: 19
-date: "2026-10-23"
+date: "2026-08-20"
 ---
 
 새 바이너리를 배포한 순간 새 API와 저장 형식까지 모두 사용한다면, 실행 파일을 되돌리는 것만으로 롤백할 수 있을까요?

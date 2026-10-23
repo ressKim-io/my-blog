@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Server-Side Apply", "HPA", "managedFields", "concept"]
 series:
   name: "k8s-theory-api"
   order: 11
-date: "2026-10-22"
+date: "2026-08-08"
 ---
 
 Deployment의 `spec.replicas`를 HPA에 맡기려면 사람이 관리하는 매니페스트에서 그 필드를 빼야 할 수 있습니다

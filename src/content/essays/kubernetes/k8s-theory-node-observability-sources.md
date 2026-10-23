@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Observability", "cAdvisor", "kube-state-metrics", "metrics
 series:
   name: "k8s-theory-node"
   order: 7
-date: "2026-10-23"
+date: "2026-09-10"
 ---
 
 같은 Pod의 메모리 사용량을 보는데 `kubectl top`과 대시보드의 숫자가 다를 수 있습니다

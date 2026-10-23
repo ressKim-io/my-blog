@@ -6,7 +6,7 @@ tags: ["Kubernetes", "QoS", "cgroup", "ResourceManagement", "OOM", "concept"]
 series:
   name: "k8s-theory-node"
   order: 5
-date: "2026-10-23"
+date: "2026-09-07"
 ---
 
 Pod의 `requests`와 `limits`는 같은 자원을 서로 다른 목적으로 표현합니다

@@ -6,7 +6,7 @@ tags: ["Kubernetes", "NodeSwap", "Swap", "Kubelet", "cgroup", "ResourceManagemen
 series:
   name: "k8s-theory-node"
   order: 16
-date: "2026-10-23"
+date: "2026-09-23"
 ---
 
 노드에서 swap을 켜고 kubelet의 기동을 허용해도 Pod가 곧바로 swap을 쓰지는 않습니다

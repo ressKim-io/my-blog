@@ -6,7 +6,7 @@ tags: [Kubernetes, Admission, PodSecurity, ResourceQuota, concept]
 series:
   name: "k8s-theory-api"
   order: 4
-date: "2026-10-22"
+date: "2026-07-27"
 ---
 
 [인가](/essays/k8s-theory-authorization)를 통과했다고 요청 본문의 모든 값이 허용된 것은 아닙니다

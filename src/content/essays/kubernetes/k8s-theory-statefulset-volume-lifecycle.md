@@ -6,7 +6,7 @@ tags: ["kubernetes", "statefulset", "persistent-volume", "concept"]
 series:
   name: "k8s-theory-storage"
   order: 4
-date: "2026-10-23"
+date: "2026-10-25"
 ---
 
 StatefulSet의 복제본을 3개에서 2개로 줄이면 `web-2` Pod는 삭제 대상이 됩니다

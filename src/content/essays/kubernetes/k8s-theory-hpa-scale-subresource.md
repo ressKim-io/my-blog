@@ -6,7 +6,7 @@ tags: ["Kubernetes", "HPA", "Autoscaling", "ServerSideApply", "GitOps", "concept
 series:
   name: "k8s-theory-node"
   order: 18
-date: "2026-10-23"
+date: "2026-09-27"
 ---
 
 HPA(Horizontal Pod Autoscaler)는 지표를 보고 워크로드의 목표 replica 수를 바꾸는 컨트롤러입니다

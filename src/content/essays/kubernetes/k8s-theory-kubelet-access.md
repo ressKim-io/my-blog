@@ -6,7 +6,7 @@ tags: ["kubernetes", "kubelet", "RBAC", "TLS", "Konnectivity", "concept"]
 series:
   name: "k8s-theory-api"
   order: 18
-date: "2026-10-23"
+date: "2026-08-18"
 ---
 
 `kubectl logs`에서 권한 오류가 나왔다고 해서 항상 사용자의 권한이 부족한 것은 아닙니다

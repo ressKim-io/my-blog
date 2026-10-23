@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CRI", "OCI", "containerd", "runc", "concept"]
 series:
   name: "k8s-theory-node"
   order: 12
-date: "2026-10-23"
+date: "2026-09-17"
 ---
 
 kubelet은 컨테이너를 만들기 위해 runc를 직접 실행하지 않습니다

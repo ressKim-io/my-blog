@@ -6,7 +6,7 @@ tags: [Kubernetes, Reconcile, Workqueue, ReplicaSet, concept]
 series:
   name: "k8s-theory-api"
   order: 13
-date: "2026-10-22"
+date: "2026-08-09"
 ---
 
 ReplicaSet이 Pod 세 개를 생성하는 요청을 보냈다고 가정하겠습니다

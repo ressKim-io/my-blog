@@ -6,7 +6,7 @@ tags: ["kubernetes", "certificates", "rbac", "impersonation", "concept"]
 series:
   name: "k8s-theory-api"
   order: 17
-date: "2026-10-23"
+date: "2026-08-17"
 ---
 
 인증서를 발급받는 권한과, 다른 신원으로 요청하는 권한은 어떻게 표현할까요?

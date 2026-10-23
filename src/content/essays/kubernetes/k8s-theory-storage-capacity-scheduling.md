@@ -6,7 +6,7 @@ tags: ["kubernetes", "CSI", "storage", "scheduling", "concept"]
 series:
   name: "k8s-theory-storage"
   order: 7
-date: "2026-10-23"
+date: "2026-10-30"
 ---
 
 사용자는 필요한 저장소 크기를 PVC(PersistentVolumeClaim, 영속 볼륨 요청)에 적습니다

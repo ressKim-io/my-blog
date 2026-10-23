@@ -6,7 +6,7 @@ tags: ["Kubernetes", "DevicePlugin", "DRA", "NUMA", "TopologyManager", "concept"
 series:
   name: "k8s-theory-node"
   order: 13
-date: "2026-10-23"
+date: "2026-09-18"
 ---
 
 Pod가 `nvidia.com/gpu: 2`를 요청하면 기본 개수 모델의 스케줄러는 GPU가 두 개 남은 노드를 찾습니다

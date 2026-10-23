@@ -6,7 +6,7 @@ tags: ["kubernetes", "controller-runtime", "reconcile", "operator", "concept"]
 series:
   name: "k8s-theory-extension"
   order: 3
-date: "2026-10-23"
+date: "2026-11-03"
 ---
 
 CR에 원하는 상태를 적었다고 자원이 저절로 맞춰지는 것은 아닙니다

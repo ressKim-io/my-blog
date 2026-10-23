@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Service", "EndpointSlice", "TrafficPolicy", "DualStack", "
 series:
   name: "k8s-theory-network"
   order: 10
-date: "2026-10-23"
+date: "2026-10-18"
 ---
 
 Service에 백엔드가 있어도 이 노드에서 사용할 후보가 없을 수 있습니다

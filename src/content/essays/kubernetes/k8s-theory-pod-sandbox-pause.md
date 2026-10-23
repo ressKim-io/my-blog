@@ -6,7 +6,7 @@ tags: ["Kubernetes", "PodSandbox", "pause", "NetworkNamespace", "CNI", "concept"
 series:
   name: "k8s-theory-network"
   order: 2
-date: "2026-10-23"
+date: "2026-10-02"
 ---
 
 같은 Pod의 컨테이너가 localhost로 통신할 수 있는 이유는 네트워크 환경을 공유하기 때문입니다

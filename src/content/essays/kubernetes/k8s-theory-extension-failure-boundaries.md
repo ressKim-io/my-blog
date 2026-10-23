@@ -6,7 +6,7 @@ tags: ["Kubernetes", "CRD", "Admission", "Controller", "Platform Engineering", "
 series:
   name: "k8s-theory-extension"
   order: 6
-date: "2026-10-24"
+date: "2026-11-07"
 ---
 
 요구사항을 구현할 수 있는지만 물으면 controller나 별도 API 서버로 해결할 수 있는 범위는 넓습니다

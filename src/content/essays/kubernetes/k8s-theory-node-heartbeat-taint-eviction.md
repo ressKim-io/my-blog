@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Node", "Lease", "Taint", "Eviction", "concept"]
 series:
   name: "k8s-theory-node"
   order: 10
-date: "2026-10-23"
+date: "2026-09-14"
 ---
 
 노드의 하트비트가 끊겨도 컨트롤 플레인은 노드의 전원이 꺼졌는지 바로 알 수 없습니다

@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Admission", "CEL", "Policy", "Server-Side Apply", "GitOps"
 series:
   name: "k8s-theory-extension"
   order: 4
-date: "2026-10-23"
+date: "2026-11-04"
 ---
 
 정책이 요청을 거절하면 대상 오브젝트의 새 상태는 저장되지 않습니다

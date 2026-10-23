@@ -6,7 +6,7 @@ tags: ["kubernetes", "authentication", "serviceaccount", "concept"]
 series:
   name: "k8s-theory-api"
   order: 2
-date: "2026-10-21"
+date: "2026-07-25"
 ---
 
 API 서버는 Pod가 보낸 요청을 누구의 요청으로 판단할까요?

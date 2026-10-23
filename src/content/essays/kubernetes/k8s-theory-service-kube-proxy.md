@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Service", "kube-proxy", "EndpointSlice", "conntrack", "con
 series:
   name: "k8s-theory-network"
   order: 4
-date: "2026-10-23"
+date: "2026-10-07"
 ---
 
 Pod가 교체되면 주소도 바뀔 수 있습니다

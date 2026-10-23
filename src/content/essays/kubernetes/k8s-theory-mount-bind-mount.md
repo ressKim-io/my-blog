@@ -6,7 +6,7 @@ tags: ["Kubernetes", "Linux", "Mount", "CSI", "Namespace", "concept"]
 series:
   name: "k8s-theory-kernel"
   order: 3
-date: "2026-10-24"
+date: "2026-11-13"
 ---
 
 같은 노드의 여러 Pod가 한 볼륨을 사용할 때, 각 Pod에 경로를 제공한다고 파일시스템도 매번 새로 만드는 것은 아닙니다

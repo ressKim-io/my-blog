@@ -6,7 +6,7 @@ tags: ["Kubernetes", "OpenTelemetry", "Tracing", "kube-apiserver", "kubelet", "c
 series:
   name: "k8s-theory-api"
   order: 23
-date: "2026-10-23"
+date: "2026-08-27"
 ---
 
 API 서버 로그에 `Trace[...]`가 나왔다고 OpenTelemetry 추적 내보내기가 켜졌다는 뜻은 아닙니다

@@ -6,7 +6,7 @@ tags: ["Kubernetes", "EphemeralContainers", "Debugging", "Kubelet", "CRI", "conc
 series:
   name: "k8s-theory-node"
   order: 19
-date: "2026-10-23"
+date: "2026-09-29"
 ---
 
 애플리케이션 이미지에 shell이나 진단 도구가 없으면 `kubectl exec`만으로 조사하기 어려울 수 있습니다

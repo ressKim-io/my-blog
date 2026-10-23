@@ -6,7 +6,7 @@ tags: ["kubernetes", "kube-apiserver", "admission", "concept"]
 series:
   name: "k8s-theory-api"
   order: 1
-date: "2026-10-21"
+date: "2026-07-24"
 ---
 
 Deployment 하나를 만들면 API 서버는 무엇부터 판단할까요?
