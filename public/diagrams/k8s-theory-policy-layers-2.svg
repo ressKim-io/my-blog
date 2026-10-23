@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="900" viewBox="0 0 560 900" role="img" aria-labelledby="title desc">
+<title id="title">admission 변경과 필드 소유권 계산</title><desc id="desc">요청의 필드 소유권을 계산한 뒤 mutating admission을 실행합니다. 이후 managedFields의 형식이 잘못되면 이전 장부를 복원하지만 새 manager를 자동으로 부여하지는 않습니다. 새 독립 필드와 기존 소유 필드는 결과가 다릅니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#27272A"/></marker></defs>
+<rect width="560" height="900" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+
+<text x="280" y="42" font-size="24" font-weight="700">변경한 주체가 장부에도 남습니까?</text>
+<rect x="56" y="92" width="448" height="108" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="280" y="133" font-size="22">요청의 field manager 계산</text>
+<text x="280" y="170" font-size="20">요청 내용과 기존 소유 집합을 사용</text>
+<path d="M280 200 V250" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="56" y="268" width="448" height="108" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="280" y="309" font-size="22">mutating admission</text>
+<text x="280" y="346" font-size="20">MAP · webhook이 오브젝트 변경</text>
+<path d="M280 376 V426" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="56" y="444" width="448" height="108" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="280" y="485" font-size="22">managedFields 유효성 검사</text>
+<text x="280" y="522" font-size="20">망가진 장부를 복원 · 새 주인 부여 안 함</text>
+<path d="M280 552 V602" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="56" y="620" width="448" height="108" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="280" y="661" font-size="22">나머지 검증을 통과하면 저장</text>
+<text x="280" y="698" font-size="20">mutator 이름의 manager는 자동 생성 안 함</text>
+<text x="280" y="800" font-size="20">새 독립 필드: 소유자가 없을 수 있음</text>
+<text x="280" y="840" font-size="20">기존 필드: 기존 소유권이 남을 수 있음</text>
+<text x="280" y="878" font-size="20">atomic 상위 단위의 소유권도 함께 확인</text>
+</g></svg>

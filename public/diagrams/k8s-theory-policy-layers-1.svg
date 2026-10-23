@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="1020" viewBox="0 0 560 1020" role="img" aria-labelledby="title desc">
+<title id="title">정책을 실행하는 시점과 위치</title><desc id="desc">요청이 기다리는 동기 admission 경로에는 API 서버 내부 정책과 외부 webhook이 있습니다. 허용된 새 상태가 저장된 뒤 배경 controller가 기존 자원을 관찰하고 별도의 API 쓰기로 검사·변경·생성을 수행합니다. 플러그인의 실행 순서를 나타내는 그림은 아닙니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#27272A"/></marker></defs>
+<rect width="560" height="1020" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+
+<text x="280" y="42" font-size="24" font-weight="700">정책은 언제 실행됩니까?</text>
+<text x="280" y="80" font-size="20">거절된 요청의 새 대상 상태는 저장되지 않음</text>
+<rect x="90" y="110" width="380" height="78" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+<text x="280" y="157" font-size="22">API 쓰기 요청</text>
+<path d="M280 188 V230" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="28" y="246" width="504" height="310" rx="16" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="280" y="282" font-size="22" font-weight="700">요청이 기다리는 동기 경로</text>
+<rect x="52" y="306" width="456" height="88" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="280" y="340" font-size="22">API 서버 안: PSA · VAP · MAP</text>
+<text x="280" y="373" font-size="20">설정된 범위에서 검증 또는 변경</text>
+<rect x="52" y="422" width="456" height="88" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+<text x="280" y="456" font-size="22">외부 서버: admission webhook</text>
+<text x="280" y="489" font-size="20">호출 실패와 명시적 거절을 구분</text>
+<path d="M280 556 V614" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="140" y="575" width="280" height="28" fill="#FAFAFA"/>
+<text x="280" y="597" font-size="20">허용된 요청만 계속 처리</text>
+<rect x="90" y="630" width="380" height="88" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="280" y="681" font-size="22">검증을 통과한 새 상태 저장</text>
+<path d="M280 718 V802" stroke="#27272A" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<rect x="140" y="744" width="280" height="28" fill="#FAFAFA"/>
+<text x="280" y="766" font-size="20">관찰 뒤 별도 API 요청</text>
+<rect x="70" y="820" width="420" height="110" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="280" y="862" font-size="22">배경 controller</text>
+<text x="280" y="898" font-size="20">기존 자원 검사 · 변경 · 생성</text>
+<text x="280" y="989" font-size="20">정책 위치 비교 · 플러그인 순서도 아님</text>
+</g></svg>

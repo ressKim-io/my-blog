@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 780" role="img" aria-labelledby="title desc">
+  <title id="title">처리 중 같은 키가 다시 추가됐을 때 두 큐가 직렬화를 유지하는 방식</title>
+  <desc id="desc">기본 우선순위 큐는 처리 중인 키를 잠그고 다시 추가된 같은 키를 대기 항목으로 합친 뒤 Done에서 잠금을 풉니다. 비우선순위 client-go 큐는 processing 중 재추가를 dirty로 표시하고 Done에서 다시 대기열에 넣습니다. 보장은 같은 Controller 큐 안에 한정됩니다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#64748B"/></marker></defs>
+  <rect width="800" height="780" rx="20" fill="#FAFAFA"/>
+  <g font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif" text-anchor="middle" fill="#0F172A">
+    <text x="400" y="48" font-size="29" font-weight="700">같은 키가 처리 중 다시 들어오면</text>
+    <text x="210" y="113" font-size="26" font-weight="700">기본 우선순위 큐</text>
+    <text x="590" y="113" font-size="25" font-weight="700">client-go 비우선순위 큐</text>
+    <rect x="40" y="146" width="340" height="100" rx="15" fill="#F5F3FF" stroke="#C4B5FD" stroke-width="2"/>
+    <text x="210" y="206" font-size="25" font-weight="700">처리 중 키 잠금</text>
+    <rect x="420" y="146" width="340" height="100" rx="15" fill="#ECFEFF" stroke="#67E8F9" stroke-width="2"/>
+    <text x="590" y="206" font-size="25" font-weight="700">processing에 키 등록</text>
+    <path d="M210 246V352" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M590 246V352" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="105" y="279" width="210" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="210" y="303" font-size="23" fill="#475569">같은 키 재추가</text>
+    <rect x="468" y="279" width="244" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="590" y="303" font-size="23" fill="#475569">재추가: dirty 표시</text>
+    <rect x="40" y="354" width="340" height="100" rx="15" fill="#F5F3FF" stroke="#C4B5FD" stroke-width="2"/>
+    <text x="210" y="414" font-size="25" font-weight="700">대기 항목 하나로 병합</text>
+    <rect x="420" y="354" width="340" height="100" rx="15" fill="#ECFEFF" stroke="#67E8F9" stroke-width="2"/>
+    <text x="590" y="414" font-size="25" font-weight="700">아직 대기열에 넣지 않음</text>
+    <path d="M210 454V560" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <path d="M590 454V560" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="79" y="487" width="262" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="210" y="511" font-size="23" fill="#475569">Done으로 잠금 해제</text>
+    <rect x="464" y="487" width="252" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="590" y="511" font-size="23" fill="#475569">Done 때 dirty 확인</text>
+    <rect x="40" y="562" width="340" height="100" rx="15" fill="#F5F3FF" stroke="#C4B5FD" stroke-width="2"/>
+    <text x="210" y="622" font-size="25" font-weight="700">준비되면 다시 처리</text>
+    <rect x="420" y="562" width="340" height="100" rx="15" fill="#ECFEFF" stroke="#67E8F9" stroke-width="2"/>
+    <text x="590" y="622" font-size="25" font-weight="700">대기열에 다시 삽입</text>
+    <text x="400" y="737" font-size="24" fill="#475569">같은 Controller 큐의 보장 · 전역 잠금은 아님</text>
+  </g>
+</svg>

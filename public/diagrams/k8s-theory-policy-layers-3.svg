@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="720" viewBox="0 0 560 720" role="img" aria-labelledby="title desc">
+<title id="title">추적 대상 생성물을 지우고 다시 만드는 경쟁</title><desc id="desc">생성물이 GitOps의 추적 및 prune 대상이고 generate의 동기화가 활성화되어 있을 때를 가정합니다. GitOps가 지운 자원을 생성 controller가 다시 만들 수 있습니다. 필드 소유권 충돌과 달리 오브젝트의 존재 여부에 관한 선언이 경쟁합니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#27272A"/></marker></defs>
+<rect width="560" height="720" fill="#FAFAFA"/>
+<g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+
+<text x="280" y="42" font-size="24" font-weight="700">같은 자원을 지우고 다시 만들 때</text>
+<text x="280" y="81" font-size="20">추적 · prune · 생성 동기화가 함께 적용될 때</text>
+<rect x="130" y="140" width="380" height="110" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+<text x="320" y="183" font-size="22">GitOps의 원하는 상태</text>
+<text x="320" y="221" font-size="20">이 추적 대상 자원은 없어야 함</text>
+<path d="M320 250 V372" stroke="#27272A" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="238" y="290" width="164" height="34" fill="#FAFAFA"/>
+<text x="320" y="315" font-size="20">prune으로 삭제</text>
+<rect x="130" y="390" width="380" height="110" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+<text x="320" y="433" font-size="22">generate의 원하는 상태</text>
+<text x="320" y="471" font-size="20">생성 자원이 계속 있어야 함</text>
+<path d="M130 445 H48 V195 H112" fill="none" stroke="#27272A" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<rect x="16" y="294" width="64" height="34" fill="#FAFAFA"/>
+<text x="48" y="319" font-size="20">재생성</text>
+<text x="280" y="589" font-size="22" font-weight="700">존재 여부를 관리하는 경계를 맞춥니다</text>
+<text x="280" y="631" font-size="20">Git에 없다는 이유만으로 모두 지우지는 않음</text>
+<text x="280" y="672" font-size="20">필드의 manager 충돌과는 다른 문제</text>
+</g></svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 980" role="img" aria-labelledby="title desc">
+  <title id="title">감시 이벤트가 이름 키로 바뀌어 Reconciler에 도달하는 흐름</title>
+  <desc id="desc">감시 캐시의 오브젝트 이벤트가 predicate와 이벤트 핸들러를 통과해 표준 namespace와 name 요청으로 바뀝니다. Controller 큐가 같은 키를 합치고 워커가 Reconciler를 호출합니다. 조정 코드는 관찰 상태를 읽고 API에 쓰며 Controller가 반환 결과와 에러로 다음 요청을 예약합니다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#64748B"/></marker></defs>
+  <rect width="800" height="980" rx="20" fill="#FAFAFA"/>
+  <g font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif" text-anchor="middle" fill="#0F172A">
+    <text x="400" y="48" font-size="29" font-weight="700">이벤트를 작업 명령 대신 키로 바꿉니다</text>
+    <rect x="100" y="88" width="600" height="100" rx="15" fill="#ECFEFF" stroke="#67E8F9" stroke-width="2"/>
+    <text x="400" y="130" font-size="28" font-weight="700">감시 캐시 · informer</text>
+    <text x="400" y="166" font-size="24">오브젝트 이벤트 전달</text>
+    <path d="M400 188V244" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="100" y="246" width="600" height="100" rx="15" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2"/>
+    <text x="400" y="286" font-size="28" font-weight="700">predicate · 이벤트 핸들러</text>
+    <text x="400" y="323" font-size="24">이벤트 필터 · 대상 또는 부모 키 생성</text>
+    <path d="M400 346V414" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="237" y="360" width="326" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="400" y="384" font-size="23" fill="#475569">표준 요청: namespace / name</text>
+    <rect x="100" y="416" width="600" height="100" rx="15" fill="#F5F3FF" stroke="#C4B5FD" stroke-width="2"/>
+    <text x="400" y="457" font-size="28" font-weight="700">Controller 큐</text>
+    <text x="400" y="494" font-size="24">같은 키 병합 · 처리 중 키 직렬화</text>
+    <path d="M400 516V584" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="280" y="530" width="240" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="400" y="554" font-size="23" fill="#475569">워커가 키로 호출</text>
+    <rect x="100" y="586" width="600" height="100" rx="15" fill="#FFFBEB" stroke="#FCD34D" stroke-width="2"/>
+    <text x="400" y="627" font-size="28" font-weight="700">사용자가 작성한 Reconciler</text>
+    <text x="400" y="664" font-size="24">관찰 상태를 읽고 필요한 API 변경</text>
+    <path d="M400 686V754" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="286" y="700" width="228" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="400" y="724" font-size="23" fill="#475569">Result + error 반환</text>
+    <rect x="100" y="756" width="600" height="100" rx="15" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2"/>
+    <text x="400" y="797" font-size="28" font-weight="700">Controller</text>
+    <text x="400" y="834" font-size="24">종료하거나 다음 요청을 예약</text>
+    <text x="400" y="925" font-size="24" fill="#475569">키에 이벤트 본문·종류·UID는 없습니다</text>
+  </g>
+</svg>
