@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 864" role="img" aria-labelledby="cni-call-title cni-call-desc">
+  <title id="cni-call-title">kubelet에서 CNI 플러그인과 IPAM으로 이어지는 호출</title>
+  <desc id="cni-call-desc">일반 Linux Pod에서 kubelet은 CRI로 sandbox를 요청합니다. 런타임이 network namespace를 준비하고 CNI 실행 파일에 환경 변수와 JSON을 전달합니다. IPAM 위임은 상위 플러그인이 담당하며 결과는 런타임을 거쳐 Pod 상태로 보고됩니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="864" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="280" y="40" font-size="24" font-weight="700">kubelet이 CNI 실행 파일을 직접 부르지는 않습니다</text>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"><path d="M280 160V224"/><path d="M280 320V384"/><path d="M280 560V624"/><path d="M280 720V784"/></g>
+    <rect x="32" y="72" width="496" height="88" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="108" font-size="22" font-weight="700">kubelet: sandbox 생성 요청</text>
+    <text x="280" y="140" font-size="20">네트워크 준비 상태도 CRI로 확인합니다</text>
+    <rect x="160" y="184" width="240" height="28" fill="#FAFAFA"/>
+    <text x="280" y="204" font-size="20">CRI RunPodSandbox</text>
+    <rect x="32" y="224" width="496" height="96" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="262" font-size="22" font-weight="700">런타임: network namespace 준비</text>
+    <text x="280" y="296" font-size="20">CNI_NETNS로 넘길 경로를 확보합니다</text>
+    <rect x="120" y="344" width="320" height="28" fill="#FAFAFA"/>
+    <text x="280" y="364" font-size="20">환경 변수 + stdin 설정 JSON</text>
+    <rect x="32" y="384" width="496" height="176" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="422" font-size="22" font-weight="700">CNI 플러그인: 인터페이스·주소 구성</text>
+    <text x="280" y="456" font-size="20">필요하면 이 플러그인이 IPAM을 호출합니다</text>
+    <rect x="64" y="480" width="432" height="56" rx="8" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="516" font-size="20">IPAM: 주소·경로 반환, 상위 플러그인이 적용</text>
+    <rect x="128" y="584" width="304" height="28" fill="#FAFAFA"/>
+    <text x="280" y="604" font-size="20">ADD 결과 JSON을 stdout으로 반환</text>
+    <rect x="32" y="624" width="496" height="96" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="662" font-size="22" font-weight="700">런타임: 결과 보관·CRI 상태 보고</text>
+    <text x="280" y="696" font-size="20">플러그인 종료 뒤에도 네트워크 상태는 남습니다</text>
+    <rect x="160" y="744" width="240" height="28" fill="#FAFAFA"/>
+    <text x="280" y="764" font-size="20">PodSandboxStatus의 IP</text>
+    <rect x="32" y="784" width="496" height="48" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="816" font-size="22" font-weight="700">kubelet: Pod 상태에 주소 반영</text>
+  </g>
+</svg>

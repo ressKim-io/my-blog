@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 704" role="img" aria-labelledby="cni-chain-title cni-chain-desc">
+  <title id="cni-chain-title">CNI 체인의 ADD 결과 누적과 DEL 역순 실행</title>
+  <desc id="cni-chain-desc">세 플러그인을 둔 개념 예에서 ADD는 P1부터 P3까지 이전 결과를 전달하며 실행하고 마지막 결과 R3를 보관합니다. DEL은 P3부터 P1까지 역순으로 실행하며 각 플러그인에 같은 마지막 ADD 결과 R3를 전달합니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="704" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="280" y="40" font-size="24" font-weight="700">생성은 결과를 이어 받고, 삭제는 같은 결과를 받습니다</text>
+    <text x="144" y="120" font-size="22" font-weight="700">ADD: 목록 순서</text>
+    <text x="416" y="120" font-size="22" font-weight="700">DEL: 역순</text>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"><path d="M144 240V304"/><path d="M144 400V464"/><path d="M144 560V616"/><path d="M416 240V304"/><path d="M416 400V464"/></g>
+    <g fill="#ECFDF5" stroke="#059669"><rect x="32" y="144" width="224" height="96" rx="12"/><rect x="32" y="304" width="224" height="96" rx="12"/><rect x="32" y="464" width="224" height="96" rx="12"/></g>
+    <g fill="#FFFBEB" stroke="#D97706"><rect x="304" y="144" width="224" height="96" rx="12"/><rect x="304" y="304" width="224" height="96" rx="12"/><rect x="304" y="464" width="224" height="96" rx="12"/></g>
+    <text x="144" y="182" font-size="22" font-weight="700">P1 → 결과 R1</text><text x="144" y="216" font-size="20">prevResult 없음</text>
+    <text x="144" y="342" font-size="22" font-weight="700">P2 → 결과 R2</text><text x="144" y="376" font-size="20">prevResult = R1</text>
+    <text x="144" y="502" font-size="22" font-weight="700">P3 → 결과 R3</text><text x="144" y="536" font-size="20">prevResult = R2</text>
+    <text x="416" y="182" font-size="22" font-weight="700">P3 삭제</text><text x="416" y="216" font-size="20">prevResult = R3</text>
+    <text x="416" y="342" font-size="22" font-weight="700">P2 삭제</text><text x="416" y="376" font-size="20">prevResult = R3</text>
+    <text x="416" y="502" font-size="22" font-weight="700">P1 삭제</text><text x="416" y="536" font-size="20">prevResult = R3</text>
+    <rect x="32" y="616" width="496" height="56" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="652" font-size="20">런타임이 마지막 ADD 결과 R3를 지속 보관합니다</text>
+  </g>
+</svg>
