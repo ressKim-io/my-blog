@@ -1,7 +1,7 @@
 # ☸️ k8s-theory 시리즈 변환 계획
 
 > Obsidian vault의 Kubernetes 이론 노트를 한국어 `essays` 글로 변환하는 계획
-> **2026-10-23 갱신: Batch 16까지 56편 검수 완료. 이번 요청 30/30편, 보류 0편. 3편씩 10개 배치·로컬 커밋까지 진행**
+> **2026-10-23 갱신: 누적 59편 검수 완료. 현재 후속 요청 3/15편 완료·보류 0편**
 > 9월 조사 당시 50편, 2026-10-21에 확인한 `sessions/*.md`는 71개. 파일 존재를 확인한 수이며 내용 검수 완료 수가 아님
 
 관련 문서 — `README.md`(진입점) · `inventory.md`(원본 전수) · `source-format.md`(변환 지침)
@@ -15,7 +15,7 @@
 3. 이 계획의 절대 제약·변환 절차와 [원본 변환 지침](source-format.md)을 읽고, 7절의 다음 배치를 진행한다
 
 문체는 공통 기준을 우선한다. 과거 계획의 문단 수·SVG 개수·고정 맺음말 요구는 적용하지 않는다
-**사용자의 2026-10-23 후속 요청으로 Batch 07부터 3편 단위로 10개 배치·총 30편을 연속 진행한다**
+**이전 요청의 Batch 07~16은 30편 검수·로컬 커밋 완료. 현재 후속 요청은 Batch 17~21의 남은 15편을 3편씩 진행한다**
 Batch 01·02는 3편, Batch 03~06은 5편씩 진행한 이력이다
 각 배치는 blog-writer 3명 분담 → 별도 blog-reviewer 검수 → 지적 수정 → post lint·전체 lint·build·정적 출력 검증 → 로컬 커밋 순서로 진행한다
 배치마다 승인 대기를 하지 않는다. 보류 편은 이유를 기록하고 완료 수에서 제외하며 독립 작업은 계속한다
@@ -180,7 +180,7 @@ Codex와 Claude 모두 같은 문서를 읽고 아래처럼 이론 해설에 적
 - 빌드 훅이 통계 등 다른 파일을 바꾸면 이번 작업에서 생긴 자동 변경만 확인해 정리한다. 기존 사용자 변경은 보존한다
 - 7절의 배치·편별 상태, 실제 검사 결과, 보류 이유, 다음 3편을 갱신한다
 - 사용자에게 완성 글 경로, 대표 문장 전후 비교, 확인이 남은 주장, 검사 결과와 다음 대상을 전달한다
-- 이번 요청은 **3편씩 10개 배치, 총 30편**을 처리한다. 배치 검증·커밋 뒤 다음 3편으로 계속한다
+- 현재 요청은 **3편씩 5개 배치, 남은 15편**을 처리한다. 배치 검증·커밋 뒤 다음 3편으로 계속한다
 
 이번 요청은 검증을 통과한 콘텐츠·SVG·진행 기록의 `git commit`까지 승인됐다. `git push`·사이트 배포·시리즈 카드 등록은 하지 않는다
 
@@ -232,7 +232,7 @@ Codex와 Claude 모두 같은 문서를 읽고 아래처럼 이론 해설에 적
 
 ## 7. 진행 상태와 다음 배치
 
-아래 Batch 01~06은 이전 요청의 완료 이력이며, 현행 상태는 문서 끝의 Batch 07~16 진행표를 따른다
+아래 Batch 01~06은 이전 요청의 완료 이력이며, 현행 상태는 문서 끝의 Batch 17~21 진행표를 따른다
 
 2026-10-23 기준선: Batch 06의 글 5편과 SVG 12장 작성·검수 완료
 누적 `k8s-theory-` 글 26편과 SVG 55장이다
@@ -1064,3 +1064,46 @@ post lint error 0/warn 4, 전체 lint error 0/warn 1, build 640 pages 및 로컬
 
 추가 30편 검수·로컬 커밋 완료, 보류 0편. 다음은 Phase 4-4·4-5·4-6이다
 push·배포·시리즈 카드 등록은 실행하지 않았다
+
+## 2026-10-23 잔여 15편 변환 — Batch 17~21
+
+사용자가 남은 글도 이전 조건으로 에이전트 분담을 통해 변환하도록 요청했다
+기준선은 `cc2bd80`의 56편이며 시작 시 원본 71개 중 미변환 15개를 확인했다
+3명 작성 → 별도 검수 → 수정 → 실제 post lint·전체 lint·build·정적 출력 → 로컬 커밋을 반복한다
+검증 실패·핵심 근거 부족은 완료 수에서 제외하고 보류 이유를 남긴다
+Vault는 읽기 전용이며 push·배포·시리즈 카드 등록은 하지 않는다
+
+| 배치 | 좌표 | 상태 | 검증·근거 기록 | 콘텐츠 커밋 | 다음 대상 |
+|---|---|---|---|---|---|
+| 17 | 4-4, 4-5, 4-6 | 검수 완료 | post lint 0/5, lint 0/1, build 646·export 통과; [근거·검수](batches/batch-17.md) | `87fe769` | 4-7, 5-1, 5-2 |
+| 18 | 4-7, 5-1, 5-2 | 미착수 | 실행 안 함 (통합 검증 전) | — | 5-3, 5-4, 5-5 |
+| 19 | 5-3, 5-4, 5-5 | 미착수 | 실행 안 함 (통합 검증 전) | — | 5-6, kernel-1, kernel-2 |
+| 20 | 5-6, kernel-1, kernel-2 | 미착수 | 실행 안 함 (통합 검증 전) | — | kernel-3, kernel-4, kernel-5 |
+| 21 | kernel-3, kernel-4, kernel-5 | 미착수 | 실행 안 함 (통합 검증 전) | — | 없음 (현재 원본 목록 기준) |
+
+### 잔여 원본·slug·시리즈 대응
+
+| 배치 | 좌표 | 정확한 원본 파일명 | slug | series / order | 상태 |
+|---|---|---|---|---|---|
+| 17 | 4-4 | `Phase 4-4 · StatefulSet과 볼륨 수명 · 지우는 대신 주인을 바꾼다.md` | `k8s-theory-statefulset-volume-lifecycle` | `k8s-theory-storage` / 4 | 검수 완료 |
+| 17 | 4-5 | `Phase 4-5 · 확장과 스냅샷과 임시 볼륨 · 나중에 하는 일에 새 장치는 없다.md` | `k8s-theory-volume-expansion-snapshots-ephemeral` | `k8s-theory-storage` / 5 | 검수 완료 |
+| 17 | 4-6 | `Phase 4-6 · 볼륨 개수 상한 · 드라이버가 말한 숫자를 누가 고치나.md` | `k8s-theory-volume-attachment-limits` | `k8s-theory-storage` / 6 | 검수 완료 |
+| 18 | 4-7 | `Phase 4-7 · 용량 기반 스케줄링 · 모르면 없다고 치지만 안 켜면 묻지 않는다.md` | `k8s-theory-storage-capacity-scheduling` | `k8s-theory-storage` / 7 | 미착수 |
+| 18 | 5-1 | `Phase 5-1 · CRD 구조 · 선언한 만큼만 존재한다.md` | `k8s-theory-crd-schema-pruning` | `k8s-theory-extension` / 1 | 미착수 |
+| 18 | 5-2 | `Phase 5-2 · CRD 버저닝과 conversion · 저장은 한 벌뿐이고 나머지는 그때 만든다.md` | `k8s-theory-crd-version-conversion` | `k8s-theory-extension` / 2 | 미착수 |
+| 19 | 5-3 | `Phase 5-3 · controller-runtime 과 reconcile · 큐에 담기는 것은 이름뿐이다.md` | `k8s-theory-controller-runtime-reconcile` | `k8s-theory-extension` / 3 | 미착수 |
+| 19 | 5-4 | `Phase 5-4 · 정책 계층 · 판정은 사라지고 변경은 주인이 없다.md` | `k8s-theory-policy-layers` | `k8s-theory-extension` / 4 | 미착수 |
+| 19 | 5-5 | `Phase 5-5 · Aggregated API server · 경로 하나를 넘기면 목록 전체가 걸린다.md` | `k8s-theory-aggregated-api-server` | `k8s-theory-extension` / 5 | 미착수 |
+| 20 | 5-6 | `Phase 5-6 · 통합 · 한 칸 올라갈 때마다 죽을 수 있는 것이 하나 는다.md` | `k8s-theory-extension-failure-boundaries` | `k8s-theory-extension` / 6 | 미착수 |
+| 20 | kernel-1 | `커널 하강 1 · cgroup v2 인터페이스와 CFS quota.md` | `k8s-theory-cgroup-v2-cpu-quota` | `k8s-theory-kernel` / 1 | 미착수 |
+| 20 | kernel-2 | `커널 하강 2 · netfilter hook 과 conntrack.md` | `k8s-theory-netfilter-conntrack` | `k8s-theory-kernel` / 2 | 미착수 |
+| 21 | kernel-3 | `커널 하강 3 · mount 와 bind mount.md` | `k8s-theory-mount-bind-mount` | `k8s-theory-kernel` / 3 | 미착수 |
+| 21 | kernel-4 | `커널 하강 4 · 페이지 캐시 회수와 OOM.md` | `k8s-theory-page-cache-reclaim-oom` | `k8s-theory-kernel` / 4 | 미착수 |
+| 21 | kernel-5 | `커널 하강 5 · namespace 수명.md` | `k8s-theory-namespace-lifetime` | `k8s-theory-kernel` / 5 | 미착수 |
+
+### Batch 17 검수·커밋 완료 — 2026-10-23
+
+좌표 4-4, 4-5, 4-6, 글 3편·SVG 6장 검수 완료. 콘텐츠 커밋 `87fe769`
+원본 hash·공식 근거·정정·별도 검수·실제 검증은 [배치 인계](batches/batch-17.md)에 보존한다
+post lint error 0/warn 5, 전체 lint error 0/warn 1, build 646 pages와 로컬 등록·정적 출력 검증 통과
+다음 대상: 4-7, 5-1, 5-2
