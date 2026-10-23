@@ -1,7 +1,7 @@
 # ☸️ k8s-theory 시리즈 변환 계획
 
 > Obsidian vault의 Kubernetes 이론 노트를 한국어 `essays` 글로 변환하는 계획
-> **2026-10-24 갱신: 누적 68편 검수 완료. 현재 후속 요청 12/15편 완료·보류 0편**
+> **2026-10-24 갱신: 누적 71편 검수 완료. 현재 후속 요청 15/15편 완료·보류 0편**
 > 9월 조사 당시 50편, 2026-10-21에 확인한 `sessions/*.md`는 71개. 파일 존재를 확인한 수이며 내용 검수 완료 수가 아님
 
 관련 문서 — `README.md`(진입점) · `inventory.md`(원본 전수) · `source-format.md`(변환 지침)
@@ -1079,7 +1079,7 @@ Vault는 읽기 전용이며 push·배포·시리즈 카드 등록은 하지 않
 | 18 | 4-7, 5-1, 5-2 | 검수 완료 | post lint 0/4, lint 0/1, build 652·export 통과; [근거·검수](batches/batch-18.md) | `7b3ab8b` | 5-3, 5-4, 5-5 |
 | 19 | 5-3, 5-4, 5-5 | 검수 완료 | post lint 0/5, lint 0/1, build 658·export 통과; [근거·검수](batches/batch-19.md) | `6cff167` | 5-6, kernel-1, kernel-2 |
 | 20 | 5-6, kernel-1, kernel-2 | 검수 완료 | post lint 0/4, lint 0/1, build 664·export 통과; [근거·검수](batches/batch-20.md) | `9e22fbf` | kernel-3, kernel-4, kernel-5 |
-| 21 | kernel-3, kernel-4, kernel-5 | 미착수 | 실행 안 함 (통합 검증 전) | — | 없음 (현재 원본 목록 기준) |
+| 21 | kernel-3, kernel-4, kernel-5 | 검수 완료 | post lint 0/3, lint 0/1, build 670·export 통과; [근거·검수](batches/batch-21.md) | `02805d1` | 없음 (현재 원본 목록 기준) |
 
 ### 잔여 원본·slug·시리즈 대응
 
@@ -1097,9 +1097,9 @@ Vault는 읽기 전용이며 push·배포·시리즈 카드 등록은 하지 않
 | 20 | 5-6 | `Phase 5-6 · 통합 · 한 칸 올라갈 때마다 죽을 수 있는 것이 하나 는다.md` | `k8s-theory-extension-failure-boundaries` | `k8s-theory-extension` / 6 | 검수 완료 |
 | 20 | kernel-1 | `커널 하강 1 · cgroup v2 인터페이스와 CFS quota.md` | `k8s-theory-cgroup-v2-cpu-quota` | `k8s-theory-kernel` / 1 | 검수 완료 |
 | 20 | kernel-2 | `커널 하강 2 · netfilter hook 과 conntrack.md` | `k8s-theory-netfilter-conntrack` | `k8s-theory-kernel` / 2 | 검수 완료 |
-| 21 | kernel-3 | `커널 하강 3 · mount 와 bind mount.md` | `k8s-theory-mount-bind-mount` | `k8s-theory-kernel` / 3 | 미착수 |
-| 21 | kernel-4 | `커널 하강 4 · 페이지 캐시 회수와 OOM.md` | `k8s-theory-page-cache-reclaim-oom` | `k8s-theory-kernel` / 4 | 미착수 |
-| 21 | kernel-5 | `커널 하강 5 · namespace 수명.md` | `k8s-theory-namespace-lifetime` | `k8s-theory-kernel` / 5 | 미착수 |
+| 21 | kernel-3 | `커널 하강 3 · mount 와 bind mount.md` | `k8s-theory-mount-bind-mount` | `k8s-theory-kernel` / 3 | 검수 완료 |
+| 21 | kernel-4 | `커널 하강 4 · 페이지 캐시 회수와 OOM.md` | `k8s-theory-page-cache-reclaim-oom` | `k8s-theory-kernel` / 4 | 검수 완료 |
+| 21 | kernel-5 | `커널 하강 5 · namespace 수명.md` | `k8s-theory-namespace-lifetime` | `k8s-theory-kernel` / 5 | 검수 완료 |
 
 ### Batch 17 검수·커밋 완료 — 2026-10-23
 
@@ -1128,3 +1128,10 @@ post lint error 0/warn 5, 전체 lint error 0/warn 1, build 658 pages와 로컬 
 원본 hash·공식 근거·정정·별도 검수·실제 검증은 [배치 인계](batches/batch-20.md)에 보존한다
 post lint error 0/warn 4, 전체 lint error 0/warn 1, build 664 pages와 로컬 등록·정적 출력 검증 통과
 다음 대상: kernel-3, kernel-4, kernel-5
+
+### Batch 21 검수·커밋 완료 — 2026-10-24
+
+좌표 kernel-3, kernel-4, kernel-5, 글 3편·SVG 6장 검수 완료. 콘텐츠 커밋 `02805d1`
+원본 hash·공식 근거·정정·별도 검수·실제 검증은 [배치 인계](batches/batch-21.md)에 보존한다
+post lint error 0/warn 3, 전체 lint error 0/warn 1, build 670 pages와 로컬 등록·정적 출력 검증 통과
+다음 대상: 없음 (현재 원본 목록 기준)
