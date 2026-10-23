@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="752" viewBox="0 0 560 752" role="img" aria-labelledby="title desc">
+  <title id="title">클러스터 sidecar와 kubelet의 서로 다른 CSI 호출 경로</title>
+  <desc id="desc">왼쪽의 클러스터 sidecar는 PVC와 VolumeAttachment 등 API 상태를 관찰해 CSI Controller를 호출하고 결과를 API에 기록한다. 오른쪽 kubelet은 노드에 배치된 Pod의 볼륨을 준비하며 CSI Node를 호출한다. 두 열은 한 줄로 이어지는 호출 순서가 아니다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="752" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <path d="M144 192 V280" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M416 192 V280" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M144 392 V504" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M416 392 V504" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="280" y="40" font-size="24" font-weight="700">두 호출자는 서로 다른 상태를 봅니다</text>
+    <text x="144" y="88" font-size="22" font-weight="700">클러스터 쪽</text>
+    <text x="416" y="88" font-size="22" font-weight="700">노드 쪽</text>
+    <rect x="32" y="112" width="224" height="80" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <rect x="304" y="112" width="224" height="80" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="144" y="145" font-size="20"><tspan x="144">PVC·StorageClass</tspan><tspan x="144" dy="30">VolumeAttachment</tspan></text>
+    <text x="416" y="160" font-size="21">이 노드에 배치된 Pod</text>
+    <rect x="32" y="288" width="224" height="104" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="304" y="288" width="224" height="104" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="144" y="328" font-size="23" font-weight="700">외부 sidecar</text>
+    <text x="144" y="364" font-size="20">API 관찰·결과 반영</text>
+    <text x="416" y="328" font-size="23" font-weight="700">kubelet CSI 어댑터</text>
+    <text x="416" y="364" font-size="20">노드의 볼륨 준비</text>
+    <rect x="32" y="512" width="224" height="120" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <rect x="304" y="512" width="224" height="120" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="144" y="556" font-size="22" font-weight="700"><tspan x="144">CSI Controller</tspan><tspan x="144" dy="40" font-size="20" font-weight="400">생성·attach 등</tspan></text>
+    <text x="416" y="556" font-size="22" font-weight="700"><tspan x="416">CSI Node</tspan><tspan x="416" dy="40" font-size="20" font-weight="400">stage·publish 등</tspan></text>
+    <rect x="96" y="224" width="96" height="32" fill="#FAFAFA"/><text x="144" y="248" font-size="20">watch</text>
+    <rect x="368" y="224" width="96" height="32" fill="#FAFAFA"/><text x="416" y="248" font-size="20">준비 요청</text>
+    <rect x="64" y="432" width="160" height="32" fill="#FAFAFA"/><text x="144" y="456" font-size="20">Controller RPC</text>
+    <rect x="352" y="432" width="128" height="32" fill="#FAFAFA"/><text x="416" y="456" font-size="20">Node RPC</text>
+    <text x="280" y="688" font-size="20"><tspan x="280">두 열은 순서대로 이어지는 호출이 아닙니다</tspan><tspan x="280" dy="32">실제 호출은 capability·설정·기능 조건을 따릅니다</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 928" role="img" aria-labelledby="title desc">
+  <title id="title">WaitForFirstConsumer에서 스케줄러와 PV 컨트롤러의 분업</title>
+  <desc id="desc">스케줄러가 노드와 볼륨 후보를 고르고 Reserve에서 PV와 PVC 캐시에 가정합니다. PreBind에서 기존 PV에는 claimRef를 쓰거나 동적 생성 대상 PVC에는 selected-node를 씁니다. 외부 provisioner는 노드 조건에 맞춰 볼륨을 공급하고 PV 컨트롤러는 참조와 완료 표시를 기록합니다. 스케줄러가 관측 조건을 확인한 뒤 Pod 바인딩으로 진행합니다</desc>
+  <defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#475569" stroke-width="1.5"/></marker></defs>
+  <rect width="720" height="928" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="360" y="48" font-size="29" font-weight="700">노드 선택 뒤에 볼륨 결정을 이어갑니다</text>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M360 184 L360 224"/>
+      <path d="M360 328 L360 352 L184 352 L184 400"/>
+      <path d="M360 352 L536 352 L536 400"/>
+      <path d="M184 520 L184 584 L360 584 L360 624"/>
+      <path d="M536 520 L536 584 L360 584"/>
+      <path d="M360 736 L360 784"/>
+    </g>
+    <rect x="48" y="80" width="624" height="104" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <text x="360" y="122" font-size="28" font-weight="700">스케줄러: 노드·볼륨 조건 검사</text>
+    <text x="360" y="160" font-size="26">PV nodeAffinity · 접근 방식 · 용량 등</text>
+    <rect x="48" y="224" width="624" height="104" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <text x="360" y="266" font-size="28" font-weight="700">Reserve: 캐시에서 임시 예약</text>
+    <text x="360" y="304" font-size="26">이 단계에서는 API에 쓰지 않음</text>
+    <rect x="24" y="400" width="320" height="120" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+    <text x="184" y="443" font-size="27" font-weight="700">PreBind: 기존 PV</text>
+    <text x="184" y="486" font-size="26" fill="#6D28D9">claimRef를 API에 기록</text>
+    <rect x="376" y="400" width="320" height="120" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="536" y="443" font-size="27" font-weight="700">PreBind: 동적 생성</text>
+    <text x="536" y="486" font-size="26" fill="#047857">PVC에 selected-node</text>
+    <rect x="392" y="540" width="288" height="32" fill="#FAFAFA"/>
+    <text x="536" y="563" font-size="23" fill="#047857">외부 provisioner가 공급</text>
+    <rect x="48" y="624" width="624" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+    <text x="360" y="666" font-size="28" font-weight="700">PV 컨트롤러: PV/PVC 연결 반영</text>
+    <text x="360" y="708" font-size="26" fill="#6D28D9">참조와 바인딩 완료 표시 기록</text>
+    <rect x="48" y="784" width="624" height="112" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <text x="360" y="826" font-size="28" font-weight="700">스케줄러: 관측 캐시의 조건 확인</text>
+    <text x="360" y="868" font-size="26">그 뒤 Pod를 Node에 바인딩</text>
+  </g>
+</svg>

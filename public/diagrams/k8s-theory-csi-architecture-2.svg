@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="1064" viewBox="0 0 560 1064" role="img" aria-labelledby="title desc">
+  <title id="title">CSI 드라이버 등록 소켓과 실제 CSI 소켓</title>
+  <desc id="desc">registrar가 CSI 소켓의 GetPluginInfo로 이름을 조회하고 plugins_registry의 등록 소켓을 연다. kubelet이 등록 소켓에 GetInfo를 호출해 호스트 CSI endpoint를 받는다. kubelet은 그 CSI 소켓에 NodeGetInfo를 호출하고 Node·CSINode에 결과를 기록한다. 두 소켓의 서버와 프로토콜이 다르다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="1064" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <path d="M280 240 V296" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 448 V512" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 656 V720" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 856 V920" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="280" y="40" font-size="24" font-weight="700">등록 소켓과 CSI 소켓은 다른 서버입니다</text>
+    <rect x="32" y="88" width="496" height="152" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="128" font-size="22" font-weight="700">registrar가 드라이버 이름 조회</text>
+    <text x="280" y="168" font-size="20"><tspan x="280">CSI GetPluginInfo · 드라이버의 CSI 소켓</tspan><tspan x="280" dy="40">호스트 예: plugins/&lt;driver&gt;/csi.sock</tspan></text>
+    <rect x="32" y="304" width="496" height="144" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="344" font-size="22" font-weight="700">registrar가 등록용 서버를 엽니다</text>
+    <text x="280" y="384" font-size="20"><tspan x="280">plugins_registry/&lt;driver&gt;-reg.sock</tspan><tspan x="280" dy="36">이 소켓은 kubelet이 감시하는 디렉터리에 노출</tspan></text>
+    <rect x="32" y="520" width="496" height="136" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="560" font-size="22" font-weight="700">kubelet이 등록 소켓에 GetInfo 호출</text>
+    <text x="280" y="600" font-size="20"><tspan x="280">registrar가 이름·지원 버전과</tspan><tspan x="280" dy="32">호스트의 실제 CSI endpoint를 반환</tspan></text>
+    <rect x="32" y="728" width="496" height="128" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="768" font-size="22" font-weight="700">kubelet이 CSI 소켓에 NodeGetInfo 호출</text>
+    <text x="280" y="812" font-size="20">드라이버의 nodeID·상한·topology 수신</text>
+    <rect x="32" y="928" width="496" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="964" font-size="22" font-weight="700">kubelet이 Node·CSINode 갱신</text>
+    <text x="280" y="1000" font-size="20"><tspan x="280">topology 값은 Node 라벨에</tspan><tspan x="280" dy="28">nodeID·키·상한 정보는 CSINode에 기록</tspan></text>
+    <rect x="216" y="248" width="128" height="40" fill="#FAFAFA"/><text x="280" y="276" font-size="20">등록 준비</text>
+    <rect x="200" y="464" width="160" height="40" fill="#FAFAFA"/><text x="280" y="492" font-size="20">감지 후 조회</text>
+    <rect x="168" y="672" width="224" height="40" fill="#FAFAFA"/><text x="280" y="700" font-size="20">검증·endpoint 기억</text>
+    <rect x="216" y="872" width="128" height="40" fill="#FAFAFA"/><text x="280" y="900" font-size="20">API 반영</text>
+  </g>
+</svg>
