@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="1032" viewBox="0 0 560 1032" role="img" aria-labelledby="title desc">
+  <title id="title">CR 생성 요청에서 구조 스키마가 적용되는 경계</title>
+  <desc id="desc">인증과 인가 등 공통 경로를 통과한 CR 생성 요청은 디코딩·가지치기·기본값 적용 뒤 mutating admission을 거친다. 변경 결과를 스키마와 CEL로 검증하고 validating admission 뒤 저장 코덱으로 넘긴다. 저장 변환에서 가지치기하는 횟수는 고정되지 않으며 controller reconcile은 이 쓰기 경로와 별개다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="1032" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <path d="M280 224 V280" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 400 V456" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 576 V632" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 752 V808" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="280" y="40" font-size="24" font-weight="700">CR 생성 요청의 필드 처리·검증</text>
+    <text x="280" y="80" font-size="20">인증·인가 등 공통 경로를 통과한 뒤의 개념 흐름</text>
+    <rect x="32" y="112" width="496" height="112" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="152" font-size="23" font-weight="700">디코딩 · 가지치기 · 기본값</text>
+    <text x="280" y="192" font-size="20">구조 스키마 · 요청의 fieldValidation</text>
+    <rect x="32" y="288" width="496" height="112" rx="12" fill="#F8FAFC" stroke="#475569"/>
+    <text x="280" y="328" font-size="23" font-weight="700">mutating admission</text>
+    <text x="280" y="368" font-size="20">패치 결과에 기본값 적용</text>
+    <rect x="32" y="464" width="496" height="112" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="504" font-size="23" font-weight="700">스키마 · 메타데이터 · 리스트 · CEL</text>
+    <text x="280" y="544" font-size="20">일부 선행 오류는 CEL 평가를 막습니다</text>
+    <rect x="32" y="640" width="496" height="112" rx="12" fill="#F8FAFC" stroke="#475569"/>
+    <text x="280" y="680" font-size="23" font-weight="700">validating admission</text>
+    <text x="280" y="720" font-size="20">정책·webhook의 추가 검증</text>
+    <rect x="32" y="816" width="496" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="856" font-size="23" font-weight="700">저장 코덱 · CR 오브젝트 저장</text>
+    <text x="280" y="896" font-size="20">필요한 버전 변환 · 저장소 인코딩</text>
+    <text x="280" y="976" font-size="20"><tspan x="280">가지치기 호출 횟수는 고정되지 않습니다</tspan><tspan x="280" dy="32">실제 자원 조정은 별도 controller의 역할입니다</tspan></text>
+  </g>
+</svg>

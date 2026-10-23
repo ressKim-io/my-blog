@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 700" role="img" aria-labelledby="title desc">
+  <title id="title">external-provisioner가 CSI 용량을 API에 기록하고 스케줄러가 읽는 흐름</title>
+  <desc id="desc">external-provisioner가 CSI 드라이버에 GetCapacity를 호출하고 응답을 클래스와 토폴로지별 CSIStorageCapacity 오브젝트로 저장합니다. 스케줄러는 informer로 정보를 읽어 Filter와 Score에 사용합니다. 이 정보는 공간 예약이나 차감이 아닙니다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#64748B"/></marker></defs>
+  <rect width="800" height="700" rx="20" fill="#FAFAFA"/>
+  <g font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif" text-anchor="middle" fill="#0F172A">
+    <text x="400" y="48" font-size="29" font-weight="700">용량을 보고하는 쪽과 읽는 쪽</text>
+    <rect x="32" y="92" width="288" height="160" rx="15" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2"/>
+    <text x="176" y="138" font-size="25" font-weight="700">external-provisioner</text>
+    <text x="176" y="177" font-size="24">v6.4.0 용량 컨트롤러</text>
+    <text x="176" y="218" font-size="24">주기·변경 시 조회</text>
+    <rect x="480" y="92" width="288" height="160" rx="15" fill="#F5F3FF" stroke="#C4B5FD" stroke-width="2"/>
+    <text x="624" y="154" font-size="28" font-weight="700">CSI 드라이버</text>
+    <text x="624" y="198" font-size="24">저장소 가용량 응답</text>
+    <path d="M320 120H478" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="326" y="87" width="148" height="29" rx="5" fill="#FAFAFA"/>
+    <text x="400" y="109" font-size="21">GetCapacity</text>
+    <path d="M480 227H322" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="365" y="190" width="70" height="29" rx="5" fill="#FAFAFA"/>
+    <text x="400" y="212" font-size="23">응답</text>
+    <path d="M176 252V288H400V334" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="295" y="273" width="360" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="475" y="297" font-size="23" fill="#475569">StorageClass·토폴로지별 기록</text>
+    <rect x="80" y="336" width="640" height="104" rx="15" fill="#ECFEFF" stroke="#67E8F9" stroke-width="2"/>
+    <text x="400" y="377" font-size="27" font-weight="700">API: CSIStorageCapacity</text>
+    <text x="400" y="415" font-size="24">capacity · maximumVolumeSize</text>
+    <path d="M400 440V500" stroke="#64748B" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+    <rect x="246" y="454" width="308" height="32" rx="6" fill="#FAFAFA"/>
+    <text x="400" y="478" font-size="23" fill="#475569">스케줄러 informer로 전달</text>
+    <rect x="80" y="502" width="640" height="104" rx="15" fill="#FFFBEB" stroke="#FCD34D" stroke-width="2"/>
+    <text x="400" y="543" font-size="27" font-weight="700">스케줄러 VolumeBinding</text>
+    <text x="400" y="582" font-size="24">Filter로 후보 검사 · Score로 점수</text>
+    <text x="400" y="662" font-size="24" fill="#475569">정보 조회·판단이며 공간 예약·차감은 아님</text>
+  </g>
+</svg>

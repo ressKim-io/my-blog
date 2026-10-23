@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="568" viewBox="0 0 560 568" role="img" aria-labelledby="title desc">
+  <title id="title">본체와 status·scale은 같은 CR의 저장소를 사용한다</title>
+  <desc id="desc">본체 쓰기와 status 쓰기, scale 투영은 서로 다른 API 경로이지만 하나의 CR 오브젝트와 resourceVersion을 공유한다. status subresource가 켜져 있으면 본체는 status를 되돌리고 status 경로는 status 이외 값을 보존한다. scale은 autoscaling/v1 Scale로 지정한 replicas 경로를 연결한다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="568" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <path d="M104 232 V280 H248 V336" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 232 V336" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M456 232 V280 H312 V336" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="280" y="40" font-size="24" font-weight="700">경로를 나눠도 저장 오브젝트는 하나입니다</text>
+    <text x="280" y="80" font-size="20">status · scale subresource를 노출한 경우</text>
+    <rect x="24" y="120" width="160" height="112" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="200" y="120" width="160" height="112" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <rect x="376" y="120" width="160" height="112" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="104" y="160" font-size="23" font-weight="700">본체</text>
+    <text x="104" y="200" font-size="20">status 되돌림</text>
+    <text x="280" y="160" font-size="23" font-weight="700">/status</text>
+    <text x="280" y="200" font-size="20">status 갱신</text>
+    <text x="456" y="160" font-size="23" font-weight="700">/scale</text>
+    <text x="456" y="200" font-size="20">Scale 투영</text>
+    <rect x="104" y="344" width="352" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="384" font-size="23" font-weight="700">같은 CR · 같은 저장 키</text>
+    <text x="280" y="424" font-size="20">resourceVersion도 공유</text>
+    <text x="280" y="504" font-size="20"><tspan x="280">쓰기 전략과 RBAC 이름은 경로별로 다릅니다</tspan><tspan x="280" dy="32">동시 업데이트의 충돌까지 없어지지는 않습니다</tspan></text>
+  </g>
+</svg>
