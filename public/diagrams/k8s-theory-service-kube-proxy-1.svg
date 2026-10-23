@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 840" role="img" aria-labelledby="service-flow-title service-flow-desc">
+  <title id="service-flow-title">백엔드 목록 갱신과 Service 패킷 전달의 경계</title>
+  <desc id="service-flow-desc">EndpointSlice controller가 Service와 Pod 상태로 백엔드 목록을 작성하면 kube-proxy가 이를 관찰해 노드 커널 규칙을 갱신합니다. 클라이언트 패킷은 controller를 경유하지 않고 노드 커널에서 목적지를 변환해 백엔드로 갑니다. iptables 모드의 대표 경로입니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="840" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="280" y="40" font-size="24" font-weight="700">목록을 갱신하는 흐름과 패킷 흐름을 나눕니다</text>
+    <g stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M280 168V232" stroke-dasharray="5 4"/><path d="M280 320V384" stroke-dasharray="5 4"/><path d="M280 472V536" stroke-dasharray="5 4"/><path d="M280 656V720"/></g>
+    <rect x="32" y="72" width="496" height="96" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="108" font-size="22" font-weight="700">EndpointSlice controller</text>
+    <text x="280" y="142" font-size="20">Service selector와 Pod 상태로 목록 작성</text>
+    <rect x="184" y="192" width="192" height="28" fill="#FAFAFA"/><text x="280" y="212" font-size="20">API 오브젝트 갱신</text>
+    <rect x="32" y="232" width="496" height="88" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="268" font-size="22" font-weight="700">EndpointSlice</text>
+    <text x="280" y="300" font-size="20">주소·포트·조건을 나눠 담은 백엔드 목록</text>
+    <rect x="160" y="344" width="240" height="28" fill="#FAFAFA"/><text x="280" y="364" font-size="20">Service와 함께 watch</text>
+    <rect x="32" y="384" width="496" height="88" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="420" font-size="22" font-weight="700">각 노드의 kube-proxy</text>
+    <text x="280" y="452" font-size="20">로컬 백엔드·정책에 맞춰 규칙 갱신</text>
+    <rect x="152" y="496" width="256" height="28" fill="#FAFAFA"/><text x="280" y="516" font-size="20">점선: 상태·규칙 설정</text>
+    <rect x="32" y="536" width="496" height="120" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="574" font-size="22" font-weight="700">클라이언트 패킷을 받은 노드 커널</text>
+    <text x="280" y="610" font-size="20">목적지 ClusterIP:port로 규칙 조회</text>
+    <text x="280" y="640" font-size="20">실제 백엔드로 DNAT, 연결 변환 상태 사용</text>
+    <rect x="176" y="680" width="208" height="28" fill="#FAFAFA"/><text x="280" y="700" font-size="20">실선: 패킷 전달</text>
+    <rect x="32" y="720" width="496" height="88" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="756" font-size="22" font-weight="700">선택된 백엔드</text>
+    <text x="280" y="788" font-size="20">패킷은 controller·API 서버를 거치지 않습니다</text>
+  </g>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 728" role="img" aria-labelledby="socket-lb-title socket-lb-desc">
+  <title id="socket-lb-title">TCP connect에서 Service 목적지를 바꾸는 위치 비교</title>
+  <desc id="socket-lb-desc">일반적인 kube-proxy 패킷 경로는 Service 주소를 대상으로 소켓을 연결한 뒤 커널 패킷 경로에서 백엔드로 변환합니다. Cilium 소켓 로드밸런싱은 connect hook에서 소켓 목적지를 백엔드로 바꿉니다. Pod 소켓 번역을 우회하면 TC 패킷 경로에서 다시 Service를 조회할 수 있습니다</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="728" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="280" y="40" font-size="24" font-weight="700">TCP connect에서 바뀌는 것은 조회 위치입니다</text>
+    <text x="144" y="88" font-size="22" font-weight="700">kube-proxy 경로</text><text x="416" y="88" font-size="22" font-weight="700">Cilium socket LB</text>
+    <g stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M144 216V280"/><path d="M144 416V480"/><path d="M416 216V280"/><path d="M416 416V480"/></g>
+    <g fill="#ECFDF5" stroke="#059669"><rect x="32" y="120" width="224" height="96" rx="12"/><rect x="304" y="120" width="224" height="96" rx="12"/><rect x="32" y="480" width="224" height="80" rx="12"/><rect x="304" y="480" width="224" height="80" rx="12"/></g>
+    <g fill="#FFFBEB" stroke="#D97706"><rect x="32" y="280" width="224" height="136" rx="12"/><rect x="304" y="280" width="224" height="136" rx="12"/></g>
+    <text x="144" y="158" font-size="20">앱의 connect<tspan x="144" dy="32">목적지: Service IP</tspan></text>
+    <text x="416" y="158" font-size="20">앱의 connect<tspan x="416" dy="32">목적지: Service IP</tspan></text>
+    <text x="144" y="318" font-size="20">소켓 목적지는 유지<tspan x="144" dy="32">커널 패킷 경로에서</tspan><tspan x="144" dy="32">백엔드 선택·DNAT</tspan></text>
+    <text x="416" y="318" font-size="20">cgroup socket hook<tspan x="416" dy="32">소켓 목적지를</tspan><tspan x="416" dy="32">백엔드로 변경</tspan></text>
+    <text x="144" y="514" font-size="20">선택된 백엔드로 전달<tspan x="144" dy="28">NAT 변환 상태 사용</tspan></text>
+    <text x="416" y="514" font-size="20">선택된 백엔드로 전달<tspan x="416" dy="28">하위 Service NAT 불필요</tspan></text>
+    <rect x="32" y="600" width="496" height="96" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="636" font-size="20">Pod 소켓 번역을 우회하면 TC에서 Service 재조회<tspan x="280" dy="32">모든 eBPF 경로에서 NAT·conntrack이 사라지지는 않습니다</tspan></text>
+  </g>
+</svg>

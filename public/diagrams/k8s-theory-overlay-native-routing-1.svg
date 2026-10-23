@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 880" role="img" aria-labelledby="routing-title routing-desc">
+  <title id="routing-title">Overlay와 native routing의 노드 간 패킷</title>
+  <desc id="routing-desc">Overlay는 Pod 패킷을 노드 IP를 사용하는 바깥 패킷에 넣어 운반합니다. Native routing은 원래 Pod 주소로 전달하므로 노드와 하부 네트워크가 목적지 Pod로 가는 경로를 알아야 합니다. IPAM의 주소 공급은 전달 방식과 별도로 선택합니다</desc>
+  <defs><marker id="route-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 10 4 0 8Z" fill="#475569"/></marker></defs>
+  <rect width="720" height="880" rx="16" fill="#FAFAFA"/>
+  <g font-family="'Pretendard', system-ui, sans-serif" fill="#0A0A0A">
+    <text x="360" y="44" text-anchor="middle" font-size="28" font-weight="700">노드를 넘는 패킷과 하부 네트워크</text>
+    <rect x="32" y="80" width="656" height="336" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <rect x="32" y="456" width="656" height="336" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#route-arrow)">
+      <path d="M240 208H472"/>
+      <path d="M240 584H472"/>
+    </g>
+    <g fill="#FAFAFA" stroke="#475569" stroke-width="1.5">
+      <rect x="64" y="160" width="176" height="88" rx="8"/>
+      <rect x="480" y="160" width="176" height="88" rx="8"/>
+      <rect x="64" y="536" width="176" height="88" rx="8"/>
+      <rect x="480" y="536" width="176" height="88" rx="8"/>
+    </g>
+    <g font-size="25" font-weight="700">
+      <text x="56" y="122">Overlay: 노드 주소로 운반</text>
+      <text x="56" y="498">Native routing: Pod 주소로 전달</text>
+    </g>
+    <g text-anchor="middle" font-size="24">
+      <text x="152" y="194">노드 1<tspan x="152" dy="32" font-size="22">캡슐화</tspan></text>
+      <text x="568" y="194">노드 2<tspan x="568" dy="32" font-size="22">역캡슐화</tspan></text>
+      <text x="152" y="570">노드 1<tspan x="152" dy="32" font-size="22">커널 경로</tspan></text>
+      <text x="568" y="570">노드 2<tspan x="568" dy="32" font-size="22">Pod로 전달</tspan></text>
+      <text x="360" y="188" font-size="21">노드 1 → 노드 2</text>
+      <text x="360" y="564" font-size="21">Pod A → Pod B</text>
+    </g>
+    <rect x="80" y="288" width="560" height="72" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <rect x="272" y="288" width="368" height="72" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <rect x="80" y="664" width="560" height="72" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <g text-anchor="middle" font-size="22" fill="#27272A">
+      <text x="176" y="332">바깥: 노드 IP</text>
+      <text x="456" y="332">안쪽: Pod A → Pod B</text>
+      <text x="360" y="708">원래 패킷: Pod A → Pod B</text>
+      <text x="360" y="393">하부 네트워크는 노드 IP 경로를 사용</text>
+      <text x="360" y="769">노드와 하부 네트워크가 Pod 경로를 알아야 함</text>
+      <text x="360" y="844">주소를 배정하는 IPAM은 별도 선택</text>
+    </g>
+  </g>
+</svg>
