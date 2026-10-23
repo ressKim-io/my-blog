@@ -1,7 +1,7 @@
 # ☸️ k8s-theory 시리즈 변환 계획
 
 > Obsidian vault의 Kubernetes 이론 노트를 한국어 `essays` 글로 변환하는 계획
-> **2026-10-23 갱신: Batch 12까지 44편 검수 완료. 이번 요청 18/30편, 보류 0편. 3편씩 10개 배치·로컬 커밋까지 진행**
+> **2026-10-23 갱신: Batch 13까지 47편 검수 완료. 이번 요청 21/30편, 보류 0편. 3편씩 10개 배치·로컬 커밋까지 진행**
 > 9월 조사 당시 50편, 2026-10-21에 확인한 `sessions/*.md`는 71개. 파일 존재를 확인한 수이며 내용 검수 완료 수가 아님
 
 관련 문서 — `README.md`(진입점) · `inventory.md`(원본 전수) · `source-format.md`(변환 지침)
@@ -948,7 +948,7 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 | 10 | 2-12, 2-13, 2-14 | k8s-theory-node / 13; k8s-theory-node / 14; k8s-theory-node / 15 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 604, export 통과; [근거·검수](batches/batch-10.md) | `2167f11` | 2-15, 2-16, 2-17 |
 | 11 | 2-15, 2-16, 2-17 | k8s-theory-node / 16; k8s-theory-node / 17; k8s-theory-node / 18 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 610, export 통과; [근거·검수](batches/batch-11.md) | `31c4495` | 2-18, 3-1, 3-2.1 |
 | 12 | 2-18, 3-1, 3-2.1 | k8s-theory-node / 19; k8s-theory-network / 1; k8s-theory-network / 2 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 616, export 통과; [근거·검수](batches/batch-12.md) | `3c62d6a` | 3-2.2, 3-3, 3-4 |
-| 13 | 3-2.2, 3-3, 3-4 | k8s-theory-network / 3; k8s-theory-network / 4; k8s-theory-network / 5 | 미착수 | 실행 안 함 | — | 3-5, 3-6, 3-7 |
+| 13 | 3-2.2, 3-3, 3-4 | k8s-theory-network / 3; k8s-theory-network / 4; k8s-theory-network / 5 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 622, export 통과; [근거·검수](batches/batch-13.md) | `a999ddc` | 3-5, 3-6, 3-7 |
 | 14 | 3-5, 3-6, 3-7 | k8s-theory-network / 6; k8s-theory-network / 7; k8s-theory-network / 8 | 미착수 | 실행 안 함 | — | 3-8, 3-9, 3-10 |
 | 15 | 3-8, 3-9, 3-10 | k8s-theory-network / 9; k8s-theory-network / 10; k8s-theory-network / 11 | 미착수 | 실행 안 함 | — | 4-1, 4-2, 4-3 |
 | 16 | 4-1, 4-2, 4-3 | k8s-theory-storage / 1; k8s-theory-storage / 2; k8s-theory-storage / 3 | 미착수 | 실행 안 함 | — | 4-4, 4-5, 4-6 |
@@ -975,9 +975,9 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 | 12 | 2-18 | `Phase 2-18 · 임시 컨테이너와 ephemeralcontainers · 더하기만 되는 문은 아무것도 바꾸지 못한다.md` | `k8s-theory-ephemeral-containers` | `k8s-theory-node` / 19 | 검수 완료 |
 | 12 | 3-1 | `Phase 3-1 · CNI spec · 만들지 않고 요구만 한다.md` | `k8s-theory-cni-contract` | `k8s-theory-network` / 1 | 검수 완료 |
 | 12 | 3-2.1 | `Phase 3-2.1 · sandbox 와 pause (1) · 주소는 컨테이너가 아니라 그 옆에 붙는다.md` | `k8s-theory-pod-sandbox-pause` | `k8s-theory-network` / 2 | 검수 완료 |
-| 13 | 3-2.2 | `Phase 3-2.2 · overlay 와 native routing (2) · 노드를 넘는 순간 k8s 는 말이 없다.md` | `k8s-theory-overlay-native-routing` | `k8s-theory-network` / 3 | 미착수 |
-| 13 | 3-3 | `Phase 3-3 · Service 와 kube-proxy · 주소가 아니라 규칙이다.md` | `k8s-theory-service-kube-proxy` | `k8s-theory-network` / 4 | 미착수 |
-| 13 | 3-4 | `Phase 3-4 · DNS 와 ndots · 이름 하나에 패킷 여덟 개.md` | `k8s-theory-dns-ndots` | `k8s-theory-network` / 5 | 미착수 |
+| 13 | 3-2.2 | `Phase 3-2.2 · overlay 와 native routing (2) · 노드를 넘는 순간 k8s 는 말이 없다.md` | `k8s-theory-overlay-native-routing` | `k8s-theory-network` / 3 | 검수 완료 |
+| 13 | 3-3 | `Phase 3-3 · Service 와 kube-proxy · 주소가 아니라 규칙이다.md` | `k8s-theory-service-kube-proxy` | `k8s-theory-network` / 4 | 검수 완료 |
+| 13 | 3-4 | `Phase 3-4 · DNS 와 ndots · 이름 하나에 패킷 여덟 개.md` | `k8s-theory-dns-ndots` | `k8s-theory-network` / 5 | 검수 완료 |
 | 14 | 3-5 | `Phase 3-5 · Ingress 와 Gateway API · 한 오브젝트에 세 사람이 있었다.md` | `k8s-theory-ingress-gateway-api` | `k8s-theory-network` / 6 | 미착수 |
 | 14 | 3-6 | `Phase 3-6 · NetworkPolicy · 기본값을 뒤집는 스위치.md` | `k8s-theory-network-policy` | `k8s-theory-network` / 7 | 미착수 |
 | 14 | 3-7 | `Phase 3-7 · ANP 와 BANP · 정하지 않겠다고 적는 칸이 필요했다.md` | `k8s-theory-admin-network-policy` | `k8s-theory-network` / 8 | 미착수 |
@@ -1029,3 +1029,10 @@ post lint error 0/warn 3, 전체 lint error 0/warn 1, build 610 pages 및 로컬
 근거·원본 hash·정정·별도 검수·검증 상세는 [배치 인계](batches/batch-12.md)에 보존한다
 post lint error 0/warn 3, 전체 lint error 0/warn 1, build 616 pages 및 로컬 등록·정적 출력 검증 통과
 이번 요청 누적 18/30편, 보류 0편. 다음 대상: 3-2.2, 3-3, 3-4
+
+### Batch 13 검수·커밋 완료 — 2026-10-23
+
+좌표 3-2.2, 3-3, 3-4, 글 3편·SVG 6장 검수 완료. 콘텐츠 커밋 `a999ddc`
+근거·원본 hash·정정·별도 검수·검증 상세는 [배치 인계](batches/batch-13.md)에 보존한다
+post lint error 0/warn 3, 전체 lint error 0/warn 1, build 622 pages 및 로컬 등록·정적 출력 검증 통과
+이번 요청 누적 21/30편, 보류 0편. 다음 대상: 3-5, 3-6, 3-7
