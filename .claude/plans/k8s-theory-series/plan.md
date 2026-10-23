@@ -1,7 +1,7 @@
 # ☸️ k8s-theory 시리즈 변환 계획
 
 > Obsidian vault의 Kubernetes 이론 노트를 한국어 `essays` 글로 변환하는 계획
-> **2026-10-23 갱신: Batch 10까지 38편 검수 완료. 이번 요청 12/30편, 보류 0편. 3편씩 10개 배치·로컬 커밋까지 진행**
+> **2026-10-23 갱신: Batch 11까지 41편 검수 완료. 이번 요청 15/30편, 보류 0편. 3편씩 10개 배치·로컬 커밋까지 진행**
 > 9월 조사 당시 50편, 2026-10-21에 확인한 `sessions/*.md`는 71개. 파일 존재를 확인한 수이며 내용 검수 완료 수가 아님
 
 관련 문서 — `README.md`(진입점) · `inventory.md`(원본 전수) · `source-format.md`(변환 지침)
@@ -946,7 +946,7 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 | 08 | 2-7, 2-8.1, 2-8.2 | k8s-theory-node / 7; k8s-theory-node / 8; k8s-theory-node / 9 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 592, export 통과; [근거·검수](batches/batch-08.md) | `4db7801` | 2-9, 2-10, 2-11 |
 | 09 | 2-9, 2-10, 2-11 | k8s-theory-node / 10; k8s-theory-node / 11; k8s-theory-node / 12 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 598, export 통과; [근거·검수](batches/batch-09.md) | `fbcd25e` | 2-12, 2-13, 2-14 |
 | 10 | 2-12, 2-13, 2-14 | k8s-theory-node / 13; k8s-theory-node / 14; k8s-theory-node / 15 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 604, export 통과; [근거·검수](batches/batch-10.md) | `2167f11` | 2-15, 2-16, 2-17 |
-| 11 | 2-15, 2-16, 2-17 | k8s-theory-node / 16; k8s-theory-node / 17; k8s-theory-node / 18 | 미착수 | 실행 안 함 | — | 2-18, 3-1, 3-2.1 |
+| 11 | 2-15, 2-16, 2-17 | k8s-theory-node / 16; k8s-theory-node / 17; k8s-theory-node / 18 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 610, export 통과; [근거·검수](batches/batch-11.md) | `31c4495` | 2-18, 3-1, 3-2.1 |
 | 12 | 2-18, 3-1, 3-2.1 | k8s-theory-node / 19; k8s-theory-network / 1; k8s-theory-network / 2 | 미착수 | 실행 안 함 | — | 3-2.2, 3-3, 3-4 |
 | 13 | 3-2.2, 3-3, 3-4 | k8s-theory-network / 3; k8s-theory-network / 4; k8s-theory-network / 5 | 미착수 | 실행 안 함 | — | 3-5, 3-6, 3-7 |
 | 14 | 3-5, 3-6, 3-7 | k8s-theory-network / 6; k8s-theory-network / 7; k8s-theory-network / 8 | 미착수 | 실행 안 함 | — | 3-8, 3-9, 3-10 |
@@ -969,9 +969,9 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 | 10 | 2-12 | `Phase 2-12 · 장치 자원 · 개수는 어느 것인지를 말하지 못한다.md` | `k8s-theory-device-resource-allocation` | `k8s-theory-node` / 13 | 검수 완료 |
 | 10 | 2-13 | `Phase 2-13 · 런타임 격리 · 지정하지 않았다는 말이 필드마다 다르다.md` | `k8s-theory-runtime-isolation` | `k8s-theory-node` / 14 | 검수 완료 |
 | 10 | 2-14 | `Phase 2-14 · 자원 회계와 점수 전략 · 세는 쪽도 고르는 쪽도 Pod 밖에 있다.md` | `k8s-theory-resource-accounting-scoring` | `k8s-theory-node` / 15 | 검수 완료 |
-| 11 | 2-15 | `Phase 2-15 · 노드의 swap · 나눠주는 쪽만 알고 세는 쪽은 모른다.md` | `k8s-theory-node-swap` | `k8s-theory-node` / 16 | 미착수 |
-| 11 | 2-16 | `Phase 2-16 · 컨테이너 로그 파일 · 경로를 정한 쪽은 그 파일을 안 쓴다.md` | `k8s-theory-container-log-files` | `k8s-theory-node` / 17 | 미착수 |
-| 11 | 2-17 | `Phase 2-17 · HPA 와 scale subresource · 같은 칸을 다른 문으로 쓴다.md` | `k8s-theory-hpa-scale-subresource` | `k8s-theory-node` / 18 | 미착수 |
+| 11 | 2-15 | `Phase 2-15 · 노드의 swap · 나눠주는 쪽만 알고 세는 쪽은 모른다.md` | `k8s-theory-node-swap` | `k8s-theory-node` / 16 | 검수 완료 |
+| 11 | 2-16 | `Phase 2-16 · 컨테이너 로그 파일 · 경로를 정한 쪽은 그 파일을 안 쓴다.md` | `k8s-theory-container-log-files` | `k8s-theory-node` / 17 | 검수 완료 |
+| 11 | 2-17 | `Phase 2-17 · HPA 와 scale subresource · 같은 칸을 다른 문으로 쓴다.md` | `k8s-theory-hpa-scale-subresource` | `k8s-theory-node` / 18 | 검수 완료 |
 | 12 | 2-18 | `Phase 2-18 · 임시 컨테이너와 ephemeralcontainers · 더하기만 되는 문은 아무것도 바꾸지 못한다.md` | `k8s-theory-ephemeral-containers` | `k8s-theory-node` / 19 | 미착수 |
 | 12 | 3-1 | `Phase 3-1 · CNI spec · 만들지 않고 요구만 한다.md` | `k8s-theory-cni-contract` | `k8s-theory-network` / 1 | 미착수 |
 | 12 | 3-2.1 | `Phase 3-2.1 · sandbox 와 pause (1) · 주소는 컨테이너가 아니라 그 옆에 붙는다.md` | `k8s-theory-pod-sandbox-pause` | `k8s-theory-network` / 2 | 미착수 |
@@ -1015,3 +1015,10 @@ post lint error 0/warn 3, 전체 lint error 0/warn 1, build 598 pages 및 로컬
 근거·원본 hash·정정·별도 검수·검증 상세는 [배치 인계](batches/batch-10.md)에 보존한다
 post lint error 0/warn 3, 전체 lint error 0/warn 1, build 604 pages 및 로컬 등록·정적 출력 검증 통과
 이번 요청 누적 12/30편, 보류 0편. 다음 대상: 2-15, 2-16, 2-17
+
+### Batch 11 검수·커밋 완료 — 2026-10-23
+
+좌표 2-15, 2-16, 2-17, 글 3편·SVG 5장 검수 완료. 콘텐츠 커밋 `31c4495`
+근거·원본 hash·정정·별도 검수·검증 상세는 [배치 인계](batches/batch-11.md)에 보존한다
+post lint error 0/warn 3, 전체 lint error 0/warn 1, build 610 pages 및 로컬 등록·정적 출력 검증 통과
+이번 요청 누적 15/30편, 보류 0편. 다음 대상: 2-18, 3-1, 3-2.1
