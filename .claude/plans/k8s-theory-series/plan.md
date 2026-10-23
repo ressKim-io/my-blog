@@ -1,7 +1,7 @@
 # ☸️ k8s-theory 시리즈 변환 계획
 
 > Obsidian vault의 Kubernetes 이론 노트를 한국어 `essays` 글로 변환하는 계획
-> **2026-10-23 갱신: Batch 15까지 53편 검수 완료. 이번 요청 27/30편, 보류 0편. 3편씩 10개 배치·로컬 커밋까지 진행**
+> **2026-10-23 갱신: Batch 16까지 56편 검수 완료. 이번 요청 30/30편, 보류 0편. 3편씩 10개 배치·로컬 커밋까지 진행**
 > 9월 조사 당시 50편, 2026-10-21에 확인한 `sessions/*.md`는 71개. 파일 존재를 확인한 수이며 내용 검수 완료 수가 아님
 
 관련 문서 — `README.md`(진입점) · `inventory.md`(원본 전수) · `source-format.md`(변환 지침)
@@ -951,7 +951,7 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 | 13 | 3-2.2, 3-3, 3-4 | k8s-theory-network / 3; k8s-theory-network / 4; k8s-theory-network / 5 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 622, export 통과; [근거·검수](batches/batch-13.md) | `a999ddc` | 3-5, 3-6, 3-7 |
 | 14 | 3-5, 3-6, 3-7 | k8s-theory-network / 6; k8s-theory-network / 7; k8s-theory-network / 8 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 628, export 통과; [근거·검수](batches/batch-14.md) | `36b28e6` | 3-8, 3-9, 3-10 |
 | 15 | 3-8, 3-9, 3-10 | k8s-theory-network / 9; k8s-theory-network / 10; k8s-theory-network / 11 | 검수 완료 | post lint 0/3, 전체 lint 0/1, build 634, export 통과; [근거·검수](batches/batch-15.md) | `28a9375` | 4-1, 4-2, 4-3 |
-| 16 | 4-1, 4-2, 4-3 | k8s-theory-storage / 1; k8s-theory-storage / 2; k8s-theory-storage / 3 | 미착수 | 실행 안 함 | — | 4-4, 4-5, 4-6 |
+| 16 | 4-1, 4-2, 4-3 | k8s-theory-storage / 1; k8s-theory-storage / 2; k8s-theory-storage / 3 | 검수 완료 | post lint 0/4, 전체 lint 0/1, build 640, export 통과; [근거·검수](batches/batch-16.md) | `c5f8353` | 4-4, 4-5, 4-6 |
 
 ### 확정한 원본·slug·시리즈 대응
 
@@ -984,9 +984,9 @@ SVG 12장은 평탄한 `public/diagrams/{slug}-{n}.svg` 경로로 저장했다
 | 15 | 3-8 | `Phase 3-8 · CCM 과 클라우드 경계 · 밖이 채울 칸은 안에서 먼저 잠근다.md` | `k8s-theory-cloud-controller-boundary` | `k8s-theory-network` / 9 | 검수 완료 |
 | 15 | 3-9 | `Phase 3-9 · 트래픽 지역성과 dual-stack · 앞자리가 비면 떨어뜨리거나 되돌아간다.md` | `k8s-theory-traffic-locality-dual-stack` | `k8s-theory-network` / 10 | 검수 완료 |
 | 15 | 3-10 | `Phase 3-10 · ServiceCIDR 와 IPAddress · 이름이 곧 자물쇠다.md` | `k8s-theory-service-cidr-ip-address` | `k8s-theory-network` / 11 | 검수 완료 |
-| 16 | 4-1 | `Phase 4-1 · PVC 바인딩과 StorageClass · claimRef 를 먼저 쓰는 쪽이 정한다.md` | `k8s-theory-pvc-storageclass-binding` | `k8s-theory-storage` / 1 | 미착수 |
-| 16 | 4-2 | `Phase 4-2 · CSI 구조 · 코어는 노드 쪽 절반만 부른다.md` | `k8s-theory-csi-architecture` | `k8s-theory-storage` / 2 | 미착수 |
-| 16 | 4-3 | `Phase 4-3 · attach 와 stage 와 publish · 한 번씩이 서로 다른 한 번이다.md` | `k8s-theory-volume-attach-stage-publish` | `k8s-theory-storage` / 3 | 미착수 |
+| 16 | 4-1 | `Phase 4-1 · PVC 바인딩과 StorageClass · claimRef 를 먼저 쓰는 쪽이 정한다.md` | `k8s-theory-pvc-storageclass-binding` | `k8s-theory-storage` / 1 | 검수 완료 |
+| 16 | 4-2 | `Phase 4-2 · CSI 구조 · 코어는 노드 쪽 절반만 부른다.md` | `k8s-theory-csi-architecture` | `k8s-theory-storage` / 2 | 검수 완료 |
+| 16 | 4-3 | `Phase 4-3 · attach 와 stage 와 publish · 한 번씩이 서로 다른 한 번이다.md` | `k8s-theory-volume-attach-stage-publish` | `k8s-theory-storage` / 3 | 검수 완료 |
 
 ### Batch 07 검수·커밋 완료 — 2026-10-23
 
@@ -1050,3 +1050,10 @@ post lint error 0/warn 3, 전체 lint error 0/warn 1, build 628 pages 및 로컬
 근거·원본 hash·정정·별도 검수·검증 상세는 [배치 인계](batches/batch-15.md)에 보존한다
 post lint error 0/warn 3, 전체 lint error 0/warn 1, build 634 pages 및 로컬 등록·정적 출력 검증 통과
 이번 요청 누적 27/30편, 보류 0편. 다음 대상: 4-1, 4-2, 4-3
+
+### Batch 16 검수·커밋 완료 — 2026-10-23
+
+좌표 4-1, 4-2, 4-3, 글 3편·SVG 6장 검수 완료. 콘텐츠 커밋 `c5f8353`
+근거·원본 hash·정정·별도 검수·검증 상세는 [배치 인계](batches/batch-16.md)에 보존한다
+post lint error 0/warn 4, 전체 lint error 0/warn 1, build 640 pages 및 로컬 등록·정적 출력 검증 통과
+이번 요청 누적 30/30편, 보류 0편. 다음 대상: 4-4, 4-5, 4-6
