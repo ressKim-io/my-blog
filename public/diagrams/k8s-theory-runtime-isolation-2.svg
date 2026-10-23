@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 552" role="img" aria-labelledby="title desc">
+ <title id="title">user namespace의 컨테이너 UID와 호스트 UID 매핑 예시</title><desc id="desc">서로 다른 Pod에서 UID 0으로 실행해도 호스트에는 서로 겹치지 않는 비특권 UID로 매핑할 수 있습니다. 예시는 Pod A의 UID 0을 65536, Pod B의 UID 0을 131072에 연결하며 각 범위에 65536개를 사용합니다</desc>
+ <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#475569"/></marker></defs><rect width="560" height="552" rx="16" fill="#FAFAFA"/>
+ <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A"><text x="24" y="40" font-size="24" font-weight="700">Pod 안의 root를 호스트 UID와 분리합니다</text>
+ <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#a)"><path d="M152 200V280"/><path d="M408 200V280"/></g>
+ <rect x="40" y="88" width="224" height="112" rx="12" fill="#ECFDF5" stroke="#059669"/><rect x="296" y="88" width="224" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+ <g text-anchor="middle"><text x="152" y="126" font-size="22" font-weight="700">Pod A</text><text x="152" y="165" font-size="20">컨테이너 UID 0</text><text x="408" y="126" font-size="22" font-weight="700">Pod B</text><text x="408" y="165" font-size="20">컨테이너 UID 0</text></g>
+ <rect x="40" y="280" width="224" height="128" rx="12" fill="#F8FAFC" stroke="#475569"/><rect x="296" y="280" width="224" height="128" rx="12" fill="#F8FAFC" stroke="#475569"/>
+ <g text-anchor="middle"><text x="152" y="316" font-size="21" font-weight="700">호스트 UID 65536</text><text x="152" y="354" font-size="20">65536–131071</text><text x="152" y="385" font-size="20">서로 다른 65536개</text><text x="408" y="316" font-size="21" font-weight="700">호스트 UID 131072</text><text x="408" y="354" font-size="20">131072–196607</text><text x="408" y="385" font-size="20">서로 다른 65536개</text></g>
+ <text x="24" y="464" font-size="20" fill="#334155">실제 할당을 관측한 값이 아닌 매핑 예시입니다</text><text x="24" y="500" font-size="20" fill="#334155">capability 목록과 유효한 namespace 범위는 다릅니다</text></g>
+</svg>

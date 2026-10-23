@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 656" role="img" aria-labelledby="title desc">
+ <title id="title">보안 설정의 검증과 실행 적용 경계</title><desc id="desc">API validation은 설정의 유효성을, PSA는 namespace 정책의 허용 여부를 검사합니다. kubelet은 생략된 값과 이미지 사용자 정보를 해석해 CRI를 조립하고 런타임은 노드와 커널 지원 조건에 따라 적용합니다</desc>
+ <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#475569"/></marker></defs><rect width="560" height="656" rx="16" fill="#FAFAFA"/>
+ <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A"><text x="24" y="40" font-size="24" font-weight="700">설정의 허용과 실행 적용은 다릅니다</text>
+ <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#a)"><path d="M280 168V216"/><path d="M280 304V352"/><path d="M280 440V488"/></g>
+ <rect x="48" y="80" width="464" height="88" rx="12" fill="#FFF1F2" stroke="#E11D48"/><text x="72" y="114" font-size="22" font-weight="700">API validation</text><text x="72" y="147" font-size="20">필드·조합이 유효한가</text>
+ <rect x="48" y="216" width="464" height="88" rx="12" fill="#FFF1F2" stroke="#E11D48"/><text x="72" y="250" font-size="22" font-weight="700">Pod Security Admission</text><text x="72" y="283" font-size="20">이 수준·정책 버전에서 허용하는가</text>
+ <rect x="48" y="352" width="464" height="88" rx="12" fill="#ECFDF5" stroke="#059669"/><text x="72" y="386" font-size="22" font-weight="700">kubelet</text><text x="72" y="419" font-size="20">생략 값·이미지 사용자를 해석해 CRI 조립</text>
+ <rect x="48" y="488" width="464" height="88" rx="12" fill="#FFFBEB" stroke="#D97706"/><text x="72" y="522" font-size="22" font-weight="700">런타임과 노드 커널</text><text x="72" y="555" font-size="20">namespace·권한·접근 규칙 적용</text>
+ <text x="24" y="616" font-size="20" fill="#334155">앞 단계 통과는 뒤 단계의 지원을 보장하지 않습니다</text></g>
+</svg>
