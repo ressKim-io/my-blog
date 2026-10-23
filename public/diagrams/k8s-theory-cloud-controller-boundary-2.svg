@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 792" role="img" aria-labelledby="title desc">
+  <title id="title">노드 CIDR 할당과 클라우드 경로 조정의 분업</title>
+  <desc id="desc">kube-controller-manager의 nodeipam이 Node의 PodCIDRs를 기록합니다. 클라우드 경로 조정이 활성화되고 provider가 Routes를 지원하면 CCM route controller가 이를 읽어 클라우드 경로를 조정하고 NetworkUnavailable 조건을 기록합니다. kube-controller-manager의 node lifecycle controller가 이 조건을 network-unavailable taint로 옮깁니다</desc>
+  <defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#475569" stroke-width="1.5"/></marker></defs>
+  <rect width="720" height="792" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="360" y="48" font-size="29" font-weight="700">주소 범위 할당과 경로 조정은 별도입니다</text>
+    <g stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M360 184 L360 224"/><path d="M360 312 L360 368"/>
+      <path d="M360 488 L360 528"/><path d="M360 624 L360 664"/>
+    </g>
+    <rect x="48" y="80" width="624" height="104" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <text x="360" y="122" font-size="28" font-weight="700">kube-controller-manager: nodeipam</text>
+    <text x="360" y="160" font-size="26">노드별 Pod 주소 범위를 할당</text>
+    <rect x="48" y="224" width="624" height="88" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="360" y="278" font-size="29" font-weight="700">Node.spec.podCIDRs</text>
+    <rect x="96" y="320" width="528" height="32" fill="#FAFAFA"/>
+    <text x="360" y="344" font-size="23" fill="#334155">클라우드 경로 활성화 + Routes 지원 시</text>
+    <rect x="48" y="368" width="624" height="120" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+    <text x="360" y="411" font-size="28" font-weight="700">CCM: route controller</text>
+    <text x="360" y="452" font-size="26">클라우드 API로 경로 조회·생성·삭제</text>
+    <rect x="48" y="528" width="624" height="96" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="360" y="568" font-size="28" font-weight="700">Node의 NetworkUnavailable</text>
+    <text x="360" y="604" font-size="25">관리하는 경로 작업 결과를 조건으로 기록</text>
+    <rect x="48" y="664" width="624" height="96" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+    <text x="360" y="704" font-size="27" font-weight="700">KCM: node lifecycle controller</text>
+    <text x="360" y="740" font-size="25" fill="#BE123C">조건이 True면 network-unavailable taint</text>
+  </g>
+</svg>

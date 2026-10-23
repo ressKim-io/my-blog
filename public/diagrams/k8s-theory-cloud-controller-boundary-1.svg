@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 824" role="img" aria-labelledby="title desc">
+  <title id="title">external 모드 새 Node의 클라우드 초기화 순서</title>
+  <desc id="desc">kubelet이 새 Node를 uninitialized NoSchedule taint와 함께 등록합니다. CCM의 cloud node controller는 메타데이터를 조회하고 주소 조건을 검증한 다음 초기화 필드와 taint 제거를 같은 Node Update로 보냅니다. 주소 status는 그 이후 별도로 기록합니다. 초기화 전 오류는 taint를 유지합니다</desc>
+  <defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#475569" stroke-width="1.5"/></marker></defs>
+  <rect width="720" height="824" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="360" y="48" font-size="29" font-weight="700">새 Node의 초기화가 끝날 때까지</text>
+    <g stroke="#475569" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M360 184 L360 224"/><path d="M360 328 L360 368"/>
+      <path d="M360 496 L360 536"/><path d="M360 640 L360 680"/>
+    </g>
+    <rect x="48" y="80" width="624" height="104" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <text x="360" y="121" font-size="28" font-weight="700">kubelet: --cloud-provider=external</text>
+    <text x="360" y="160" font-size="26">자기 Node를 새로 등록</text>
+    <rect x="48" y="224" width="624" height="104" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+    <text x="360" y="266" font-size="28" font-weight="700">uninitialized:NoSchedule</text>
+    <text x="360" y="305" font-size="26" fill="#BE123C">견디지 못하는 Pod의 새 배치 제한</text>
+    <rect x="48" y="368" width="624" height="128" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+    <text x="360" y="410" font-size="28" font-weight="700">CCM: 메타데이터 조회·검증</text>
+    <text x="360" y="448" font-size="26">클라우드 신원 · 라벨 · 지정 주소 조건</text>
+    <text x="360" y="480" font-size="23" fill="#B45309">오류 시 taint 유지 · 오류를 반환해 재시도</text>
+    <rect x="48" y="536" width="624" height="104" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="360" y="578" font-size="28" font-weight="700">같은 Node Update에 반영</text>
+    <text x="360" y="617" font-size="26" fill="#047857">초기화 필드 설정 + taint 제거</text>
+    <rect x="48" y="680" width="624" height="112" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <text x="360" y="723" font-size="28" font-weight="700">주소는 이후 status에 별도 기록</text>
+    <text x="360" y="763" font-size="25">주소 patch까지 하나의 원자적 쓰기는 아님</text>
+  </g>
+</svg>

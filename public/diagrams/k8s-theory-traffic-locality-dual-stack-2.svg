@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="864" viewBox="0 0 560 864" role="img" aria-labelledby="title desc">
+  <title id="title">dual-stack VIP Service의 주소군별 EndpointSlice와 후보</title>
+  <desc id="desc">IPv4를 primary로 둔 VIP Service의 개념 예다. clusterIP는 clusterIPs의 첫 값을 가리킨다. IPv4 VIP와 IPv6 VIP는 각각 해당 주소군의 EndpointSlice 집합과 백엔드 후보를 사용한다. 박스는 집합을 뜻하며 실제 Slice 개수를 뜻하지 않는다</desc>
+  <rect width="560" height="864" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <path d="M144 408 V472 M416 408 V472 M144 640 V712 M416 640 V712" fill="none" stroke="#475569" stroke-width="2"/>
+    <path d="M144 256 V312 M416 256 V312" fill="none" stroke="#475569" stroke-width="2"/>
+    <text x="280" y="40" font-size="24" font-weight="700">주소 목록은 하나, 전달 후보는 주소군별</text>
+    <rect x="32" y="96" width="496" height="160" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="136" font-size="24" font-weight="700">하나의 VIP Service · 개념 예</text>
+    <text x="280" y="176" font-size="21"><tspan x="280">ipFamilies: [IPv4, IPv6]</tspan><tspan x="280" dy="40">clusterIP = clusterIPs[0] · IPv4 primary</tspan></text>
+    <rect x="32" y="320" width="224" height="88" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="304" y="320" width="224" height="88" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="144" y="356" font-size="22"><tspan x="144">clusterIPs[0]</tspan><tspan x="144" dy="32">IPv4 VIP</tspan></text>
+    <text x="416" y="356" font-size="22"><tspan x="416">clusterIPs[1]</tspan><tspan x="416" dy="32">IPv6 VIP</tspan></text>
+    <rect x="32" y="480" width="224" height="160" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <rect x="304" y="480" width="224" height="160" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="144" y="520" font-size="22" font-weight="700">EndpointSlice 집합</text>
+    <text x="416" y="520" font-size="22" font-weight="700">EndpointSlice 집합</text>
+    <text x="144" y="564" font-size="20"><tspan x="144">addressType: IPv4</tspan><tspan x="144" dy="40">포트·상태·힌트</tspan></text>
+    <text x="416" y="564" font-size="20"><tspan x="416">addressType: IPv6</tspan><tspan x="416" dy="40">포트·상태·힌트</tspan></text>
+    <rect x="32" y="720" width="224" height="80" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <rect x="304" y="720" width="224" height="80" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="144" y="768" font-size="22">IPv4 백엔드 후보</text>
+    <text x="416" y="768" font-size="22">IPv6 백엔드 후보</text>
+    <text x="280" y="840" font-size="20">그림의 박스 수가 실제 Slice 수는 아닙니다</text>
+  </g>
+</svg>

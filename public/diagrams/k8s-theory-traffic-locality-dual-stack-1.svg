@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="840" viewBox="0 0 560 840" role="img" aria-labelledby="title desc">
+  <title id="title">Local 후보 제한과 trafficDistribution의 범위 확장</title>
+  <desc id="desc">kube-proxy가 노드·ServicePort·주소군별로 후보를 분류한다. Local은 로컬 Ready 또는 로컬 Serving-Terminating 후보만 쓰며 원격으로 fallback하지 않는다. Cluster의 PreferSameNode 예는 성립 가능한 노드·zone·전체 Ready 모드를 고르고 전체 Ready가 없을 때 종료 후보를 사용한다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="840" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <path d="M280 160 V176 H144 V224" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 176 H416 V224" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M144 496 V552" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M416 496 V552" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="280" y="36" font-size="24" font-weight="700">후보를 제한하는 Local, 범위를 넓히는 선호</text>
+    <text x="280" y="72" font-size="20">판정 단위: 노드 · Service 포트 · 주소군</text>
+    <rect x="32" y="96" width="496" height="64" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="136" font-size="22">kube-proxy · 진입 주소에 맞춰 정책 선택</text>
+    <rect x="32" y="232" width="224" height="264" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="304" y="232" width="224" height="264" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="144" y="272" font-size="24" font-weight="700">Local 정책</text>
+    <text x="144" y="320" font-size="20"><tspan x="144">로컬 Ready 우선</tspan><tspan x="144" dy="40">없으면 로컬의</tspan><tspan x="144" dy="32">serving+terminating</tspan><tspan x="144" dy="48">원격 fallback 없음</tspan></text>
+    <text x="416" y="272" font-size="22" font-weight="700"><tspan x="416">Cluster 정책</tspan><tspan x="416" dy="32">PreferSameNode 예</tspan></text>
+    <text x="416" y="352" font-size="20"><tspan x="416">노드 모드 성립?</tspan><tspan x="416" dy="40">아니면 zone 모드</tspan><tspan x="416" dy="40">아니면 전체 Ready</tspan></text>
+    <rect x="32" y="560" width="224" height="128" rx="12" fill="#FFF1F2" stroke="#E11D48"/>
+    <text x="144" y="600" font-size="21"><tspan x="144">로컬 후보 없음</tspan><tspan x="144" dy="32">원격에는 있음</tspan><tspan x="144" dy="32">이 Local 경로 DROP</tspan></text>
+    <rect x="304" y="560" width="224" height="128" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="416" y="600" font-size="20"><tspan x="416">전체 Ready도 없으면</tspan><tspan x="416" dy="32">클러스터 범위의</tspan><tspan x="416" dy="32">serving+terminating</tspan></text>
+    <rect x="104" y="184" width="80" height="32" fill="#FAFAFA"/>
+    <text x="144" y="208" font-size="20">Local</text>
+    <rect x="368" y="184" width="96" height="32" fill="#FAFAFA"/>
+    <text x="416" y="208" font-size="20">Cluster</text>
+    <rect x="80" y="512" width="128" height="32" fill="#FAFAFA"/>
+    <text x="144" y="536" font-size="20">후보가 비면</text>
+    <rect x="352" y="512" width="128" height="32" fill="#FAFAFA"/>
+    <text x="416" y="536" font-size="20">Ready 없음</text>
+    <text x="280" y="744" font-size="21"><tspan x="280">전체에 사용할 후보가 없으면 REJECT</tspan><tspan x="280" dy="32">그림의 부재 처리는 Linux iptables·nftables 기준</tspan><tspan x="280" dy="32">Cluster와 Local의 준비·종료 fallback은 독립</tspan></text>
+  </g>
+</svg>
