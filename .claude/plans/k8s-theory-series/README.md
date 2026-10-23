@@ -116,3 +116,10 @@ push·배포·시리즈 카드 등록은 별도 요청으로 진행한다
 | `scripts/lint-post.mjs` | `npm run lint:post -- <file>` |
 | `src/content/essays/kubernetes/cloud-virtualization-double-tax.md` | 근거 등급 고지 블록의 선례 |
 | `src/content/essays/rust/` | 같은 vault에서 변환한 선행 사례 (CS레이어 7편) |
+
+## 30편 연속 작업 최종 인계
+
+[배치별 커밋·검증·남은 문제·다음 3편](batches/summary-30.md)
+
+추가 30편 검수·로컬 커밋 완료, 보류 0편. 다음은 Phase 4-4·4-5·4-6이다
+push·배포·시리즈 카드 등록은 실행하지 않았다
