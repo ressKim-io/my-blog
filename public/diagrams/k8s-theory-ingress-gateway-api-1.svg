@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 688" role="img" aria-labelledby="title desc">
+  <title id="title">Gateway API의 세 리소스와 편집 역할</title>
+  <desc id="desc">인프라 제공자는 GatewayClass, 클러스터 운영자는 Gateway, 앱 팀은 HTTPRoute를 편집합니다. Gateway가 GatewayClass를 참조하고 HTTPRoute가 Gateway 부착을 요청합니다. 컨트롤러는 이 명세를 읽어 프록시나 로드 밸런서에 반영합니다</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#475569" stroke-width="1.5"/></marker>
+  </defs>
+  <rect width="720" height="688" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="360" y="48" font-size="29" font-weight="700">결정 주체를 리소스 경계로 나눕니다</text>
+    <path d="M648 288 L680 288 L680 160 L648 160" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M648 480 L680 480 L680 352 L648 352" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="24" y="96" width="192" height="112" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+    <text x="120" y="145" font-size="25"><tspan x="120">인프라</tspan><tspan x="120" dy="34">제공자</tspan></text>
+    <rect x="248" y="96" width="400" height="112" rx="12" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+    <text x="448" y="142" font-size="29" font-weight="700">GatewayClass</text>
+    <text x="448" y="181" font-size="25" fill="#B45309">controllerName · 구현 선택</text>
+    <rect x="24" y="256" width="192" height="112" rx="12" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+    <text x="120" y="305" font-size="25"><tspan x="120">클러스터</tspan><tspan x="120" dy="34">운영자</tspan></text>
+    <rect x="248" y="256" width="400" height="112" rx="12" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
+    <text x="448" y="301" font-size="29" font-weight="700">Gateway</text>
+    <text x="448" y="340" font-size="25" fill="#0E7490">listener · 포트 · 인증서</text>
+    <rect x="24" y="416" width="192" height="112" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="120" y="482" font-size="27">앱 팀</text>
+    <rect x="248" y="416" width="400" height="112" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="448" y="461" font-size="29" font-weight="700">HTTPRoute</text>
+    <text x="448" y="500" font-size="25" fill="#047857">요청 매칭 · backendRefs</text>
+    <path d="M216 152 L248 152 M216 312 L248 312 M216 472 L248 472" stroke="#475569" stroke-width="2"/>
+    <text x="448" y="234" font-size="23" fill="#334155">Gateway가 class를 참조</text>
+    <text x="448" y="394" font-size="23" fill="#334155">Route가 Gateway 부착 요청</text>
+    <rect x="24" y="576" width="672" height="88" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <text x="360" y="614" font-size="25"><tspan x="360">컨트롤러가 세 명세를 읽어</tspan><tspan x="360" dy="33">프록시·로드 밸런서에 반영</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="792" viewBox="0 0 560 792" role="img" aria-labelledby="title desc">
+  <title id="title">NetworkPolicy의 방향별 합집합과 양끝 허용</title>
+  <desc id="desc">같은 Pod 방향에 적용되는 표준 정책은 허용 범위를 합친다. 출발지 egress와 목적지 ingress가 모두 허용해야 새 연결을 만들 수 있으며, 그림은 실제 물리적 판정 위치를 뜻하지 않는 개념도다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="792" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <path d="M280 280 V360" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <path d="M280 536 V456" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <text x="280" y="40" font-size="24" font-weight="700">같은 방향은 합집합, 양끝은 모두 허용</text>
+    <rect x="32" y="80" width="496" height="200" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="120" font-size="24" font-weight="700">출발지 Pod · egress</text>
+    <text x="280" y="164" font-size="21">이 방향이 미격리이면 허용</text>
+    <text x="280" y="208" font-size="21">격리돼 있다면 적용 정책들의</text>
+    <text x="280" y="240" font-size="21">egress 허용 범위를 합칩니다</text>
+    <rect x="88" y="368" width="384" height="80" rx="12" fill="#FFF1F2" stroke="#E11D48"/>
+    <text x="280" y="400" font-size="22" font-weight="700">AND · 두 방향 모두 허용</text>
+    <text x="280" y="430" font-size="20">한쪽만 허용하면 연결되지 않습니다</text>
+    <rect x="32" y="536" width="496" height="160" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="280" y="576" font-size="24" font-weight="700">목적지 Pod · ingress</text>
+    <text x="280" y="620" font-size="21">미격리 또는 적용 정책들의</text>
+    <text x="280" y="652" font-size="21">ingress 허용 합집합으로 판단</text>
+    <rect x="224" y="304" width="112" height="32" fill="#FAFAFA"/>
+    <text x="280" y="328" font-size="20">허용 여부</text>
+    <rect x="224" y="480" width="112" height="32" fill="#FAFAFA"/>
+    <text x="280" y="504" font-size="20">허용 여부</text>
+    <text x="280" y="736" font-size="20">표준 NetworkPolicy의 새 연결 개념도</text>
+    <text x="280" y="768" font-size="20">응답과 resident-node·자기 자신 예외는 별도</text>
+  </g>
+</svg>

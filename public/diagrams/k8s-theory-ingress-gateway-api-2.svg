@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 664" role="img" aria-labelledby="title desc">
+  <title id="title">Gateway 부착 허가와 백엔드 참조 허가의 차이</title>
+  <desc id="desc">다른 네임스페이스의 Gateway에 붙으려는 HTTPRoute는 parentRefs로 부착을 요청하고 Gateway의 allowedRoutes로 허가받습니다. 다른 네임스페이스의 Service로 보내는 HTTPRoute의 backendRefs는 Service 쪽 네임스페이스의 ReferenceGrant로 허가받습니다. 화살표는 패킷이 아닌 설정 참조와 허가 관계입니다</desc>
+  <defs>
+    <marker id="ref" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#475569" stroke-width="1.5"/></marker>
+    <marker id="grant" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#E11D48" stroke-width="1.5"/></marker>
+  </defs>
+  <rect width="720" height="664" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <text x="360" y="48" font-size="29" font-weight="700">대상에 따라 허가하는 설정이 다릅니다</text>
+    <rect x="24" y="88" width="288" height="224" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="408" y="88" width="288" height="224" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+    <path d="M312 176 L408 176" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#ref)"/>
+    <path d="M408 264 L312 264" fill="none" stroke="#E11D48" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#grant)"/>
+    <text x="168" y="127" font-size="25" fill="#047857">앱 네임스페이스</text>
+    <text x="168" y="185" font-size="29" font-weight="700">HTTPRoute</text>
+    <text x="168" y="264" font-size="25">parentRefs</text>
+    <text x="552" y="127" font-size="25" fill="#334155">운영 네임스페이스</text>
+    <text x="552" y="185" font-size="29" font-weight="700">Gateway</text>
+    <text x="552" y="264" font-size="25" fill="#BE123C">allowedRoutes</text>
+    <text x="360" y="158" font-size="22" fill="#334155">요청</text>
+    <text x="360" y="245" font-size="22" fill="#BE123C">허가</text>
+    <rect x="24" y="360" width="288" height="224" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="408" y="360" width="288" height="224" rx="12" fill="#FFF1F2" stroke="#E11D48" stroke-width="2"/>
+    <path d="M312 448 L408 448" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#ref)"/>
+    <text x="168" y="399" font-size="25" fill="#047857">앱 네임스페이스</text>
+    <text x="168" y="457" font-size="29" font-weight="700">HTTPRoute</text>
+    <text x="168" y="536" font-size="25">backendRefs</text>
+    <text x="552" y="399" font-size="25" fill="#BE123C">대상 네임스페이스</text>
+    <text x="552" y="457" font-size="29" font-weight="700">Service</text>
+    <text x="552" y="536" font-size="25" fill="#BE123C">ReferenceGrant</text>
+    <text x="360" y="631" font-size="25">Grant는 참조 대상과 같은 네임스페이스에 생성</text>
+  </g>
+</svg>

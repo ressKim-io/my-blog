@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="816" viewBox="0 0 560 816" role="img" aria-labelledby="title desc">
+  <title id="title">같은 peer의 selector 교집합과 별도 peer의 합집합</title>
+  <desc id="desc">정책 namespace에는 team blue 라벨이 없다는 가정이다. 같은 peer에 namespaceSelector와 podSelector를 쓰면 blue namespace의 client Pod만 선택한다. 별도 peer로 나누면 blue namespace의 모든 Pod와 정책 namespace의 client Pod가 선택된다. 허용 대상은 초록색 실선, 미선택은 회색 점선으로 구분한다</desc>
+  <rect width="560" height="816" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" fill="#0A0A0A" text-anchor="middle">
+    <text x="280" y="40" font-size="24" font-weight="700">selector는 한 항목인지 먼저 봅니다</text>
+    <text x="280" y="96" font-size="22" font-weight="700">같은 peer: namespace AND Pod</text>
+    <rect x="32" y="120" width="240" height="216" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="288" y="120" width="240" height="216" rx="12" fill="#F8FAFC" stroke="#475569"/>
+    <text x="152" y="160" font-size="21">team=blue namespace</text>
+    <text x="408" y="160" font-size="21">정책 namespace</text>
+    <rect x="48" y="184" width="208" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="48" y="256" width="208" height="56" rx="8" fill="#FAFAFA" stroke="#94A3B8" stroke-dasharray="5 3"/>
+    <rect x="304" y="184" width="208" height="56" rx="8" fill="#FAFAFA" stroke="#94A3B8" stroke-dasharray="5 3"/>
+    <rect x="304" y="256" width="208" height="56" rx="8" fill="#FAFAFA" stroke="#94A3B8" stroke-dasharray="5 3"/>
+    <text x="152" y="220" font-size="21">app=client · 허용</text>
+    <text x="152" y="292" font-size="21">다른 app · 미선택</text>
+    <text x="408" y="220" font-size="21">app=client · 미선택</text>
+    <text x="408" y="292" font-size="21">다른 app · 미선택</text>
+    <text x="280" y="432" font-size="22" font-weight="700">별도 peer: namespace OR Pod</text>
+    <rect x="32" y="456" width="240" height="216" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="288" y="456" width="240" height="216" rx="12" fill="#F8FAFC" stroke="#475569"/>
+    <text x="152" y="496" font-size="21">team=blue namespace</text>
+    <text x="408" y="496" font-size="21">정책 namespace</text>
+    <rect x="48" y="520" width="208" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="48" y="592" width="208" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="304" y="520" width="208" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="304" y="592" width="208" height="56" rx="8" fill="#FAFAFA" stroke="#94A3B8" stroke-dasharray="5 3"/>
+    <text x="152" y="556" font-size="21">app=client · 허용</text>
+    <text x="152" y="628" font-size="21">다른 app · 허용</text>
+    <text x="408" y="556" font-size="21">app=client · 허용</text>
+    <text x="408" y="628" font-size="21">다른 app · 미선택</text>
+    <text x="280" y="736" font-size="20"><tspan x="280">가정: 정책 namespace에는 team=blue 없음</tspan><tspan x="280" dy="40">초록 실선: 허용 대상 · 회색 점선: 미선택</tspan></text>
+  </g>
+</svg>
