@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="848" viewBox="0 0 560 848" role="img" aria-labelledby="title desc">
+  <title id="title">generic ephemeral과 CSI inline의 다른 준비·정리 경로</title>
+  <desc id="desc">generic ephemeral은 Pod의 PVC 템플릿에서 소유 참조가 붙은 PVC를 만들고 일반 볼륨 경로를 사용한다. Pod 삭제 후 GC·PVC 보호·회수 정책을 거쳐 정리한다. CSI inline은 PVC 없이 kubelet의 NodePublishVolume으로 준비하고 NodeUnpublishVolume으로 드라이버에 정리를 요청한다. 자원 회수 완료가 Pod 삭제와 같은 시각이라는 보장은 아니다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="848" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <path d="M144 216 V288" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M144 416 V488" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M144 600 V672" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M416 216 V288" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M416 416 V488" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M416 600 V672" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="280" y="40" font-size="24" font-weight="700">Pod 수명을 따라도 정리 경로는 다릅니다</text>
+    <text x="144" y="88" font-size="21" font-weight="700">generic ephemeral</text>
+    <text x="416" y="88" font-size="21" font-weight="700">CSI inline</text>
+    <rect x="32" y="112" width="224" height="104" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="304" y="112" width="224" height="104" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="144" y="152" font-size="21"><tspan x="144">Pod의 PVC 템플릿</tspan><tspan x="144" dy="32">ephemeral 소스</tspan></text>
+    <text x="416" y="152" font-size="21"><tspan x="416">Pod의 csi 소스</tspan><tspan x="416" dy="32">Ephemeral 지원 필요</tspan></text>
+    <rect x="32" y="296" width="224" height="120" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <rect x="304" y="296" width="224" height="120" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="144" y="332" font-size="21"><tspan x="144">Pod 소유 PVC 생성</tspan><tspan x="144" dy="32">일반 볼륨 경로</tspan><tspan x="144" dy="32">PVC 쿼터 적용</tspan></text>
+    <text x="416" y="332" font-size="20"><tspan x="416">NodePublishVolume</tspan><tspan x="416" dy="32">드라이버가 준비</tspan><tspan x="416" dy="32">PVC 생성 없음</tspan></text>
+    <rect x="32" y="496" width="224" height="104" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <rect x="304" y="496" width="224" height="104" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="144" y="536" font-size="21"><tspan x="144">Pod 사용 종료·삭제</tspan><tspan x="144" dy="32">일반 노드 해제</tspan></text>
+    <text x="416" y="536" font-size="21"><tspan x="416">Pod 사용 종료·삭제</tspan><tspan x="416" dy="32">kubelet이 정리 요청</tspan></text>
+    <rect x="32" y="680" width="224" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <rect x="304" y="680" width="224" height="112" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="144" y="716" font-size="20"><tspan x="144">PVC는 GC 대상</tspan><tspan x="144" dy="30">보호·회수 정책 적용</tspan><tspan x="144" dy="30">Retain이면 자원 잔존</tspan></text>
+    <text x="416" y="716" font-size="20"><tspan x="416">NodeUnpublishVolume</tspan><tspan x="416" dy="30">드라이버가 정리</tspan><tspan x="416" dy="30">실패·재시도 가능</tspan></text>
+    <text x="280" y="828" font-size="20">두 경로 모두 즉시 회수 완료를 보장하지 않습니다</text>
+  </g>
+</svg>

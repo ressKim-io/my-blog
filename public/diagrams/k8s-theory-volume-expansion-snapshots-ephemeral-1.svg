@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="936" viewBox="0 0 560 936" role="img" aria-labelledby="title desc">
+  <title id="title">백엔드와 노드 확장이 모두 필요한 파일시스템 볼륨 예시</title>
+  <desc id="desc">요청 10Gi를 20Gi로 바꾸는 가정 예시다. API가 요청을 저장한 뒤 external-resizer가 ControllerExpandVolume으로 백엔드를 확장하고 PV 용량을 반영한다. 필요한 노드 작업을 kubelet이 NodeExpandVolume으로 수행한 뒤 PVC 용량 상태가 따라온다. 모든 드라이버가 두 RPC를 모두 호출하는 것은 아니다</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="936" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, system-ui, sans-serif" text-anchor="middle" fill="#0A0A0A">
+    <path d="M280 224 V280" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 424 V488" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M280 632 V696" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="280" y="40" font-size="24" font-weight="700">요청 저장과 확장 완료는 다른 상태입니다</text>
+    <text x="280" y="80" font-size="20">두 RPC가 필요한 파일시스템의 가정 예시</text>
+    <rect x="32" y="112" width="496" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="152" font-size="23" font-weight="700">PVC 요청을 10Gi에서 20Gi로 변경</text>
+    <text x="280" y="192" font-size="20">명세는 20Gi · 용량 상태는 아직 10Gi</text>
+    <rect x="32" y="288" width="496" height="136" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="328" font-size="23" font-weight="700">external-resizer가 드라이버 호출</text>
+    <text x="280" y="368" font-size="20"><tspan x="280">ControllerExpandVolume</tspan><tspan x="280" dy="32">백엔드 확장 · PV 용량 반영</tspan></text>
+    <rect x="32" y="496" width="496" height="136" rx="12" fill="#FFFBEB" stroke="#D97706"/>
+    <text x="280" y="536" font-size="23" font-weight="700">kubelet이 필요한 노드 작업 요청</text>
+    <text x="280" y="576" font-size="20"><tspan x="280">NodeExpandVolume</tspan><tspan x="280" dy="32">이 예시에서는 파일시스템 확장</tspan></text>
+    <rect x="32" y="704" width="496" height="112" rx="12" fill="#F5F3FF" stroke="#7C3AED"/>
+    <text x="280" y="744" font-size="23" font-weight="700">PVC 용량 상태가 20Gi로 갱신</text>
+    <text x="280" y="784" font-size="20">이 경로의 확장 상태 정리</text>
+    <rect x="176" y="232" width="208" height="40" fill="#FAFAFA"/><text x="280" y="260" font-size="20">검증 후 요청 저장</text>
+    <rect x="168" y="440" width="224" height="40" fill="#FAFAFA"/><text x="280" y="468" font-size="20">필요한 노드 확장 대기</text>
+    <rect x="176" y="648" width="208" height="40" fill="#FAFAFA"/><text x="280" y="676" font-size="20">노드 작업 완료</text>
+    <text x="280" y="864" font-size="20"><tspan x="280">capability·응답·노드 준비가 호출을 결정합니다</tspan><tspan x="280" dy="32">요청 저장만으로 실제 확장은 끝나지 않습니다</tspan></text>
+  </g>
+</svg>
