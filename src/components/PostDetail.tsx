@@ -125,7 +125,7 @@ export default function PostDetail({ post, allPosts, seriesPosts }: PostDetailPr
                 )}
               </Link>
 
-              <header className="mb-10">
+              <header className="mb-10 [overflow-wrap:anywhere]">
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <h1 className="text-[32px] md:text-[36px] font-bold leading-[1.2] tracking-tight text-[var(--text)] flex-1">
                     {post.title}

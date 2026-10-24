@@ -26,6 +26,8 @@ const typeLabel: Record<string, string> = {
 
 const HOVER_DELAY = 220;
 const HIDE_DELAY = 160;
+const PREVIEW_WIDTH = 360;
+const VIEWPORT_MARGIN = 12;
 
 export default function LinkPreview({
   href,
@@ -50,6 +52,13 @@ export default function LinkPreview({
     [],
   );
 
+  useEffect(() => {
+    if (!open) return;
+    const closeOnResize = () => setOpen(false);
+    window.addEventListener('resize', closeOnResize);
+    return () => window.removeEventListener('resize', closeOnResize);
+  }, [open]);
+
   // 미리보기 데이터가 없으면 일반 a로
   if (!meta) {
     return (
@@ -62,13 +71,12 @@ export default function LinkPreview({
   const computePosition = () => {
     if (!linkRef.current) return;
     const rect = linkRef.current.getBoundingClientRect();
-    const previewWidth = 360;
-    const margin = 12;
-    let left = rect.left + window.scrollX;
-    if (left + previewWidth + margin > window.innerWidth) {
-      left = window.innerWidth - previewWidth - margin;
-    }
-    if (left < margin) left = margin;
+    const viewportWidth = document.documentElement.clientWidth;
+    const previewWidth = Math.min(PREVIEW_WIDTH, viewportWidth - VIEWPORT_MARGIN * 2);
+    const left = Math.max(
+      VIEWPORT_MARGIN,
+      Math.min(rect.left, viewportWidth - previewWidth - VIEWPORT_MARGIN),
+    ) + window.scrollX;
     setPosition({ top: rect.bottom + window.scrollY + 8, left });
   };
 
@@ -114,7 +122,13 @@ export default function LinkPreview({
           role="tooltip"
           onMouseEnter={cancelTimers}
           onMouseLeave={scheduleHide}
-          style={{ position: 'absolute', top: position.top, left: position.left, width: 360 }}
+          style={{
+            position: 'absolute',
+            top: position.top,
+            left: position.left,
+            width: PREVIEW_WIDTH,
+            maxWidth: `calc(100vw - ${VIEWPORT_MARGIN * 2}px)`,
+          }}
           className="z-40 p-4 bg-[var(--elevated)] border border-[var(--border)] rounded-lg shadow-xl pointer-events-auto animate-in fade-in"
         >
           <div className="flex items-center gap-2 mb-2 text-[11px] font-medium uppercase tracking-wider">
