@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { getPublicationDate, isPostPublished } from '../src/lib/publication.mjs';
+import { isPostListed } from '../src/lib/post-visibility.mjs';
 
 const SITE_URL = 'https://resskim-io.github.io/my-blog';
 const OUT_DIR = path.join(process.cwd(), 'out');
@@ -33,7 +34,7 @@ function getAllPosts() {
   });
   const today = getPublicationDate();
   return posts
-    .filter((post) => isPostPublished(post.date, today))
+    .filter((post) => isPostPublished(post.date, today) && isPostListed(post))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 

@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PostDetail from '@/components/PostDetail';
 import { getAllPosts, getPostBySlug, getEssays, getSeriesPosts, getSearchIndex } from '@/lib/posts';
+import { isPostListed } from '@/lib/post-visibility.mjs';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.title,
     description: post.excerpt,
     alternates: { canonical: `/essays/${slug}/` },
+    robots: isPostListed(post) ? undefined : { index: false, follow: true },
     openGraph: {
       type: 'article',
       title: post.title,

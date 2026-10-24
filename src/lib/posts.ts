@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { getPublicationDate, isPostPublished } from './publication.mjs';
+import { getPublicationDate } from './publication.mjs';
+import { isPostAccessible, isPostListed } from './post-visibility.mjs';
 
 const postsDirectory = path.join(process.cwd(), 'src/content');
 
@@ -99,7 +100,7 @@ export function getAllPosts(): PostData[] {
   }
 
   const today = getPublicationDate();
-  return cachedPosts.filter((post) => isPostPublished(post.date, today));
+  return cachedPosts.filter((post) => isPostAccessible(post, today));
 }
 
 export function getPostBySlug(slug: string): PostData | null {
@@ -107,7 +108,7 @@ export function getPostBySlug(slug: string): PostData | null {
   const relativePath = slugIndex?.get(slug);
   if (!relativePath) return null;
   const post = readPost(relativePath);
-  return isPostPublished(post.date) ? post : null;
+  return isPostAccessible(post) ? post : null;
 }
 
 export function getSeriesPosts(seriesName: string): PostData[] {
@@ -118,6 +119,11 @@ export function getSeriesPosts(seriesName: string): PostData[] {
 
 export function getEssays(): PostData[] {
   return getAllPosts().filter((p) => p.track === 'essays');
+}
+
+/** 홈·목록·검색용. 직접 링크와 시리즈 이동에는 getEssays/getSeriesPosts를 사용합니다. */
+export function getListedEssays(): PostData[] {
+  return getEssays().filter(isPostListed);
 }
 
 export function getLogs(): PostData[] {
@@ -145,7 +151,7 @@ export interface SearchPost {
 }
 
 export function getSearchIndex(): SearchPost[] {
-  return getEssays().map((p) => ({
+  return getListedEssays().map((p) => ({
     slug: p.slug,
     title: p.title,
     excerpt: p.excerpt,
@@ -179,7 +185,7 @@ export function toListItem(p: PostData): PostListItem {
 }
 
 export function getEssaysList(): PostListItem[] {
-  return getEssays().map(toListItem);
+  return getListedEssays().map(toListItem);
 }
 
 export interface Heading {

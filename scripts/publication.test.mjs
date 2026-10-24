@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { getPublicationDate, isPostPublished } from '../src/lib/publication.mjs';
+import { isPostListed } from '../src/lib/post-visibility.mjs';
 
 test('한국 자정 직전까지 다음 날 글을 숨깁니다', () => {
   const today = getPublicationDate(new Date('2026-10-24T14:59:59.999Z'));
@@ -26,7 +27,7 @@ test('연도 변경과 윤년에도 비교 가능한 날짜를 반환합니다',
   assert.equal(getPublicationDate(new Date('2028-02-28T15:00:00Z')), '2028-02-29');
 });
 
-test('postbuild는 미래 글과 logs를 공개 인덱스에서 제외합니다', (t) => {
+test('postbuild는 예약일·logs 격리·목록 노출 설정을 공개 인덱스에 적용합니다', (t) => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'blog-publication-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, 'out'));
@@ -37,6 +38,8 @@ test('postbuild는 미래 글과 logs를 공개 인덱스에서 제외합니다'
     ['essays', 'past-post', '2000-01-01'],
     ['essays', 'today-post', today],
     ['essays', 'future-post', future],
+    ['essays', 'k8s-theory-preview-past', '2000-01-01'],
+    ['essays', 'k8s-theory-preview-future', future],
     ['logs', 'private-log', today],
     ['logs', 'future-log', future],
   ];
@@ -61,5 +64,11 @@ test('postbuild는 미래 글과 logs를 공개 인덱스에서 제외합니다'
     assert(!output.includes('future-post'), file);
     assert(!output.includes('private-log'), file);
     assert(!output.includes('future-log'), file);
+    assert.equal(
+      output.includes('/essays/k8s-theory-preview-past/'),
+      isPostListed({ slug: 'k8s-theory-preview-past' }),
+      file,
+    );
+    assert(!output.includes('k8s-theory-preview-future'), file);
   }
 });

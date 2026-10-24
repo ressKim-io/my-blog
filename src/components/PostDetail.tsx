@@ -10,6 +10,7 @@ import EditOnGitHub from './EditOnGitHub';
 import ShareButton from './ShareButton';
 import MobileTOC from './MobileTOC';
 import { extractHeadings, type PostData, type Track } from '@/lib/posts';
+import { isPostListed } from '@/lib/post-visibility.mjs';
 
 interface PostDetailProps {
   post: PostData;
@@ -68,7 +69,7 @@ export default function PostDetail({ post, allPosts, seriesPosts }: PostDetailPr
 
   const recommended = allPosts
     .filter(
-      (p) => p.slug !== post.slug && p.track === track && p.category === post.category,
+      (p) => isPostListed(p) && p.slug !== post.slug && p.track === track && p.category === post.category,
     )
     .slice(0, 3);
 

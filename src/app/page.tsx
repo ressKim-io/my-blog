@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SeriesShowcase from '@/components/SeriesShowcase';
 import HomeCategoryFeed from '@/components/HomeCategoryFeed';
-import { getEssays, getSearchIndex } from '@/lib/posts';
+import { getListedEssays, getSearchIndex } from '@/lib/posts';
 import { getAllSeries, pickFeatured } from '@/lib/series';
 import { getActiveProjects, getProjectPosts } from '@/lib/projects';
 
@@ -37,7 +37,7 @@ export default function Home() {
   const rest = allSeries.filter((s) => s.id !== featured.id);
   const seriesTotal = allSeries.reduce((n, s) => n + s.count, 0);
 
-  const essays = getEssays();
+  const essays = getListedEssays();
   const feedPosts = essays.map((p) => ({
     slug: p.slug,
     title: p.title,
