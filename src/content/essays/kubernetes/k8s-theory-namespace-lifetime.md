@@ -1,6 +1,6 @@
 ---
 title: "Namespace 수명 — 프로세스가 없어도 남는 참조"
-excerpt: "프로세스·namespace 객체·runtime sandbox·Pod 객체의 수명을 구분합니다. 열린 FD와 bind mount, PID 1 종료, 비동기 정리와 CNI/IPAM의 책임을 따라 삭제 완료와 관측 신원의 경계를 살펴봅니다"
+excerpt: "프로세스·namespace 객체·runtime sandbox·Pod 객체의 수명을 구분합니다. 열린 FD와 bind mount, PID 1 종료, 비동기 정리와 CNI/IPAM의 책임을 따라 삭제 완료를 판단하는 근거와 관측 대상을 구별하는 방법을 살펴봅니다"
 category: "kubernetes"
 tags: ["kubernetes", "linux", "namespace", "containerd", "cni", "concept"]
 series:
@@ -39,7 +39,7 @@ API 객체와 정책을 구획하는 Kubernetes Namespace를 만들었다는 사
 커널의 `task_struct`는 스케줄링하는 작업을 표현합니다
 이 객체의 `nsproxy`는 mount·UTS·IPC·network·cgroup·time namespace 등으로 향하는 참조를 묶습니다
 
-모든 namespace 정보를 단순히 이 구조체의 목록으로만 읽으면 두 예외를 놓칩니다
+namespace 정보를 모두 `nsproxy`에서 찾으려 하면 두 예외를 놓칩니다
 현재 task의 **활성 PID namespace**는 `task_active_pid_ns()`로 접근합니다
 `nsproxy.pid_ns_for_children`은 앞으로 생성할 자식의 대상을 가리킵니다
 
@@ -66,7 +66,7 @@ Network namespace 안의 마지막 프로세스가 종료돼도 열린 namespace
 
 해당 namespace 파일을 다른 경로에 bind mount한 경우에도 같은 효과가 있습니다
 `nsfs`는 namespace를 파일처럼 다루는 커널 파일시스템입니다
-고정 소스의 `nsfs_evict()`는 inode를 정리할 때 종류별 namespace `put`을 호출합니다
+확인한 소스의 `nsfs_evict()`는 inode를 정리할 때 종류별 namespace `put`을 호출합니다
 
 관찰 도구가 FD를 열고 runtime은 같은 namespace의 bind mount를 유지한다고 가정하겠습니다
 관찰 도구가 FD를 닫아도 runtime의 mount가 남았다면 아직 마지막 참조가 해제된 것은 아닙니다
@@ -225,7 +225,7 @@ Cgroup namespace는 경로를 보는 관점을 나누며 조상 cgroup의 자원
 이 구별은 [CPU quota](/essays/k8s-theory-cgroup-v2-cpu-quota)와 자원 압박을 해석할 때도 필요합니다
 관찰자의 경로를 실제 호스트 계층과 연결해야 어떤 부모 제한을 받는지 설명할 수 있습니다
 
-### 실행 신원은 범위와 시각을 함께 연결합니다
+### 실행 인스턴스를 구별하려면 범위와 시각이 필요합니다
 
 프로세스 번호나 Pod IP는 재사용될 수 있습니다
 어느 노드의 어느 시각에 그 값이 어떤 runtime 객체와 연결됐는지 보존하지 않으면 재시작 전후의 자료를 섞을 수 있습니다
@@ -236,8 +236,8 @@ OpenTelemetry의 `k8s.pod.uid`는 Pod 객체를, `container.id`는 실행 컨테
 속성이 정의돼 있다는 사실이 kernel 식별자와의 자동 연관까지 보장하지는 않습니다
 수집기의 매핑·캐시 갱신·재시작 처리는 별도로 검증해야 합니다
 
-세부 식별자를 모두 모든 metric label에 추가하자는 뜻도 아닙니다
-Label 조합이 늘어나는 카디널리티에는 저장·조회 비용이 있으므로 실행 신원을 보존할 신호와 서비스 단위로 집계할 신호를 나눕니다
+모든 세부 식별자를 metric label에 추가하자는 뜻도 아닙니다
+Label 조합이 늘어나면 카디널리티에 따른 저장·조회 비용도 커지므로, 개별 실행을 구별해야 하는 신호와 서비스 단위로 집계할 신호를 나눕니다
 
 ## 삭제 완료는 대상별 근거로 판단합니다
 
@@ -252,7 +252,7 @@ Finalizer는 API 객체의 삭제 완료를 보류해 정리 책임자가 작업
 | 커널 namespace | 참조 보유 주체와 커널 | 남은 수명 참조와 종류별 정리 상태 |
 
 이 표는 실행 순서가 아닙니다
-API 목록에서 Pod가 안 보이는 것, sandbox가 종료된 것, namespace가 정리된 것과 IP가 반환된 것을 같은 완료 증거로 바꾸지 않기 위한 구분입니다
+API 목록에서 Pod가 안 보이는 것, sandbox가 종료된 것, namespace가 정리된 것과 IP가 반환된 것은 각각 따로 확인해야 합니다
 
 남은 namespace가 곧 누수라는 뜻도, 존재하는 namespace가 계속 쓸 수 있는 실행 환경이라는 뜻도 아닙니다
 종류·참조 주체·실행 가능성·외부 정리 결과를 구분해야 남은 대상과 재시도 책임을 설명할 수 있습니다

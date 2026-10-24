@@ -13,7 +13,7 @@ date: "2026-11-13"
 이미 준비한 트리를 다른 경로에 연결하는 **bind mount**를 사용할 수 있기 때문입니다
 
 이 구분을 알면 CSI의 stage와 publish가 왜 다른 경로를 준비하는지 설명할 수 있습니다
-드라이버 컨테이너 안에서 만든 mount를 호스트가 보려면 무엇이 필요한지도 mount namespace와 전파 관계로 이어집니다
+드라이버 컨테이너 안에서 만든 mount를 호스트가 볼 수 있는지는 mount namespace와 전파 관계에 달려 있습니다
 
 > **근거**: Linux LTS v6.18.58 `2926d88bb7fc4608fd942453d929c39e4e5ec006`의 공식 소스와 문서를 대조했습니다
 > 사용자 공간 인터페이스 문서는 Linux man-pages 6.20 공식 배포본을 확인했습니다. 커널 버전과 man-pages 버전은 별개입니다
@@ -53,7 +53,7 @@ Linux v6.18.58의 `__do_loopback`은 비재귀 bind에 `clone_mnt`를 사용합�
 새 mount 객체를 만들면서 원본 경로의 dentry를 루트로 연결하고, 그 dentry의 superblock을 참조합니다
 원본 mount 전체의 루트 대신 그 안의 하위 디렉터리를 bind할 수도 있습니다
 
-연결한 것은 원본 경로의 문자열을 매번 다시 해석하는 링크가 아닙니다
+bind mount는 원본 경로 문자열을 매번 다시 해석해 찾아가는 링크가 아닙니다
 어떤 트리를 참조하는지와 그 트리에 도달하는 경로의 이름은 별개입니다
 파일 내용의 일관성·접근 권한·동시 쓰기 안전성까지 bind가 새로 보장하는 것도 아닙니다
 
@@ -97,10 +97,10 @@ RPC가 실패하거나 결과가 불명확하면 같은 요청을 다시 보낼 
 따라서 stage의 “한 번”을 mount syscall 호출 횟수와 같게 읽으면 안 됩니다
 
 정리할 때는 해당 볼륨의 모든 `NodeUnpublishVolume`이 성공한 뒤 `NodeUnstageVolume`을 호출합니다
-예시 구현에서는 Pod별 bind를 먼저 풀고 마지막에 공용 staging 경로를 정리하는 모양입니다
+예시 구현에서는 Pod별 bind를 먼저 풀고 마지막에 공용 staging 경로를 정리합니다
 경로를 공유하는 소비자가 남아 있는지와 정리 성공을 함께 관리해야 합니다
 
-## mount namespace는 mount 목록의 뷰를 나눕니다
+## mount namespace는 프로세스가 보는 mount 목록을 나눕니다
 
 같은 mount namespace에 속한 프로세스는 같은 mount 목록을 봅니다
 새 mount namespace를 만들면 호출자 쪽 목록을 복사해 시작하지만 파일 데이터까지 복제하는 것은 아닙니다
@@ -147,7 +147,7 @@ CSI 배포 문서가 이 경우의 드라이버 mount 경로에 `Bidirectional`�
 
 Kubernetes는 `Bidirectional`을 사용하는 컨테이너에 `securityContext.privileged: true`를 요구합니다
 이는 그 전파 방식을 쓰는 컨테이너에 대한 검증이며 모든 CSI sidecar와 controller에 같은 권한을 요구한다는 뜻은 아닙니다
-호스트 경로의 mount를 바꾸는 영향이 있으므로 생성한 mount의 정리도 배포가 책임져야 합니다
+호스트 경로의 mount를 바꾸므로, 이 구성을 사용하는 쪽은 생성한 mount를 정리하는 방법도 마련해야 합니다
 
 공식 문서는 전파가 모든 볼륨 타입에서 일관되게 동작하지 않는다고 설명합니다
 사용 권장 범위도 `hostPath` 또는 메모리 기반 `emptyDir`로 좁혀 안내하므로, 모든 볼륨에 같은 효과를 보장하는 옵션으로 보면 안 됩니다
@@ -189,7 +189,7 @@ Kubernetes의 `readOnly: true`도 Linux에서 하위 mount까지 자동으로 �
 
 `MNT_DETACH`를 사용하는 lazy unmount는 해당 mount 트리를 경로 목록에서 먼저 떼어 냅니다
 기존 참조가 남아 있으면 실제 자원 정리는 나중까지 미뤄질 수 있습니다
-기존 fd에서 가능한 접근까지 모두 즉시 끊었다거나, 파일시스템·장치·외부 볼륨의 정리가 완료됐다는 뜻은 아닙니다
+이미 열린 파일 디스크립터(fd)를 통한 접근까지 모두 즉시 끊었다거나, 파일시스템·장치·외부 볼륨의 정리가 완료됐다는 뜻은 아닙니다
 
 해제 사건 역시 shared·slave 관계를 따라 전파될 수 있습니다
 한 namespace에서 경로가 사라졌다는 관측만으로 다른 namespace의 mount나 CSI 소비자 참조가 전부 정리됐다고 판단해서는 안 됩니다
