@@ -79,7 +79,7 @@ update를 10초로 직접 지정한 경우도 변경 없는 상태 보고가 기
 새 값을 보면 컨트롤러 자신의 현재 시각을 `probeTimestamp`에 저장합니다
 Node `Ready` 조건의 `lastHeartbeatTime`이 바뀐 경우도 관찰 시각을 갱신합니다
 
-시간이 지났는지는 컨트롤러의 현재 시각과 이 관찰 시각을 비교합니다
+판정 유예가 지났는지는 컨트롤러의 현재 시각과 이 관찰 시각을 비교해 확인합니다
 노드가 쓴 타임스탬프를 컨트롤러의 현재 시각에서 직접 빼는 계산은 아닙니다
 이렇게 하면 경과 시간 계산에 노드와 컨트롤 플레인의 시계 차이가 직접 들어오는 것을 피할 수 있습니다
 
@@ -89,7 +89,7 @@ Node `Ready` 조건의 `lastHeartbeatTime`이 바뀐 경우도 관찰 시각을 
 | `--node-monitor-grace-period` | 50초 | 상태를 보고한 적 있는 노드에서 새 하트비트를 관찰하지 못한 유예 |
 | `--node-startup-grace-period` | 60초 | 아직 Ready 조건을 보고하지 않은 시작 단계의 유예 |
 
-Lease 또는 Node status의 새 하트비트를 관찰하면 부재 타임아웃을 피할 수 있습니다
+Lease 또는 Node status의 새 하트비트를 관찰하면 하트비트가 끊겼다는 판정을 피할 수 있습니다
 Lease 갱신 자체가 kubelet의 `Ready=False`를 `True`로 바꿔 주는 것은 아닙니다
 
 **Lease의 `leaseDurationSeconds: 40`은 node lifecycle controller의 판정 타임아웃이 아닙니다**
@@ -128,7 +128,7 @@ v1.37에서 Beta·기본 on인 `NodeControllerLeaseCircuitBreaker`는 유예를 
 GET 자체가 실패해도 오류를 무시하고 Unknown 판정으로 진행하지는 않습니다
 실제 Lease와 캐시가 같거나 Lease가 존재하지 않는 응답이면 이후 상태 판정 경로로 갑니다
 
-이 대조는 관찰 캐시의 지연을 줄여 해석하기 위한 보호입니다
+이 대조는 캐시가 뒤처진 것을 노드의 하트비트 중단으로 오인하지 않도록 하는 보호입니다
 Lease 갱신을 볼 수 없다는 사실만으로 노드의 실제 전원 상태까지 증명하지는 못합니다
 
 ## Ready=False와 Unknown은 다른 taint로 이어집니다
@@ -171,7 +171,7 @@ node lifecycle controller는 zone마다 `NoExecute` taint를 붙이는 노드 �
 이 크기 비교는 다중 zone 구성에서 전체 클러스터 합계가 아니라 해당 zone의 노드 수를 사용합니다
 
 한 노드의 taint를 본 뒤 여러 Pod가 각각 삭제될 수 있으므로, 초당 0.1개 노드는 Pod DELETE 요청을 초당 0.1개로 제한한다는 뜻이 아닙니다
-노드 수가 많으면 taint 추가 대기만으로도 Pod 타이머의 시작이 늦어질 수 있습니다
+노드 수가 많으면 taint 추가 대기만으로도 Pod의 toleration 시간을 세기 시작하는 시점이 늦어질 수 있습니다
 
 ### 모든 zone이 전면 장애면 이 경로의 taint 추가를 멈춥니다
 
@@ -204,7 +204,7 @@ taint eviction controller는 다음 규칙으로 각 Pod의 삭제를 예약합�
 | 모두 견디며 매칭에 사용한 toleration에 유한한 시간이 있음 | 그중 가장 짧은 시간 사용. 0 이하는 즉시 |
 | 매칭에 사용한 toleration의 시간이 전부 생략됨 | 무기한 허용, 예약한 삭제 취소 |
 
-DaemonSet controller가 추가하는 not-ready·unreachable toleration에는 초가 없습니다
+DaemonSet controller가 추가하는 not-ready·unreachable toleration에는 `tolerationSeconds`가 없습니다
 따라서 두 taint의 시간 만료만으로 해당 DaemonSet Pod가 삭제되지는 않습니다
 다른 삭제 원인에 대한 면제를 의미하지는 않습니다
 
@@ -221,7 +221,7 @@ Pod별 삭제 타이머는 컨트롤러 메모리에 있습니다
 컨트롤러가 재시작하면 현재 taint·toleration을 보고 다시 만들기 때문에 유한한 대기가 다시 시작할 수 있습니다
 기존 타이머가 계속 유지된다고 가정해 이전 예약 시각만으로 완료 시점을 계산할 수는 없습니다
 
-기본 50초 뒤 노드 판정을 마치고 즉시 taint를 추가·관찰했다고 가정하면, 300초 toleration 뒤인 약 350초에 삭제를 요청하는 관계를 생각할 수 있습니다
+기본 50초 뒤 노드 판정을 마치고 즉시 taint를 추가·관찰했다고 가정하면, 300초 toleration을 더해 삭제 요청 시점을 약 350초로 계산할 수 있습니다
 이는 기본값을 연결한 예시이며 감시·큐·API 처리·재시작 지연과 실제 종료 시간을 생략한 값입니다
 
 또한 Pod의 Ready 변경은 이 삭제 요청보다 앞설 수 있습니다

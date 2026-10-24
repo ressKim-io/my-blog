@@ -51,9 +51,9 @@ CPU·메모리 request가 없으면 해당 자원의 Filter 요청량은 0입니
 그 자원 요청 때문에 노드를 제외하지 않는다는 뜻이며, 다른 배치 조건까지 통과한다는 뜻은 아닙니다
 
 자원 Score에서 누락 요청을 보정하는 경로는 컨테이너당 CPU `100m`·메모리 `200Mi`를 가정값으로 씁니다
-Pod-level request가 있으면 그 값도 계산에 반영하므로, Pod-level 선언까지 있는데 무조건 가정값을 더하는 것으로 읽으면 안 됩니다
+Pod-level request가 있으면 그 값도 계산에 반영하므로, 이 경우까지 항상 가정값을 더하는 것은 아닙니다
 
-이 가정값은 요청이 없는 Pod들이 이미 많은 노드를 자원 계산상 비어 있는 것처럼 보는 문제를 줄입니다
+이 가정값은 request가 없는 Pod가 이미 많이 배치된 노드를 자원 계산상 비어 있는 것처럼 보는 문제를 줄입니다
 실제 사용량을 측정한 값도, Pod 오브젝트에 채워 넣는 기본 request도 아닙니다
 
 구현은 [`computePodResourceRequest`·`fitsRequest`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/fit.go), [`calculatePodResourceRequest`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/resource_allocation.go), [`getNonMissingContainerRequests`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/types.go)에서 확인할 수 있습니다
@@ -174,7 +174,7 @@ CPU quota를 다 쓰면 커널은 실행을 미뤘다가 다음 period에 다시
 quota 제한 자체는 프로세스를 종료하지 않습니다
 
 메모리는 이미 사용 중인 페이지를 CPU 실행처럼 다음 period로 미룰 수 없습니다
-커널은 먼저 회수 가능한 페이지를 회수하며, 한도 안에서 할당을 수용하지 못하면 cgroup OOM kill이 일어날 수 있습니다
+커널은 먼저 회수 가능한 페이지를 회수하며, 한도 안에서 메모리를 할당할 수 없으면 cgroup OOM kill이 일어날 수 있습니다
 상한에 닿는 순간 항상 즉시 종료된다는 뜻은 아닙니다
 
 이 때문에 CPU를 압축 가능한 자원, 메모리를 압축 불가능한 자원이라고 구분하기도 합니다
@@ -253,10 +253,10 @@ cgroup v2에서는 `SingleProcessOOMKill` 설정에 따라 kubelet이 `memory.oo
 | kubepods cgroup 한도 | capacity에서 system-reserved·kube-reserved 차감 |
 
 [`getNodeAllocatableAbsoluteImpl`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/cm/node_container_manager_linux.go)은 cgroup 집행에 쓸 값에서 eviction 예약을 빼지 않습니다
-배치에 예약할 양을 만드는 `GetNodeAllocatableReservation`은 `hardEvictionReservation`까지 더합니다
+배치에서 제외할 예약량을 계산하는 `GetNodeAllocatableReservation`은 `hardEvictionReservation`까지 더합니다
 실제 집행 값은 `cgroupsPerQOS`와 `enforceNodeAllocatable` 설정 조건도 따릅니다
 
-따라서 스케줄러가 request로 채우지 않은 예약 구간에 Pod의 초과 사용이 들어갈 수 있습니다
+따라서 Pod가 request를 초과해 메모리를 쓰면 배치 계산에서 제외했던 eviction 예약분까지 사용할 수 있습니다
 그 결과 노드 압박이 임계값에 도달하면 kubelet의 node-pressure eviction이 개입합니다
 allocatable 자체가 노드 메모리 사용을 그 숫자에서 바로 멈추게 하는 cgroup 상한은 아닙니다
 
@@ -277,7 +277,7 @@ allocatable 자체가 노드 메모리 사용을 그 숫자에서 바로 멈추�
 `NotRequired`가 기본이며 재시작 없이 적용합니다
 `RestartContainer`는 재시작해 적용하며, 시작 시점에 정한 메모리 설정을 실행 중 바꿀 수 없는 애플리케이션 등에서 사용합니다
 
-컨테이너의 변경 후 원하는 값은 spec, 실제 적용한 자원은 `status.containerStatuses[].resources`에서 구분합니다
+변경하려는 자원 값은 spec에, 실제 적용한 값은 `status.containerStatuses[].resources`에 기록됩니다
 spec이 바뀌었다는 사실만으로 노드에 적용까지 끝났다고 판단하면 안 됩니다
 
 | 상태 조건 | 의미 |

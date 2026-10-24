@@ -101,7 +101,7 @@ CPU 초기화 기간은 기본 5분, initial readiness delay는 기본 30초입�
 5분 동안 CPU 지표를 무조건 전부 버리는 것이 아니라, 해당 기간의 준비 상태와 표본 시점으로 사용할 지표를 고릅니다
 확대 계산에서 미준비 Pod를 보정하는 분기는 이들의 사용량을 0으로 둡니다
 
-보정한 비율이 허용 오차 안으로 들어오거나 스케일 방향을 뒤집으면 변경하지 않습니다
+보정한 비율이 허용 오차 안으로 들어오거나 처음 계산한 스케일 방향과 반대가 되면 변경하지 않습니다
 보정 후 계산한 개수의 방향을 다시 확인하는 조건도 있습니다
 이 값들은 실제 사용량을 측정한 결과가 아니라 불확실한 표본으로 변경 폭을 키우지 않기 위한 계산상의 가정입니다
 
@@ -156,11 +156,11 @@ API의 기본 behavior는 [`SetDefaults_HorizontalPodAutoscalerBehavior`](https:
 
 다만 첫 조정에서 현재 목표 replica 수를 초기 추천으로 기록합니다
 현재 개수가 높은 상태라면 이 값이 기본 down 창 안에서 축소를 막을 수 있습니다
-따라서 재시작으로 과거 이력을 잃었다는 사실을 모든 scale down 제동이 즉시 사라진다는 뜻으로 해석하면 안 됩니다
+따라서 재시작으로 과거 이력을 잃었어도 scale down을 늦추는 효과가 모두 즉시 사라지는 것은 아닙니다
 
 관련 처리는 [`recordInitialRecommendation`과 이력 맵 초기화](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/podautoscaler/horizontal.go)에 있습니다
 
-## scale은 같은 저장 오브젝트를 다른 형태로 보여줍니다
+## scale은 본체의 replica 정보를 별도 API로 보여 줍니다
 
 Deployment 본체와 `/scale`은 같은 저장 오브젝트와 etcd 키를 사용합니다
 `/scale` GET의 `autoscaling/v1 Scale`은 별도로 저장한 복사본이 아니라 Deployment의 replica 값과 selector를 뽑아 만든 표현입니다
@@ -207,7 +207,7 @@ HPA가 Scale을 읽은 뒤 다른 요청이 저장 오브젝트를 먼저 바꾸
 재시도가 소진되거나 다른 오류가 나면 실패를 반환하므로, Update가 항상 성공한다는 뜻은 아닙니다
 
 HPA의 Update는 `fieldManager`를 지정하지 않습니다
-서버는 없으면 User-Agent의 첫 `/` 앞 문자열을 매니저 이름으로 사용합니다
+서버는 `fieldManager`가 없으면 User-Agent의 첫 `/` 앞 문자열을 매니저 이름으로 사용합니다
 표준 `kube-controller-manager` 실행에서는 `kube-controller-manager`가 기록되며, 컨트롤러 이름 `horizontal-pod-autoscaler`를 그대로 기대하면 안 됩니다
 
 이 이름은 호출자의 인증 신원을 대신하는 정보가 아닙니다
@@ -227,7 +227,7 @@ HPA의 Update는 `fieldManager`를 지정하지 않습니다
 | 5 | HPA가 다시 Update로 7 | 7로 바꾸고 관리 기록도 다시 변경 |
 
 3에서 충돌을 반환하면 그 요청은 값을 바꾸지 못합니다
-4처럼 강제로 되가져오거나 다른 Update가 다시 쓰는 경우에 두 주체가 번갈아 값을 바꿀 수 있습니다
+4처럼 강제로 소유권을 다시 가져오거나 다른 Update가 다시 쓰는 경우에 두 주체가 번갈아 값을 바꿀 수 있습니다
 Apply 충돌 하나만으로 replica가 계속 오간다고 단정할 수는 없습니다
 
 `--force-conflicts`는 SSA Apply가 다른 매니저의 필드를 가져오는 옵션입니다
@@ -283,7 +283,7 @@ HPA는 Scale의 selector가 비어 있으면 `SelectorRequired` 이벤트와 `Sc
 | replica가 두 값 사이를 오감 | 어떤 주체가 어떤 요청 방식으로 값을 다시 쓰는지 |
 
 지표에서 추천한 수, 정책으로 제한한 수, `/scale`에 저장한 목표, 실제 준비된 Pod 수는 구분해서 봐야 합니다
-managedFields는 마지막 쓰기의 관계를 설명하지만, HPA가 왜 그 수를 계산했는지는 지표·보정·허용 오차·추천 이력과 정책에서 확인해야 합니다
+managedFields는 현재 어떤 매니저가 필드를 관리하는지 보여 주지만, HPA가 왜 그 수를 계산했는지는 지표·보정·허용 오차·추천 이력과 정책에서 확인해야 합니다
 
 ## 참고 자료
 

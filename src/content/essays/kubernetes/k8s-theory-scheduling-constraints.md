@@ -10,7 +10,7 @@ date: "2026-08-31"
 ---
 
 Pod에 배치 조건을 넣었는데도 원하는 노드에 가지 않거나 Pending에 남는다면, 먼저 그 조건이 필수인지 선호인지 구분해야 합니다
-필수 조건은 후보 노드를 제외하고, 선호 조건은 남은 후보 사이의 순위를 바꿉니다
+필수 조건을 어긴 노드는 후보에서 제외되고, 선호 조건은 남은 후보 사이의 순위를 바꿉니다
 노드 선호 점수가 높아도 필수 조건을 만족하지 못한 노드를 선택할 수는 없습니다
 
 같은 노드풀을 사용하더라도 원하는 Pod의 목적지를 제한하는 일과 다른 Pod의 진입을 막는 일은 별개입니다
@@ -88,12 +88,12 @@ preferred 항목의 `weight`는 1~100이며 만족한 항목의 가중치를 합
 그 뒤 NodeAffinity 플러그인의 후보 점수를 0~100 범위로 정규화합니다
 위의 50은 노드 선택 확률 50%나 전체 스케줄러 점수 50점을 보장하는 값이 아닙니다
 
-스케줄러 프로파일에 `addedAffinity`를 설정했다면 Pod가 적은 조건 외에 그 조건도 적용됩니다
+스케줄러 프로파일에 `addedAffinity`를 설정했다면 Pod에 적힌 조건 외에 그 조건도 적용됩니다
 Pod spec만 읽었는데 노드가 제외되는 경우에는 프로파일의 추가 조건도 확인해야 합니다
 
 ## taint는 다른 Pod를 제외하지만 toleration은 목적지를 고르지 않습니다
 
-taint는 노드에 지정하는 배치 거절 조건입니다
+taint는 노드에 지정하며, effect에 따라 Pod 배치를 거절하거나 선호도를 낮추는 데 쓰입니다
 toleration은 해당 taint를 이유로 거절하지 않도록 Pod에 적는 예외입니다
 
 GPU Pod가 GPU 노드만 사용하게 하려면 required nodeAffinity로 목적지를 제한할 수 있습니다
@@ -158,7 +158,7 @@ required anti-affinity에서는 반대로 해당 영역의 후보를 제외합�
 
 ### 새 Pod와 기존 Pod 양쪽의 required anti-affinity를 확인합니다
 
-새 Pod가 적은 anti-affinity만 검사하면 이미 실행 중인 Pod의 조건을 깨뜨릴 수 있습니다
+새 Pod에 적힌 anti-affinity만 검사하면 이미 실행 중인 Pod의 조건을 깨뜨릴 수 있습니다
 그래서 [`InterPodAffinity.Filter`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/interpodaffinity/filtering.go)는 기존 Pod가 요구한 anti-affinity도 확인합니다
 
 새 Pod의 조건은 자신이 피하려는 기존 Pod의 영역을 제외합니다
@@ -177,15 +177,15 @@ pod affinity는 다른 Pod의 위치와 조건도 확인해야 하므로 집계 
 이는 특정 환경에서 측정한 절대 성능 한도가 아니라 [문서의 사용 권고](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/scheduling-eviction/assign-pod-node.md#inter-pod-affinity-and-anti-affinity)입니다
 
 기본 경로는 PreFilter에서 기존 Pod의 조건과 domain별 매칭 정보를 집계해 노드별 Filter에서 재사용합니다
-기존 Pod의 required anti-affinity는 해당 규칙이 있는 Pod를 가진 노드로 조회 범위를 좁힙니다
+기존 Pod의 required anti-affinity를 검사할 때는 해당 규칙을 가진 Pod가 있는 노드만 조회합니다
 아무 조건도 없는 경우에는 계산을 건너뛰는 경로도 있습니다
 
 v1.37의 `InterPodAffinityHostnameFastPath`는 Alpha·기본 off입니다
 이 기능을 켠 경로는 hostname 조건 일부를 노드별 Pod 검사로 처리하므로, 모든 설정이 동일한 전역 집계를 수행한다고 일반화하면 안 됩니다
 
-## topology spread는 후보 domain의 개수 차이를 계산합니다
+## topology spread는 domain별 Pod 개수 차이를 계산합니다
 
-`topologySpreadConstraints`는 selector에 맞는 Pod가 domain 사이에 얼마나 분산됐는지 사용합니다
+`topologySpreadConstraints`는 selector에 맞는 Pod가 domain별로 몇 개씩 있는지 비교합니다
 `DoNotSchedule`의 Filter 판정식은 다음과 같습니다
 
 ```text
@@ -280,7 +280,7 @@ NodeAffinity·TaintToleration Filter의 거절까지 끄지는 않습니다
 | 배치 뒤의 변화 | 해당 제약이 하는 일 |
 |---|---|
 | 노드 라벨이 바뀌어 required nodeAffinity를 만족하지 않음 | 그 사실만으로 기존 Pod를 축출하지 않음 |
-| 기존 affinity·anti-affinity 관계가 달라짐 | 실행 중 조건을 계속 집행해 재배치하지 않음 |
+| 기존 affinity·anti-affinity 관계가 달라짐 | 바뀐 관계에 맞춰 기존 Pod를 재배치하지 않음 |
 | 노드 증설로 spread 분포가 달라짐 | 새 Pod의 배치에 계산하며 기존 Pod를 자동 이동하지 않음 |
 | toleration하지 못하는 NoExecute taint 추가 | 별도의 taint eviction controller가 삭제를 처리 |
 

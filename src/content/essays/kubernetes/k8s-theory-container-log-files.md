@@ -9,16 +9,16 @@ series:
 date: "2026-09-25"
 ---
 
-> **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
-> 소스 ref: `f78e722310e50bcaca9276be22276d9e91d91308`
-> 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
-> containerd 구현 예시는 v2.4.2의 고정 소스를 사용하며 클러스터에서 재현한 실측 기록은 포함하지 않습니다
-
 `kubectl logs --since=1h`를 요청해도 한 시간 분량이 나오지 않을 수 있습니다
 조회 조건이 한 시간을 지정했어도 노드의 현재 파일에 그 구간이 남아 있지 않으면 읽을 수 없습니다
 
 컨테이너 로그는 kubelet이 경로를 정하고 런타임이 기록합니다
 kubelet은 파일 회전과 조회를 맡지만, 로그 요청마다 남아 있는 회전본을 전부 모아 반환하지는 않습니다
+
+> **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
+> 소스 ref: `f78e722310e50bcaca9276be22276d9e91d91308`
+> 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
+> containerd 구현 예시는 v2.4.2의 고정 소스를 사용하며 클러스터에서 재현한 실측 기록은 포함하지 않습니다
 
 ![kubelet의 경로 지정, 런타임의 파일 기록, kubelet의 읽기와 API 서버 중계를 구분한 흐름|tall](/diagrams/k8s-theory-container-log-files-1.svg)
 
@@ -49,7 +49,7 @@ Linux의 기본 루트는 `podLogsDir: /var/log/pods`입니다
 상태가 없으면 `calcRestartCountByLogDir`로 로그 디렉터리를 읽어 파일 이름에 남은 숫자를 확인합니다
 
 이 함수는 `0.log` 같은 현재 파일뿐 아니라 `0.log.<시각>.gz` 같은 회전본 이름도 살핍니다
-찾은 가장 큰 숫자에 1을 더하므로, 로그 파일 이름은 실행 결과이면서 다음 실행 번호를 정하는 입력입니다
+찾은 가장 큰 숫자에 1을 더하므로, 로그 파일 이름은 지난 실행의 기록이면서 다음 실행 번호를 정하는 입력입니다
 
 일부 런타임이 재부팅 등으로 상태를 잃더라도 기존 로그를 다시 `0.log`에 쓰지 않도록 보완하는 경로입니다
 재부팅 자체가 언제나 상태 손실을 뜻하지는 않습니다
@@ -160,7 +160,7 @@ fd는 프로세스가 열어 둔 파일을 참조하는 식별자입니다
 
 RPC가 실패하면 kubelet은 회전한 파일의 이름을 되돌리려고 시도합니다
 CRI 계약은 오류를 반환한 런타임이 새 로그 파일을 만들면 안 된다고 규정합니다
-복구 rename 자체의 실패나 그 사이 kubelet 종료까지 원자적으로 보호하는 절차는 아닙니다
+이 절차가 복구 rename의 실패나 도중에 kubelet이 종료되는 경우까지 원자적으로 보호하지는 않습니다
 
 [초기 CRI 로그 설계](https://github.com/kubernetes/design-proposals-archive/blob/main/node/kubelet-cri-logging.md)는 회전을 외부 cron 작업 등에 맡기는 그림을 제시했습니다
 현재는 kubelet의 회전 구현과 `ReopenContainerLog` RPC를 함께 봐야 합니다
@@ -203,7 +203,7 @@ CRI 계약은 오류를 반환한 런타임이 새 로그 파일을 만들면 �
 
 기본 [`MaxPerPodContainerCount`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/options/options.go)는 1입니다
 종료 인스턴스를 하나 남기는 기본 보존 정책이며, 이전 로그를 영구 보관한다는 뜻은 아닙니다
-[`containerGC`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_gc.go)는 최소 나이·개수와 Pod 제거 가능 여부 등을 함께 판단합니다
+[`containerGC`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_gc.go)는 최소 보존 시간과 보존 개수 제한, Pod 제거 가능 여부 등을 함께 판단합니다
 
 GC의 삭제 경로는 `removeContainerLog`를 거쳐 `LogPath`와 접두사가 같은 회전본까지 정리합니다
 이전 인스턴스가 실행 중에 이미 회전했다면 `--previous`로도 마지막 파일만 읽습니다
@@ -222,7 +222,7 @@ GC의 삭제 경로는 `removeContainerLog`를 거쳐 `LogPath`와 접두사가 
 노드가 정해졌더라도 kubelet과 연결할 수 없으면 해당 노드의 파일을 이 경로로 읽을 수 없습니다
 로그 본문 전체가 Pod처럼 etcd에 저장돼 대신 반환되는 구조는 아닙니다
 
-### 종료 메시지에 복사한 로그 꼬리는 예외입니다
+### 종료 메시지에 복사한 로그 끝부분은 예외입니다
 
 `terminationMessagePolicy: FallbackToLogsOnError`이면 kubelet이 로그의 끝부분을 종료 메시지로 사용할 수 있습니다
 [`convertToKubeContainerStatus`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container.go)의 조건은 다음과 같습니다
@@ -232,7 +232,7 @@ GC의 삭제 경로는 `removeContainerLog`를 거쳐 `LogPath`와 접두사가 
 - 종료 메시지가 비어 있거나 경로·파일·해당 mount가 없을 때 로그를 확인합니다
 - 파일 부재 이외의 종료 메시지 읽기 오류에서는 fallback하지 않고 그 오류를 메시지에 남깁니다
 
-로그 읽기가 성공하면 마지막 최대 80개 로그 레코드를 읽어 최대 2 KiB의 꼬리를 사용합니다
+로그 읽기가 성공하면 마지막 최대 80개 로그 레코드를 읽고, 그 끝부분을 최대 2 KiB까지 사용합니다
 로그 읽기 자체가 실패하면 그 오류 문구가 메시지에 들어갈 수 있습니다
 이 제한은 [`MaxContainerTerminationMessageLogLines`와 `MaxContainerTerminationMessageLogLength`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/container/runtime.go)에서 확인할 수 있습니다
 

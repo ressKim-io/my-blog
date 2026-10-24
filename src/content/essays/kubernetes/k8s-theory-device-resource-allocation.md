@@ -1,5 +1,5 @@
 ---
-title: "장치 자원 할당 — 개수의 노드 선택에서 DRA의 장치 선택으로"
+title: "장치 자원 할당 — 수량에 따른 노드 선택과 DRA의 장치 선택"
 excerpt: "device plugin의 정수 자원 요청과 kubelet의 장치 ID 선택, DRA의 ResourceClaim 할당과 노드 준비를 비교합니다. NUMA 정렬, CPU·Memory Manager의 조건, 현행 feature gate와 단계별 실패 경계를 함께 살펴봅니다"
 category: "kubernetes"
 tags: ["Kubernetes", "DevicePlugin", "DRA", "NUMA", "TopologyManager", "concept"]
@@ -64,7 +64,7 @@ limits만 작성했다면 기본값 처리로 requests도 같은 값이 됩니�
 스케줄러에게는 작은 수량을 요청하고 kubelet에서는 더 큰 수량을 받는 모델을 허용하지 않는 것입니다
 
 hugepages도 일반 CPU·메모리와 달리 overcommit이 금지돼 request와 limit이 같아야 합니다
-다만 hugepages는 `hugepages-2Mi`처럼 페이지 크기별로 미리 확보한 메모리를 별도 회계하는 자원이며, GPU의 정수 개수와 같은 물건은 아닙니다
+다만 hugepages는 `hugepages-2Mi`처럼 페이지 크기별로 미리 확보한 메모리를 따로 집계하는 자원이며, GPU 장치 수와는 구분해야 합니다
 
 ### 장치만 요청해도 CPU·메모리 QoS는 올라가지 않습니다
 
@@ -109,7 +109,7 @@ kubelet이 재시작하면서 플러그인 소켓 디렉터리를 정리하면 �
 
 `Allocate`의 컨테이너별 요청에는 선택한 장치 ID 목록이 들어갑니다
 Pod 이름이나 컨테이너 이름을 전달하는 필드는 없습니다
-장치 초기화 등 벤더별 처리를 마친 응답은 다음 항목을 반환할 수 있습니다
+플러그인은 장치 초기화 등 벤더별 처리를 마친 뒤 다음 항목을 응답으로 반환할 수 있습니다
 
 | 응답 항목 | 컨테이너로 전달하는 설정 |
 |---|---|
@@ -177,7 +177,7 @@ Windows의 Static은 지원되지 않고 별도 BestEffort 정책 분기가 있�
 
 Pod 수준 자원을 사용한다면 한 조건이 더 있습니다
 현재 Beta·기본 off인 `PodLevelResourceManagers`를 켜지 않은 기본 구성에서는 CPU·Memory Static이 Pod 수준 자원을 사용하는 Pod의 할당·힌트를 건너뛰는 경로가 있습니다
-Guaranteed라는 이유만으로 이 생략 조건을 없애면 안 됩니다
+Guaranteed여도 이 생략 조건은 적용됩니다
 이 게이트를 켜는 경우에는 Pod 단위 할당과 컨테이너별 자격 조건도 추가되므로 기본 컨테이너 경로와 구분해야 합니다
 
 ## DRA는 목록·요구·할당 결과를 API로 표현합니다
@@ -207,7 +207,8 @@ Pod는 `spec.resourceClaims`에서 claim을 선언하고 컨테이너는 `resour
 이것이 모든 하드웨어를 임의로 공유할 수 있다는 보장은 아니며, 선택한 장치·할당 결과와 드라이버의 지원을 따라야 합니다
 
 직접 만든 claim은 사용자가 수명을 관리합니다
-ResourceClaimTemplate에서 생성한 Pod별 claim은 해당 Pod에 연결된 수명을 가지므로, API 오브젝트가 늘어난 뒤의 생성·정리도 할당 모델의 일부가 됩니다
+ResourceClaimTemplate에서 생성한 Pod별 claim은 해당 Pod에 연결된 수명을 가집니다
+이 경로에서는 claim을 만들고 정리하는 일도 자원 할당 과정에 포함됩니다
 
 ## DRA의 내부 예약과 API 기록은 다른 단계입니다
 
@@ -231,7 +232,7 @@ Reserve에서 claim의 API 예약 쓰기를 기다리면 직렬로 진행하는 
 이미 할당한 공유 claim에는 여러 사용자를 기록할 수 있지만 예약 슬롯과 할당 조건을 만족해야 합니다
 
 [`bindClaim`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/dynamicresources/dynamicresources.go)은 resourceVersion 충돌이면 최신 claim을 읽어 재시도합니다
-하지만 미할당 claim에 서로 다른 할당 결과를 쓰려던 사이 다른 쪽이 먼저 할당했다면 `got allocated elsewhere in the meantime`로 실패할 수 있습니다
+하지만 아직 할당되지 않은 claim에 결과를 기록하려는 사이, 다른 쪽이 그와 다른 할당 결과를 먼저 기록했다면 `got allocated elsewhere in the meantime`로 실패할 수 있습니다
 모든 경합이 단순 쓰기 재시도로 해결되는 것은 아닙니다
 
 PreBind가 실패하면 Unreserve 정리를 거쳐 Pod가 backoff 큐로 돌아갑니다

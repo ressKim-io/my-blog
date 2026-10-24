@@ -65,7 +65,7 @@ available은 Ready 상태를 `minReadySeconds` 이상 유지한 Pod입니다
 
 기본값에서 `replicas: 3`이면 surge는 `0.75`를 올림한 `1`, unavailable은 내림한 `0`입니다
 따라서 목표 replica 합계를 최대 4로 늘릴 수 있고 available은 3개를 유지하려고 합니다
-정상적으로 가용한 기존 Pod를 줄이려면 새 Pod가 available이 되어야 합니다
+기존의 가용 Pod를 줄이려면 새 Pod가 available이 되어야 합니다
 
 이것은 종료 중인 Pod까지 포함한 실제 Pod 수가 항상 4 이하라는 뜻은 아닙니다
 ReplicaSet이 목표 수를 줄여 삭제를 요청해도 종료 유예 중인 Pod는 자원을 계속 사용할 수 있습니다
@@ -80,7 +80,7 @@ ReplicaSet이 목표 수를 줄여 삭제를 요청해도 종료 유예 중인 P
 그 수가 바뀌었다면 status를 갱신하고 해당 sync를 끝냅니다
 그 단계에서 바뀐 수가 없을 때 기존 ReplicaSet을 줄일 수 있는지 판단합니다
 
-목표 수 변경은 Pod 생성·Ready·available 완료와 같은 사건이 아닙니다
+목표 수를 바꿨다고 Pod가 생성되고 Ready·available 상태가 된 것은 아닙니다
 여러 컨트롤러의 처리와 상태 관찰을 거치며 점진적으로 교체합니다
 
 [`ResolveFenceposts`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/util/deployment_util.go)는 surge를 올림하고 unavailable을 내립니다
@@ -131,7 +131,7 @@ revision은 `deployment.kubernetes.io/revision` annotation으로 관리합니다
 
 정리 조건과 일시 중지 경로는 [`cleanupDeployment`와 `sync`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/sync.go), 롤아웃 완료 뒤의 정리 설명은 [공식 Clean up Policy](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/workloads/controllers/deployment.md#clean-up-policy)에 나와 있습니다
 
-## Progressing은 지난 상태와의 변화를 봅니다
+## Progressing은 이전 상태보다 나아졌는지 확인합니다
 
 [`DeploymentProgressing`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/util/deployment_util.go)은 다음 중 하나가 이전 status보다 나아졌는지 확인합니다
 
@@ -218,7 +218,7 @@ DaemonSet은 노드별 Pod를 직접 관리하므로 템플릿 집합마다 목�
 | Deployment | 이전 ReplicaSet의 Pod template | 그 집합의 목표 Pod 수 관리 |
 | DaemonSet | ControllerRevision의 `data` | 직렬화된 템플릿 상태 보관 |
 
-[`ControllerRevision`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/api/apps/v1/types.go)의 불변 대상은 저장한 `data`입니다
+[`ControllerRevision`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/api/apps/v1/types.go)에서 변경할 수 없는 부분은 저장한 `data`입니다
 [`ValidateControllerRevisionUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/apps/validation/validation.go)가 이 필드의 변경을 거부합니다
 오브젝트의 모든 필드가 수정 불가능한 것은 아닙니다
 
@@ -228,11 +228,11 @@ DaemonSet에도 `revisionHistoryLimit`이 있으며 기본값은 10입니다
 ### 기본 갱신은 노드에서 옛 Pod를 먼저 삭제합니다
 
 DaemonSet의 기본 전략은 `RollingUpdate`이고 `maxSurge: 0`, `maxUnavailable: 1`입니다
-surge가 없는 경로는 허용할 미가용 수 안에서 옛 Pod를 먼저 삭제하고, 관리 루프가 새 Pod를 만듭니다
+surge가 없는 경로에서는 `maxUnavailable`이 허용하는 범위 안에서 옛 Pod를 먼저 삭제하고, 관리 루프가 새 Pod를 만듭니다
 따라서 교체 중 해당 노드에 가용한 DaemonSet Pod가 없는 구간이 생길 수 있습니다
 
 `maxSurge`를 사용하면 한 노드에서 옛 Pod와 새 Pod가 겹칠 수 있습니다
-이때 같은 `hostPort`를 확보하거나 hostNetwork에서 같은 주소·포트를 사용하는 워크로드라면 겹침을 수용할 수 있는지 확인해야 합니다
+이때 같은 `hostPort`를 확보하거나 hostNetwork에서 같은 주소·포트를 사용하는 워크로드라면 두 Pod가 동시에 실행될 수 있는지 확인해야 합니다
 DaemonSet의 백분율 unavailable은 대상 노드 수를 기준으로 올림하므로 Deployment의 내림 계산을 그대로 적용해서도 안 됩니다
 
 `OnDelete`는 템플릿이 바뀌어도 기존 Pod를 자동 교체하지 않습니다

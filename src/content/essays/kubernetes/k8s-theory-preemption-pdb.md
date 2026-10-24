@@ -53,7 +53,7 @@ preemption으로 후보를 찾은 시도도 새 Pod의 관점에서는 `PodSched
 `globalDefault: true`인 클래스를 추가할 때 다른 기본 클래스가 있으면 admission이 거부합니다
 경쟁 때문에 여러 기본 클래스가 보이는 경우에는 `value`가 가장 작은 것을 선택하는 보정도 있습니다
 
-### 기존 Pod의 우선순위는 클래스 이름을 계속 조회해 바뀌지 않습니다
+### 클래스를 다시 만들어도 기존 Pod의 우선순위는 바뀌지 않습니다
 
 우선순위는 생성 시점에 Pod에 기록한 값입니다
 클래스를 삭제하거나 같은 이름의 클래스를 다시 만들었다고 기존 Pod의 `spec.priority`가 자동으로 갱신되지는 않습니다
@@ -100,7 +100,7 @@ Filter의 `Unschedulable`은 다른 Pod를 제거하면 조건이 바뀔 여지�
 삭제하면 PDB를 위반할 후보부터 남겨 보고, 위반하지 않을 후보는 그다음에 검사합니다
 각 그룹에서는 우선순위가 높은 Pod부터, 같으면 먼저 시작한 Pod부터 되돌립니다
 
-이것은 모든 조합을 비교해 전역 최소 희생자 집합을 증명하는 탐색은 아닙니다
+모든 조합을 비교해 희생자 수가 가장 적은 결과를 찾는 탐색은 아닙니다
 정해진 순서로 Pod를 되돌리며 가능한 한 많이 남기는 방식입니다
 
 ### PDB 위반을 줄이려 하지만 제거를 금지하지는 않습니다
@@ -129,7 +129,7 @@ PDB를 위반하는 Pod까지 모두 남기면 새 Pod가 들어갈 수 없는 �
 다섯 번째 기준은 같은 최고 우선순위라면 더 오래 실행한 Pod를 가급적 남기는 순서입니다
 마지막 후보 순서는 노드 이름의 정렬 순서로 보장되는 것은 아닙니다
 
-## 높은 우선순위도 밀어내기를 하지 않을 수 있습니다
+## 우선순위가 높아도 다른 Pod를 밀어내지 않을 수 있습니다
 
 `preemptionPolicy: Never`인 Pod는 높은 우선순위를 가져도 다른 Pod를 밀어내지 않습니다
 우선순위는 큐 순서에 반영되지만, 자리가 없으면 다른 Pod가 빠져 배치 가능해지기를 기다립니다
@@ -197,7 +197,7 @@ PreBind 취소도 성공하면 해당 Pod를 API에서 삭제하는 경로로 �
 현재 구현은 마지막 희생자가 이미 없어졌거나 `deletionTimestamp`가 생긴 상태도 확인하므로, goroutine이 반환했는지만으로 재진입을 결정하지는 않습니다
 
 DELETE가 승인되어도 희생자의 프로세스가 즉시 종료되는 것은 아닙니다
-종료 유예 동안 자원이 남아 있을 수 있으므로, 다음 시도에서도 실제 배치 조건을 다시 판단해야 합니다
+종료 유예 동안 희생자가 자원을 계속 사용할 수 있으므로, 다음 시도에서도 실제 배치 조건을 다시 판단해야 합니다
 
 ## PDB의 예산은 disruption controller가 계산합니다
 
@@ -278,7 +278,7 @@ PDB는 희생자 선정 중 되돌리는 순서와 최종 노드 선택에 반�
 [공식 문서의 best effort](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/scheduling-eviction/pod-priority-preemption.md#poddisruptionbudget-is-supported-but-not-guaranteed)는 이 범위를 뜻합니다
 PDB 위반을 줄이려고 시도하지만 필요하면 위반하는 희생자도 제거할 수 있습니다
 
-이 경계를 없애면 사용자의 `maxUnavailable: 0`이 시스템용 고우선순위 Pod가 사용할 자리까지 막을 수 있습니다
+preemption에도 이 예산 검사를 강제하면 사용자의 `maxUnavailable: 0`이 시스템용 고우선순위 Pod가 사용할 자리까지 막을 수 있습니다
 가용성 예산은 자원을 선점할 권한을 정하는 우선순위와 별도입니다
 
 ### drain의 기본 Eviction 경로와 예외도 구분합니다
@@ -319,7 +319,7 @@ PDB 위반을 줄이려고 시도하지만 필요하면 위반하는 희생자�
 | `Preemption is not helpful for scheduling` | 배치 가능한 preemption 후보를 얻지 못함 |
 | `No preemption victims found for incoming pod` | 후보 노드에서 제거할 수 있는 더 낮은 우선순위 희생자를 찾지 못함 |
 
-후보 부재는 초기 Filter가 모두 Unresolvable이었다는 경우만 뜻하지 않습니다
+후보를 찾지 못했다고 해서 초기 Filter 결과가 모두 Unresolvable이었다는 뜻은 아닙니다
 희생자를 빼고도 배치가 안 되는 경우 등 여러 단계에서 후보를 얻지 못할 수 있습니다
 
 PostFilter가 자체 `FitError`를 만들면 앞선 스케줄링 실패 메시지 뒤에 `0/N nodes are available`이 다시 붙을 수도 있습니다

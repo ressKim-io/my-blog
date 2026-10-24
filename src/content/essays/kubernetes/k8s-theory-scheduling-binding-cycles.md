@@ -1,6 +1,6 @@
 ---
 title: "스케줄링과 바인딩 사이클 — 노드 선택과 기록을 나누는 이유"
-excerpt: "스케줄러가 노드를 고른 뒤 assume·Reserve·Permit을 거쳐 바인딩하는 경로를 살펴봅니다. 직렬 결정과 비동기 쓰기, 재시도 큐와 실패 분류, 플러그인 상태를 되돌리는 범위를 연결합니다"
+excerpt: "스케줄러가 노드를 고른 뒤 assume·Reserve·Permit을 거쳐 바인딩하는 경로를 살펴봅니다. Pod별 순차 판단과 비동기 기록이 어떻게 겹치는지, 실패하면 무엇을 정리하고 언제 재시도하는지 설명합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "Scheduler", "SchedulingFramework", "Binding", "QueueingHint", "concept"]
 series:
@@ -12,7 +12,7 @@ date: "2026-08-29"
 Pod를 배치할 노드를 골랐다고 해서 API 서버의 `spec.nodeName`이 바로 채워지는 것은 아닙니다
 노드를 고르는 판단과, 그 결과를 API 서버에 기록하는 요청 사이에는 시간이 필요합니다
 
-그동안 다음 Pod의 판단까지 멈추면 API 응답 대기가 스케줄러 전체의 처리 속도를 제한합니다
+그동안 다음 Pod의 노드를 고르는 일까지 멈추면 API 응답 대기가 스케줄러 전체의 처리 속도를 제한합니다
 스케줄러는 선택한 노드를 자기 캐시에 먼저 반영하고, API 서버에 기록하는 작업은 별도 goroutine으로 진행합니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
@@ -50,47 +50,6 @@ v1.37.1의 `GenericWorkload`는 Beta·기본 off이며, 활성화한 PodGroup �
 API 서버는 게이트가 있는 Pod를 생성할 때 [`applySchedulingGatedCondition`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)으로 `PodScheduled=False`, `reason=SchedulingGated`를 기록합니다
 메시지는 `Scheduling is blocked due to non-empty scheduling gates`입니다
 스케줄러의 기본 PreEnqueue 차단이 `FailedScheduling` 실패 처리 경로를 거치는 것은 아닙니다
-
-## 재시도할 Pod를 모두 같은 대기열에 넣지는 않습니다
-
-[`PriorityQueue`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/backend/queue/scheduling_queue.go)는 실행할 항목과 백오프 중인 항목, 조건 변화를 기다리는 항목을 나눕니다
-v1.37.1의 배치 불가 대기 저장소 이름은 `unschedulableEntities`이며 Pod와 PodGroup을 함께 담을 수 있습니다
-
-![PreEnqueue를 통과한 Pod는 activeQ에서 선택되고 실패 후에는 조건 변화나 백오프를 기다렸다가 재시도하는 큐 관계](/diagrams/k8s-theory-scheduling-binding-cycles-2.svg)
-
-| 위치 | 자료구조와 역할 | 다시 시도하는 조건 |
-|---|---|---|
-| `activeQ` | QueueSort 순서의 힙 | 스케줄러가 꺼내 다음 사이클 시작 |
-| `backoffQ` | 배치 거절·실행 오류를 나눠 담는 두 힙 | 백오프 완료 후 activeQ로 이동 |
-| `unschedulableEntities` | 배치 불가·게이트 대기 항목을 담는 맵 | 관련 사건 또는 주기적인 재검토 |
-
-기본 Pod 백오프는 1초에서 시작해 두 배씩 늘고 최대 10초입니다
-설정값을 그대로 두면 계산상 `1s, 2s, 4s, 8s, 10s, 10s`처럼 늘어납니다
-노드에 맞지 않아 거절된 횟수와 연속 실행 오류 횟수는 별도로 관리합니다
-
-다만 이 숫자가 모든 재시도의 최소 간격을 보장하지는 않습니다
-기본 on인 `SchedulerPopFromBackoffQ`는 activeQ가 비면 아직 백오프 중인 **배치 거절 쪽 힙**에서도 항목을 꺼낼 수 있습니다
-[오류 전용 힙](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/backend/queue/backoff_queue.go)은 이 조기 꺼내기 대상이 아닙니다
-
-배치 거절 쪽 힙은 백오프 만료 시각을 1초 창으로 묶고, 같은 창에서는 activeQ와 같은 우선순위를 사용합니다
-오류 쪽 힙은 백오프 만료 시각으로 정렬합니다
-두 힙을 모두 단순한 대기 시간 순서라고 요약하면 이 차이가 사라집니다
-
-`unschedulableEntities`에 머무는 기본 제한은 5분입니다
-스케줄러는 30초 주기로 오래 남은 항목을 찾아 activeQ 또는 backoffQ로 옮길지 다시 검토합니다
-게이트가 여전히 남아 있다면 재검토가 곧 노드 선택의 시작을 뜻하지는 않습니다
-
-### QueueingHint는 그 사건이 배치 조건을 바꿀 수 있는지 묻습니다
-
-**QueueingHint**는 클러스터의 변경이 해당 Pod의 재시도에 도움이 되는지 플러그인이 답하는 함수입니다
-예를 들어 노드 조건 때문에 거절한 Pod를 관계없는 PVC 변경마다 다시 계산할 필요는 없습니다
-
-[`isPodWorthRequeuing`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/backend/queue/scheduling_queue.go)는 앞선 시도의 `UnschedulablePlugins`와 `PendingPlugins`에 기록된 플러그인만 대상으로 삼습니다
-일반적인 사건에서는 기본적으로 Skip하고, 관련 함수가 Queue를 반환하면 다시 큐에 넣습니다
-
-Pending 플러그인의 Queue는 즉시 재시도를 허용하고, 배치 거절 플러그인의 Queue는 남은 백오프를 고려합니다
-함수가 오류를 반환하면 Pod가 계속 대기 목록에 갇히지 않도록 Queue로 취급합니다
-실패 플러그인이 기록되지 않은 실행 오류나 강제 활성화 사건에는 별도의 재큐잉 경로도 있습니다
 
 ## Filter는 가능한 노드를 남기고 Score는 그 안에서 고릅니다
 
@@ -141,8 +100,8 @@ extender는 프레임워크 밖의 서비스에 노드 검사 등을 위임하�
 스케줄러는 다음 탐색의 시작 위치도 옮깁니다
 직전 사이클에서 처리한 위치를 반영해 원형으로 탐색하므로, 늘 목록 앞의 노드만 후보가 되는 편향을 줄입니다
 
-후보 수를 줄이면 직렬 결정 구간을 짧게 할 수 있습니다
-대신 모든 노드의 점수를 비교해 가장 높은 노드를 고르는 범위는 줄어듭니다
+후보 수를 줄이면 노드를 고르는 직렬 구간을 짧게 할 수 있습니다
+대신 점수를 비교하는 노드의 범위도 줄어듭니다
 
 ## assume과 Reserve는 서로 다른 상태를 반영합니다
 
@@ -231,12 +190,12 @@ Reserve를 실행하지 못한 플러그인에도 호출될 수 있으므로 구
 
 VolumeBinding의 Unreserve는 PV·PVC 캐시에 둔 가정을 정리합니다
 이미 PreBind에서 API 서버에 성공적으로 기록한 변경을 모두 원복하는 트랜잭션은 아닙니다
-노드 캐시, 플러그인 캐시, API 서버의 영구 기록을 같은 수명으로 취급하면 안 됩니다
+따라서 노드 캐시와 플러그인 캐시를 정리하더라도 API 서버의 기록까지 함께 되돌아가지는 않습니다
 
 바인딩 실패 뒤 assumed Pod를 제거하면 그 자원 때문에 기다리던 다른 Pod의 재시도도 검토합니다
 하지만 실패한 Pod를 무조건 다시 넣지는 않습니다
 현재 informer 사본에서 Pod가 사라졌거나 이미 바인딩되었거나 UID가 바뀌었다면 재큐잉을 중단하는 검사가 있습니다
-API 쓰기는 성공했지만 응답이 늦어 실패처럼 보인 경우도 고려하는 경계입니다
+이 검사는 API 쓰기는 성공했지만 응답이 늦어 실패처럼 보인 경우도 고려합니다
 
 ### 단계 이름에 더해 반환 코드도 확인합니다
 
@@ -248,6 +207,47 @@ Permit의 거절이나 대기 중 거절은 `Unschedulable`로 기록될 수 있
 따라서 모든 플러그인에 대해 Permit 뒤의 실패가 반드시 SchedulerError라고 일반화하면 안 됩니다
 
 소스에는 Permit을 스케줄 불가 판정의 마지막 단계로 설명한 주석이 남아 있지만, 오류를 판별할 때는 현재 플러그인의 반환 코드와 실제 처리 분기를 함께 봐야 합니다
+
+## 재시도할 Pod를 모두 같은 대기열에 넣지는 않습니다
+
+[`PriorityQueue`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/backend/queue/scheduling_queue.go)는 실행할 항목과 백오프 중인 항목, 조건 변화를 기다리는 항목을 나눕니다
+v1.37.1의 배치 불가 대기 저장소 이름은 `unschedulableEntities`이며 Pod와 PodGroup을 함께 담을 수 있습니다
+
+![PreEnqueue를 통과한 Pod는 activeQ에서 선택되고 실패 후에는 조건 변화나 백오프를 기다렸다가 재시도하는 큐 관계](/diagrams/k8s-theory-scheduling-binding-cycles-2.svg)
+
+| 위치 | 자료구조와 역할 | 다시 시도하는 조건 |
+|---|---|---|
+| `activeQ` | QueueSort 순서의 힙 | 스케줄러가 꺼내 다음 사이클 시작 |
+| `backoffQ` | 배치 거절·실행 오류를 나눠 담는 두 힙 | 백오프 완료 후 activeQ로 이동 |
+| `unschedulableEntities` | 배치 불가·게이트 대기 항목을 담는 맵 | 관련 사건 또는 주기적인 재검토 |
+
+기본 Pod 백오프는 1초에서 시작해 두 배씩 늘고 최대 10초입니다
+설정값을 그대로 두면 계산상 `1s, 2s, 4s, 8s, 10s, 10s`처럼 늘어납니다
+노드에 맞지 않아 거절된 횟수와 연속 실행 오류 횟수는 별도로 관리합니다
+
+다만 이 숫자가 모든 재시도의 최소 간격을 보장하지는 않습니다
+기본 on인 `SchedulerPopFromBackoffQ`는 activeQ가 비면 아직 백오프 중인 **배치 거절 쪽 힙**에서도 항목을 꺼낼 수 있습니다
+[오류 전용 힙](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/backend/queue/backoff_queue.go)은 이 조기 꺼내기 대상이 아닙니다
+
+배치 거절 쪽 힙은 백오프 만료 시각을 1초 단위로 묶고, 같은 시간대에서는 activeQ와 같은 우선순위를 사용합니다
+오류 쪽 힙은 백오프 만료 시각으로 정렬합니다
+두 힙을 모두 단순한 대기 시간 순서라고 요약하면 이 차이가 사라집니다
+
+`unschedulableEntities`에 머무는 기본 제한은 5분입니다
+스케줄러는 30초 주기로 오래 남은 항목을 찾아 activeQ 또는 backoffQ로 옮길지 다시 검토합니다
+게이트가 여전히 남아 있다면 재검토가 곧 노드 선택의 시작을 뜻하지는 않습니다
+
+### QueueingHint는 그 사건이 배치 조건을 바꿀 수 있는지 묻습니다
+
+**QueueingHint**는 클러스터의 변경이 해당 Pod의 재시도에 도움이 되는지 플러그인이 답하는 함수입니다
+예를 들어 노드 조건 때문에 거절한 Pod를 관계없는 PVC 변경마다 다시 계산할 필요는 없습니다
+
+[`isPodWorthRequeuing`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/backend/queue/scheduling_queue.go)는 앞선 시도의 `UnschedulablePlugins`와 `PendingPlugins`에 기록된 플러그인만 대상으로 삼습니다
+일반적인 사건에서는 기본적으로 Skip하고, 관련 함수가 Queue를 반환하면 다시 큐에 넣습니다
+
+Pending 플러그인의 Queue는 즉시 재시도를 허용하고, 배치 거절 플러그인의 Queue는 남은 백오프를 고려합니다
+함수가 오류를 반환하면 Pod가 계속 대기 목록에 갇히지 않도록 Queue로 취급합니다
+실패 플러그인이 기록되지 않은 실행 오류나 강제 활성화 사건에는 별도의 재큐잉 경로도 있습니다
 
 ## Pending의 원인은 PodScheduled 조건에서 나눠 봅니다
 
@@ -287,7 +287,7 @@ Binding 경로의 대표 거절 문구는 다음과 같습니다
 ## 비동기 바인딩과 별도의 API 호출 기능을 구분합니다
 
 다음은 [v1.37.1의 gate 목록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/features/kube_features.go)에서 기본 동작과 관련 있는 항목입니다
-[emulated 버전](/essays/k8s-theory-version-emulation-rollback)이나 명시적 설정에 따라 적용 스펙은 달라질 수 있습니다
+[emulated 버전](/essays/k8s-theory-version-emulation-rollback)이나 명시적 설정에 따라 실제로 적용되는 동작은 달라질 수 있습니다
 
 | 기능 | v1.37 기준 상태 | 바꾸는 범위 |
 |---|---|---|

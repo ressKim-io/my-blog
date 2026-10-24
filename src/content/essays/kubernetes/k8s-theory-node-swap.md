@@ -1,6 +1,6 @@
 ---
 title: "노드 swap — 기동 허용과 컨테이너 한도, 배치 계산을 구분하기"
-excerpt: "failSwapOn과 LimitedSwap이 여는 범위를 나누고, 컨테이너별 swap 자격과 비례 한도가 CRI·cgroup에 전달되는 과정을 살펴봅니다. 스케줄러·축출·통계가 swap을 다루는 경계도 확인합니다"
+excerpt: "failSwapOn의 기동 허용과 LimitedSwap의 사용 조건을 나누고, 컨테이너별 swap 자격과 비례 한도가 CRI·cgroup에 전달되는 과정을 살펴봅니다. 스케줄러·축출·통계가 swap을 다루는 경계도 확인합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "NodeSwap", "Swap", "Kubelet", "cgroup", "ResourceManagement", "concept"]
 series:
@@ -15,7 +15,7 @@ kubelet을 시작할 수 있는지와 컨테이너에 얼마의 swap을 허용�
 swap은 RAM의 페이지를 다른 저장 공간으로 내보내 물리 메모리를 회수하는 수단입니다
 디스크를 사용한다면 다시 읽어 올 때 I/O가 필요하며, swap을 추가한 용량이 스케줄러의 메모리 배치량에 그대로 더해지는 것도 아닙니다
 
-Linux 노드에서 설정 하나가 기동 검사, 컨테이너 자격 판정, cgroup 상한으로 이어지는 과정을 따라가겠습니다
+Linux 노드에서 kubelet이 기동 여부를 판단하고, 컨테이너별 swap 자격과 cgroup 상한을 정하는 과정을 따라가겠습니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
 > 소스 ref: `f78e722310e50bcaca9276be22276d9e91d91308`
@@ -87,7 +87,7 @@ Pod 수준 계산 경로를 사용하지 않을 때는 컨테이너별 선언을
 `LimitedSwap`은 정책상 Guaranteed와 BestEffort를 제외합니다
 컨테이너 수준 선언으로 QoS를 계산한 BestEffort는 memory request도 0이어서 비례식에 넣어도 한도가 0입니다
 
-Guaranteed라는 분류가 물리 메모리의 상주나 OOM·축출에서의 절대 생존을 보장한다는 뜻은 아닙니다
+Guaranteed여도 메모리가 항상 RAM에 머무른다는 뜻은 아니며, Pod가 OOM·축출에서 반드시 살아남는 것도 아닙니다
 
 critical 판정도 단순히 우선순위가 높은 Pod라는 설명보다 넓습니다
 [`IsCriticalPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/types/pod_update.go)는 static Pod, mirror Pod, `spec.priority`가 시스템 critical 기준 이상인 Pod를 포함합니다
@@ -186,11 +186,12 @@ Pod에 user namespace를 사용한다는 이유만으로 곧바로 같은 분기
 
 swap이 켜진 노드에서 기동을 허용했는데 `noswap`을 지원하지 않으면 kubelet은 `PossibleMemoryBackedVolumesOnDisk` Warning 이벤트를 남깁니다
 이 경고만으로 기동을 중단하지는 않습니다
-메모리 볼륨의 내용이 디스크로 나갈 수 있다는 조건을 보존해야 하며, swap 암호화는 kubelet 설정 밖의 OS 구성입니다
+이때는 메모리 볼륨의 내용이 디스크로 나갈 수 있습니다
+swap 암호화는 kubelet 설정 밖의 OS 구성입니다
 
 실제 마운트 옵션 추가는 [`emptyDir.setupTmpfs`와 `generateTmpfsMountOptions`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/emptydir/empty_dir.go), Secret의 메모리 emptyDir 사용은 [`wrappedVolumeSpec`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/secret/secret.go)에서 확인했습니다
 
-## 스케줄러의 memory 회계에는 swap이 더해지지 않습니다
+## 스케줄러의 메모리 배치 계산에는 swap이 더해지지 않습니다
 
 스케줄러는 Pod의 memory request를 노드 allocatable과 이미 배치한 요청량에 대조합니다
 swap 용량을 memory allocatable에 더하거나, swap 사용량으로 새 Pod의 배치 가능량을 계산하지 않습니다
@@ -200,7 +201,7 @@ swap에 별도의 request를 선언하는 모델이 아니기 때문입니다
 
 Pod overhead는 계산해서 붙이는 값이어도 자원 요청 합에 포함됩니다
 반면 swap 한도는 컨테이너 실행 설정으로 계산할 뿐, 새로운 배치 자원 요청으로 더하지 않습니다
-계산해서 생긴 값인지보다 어느 회계에 포함하는지가 다릅니다
+두 값 모두 계산으로 만들어지지만, 배치 요청량에 포함되는 것은 overhead입니다
 
 노드의 taint나 label로 swap 노드에 배치할 자격을 구분할 수는 있습니다
 하지만 자격을 제한하는 정책과 남은 swap 수량을 세어 배치하는 기능은 별개입니다

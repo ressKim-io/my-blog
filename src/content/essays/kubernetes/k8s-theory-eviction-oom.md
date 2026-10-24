@@ -57,12 +57,12 @@ Pod를 관리하는 컨트롤러가 있어야 원하는 개수를 복구할 수 
 
 또한 `OOMKilled`만으로 컨테이너 자신의 한도 초과와 노드 전역 OOM을 구분하지는 못합니다
 한도와 cgroup의 `memory.events`, 커널 기록 등 발생 범위를 알 수 있는 근거가 더 필요합니다
-커널 문서의 `oom_kill`도 해당 cgroup의 프로세스가 **어떤 종류의 OOM killer에 의해** 종료됐는지 합산하는 값입니다
+커널 문서의 `oom_kill`도 해당 cgroup에서 OOM killer가 종료한 프로세스 수를 합산하며, **OOM killer의 종류는 구분하지 않습니다**
 
 OOM 종료 자체는 Pod의 `DisruptionTarget` 조건을 설정하거나 Pod 전체를 삭제하는 사건이 아닙니다
 이 조건이 없다는 이유만으로 OOM이라고 역으로 판정해서도 안 됩니다
 
-## kubelet은 노드의 여유를 신호와 비교합니다
+## kubelet은 자원 여유를 임계값과 비교합니다
 
 eviction manager는 내부 Summary provider에서 받은 자원 통계를 임계값과 비교합니다
 컨테이너 한도의 집행과 달리, 노드나 전체 Pod 영역에 남은 자원을 보는 판단입니다
@@ -110,7 +110,7 @@ hugepage를 예약한 노드에서는 [`adjustForHugePages`](https://github.com/
 
 [QoS와 cgroup](/essays/k8s-theory-qos-cgroups)에서 구분한 두 자원 계산에도 이 임계값이 연결됩니다
 스케줄러에게 알리는 `node.status.allocatable`에는 시스템 예약·Kubernetes 예약·hard eviction 예약을 반영하지만, 전체 Pod cgroup 한도 계산에서는 앞의 두 예약만 뺍니다
-Pod들이 요청을 넘겨 사용하면 배치 계산에서 제외했던 여유까지 사용할 수 있고, kubelet은 줄어드는 여유를 별도 신호로 판단합니다
+Pod들이 요청을 넘겨 사용하면 배치 계산에서 제외했던 hard eviction 예약분까지 사용할 수 있고, kubelet은 남은 여유를 자원 신호로 확인합니다
 
 cgroup v2에서는 `cgroup.event_control`을 사용하는 메모리 임계값 알림을 지원하지 않습니다
 [`NewCgroupNotifier`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/threshold_notifier_linux.go)는 비활성 알림기를 반환하므로 `--kernel-memcg-notification`을 켜도 이 알림 경로는 사용할 수 없습니다
@@ -208,7 +208,7 @@ eviction manager는 먼저 노드 수준에서 회수할 수 있는 자원을 �
 ### 부족 상태가 사라져도 조건은 바로 해제되지 않습니다
 
 `--eviction-pressure-transition-period`의 기본값은 5분입니다
-kubelet은 마지막으로 압박 조건을 관찰한 시각을 보관하고, 이 기간 안에 관찰했다면 그 조건을 유지합니다
+kubelet은 마지막으로 압박 조건을 관찰한 시각을 보관하고, 그때부터 이 기간이 지나기 전까지 조건을 유지합니다
 soft 발동 전 대기가 끝나기 전에도 압박 조건 자체는 보고할 수 있습니다
 
 이는 임계값 근처에서 신호가 오르내릴 때 조건과 taint가 계속 바뀌는 일을 줄입니다
@@ -258,7 +258,7 @@ node-pressure 축출은 이 상황에서 노드 자원을 회수하려는 동작
 
 축출된 Pod가 나중에 사라지는 경우도 있습니다
 [`PodGCController`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/podgc/gc_controller.go)는 종료 Pod 정리 임계값이 양수이고 종료 Pod 수가 이를 넘으면 초과 수만큼 삭제합니다
-이후 오브젝트가 없다고 해서 원래 종료 원인을 API eviction으로 바꿔 판단하지는 않습니다
+이후 오브젝트가 사라졌다고 해서 원래 종료 원인이 API eviction이었다고 판단해서는 안 됩니다
 
 축출할 수 있는 후보를 찾지 못하면 다음 로그가 나올 수 있습니다
 critical Pod만 남은 경우가 한 예입니다

@@ -1,5 +1,5 @@
 ---
-title: "자원 회계와 점수 전략 — Pod 요청을 세고 노드를 고르는 기준"
+title: "자원 계산과 점수 전략 — Pod 요청을 세고 노드를 고르는 기준"
 excerpt: "RuntimeClass overhead가 Pod 자원 계산에 더해지는 과정을 따라갑니다. init·sidecar·Pod-level 자원의 합산 조건, Filter와 Score의 요청 차이, NodeResourcesFit 전략과 균형 점수의 범위를 구분합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "Scheduler", "RuntimeClass", "PodOverhead", "ResourceManagement", "concept"]
@@ -12,7 +12,7 @@ date: "2026-09-20"
 스케줄러가 세는 Pod의 요청은 컨테이너에 적은 `requests`의 단순 합계가 아닙니다
 init container가 실행되는 순서, Pod 수준 자원 선언, 런타임의 sandbox를 위한 overhead까지 계산에 영향을 줍니다
 
-그 요청으로 배치 가능한 노드를 걸러낸 뒤에도 선택은 남습니다
+요청량으로 배치 가능한 노드를 걸러낸 뒤에는 남은 후보 중 하나를 골라야 합니다
 여유가 많은 노드를 선호할지, 이미 사용 중인 노드에 모을지는 Pod의 자원 선언 대신 스케줄러 프로파일에서 정합니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
@@ -91,9 +91,10 @@ overhead는 이 선택을 마친 뒤 더합니다
 
 DRA(Dynamic Resource Allocation)는 장치 등의 자원을 claim으로 요청하는 기능입니다
 이 기능을 사용한다고 모든 claim의 양이 일반 CPU·메모리 요청 합계에 자동으로 추가되지는 않습니다
-`DRANodeAllocatableResources`는 현재 alpha·기본 off이며, 이를 켠 호출이 관련 Pod status와 helper 옵션을 사용하는 경우에 추가 회계가 적용됩니다
+`DRANodeAllocatableResources`는 현재 alpha·기본 off입니다
+이 기능을 켜고 관련 Pod status와 helper 옵션을 사용하는 호출에서 추가 자원 집계가 적용됩니다
 
-스케줄러에는 DRA로 처리하는 extended resource를 일반 scalar 자원 검사에서 넘겨받는 분기도 있습니다
+스케줄러는 DRA로 처리하는 extended resource를 일반 scalar 자원 검사에서 DRA 경로로 넘기기도 합니다
 따라서 claim 기반 장치 할당과 노드 allocatable의 자원 합산을 같은 계산으로 취급하면 안 됩니다
 
 기본 집계는 [`PodRequests`·`AggregateContainerRequests`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-helpers/resource/helpers.go), 스케줄러의 DRA 조건은 [`NodeResourcesFit`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/fit.go)에 있습니다
@@ -118,7 +119,7 @@ BestEffort라는 분류를 배치 요청량 0과 같은 뜻으로 읽을 수 없
 
 eviction 순위의 helper는 Pod-level 자원이 선언된 경우 컨테이너 집계를 건너뛰는 경로도 사용합니다
 해당 자원에 선택된 요청이 0인지 확인한 뒤 overhead를 더하므로, 항상 컨테이너 요청 합계만으로 조건을 판단하는 것은 아닙니다
-이 경로는 DRA의 node-allocatable claim 회계를 아직 고려하지 않는다는 TODO도 남겨 두고 있습니다
+이 경로에는 DRA의 node-allocatable claim 자원량을 아직 계산에 넣지 않는다는 TODO도 남아 있습니다
 
 Pod cgroup 설정을 만드는 입력 집계에도 overhead가 포함됩니다
 다만 실제 적용할 CPU shares·quota·메모리 상한은 QoS와 상한 선언 여부로 다시 선택합니다
@@ -192,7 +193,8 @@ CPU만 채점하고 두 후보가 모두 Filter를 통과했다고 가정하겠�
 Resource Bin Packing 공식 문서는 밀집 배치를 위한 MostAllocated와 RequestedToCapacityRatio를 설명하므로, 기본값은 별도의 [설정 기본값 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/apis/config/v1/defaults.go)까지 확인해야 합니다
 
 자원 가중치는 1~100을 허용합니다
-가중치를 생략하거나 0으로 보내면 기본값 처리가 1을 채운 뒤 검증하므로, 0이 자원을 끄는 설정은 아닙니다
+가중치를 생략하거나 0으로 보내면 기본값 처리에서 1을 채운 뒤 검증합니다
+따라서 가중치 0으로 해당 자원을 점수 계산에서 제외할 수는 없습니다
 
 ### shape의 0~10과 프레임워크의 0~100을 구분합니다
 

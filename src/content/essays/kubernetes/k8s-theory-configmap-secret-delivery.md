@@ -38,7 +38,7 @@ kubelet은 Pod가 참조한 오브젝트를 읽어 컨테이너 생성 설정이
 파일이 갱신되었다는 사실과 애플리케이션이 설정을 다시 읽었다는 사실도 다릅니다
 프로세스가 내용을 메모리에 캐시하거나 이전 파일을 계속 열어 둔다면, 새 경로가 준비되어도 이전 설정을 계속 사용할 수 있습니다
 
-## envFrom을 펼친 다음 env를 덮어씁니다
+## envFrom으로 가져온 값은 env로 덮어쓸 수 있습니다
 
 `envFrom`은 ConfigMap이나 Secret의 키와 값을 한꺼번에 환경 변수로 가져옵니다
 `prefix`가 있으면 변수 이름 앞에 그 문자열을 붙입니다
@@ -47,7 +47,7 @@ kubelet은 Pod가 참조한 오브젝트를 읽어 컨테이너 생성 설정이
 [`makeEnvironmentVariables`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)는 `envFrom`을 먼저 처리하고 이후 `env`를 같은 이름에 덮어씁니다
 여러 `envFrom`에서 이름이 겹치면 뒤 source가 앞 source를 덮습니다
 
-예를 들어 source의 값이 `LOG_LEVEL=info`, `PORT=8080`이고 같은 컨테이너의 `env`에 `LOG_LEVEL=debug`를 선언했다는 가정입니다
+예를 들어 source의 값이 `LOG_LEVEL=info`, `PORT=8080`이고 같은 컨테이너의 `env`에 `LOG_LEVEL=debug`를 선언했다고 가정하겠습니다
 생성 시 최종 값은 `LOG_LEVEL=debug`, `PORT=8080`입니다
 이는 조립 규칙을 설명하는 예시이며 실행 중 갱신을 뜻하지 않습니다
 
@@ -128,7 +128,7 @@ Linux에서 새 내용을 공개하는 흐름은 다음과 같습니다
 
 ## 파일 반영 시간은 재처리와 변경 전달을 함께 봅니다
 
-ConfigMap·Secret·projected·downwardAPI 플러그인은 다시 투영해야 하는 볼륨입니다
+ConfigMap·Secret·projected·downwardAPI 볼륨은 내용을 다시 투영해야 합니다
 [`processPodVolumes`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/populator/desired_state_of_world_populator.go)는 Pod 볼륨을 처리한 뒤 필요한 볼륨에 재마운트를 표시합니다
 
 kubelet의 기본 `syncFrequency`는 1분입니다
@@ -150,7 +150,7 @@ Watch 방식도 참조가 있는 동안 항상 watch를 유지하는 것은 아�
 [`NewWatchBasedManager`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/util/manager/watch_based_manager.go)는 유휴 기준을 재처리 주기의 5배로 계산하되 최소 1분을 적용합니다
 이 시간이 지난 대상은 검사 시 watch를 멈출 수 있습니다
 
-## immutable은 데이터 변경과 감시 비용을 줄입니다
+## immutable은 데이터 변경을 막고 감시 비용을 줄입니다
 
 `immutable: true`인 ConfigMap·Secret은 같은 오브젝트에서 데이터를 수정할 수 없습니다
 ConfigMap의 `data`·`binaryData`, Secret의 `data` 변경을 막으며 immutable을 해제하는 요청도 거부합니다
@@ -165,7 +165,8 @@ watch 기반 캐시는 읽은 오브젝트가 immutable이면 reflector를 멈�
 
 그 데이터 자체를 바꾸려면 오브젝트를 삭제한 뒤 다시 만들어야 합니다
 삭제해도 이미 전달된 볼륨 파일과 실행 중인 환경 변수가 즉시 사라지지는 않습니다
-같은 이름으로 다시 만든 오브젝트를 기존 Pod가 새 데이터로 갱신할 것이라고 기대해서는 안 되며, 공식 문서는 해당 Pod도 다시 만들도록 권고합니다
+같은 이름으로 오브젝트를 다시 만들어도 기존 Pod에 새 데이터가 전달될 것이라고 기대해서는 안 됩니다
+공식 문서는 해당 Pod도 다시 만들도록 권고합니다
 
 ## Secret의 비밀성은 저장·권한·전달을 나눠 봅니다
 
@@ -200,7 +201,7 @@ API 읽기 권한과 컨테이너 안에서 파일을 읽는 권한은 서로 �
 
 [`secret.wrappedVolumeSpec`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/secret/secret.go)은 `medium: Memory`인 emptyDir을 감싸 파일을 tmpfs에 둡니다
 반면 [`configmap.wrappedVolumeSpec`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/configmap/configmap.go)은 기본 medium을 사용합니다
-ConfigMap 플러그인 주석은 tmpfs 메모리를 올바른 cgroup에 회계하는 문제를 이 차이의 이유로 적습니다
+ConfigMap 플러그인 주석은 tmpfs 메모리 사용량을 올바른 cgroup에 집계하는 문제를 이 차이의 이유로 적습니다
 기본 medium이 사용하는 실제 노드 파일시스템까지 항상 디스크라고 단정할 수는 없습니다
 
 Memory emptyDir은 새 tmpfs를 마운트할 때 지원되면 `noswap` 옵션을 붙입니다

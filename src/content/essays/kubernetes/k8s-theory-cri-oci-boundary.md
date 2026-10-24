@@ -11,10 +11,10 @@ date: "2026-09-17"
 
 kubelet은 컨테이너를 만들기 위해 runc를 직접 실행하지 않습니다
 CRI를 구현한 런타임 서비스에 요청하고, 그 구현이 이미지와 파일시스템, 실행 설정을 준비합니다
-Linux에서 containerd와 runc를 쓰는 경우에는 그 뒤에 shim을 거치는 실행 경계도 있습니다
+Linux에서 containerd와 runc를 쓰는 경우에는 실행 요청이 shim을 거쳐 runc로 이어집니다
 
 이 경로에서 CRI는 요청 API를, OCI runtime specification은 컨테이너 설정과 표준 동작을 정합니다
-같은 create라는 이름이 등장해도 각 계약에서 처리하는 대상과 시점은 다릅니다
+같은 create라는 이름이 등장해도 CRI와 OCI에서 처리하는 대상과 시점은 다릅니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서, OCI Runtime Specification v1.3.0을 바탕으로 설명합니다
 > Kubernetes ref: `f78e722310e50bcaca9276be22276d9e91d91308`, 공식 문서 저장본: `7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
@@ -146,7 +146,7 @@ OCI create는 `process`를 제외한 설정을 적용하지만 사용자 프로�
 `process.args`는 start 전까지 적용하지 않고, 다른 process 속성은 create에서 적용할 수 있습니다
 create와 start 사이에는 규격에 정의한 lifecycle hook도 실행됩니다
 
-같이 create/start가 나뉘어 있어도 OCI hook과 kubelet의 자원 매니저 등록은 서로 다른 단계입니다
+CRI와 OCI 모두 create/start를 나누지만, OCI hook과 kubelet의 자원 매니저 등록은 서로 다른 단계입니다
 containerd 예시에서 두 계약의 호출 대응이 다른 이유도 함께 구분해야 합니다
 
 ### config.json 수정과 실행 중 자원 갱신은 다른 경로입니다
@@ -213,7 +213,7 @@ kubelet이 pull한 기록이 있는 이미지는 자격증명을 확인하고, k
 게이트를 켠 시점에 kubelet의 pull 기록이 없는 로컬 이미지도 이 예외에 포함될 수 있습니다
 `AlwaysVerify`는 사전 적재 이미지도 확인 범위에 넣습니다
 
-자격증명 확인이 매번 레지스트리 재다운로드를 뜻하는 것은 아닙니다
+자격증명을 확인할 때마다 레지스트리에서 이미지를 다시 내려받는 것은 아닙니다
 이미 성공한 자격증명 기록으로 로컬 확인을 마칠 수도 있습니다
 이 때문에 이벤트의 `already present on machine and can be accessed by the pod` 문구만으로 모든 이미지에 네트워크 검증을 수행했다고 읽으면 안 됩니다
 
@@ -247,7 +247,7 @@ kubelet이 pull한 기록이 있는 이미지는 자격증명을 확인하고, k
 ## 이미지 GC는 시작 임계값과 삭제 목표를 나눕니다
 
 kubelet의 기본 이미지 GC 확인 주기는 5분이고, 종료한 컨테이너 GC는 1분입니다
-이미지 GC는 디스크 사용률이 높은 임계값에 닿으면 낮은 목표까지 내릴 공간을 계산해 삭제를 시도합니다
+이미지 GC는 디스크 사용률이 정리 시작 기준에 닿으면, 목표 사용률까지 낮추는 데 필요한 공간을 계산해 삭제를 시도합니다
 
 | 설정 | 기본값 | 역할 |
 |---|---:|---|
@@ -261,7 +261,7 @@ kubelet의 기본 이미지 GC 확인 주기는 5분이고, 종료한 컨테이�
 삭제해도 부족하면 `FreeDiskSpaceFailed` 이벤트를 남길 수 있습니다
 
 85%에서 조금만 정리하고 멈추면 다음 pull 뒤 다시 경계에 닿기 쉽습니다
-80%라는 별도 목표를 두는 것은 한 번 정리할 때 여유를 확보해 반복 정리를 줄이려는 형태입니다
+80%라는 별도 목표를 두어 한 번 정리할 때 여유를 확보하고 반복 정리를 줄이려 합니다
 [node-pressure eviction](/essays/k8s-theory-eviction-oom)의 노드 자원 회수와도 연결되지만, 여기서 우선 정리하는 대상은 이미지입니다
 
 `imageMaximumGCAge`를 설정하면 디스크 사용률과 별개로 오래 사용하지 않은 이미지도 정리할 수 있습니다

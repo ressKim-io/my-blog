@@ -43,7 +43,7 @@ kubelet은 컨테이너의 실행 상태를 관찰하고, Pod의 전체 상태�
 | housekeeping | 남은 Pod·볼륨 등의 정리 | 2초 티커. 구성 소스가 준비된 뒤 수행 |
 
 현재 확인한 구현에는 container manager 업데이트까지 여덟 입력 분기가 있습니다
-입력의 수보다 중요한 것은 구성 변화, 런타임 관찰, probe 결과, 주기 처리가 각각 동기화를 요청한다는 관계입니다
+구성 변화, 런타임 관찰, probe 결과, 주기 처리가 서로 다른 경로로 동기화를 요청합니다
 
 ### 1초 티커와 1분 동기화 설정은 다른 값입니다
 
@@ -52,10 +52,10 @@ sync 티커가 1초마다 울린다고 모든 Pod를 매초 동기화하지는 �
 
 [`SyncFrequency`의 설정 기본값](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/apis/config/v1beta1/defaults.go)은 1분입니다
 이 값은 Pod worker의 `resyncInterval`로 전달됩니다
-정상 동기화 뒤 상태 전이가 없는 경로에서는 이 간격에 jitter, 즉 무작위 지연을 더해 다시 예약합니다
+정상적으로 동기화를 마쳤고 상태 전이가 없으면 이 간격에 jitter, 즉 무작위 지연을 더해 다시 예약합니다
 
 상태 전이, 처리 대기 중인 업데이트, 오류, 다른 이벤트는 별도 경로를 따릅니다
-따라서 모든 Pod가 정확히 1분마다 실행된다는 시간 보장도 아닙니다
+따라서 모든 Pod의 동기화가 정확히 1분마다 이뤄진다는 시간 보장도 아닙니다
 `syncLoop` 주석의 기본 10초라는 설명 대신 실제 설정 기본값과 [`completeWork`의 재예약](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/pod_workers.go)을 함께 봐야 합니다
 
 ### Generic PLEG는 런타임을 조회해 변화를 찾습니다
@@ -110,7 +110,7 @@ sync 티커가 1초마다 울린다고 모든 Pod를 매초 동기화하지는 �
 
 `readinessGates`는 Pod의 준비 판정에 추가할 조건 이름을 선언합니다
 외부 컴포넌트가 관리하는 해당 조건이 없거나 `True`가 아니면, 컨테이너가 모두 준비돼도 Pod의 `Ready`는 `False`입니다
-종료 phase에서는 `ContainersReady`도 별도 규칙으로 `False`가 되므로, 위 표를 모든 수명 단계에 같은 단순 합으로 적용하지는 않습니다
+종료 phase에서는 `ContainersReady`도 별도 규칙으로 `False`가 되므로, 컨테이너별 준비 상태만으로 판단하지는 않습니다
 
 API 타입에 `Unknown` phase가 남아 있어도 Node의 `Ready=Unknown`과 같은 판정은 아닙니다
 현재 타입 주석은 `PodUnknown`을 Deprecated로 표시하며, 확인한 kubelet의 `getPhase`는 이 값을 반환하지 않습니다
@@ -207,7 +207,8 @@ Pod worker 등의 호출자가 별도 유예 override를 전달하면 `killConta
 이후 preStop 실행과 sidecar 종료 순서 대기에 쓴 시간을 빼고, CRI `StopContainer`에 남은 시간을 전달합니다
 **CRI(Container Runtime Interface)**는 kubelet이 런타임에 컨테이너 작업을 요청하는 인터페이스입니다
 
-예를 들어 기본 유예 30초에서 preStop의 sleep이 15초를 사용했다면, 다른 대기를 제외한 종료 시간은 그만큼 줄어듭니다
+예를 들어 기본 유예 30초에서 preStop의 sleep이 15초를 사용했다면, 앱이 종료할 수 있도록 남겨 둔 시간도 그만큼 줄어듭니다
+다른 대기가 있으면 남은 시간은 더 줄어듭니다
 이는 설정의 관계를 보여 주는 예시이며, 정확한 신호 도착 시각을 측정한 결과는 아닙니다
 
 preStop이 유예를 다 쓰면 kubelet은 훅이 끝나기를 더 기다리지 않고 중지를 요청합니다
@@ -215,7 +216,7 @@ preStop이 유예를 다 쓰면 kubelet은 훅이 끝나기를 더 기다리지 
 Pod에 선언한 유예 자체를 항상 2초로 바꾼다는 뜻은 아닙니다
 
 런타임은 컨테이너의 주 프로세스에 중지 신호를 전달하고, 제시간에 종료하지 못하면 강제로 종료합니다
-이 글의 SIGTERM 설명은 Linux의 일반적인 기본 동작을 가리킵니다
+Linux의 일반적인 기본 중지 신호는 SIGTERM입니다
 이미지의 `STOPSIGNAL`이나 활성화한 `ContainerStopSignals`의 별도 신호 설정이 있으면 실제 신호가 달라질 수 있습니다
 
 이 유예는 API 오브젝트가 삭제되는 시각의 엄격한 상한도 아닙니다

@@ -13,7 +13,7 @@ Pod의 보안 필드를 생략했다고 모든 제한이 꺼지거나 같은 기
 seccomp 프로필을 생략하면 kubelet이 명시적인 값을 만들지만, AppArmor 프로필을 생략하면 런타임에 전달하는 값을 비웁니다
 capability 목록을 비우는 것과 모든 capability를 제거하는 것도 다른 설정입니다
 
-이 차이를 알아야 API에서 허용한 Pod가 노드에서 생성에 실패하거나, baseline을 통과해도 기대한 제약이 적용되지 않는 이유를 설명할 수 있습니다
+이 차이를 알아야 API에서 허용한 Pod가 노드에서 생성에 실패하거나, baseline 보안 정책을 통과해도 기대한 제약이 적용되지 않는 이유를 설명할 수 있습니다
 Linux의 보안 설정을 중심으로 API의 검사와 실제 실행 경계를 나눠 보겠습니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
@@ -29,7 +29,7 @@ kubelet은 Pod 설정과 이미지 정보를 읽어 CRI 보안 설정을 만들�
 
 ![API validation과 PSA가 선언의 유효성과 정책을 검사한 뒤 kubelet이 생략 값과 이미지 사용자를 해석하고 런타임이 노드에서 적용하는 경계|tall](/diagrams/k8s-theory-runtime-isolation-1.svg)
 
-seccomp 프로필 파일이 노드에 있는지, 선택한 런타임이 user namespace를 지원하는지 같은 조건은 필드의 모양만 검사해서 확정할 수 없습니다
+seccomp 프로필 파일이 노드에 있는지, 선택한 런타임이 user namespace를 지원하는지 같은 조건은 필드 값과 조합만 검사해서 확정할 수 없습니다
 [CRI와 OCI의 경계](/essays/k8s-theory-cri-oci-boundary)에서 본 것처럼, kubelet이 전달할 설정을 조립하는 일과 런타임이 실행 환경을 만드는 일도 나뉘어 있습니다
 
 ## securityContext의 위치는 적용 범위와 연결됩니다
@@ -54,7 +54,7 @@ Pod 수준은 `spec.securityContext`, 컨테이너 수준은 `spec.containers[].
 ### 공통 병합과 프로필 선택은 별도 경로입니다
 
 [`DetermineEffectiveSecurityContext`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/securitycontext/util.go)의 공통 병합은 Pod에서 `runAsUser`·`runAsGroup`·`runAsNonRoot`·`seLinuxOptions`·`windowsOptions`를 가져옵니다
-같은 컨테이너 필드가 있으면 그 값을 우선합니다
+컨테이너에도 같은 필드를 지정했다면 그 값을 우선합니다
 
 seccomp과 AppArmor는 이 다섯 필드에 포함되지 않습니다
 별도 함수가 다음 순서로 값을 찾습니다
@@ -154,7 +154,7 @@ v1.34 정책부터는 probe와 lifecycle hook의 `host` 필드 제한도 포함�
 | seccomp | Pod 또는 각 컨테이너의 `RuntimeDefault`·`Localhost` |
 | capability | `drop: [ALL]`, 다시 add할 수 있는 것은 `NET_BIND_SERVICE` |
 
-이 통제들은 nil의 결과가 안전한지까지 고려해야 합니다
+이 조건을 읽을 때는 필드를 생략한 경우, 즉 nil일 때의 동작도 함께 봐야 합니다
 가령 allowPrivilegeEscalation은 생략해도 false가 되지 않으므로 false 명시가 필요합니다
 capability를 생략해도 런타임 기본 집합이 남으므로 ALL 제거가 필요합니다
 
@@ -175,7 +175,7 @@ latest는 API 서버 업그레이드에 따라 검사하는 정책도 달라질 
 Deployment 같은 워크로드 요청의 audit·warn과 실제 Pod 생성에 적용하는 enforce도 구분합니다
 Deployment가 저장되어도 그 컨트롤러가 만드는 Pod는 정책에 거부될 수 있습니다
 
-## runAsNonRoot는 kubelet이 이미지 사용자도 검사합니다
+## kubelet은 runAsNonRoot에 따라 이미지 사용자도 검사합니다
 
 PSA는 이미지를 가져와 실행 UID를 확인하지 않습니다
 `runAsNonRoot: true`를 요구할 수는 있지만 그 선언만으로 이미지가 비 root로 실행될지 확정할 수 없습니다
@@ -243,7 +243,7 @@ GA라는 상태만으로 모든 gate가 같은 시점에 잠겼거나 모든 볼
 
 RuntimeClass의 `handler`는 노드 런타임에 등록된 구현을 선택하는 문자열입니다
 `metadata.name`으로 RuntimeClass를 참조하고 kubelet이 handler를 조회해 `RunPodSandbox`의 별도 인자로 넘깁니다
-같은 오브젝트의 overhead·scheduling은 자원 회계와 배치 역할이며 격리 구현 자체와 구분합니다
+같은 오브젝트의 overhead·scheduling은 자원 계산과 배치 조건에 쓰이며, 격리 구현 자체와 구분합니다
 
 capability·seccomp·user namespace는 일반적으로 같은 노드 커널이 집행합니다
 RuntimeClass는 다른 격리 방식을 선택할 수도 있습니다

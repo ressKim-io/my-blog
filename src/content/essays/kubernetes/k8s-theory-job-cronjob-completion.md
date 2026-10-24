@@ -128,13 +128,13 @@ Pod 정책과 컨테이너별 규칙을 함께 확인해야 실제 재시작 여
 ## 새로운 실패와 성공을 동시에 평가하면 실패 기준을 먼저 봅니다
 
 [`syncJob`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/job_controller.go)은 먼저 이미 기록된 `SuccessCriteriaMet`와 `FailureTarget`을 확인합니다
-아직 종료 방향을 정하지 않은 경우에는 다음 순서로 새로운 기준을 평가합니다
+어느 조건으로 종료할지 아직 정하지 않은 경우에는 다음 순서로 새로운 기준을 평가합니다
 
 1. 실패 Pod가 `podFailurePolicy`의 `FailJob` 규칙에 맞는지 확인합니다
 2. 실패 Pod 수나 `OnFailure` 재시작 합이 `backoffLimit`에 걸리는지 확인합니다
 3. `activeDeadlineSeconds`에 걸리는지 확인합니다
 4. index별 실패 한도를 사용하는 Job이면 실패한 index 수와 남은 index를 확인합니다
-5. Indexed Job의 `successPolicy`를 평가하고, 종료 방향이 정해지지 않은 경로에서 기본 성공 목표도 평가합니다
+5. Indexed Job의 `successPolicy`를 평가하고, 아직 종료 조건을 정하지 않았다면 기본 성공 목표도 평가합니다
 
 앞선 검사에서 종료 이유를 정하면 뒤의 검사로 덮어쓰지 않습니다
 `podFailurePolicy`의 모든 매치가 Job을 즉시 실패시키는 것은 아닙니다
@@ -182,12 +182,12 @@ suspend 상태에서는 이 시간 한도를 검사하지 않습니다
 기본 성공 목표로 충족한 경우의 reason은 `CompletionsReached`입니다
 
 새 실패 기준과 성공 기준이 같은 sync에서 함께 충족되면 앞선 실패 검사가 먼저 적용됩니다
-그러나 이미 `SuccessCriteriaMet`가 저장돼 있다면 다음 sync에서는 그 조건을 먼저 존중하고 새로운 실패 검사를 건너뜁니다
+그러나 이미 `SuccessCriteriaMet`가 저장돼 있다면 다음 sync에서는 그 조건에 따라 처리하고 새로운 실패 검사를 건너뜁니다
 항상 실패가 성공을 뒤집는다고 일반화하면 이 저장된 조건의 처리를 놓칩니다
 
 ## 대체 Pod를 만드는 시점은 종료 완료 시점과 다를 수 있습니다
 
-`parallelism`은 종료 중인 Pod까지 합친 전체 존재 수의 상한이 아닙니다
+`parallelism`은 종료 중인 Pod까지 합쳐 실제로 존재하는 Pod 수의 상한이 아닙니다
 기본 `podReplacementPolicy: TerminatingOrFailed`에서는 이전 Pod에 `deletionTimestamp`가 생기면 종료 완료 전에 대체 Pod를 만들 수 있습니다
 그동안 종료 중인 Pod와 새 Pod가 함께 존재할 수 있습니다
 
@@ -228,16 +228,6 @@ CronJob 컨트롤러는 생성할 스케줄 시각을 계산해 가장 최근의
 오래된 누락분을 모두 Job 오브젝트로 복원하는 동작은 아닙니다
 회차 하나를 골랐다고 실제 생성까지 확정되는 것도 아닙니다
 
-### 100회 초과는 현재 소스에서 생성 중단 조건이 아닙니다
-
-현재 확인한 [CronJob 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/workloads/controllers/cron-jobs.md#job-creation)는 100회를 넘게 놓치면 Job을 시작하지 않는다고 설명합니다
-하지만 확인한 고정 소스의 `nextScheduleTime`은 `TooManyMissedTimes` 경고 뒤에도 최근 스케줄 시각을 반환합니다
-`syncCronJob`은 그 시각으로 나머지 조건을 검사하고 생성을 시도합니다
-
-따라서 이 버전에서 경고가 남았다는 이유만으로 Job 생성이 중단됐다고 판단할 수는 없습니다
-100회는 놓친 횟수를 분류해 경고하는 기준이며, 모든 회차를 생성하는 개수 제한도 아닙니다
-문서와 구현이 다른 부분이므로 실제 동작을 설명할 때 기준 ref를 함께 봐야 합니다
-
 ### startingDeadlineSeconds는 실행 시간이 아니라 시작 기한입니다
 
 이 필드는 스케줄 시각에서 얼마나 늦게 Job 생성을 시작할 수 있는지 제한합니다
@@ -250,6 +240,16 @@ CronJob 컨트롤러는 생성할 스케줄 시각을 계산해 가장 최근의
 문서는 10초 미만의 시작 기한에서 스케줄을 놓칠 수 있다고 경고하며 10초 검사 주기로 설명합니다
 반면 확인한 현재 컨트롤러는 다음 스케줄 시각에 100ms를 더해 큐에 다시 예약하는 경로를 사용합니다
 이 경고를 모든 CronJob이 고정 10초 간격으로만 검사된다는 구현 설명이나, 짧은 기한이면 반드시 누락된다는 보장으로 옮기지는 않습니다
+
+### 100회 초과는 현재 소스에서 생성 중단 조건이 아닙니다
+
+현재 확인한 [CronJob 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/workloads/controllers/cron-jobs.md#job-creation)는 100회를 넘게 놓치면 Job을 시작하지 않는다고 설명합니다
+하지만 확인한 고정 소스의 `nextScheduleTime`은 `TooManyMissedTimes` 경고 뒤에도 최근 스케줄 시각을 반환합니다
+`syncCronJob`은 그 시각으로 나머지 조건을 검사하고 생성을 시도합니다
+
+따라서 이 버전에서 경고가 남았다는 이유만으로 Job 생성이 중단됐다고 판단할 수는 없습니다
+100회는 놓친 횟수를 분류해 경고하는 기준이며, 모든 회차를 생성하는 개수 제한도 아닙니다
+문서와 구현이 다른 부분이므로 실제 동작을 설명할 때 기준 ref를 함께 봐야 합니다
 
 ## concurrencyPolicy와 이름 충돌은 다른 중복을 다룹니다
 
@@ -269,14 +269,15 @@ CronJob 컨트롤러는 생성할 스케줄 시각을 계산해 가장 최근의
 삭제 요청과 실제 프로세스 종료를 구분해야 합니다
 
 같은 회차를 반복 처리하는 문제는 Job 이름으로도 줄입니다
-[`getJobName`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/cronjob/cronjob_controllerv2.go)은 CronJob 이름과 스케줄 시각의 Unix 분 값을 조합해 결정적인 이름을 만듭니다
+[`getJobName`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/cronjob/cronjob_controllerv2.go)은 CronJob 이름과 스케줄 시각의 Unix 분 값을 조합해 이름을 정합니다
+같은 회차를 다시 처리해도 이름은 같습니다
 같은 이름의 Job이 이미 있으면 API 서버의 생성은 `AlreadyExists`로 실패합니다
 컨트롤러는 자기 소유의 Job인지 확인하고 필요하면 활성 목록에 다시 반영합니다
 
 이름 충돌은 **같은 회차의 추가 오브젝트 생성**을 다루고, `Forbid`는 **다른 회차의 동시 실행**을 다룹니다
 판정 대상과 주체가 같지 않습니다
 
-## CronJob과 Job은 작업 효과의 정확히 한 번 실행을 보장하지 않습니다
+## CronJob과 Job은 작업이 정확히 한 번만 실행된다고 보장하지 않습니다
 
 [`Forbid` 검사 주석](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/cronjob/cronjob_controllerv2.go)은 이미 실행 중인 Job을 아직 보지 못한 채 판단할 수 있다고 설명합니다
 컨트롤러가 본 `status.active`가 뒤처지면 `Forbid`에서도 이론적으로 실행이 겹칠 수 있습니다
