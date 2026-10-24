@@ -15,9 +15,9 @@ LoadBalancer Service가 저장됐다고 외부 로드 밸런서의 생성까지 
 **cloud-controller-manager(CCM)**는 클라우드의 인스턴스·경로·로드 밸런서를 Kubernetes 오브젝트와 연결합니다
 클라우드 API로 정보를 읽거나 자원을 조정하고, 그 결과를 Node와 Service에 반영합니다
 
-여기서 외부라는 말은 CCM 프로세스의 실행 위치를 뜻하지 않습니다
-CCM도 클러스터 안의 Pod로 실행할 수 있습니다
-경계는 클라우드 API를 호출할 자격과 Kubernetes API를 갱신할 권한이며, 둘 다 갖춰야 작업을 이어갈 수 있습니다
+CCM은 클러스터 안의 Pod로도 실행할 수 있습니다
+클라우드 API를 호출할 자격과 Kubernetes API를 갱신할 권한은 따로 확인해야 합니다
+둘 다 갖춰야 작업을 이어갈 수 있습니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
 > 소스 ref는 `f78e722310e50bcaca9276be22276d9e91d91308`, website 저장본은 `7fde177e22dc98390a6d55d215dd0301b5f6d0bb`입니다
@@ -30,7 +30,7 @@ CCM도 클러스터 안의 Pod로 실행할 수 있습니다
 이 taint를 견디는 toleration이 없는 Pod의 새 배치를 제한합니다
 
 이것은 Node의 `Ready` 조건과 다른 판단입니다
-노드가 연락되고 런타임을 사용할 수 있더라도 클라우드 정보가 아직 채워지지 않았다면 초기화 제약이 남을 수 있습니다
+노드와 통신할 수 있고 런타임을 사용할 수 있더라도 클라우드 정보가 아직 채워지지 않았다면 초기화 제약이 남을 수 있습니다
 
 ![external kubelet의 새 Node 등록부터 CCM 초기화 필드·taint의 단일 Update와 별도 주소 status 기록까지|tall](/diagrams/k8s-theory-cloud-controller-boundary-1.svg)
 
@@ -71,9 +71,9 @@ CCM의 cloud node controller는 메타데이터를 읽고 Node에 적용할 변�
 
 Node에 이미 `providerID`가 있으면 초기화 변경 목록은 그 값을 덮어쓰지 않습니다
 `InstancesV2`가 메타데이터 자체를 `nil`로 반환한 경우에도 이 초기화를 건너뛰므로 taint 제거가 수행되지 않습니다
-구현의 계약과 기존 값에 따른 조건을 빼고 모든 초기화가 같은 필드를 반드시 새로 쓴다고 설명하면 범위가 넓어집니다
+이처럼 인터페이스와 기존 값에 따라 동작이 달라지므로, 초기화할 때 모든 필드를 반드시 새로 쓰는 것은 아닙니다
 
-주소는 쓰기 경계가 다릅니다
+주소는 초기화 필드와 별도로 기록합니다
 taint를 제거하기 전에 kubelet이 지정한 Node IP를 클라우드 주소 목록에 적용할 수 있는지 검증합니다
 이 검증이 실패하면 초기화 Update로 진행하지 않습니다
 
@@ -179,7 +179,7 @@ class 변경 제한도 이전·새 타입을 함께 봐야 합니다
 이는 [`validateLoadBalancerClassField`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go#L9647-L9689)와 Service strategy의 `dropTypeDependentFields`를 함께 적용한 경계입니다
 타입 전환이 API에서 허용된다는 사실이 외부 LB의 전환 순서나 무중단을 보장하지는 않습니다
 
-## Service는 LB 생성 전에 정리 finalizer를 붙입니다
+## LB 생성 전에 Service에 정리 finalizer를 붙입니다
 
 기본 service controller는 외부 자원을 만들기 전에 `service.kubernetes.io/load-balancer-cleanup` finalizer부터 추가합니다
 LB 생성 뒤 Service가 먼저 사라져 정리 대상을 잃는 일을 막기 위한 순서입니다
@@ -220,15 +220,15 @@ Service finalizer는 오브젝트의 **삭제 완료**를 제한합니다
 여기서 포함 가능하다는 말은 이 조건만 통과한다는 뜻입니다
 삭제 여부·오토스케일러 taint 등 나머지 조건도 계속 적용합니다
 
-Node 갱신이 즉시 LB 동기화를 요청하는 판단도 제외 조건의 결과가 바뀌거나 `providerID`가 바뀌는 경우입니다
-Ready 변화 자체는 이 판단을 통과하지 않습니다
+Node 갱신 때는 제외 조건의 결과나 `providerID`가 바뀌어야 즉시 LB 동기화를 요청합니다
+Ready만 바뀌면 이 조건에 해당하지 않습니다
 Node 추가·삭제와 주기적 재동기, 다른 Service 변경에 따른 처리까지 없어진 것은 아닙니다
 
 이 동작은 노드 상태가 흔들릴 때마다 LB 후보를 바꿔 연결을 갑자기 끊고 클라우드 API 호출을 늘리는 문제를 줄이기 위해 도입됐습니다
 [KEP-3458](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-network/3458-remove-transient-node-predicates-from-service-controller/README.md)의 동기이며 v1.30에 stable이 됐습니다
 현재 확인한 후보 선택에는 이를 켜는 feature gate 분기가 없습니다
 
-실제로 불건전한 노드로 트래픽을 계속 보낼지는 클라우드 LB의 health check와 구성에 달려 있습니다
+실제로 정상 동작하지 않는 노드로 트래픽을 계속 보낼지는 클라우드 LB의 health check와 구성에 달려 있습니다
 안정 노드 집합만으로 무중단이나 빠른 대상 제외를 보장하지 않습니다
 노드를 백엔드로 사용하는 `externalTrafficPolicy: Local` 구성에서는 노드 제외가 그 노드의 Pod에 대한 외부 도달성에도 영향을 줄 수 있습니다
 

@@ -24,7 +24,7 @@ date: "2026-10-05"
 ## Kubernetes의 통신 요구와 구현의 전달 방식을 구분합니다
 
 [Kubernetes 네트워크 모델](https://kubernetes.io/docs/concepts/services-networking/)은 의도적인 네트워크 격리 등을 제외하면 Pod들이 노드 경계를 넘어 직접 통신할 수 있어야 한다고 요구합니다
-이 결과를 VXLAN으로 만들지, 하부 네트워크의 라우팅으로 만들지는 하나로 고정하지 않습니다
+이 통신을 VXLAN으로 구현할지 하부 네트워크의 라우팅으로 구현할지는 정하지 않습니다
 
 하부 네트워크인 **underlay**는 노드들을 실제로 연결하는 네트워크입니다
 Overlay를 사용하면 그 위에 터널을 구성하고, native routing을 사용하면 그 네트워크의 라우팅 기능을 활용합니다
@@ -36,6 +36,59 @@ Pod IP의 할당·관리를 뜻하는 **IPAM**은 패킷 전달 방식과 구분
 Cilium의 AWS ENI는 VPC 주소 공급과 native routing을 결합하는 사례입니다
 
 ![Overlay는 Pod 패킷에 노드 주소의 바깥 헤더를 붙이고 native routing은 Pod 주소 그대로 전달하므로 하부 네트워크에 필요한 경로가 달라지는 비교|tall](/diagrams/k8s-theory-overlay-native-routing-1.svg)
+
+## Overlay는 노드 주소로 원래 패킷을 운반합니다
+
+출발 노드는 원래 Pod 패킷에 바깥 헤더를 붙여 목적지 노드로 보냅니다
+목적지 노드는 이를 제거하고 원래 목적지 Pod로 전달합니다
+
+하부 네트워크가 라우팅에 사용하는 주소는 바깥쪽 노드 IP입니다
+따라서 하부 네트워크가 Pod 주소 범위의 경로까지 알 필요는 없습니다
+네트워크 구현은 목적지 Pod가 어느 노드에 있는지 알고 적절한 터널 종단을 선택해야 합니다
+
+Cilium은 노드 간 UDP 기반 터널 메시를 구성하며, 새 노드의 정보를 받아 터널에 편입합니다
+새 노드가 자동으로 편입되려면 노드끼리 통신할 수 있고 방화벽도 터널 패킷을 허용해야 합니다
+
+Cilium v1.20.3의 기본 터널 프로토콜은 VXLAN이며 기본 포트는 `8472/UDP`입니다
+Geneve를 선택하면 기본 포트는 `6081/UDP`입니다
+이 포트는 해당 Cilium 설정의 기본값이며 모든 VXLAN 구현의 고정 포트라는 뜻은 아닙니다
+
+설정의 `tunnel-protocol`·`tunnel-port`와 주소군을 고르는 `underlay-protocol`은 각각 별도 항목입니다
+`underlay-protocol: auto`는 활성화한 주소군에 따라 선택하며, IPv4·IPv6를 모두 켰을 때 IPv4를 우선합니다
+Pod IP의 주소군만 보고 바깥 터널 헤더의 주소군을 결정할 수는 없습니다
+
+이 동작과 기본값은 [Cilium routing 설명](https://github.com/cilium/cilium/blob/bf1aba7b34ab6d9c711315d78d8eefbea81962d1/Documentation/network/concepts/routing.rst)을 기준으로 확인했습니다
+
+## Native routing은 Pod 경로가 하부 네트워크에 연결돼야 합니다
+
+Native routing은 터널 캡슐화 대신 Linux 커널의 라우팅을 활용합니다
+노드에는 목적지 Pod로 가는 다음 홉이 필요하고, 하부 네트워크도 그 Pod 주소를 전달할 수 있어야 합니다
+
+각 노드가 모든 Pod의 개별 경로를 가져야만 하는 것은 아닙니다
+모든 Pod로 가는 경로를 아는 라우터가 있다면 노드가 그 라우터를 향하는 기본 경로를 사용할 수도 있습니다
+반대로 노드별 Pod CIDR 경로를 각 노드에 설치하는 구성도 가능합니다
+
+같은 L2 네트워크의 노드에서는 Cilium의 `auto-direct-node-routes: true`로 직접 경로를 설치할 수 있습니다
+L2는 같은 링크 계층 네트워크를 뜻하며, 이 설정만으로 서로 다른 모든 네트워크의 라우터 경로가 만들어지는 것은 아닙니다
+다른 토폴로지에서는 라우터 설정이나 BGP 같은 경로 배포 수단이 필요할 수 있습니다
+
+설정 형식도 구분해야 합니다
+ConfigMap의 `routing-mode: native`와 `auto-direct-node-routes: true`는 Helm values에서 각각 `routingMode: native`와 `autoDirectNodeRoutes: true`에 대응합니다
+이름이 비슷해도 서로 다른 설정 형식의 키를 섞어 쓰면 안 됩니다
+
+### 두 전달 방식의 선택 기준은 경로 요구와 헤더 비용입니다
+
+| 방식 | 하부 네트워크에 요구하는 것 | 함께 감당할 조건 |
+|---|---|---|
+| Overlay | 노드 IP로 터널 패킷 전달 | 터널 종단 관리·UDP 허용·캡슐화에 필요한 MTU 공간 |
+| Native routing | Pod 주소로 전달할 수 있는 경로 | 노드·라우터·클라우드의 경로 일치와 배포 |
+
+Overlay는 하부 네트워크에 Pod 경로를 배포하는 부담을 줄입니다
+Native routing은 하부 네트워크에 Pod 주소를 전달할 경로가 필요한 대신 터널 캡슐화 헤더를 더하지 않습니다
+
+이 차이만으로 실제 처리량이나 지연의 우위를 확정할 수는 없습니다
+NIC의 offload, 암호화, 경로 길이와 패킷 크기 등 구현·환경 조건을 함께 봐야 합니다
+여기서는 실측 성능 순위가 아니라 패킷 형식과 경로의 전제를 비교합니다
 
 ## nodeipam은 노드별 주소 범위를 기록합니다
 
@@ -88,59 +141,6 @@ Node의 `spec.podCIDR`이 비었다는 사실만으로 Pod 주소를 할당할 �
 
 두 축이 별도라는 말이 모든 조합을 사용할 수 있다는 뜻은 아닙니다
 [Cilium IPAM 지원 표](https://github.com/cilium/cilium/blob/bf1aba7b34ab6d9c711315d78d8eefbea81962d1/Documentation/network/concepts/ipam/index.rst)처럼 모드마다 가능한 전달 방식이 다릅니다
-
-## Overlay는 노드 주소로 원래 패킷을 운반합니다
-
-출발 노드는 원래 Pod 패킷에 바깥 헤더를 붙여 목적지 노드로 보냅니다
-목적지 노드는 이를 제거하고 원래 목적지 Pod로 전달합니다
-
-하부 네트워크가 라우팅에 사용하는 주소는 바깥쪽 노드 IP입니다
-따라서 하부 네트워크가 Pod 주소 범위의 경로까지 알 필요는 없습니다
-네트워크 구현은 목적지 Pod가 어느 노드에 있는지 알고 적절한 터널 종단을 선택해야 합니다
-
-Cilium은 노드 간 UDP 기반 터널 메시를 구성하며, 새 노드의 정보를 받아 터널에 편입합니다
-자동 편입도 노드 간 도달성과 터널 패킷을 허용하는 방화벽이라는 조건 위에서 동작합니다
-
-Cilium v1.20.3의 기본 터널 프로토콜은 VXLAN이며 기본 포트는 `8472/UDP`입니다
-Geneve를 선택하면 기본 포트는 `6081/UDP`입니다
-이 포트는 해당 Cilium 설정의 기본값이며 모든 VXLAN 구현의 고정 포트라는 뜻은 아닙니다
-
-설정의 `tunnel-protocol`·`tunnel-port`와 주소군을 고르는 `underlay-protocol`은 각각 별도 항목입니다
-`underlay-protocol: auto`는 활성화한 주소군에 따라 선택하며, IPv4·IPv6를 모두 켰을 때 IPv4를 우선합니다
-Pod IP의 주소군만 보고 바깥 터널 헤더의 주소군을 결정할 수는 없습니다
-
-이 동작과 기본값은 [Cilium routing 설명](https://github.com/cilium/cilium/blob/bf1aba7b34ab6d9c711315d78d8eefbea81962d1/Documentation/network/concepts/routing.rst)을 기준으로 확인했습니다
-
-## Native routing은 Pod 경로가 하부 네트워크에 연결돼야 합니다
-
-Native routing은 터널 캡슐화 대신 Linux 커널의 라우팅을 활용합니다
-노드에는 목적지 Pod로 가는 다음 홉이 필요하고, 하부 네트워크도 그 Pod 주소를 전달할 수 있어야 합니다
-
-각 노드가 모든 Pod의 개별 경로를 가져야만 하는 것은 아닙니다
-모든 Pod로 가는 경로를 아는 라우터가 있다면 노드가 그 라우터를 향하는 기본 경로를 사용할 수도 있습니다
-반대로 노드별 Pod CIDR 경로를 각 노드에 설치하는 구성도 가능합니다
-
-같은 L2 네트워크의 노드에서는 Cilium의 `auto-direct-node-routes: true`로 직접 경로를 설치할 수 있습니다
-L2는 같은 링크 계층 네트워크를 뜻하며, 이 설정만으로 서로 다른 모든 네트워크의 라우터 경로가 만들어지는 것은 아닙니다
-다른 토폴로지에서는 라우터 설정이나 BGP 같은 경로 배포 수단이 필요할 수 있습니다
-
-설정 형식도 구분해야 합니다
-ConfigMap의 `routing-mode: native`와 `auto-direct-node-routes: true`는 Helm values에서 각각 `routingMode: native`와 `autoDirectNodeRoutes: true`에 대응합니다
-이름이 비슷해도 서로 다른 설정 형식의 키를 섞어 쓰면 안 됩니다
-
-### 두 전달 방식의 선택 기준은 경로 요구와 헤더 비용입니다
-
-| 방식 | 하부 네트워크에 요구하는 것 | 함께 감당할 조건 |
-|---|---|---|
-| Overlay | 노드 IP로 터널 패킷 전달 | 터널 종단 관리·UDP 허용·캡슐화에 필요한 MTU 공간 |
-| Native routing | Pod 주소로 전달할 수 있는 경로 | 노드·라우터·클라우드의 경로 일치와 배포 |
-
-Overlay는 하부 네트워크에 Pod 경로를 배포하는 부담을 줄입니다
-Native routing은 그 경로 조건을 맡기는 대신 터널 캡슐화 헤더를 더하지 않습니다
-
-이 차이만으로 실제 처리량이나 지연의 우위를 확정할 수는 없습니다
-NIC의 offload, 암호화, 경로 길이와 패킷 크기 등 구현·환경 조건을 함께 봐야 합니다
-여기서는 실측 성능 순위가 아니라 패킷 형식과 경로의 전제를 비교합니다
 
 ## VPC 주소를 사용하면 ENI와 서브넷 한도를 함께 봅니다
 

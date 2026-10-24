@@ -40,7 +40,7 @@ cluster domain이 `cluster.local`인 **예시**에서 search는 다음 순서입
 | 그 뒤 | 노드 resolver 설정에 있던 search | 클러스터 접미사 뒤에 추가, 중복 제거 |
 
 이 때문에 같은 namespace의 Service는 `my-svc` 같은 짧은 이름으로 찾을 수 있습니다
-정상적인 Service 이름은 `my-svc.my-ns.svc.cluster.local`처럼 Service·namespace·cluster domain을 포함합니다
+Service의 전체 이름은 `my-svc.my-ns.svc.cluster.local`처럼 Service·namespace·cluster domain을 포함합니다
 
 설정을 만드는 실제 구현은 [`GetPodDNS`·`generateSearchesForDNSClusterFirst`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/network/dns/dns.go)에 있습니다
 
@@ -85,7 +85,8 @@ glibc는 이름에 든 점이 기준 이상이면 입력 이름 자체를 먼저
 
 `my-svc.my-ns`의 점은 1개입니다
 ndots가 1이면 그 이름 자체를 먼저 묻고, ndots가 5이면 search를 먼저 적용합니다
-glibc에서는 앞의 절대 조회가 실패해도 조건에 따라 search를 이어갈 수 있으므로, 낮은 ndots가 두 조각 Service 이름을 항상 실패시키는 것은 아닙니다
+glibc에서는 앞의 절대 조회가 실패해도 조건에 따라 search를 이어갈 수 있습니다
+따라서 ndots를 낮췄다고 `my-svc.my-ns` 조회가 항상 실패하는 것은 아닙니다
 
 다만 이 규칙을 모든 resolver에 그대로 적용할 수는 없습니다
 확인한 musl은 점 개수가 ndots 이상이면 search 목록을 비우고 입력 이름 자체만 질의합니다
@@ -150,7 +151,7 @@ API의 새 상태를 봤더라도 앞서 보관한 부정 응답이 TTL 동안 �
 
 캐시의 위치에 따라 줄어드는 질의도 다릅니다
 앱이나 로컬 캐시에서 끝나면 그 뒤 서버로 보낼 요청이 줄지만, CoreDNS에서 적중한 요청은 이미 Pod와 CoreDNS 사이를 지나온 요청입니다
-후자의 적중은 상위 DNS나 후단 처리의 요청을 줄이며 Pod에서 DNS 서버로 보낸 질의 자체를 없애지는 않습니다
+CoreDNS 캐시가 응답하면 상위 DNS로 보내거나 후단에서 처리할 요청은 줄어들지만, Pod가 DNS 서버로 보낸 질의 자체가 없어지지는 않습니다
 
 구현 근거는 [CoreDNS controller](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/controller.go), [기동 동기화](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/kubernetes.go), [응답 처리](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/handler.go), [cache 문서](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/cache/README.md)에 있습니다
 
@@ -159,7 +160,7 @@ API의 새 상태를 봤더라도 앞서 보관한 부정 응답이 TTL 동안 �
 클러스터 영역 밖의 이름은 Corefile 구성에 따라 forward 같은 플러그인이 상위 DNS로 전달합니다
 반면 kubernetes 플러그인이 담당하는 영역의 이름이 없으면 기본적으로 NXDOMAIN을 응답합니다
 
-`fallthrough`는 설정한 영역의 미발견 질의를 다음 플러그인으로 넘기는 옵션입니다
+`fallthrough`는 설정한 영역에서 이름을 찾지 못한 질의를 다음 플러그인으로 넘기는 옵션입니다
 이는 외부 이름을 전달하는 것과 다르며, 클러스터 이름이 없다고 항상 상위 DNS로 넘기는 것은 아닙니다
 관련 조건은 [kubernetes 플러그인 문서](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/README.md)에 있습니다
 

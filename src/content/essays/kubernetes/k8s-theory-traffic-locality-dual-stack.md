@@ -60,7 +60,7 @@ iptables의 `masqueradeAll` 설정이나 클러스터 밖 출발지가 ClusterIP
 
 현재 [`CategorizeEndpoints`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/proxy/topology.go)는 Cluster 정책용 집합과 Local 정책용 집합을 따로 만듭니다
 판정 범위는 **해당 노드·Service 포트·주소군**입니다
-Service 이름에 달린 전체 주소 수만 보고 이 노드가 사용할 후보를 알 수는 없습니다
+Service의 전체 백엔드 주소 수만으로 이 노드가 사용할 후보를 알 수는 없습니다
 
 ### 전체 후보 부재와 로컬 후보 부재는 다른 규칙입니다
 
@@ -114,7 +114,7 @@ Local 집합은 **로컬 Ready**를 먼저 사용합니다
 [공식 문서](https://kubernetes.io/docs/reference/networking/virtual-ips/#traffic-to-terminating-endpoints)에는 `ProxyTerminatingEndpoints` 게이트를 언급하는 설명이 남아 있습니다
 확인한 v1.37.1의 `CategorizeEndpoints`는 별도 게이트 분기 없이 위의 Ready·Serving-Terminating 순서를 적용합니다
 
-## trafficDistribution은 후보가 부족하면 범위를 넓힙니다
+## trafficDistribution은 선호 조건이 맞지 않으면 범위를 넓힙니다
 
 `trafficDistribution`은 Local 같은 제약보다 약한 선호입니다
 현재 유효한 값은 다음 세 가지입니다
@@ -163,7 +163,7 @@ Auto 어노테이션이 설정돼 있으면 현재 [`Reconciler`](https://github
 internalTrafficPolicy가 Local이면 ClusterIP는 로컬 집합을 사용하지만, 같은 Service의 외부 정책이 Cluster라면 그 경로는 힌트를 적용한 Cluster 집합을 사용할 수 있습니다
 
 선호를 적용한 뒤에는 같은 노드·zone의 후보 수와 그곳에서 발생하는 요청량을 함께 봐야 합니다
-전체 후보를 대상으로 분배한다는 기본 방향도 실제 요청 수·응답 시간·부하의 균등을 보장하지 않습니다
+전체 후보를 대상으로 분배해도 실제 요청 수·응답 시간·부하의 균등까지 보장되지는 않습니다
 
 ## dual-stack은 주소 할당과 주소군별 후보를 나눕니다
 
@@ -199,7 +199,7 @@ IPv4 Service 트래픽이 IPv6 후보 목록을 그대로 쓰는 구조는 아�
 각 집합 안에서도 포트 조합과 엔드포인트 수, 기존 Slice 재사용 이력에 따라 조각 수가 달라집니다
 따라서 VIP 두 개가 있다고 EndpointSlice도 정확히 두 개라고 계산할 수는 없습니다
 
-관리 대상 주소군에서 보통 남길 Slice가 없는 경우에는 Reconciler가 빈 placeholder Slice를 만들기도 합니다
+관리 대상 주소군에 남길 Slice가 없으면 Reconciler가 빈 placeholder Slice를 만들기도 합니다
 Slice 오브젝트가 있다는 사실만으로 사용할 백엔드가 있다고 판단해서는 안 됩니다
 `FQDN` addressType은 deprecated이며 현재 기본 컨트롤러·kube-proxy의 IP 처리와 같은 의미로 정의돼 있지 않습니다
 
@@ -213,7 +213,7 @@ Slice 오브젝트가 있다는 사실만으로 사용할 백엔드가 있다고
 업데이트 검증도 일반 VIP Service의 primary 주소와 주소군 변경을 막습니다
 ExternalName 전환 등 타입별 처리까지 무시한 모든 Service의 절대 불변 규칙으로 넓히면 안 됩니다
 
-같은 호환 형태가 다른 타입에도 남아 있습니다
+다른 타입도 단수 필드가 복수 필드의 첫 값을 가리키는 형태로 호환성을 유지합니다
 
 | 단수 필드 | 대응하는 첫 항목 |
 |---|---|
@@ -232,7 +232,7 @@ headless Service는 `clusterIP: None`이며 두 VIP를 할당하는 대상이 �
 현재 업데이트 검증은 headless의 주소군 변경을 일반 VIP Service와 다르게 취급합니다
 따라서 VIP의 primary 불변 설명을 headless에 그대로 적용할 수는 없습니다
 
-특히 **headless이면서 selector가 없는 Service를 새로 만들 때**는 ipFamilyPolicy 생략 시 RequireDualStack으로 기본화합니다
+특히 **headless이면서 selector가 없는 Service를 새로 만들 때**는 ipFamilyPolicy를 생략하면 기본값으로 RequireDualStack을 넣습니다
 alloc.go는 이 경로를 일반 allocator 검사보다 먼저 처리하며 single-stack Service 할당 구성에서도 복수 주소군을 허용합니다
 VIP를 할당하지 않는 특수 경로이므로 일반 VIP Service의 RequireDualStack 실패 조건과 구분해야 합니다
 

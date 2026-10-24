@@ -29,7 +29,7 @@ CRI는 이 요청이 sandbox를 생성하고 시작하며 성공 응답 시 read
 모든 런타임이 pause 컨테이너나 veth를 사용해야 한다고 규정하지는 않습니다
 여기서 설명할 pause와 Linux network namespace는 containerd의 podsandbox 구현 예시입니다
 
-일반적인 비-hostNetwork Pod를 처리하는 확인한 containerd 경로는 다음 순서입니다
+확인한 containerd에서 일반적인 비-hostNetwork Pod를 처리하는 순서는 다음과 같습니다
 
 ![Linux containerd의 일반 Pod 예시에서 kubelet의 RunPodSandbox 요청 뒤 런타임이 netns를 bind mount로 고정하고 CNI 설정과 pause 시작을 거쳐 앱 컨테이너를 시작하는 순서|tall](/diagrams/k8s-theory-pod-sandbox-pause-1.svg)
 
@@ -60,7 +60,7 @@ Kubernetes의 [`pause.c`](https://github.com/kubernetes/kubernetes/blob/f78e7223
 pause 프로세스가 해당 namespace 안에 존재하면 참조도 유지됩니다
 하지만 IP를 할당하거나 veth를 만드는 일은 이 프로그램이 하지 않습니다
 
-공유 PID namespace의 init인 PID 1로 동작하는 구성에서는 자신에게 재부모화된 프로세스의 종료를 회수하는 역할도 맡습니다
+공유 PID namespace의 init인 PID 1로 동작하는 구성에서는 자신을 새 부모로 갖게 된 프로세스가 종료되면 그 상태를 회수하는 역할도 맡습니다
 기본 Pod는 PID namespace를 공유하지 않으므로 pause가 모든 앱 컨테이너의 자식 프로세스를 대신 회수한다고 일반화하면 안 됩니다
 
 pause 이미지도 런타임 설정에서 선택합니다
@@ -110,7 +110,7 @@ go.mod에 적힌 라이브러리 의존성이 노드에 설치된 CNI 실행 파
 ![두 veth 기반 구성에서 Pod쪽과 노드쪽 인터페이스 쌍은 유지되고 bridge 전달 또는 Cilium의 노드쪽 TC hook 처리로 갈리는 비교|tall](/diagrams/k8s-theory-pod-sandbox-pause-2.svg)
 
 bridge는 노드 안에서 이더넷 프레임을 전달하는 가상 스위치입니다
-일반적인 학습 동작은 수신 프레임의 출발지 MAC 주소를 기억하고 목적지 MAC 주소를 기준으로 전달할 포트를 고릅니다
+bridge는 일반적으로 수신 프레임의 출발지 MAC 주소를 학습하고, 목적지 MAC 주소를 기준으로 전달할 포트를 고릅니다
 학습할 주소와 전달 판단에 사용하는 주소가 다릅니다
 
 다른 예로 [Cilium 1.20.3의 veth 기반 설명](https://docs.cilium.io/en/stable/network/ebpf/intro/)은 노드 쪽 veth의 TC ingress hook에 붙은 eBPF 프로그램을 다룹니다
@@ -147,7 +147,7 @@ primary 또는 additional IP가 파싱되지 않으면 해당 값만 빼고 계�
 이 모드에서 Pod status의 IP는 [노드 IP를 상속하는 경로](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)로 채웁니다
 CRI의 sandbox network status도 host network 공유 Pod에서는 무시한다고 정의합니다
 
-확인한 containerd 경로는 hostNetwork Pod에 별도 network namespace와 앞 절의 CNI setup을 수행하지 않습니다
+확인한 containerd 경로는 hostNetwork Pod에 별도 network namespace를 만들거나 앞 절의 CNI setup을 수행하지 않습니다
 이는 이 구현을 확인한 결과이며 namespace 모드 `NODE`라는 API 값만으로 모든 런타임의 내부 호출까지 규정하는 것은 아닙니다
 
 kubelet은 [런타임의 network 준비 오류로 Pod를 막는 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet.go)에서도 hostNetwork를 제외합니다
@@ -191,7 +191,7 @@ v1.28 alpha·v1.29 beta를 거쳐 현재 v1.37에서는 GA·기본 on이며 gate
 [`GeneratePodReadyToStartContainersCondition`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/status/generate.go)은 `PodSandboxChanged`가 새 sandbox를 요구하지 않으면 True를 반환합니다
 이 계산식은 Network 정보 부재를 앞 절의 빈 IP 조건으로 잡지 않으므로, 그 자체가 유효한 IP의 존재를 별도로 검증하는 식은 아닙니다
 
-또한 컨테이너가 시작할 준비를 했다는 조건이지 앱의 readiness probe 통과를 뜻하지 않습니다
+또한 컨테이너를 시작할 준비가 됐다는 조건이지 앱의 readiness probe 통과를 뜻하지 않습니다
 실제 앱 준비 상태는 `ContainersReady`·`Ready` 등 다른 조건으로 확인해야 합니다
 
 공식 정의는 [Pod network readiness](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-network-readiness), 현재 기능 상태는 [gate 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/features/kube_features.go)에 있습니다

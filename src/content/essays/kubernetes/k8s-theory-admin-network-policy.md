@@ -33,7 +33,7 @@ NetworkPolicy의 허용 규칙보다 먼저 적용할 관리자 거부 규칙은
 ![ingress 또는 egress 한 방향에서 Admin과 NetworkPolicy와 Baseline을 차례로 평가하며 Accept와 Deny는 최종 판정하고 Pass는 현재 tier의 남은 규칙을 건너뛰는 흐름|xtall](/diagrams/k8s-theory-admin-network-policy-1.svg)
 
 그림은 **ingress 또는 egress 한 방향**의 판정입니다
-Admin에서 그 방향을 허용해도 상대 Pod의 다른 방향에 필요한 허용까지 대신하지 않습니다
+Admin이 한 Pod의 해당 방향을 허용해도 상대 Pod에서 필요한 허용까지 대신하지는 않습니다
 또한 네트워크 정책의 허용이 방화벽이나 서비스 메시 등 다른 경로의 차단까지 없애는 것은 아닙니다
 
 Admin의 `Accept`와 `Deny`는 최종 판정이므로 아래 계층의 정책을 더 평가하지 않습니다
@@ -47,7 +47,7 @@ NetworkPolicy가 해당 방향을 격리했다면, 허용 규칙의 합집합으
 예를 들어 ingress만 격리하는 NetworkPolicy가 있어도 egress에 대한 Baseline 판정은 남을 수 있습니다
 어느 계층에서도 그 방향을 확정하지 않으면 정책 모델의 기본 허용으로 이어집니다
 
-계층·최종성은 [ClusterNetworkPolicySpec](https://github.com/kubernetes-sigs/network-policy-api/blob/a17adecd0316b8ff1c3f83939ec0441d68cd6cce/apis/v1alpha2/clusternetworkpolicy_types.go), 방향별 격리는 [코어 NetworkPolicy 문서](https://kubernetes.io/docs/concepts/services-networking/network-policies/)에 근거합니다
+계층의 평가 순서와 판정이 끝나는 조건은 [ClusterNetworkPolicySpec](https://github.com/kubernetes-sigs/network-policy-api/blob/a17adecd0316b8ff1c3f83939ec0441d68cd6cce/apis/v1alpha2/clusternetworkpolicy_types.go), 방향별 격리는 [코어 NetworkPolicy 문서](https://kubernetes.io/docs/concepts/services-networking/network-policies/)에 근거합니다
 
 ## ANP와 BANP의 역할이 한 Kind의 tier가 됐습니다
 
@@ -62,7 +62,7 @@ NetworkPolicy가 해당 방향을 격리했다면, 허용 규칙의 합집합으
 
 이하 ANP는 구형 AdminNetworkPolicy, BANP는 구형 BaselineAdminNetworkPolicy를 뜻합니다
 현재 ClusterNetworkPolicy는 두 Kind의 역할을 tier 필드로 합쳤고, 허용 액션의 이름도 `Allow`에서 `Accept`로 바꿨습니다
-액션 개명 이유는 확인한 발표 글과 설계 문서에서 확인하지 못했습니다
+허용 액션의 이름을 바꾼 이유는 확인한 발표 글과 설계 문서에서 찾지 못했습니다
 
 공식 프로젝트는 ClusterNetworkPolicy를 현재 개발하는 API로, ANP/BANP를 이전 API로 분류합니다
 다만 구형 API가 사라졌거나 유지보수가 모두 끝났다는 뜻은 아닙니다
@@ -155,7 +155,7 @@ standard 배포본에는 이 조합 검증식이 없으므로, API의 사용 제
 
 두 채널은 같은 Kind의 서로 다른 CRD 배포본입니다
 v0.2.0 standard 스키마에는 `nodes`와 `domainNames`가 없고 experimental에만 있습니다
-코어 API 필드를 feature gate로 켜고 끄는 것과는 설치 경계가 다릅니다
+코어 API에서 feature gate로 필드를 켜고 끄는 것과 달리, 여기서는 설치한 CRD 배포본에 따라 사용할 필드가 달라집니다
 
 standard CRD에 없는 필드를 보내면 요청의 `fieldValidation` 모드가 결과에 영향을 줍니다
 Strict는 알 수 없는 필드를 거절하고, 기본 Warn은 경고와 함께 필드를 제거한 뒤 나머지 오브젝트를 검증합니다
@@ -228,7 +228,7 @@ ClusterNetworkPolicy에는 kube-network-policies, Kube-OVN의 experimental 지�
 [go.mod](https://github.com/cilium/cilium/blob/bf1aba7b34ab6d9c711315d78d8eefbea81962d1/go.mod)는 `sigs.k8s.io/network-policy-api v0.2.0`을 요구합니다
 이는 `policy.networking.k8s.io`의 ClusterNetworkPolicy를 위한 설정이며 `cilium.io`의 CiliumNetworkPolicy와 구분합니다
 
-옵션과 의존성의 존재를 전체 conformance나 실제 설치에서의 활성화로 확대하지 않습니다
+모든 적합성 조건을 충족하는지, 실제 설치에서 활성화됐는지는 옵션과 의존성만으로 알 수 없습니다
 프로젝트가 공개한 kube-network-policies의 [conformance 보고서](https://github.com/kubernetes-sigs/network-policy-api/blob/730bd5474d82a2cf82be8b0c6c2a5515598cc44e/conformance/reports/v0.2.0/kube-network-policies.yaml)도 구현 버전·API 릴리스·시험한 standard/experimental 기능 범위를 함께 기록합니다
 이 공개 결과는 이 글에서 테스트를 실행했다는 뜻이 아닙니다
 

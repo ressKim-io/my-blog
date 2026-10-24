@@ -48,7 +48,7 @@ API 서버에 저장된 정책과 패킷에 적용된 제한도 구분해야 합
 
 `spec.podSelector`가 정책 자신의 namespace에서 적용할 Pod를 고릅니다
 그 Pod를 선택한 정책의 `policyTypes`에 `Ingress`가 하나라도 있으면 ingress 방향이 격리됩니다
-`Egress`가 있는 정책의 존재는 egress 격리를 별도로 결정합니다
+`Egress`가 있는 정책이 그 Pod를 선택하면 egress 방향이 격리됩니다
 
 예를 들어 Pod X의 ingress만 선택한 정책은 X의 egress나 선택하지 않은 Pod Y의 방향까지 바꾸지 않습니다
 `spec.podSelector: {}`는 정책 namespace의 모든 Pod를 선택하며, 이 최상위 필드를 생략해도 현재 타입 정의상 빈 selector로 처리합니다
@@ -179,7 +179,7 @@ Pod IP는 교체될 수 있고, 실제 정책이 관찰하는 주소에는 NAT �
 포트 항목에서 `port`를 생략하면 그 항목의 프로토콜에 대해 포트 번호를 제한하지 않습니다
 반면 `ports` 목록 전체를 생략하면 규칙 자체에 포트 조건이 없습니다
 
-범위를 지정하는 `endPort`는 시작 `port`와 끝을 모두 포함합니다
+`port`부터 `endPort`까지의 범위에는 양 끝 포트가 모두 포함됩니다
 숫자 `port`가 있어야 하며 이름 포트와 함께 쓸 수 없고 `endPort >= port`여야 합니다
 [`ValidateNetworkPolicyPort`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/networking/validation/validation.go)가 이 조합과 유효한 포트 형식을 검사합니다
 
@@ -187,13 +187,13 @@ API가 필드를 받아들이는 것과 플러그인이 이를 구현하는 것�
 SCTP는 해당 프로토콜 정책을 지원하는 플러그인이 필요하며 `endPort` 지원도 확인해야 합니다
 공식 문서는 `endPort`를 지원하지 않는 구현에서는 단일 `port`만 적용될 수 있다고 설명합니다
 
-## 노드 예외와 구현별 경계를 남겨 둬야 합니다
+## 노드 통신 예외와 구현별 동작을 구분합니다
 
 Pod 자신을 향한 통신과 **그 Pod가 실행 중인 노드와의 양방향 트래픽**은 표준 NetworkPolicy로 막을 수 없습니다
 다른 모든 노드와의 통신까지 예외라는 뜻은 아닙니다
 API의 ingress 주석에만 로컬 노드가 적혀 있어도, 공식 문서가 정한 양방향 예외를 반대로 해석하면 안 됩니다
 
-kubelet의 로컬 노드 probe는 이 경로를 확인할 때 고려할 예입니다
+kubelet의 로컬 노드 probe를 볼 때도 이 예외를 고려해야 합니다
 정책 생성 직후 Ready가 바뀌었다는 시점만으로 NetworkPolicy가 probe를 막았다고 확정할 수는 없습니다
 실제 probe 방식과 통신 경로, 집행 구현을 확인해야 합니다
 
@@ -225,7 +225,7 @@ Service 주소의 변환과 노드 로컬 DNS 경로가 있을 수 있으므로 
 ## 패킷 판정 위치와 확장 API는 구현이 정합니다
 
 [Cilium v1.20.3의 eBPF 설명](https://github.com/cilium/cilium/blob/bf1aba7b34ab6d9c711315d78d8eefbea81962d1/Documentation/network/ebpf/intro.rst)은 veth의 호스트 쪽 TC hook에서 컨테이너의 송신 트래픽에 정책을 집행하는 구성을 보여 줍니다
-패킷의 신원과 정책을 대응시켜 L3·L4를 집행하는 경로입니다
+패킷의 신원에 맞는 L3·L4 정책을 적용하는 경로입니다
 모든 플러그인이 veth나 같은 hook을 사용한다는 뜻은 아닙니다
 
 overlay 패킷의 바깥쪽 노드 IP만으로는 원래 Pod의 라벨을 알 수 없습니다
@@ -236,7 +236,7 @@ Cilium은 표준 NetworkPolicy 외에 namespace 범위의 `CiliumNetworkPolicy`�
 이들은 별도 CRD이며 [정책 문서](https://github.com/cilium/cilium/blob/bf1aba7b34ab6d9c711315d78d8eefbea81962d1/Documentation/security/policy/index.rst)는 L7·DNS 기반·Deny·호스트 정책 같은 확장 기능을 다룹니다
 각 기능의 타입·설정·결합 규칙은 해당 구현에서 확인해야 합니다
 
-표준의 허용 합집합을 확장 Deny의 결합 방식으로 그대로 옮길 수는 없습니다
+표준 정책의 허용 규칙을 합치는 방식이 확장 Deny에도 그대로 적용된다고 볼 수는 없습니다
 확장 CRD의 스키마가 등록됐거나 오브젝트가 생성됐다는 사실도 해당 데이터 경로의 집행 완료를 보장하지 않습니다
 
 ## 실패를 지원·대상·방향·집행으로 나눕니다

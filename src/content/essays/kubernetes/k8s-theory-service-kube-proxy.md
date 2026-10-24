@@ -37,7 +37,7 @@ kube-proxy의 [`ServiceConfig`·`EndpointSliceConfig` 등록](https://github.com
 모든 노드가 같은 오브젝트를 보더라도 규칙이 바이트 단위로 같지는 않습니다
 노드 이름과 로컬 백엔드, 트래픽 정책에 따라 각자 사용할 후보가 달라집니다
 
-### 주소 목록을 쪼개면 변경을 전달하는 크기가 달라집니다
+### 주소 목록을 나눠 변경된 조각을 전달합니다
 
 목록 전체를 하나의 오브젝트로 관리하면 주소 하나의 변경도 큰 목록의 재전송으로 이어집니다
 EndpointSlice는 목록을 나눠 변경된 조각을 전달하도록 합니다
@@ -64,7 +64,7 @@ ClusterIP는 API 서버의 Service 주소 할당 경로가 선택해 오브젝�
 iptables·nftables 모드는 일반적으로 주소를 규칙의 매치 대상으로 사용하지만, IPVS는 ClusterIP를 `kube-ipvs0` dummy interface에 바인딩합니다
 현재 [`syncService`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/proxy/ipvs/proxier.go)와 ClusterIP 처리 분기에서 이 예외를 확인할 수 있습니다
 
-어느 모드든 주소를 할당한 사실만으로 백엔드 전달이 완성되지는 않습니다
+어느 모드든 주소를 할당하는 것만으로 백엔드에 패킷을 전달할 수 있는 것은 아닙니다
 그 주소를 어떻게 처리할지 데이터 평면의 규칙과 구현이 필요합니다
 
 ### Service 타입은 접근점을 구분합니다
@@ -208,7 +208,7 @@ v1.37의 `NFTablesNetlink`는 Beta·기본 on이지만 일부 List 경로를 net
 
 iptables·IPVS의 기본 `nodePortAddresses`는 모든 로컬 주소를 대상으로 합니다
 nftables 모드는 기본값을 `primary`로 넣어 노드의 주 IPv4·IPv6 주소로 제한합니다
-따라서 모드만 바꿨는데 특정 보조 주소로 접속하던 NodePort가 달라질 수 있습니다
+따라서 모드만 바꿔도 NodePort에 접속할 수 있는 주소가 달라질 수 있습니다
 
 localhost도 같은 동작으로 가정하면 안 됩니다
 iptables는 IPv4에서 loopback 주소가 허용 범위에 들고 `iptables.localhostNodePorts`가 켜져 있어야 하며 이 경우 `route_localnet`을 설정합니다
@@ -252,9 +252,9 @@ kube-proxy를 대체하는 모든 구현이 같은 위치에서 주소를 바꾸
 
 TCP와 connected UDP는 `connect`, unconnected UDP는 `sendmsg`·`recvmsg` 경로를 구분합니다
 소켓 hook에서 Service 주소를 확인해 백엔드를 고르면 앱에는 Service에 연결한 것처럼 보이지만 커널 소켓의 실제 목적지는 백엔드 주소가 됩니다
-이 경로의 패킷에는 추가 하위 Service NAT가 필요하지 않습니다
+소켓 단계에서 목적지를 바꿨으므로, 이 경로의 패킷은 이후 전달 단계에서 Service NAT를 추가로 거칠 필요가 없습니다
 
-`socketLB.hostNamespaceOnly=true`로 Pod namespace의 소켓 번역을 우회하면 veth의 TC 프로그램에서 Service 조회가 다시 일어날 수 있습니다
+`socketLB.hostNamespaceOnly=true`로 Pod namespace에서 소켓 단계의 주소 변환을 우회하면 veth의 TC 프로그램에서 Service 조회가 다시 일어날 수 있습니다
 따라서 소켓 경로의 특징을 모든 eBPF 구현에 적용하거나 conntrack 일반이 사라진다고 해석하면 안 됩니다
 `KUBE-SVC-…`가 없다는 사실만으로 Service가 구현되지 않았다고 판단할 수도 없습니다
 

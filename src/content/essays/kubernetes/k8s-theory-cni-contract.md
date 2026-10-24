@@ -1,6 +1,6 @@
 ---
-title: "CNI 계약: Kubernetes의 통신 조건을 런타임과 플러그인이 연결합니다"
-excerpt: "CNI 실행 파일의 환경 변수·stdin·stdout 계약부터 체인과 IPAM 위임, 결과 보관과 삭제 책임, containerd의 설정 탐색과 STATUS 조건까지 확인합니다"
+title: "CNI 호출 규약 — 런타임은 Pod 네트워크를 어떻게 준비할까"
+excerpt: "런타임이 CNI 플러그인에 전달하는 입력과 돌려받는 결과부터 살펴봅니다. 여러 플러그인의 실행 순서, IPAM에 주소 할당을 맡기는 방식, 실패 뒤 자원을 정리하는 책임, containerd의 설정 탐색과 STATUS 호출 조건을 설명합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "CNI", "containerd", "IPAM", "Networking", "concept"]
 series:
@@ -10,11 +10,13 @@ date: "2026-10-01"
 ---
 
 Pod에 노드가 배정됐다고 해서 IP까지 준비된 것은 아닙니다
-kubelet이 CRI로 sandbox 생성을 요청하면 런타임은 네트워크 환경을 준비하고 CNI 플러그인에 설정을 요청합니다
+kubelet은 컨테이너 런타임과 통신하는 인터페이스인 CRI로 Pod sandbox 생성을 요청합니다
+sandbox는 Pod 단위의 공유 실행 환경입니다
+런타임은 이 환경을 준비하면서 CNI 플러그인에 네트워크 설정을 요청합니다
 
 Kubernetes는 Pod 사이에 어떤 통신이 가능해야 하는지 정합니다
-**CNI(Container Network Interface)**는 런타임이 네트워크 플러그인을 호출하고 결과를 받는 계약입니다
-통신 조건과 그 조건을 구현하는 호출 절차를 나눠 보겠습니다
+**CNI(Container Network Interface)**는 런타임이 네트워크 플러그인에 무엇을 전달하고 어떤 결과를 받아야 하는지 정한 규약입니다
+Kubernetes가 요구하는 통신 조건부터 살펴본 뒤, 런타임과 플러그인이 그 환경을 준비하는 과정을 따라가겠습니다
 
 > **근거**: Kubernetes v1.37.1과 CNI spec 1.1.0, 공식 문서 및 고정 소스를 바탕으로 설명합니다
 > Kubernetes ref: `f78e722310e50bcaca9276be22276d9e91d91308`, 공식 문서 저장본: `7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
@@ -52,7 +54,7 @@ kubelet은 CRI 런타임에 요청하고, CNI 설정과 실행 파일의 선택�
 namespace의 생성과 그 안에 통신 설정을 넣는 것은 별도 작업입니다
 
 containerd v2.4.2의 [`RunPodSandbox`](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/internal/cri/server/sandbox_run.go)는 일반 Linux 경로에서 namespace를 만든 뒤 `setupPodNetwork`를 호출합니다
-이후 sandbox 실행 경로를 진행하므로 CNI 호출 시점을 애플리케이션 컨테이너 시작과 같은 단계로 읽으면 안 됩니다
+CNI 호출 뒤에 sandbox 시작 절차가 이어지므로, 이 시점을 애플리케이션 컨테이너가 시작하는 시점과 혼동하면 안 됩니다
 
 ### 규격 버전과 라이브러리 릴리스는 다릅니다
 
@@ -67,11 +69,11 @@ containerd v2.4.2의 [`RunPodSandbox`](https://github.com/containerd/containerd/
 
 CNI 라이브러리 v1.3.1 안의 `SPEC.md`와 `version.Current()`가 가리키는 규격은 **1.1.0**입니다
 설정의 `cniVersion`은 이 실행 규격을 뜻하며 라이브러리 릴리스 번호를 넣는 칸이 아닙니다
-런타임의 Go 의존 버전도 노드에 놓인 개별 플러그인 실행 파일의 설치 버전을 증명하지는 않습니다
+런타임의 Go 의존 버전만으로는 노드에 설치된 개별 플러그인 실행 파일의 버전을 알 수 없습니다
 
 ## CNI는 환경 변수와 JSON으로 실행 파일을 호출합니다
 
-런타임은 플러그인 실행 파일을 실행하고 요청이 끝나면 종료 결과를 받습니다
+런타임은 플러그인을 별도 프로세스로 실행하고 종료 결과를 받습니다
 플러그인 전체가 데몬 없이 동작하거나 상태를 저장하지 않는다는 뜻은 아닙니다
 
 | 전달 경로 | 내용 |
@@ -125,7 +127,7 @@ stdout이 비어 있으면 stderr 등을 사용해 진단 문구를 만듭니다
 
 ![세 플러그인의 ADD는 직전 결과를 누적하고 DEL은 역순으로 같은 마지막 ADD 결과를 받는 개념 예|tall](/diagrams/k8s-theory-cni-contract-2.svg)
 
-런타임은 마지막 ADD 결과를 지속 보관해야 합니다
+런타임은 마지막 ADD 결과를 저장해 두어야 합니다
 [`libcni.AddNetworkList`](https://github.com/containernetworking/cni/blob/3f51e8803ebbdba0ebeed735b42137e4c7302403/libcni/api.go)는 체인이 모두 성공하면 결과와 설정 등을 파일에 저장합니다
 이 기록은 이후 CHECK·DEL이 기대 상태를 확인하거나 정리할 때 사용합니다
 
@@ -149,7 +151,7 @@ IPAM 결과는 `interfaces` 배열과 `ips` 안의 인터페이스 인덱스가 
 
 plugins v1.9.1의 [`bridge`](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/plugins/main/bridge/bridge.go)는 주소 구성이 필요한 경로에서 `ipam.ExecAdd`를 호출합니다
 [`README`](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/README.md)의 `host-local`은 할당 IP의 로컬 DB를, `dhcp`는 호스트 데몬을 사용합니다
-같은 실행 파일 계약을 사용해도 주소를 고르고 보관하는 방식은 달라질 수 있습니다
+같은 실행 파일 호출 규약을 따라도 주소를 고르고 보관하는 방식은 달라질 수 있습니다
 
 Kubernetes의 NodeIPAM과도 구분해야 합니다
 [`rangeAllocator`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/nodeipam/ipam/range_allocator.go)는 Node의 `spec.podCIDRs`에 대역을 배정합니다
@@ -168,7 +170,7 @@ containerd의 [`RunPodSandbox`](https://github.com/containerd/containerd/blob/b7
 호출이 실패해도 자원이 이미 배정됐을 수 있기 때문이라고 주석이 설명합니다
 [`teardownPodNetwork`](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/internal/cri/server/sandbox_stop.go)는 go-cni의 Remove를 통해 삭제를 요청합니다
 
-이것은 정리 요청을 연결하는 경로이며 실패해도 모든 자원이 반드시 회수된다는 보장은 아닙니다
+정리 요청도 실패할 수 있으므로, 요청을 보냈다는 사실만으로 모든 자원이 회수됐다고 판단할 수는 없습니다
 플러그인은 반복된 DEL과 이미 없는 인터페이스를 받아들여야 하고, namespace가 없어도 주소 예약 등 가능한 정리를 수행해야 합니다
 
 최종 ADD 결과와 IPAM의 주소 예약은 서로 다른 기록입니다
@@ -208,7 +210,7 @@ go-cni v1.1.14의 [`Status`](https://github.com/containerd/go-cni/blob/8c8d2ad0f
 
 플러그인 STATUS는 새 ADD를 처리할 준비가 됐는지 묻습니다
 필요한 외부 데몬을 사용할 수 없거나 주소가 고갈돼 새 연결을 만들 수 없으면 오류를 보고할 수 있습니다
-기존 attachment의 설정을 점검하는 CHECK와 질문의 대상이 다릅니다
+기존 attachment의 설정을 점검하는 CHECK와는 확인 대상이 다릅니다
 
 spec은 STATUS를 정보 제공용으로 정합니다
 실패 뒤에도 다른 CNI 요청을 받을 수 있어야 하며 플러그인은 STATUS가 반드시 먼저 호출된다고 가정하면 안 됩니다
@@ -244,9 +246,10 @@ kubelet이 여기서 새 주소를 할당하는 것은 아닙니다
 [`kubelet_first_network_pod_start_sli_duration_seconds`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/metrics/metrics.go)는 이미지 pull과 init 실행 시간을 제외한 첫 네트워크 Pod 시작 시간을 다루는 INTERNAL 지표입니다
 STATUS 제안을 가리키는 주석은 있지만 지표 하나가 특정 지연 원인을 확정하지는 않습니다
 
-CNI의 ADD·DEL이 다루는 것은 네트워크에 attachment를 붙이고 떼는 작업입니다
-클러스터 네트워크 전체의 생성·운영을 이 명령 하나에 정의하지 않습니다
-실행 파일 호출이 끝나도 외부 에이전트, 런타임의 결과 파일, IPAM의 예약 상태는 남을 수 있으므로 장애와 정리 책임도 그 경계에 맞춰 확인해야 합니다
+CNI의 ADD·DEL은 대상의 네트워크 연결을 구성하고 해제하는 명령입니다
+클러스터 네트워크 전체를 만들고 운영하는 일을 이 명령들만으로 설명할 수는 없습니다
+실행 파일 호출이 끝나도 외부 에이전트, 런타임의 결과 파일, IPAM의 예약 상태는 남을 수 있습니다
+장애를 조사하거나 자원을 정리할 때도 각각을 관리하는 구성요소를 확인해야 합니다
 
 ## 확인한 근거
 

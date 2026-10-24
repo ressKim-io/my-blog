@@ -9,7 +9,7 @@ series:
 date: "2026-10-18"
 ---
 
-Service 하나가 받는 ClusterIP는 누가 어디서 고르고, 같은 주소를 다른 Service에 주지 못하도록 무엇이 지킬까요?
+Service가 사용할 ClusterIP는 누가 고르고, 같은 주소를 다른 Service에 중복 할당하지 않도록 어떻게 막을까요?
 API 서버의 할당기는 사용할 수 있는 대역에서 주소를 고르고, 그 주소를 이름으로 하는 IPAddress 오브젝트를 만듭니다
 
 노드에서 ClusterIP를 백엔드로 전달하는 규칙을 만들기 전에 주소를 확보하는 과정입니다
@@ -63,12 +63,12 @@ spec:
 Service의 코어 API 그룹은 빈 문자열이므로 예시에서는 group을 생략했습니다
 
 parentRef는 `ownerReferences`가 아닙니다
-이 참조만 보고 Kubernetes GC가 사용자를 따라 IPAddress를 자동 삭제하는 구조는 아닙니다
+대상 오브젝트가 삭제돼도 이 참조만으로 Kubernetes GC가 IPAddress를 자동 삭제하지는 않습니다
 Service 저장소의 해제 경로와 repair가 참조를 대조합니다
 parentRef는 변경할 수 없는 필드이므로 참조를 바로잡는 복구도 삭제·재생성을 사용합니다
 
 IPAddress에는 status 필드도 `/status` 하위 리소스도 없습니다
-오브젝트가 존재한다는 사실이 주소 확보 기록이지만, 참조한 Service가 실제로 존재하고 그 주소를 쓰는지까지 자동으로 참이 되지는 않습니다
+오브젝트의 존재는 주소 확보 기록이지만, 참조한 Service가 실제로 존재하고 그 주소를 쓰는지는 따로 확인해야 합니다
 그래서 별도의 정합성 검사가 필요합니다
 
 ### 이름이 같으면 두 생성 요청이 함께 성공하지 못합니다
@@ -195,8 +195,8 @@ API 서버들의 할당기에 삭제 정보가 전파되기 전에 새 주소가
 ServiceCIDR도 오브젝트가 되어 범위를 추가하고 삭제 보호를 적용할 수 있습니다
 
 이행기에는 옛 API 서버가 bitmap만 읽으므로 새 API 서버가 양쪽에 쓰는 호환 경로가 필요했습니다
-그 경로에서는 bitmap을 먼저 확보하고 IPAddress를 나중에 만듭니다
-IPAddress를 먼저 만들고 bitmap을 나중에 확보하면 그 사이 옛 할당기가 같은 주소를 고를 수 있기 때문입니다
+그 경로에서는 bitmap에서 주소를 먼저 확보하고 IPAddress를 나중에 만듭니다
+IPAddress를 먼저 만들고 bitmap에서 주소를 나중에 확보하면 그 사이 옛 할당기가 같은 주소를 고를 수 있기 때문입니다
 
 | gate | v1.37.1 실제 등록 | 의미 |
 |---|---|---|
@@ -241,12 +241,12 @@ Service가 없을 때는 IPAddress의 생성 시각으로부터 60초를 넘기�
 주소 기록이 Service보다 먼저 생기는 정상 구간을 보호하기 위해서입니다
 ExternalName Service를 주소가 필요한 타입으로 바꾸는 중의 일부 불일치에도 60초 보호가 있습니다
 
-또 IPAddress가 기존 Service보다 나중에 생겼고 생성 뒤 5초 미만이면 별도로 재예약합니다
+또 IPAddress가 기존 Service보다 나중에 생겼고 생성 뒤 5초 미만이면, 다시 검사하도록 예약합니다
 트랜잭션 되돌리기와 repair가 경합해 불필요한 `IPAddressWrongReference` 경고를 내는 것을 막기 위해서입니다
 따라서 모든 잘못된 참조를 발견한 뒤 60초에 삭제하는 규칙이 아닙니다
 컨트롤러의 큐 처리와 재시도도 있으므로 이 값은 관측한 전체 복구 시간과 구분합니다
 
-한 주소를 두 Service가 쓰거나 주소가 어느 ServiceCIDR에도 속하지 않는 상황은 Service를 자동 재주소화해 고치지 않습니다
+한 주소를 두 Service가 쓰거나 주소가 어느 ServiceCIDR에도 속하지 않는 상황은 Service에 새 주소를 자동 할당하는 방식으로 고치지 않습니다
 `ClusterIPAlreadyAllocated` 또는 `ClusterIPOutOfRange` Event와 재생성 안내를 남깁니다
 repair가 만드는 변경은 IPAddress 쪽이며, 정상적인 기존 ClusterIP를 임의로 교체하는 컨트롤러가 아닙니다
 
