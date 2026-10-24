@@ -1,5 +1,5 @@
 ---
-title: "Kubernetes 인가: 그 신원으로 무엇을 판정할 수 있나"
+title: "Kubernetes 인가: 요청을 허용하는 기준과 RBAC의 범위"
 excerpt: "RBAC이 비교하는 요청 속성과 authorizer 체인의 판단 순서를 설명합니다. RoleBinding의 범위, selector의 한계, bind·escalate와 system:masters, can-i의 진단 범위를 구분합니다"
 category: "kubernetes"
 tags: ["kubernetes", "authorization", "rbac", "concept"]
@@ -11,7 +11,7 @@ date: "2026-07-25"
 
 [인증](/essays/k8s-theory-authentication)이 자격증명을 `user.Info`로 바꿨다면, 인가는 그 신원으로 어떤 요청을 허용할지 판단합니다
 `user.Info`는 인증된 이름·UID·그룹·extra를 담는 사용자 정보입니다
-여기에 동작·대상·범위를 붙여 인가를 맡는 구성요소인 authorizer에 전달합니다
+API 서버는 이 사용자 정보에 요청의 동작·대상·범위를 더해 인가를 맡는 구성요소인 authorizer에 전달합니다
 
 이 판단이 오브젝트 본문의 값이나 반환될 목록의 각 항목까지 검사하는 것은 아닙니다
 먼저 한 요청이 허용되는 과정을 보고, 어디에서 판단 범위가 달라지는지 살펴보겠습니다
@@ -41,14 +41,14 @@ API 서버는 HTTP 요청에서 다음 속성을 얻습니다
 
 RBAC이 비교한 것은 요청의 속성입니다
 어떤 Pod가 결과에 포함될지는 뒤의 목록 처리 경로가 정합니다
-그 결과 Pod의 내용을 하나씩 RBAC으로 검사한 것은 아닙니다
+RBAC이 목록에 담길 Pod의 내용을 하나씩 검사하는 것은 아닙니다
 
 ## RBAC 규칙은 무엇을 비교하나
 
 RBAC(Role-Based Access Control)은 역할의 허용 규칙과 신원·요청 속성을 비교합니다
 한 규칙의 API group·resource·verb·이름 조건은 함께 만족해야 합니다
-여러 규칙이나 여러 Binding에서 얻은 허용은 누적됩니다
-좁은 RoleBinding을 추가해도 다른 ClusterRoleBinding이 이미 준 넓은 허용을 빼앗지는 못합니다
+여러 규칙이나 Binding에서 부여한 권한은 합쳐집니다
+권한 범위가 좁은 RoleBinding을 추가해도 다른 ClusterRoleBinding이 이미 준 넓은 권한이 줄어들지는 않습니다
 
 다음은 완전한 매니페스트가 아니라 ClusterRole 규칙의 구조를 보여 주는 조각입니다
 
@@ -69,7 +69,7 @@ rules:
 
 ### HTTP 메서드와 verb는 같지 않다
 
-이름을 지정한 GET은 `get`, collection에 대한 GET은 `list`, watch 요청은 `watch`입니다
+이름을 지정한 GET은 `get`, 목록을 조회하는 collection GET은 `list`, watch 요청은 `watch`입니다
 PATCH는 `patch`로 인가되므로 `update` 권한만으로 자동 통과하지 않습니다
 반면 admission은 PATCH를 적용한 결과를 UPDATE 또는 CREATE operation으로 심사할 수 있습니다
 인가 verb와 admission operation은 목적이 다른 분류입니다
@@ -83,7 +83,7 @@ PATCH는 `patch`로 인가되므로 `update` 권한만으로 자동 통과하지
 ## Role과 Binding이 권한 범위를 나누는 방식
 
 Role과 ClusterRole은 허용할 동작을 적습니다
-Binding은 그 규칙을 누구에게 어느 범위에서 줄지 연결합니다
+Binding은 그 규칙을 적용할 신원과 범위를 정합니다
 ClusterRole을 정의하기만 해서는 아무 신원에도 권한을 주지 않습니다
 
 | 규칙 객체 | namespace X의 RoleBinding으로 연결 | ClusterRoleBinding으로 연결 |
@@ -95,7 +95,7 @@ ClusterRole을 정의하기만 해서는 아무 신원에도 권한을 주지 �
 같은 규칙을 ClusterRoleBinding으로 부여하면 namespace 하나에 묶이지 않는 권한이 됩니다
 
 RoleBinding의 namespace는 **권한을 행사할 대상의 범위**입니다
-subject인 ServiceAccount의 namespace와 같아야 하는 것은 아닙니다
+권한을 받을 대상인 subject가 ServiceAccount라면, 그 ServiceAccount의 namespace와 같을 필요는 없습니다
 `team-a`의 ServiceAccount를 `prod`의 RoleBinding에 적으면 그 신원에 `prod` 안의 권한을 줄 수 있습니다
 
 여러 namespace의 RoleBinding을 받았다고 `/api/v1/pods` 같은 전체 namespace 목록 요청까지 자동 허용되지는 않습니다
@@ -136,7 +136,7 @@ authorizer는 Decision과 별도로 오류도 반환하며, 인가 필터는 `Al
 
 호출 실패에서 `NoOpinion`을 선택하는 것은 다음 authorizer에게 판단 기회를 주는 것이며, 그 요청을 허용한다는 뜻은 아닙니다
 뒤 authorizer가 결론을 내면 그 결과가 반환되고, 끝까지 결론이 없으면 누적한 오류가 남습니다
-캐시된 판단을 재사용하는 동안에는 원격 정책 변경이나 권한 회수가 곧바로 반영되지 않을 수도 있습니다
+캐시된 판단을 재사용하는 동안에는 외부 Webhook의 정책 변경이나 권한 회수가 곧바로 반영되지 않을 수도 있습니다
 
 이 관계는 [`unionAuthzHandler.Authorize`](https://github.com/kubernetes/kubernetes/blob/8aaeb4e53d1a489570afe94ef5258554de68897a/staging/src/k8s.io/apiserver/pkg/authorization/union/union.go), [`WebhookAuthorizer.Authorize`](https://github.com/kubernetes/kubernetes/blob/8aaeb4e53d1a489570afe94ef5258554de68897a/staging/src/k8s.io/apiserver/plugin/pkg/authorizer/webhook/webhook.go), [`withAuthorization`](https://github.com/kubernetes/kubernetes/blob/8aaeb4e53d1a489570afe94ef5258554de68897a/staging/src/k8s.io/apiserver/pkg/endpoints/filters/authorization.go)에 나뉘어 있습니다
 
@@ -156,7 +156,8 @@ field selector는 객체 필드 값으로 검색 대상을 좁히는 조건입�
 실제로 그 이름을 대상으로 하는 list·watch verb 권한도 있어야 합니다
 
 `deletecollection`과 최상위 resource의 `create`는 이름으로 제한할 수 없습니다
-`create`라도 `pods/exec`처럼 URL에 대상 이름이 있는 하위 resource는 이 제한을 그대로 적용하지 않습니다
+다만 `pods/exec`처럼 URL에 대상 이름이 있는 하위 resource는 다릅니다
+이런 요청은 verb가 `create`여도 이름을 기준으로 제한할 수 있습니다
 요청 시점에 어떤 이름을 알 수 있는지가 차이를 만듭니다
 
 ### selector는 결과 객체별 접근 제어가 아니다
@@ -171,7 +172,7 @@ SubjectAccessReview는 지정한 신원·동작의 인가 판단을 묻는 API�
 허용 뒤에는 목록 처리 경로가 selector에 맞는 객체를 고릅니다
 authorizer가 반환 객체를 하나씩 숨기는 구조가 아닙니다
 
-예를 들어 정책이 `team=a` 검색 범위만 허용한다면 selector가 없거나 더 넓은 요청을 거부해야 경계가 됩니다
+예를 들어 `team=a` 검색 범위만 허용하는 정책이라면, selector가 없거나 더 넓은 범위를 요청할 때 거부해야 그 제한이 유지됩니다
 사용자가 selector 자체를 바꿀 수 있다는 점도 고려해야 합니다
 `team=a` label을 소유권의 근거로 사용한다면 누가 그 label을 쓸 수 있는지 별도 쓰기 정책도 필요합니다
 정해진 이름 하나의 허용과 “내가 소유한 Pod 전체”의 동적 허용은 같은 기능이 아닙니다
@@ -179,18 +180,18 @@ authorizer가 반환 객체를 하나씩 숨기는 구조가 아닙니다
 ## 규칙을 만들고 위임하는 일도 검사한다
 
 `aggregationRule`이 있는 ClusterRole의 `rules`는 aggregation controller가 계산합니다
-selector에 맞는 다른 ClusterRole의 규칙을 모으므로 집계 대상의 `rules`를 직접 수정해도 덮어쓸 수 있습니다
+selector에 맞는 다른 ClusterRole의 규칙을 모아 채우므로, `aggregationRule`이 있는 ClusterRole의 `rules`를 직접 수정해도 controller가 덮어쓸 수 있습니다
 예를 들어 CRD operator가 자기 resource의 읽기 규칙에 집계 label을 붙이면 기본 `view` 역할에 포함되도록 구성할 수 있습니다
 
 Role을 생성할 수 있다는 이유로 임의의 권한을 그 Role에 쓸 수 있다면 스스로 권한을 키울 수 있습니다
-이를 막기 위해 Role·ClusterRole을 쓸 때는 그 안의 권한을 이미 갖고 있거나 해당 범위의 `escalate` 권한이 필요합니다
-Binding을 쓸 때도 연결할 역할의 권한을 갖고 있거나 해당 역할에 대한 `bind` 권한이 필요합니다
+이를 막기 위해 Role·ClusterRole을 생성하거나 수정할 때는 그 안의 권한을 이미 갖고 있거나 해당 범위의 `escalate` 권한이 있어야 합니다
+Binding을 생성하거나 수정할 때도 연결할 역할의 권한을 갖고 있거나 해당 역할에 대한 `bind` 권한이 필요합니다
 
-이 승격 검사는 일반 authz 필터가 디코딩 전 본문을 읽는 예외가 아닙니다
-Role·Binding API의 저장 구현이 디코딩된 규칙을 검사하는 추가 방어선이며, RBAC authorizer를 사용하지 않는 구성에도 적용됩니다
+이 승격 검사는 Role·Binding API의 저장 구현이 디코딩된 규칙을 검사하는 추가 방어선입니다
+일반 authz 필터가 디코딩 전에 본문을 읽는 것은 아니며, RBAC authorizer를 사용하지 않는 구성에도 이 검사가 적용됩니다
 `bind`·`escalate`가 원래 객체의 create·update 권한을 대신하지도 않습니다
 
-위험 범위는 어떤 역할·이름·범위에 이를 허용했는지에 달려 있습니다
+권한을 얼마나 확대할 수 있는지는 `bind`·`escalate`를 어떤 역할·이름·범위에 허용했는지에 달려 있습니다
 어떤 `bind`나 `escalate` 권한이든 전체 클러스터 관리자와 같다고 단정할 수는 없습니다
 앱 팀에 Role과 Binding 관리를 위임할 때도 객체를 쓸 권한과 어떤 권한까지 위임할 수 있는지를 따로 정해야 합니다
 
@@ -205,7 +206,7 @@ informer는 API의 변경을 따라가며 객체의 로컬 사본을 관리하�
 
 ![Node authorizer가 Pod 배치와 참조에서 Node가 접근할 객체의 관계를 얻는 구조](/diagrams/k8s-theory-authorization-2.svg)
 
-이 그래프는 관측한 사본이므로 변화 전파에 지연이 있을 수 있습니다
+이 그래프는 관측한 객체 사본으로 유지하므로 실제 변경이 반영되기까지 지연이 있을 수 있습니다
 Node authorizer는 관계에 따른 읽기 외에도 kubelet에 필요한 여러 API 동작을 허용합니다
 
 `NodeRestriction` admission은 `system:node:<nodeName>` kubelet이 수정할 Node·Pod의 **내용**을 제한합니다
@@ -222,13 +223,13 @@ RBAC 승격 검사에서도 별도로 통과시킵니다
 `rbac.authorization.kubernetes.io/autoupdate: "false"`는 그 자동 갱신을 끄는 annotation이지만, 앞의 특권 그룹 허용까지 끄지는 않습니다
 기본 Binding만 수정해 이 그룹의 API 접근을 회수할 수 없는 이유입니다
 
-`O=system:masters`인 클라이언트 인증서가 유출되면 개별 인증서 폐기 미지원과 이 특권이 겹칩니다
+`O=system:masters`인 클라이언트 인증서가 유출되면 이 특권에 더해 개별 인증서를 폐기할 수 없다는 문제까지 생깁니다
 인증서 만료와 신뢰 CA, API 서버 인증 설정까지 함께 확인해야 합니다
 여기서의 특권은 인가에 대한 것이며, 타입 검증을 건너뛰거나 모든 admission 정책을 일괄 면제하는 기능은 아닙니다
 
 ## can-i가 yes인데 실제 요청은 왜 막힐까
 
-`kubectl auth can-i` 단건은 `SelfSubjectAccessReview`로 대상 동작의 authorizer 결과를 확인합니다
+`kubectl auth can-i`로 동작 하나를 물으면 `SelfSubjectAccessReview`를 통해 해당 동작에 대한 authorizer의 판단을 확인합니다
 `--list`는 `SelfSubjectRulesReview`로 규칙을 열거하므로, Webhook처럼 규칙을 열거할 수 없는 authorizer가 있으면 불완전할 수 있습니다
 `--as`는 다른 신원으로 요청하는 impersonation이며 별도 권한이 필요합니다
 

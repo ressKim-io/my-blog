@@ -1,5 +1,5 @@
 ---
-title: "Server-Side Apply — 필드마다 소유권과 충돌을 기록하는 방식"
+title: "Server-Side Apply — 필드별 소유권으로 변경 충돌을 판단합니다"
 excerpt: "같은 값을 Apply하면 공동 소유가 되고, 다른 값을 Apply하면 충돌할 수 있습니다. managedFields의 구조와 Update의 차이, 리스트 병합 단위와 스키마 변경의 영향을 살펴봅니다"
 category: "kubernetes"
 tags: ["Kubernetes", "Server-Side Apply", "managedFields", "CRD", "concept"]
@@ -37,7 +37,6 @@ SSA의 필드 소유권 충돌로 거부하지 않고, 실제 바뀐 필드의 �
 공식 문서에서 필드를 관리한다는 것은 그 값이 다른 주체에 의해 바뀌지 않기를 기대한다는 뜻입니다
 
 공동 소유 상태에서는 이후 A나 B가 Apply로 값을 바꿀 때 상대방의 소유권과 충돌합니다
-같은 값이라 통과한 요청이 다음 변경에서는 충돌 조건을 만든 셈입니다
 
 ## managedFields는 이름 하나당 한 항목이 아닙니다
 
@@ -117,7 +116,7 @@ Apply의 충돌 계산에서는 다른 매니저가 소유한 필드와 이번 �
 [resourceVersion](/essays/k8s-theory-resource-version)의 충돌도 HTTP 409를 반환할 수 있지만 원인은 다릅니다
 resourceVersion은 읽은 뒤 오브젝트가 바뀌었는지 검사하고, SSA는 필드별 관리 범위가 겹치는지 검사합니다
 
-SSA 충돌의 판별 재료로 다음과 같은 메시지와 `FieldManagerConflict` cause를 볼 수 있습니다
+SSA 충돌은 다음과 같은 메시지와 오류 원인을 나타내는 `FieldManagerConflict` cause로 구분할 수 있습니다
 아래는 소스의 형식에 맞춘 예시이며 클러스터에서 수집한 로그가 아닙니다
 
 ```text
@@ -127,7 +126,7 @@ Apply failed with 1 conflict: conflict with "hpa" using apps/v1: .spec.replicas
 응답 `Status` 객체의 `details.causes[].reason`과 필드 경로를 함께 확인해야 합니다
 메시지와 cause를 만드는 코드는 [`NewConflictError`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/util/managedfields/internal/conflict.go)에 있습니다
 
-## 충돌을 푸는 선택은 값과 소유권을 함께 바꿉니다
+## 충돌을 풀 때는 값과 소유권을 함께 정해야 합니다
 
 다른 매니저가 관리하는 값을 Apply로 바꾸려다 충돌했다면, 어떤 값을 유지하고 누가 관리할지 정해야 합니다
 
@@ -152,7 +151,8 @@ CLI의 `--force-conflicts`는 `--server-side`와 함께 사용하도록 [kubectl
 실제로 변경하거나 추가한 필드를 가져오고, 값이 같은 필드는 그것만으로 가져오지 않습니다
 
 [`Updater.Update`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/sigs.k8s.io/structured-merge-diff/v6/merge/update.go)는 기존 소유 집합에서 제거된 필드를 빼고 `Modified`·`Added`를 더합니다
-Apply는 자신이 관리할 필드 집합을 선언하지만 Update는 최종 객체의 값 변화를 기준으로 소유권을 갱신하는 차이입니다
+Apply는 자신이 관리할 필드 집합을 선언합니다
+반면 Update는 최종 객체의 값 변화를 기준으로 소유권을 갱신합니다
 
 SSA 요청에는 `fieldManager` 쿼리 파라미터가 필수입니다
 다른 쓰기에서는 선택이며, 생략하면 서버가 `User-Agent` 헤더에서 이름을 추론할 수 있습니다
@@ -169,7 +169,7 @@ API 규칙은 [공식 SSA 문서](https://github.com/kubernetes/website/blob/7fd
 
 | `x-kubernetes-list-type` | 병합·소유 단위 | 예시 |
 |---|---|---|
-| `atomic` | 리스트 전체 | 별도 topology를 선언하지 않은 CRD 배열 |
+| `atomic` | 리스트 전체 | 별도 병합 단위(topology)를 선언하지 않은 CRD 배열 |
 | `set` | 중복 없는 원소의 값 | `metadata.finalizers` |
 | `map` | 지정한 키 필드로 식별한 원소 | `spec.containers`의 `name` |
 
@@ -212,7 +212,7 @@ API 버전을 그대로 둔 채 이 구조를 바꾸면 이미 저장된 `manage
 `map`·`set`·`granular`에서 `atomic`으로 바꾸면 원소나 내부 필드를 소유했던 매니저가 전체를 소유하게 됩니다
 그 뒤에는 전에 독립적으로 바꾸던 부분도 다른 매니저와 충돌할 수 있습니다
 
-반대 방향은 충돌이 사라질 수 있어서 더 알아차리기 어렵습니다
+반대로 `atomic`에서 원소별·필드별 관리로 바꾸면 충돌이 사라질 수 있어 소유권 변화를 알아차리기 어렵습니다
 전체를 소유했다는 기록만으로는 서버가 내부 필드의 주인을 나눠 복원할 수 없기 때문입니다
 예를 들어 atomic 맵을 granular로 바꾸면 매니저가 맵 자체의 소유권은 유지하더라도 내부 키의 소유권은 잃을 수 있습니다
 다른 매니저가 그 키를 바꾸거나 지울 때 충돌이 발생하지 않을 수 있습니다
@@ -236,7 +236,7 @@ API 버전을 그대로 둔 채 이 구조를 바꾸면 이미 저장된 `manage
 다른 매니저에게 필드가 넘어갔거나 자신이 관리에서 뺐을 때, 빈 항목이 계속 남지는 않습니다
 이 조건은 [`Updater.update`의 정리 루프](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/sigs.k8s.io/structured-merge-diff/v6/merge/update.go)에서 확인할 수 있습니다
 
-## client-side apply와 다른 판단 재료가 생깁니다
+## client-side apply와 SSA는 변경안을 계산하는 곳이 다릅니다
 
 client-side apply는 `kubectl.kubernetes.io/last-applied-configuration` 어노테이션에 지난 적용 내용을 남깁니다
 클라이언트가 지난 설정·현재 서버 값·이번 설정을 비교해 변경안을 계산하는 방식입니다

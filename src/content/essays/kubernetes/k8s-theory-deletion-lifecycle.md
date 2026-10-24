@@ -1,5 +1,5 @@
 ---
-title: "DELETE와 삭제 수명 — finalizer와 유예 종료가 기다리는 것"
+title: "DELETE 이후 객체가 남는 이유 — finalizer와 유예 종료"
 excerpt: "DELETE 요청 뒤에도 객체가 남는 이유를 finalizer와 유예 종료로 나누고, 전파 정책·Namespace 정리·generation을 통해 삭제가 멈춘 지점을 살펴봅니다"
 category: kubernetes
 tags: [Kubernetes, Finalizer, Garbage Collection, Namespace, concept]
@@ -10,7 +10,7 @@ date: "2026-08-04"
 ---
 
 DELETE 요청이 성공해도 객체가 API에서 바로 사라지는 것은 아닙니다
-삭제 전에 정리를 끝내야 하거나, 실행 중인 컨테이너가 종료할 시간을 받아야 한다면 API 서버는 삭제 시작을 기록하고 객체를 남깁니다
+삭제 전에 정리를 끝내야 하거나 실행 중인 컨테이너에 종료할 시간을 줘야 한다면, API 서버는 삭제 시작을 기록하고 객체를 남깁니다
 
 그때 무엇을 기다리는지에 따라 확인할 필드와 담당 주체가 달라집니다
 `metadata.finalizers`가 남은 경우와, 이 목록이 비었는데도 Pod가 남은 경우를 같은 문제로 보면 삭제가 멈춘 지점을 놓칠 수 있습니다
@@ -50,7 +50,7 @@ Garbage collector(GC)는 객체의 `ownerReferences`를 따라 소유 관계를 
 | 정책 | 부모 객체 | 자식 처리 | 부모에 붙는 전파용 finalizer |
 |---|---|---|---|
 | `Background` | 다른 보류 조건이 없으면 먼저 사라짐 | GC가 뒤따라 정리 | 없음 |
-| `Foreground` | 삭제 중인 상태로 남음 | 부모 삭제를 막는 자식의 처리가 끝나야 부모를 놓아줌 | `foregroundDeletion` |
+| `Foreground` | 삭제 중인 상태로 남음 | 부모 삭제를 막는 자식의 처리가 끝나면 부모 삭제를 진행할 수 있음 | `foregroundDeletion` |
 | `Orphan` | GC가 소유 참조를 제거하는 동안 남음 | 해당 부모의 owner reference만 제거하고 자식은 남김 | `orphan` |
 
 Background에서 자식이 무조건 모두 삭제되는 것은 아닙니다
@@ -67,7 +67,7 @@ Background에서는 부모가 먼저 사라질 수 있으므로 `blockOwnerDelet
 
 Foreground에서는 blocking 자식 하나가 자기 finalizer에 걸려도 부모가 계속 남을 수 있습니다
 부모 이름도 점유되므로 같은 이름으로 다시 만들려 하면 `AlreadyExists`가 날 수 있습니다
-Background는 부모 이름을 먼저 놓아줄 수 있지만, 그 뒤에도 자식이 남아 있는 구간을 허용합니다
+Background에서는 부모가 먼저 사라져 이름을 다시 쓸 수 있지만, 그 뒤에도 자식이 남아 있을 수 있습니다
 
 전파 정책의 계약은 [Garbage Collection 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/architecture/garbage-collection.md)에 있습니다
 구현은 [`shouldOrphanDependents`·`shouldDeleteDependentsInForeground`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go), GC의 [`classifyReferences`·`processDeletingDependentsItem`·`orphanDependents`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/garbagecollector.go), kubectl 기본값은 [`delete_flags.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/delete/delete_flags.go)에서 확인했습니다
@@ -78,7 +78,7 @@ Background는 부모 이름을 먼저 놓아줄 수 있지만, 그 뒤에도 자
 API 서버가 이 문자열을 보고 담당 컨트롤러를 등록하거나 정리 함수를 호출하지는 않습니다
 보통 해당 이름을 관리하는 컨트롤러가 삭제 시작을 관찰하고, 자신이 맡은 정리를 마친 뒤 항목을 제거합니다
 
-API 서버는 그 항목을 지울 권한을 문자열의 담당자에게만 주지도 않습니다
+API 서버가 그 이름을 관리하는 컨트롤러에게만 항목을 지울 권한을 주는 것도 아닙니다
 수정 권한이 있는 다른 주체도 제거할 수 있으므로, **항목이 없어졌다는 사실만으로 외부 정리가 실제로 끝났다고 증명할 수는 없습니다**
 컨트롤러가 멈추고 다른 주체도 항목을 제거하지 않으면 객체는 삭제 중인 상태로 남습니다
 
@@ -142,11 +142,11 @@ kubelet의 status manager는 종료 완료 조건을 확인한 뒤 다음 두 �
 | DELETE 옵션 | 목적 |
 |---|---|
 | `gracePeriodSeconds: 0` | 추가 유예 없이 삭제 요청 |
-| `preconditions.uid` | 같은 이름으로 새로 생긴 다른 Pod를 지우지 않도록 대상 수명 확인 |
+| `preconditions.uid` | 같은 이름으로 새로 생긴 다른 Pod를 지우지 않도록 UID 확인 |
 
 확인한 구현은 API에서 관찰한 Pod phase가 terminal인지와 Pod 종료 처리가 끝났는지도 검사합니다
 여기서 terminal은 `Succeeded` 또는 `Failed`처럼 실행이 끝난 phase를 뜻합니다
-단순히 처음 요청한 시각이 지났다는 이유만으로 이 경로가 모두 끝나는 것은 아닙니다
+유예 시간이 지났다는 이유만으로 종료 처리와 마지막 DELETE까지 모두 끝나는 것은 아닙니다
 
 이 DELETE가 성공한 뒤 status manager가 남기는 로그 문구는 다음과 같습니다
 
@@ -181,7 +181,7 @@ Pod fully terminated and removed from etcd
 `deletionTimestamp`는 삭제가 시작됐다는 상태와 예정 시각을 읽는 필드이지, 저장소에서 실제로 사라진 시각의 기록이 아닙니다
 관련 분기는 [`BeforeDelete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/delete.go)와 [`markAsDeleting`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go)에 있습니다
 
-## Namespace는 안의 내용을 확인한 뒤 자기 finalizer를 제거합니다
+## Namespace 안의 객체를 정리한 뒤 finalizer를 제거합니다
 
 Namespace는 일반적인 `metadata.finalizers`와 별도로 `spec.finalizers`도 사용합니다
 API 서버는 Namespace를 만들 때 `spec.finalizers`에 `kubernetes`가 없으면 추가합니다
@@ -207,7 +207,7 @@ v1.37.1 구현은 발견한 삭제 대상에 Pod가 포함돼 있으면 Pod를 �
 Pod가 남았다고 확인되면 다른 리소스 삭제로 넘어가지 않습니다
 이 동작은 현재 소스에서 `OrderedNamespaceDeletion` feature gate 분기 없이 적용됩니다
 
-발견한 내용의 삭제가 끝나고 잔존 내용과 오류가 없으면 `/finalize`로 자신이 관리하는 `kubernetes` finalizer를 제거합니다
+찾아낸 객체를 모두 삭제했고 오류도 없으면, namespace controller는 `/finalize`로 자신이 관리하는 `kubernetes` finalizer를 제거합니다
 다른 `spec.finalizers` 항목은 지우지 않습니다
 Namespace는 두 finalizer 필드를 모두 가질 수 있으므로 `kubernetes`가 없어졌다는 것만으로 삭제 완료를 판단할 수는 없습니다
 
@@ -229,7 +229,7 @@ APIService는 Kubernetes API 경로를 별도 API 서버에 연결하는 등록 
 이 경우 실패한 group과 APIService의 `Available` 상태를 살펴봐야 합니다
 
 일부 discovery만 성공해도 namespace controller는 확인한 리소스의 삭제를 계속 시도할 수 있습니다
-그러나 discovery 오류가 남은 시도에서는 `kubernetes` finalizer를 제거하지 않습니다
+그러나 discovery 오류가 해결되지 않은 동안에는 `kubernetes` finalizer를 제거하지 않습니다
 아직 찾지 못한 삭제 대상이 있을 수 있기 때문입니다
 
 한 객체가 남아 있고 그 객체에 finalizer도 있다면 `NamespaceContentRemaining`과 `NamespaceFinalizersRemaining`이 함께 True일 수 있습니다
@@ -256,7 +256,7 @@ unable to create new content in namespace <ns> because it is being terminated
 네임스페이스 안의 권한을 조회하는 `localsubjectaccessreviews`는 존재 여부를 통한 정보 노출을 막기 위해 이 검사에서 제외됩니다
 이 예외는 [`NamespaceLifecycle.Admit`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/namespace/lifecycle/admission.go)에 있습니다
 
-`spec.finalizers`를 `/finalize`로 강제로 비우면 namespace controller의 내용 확인을 건너뛰게 됩니다
+`spec.finalizers`를 `/finalize`로 강제로 비우면 namespace controller가 내부 객체의 정리 여부를 확인하는 과정을 건너뛰게 됩니다
 다른 삭제 보류 조건이 없다면 Namespace가 사라질 수 있고, 남은 객체는 정상적인 조회·정리 경로에서 벗어날 수 있습니다
 따라서 이 필드를 비우는 일을 내부 리소스를 모두 정리하는 작업과 같게 취급하면 안 됩니다
 
@@ -278,7 +278,8 @@ Custom resource는 status subresource를 켜지 않았다면 `status`도 metadat
 여기서 말하는 custom resource는 정의 자체인 CRD 객체와 구분합니다
 
 삭제 시작을 저장할 때도 변화가 있습니다
-기존 generation이 양수라면 첫 유예 삭제의 update나 finalizer 때문에 남겨 두는 첫 삭제 표시에서 1 증가할 수 있습니다
+기존 generation이 양수라면 유예 삭제를 처음 기록하는 update에서 1 증가할 수 있습니다
+finalizer 때문에 객체를 남기면서 처음 삭제 표시를 기록할 때도 마찬가지입니다
 즉시 저장소에서 지우는 경로라면 새 번호를 읽을 객체 자체가 남지 않습니다
 
 사용자 값 초기화는 [`BeforeUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/update.go), 증가 조건은 [StatefulSet](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/statefulset/strategy.go)·[Deployment](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/deployment/strategy.go)·[custom resource](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/registry/customresource/strategy.go)의 `PrepareForUpdate`에 있습니다

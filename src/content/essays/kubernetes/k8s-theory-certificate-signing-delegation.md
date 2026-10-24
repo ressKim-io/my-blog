@@ -1,5 +1,5 @@
 ---
-title: "인증서 발급과 사칭: API에 없는 리소스로 권한을 묻는 이유"
+title: "인증서 발급과 사칭: 조회할 수 없는 리소스 이름으로 권한을 묻는 이유"
 excerpt: "CSR 생성·자동 승인·서명의 권한을 구분하고 kubelet의 첫 인증서 발급과 갱신을 따라갑니다. signer별 인가와 요청별 impersonation, v1.37의 ConstrainedImpersonation이 검사하는 범위를 설명합니다"
 category: "kubernetes"
 tags: ["kubernetes", "certificates", "rbac", "impersonation", "concept"]
@@ -14,14 +14,14 @@ Kubernetes는 두 경우 모두 리소스 이름과 동사를 사용해 인가�
 그중에는 실제 API 오브젝트나 조회 엔드포인트가 없는 이름도 있습니다
 
 [인증](/essays/k8s-theory-authentication)에서는 자격증명이 요청자의 신원으로 바뀌는 과정을 봤습니다
-이번에는 인증에 쓸 증거를 발급하는 과정과, 이미 인증한 요청에서 사용할 신원을 바꾸는 과정을 살펴봅니다
+이번에는 인증에 쓸 인증서를 발급하는 과정과, 이미 인증한 요청에서 사용할 신원을 바꾸는 과정을 살펴봅니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
 > 소스 ref: `f78e722310e50bcaca9276be22276d9e91d91308`
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 클러스터에서 재현한 실측 기록은 포함하지 않습니다
 
-## 인증서와 impersonation은 신원이 남는 범위가 다르다
+## 인증서와 impersonation은 적용되는 요청 범위가 다릅니다
 
 인증서를 발급받으면 파일로 남은 인증서를 다음 요청의 자격증명으로 사용할 수 있습니다
 impersonation은 자기 자격증명으로 먼저 인증한 뒤, 해당 요청에서 다른 신원을 사용하도록 서버에 요청하는 방식입니다
@@ -105,7 +105,7 @@ authorizer는 요청 속성과 정책을 받아 허용 여부를 판단하는 �
 | kubelet 클라이언트 인증서 요청 | `certificatesigningrequests/nodeclient`에 `create` |
 | 위 조건에 더해 요청자 이름과 CSR의 subject Common Name이 같은 요청 | `certificatesigningrequests/selfnodeclient`에 `create` |
 
-`nodeclient`와 `selfnodeclient`는 자동 승인 자격을 표현하는 합성 subresource 이름입니다
+`nodeclient`와 `selfnodeclient`는 자동 승인 자격을 표현하기 위해 붙인 합성 subresource 이름입니다
 실제로 POST할 수 있는 별도 엔드포인트는 없습니다
 컨트롤러가 생성한 SubjectAccessReview에 이 이름을 넣는 것입니다
 
@@ -113,7 +113,7 @@ authorizer는 요청 속성과 정책을 받아 허용 여부를 판단하는 �
 따라서 첫 발급과 갱신을 설명하는 두 이름을, 서로 완전히 배타적인 실행 경로로 이해하면 안 됩니다
 
 SubjectAccessReview에는 컨트롤러 자신의 신원 대신 CSR의 `username`·`uid`·`groups`·`extra`가 들어갑니다
-요청을 알아봤어도 이 권한을 허용받지 못하면 승인·거절 조건을 쓰지 않고 요청을 남겨 둡니다
+CSR의 요청 형태를 인식했어도 이 권한을 허용받지 못하면 승인·거절 조건을 쓰지 않고 요청을 남겨 둡니다
 이때의 로그 판별 문구는 `subject access review was not approved`입니다
 정확한 분기는 [`recognizers`·`sarApprover.handle`·`authorize`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/certificates/approver/sarapprove.go), 기본 역할은 [`ClusterRoles`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/auth/authorizer/rbac/bootstrappolicy/policy.go)에서 확인할 수 있습니다
 
@@ -142,7 +142,7 @@ RBAC은 API group·resource·verb·name 등의 속성으로 권한을 표현합�
 일반 RBAC 규칙에는 `spec.signerName` 값에 따라 허용하라는 필드 조건이 없습니다
 
 그래서 승인·서명 코드는 authorizer에 직접 질문할 때 `signers`라는 합성 리소스 이름을 사용합니다
-CSR의 `spec.signerName`을 이 질문의 리소스 `name`으로 옮깁니다
+CSR의 `spec.signerName` 값을 인가 속성의 리소스 `name`으로 전달합니다
 다음은 서명 권한 질문을 나타내는 속성이며, 실제 signer 오브젝트의 명세가 아닙니다
 
 ```yaml
@@ -190,7 +190,7 @@ Secret 타입은 `bootstrap.kubernetes.io/token`이며, 클라이언트는 `<tok
 
 인증기는 Secret informer의 사본을 읽습니다
 informer는 API의 변경을 받아 로컬 객체 사본을 유지하는 구성요소입니다
-따라서 Secret 삭제가 인증 판정에 반영되려면 그 삭제를 인증기가 사용하는 사본도 알아야 합니다
+따라서 Secret 삭제가 인증 판정에 반영되려면 인증기가 사용하는 사본에도 삭제가 반영돼야 합니다
 
 반면 `expiration`은 인증기가 현재 시각과 직접 비교합니다
 TokenCleaner가 아직 Secret을 삭제하지 않았어도 만료한 토큰은 이 인증 검사에서 거절합니다
@@ -300,7 +300,7 @@ APF는 요청을 분류하고 우선순위 수준별 동시 처리 용량을 배
 `users`·`groups`·`uids`·`userextras`는 여기서 인가를 위해 사용하는 이름입니다
 `serviceaccounts`는 실제 namespaced core 리소스 이름을 재사용합니다
 하지만 확인한 사칭 구현은 ServiceAccount 객체를 조회하지 않고, 이름에서 분리한 namespace와 이름으로 인가를 묻습니다
-사칭 권한 허용은 그 ServiceAccount 객체의 존재 확인과 다른 질문입니다
+사칭 권한을 허용받았다고 그 ServiceAccount 객체가 존재한다는 뜻은 아닙니다
 
 기존 경로에서 사용자 하나와 명시한 그룹 둘을 사칭하면 각각의 대상에 대한 인가가 필요합니다
 하나라도 허용되지 않으면 이 경로로 사칭할 수 없습니다
@@ -345,7 +345,7 @@ ServiceAccount에는 `serviceaccount`, Node에는 `arbitrary-node`·`associated-
 
 admission webhook의 `userInfo`에는 바뀐 신원이 전달됩니다
 기본 AdmissionReview의 이 필드만으로는 원래 호출자나 사칭 사용 여부를 알 수 없습니다
-사칭을 허용한 권한 정책과, 원래 호출자·사칭 신원을 보존하는 audit를 함께 봐야 하는 경계입니다
+사칭을 허용한 권한 정책뿐 아니라, 원래 호출자와 사칭 신원을 남기는 audit도 함께 확인해야 합니다
 이 처리는 [`processImpersonationHeaders`·`ServeHTTP`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/filters/impersonation/constrained_impersonation.go)에서 확인할 수 있습니다
 
 ### --as도 서버의 실제 사칭 검사부터 통과해야 한다
@@ -356,7 +356,8 @@ admission webhook의 `userInfo`에는 바뀐 신원이 전달됩니다
 
 제한 사칭만 허용했다면 실제 Pod 요청과 SelfSubjectAccessReview 생성은 서로 다른 작업입니다
 Pod 조회의 제한 사칭 권한만으로 `can-i --as`의 review 생성까지 허용된다고 가정하면 안 됩니다
-review 요청을 통과한 뒤 답하는 대상도 인가이며, [앞서 본 can-i의 경계](/essays/k8s-theory-authorization)처럼 admission까지 실행해 보는 것은 아닙니다
+review 요청을 통과해 얻는 답은 대상 동작의 인가 결과입니다
+[앞서 본 can-i의 경계](/essays/k8s-theory-authorization)처럼 admission까지 실행해 보는 것은 아닙니다
 요청 생성은 [`RunAccessCheck`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/auth/cani.go), 사칭 헤더의 의미는 [공식 문서 저장본](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/access-authn-authz/user-impersonation.md)에 설명돼 있습니다
 
 ## 멈춘 지점에 따라 확인할 권한도 달라진다

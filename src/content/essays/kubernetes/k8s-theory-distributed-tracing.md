@@ -11,7 +11,7 @@ date: "2026-08-27"
 
 API 서버 로그에 `Trace[...]`가 나왔다고 OpenTelemetry 추적 내보내기가 켜졌다는 뜻은 아닙니다
 한 요청을 처리하는 코드에는 메트릭, 느린 구간 로그, 분산 추적을 위한 계측이 함께 들어 있습니다
-각 기록은 남기는 조건과 시간 경계가 다릅니다
+기록마다 남는 조건과 측정하는 구간이 다릅니다
 
 span은 이름과 시작·끝 시각을 가진 추적 구간입니다
 여러 span을 부모·자식 관계로 연결하면 컴포넌트를 넘나드는 요청의 처리 흐름을 따라갈 수 있습니다
@@ -89,7 +89,7 @@ Kubernetes의 공통 추적 코드는 이 문맥을 읽고 쓰는 전파기와 �
 noop TracerProvider는 실제 span을 기록하지 않는 구현이지만, 계측된 HTTP transport의 문맥 전파까지 없애지는 않습니다
 
 [`WithTracing`과 `WrapperFor`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/tracing/utils.go)는 noop 추적기를 사용해도 HTTP 문맥 전파를 처리합니다
-이렇게 해야 중간 컴포넌트가 span을 내보내지 않는다는 이유만으로 뒤의 계측된 호출에 전달할 문맥까지 사라지지 않습니다
+그래서 중간 컴포넌트가 span을 내보내지 않아도 뒤의 계측된 호출에 문맥을 전달할 수 있습니다
 
 다만 이것은 모든 호출 경로가 자동으로 하나의 trace에 속한다는 뜻은 아닙니다
 계측기가 설치된 경로인지, 유효한 문맥이 있는지, 받은 쪽이 이를 부모로 신뢰하는지가 각각 영향을 줍니다
@@ -143,7 +143,7 @@ kubelet의 `KubeletTracing` 등록은 남아 있으며 v1.34부터 GA·기본 �
 
 실제 연결은 API 서버의 [`TracingOptions.ApplyTo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/tracing.go)와 kubelet의 [`newTracerProvider`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/server.go)에서 확인할 수 있습니다
 
-## 표본 수를 생략한 것과 0은 같은 표본기를 고릅니다
+## 표본 수를 생략하거나 0으로 두어도 부모의 표본 결정을 따릅니다
 
 `samplingRatePerMillion`은 백만 개당 얼마를 선택할지 정하며 0 이상 1,000,000 이하를 허용합니다
 예시의 `100`은 새 루트의 표본 비율을 10,000분의 1로 정한 값입니다
@@ -170,7 +170,7 @@ kubelet의 `KubeletTracing` 등록은 남아 있으며 v1.34부터 GA·기본 �
 
 ![특권 그룹의 유효한 원격 문맥은 부모가 되고 일반 요청의 문맥은 새 루트에 링크로 연결되는 표본 결정](/diagrams/k8s-theory-distributed-tracing-3.svg)
 
-부모는 trace의 계보와 표본 결정을 이어받는 관계입니다
+부모로 삼으면 같은 trace에 속하면서 표본 결정도 이어받습니다
 link는 다른 span과 관련이 있다는 표시이며, 여기서 사용하는 루트 표본기는 link의 sampled 표시를 따라 선택하지 않습니다
 
 외부 요청자의 sampled 표시를 모두 부모로 신뢰하면 서버의 루트 표본 비율을 우회할 수 있습니다
@@ -181,7 +181,7 @@ link는 다른 span과 관련이 있다는 표시이며, 여기서 사용하는 
 
 인증 구간의 span은 최상위 HTTP 추적 필터보다 바깥에서 먼저 열립니다
 특권 그룹 요청에 유효한 `traceparent`가 없으면 이미 열린 인증 span이 로컬 부모로 남을 수 있습니다
-그 경우에는 부모 기반 표본기가 인증 span의 선택을 따릅니다
+그 경우에는 부모 기반 표본기가 인증 span의 표본 결정을 따릅니다
 
 따라서 특권 그룹 요청에 헤더가 없다는 이유만으로 항상 span이 없다고 결론 낼 수 없습니다
 인증 span도 설정한 추적기로 시작하므로 그 부모 유무와 루트 표본 비율에 따라 선택 결과가 달라집니다
@@ -250,7 +250,7 @@ CNI·CSI 인터페이스 전체의 추적 구현 여부는 여기서 확인한 �
 기본값은 전송 간격을 항상 5초로 고정하거나, collector 도달 시간을 5초로 보장하는 설정이 아닙니다
 
 표의 30초는 배치 처리기 쪽 제한입니다
-OTLP gRPC exporter에는 별도로 기본 10초의 전송 제한이 있으며, 실제 내보내기는 상위 문맥과 exporter의 기한 중 먼저 만나는 제한을 따릅니다
+OTLP gRPC exporter에는 별도로 기본 10초의 전송 제한이 있으며, 실제 내보내기에는 상위 문맥과 exporter의 기한 중 더 이른 것이 적용됩니다
 
 | 상황 | 처리 |
 |---|---|
@@ -300,7 +300,7 @@ API 서버 추적 필터는 HTTP span에 `audit-id` 속성을 붙입니다
 이때 사용하는 `GetAuditIDTruncated`는 긴 ID를 64자로 제한하므로 원래 ID가 긴 경우에는 이 조건도 고려해야 합니다
 
 audit 로그는 요청의 감사 기록이고, span은 선택된 처리 구간의 관계와 시간을 담습니다
-집계 히스토그램, 조건부 요청 로그, 표본 span을 전부 같은 요청별 기록으로 취급하면 빈자리가 생긴 이유를 잘못 해석할 수 있습니다
+집계 히스토그램, 조건부 요청 로그, 표본 span을 전부 같은 요청별 기록으로 취급하면 특정 요청의 기록이 없는 이유를 잘못 해석할 수 있습니다
 
 ### 느린 요청을 남기는 정책은 수집 단계까지 이어집니다
 

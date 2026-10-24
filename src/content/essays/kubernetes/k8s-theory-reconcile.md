@@ -59,19 +59,19 @@ Pod가 Ready가 된 시점과 충분히 오래 Ready였다는 판단 시점이 �
 
 [`syncReplicaSet`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go)은 가용성 재확인 시점을 계산하고, [`AddRateLimited`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/rate_limiting_queue.go)는 limiter의 지연값을 `AddAfter`에 넘깁니다
 
-## expectations는 보낸 요청의 관찰을 기다립니다
+## expectations는 요청에 따른 자식 이벤트를 기다립니다
 
 같은 키의 동시 처리를 막아도 캐시 지연으로 인한 중복 조정은 남습니다
 두 reconcile이 순서대로 실행됐더라도, 둘 다 아직 0개인 사본을 읽을 수 있기 때문입니다
 
-ReplicaSet은 생성 요청을 보내기 전에 `ExpectCreations`로 기대 개수를 기록합니다
-Pod 생성 알림이 핸들러에 도착하면 `CreationObserved`가 기대 개수를 줄입니다
-다음 reconcile에서는 `SatisfiedExpectations`로 이 관찰이 채워졌는지 확인합니다
+ReplicaSet은 생성 요청을 보내기 전에 `ExpectCreations`로 기다릴 생성 이벤트 수를 기록합니다
+Pod 생성 알림이 핸들러에 도착하면 `CreationObserved`가 이 기대 개수를 줄입니다
+다음 reconcile에서는 `SatisfiedExpectations`로 기대한 자식 이벤트를 모두 관찰했는지 확인합니다
 
 ![생성 요청 전에 기대 수를 기록하고 생성 응답과 별도로 watch 관찰을 기다린 뒤 다음 조정을 허용하는 흐름](/diagrams/k8s-theory-reconcile-2.svg)
 
 예를 들어 세 개를 만들기로 했다면 먼저 기대 수를 3으로 둡니다
-생성 이벤트 세 개를 관찰하면 기대 수가 0이 되어 다음 수 조정을 진행할 수 있습니다
+생성 이벤트 세 개를 관찰하면 기대 수가 0이 되어 다음 복제본 수 조정을 진행할 수 있습니다
 기대가 아직 남아 있다면 `manageReplicas`를 건너뜁니다
 
 이때 전체 reconcile이 곧바로 끝나는 것은 아닙니다
@@ -86,7 +86,7 @@ expectations는 프로세스 메모리에 있는 임시 기록입니다
 만료는 다음 검사에서 적용하는 조건이므로, 실제 재처리 시점에는 다른 이벤트나 재예약도 필요합니다
 
 생성 요청 일부가 실패하거나 slow start 때문에 보내지 못했다면, 오지 않을 이벤트 수만큼 기대 개수를 줄입니다
-이렇게 해야 실패한 요청을 성공 관찰로 기다리지 않습니다
+이렇게 해야 실패한 요청에서 발생하지 않을 생성 이벤트를 계속 기다리지 않습니다
 
 삭제는 개수만으로 구분하기 어렵습니다
 유예 삭제에서는 `deletionTimestamp`가 설정되는 update와 실제 delete가 둘 다 들어올 수 있습니다
@@ -110,10 +110,10 @@ expectations는 프로세스 메모리에 있는 임시 기록입니다
 
 `RealPodControl`은 생성 및 관련 patch 성공 시 callback으로 버전을 기록하고, ReplicaSet status 갱신 뒤에도 버전을 기록합니다
 모든 API 쓰기를 포괄하는 영구 기록은 아니며, 기능을 끄면 아무 일도 하지 않는 구현을 사용합니다
-추적하지 않는 리소스, 빈 캐시 버전, 버전 비교 오류 등은 검사에서 건너뛰는 조건도 있습니다
+추적하지 않는 리소스이거나 캐시 버전이 비어 있거나 버전 비교에서 오류가 나면 검사를 건너뛰는 경로도 있습니다
 
 실제 동작은 [`NewReplicaSetController`와 `syncReplicaSet`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go), [`ConsistencyStore`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/util/consistency/consistency.go), [기능 기본값과 의존성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/features/kube_features.go)에 있습니다
-두 장치 모두 캐시가 언제나 서버의 전역 최신 상태라는 보장을 만드는 것은 아닙니다
+두 장치 모두 캐시가 서버의 전역 최신 상태를 항상 반영한다고 보장하지는 않습니다
 
 ## 생성 요청은 작은 배치부터 늘립니다
 
@@ -127,7 +127,7 @@ ReplicaSet은 부족한 Pod를 한꺼번에 모두 생성하지 않습니다
 
 같은 배치 안의 요청은 병렬로 실행될 수 있습니다
 따라서 언제나 딱 한 번의 실패만 생긴다는 뜻은 아니며, **첫 1개 배치가 실패했을 때** 한 번에서 멈춥니다
-보내지 않았거나 실패한 수는 expectations에서도 내려 줍니다
+보내지 않았거나 실패한 요청 수는 expectations의 대기 개수에서도 뺍니다
 
 [`manageReplicas`와 `slowStartBatch`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go)는 요청량 제한과 관찰 대기 수 조정을 함께 처리합니다
 Namespace가 종료 중인 오류에는 별도 분기가 있으므로 모든 생성 오류를 같은 처리로 단정하지 않습니다
@@ -214,7 +214,7 @@ status의 개수와 Event의 message를 함께 봐야 원하는 수에 도달하
 다른 쪽은 오래된 버전이므로 충돌합니다
 [`LeaseLock.Update`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/leaderelection/resourcelock/leaselock.go)는 직전 조회나 성공 응답에 있던 Lease 객체로 일반 Update를 보냅니다
 
-하지만 이 낙관적 동시성 보장은 **Lease 갱신**에 걸립니다
+하지만 이 낙관적 동시성 제어가 보호하는 대상은 **Lease 갱신**입니다
 이전 리더가 이미 시작한 API 요청이나 외부 작업까지 취소하지 않습니다
 [`leaderelection`의 계약](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/leaderelection/leaderelection.go)도 하나의 프로세스만 리더로 행동하게 강제하는 fencing을 보장하지 않는다고 명시합니다
 
@@ -253,7 +253,7 @@ v1.37.1의 Prometheus workqueue 제공자는 다음 7개 메트릭을 큐 이름
 
 `retries_total`은 실패 횟수와 같지 않습니다
 가용성 재확인처럼 정상적인 `AddAfter()`도 포함되며, 지연이 0 이하인 호출도 기록합니다
-기본 큐에서 중복이 합쳐지는 것과 지연 예약 호출 수는 다른 지표입니다
+기본 큐가 중복 키를 합쳐도 지연 예약을 호출한 횟수가 줄어드는 것은 아닙니다
 
 큐 깊이만 보지 말고 처리 시간과 진행 중인 작업의 경과 시간도 함께 봐야 합니다
 새 키가 늘지 않더라도 `longest_running_processor_seconds`가 계속 커지면 워커가 긴 작업을 붙잡고 있을 수 있습니다

@@ -53,7 +53,7 @@ The object might have been deleted and then recreated
 ```
 
 `DeleteOptions.Preconditions.resourceVersion`도 지정할 수 있습니다
-UID는 같은 이름의 다른 개체를 가리고, [resourceVersion](/essays/k8s-theory-resource-version)은 같은 개체가 조회 이후 바뀌었는지 확인합니다
+UID로는 같은 이름을 가진 다른 객체인지 구분하고, [resourceVersion](/essays/k8s-theory-resource-version)으로는 같은 객체가 조회 이후 바뀌었는지 확인합니다
 
 근거는 [`BeforeDelete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/delete.go)와 [kubelet의 `NewUIDPreconditions` 사용](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/status/status_manager.go)입니다
 
@@ -70,7 +70,7 @@ UID는 같은 이름의 다른 개체를 가리고, [resourceVersion](/essays/k8
 
 foreground 삭제는 부모를 API에 남겨 둔 채 자식 처리를 기다리는 방식입니다
 이때 부모의 `foregroundDeletion` finalizer가 삭제 완료를 기다리게 합니다
-`blockOwnerDeletion: true`인 자식이라도 GC 캐시가 알고 있어야 이 대기에 참여합니다
+`blockOwnerDeletion: true`인 자식이라도 GC 캐시에 있어야 부모 삭제를 보류시킬 수 있습니다
 background 삭제에는 같은 대기 조건이 적용되지 않으며, 아직 관찰하지 못한 자식까지 기다린다는 보장도 없습니다
 
 이 범위는 [`OwnerReference`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/apis/meta/v1/types.go)와 [foreground garbage collection 설명](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/architecture/garbage-collection.md#foreground-cascading-deletion)을 기준으로 합니다
@@ -81,10 +81,8 @@ background 삭제에는 같은 대기 조건이 적용되지 않으며, 아직 �
 반대로 부모가 자식 목록을 가진다고 가정하면, 자식을 만들 때마다 같은 부모를 수정해야 하고 목록도 계속 커집니다
 자식 쪽에 참조를 두면 이 쓰기가 여러 객체로 나뉩니다
 
-대신 부모에서 자식을 찾으려면 참조를 역방향으로 찾아야 합니다
+대신 부모에 속한 자식을 찾으려면 자식들의 `ownerReferences`에서 그 부모를 가리키는 참조를 찾아야 합니다
 GC는 메모리에 소유 그래프를 유지하고, 컨트롤러도 부모에 대응하는 자식을 찾을 수 있도록 인덱스를 둡니다
-소유 정보를 자식에 저장하는 방식의 이점을 이렇게 이해할 수 있습니다
-
 label selector와 소유자 참조도 구분해야 합니다
 selector는 label 조건에 맞는 대상을 고르며, `ownerReferences`는 특정 개체와의 소유 관계를 가리킵니다
 ReplicaSet 같은 컨트롤러가 둘을 함께 사용하더라도, selector에 맞는 모든 객체가 자동으로 소유 관계를 갖는 것은 아닙니다
@@ -115,7 +113,7 @@ Event가 없다는 이유만으로 소유 관계가 유효하다고 판단할 �
 
 이 내용은 [Owners and Dependents의 범위 규칙](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/overview/working-with-objects/owners-dependents.md), [`isDangling`·`attemptToDeleteWorker`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/garbagecollector.go), [`reportInvalidNamespaceOwnerRef`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/graph_builder.go)를 대조했습니다
 
-namespace 필드가 없다는 사실만으로 저장 요청에서 가능한 모든 검사를 단정할 수는 없습니다
+`ownerReferences`에 namespace 필드가 없다는 사실만으로 저장할 때 어떤 소유 관계 검사까지 가능한지 판단할 수는 없습니다
 객체 구조의 검증과 admission 정책, GC의 현재 소유자 조회는 서로 다른 단계입니다
 저장할 때 참조가 유효했더라도 소유자는 나중에 삭제되거나 같은 이름으로 재생성될 수 있습니다
 
@@ -159,7 +157,7 @@ GC는 최신 `ownerReferences`를 읽고 각 소유자의 존재와 삭제 상�
 사용자의 DELETE나 다른 컨트롤러가 시작한 삭제까지 막는다는 뜻은 아닙니다
 
 자식을 보존하더라도 `dangling`과 `waitingForDependentsDeletion` 참조는 patch로 제거합니다
-다른 solid 소유자 때문에 살아남을 자식이 foreground 삭제 중인 부모를 계속 붙잡지 않도록, 기다리는 부모와의 참조도 끊는 것입니다
+다른 solid 소유자가 있어 자식을 남길 경우, 그 자식 때문에 foreground 삭제 중인 부모까지 계속 남지 않도록 참조를 끊는 것입니다
 
 소유자 참조가 처음부터 없는 객체는 이 판단만으로 삭제하지 않습니다
 참조가 있는 객체에서 모든 소유자의 부재가 확인됐거나, 소유자가 자식 삭제를 기다리는 상황을 구분해야 합니다
@@ -181,7 +179,8 @@ orphan은 부모와의 소유 관계를 끊어 자식을 남기는 처리입니�
 
 노드의 `beingDeleted`는 `deletionTimestamp`가 설정됐음을 나타냅니다
 `deletingDependents`는 삭제 중인 객체가 `foregroundDeletion` finalizer를 갖고 자식 처리를 기다리는 상태입니다
-삭제 큐는 앞에서 본 참조 분류를 수행하고, orphan 큐는 자식들의 `ownerReferences`에서 부모 참조를 제거한 뒤 부모의 `orphan` finalizer를 없앱니다
+삭제 큐의 작업을 맡은 워커는 앞에서 본 참조 분류를 수행합니다
+orphan 큐의 워커는 자식들의 `ownerReferences`에서 부모 참조를 제거한 뒤 부모의 `orphan` finalizer를 없앱니다
 다른 finalizer가 남아 있다면 실제 삭제는 계속 기다립니다
 
 ### 이벤트를 못 봤다는 사실은 부재의 증거가 아닙니다
@@ -195,12 +194,12 @@ informer는 API의 목록과 변경을 받아 로컬 사본을 유지하는 구�
 조회 오류를 소유자 부재와 같게 처리하지 않습니다
 
 한 번 부재를 확인한 소유자를 매번 다시 조회하지 않도록 `absentOwnerCache`도 사용합니다
-캐시에는 API version·kind·name·UID와 namespace를 포함한 참조 좌표를 기록합니다
-UID만 같다는 이유로 다른 좌표의 조회까지 같은 결과로 처리하지 않으며, 접근 오류를 부재로 저장하지도 않습니다
+캐시에는 조회 대상을 식별하는 API version·kind·name·UID·namespace를 함께 기록합니다
+UID만 같고 나머지 참조 정보가 다르면 같은 조회 결과로 취급하지 않으며, 접근 오류를 부재로 저장하지도 않습니다
 
 그래프의 상태와 처리 경로는 [`node` 정의](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/graph.go), [`addDependentToOwners`·`processGraphChanges`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/graph_builder.go), [`isDangling`·`attemptToOrphanWorker`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/garbagecollector.go)를 기준으로 합니다
 
-## 감시 대상 discovery가 실패해도 영향은 나뉩니다
+## discovery 실패가 모든 리소스의 감시를 멈추지는 않습니다
 
 discovery는 API 서버가 제공하는 리소스 종류와 지원 동작을 확인하는 과정입니다
 GC는 discovery의 preferred resource 중 `delete`·`list`·`watch`를 모두 지원하는 타입을 고른 뒤 무시 목록을 제외합니다
@@ -259,4 +258,5 @@ annotation 키를 검증하면서 소문자로 바꿔 보는 것은 형식 검�
 | `metadata.annotations: Too long` | 개별 annotation 값이 아니라 전체 키·값 바이트 합계가 제한을 넘었는지 |
 
 이름으로 찾은 객체가 있다는 것, 참조한 UID의 소유자가 있다는 것, 자식의 삭제가 끝났다는 것은 각각 확인해야 할 상태입니다
-GC는 이 차이를 현재 객체 조회와 소유 그래프에 반영하며, 삭제 완료 시점은 finalizer와 삭제 정책의 조건까지 함께 결정합니다
+GC는 현재 객체를 조회하고 소유 그래프를 갱신하면서 이 상태들을 구분합니다
+실제로 삭제가 끝나는 시점은 finalizer와 삭제 정책의 조건에도 달려 있습니다

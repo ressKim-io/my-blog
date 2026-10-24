@@ -56,8 +56,8 @@ API 서버는 Node 오브젝트에서 접속 정보를 얻습니다
 | 5 | `ExternalIP` |
 
 API 서버는 타입별로 주소 목록을 훑어 처음 일치하는 값을 사용합니다
-지정한 타입이 하나도 없으면 다이얼 전에 `no preferred addresses found; known addresses: [...]`로 실패합니다
-주소를 고른 뒤 연결에 실패한다고 자동으로 다음 타입의 주소를 재시도하는 선택 알고리즘은 아닙니다
+지정한 타입의 주소가 하나도 없으면 연결을 시도하기 전에 `no preferred addresses found; known addresses: [...]`로 실패합니다
+주소를 골라 연결을 시도한 뒤 실패하더라도 다음 타입의 주소로 자동 재시도하지는 않습니다
 
 노드가 늘고 줄 때마다 API 서버의 주소 목록을 고치는 대신, Node 오브젝트가 접속 정보를 전달하는 구조입니다
 kubelet이 보고한 포트와 주소를 실제로 읽는 곳은 [`GetConnectionInfo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/client/kubelet_client.go)이며, 타입 우선순위는 [`GetPreferredNodeAddress`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/util/node/node.go)에서 적용합니다
@@ -71,7 +71,7 @@ NodeRestriction은 노드가 자기 Node만 수정하도록 제한하고, `confi
 `nodes/proxy`의 [`ResourceLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/node/strategy.go)은 이름을 IP로 해석하고, 결과 중 하나라도 global unicast가 아니면 `address not allowed`로 거절합니다
 global unicast는 일반적인 유니캐스트 주소 분류이며, 사설 IP가 모두 금지된다는 뜻은 아닙니다
 
-이 검사는 루프백·link-local 등을 제외하지만, 다른 호스트의 일반 유니캐스트 주소까지 노드의 소유 여부로 구분하지는 않습니다
+이 검사는 루프백·link-local 등을 제외하지만, 일반 유니캐스트 주소가 해당 노드의 것인지 다른 호스트의 것인지까지 확인하지는 않습니다
 또한 `kubectl logs`의 [`LogLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)은 이 함수를 거치지 않고 접속 URL을 만듭니다
 따라서 `nodes/proxy`의 주소 검사를 모든 kubelet 접속에 공통으로 적용되는 방어선으로 설명할 수는 없습니다
 
@@ -111,7 +111,7 @@ CSR은 인증서 발급 요청을 담는 API 오브젝트입니다
 
 따라서 노드의 클라이언트 인증서 발급이 끝났다고 kubelet의 CA 서명 서빙 인증서와 API 서버의 신뢰 설정까지 준비된 것은 아닙니다
 서빙 인증서 승인자는 요청한 IP·DNS 이름을 그 노드가 사용할 자격이 있는지도 확인해야 합니다
-이 비대칭은 [TLS bootstrapping 문서의 서빙 인증서 절](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/access-authn-authz/kubelet-tls-bootstrapping.md)에 설명돼 있습니다
+클라이언트 인증서와 서빙 인증서의 승인 조건 차이는 [TLS bootstrapping 문서의 서빙 인증서 절](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/access-authn-authz/kubelet-tls-bootstrapping.md)에 설명돼 있습니다
 
 `kubectl logs --insecure-skip-tls-verify-backend`는 해당 로그 요청에 한해 검증을 건너뛰는 transport를 선택합니다
 API 서버 전체의 CA 설정을 바꾸는 플래그가 아니라, 호출자가 `PodLogOptions.insecureSkipTLSVerifyBackend`로 전달하는 요청 옵션입니다
@@ -144,7 +144,8 @@ TokenReview는 토큰을 보내 인증 결과와 신원을 받는 API입니다
 
 이 시간은 권한 변경을 클러스터 전체에 반영하는 보장 시간이 아닙니다
 각 kubelet의 결과 캐시와 API 서버 쪽 정책 반영도 구분해야 합니다
-API 서버에 되묻는 과정에서 오류가 나면 인가 필터는 500을 반환하지만, 캐시로 답할 수 있는 요청은 새 왕복 없이 처리될 수 있습니다
+API 서버에 인가를 요청하다 오류가 나면 인가 필터는 500을 반환합니다
+다만 캐시로 답할 수 있는 요청은 API 서버에 다시 묻지 않고 처리할 수 있습니다
 
 ## 설정 파일과 기존 명령행의 기본값이 다릅니다
 
@@ -166,7 +167,7 @@ API 서버에 되묻는 과정에서 오류가 나면 인가 필터는 500을 �
 파일의 명시적 값, 함께 준 플래그, 추가 설정 조각까지 확인해야 합니다
 
 플래그만 사용하고 이 값들을 바꾸지 않았다면 익명 인증과 `AlwaysAllow`가 함께 동작합니다
-네트워크로 닿는 클라이언트의 익명 요청이 등록된 kubelet API에 허용될 수 있고, 별도의 읽기 전용 포트도 열립니다
+네트워크로 접근할 수 있는 클라이언트의 익명 요청이 등록된 kubelet API에서 허용될 수 있고, 별도의 읽기 전용 포트도 열립니다
 공식 문서에 적힌 익명 허용·`AlwaysAllow` 기본값과 설정 파일 API의 기본값을 섞으면 실제 접근 조건을 잘못 판단할 수 있습니다
 
 ## HTTP 경로를 nodes 하위 리소스 권한으로 바꿉니다
@@ -230,7 +231,7 @@ v1.37.1 소스에는 `/allocatedPods` 계열도 `pods`, `proxy`로 매핑하는 
 오류 없이 `Deny`나 `NoOpinion`이 나오면 `nodes/proxy`로 다시 묻고, 어느 속성에서든 `Allow`가 나오면 통과합니다
 어느 쪽도 허용하지 않으면 403이며, 인가 호출 오류가 나면 즉시 500으로 끝납니다
 
-일반 authorizer 체인과는 반복하는 대상이 다릅니다
+이 순차 검사는 일반 authorizer 체인과 평가 대상이 다릅니다
 일반 체인은 같은 속성에 대해 여러 authorizer를 평가하고 첫 `Allow` 또는 `Deny`에서 멈춥니다
 kubelet의 [`InstallAuthFilter`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/server/server.go)는 서로 다른 하위 리소스 속성을 순서대로 평가합니다
 
@@ -301,7 +302,7 @@ kubelet용 transport는 `cluster` dialer를 조회하고, 있으면 그 연결 �
 
 바뀌는 것은 TCP 연결 경로입니다
 터널을 거쳐도 클라이언트 인증서 검증과 `SubjectAccessReview`의 주체·권한은 그대로입니다
-연결 가능 여부를 해결하는 설정이 kubelet 인가 권한까지 만들어 주지는 않습니다
+접속 경로를 마련하는 설정이 kubelet에 접근할 권한까지 부여하지는 않습니다
 
 ### proxy API의 transport는 목적지 포트에 따라 다릅니다
 

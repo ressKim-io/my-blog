@@ -47,7 +47,7 @@ CRD를 쓰면 새 API 서버를 만들지 않아도 되지만, kube-apiserver가
 aggregated API의 “가능”은 등록만 하면 자동으로 갖춰진다는 뜻이 아니라 서버가 그 기능을 구현할 수 있다는 뜻입니다
 또한 CRD 본문과 `PartialObjectMetadata`처럼 변환된 응답 형식의 직렬화 지원은 구분해야 합니다
 
-타입에 필드 몇 개를 추가하고 그 상태에 맞춰 작업하는 요구라면 CRD가 출발점이 될 수 있습니다
+새 타입에 필요한 필드를 정의하고 그 상태에 따라 작업하면 되는 경우에는 CRD가 출발점이 될 수 있습니다
 저장 백엔드나 CRUD 밖의 동작을 바꿔야 할 때 별도 API 서버를 검토할 이유가 생깁니다
 CRD를 등록하는 일과 그 상태에 반응하는 controller를 구현하는 일도 별개입니다
 
@@ -78,8 +78,8 @@ availability controller는 Service를 조회하고, ClusterIP Service라면 포�
 | 검사를 통과 | `True` | `Passed` |
 
 v1.37.1 구현의 GET용 HTTP timeout은 5초이고, GET 결과를 기다리는 별도 제한은 6초입니다
-다섯 시도를 병렬로 보내 하나라도 성공하면 통과합니다
-이 값이 등록 후 5초 안에 `Available`이 바뀐다는 보장은 아닙니다
+GET 요청을 다섯 번 병렬로 보내며, 하나라도 성공하면 검사를 통과합니다
+이 timeout 값이 등록 후 5초 안에 `Available` 상태가 바뀐다는 보장은 아닙니다
 
 TLS 설정도 버전별 구현을 확인해야 합니다
 이 버전의 상태 검사와 사용자 요청 프록시는 모두 `BuildTransportConfig`를 호출합니다
@@ -161,7 +161,7 @@ kubectl의 다른 요청이 오래된 discovery 캐시를 사용하는 동안 `a
 `v1alpha1`, `v1beta1`, `v1`은 각각 alpha·beta·GA 안정도에 속하는 API 버전 이름입니다
 예를 들어 `v1beta1`이 같은 이름으로 GA가 되는 것이 아니라, `v1` 같은 새 버전을 제공합니다
 
-[Kubernetes API 폐기 정책](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/deprecation-policy.md)은 다음 경계를 정합니다
+[Kubernetes API 폐기 정책](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/deprecation-policy.md)은 버전 사이에서 지켜야 할 조건과 지원 기간을 정합니다
 
 | 항목 | 정책 |
 |---|---|
@@ -186,7 +186,7 @@ deprecated API 호출에는 v1.19부터 세 가지 신호가 제공됩니다
 이는 [폐기 메시지 생성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/deprecation/deprecation.go)과 [요청 계측](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/metrics/metrics.go)에서 확인할 수 있습니다
 API의 서빙을 멈추는 것과 이미 저장한 객체를 지우거나 다른 저장 버전으로 옮기는 것도 구분해야 합니다
 
-## feature gate와 API 서빙 설정은 서로 다른 곳에서 읽습니다
+## feature gate와 API 서빙 설정은 따로 확인해야 합니다
 
 feature gate는 특정 기능의 코드 경로를 켜고 끄는 설정입니다
 API 그룹·버전의 서빙 설정은 해당 경로로 요청을 받을지를 정합니다
@@ -226,7 +226,7 @@ API 서빙 쪽에서는 [`DefaultGenericAPIResourceConfigSource`와 `DefaultAPIR
 기본 활성 목록에는 안정 버전을 넣고 alpha·beta는 별도 비활성 목록에 둡니다
 추가로 열 그룹·버전은 [`--runtime-config`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/api_enablement.go)에서 지정합니다
 
-목록에 이름이 남았다고 해당 버전을 실제로 다시 제공할 수 있는 것은 아닙니다
+기본 설정 목록에 API 버전 이름이 남아 있어도 그 버전을 실제로 다시 제공할 수 있는 것은 아닙니다
 예를 들어 기본 설정의 비활성 목록에는 flowcontrol의 예전 beta 버전이 남아 있지만, v1.37.1의 [flowcontrol 저장소 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/flowcontrol/rest/storage_flowcontrol.go)은 `v1`만 설치합니다
 설정 목록과 현재 서버가 구현한 경로를 함께 봐야 합니다
 
@@ -245,5 +245,6 @@ API 서빙 쪽에서는 [`DefaultGenericAPIResourceConfigSource`와 `DefaultAPIR
 | 정책을 저장했는데 mutation이 없음 | 플러그인 활성 여부, Policy·Binding, 매칭 조건 |
 | 집계 discovery를 기대했는데 다른 형식이 옴 | `Accept`의 GVK와 실제 응답 형식, 서버의 지원 버전 |
 
-타입을 등록하는 일, 타입을 발견하는 일, 특정 버전으로 요청하는 일, 기능을 실행하는 일은 이어져 있지만 같은 판정은 아닙니다
+타입을 등록하는 일, 클라이언트가 타입을 찾는 일, 특정 버전으로 요청하는 일, 기능을 실행하는 일은 서로 이어져 있습니다
+다만 각 단계에서 확인할 조건은 다릅니다
 실패한 요청이 어느 단계까지 갔는지를 구분하면 API 등록 설정을 고쳐야 할지, 클라이언트 목록이나 기능 설정을 확인해야 할지 좁힐 수 있습니다

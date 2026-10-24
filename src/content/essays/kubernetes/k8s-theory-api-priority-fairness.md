@@ -45,7 +45,7 @@ watch가 아닌 long-running 요청으로 판정된 요청은 이 필터의 추�
 | `PriorityLevelConfiguration` | 그 수준의 동시성 몫, 차용 범위, 큐 구성과 한도 초과 처리 |
 
 FlowSchema의 `rules` 항목 하나가 맞으려면 요청자 조건인 `subjects`와 요청 조건이 **모두** 맞아야 합니다
-요청 조건은 resource 요청이면 `resourceRules`, 그 외 URL 요청이면 `nonResourceRules`를 사용합니다
+resource를 대상으로 하는 요청은 `resourceRules`로, 그 외 URL 요청은 `nonResourceRules`로 조건을 검사합니다
 각 목록 안에서는 하나가 맞으면 되고, `rules` 목록 역시 어느 항목 하나가 맞으면 됩니다
 
 namespace 조건도 구분해야 합니다
@@ -104,7 +104,7 @@ FlowSchema 이름과 flow distinguisher라는 구분자 값의 쌍으로 식별�
 다만 `Exempt`이거나 큐가 2개 미만이면 이 구분자와 해시를 계산하지 않습니다
 분류·참조 검사·해시는 [`apf_controller.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go)에 구현되어 있습니다
 
-## 요청의 폭은 실행 전에 정합니다
+## 요청이 사용할 자리 수는 실행 전에 추정합니다
 
 추정 결과인 `WorkEstimate`는 세 값을 가집니다
 
@@ -118,7 +118,7 @@ FlowSchema 이름과 flow distinguisher라는 구분자 값의 쌍으로 식별�
 실행 전에는 결과를 모르므로 리소스별 객체 수·평균 크기나 관심 watcher 수를 사용합니다
 [`width.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/width.go)가 요청별 추정기를 선택합니다
 
-이 세 값과 실제 자리 예약 방식은 구분해야 합니다
+추정한 초기·후속 자리 수가 각 구간에서 그대로 예약되는 것은 아닙니다
 큐 구현은 실행·후속 구간에 `max(InitialSeats, FinalSeats)`를 예약합니다
 그래서 `InitialSeats: 1`, `FinalSeats: 10`이라고 해서 실행 중에는 꼭 1자리만 쓰는 것은 아닙니다
 
@@ -150,7 +150,8 @@ v1.37.1에서는 `SizeBasedListCostEstimate`가 beta·기본 활성입니다
 이 버전에서는 과거 `ConsistentListFromCache` gate를 검사하지 않고 watch progress 지원을 확인합니다
 
 추정 경로와 실제 읽기 경로가 같다는 보장은 없습니다
-추정기의 helper는 캐시 snapshot을 고려하지 않고, 실제 읽기는 캐시의 준비 상태나 신선도 등 추가 조건에 영향을 받습니다
+추정에 쓰는 helper 함수는 캐시 snapshot을 고려하지 않습니다
+실제 읽기 경로는 캐시가 준비됐는지, 필요한 revision까지 따라잡았는지 등의 조건에도 영향을 받습니다
 따라서 [410 이후 전체 상태를 다시 읽는 과정](/essays/k8s-theory-watch)이 항상 100자리 LIST가 되는 것도 아닙니다
 
 객체 수를 계산할 때도 조건이 있습니다
@@ -281,7 +282,8 @@ BorrowingCL = round(NominalCL × borrowingLimitPercent / 100)
 ```
 
 서버는 수준별 자리 수요를 모아 10초마다 현재 한도를 다시 계산합니다
-수요가 줄어들 때 적용하는 평활 계수는 0.977이며, 코드 주석의 반감기는 약 5분입니다
+수요가 줄어들면 이전 수요를 서서히 줄여 반영합니다
+이때 쓰는 평활 계수는 0.977이며, 코드 주석의 반감기는 약 5분입니다
 
 평활값을 갱신할 때는 측정 구간의 `평균 + 표준편차`와 감쇠시킨 이전 값 중 큰 값을 사용합니다
 그래서 짧은 부하 증가도 측정 구간에 잡히면 다음 재계산에 반영될 수 있습니다
@@ -320,7 +322,7 @@ BorrowingCL = round(NominalCL × borrowingLimitPercent / 100)
 요청이 끝나면 실제 실행 시간과 3ms 추정치의 차이로 그 큐의 가상 시점을 보정합니다
 초기 배정은 추정값으로 하지만 실제 시간을 전혀 사용하지 않는 구현은 아닙니다
 
-shuffle sharding은 흐름 사이의 완전한 겹침 가능성을 줄이며 격리를 보장하지는 않습니다
+shuffle sharding은 서로 다른 흐름의 큐 후보가 전부 겹칠 가능성을 줄이지만, 흐름 사이의 격리를 보장하지는 않습니다
 큐 128개에서 6개 후보를 고르는 조합은 `C(128, 6) = 5,423,611,200`개입니다
 후보 조합이 균등하게 선택된다는 가정에서 두 흐름의 후보가 전부 같을 확률은 약 54억 분의 1이지만, 일부 큐가 겹칠 가능성까지 이 값으로 계산하면 안 됩니다
 
@@ -345,7 +347,7 @@ deadline이 없으면 `RequestTimeout/4`를 쓰며, 기본 RequestTimeout이 60�
 실행할 시간을 남기려는 제한이며, 큐에서 기다렸다고 실행 성공까지 보장하지는 않습니다
 대기 context가 취소된 경우도 큐 구현에서는 `time-out` 거절 사유로 집계될 수 있습니다
 
-현재 한도보다 넓은 요청을 다루는 예외도 있습니다
+현재 동시성 한도보다 많은 자리가 필요한 요청을 다루는 예외도 있습니다
 `canAccommodateSeatsLocked`는 그런 요청을 배정할 때 실행 중인 요청 수가 0인지 검사합니다
 기본 몫만 보고 바로 거절된다고 단정할 수 없으며, 실제 dispatch는 현재 한도와 큐 상태를 함께 따릅니다
 
@@ -375,7 +377,7 @@ APF의 429에는 `Retry-After`도 붙습니다
 값은 수준별로 관리하고 1에서 시작합니다
 최근 거절량과 이전 증가 후 경과 시간을 검사해 두 배로 늘리되 최대 32이며, 거절량이 적으면 1씩 줄입니다
 거절할 때마다 무조건 두 배가 되거나 부하가 멈춘 즉시 타이머로 줄어드는 것은 아닙니다
-갱신은 새 거절을 기록하며 초 경계를 넘을 때 수행합니다
+새 거절을 기록할 때 시각이 다음 초로 넘어갔다면 값을 갱신합니다
 [`dropped_requests_tracker.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/dropped_requests_tracker.go)가 이 조건을 정의합니다
 
 | 확인할 상황 | 함께 볼 값 |

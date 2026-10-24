@@ -1,5 +1,5 @@
 ---
-title: "resourceVersion — 같은 오브젝트의 갱신 충돌을 가리는 번호"
+title: "resourceVersion — 오래된 상태로 덮어쓰는 일을 막는 번호"
 excerpt: "etcd revision이 resourceVersion으로 전달되는 경로와 낙관적 동시성 제어를 살펴보고, API의 번호 검사와 저장소의 CAS 재시도를 구분합니다"
 category: kubernetes
 tags: [Kubernetes, etcd, resourceVersion, Concurrency, concept]
@@ -20,7 +20,7 @@ date: "2026-07-31"
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 아래 번호는 설명을 위한 가정이며, 클러스터에서 재현한 실측값이 아닙니다
 
-## 같은 번호를 읽어도 먼저 저장한 뒤에는 상태가 달라집니다
+## 두 작성자가 같은 버전을 읽었을 때
 
 A와 B가 모두 resourceVersion `100`인 Deployment를 읽었다고 가정하겠습니다
 A가 먼저 변경을 저장했고 번호가 `104`로 바뀌었다면, B가 이전 번호 `100`을 넣어 갱신할 때 서버가 거부합니다
@@ -34,7 +34,7 @@ B가 A의 변경을 보존하려면 현재 상태를 다시 읽고 자기 변경
 충돌을 무시하는 것이 아니라, 충돌한 쪽이 현재 상태를 바탕으로 다시 작업하는 방식입니다
 
 클라이언트가 읽는 동안 락을 잡는 설계라면 다른 작성자를 기다리게 하고, 락 소유자가 죽었을 때 회수하는 처리도 필요합니다
-번호 비교 방식은 그 대기·회수 부담 대신 충돌 후 재계산을 감수합니다
+번호를 비교하면 읽는 동안 락을 유지하고 회수할 필요는 줄지만, 충돌한 클라이언트는 현재 상태를 읽어 변경을 다시 계산해야 합니다
 서버 내부에서 락을 전혀 쓰지 않는다는 뜻은 아닙니다
 
 번호가 같다는 것은 그 버전 검사만 통과했다는 뜻입니다
@@ -58,7 +58,8 @@ etcd의 revision은 키마다 독립적으로 매기는 번호가 아닙니다
 리소스별 저장소를 달리 설정한 경우까지 클러스터 전체에 번호 하나가 있다고 확대하지는 않습니다
 
 etcd에는 키가 수정된 횟수를 세는 `version`도 있습니다
-새 키는 1에서 시작하며, 삭제하면 해당 키의 version은 0으로 끝나고 다시 생성하면 새 수명을 시작합니다
+새 키의 version은 1에서 시작하고, 키를 삭제하면 0이 됩니다
+같은 키를 다시 만들어도 이전 version을 이어 쓰지 않습니다
 Kubernetes의 resourceVersion이 사용하는 것은 이 키별 version이 아니라 revision입니다
 
 이 구분은 [etcd v3.7 데이터 모델](https://etcd.io/docs/v3.7/learning/data_model/)과 [revision의 API 보장](https://etcd.io/docs/v3.7/learning/api_guarantees/#revision)에 설명돼 있습니다
@@ -84,7 +85,7 @@ API 서버의 [`store.Get`·목록 디코딩](https://github.com/kubernetes/kube
 ## 번호를 생략하면 리소스마다 결과가 다릅니다
 
 모든 Update가 resourceVersion 생략을 같은 방식으로 처리하지는 않습니다
-리소스의 update strategy가 무조건 갱신을 허용하는지에 따라 달라집니다
+리소스별 갱신 규칙인 update strategy가 resourceVersion을 생략한 무조건 갱신을 허용하는지에 따라 달라집니다
 
 | 일반 Update의 `metadata.resourceVersion` | 무조건 갱신을 허용하는 리소스 | 허용하지 않는 리소스 |
 |---|---|---|
@@ -101,13 +102,13 @@ custom resource에서 번호를 생략하면 `must be specified for an update` �
 양수 번호가 있는데 현재 값과 다르면 두 경우 모두 충돌입니다
 
 이 표는 **갱신 본문의** `metadata.resourceVersion`에 관한 설명입니다
-GET·LIST query의 `resourceVersion=0`은 읽기 신선도를 정하는 별도의 계약입니다
+GET·LIST query의 `resourceVersion=0`은 얼마나 최신 상태를 읽을지 정하는 별도의 옵션입니다
 둘을 같은 “검사 생략”으로 묶어 해석하면 안 됩니다
 
 분기는 [`Store.Update`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go)에 있습니다
 [`deploymentStrategy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/deployment/strategy.go)와 [`customResourceStrategy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/registry/customresource/strategy.go)의 `AllowUnconditionalUpdate` 반환값도 대조했습니다
 
-## API의 번호 검사와 etcd의 CAS는 다른 간격을 지킵니다
+## resourceVersion 검사 뒤에도 etcd의 CAS가 필요한 이유
 
 API 서버가 요청 번호와 현재 번호를 비교한 직후에도 다른 API 서버가 저장할 수 있습니다
 그래서 저장소에 실제로 쓸 때도 조건을 확인해야 합니다
@@ -120,7 +121,7 @@ Kubernetes의 etcd 저장 경로는 읽은 키의 `ModRevision`을 쓰기 조건
 1. API의 번호 검사는 클라이언트가 읽은 뒤 생긴 변경을 확인합니다
 2. etcd의 조건부 쓰기는 API 서버가 저장할 상태를 읽은 뒤 생긴 변경을 확인합니다
 3. etcd 비교가 실패하면 현재 상태를 받아 서버 내부에서 갱신 함수를 다시 실행합니다
-4. 다시 실행하는 동안 클라이언트의 번호가 이미 낡았다고 확인되면 API 층에서 409를 반환할 수 있습니다
+4. 다시 실행하는 동안 클라이언트가 보낸 번호가 현재 번호와 다르다고 확인되면 API 계층에서 409를 반환할 수 있습니다
 
 서버 내부 재시도가 클라이언트의 충돌을 없애 주지는 않습니다
 현재 상태를 기준으로 사용자의 변경을 어떻게 다시 계산할지는 클라이언트가 처리해야 합니다
@@ -143,7 +144,7 @@ v1.35 이전에는 같은 값인지만 확인하고 내부 형식이나 숫자 �
 선행 0이나 부호는 허용하지 않습니다
 빈 문자열과 `"0"`은 요청에서 별도 의미가 있으므로 이 비교 대상이 아닙니다
 
-고정된 비트 수에 들어간다고 가정하지 않고 임의 정밀도 정수로 처리해야 합니다
+고정된 비트 수 안에 들어간다고 가정하지 않고, 자릿수에 맞춰 크기를 늘릴 수 있는 임의 정밀도 정수로 처리해야 합니다
 문자열로 비교한다면 길이가 긴 쪽이 크고, 길이가 같을 때 사전순으로 비교할 수 있습니다
 예를 들어 `"123"`은 `"23"`보다 크고, 같은 길이의 `"234"`는 `"123"`보다 큽니다
 
@@ -158,7 +159,7 @@ v1.35 이전에는 같은 값인지만 확인하고 내부 형식이나 숫자 �
 ## 오래된 번호를 언제까지 사용할 수 있을까
 
 etcd는 이전 버전의 값을 이력으로 남깁니다
-이 이력이 과거 revision 조회와 watch의 지난 변경 전달에 쓰입니다
+이 이력은 과거 revision을 조회하거나 watch로 이전 변경을 이어 받을 때 쓰입니다
 계속 보관하면 저장 공간이 늘어나므로 compaction으로 오래된 이력을 정리합니다
 
 kube-apiserver의 `--etcd-compaction-interval` 기본값은 `5m0s`입니다
@@ -205,7 +206,8 @@ controller가 이 객체를 직접 갱신하며, etcd lease와 같은 것은 아
 
 Event마다 새 etcd lease를 만들면 lease 관리 부담도 늘어납니다
 그래서 만료 시점이 비슷한 키는 lease를 재사용합니다
-기본 재사용 창은 TTL의 5%와 60초 중 작은 값이고, 기본 카운트 한도는 1000입니다
+lease를 재사용할 수 있는 만료 시점의 차이는 기본적으로 TTL의 5%와 60초 중 작은 값입니다
+기본 재사용 카운트 한도는 1000입니다
 이 카운트는 성공한 객체 수만 세는 것이 아니라 실패한 시도도 포함합니다
 
 정확한 기본값과 재사용 조건은 [`leaseManager.GetLease`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/lease_manager.go), Event의 TTL 전달은 [Event 저장 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/event/storage/storage.go)에서 확인했습니다

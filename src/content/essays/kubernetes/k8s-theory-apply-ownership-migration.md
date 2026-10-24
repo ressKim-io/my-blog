@@ -1,5 +1,5 @@
 ---
-title: "SSA 소유권 이행 — 필드를 뺐는데 값이 바뀌는 이유"
+title: "SSA 소유권 이전 — 필드를 뺐는데 값이 바뀌는 이유"
 excerpt: "replicas를 HPA에 넘길 때 생기는 소유권 공백을 시작으로, prune과 기본값 적용, 반복 Apply의 쓰기 생략, CSA 전환과 managedFields 초기화 조건을 확인합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "Server-Side Apply", "HPA", "managedFields", "concept"]
@@ -36,13 +36,6 @@ Apply는 이번에 바꿀 값만 나열하는 요청이 아닙니다
 2. 이번 Apply에는 그 필드를 넣지 않았습니다
 3. 다른 매니저도 그 필드를 소유하지 않습니다
 
-소스의 주석은 세 번째 조건에 다른 applier가 없다고 표현합니다
-실제 `addBackOwnedItems`는 Apply 매니저뿐 아니라 Update 매니저가 소유한 필드도 보존합니다
-HPA처럼 Update로 값을 쓰는 주체의 소유권도 이 조건에 영향을 줍니다
-
-기록된 이전 API 버전으로 변환할 수 없다는 오류가 나면 `prune`을 건너뛰는 분기도 있습니다
-이 동작은 [`Updater.prune`과 `addBackOwnedItems`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/sigs.k8s.io/structured-merge-diff/v6/merge/update.go)에서 확인했습니다
-
 필드를 제거한 뒤에는 기본값 적용이 이어집니다
 기본값이 없다면 필드가 사라지고, 기본값이 있다면 그 값으로 다시 나타날 수 있습니다
 Deployment의 `spec.replicas`는 기본값이 1입니다
@@ -50,6 +43,13 @@ Deployment의 `spec.replicas`는 기본값이 1입니다
 따라서 매니페스트에서 `replicas` 한 줄을 뺐다고 언제나 1이 되는 것은 아닙니다
 그 필드가 실제로 제거되는 조건부터 만족해야 합니다
 근거는 [병합 뒤 defaulting](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/util/managedfields/internal/structuredmerge.go)과 [`SetDefaults_Deployment`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/apps/v1/defaults.go)입니다
+
+소스의 주석은 세 번째 조건에 다른 applier가 없다고 표현합니다
+실제 `addBackOwnedItems`는 Apply 매니저뿐 아니라 Update 매니저가 소유한 필드도 보존합니다
+HPA처럼 Update로 값을 쓰는 주체의 소유권도 이 조건에 영향을 줍니다
+
+기록된 이전 API 버전으로 변환할 수 없다는 오류가 나면 `prune`을 건너뛰는 분기도 있습니다
+이 동작은 [`Updater.prune`과 `addBackOwnedItems`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/sigs.k8s.io/structured-merge-diff/v6/merge/update.go)에서 확인했습니다
 
 ## HPA를 붙였다는 사실만으로 인계가 끝나지는 않습니다
 
@@ -69,7 +69,7 @@ HPA가 소유권을 얻기 전에 사람이 필드를 빼고 Apply하면, 다른
 
 한 방법은 사람이 `replicas`를 계속 포함한 상태에서 HPA가 값을 바꿀 때까지 기다리는 것입니다
 HPA가 소유한 뒤 사람이 이전 값을 Apply하면 필드 충돌이 나타날 수 있습니다
-그 충돌에서 HPA의 소유권을 확인한 다음 필드를 빼면, HPA가 관리하는 값은 `prune`되지 않습니다
+충돌 응답에서 HPA의 소유권을 확인한 다음 필드를 빼면, HPA가 관리하는 값은 `prune`되지 않습니다
 
 다만 HPA가 값을 바꿀 필요가 없었다면 충돌 신호가 아직 나오지 않을 수 있습니다
 시간이 지났다는 이유만으로 소유권을 넘겼다고 판단할 수는 없습니다
@@ -87,7 +87,7 @@ HPA가 소유한 뒤 사람이 이전 값을 Apply하면 필드 충돌이 나타
 
 HPA가 값을 바꾸지 않는 동안에는 임시 소유권도 남습니다
 임시 매니저의 요청이 HPA와 충돌했다면 이미 HPA가 필드를 소유한 상황인지 확인해야 합니다
-이 목적의 인계에서 무조건 force로 HPA의 값을 되찾을 필요는 없습니다
+HPA에 관리를 넘기려는 상황에서 무조건 force로 그 값을 되찾을 필요는 없습니다
 두 방식은 공식 문서의 [소유권 이전 설명](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/using-api/server-side-apply.md#transferring-ownership)에 제시돼 있습니다
 
 ## HPA의 Update와 GitOps의 Apply는 다른 충돌을 만납니다
@@ -133,9 +133,8 @@ SSA를 쓰는 컨트롤러는 쓰기 직전에 전체 오브젝트를 다시 읽
 컨트롤러가 사람처럼 충돌을 해석하고 다음 행동을 정하기 어려울 수 있기 때문입니다
 모든 오브젝트와 모든 필드의 소유권을 가져오라는 뜻은 아닙니다
 
-그 범위에서는 사람이 바꾼 값도 다음 reconcile에서 돌아갈 수 있습니다
 reconcile은 현재 상태를 원하는 상태에 맞추는 컨트롤러의 반복 처리입니다
-사람의 수정과 컨트롤러가 계속 선언하는 값이 다르면, 다음 처리가 값을 다시 바꿀 수 있습니다
+컨트롤러가 관리하는 범위에서 사람이 다른 값을 쓰더라도, 다음 reconcile에서 컨트롤러가 선언한 값으로 돌아갈 수 있습니다
 
 client-go에는 타입별 `ApplyConfiguration`, 클라이언트의 `Apply`·`ApplyStatus`, 특정 매니저 소유분을 뽑는 `Extract*` 함수가 생성돼 있습니다
 Deployment 예시는 [Apply 설정·Extract 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/applyconfigurations/apps/v1/deployment.go)과 [클라이언트 인터페이스](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/kubernetes/typed/apps/v1/deployment.go)에서 확인할 수 있습니다
@@ -176,7 +175,7 @@ client-side apply, 줄여서 CSA와 SSA는 기본 매니저 이름이 다릅니�
 이 서버 측 처리는 매니저가 `kubectl`일 때만 적용됩니다
 
 기존 어노테이션이 있고, API 버전이 맞으며, 기록한 값과 현재 값이 일치하는 필드인지 확인합니다
-그 범위의 충돌은 이전 CSA 관리분으로 판단해 넘길 수 있습니다
+해당 필드를 이전 CSA의 관리 범위로 판단하면 그 충돌을 해결할 수 있습니다
 반대로 `kubectl scale` 등으로 다른 값이 된 필드라면 이 범위를 벗어나 충돌이 남을 수 있습니다
 
 여기서 끝나는 것은 아닙니다
@@ -186,7 +185,7 @@ v1.37.1 kubectl은 첫 SSA 요청이 성공한 뒤에도 CSA의 `managedFields`�
 2. 그 Update 매니저가 소유한 필드 집합을 선택한 SSA 매니저로 옮기는 JSON Patch를 만듭니다
 3. 이전이 이루어졌다면 원래 SSA 내용을 다시 Apply해 제외한 필드의 제거까지 반영합니다
 
-이 kubectl의 `migrateToSSAIfNecessary`에는 대상 이름이 `kubectl`이어야 한다는 검사가 없습니다
+kubectl의 `migrateToSSAIfNecessary`에는 이전받을 매니저의 이름이 `kubectl`이어야 한다는 검사가 없습니다
 따라서 **다른 `--field-manager`를 쓰면 모든 자동 이전이 꺼진다**고 일반화할 수 없습니다
 다른 이름은 서버의 어노테이션 기반 충돌 처리에서 빠지지만, 첫 Apply가 성공했다면 클라이언트의 후속 이전이 적용될 수 있습니다
 
@@ -210,7 +209,7 @@ SSA를 한 번 실행했다는 이유만으로 CSA 복귀에 필요한 기록이
 
 ## managedFields 초기화는 문서와 구현을 구분해야 합니다
 
-Apply 외의 본체 쓰기에서는 `managedFields`를 직접 초기화할 수 있습니다
+오브젝트 본체에 대한 Apply 이외의 쓰기 요청에서는 `managedFields`를 직접 초기화할 수 있습니다
 `[{}]`처럼 빈 항목 하나를 담은 목록은 명시적인 초기화 값입니다
 다른 필드도 함께 바꾸면 기존 기록을 초기화한 뒤 그 변경을 다시 처리하므로 새 소유권 항목이 생길 수 있습니다
 

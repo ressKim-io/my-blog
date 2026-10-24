@@ -21,7 +21,7 @@ API 서버가 요청을 디코딩한다고 하면 JSON을 Go 구조체로 읽는
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 클러스터에서 재현한 실측 기록은 포함하지 않습니다
 
-## 요청 버전과 메모리 버전, 저장 버전은 다릅니다
+## 요청 버전과 메모리 버전, 저장 버전은 따로 정합니다
 
 내부 타입을 사용하는 내장 API의 쓰기 요청을 따라가면 먼저 요청 바이트를 외부 버전의 구조체로 읽습니다
 그 버전에 맞는 기본값을 채운 뒤, 서버가 메모리에서 다룰 타입으로 변환합니다
@@ -51,7 +51,7 @@ storing <resource> in <storage version>, reading as <memory version> from <confi
 `__internal`은 서버 안에서 사용하는 타입을 등록할 때 쓰는 버전 이름입니다
 [`APIVersionInternal`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/runtime/interfaces.go)의 주석도 이 문자열 자체는 규약이며, 상수에 특별한 차단 기능이 있는 것은 아니라고 설명합니다
 
-실제 경계는 타입 등록과 변환, 서빙·저장 설정에 나뉘어 있습니다
+내부 버전을 어떻게 취급할지는 타입 등록·변환 코드와 서빙·저장 설정이 각각 정합니다
 
 | 위치 | 내부 버전 처리 |
 |---|---|
@@ -68,8 +68,8 @@ GVK는 API 그룹·버전·Kind를 묶은 식별자입니다
 지원하는 API 경로가 내부 버전을 제공하지 않고, 정상 응답·저장 경로가 외부 버전으로 바꿔 내보낸다는 뜻입니다
 `__internal`을 숨겨진 API endpoint로 취급하면 안 됩니다
 
-외부에 제공하거나 영구 저장하는 표현에는 호환성 책임이 붙습니다
-내부 타입의 모양을 그 계약으로 삼지 않으면 내부 구현을 바꾸면서도 외부 버전과 저장 데이터의 호환성은 변환 경로에서 유지할 수 있습니다
+외부에 제공하거나 영구 저장하는 표현은 호환성을 유지해야 합니다
+내부 타입의 구조를 외부에 그대로 제공하지 않으면, 내부 구현을 바꾸더라도 변환을 통해 외부 버전과 저장 데이터의 호환성을 유지할 수 있습니다
 
 ## 가운데 타입 하나가 버전 사이의 연결 수를 줄입니다
 
@@ -121,7 +121,7 @@ KEP의 v1.37 목표는 첫 단계입니다
 
 다만 기본값 적용이 언제나 입력의 누락과 명시적인 빈 값을 구별한다는 뜻은 아닙니다
 [`SetDefaults_Pod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/defaults.go)는 `enableServiceLinks`의 포인터가 `nil`인지 확인하지만, `SetDefaults_PodSpec`의 `dnsPolicy`는 문자열이 비었는지 확인합니다
-두 값의 구분 가능성은 필드 타입과 디코딩·기본값 로직에 달려 있습니다
+누락된 값과 명시적인 빈 값을 구분할 수 있는지는 필드 타입과 디코딩·기본값 로직에 달려 있습니다
 
 일부 기본값을 변환 과정에서 채우는 예외도 있습니다
 [`autoscaling/v1`의 HPA 변환](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/autoscaling/v1/conversion.go)은 변환 뒤 Metrics가 비어 있으면 기본 CPU 사용률 메트릭을 구성합니다
@@ -161,7 +161,7 @@ Kubernetes protobuf는 객체를 protobuf 바이트로 만들고 Kubernetes의 e
 [`protobuf` serializer](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/runtime/serializer/protobuf/protobuf.go)는 앞에 `6b 38 73 00`, 즉 `k8s`와 0 바이트를 붙입니다
 
 객체 타입은 protobuf marshal 인터페이스를 구현해야 합니다
-지원하는 내장 타입은 생성된 코드가 있지만, CRD로 정의한 사용자 객체 본체는 `Unstructured`로 다뤄지며 그 생성 코드가 없습니다
+지원하는 내장 타입은 생성된 코드가 있지만, CRD로 정의한 사용자 객체(Custom Resource, CR)의 본체는 `Unstructured`로 다뤄지며 그 생성 코드가 없습니다
 해당 인터페이스가 없을 때 serializer가 만드는 오류 형식은 다음과 같습니다
 
 ```text
@@ -214,7 +214,7 @@ kubectl이 사용자 정의 타입의 구조를 미리 알지 못해도 서버�
 버전별 구조는 CRD의 스키마와 변환 설정으로 다룹니다
 
 Webhook 전략을 쓰면 `ConversionReview`의 `desiredAPIVersion`이 원하는 결과 버전을 지정합니다
-서버가 요청하는 계약은 입력 객체들을 그 버전으로 바꿔 돌려달라는 것이며, 별도의 `__internal` 단계를 요구하지 않습니다
+서버는 입력 객체들을 지정한 버전으로 바꿔 반환하도록 요청하며, 별도의 `__internal` 단계를 요구하지 않습니다
 실제 요청 구성은 [`webhook_converter.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/conversion/webhook_converter.go)에서 확인할 수 있습니다
 
 웹훅 구현이 서빙 버전 하나를 hub로 삼아 나머지 버전을 연결할 수는 있습니다

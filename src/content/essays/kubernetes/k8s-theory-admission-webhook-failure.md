@@ -14,7 +14,7 @@ date: "2026-07-29"
 
 Admission webhook은 API 서버가 HTTPS로 호출하는 별도 프로그램입니다
 클러스터 안의 Service로 연결하든 외부 URL로 연결하든, API 서버는 그 프로그램의 응답을 기다립니다
-규칙을 자유롭게 작성할 수 있는 만큼 판단자의 지연과 장애도 원래 요청에 영향을 줍니다
+규칙을 자유롭게 작성할 수 있는 만큼 webhook 프로그램의 지연과 장애도 원래 요청에 영향을 줍니다
 
 VAP(ValidatingAdmissionPolicy)와 MAP(MutatingAdmissionPolicy)는 CEL로 적은 규칙을 API 서버 안에서 평가합니다
 CEL은 제공된 입력을 바탕으로 조건이나 변경을 표현하는 언어입니다
@@ -24,6 +24,25 @@ CEL은 제공된 입력을 바탕으로 조건이나 변경을 표현하는 언�
 > 소스 ref: `f78e722310e50bcaca9276be22276d9e91d91308`
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 클러스터 실측은 포함하지 않으며, 수치가 들어간 상황 예시는 설명을 위한 가정입니다
+
+## Ignore는 정상적인 거부를 무시하지 않습니다
+
+webhook의 `failurePolicy`는 호출 오류 등으로 판단을 얻지 못했을 때의 처리를 정합니다
+기본값은 `Fail`입니다
+
+| webhook의 결과 | `Fail` | `Ignore` |
+|---|---|---|
+| 정상 응답 `allowed: true` | 다음 검사로 진행 | 다음 검사로 진행 |
+| 정상 응답 `allowed: false` | 거부 | 거부 |
+| 연결·TLS·timeout·응답 검증 등의 호출 오류 | 거부 | 그 호출 실패를 무시하고 다음 검사로 진행 |
+
+`Ignore`로 다음 검사에 넘겨도 저장 성공은 보장되지 않습니다
+필수 라벨을 넣는 mutating webhook이 응답하지 못했다고 가정하겠습니다
+뒤의 validator가 그 라벨을 요구하면 라벨이 추가되지 않은 객체는 거기서 거부됩니다
+사용자가 처음부터 라벨을 넣었다면 같은 최종 검증을 통과할 수도 있습니다
+
+다만 라벨을 넣는 webhook과 최종 validator가 같은 서버에 의존한다면, 그 서버가 장애 상태일 때 검증 단계에서도 다시 응답을 기다립니다
+변경과 검증의 역할을 나누는 것만으로 가용성이 개선되지는 않습니다
 
 ## AdmissionReview는 원래 HTTP 요청과 다릅니다
 
@@ -92,26 +111,8 @@ validating에서는 보통 가장 늦게 끝나는 호출이 전체 대기 시�
 
 실행 방식은 [mutating dispatcher](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/mutating/dispatcher.go)와 [validating dispatcher](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/validating/dispatcher.go)에서 확인했습니다
 
-## Ignore는 정상적인 거부를 무시하지 않습니다
+## Ignore가 무시할 수 있는 오류의 범위
 
-webhook의 `failurePolicy`는 호출 오류 등으로 판단을 얻지 못했을 때의 처리를 정합니다
-기본값은 `Fail`입니다
-
-| webhook의 결과 | `Fail` | `Ignore` |
-|---|---|---|
-| 정상 응답 `allowed: true` | 다음 검사로 진행 | 다음 검사로 진행 |
-| 정상 응답 `allowed: false` | 거부 | 거부 |
-| 연결·TLS·timeout·응답 검증 등의 호출 오류 | 거부 | 그 호출 실패를 무시하고 다음 검사로 진행 |
-
-`Ignore`로 다음 검사에 넘겨도 저장 성공은 보장되지 않습니다
-필수 라벨을 넣는 mutating webhook이 응답하지 못했다고 가정하겠습니다
-뒤의 validator가 그 라벨을 요구하면 변경받지 못한 객체는 거기서 거부됩니다
-사용자가 처음부터 라벨을 넣었다면 같은 최종 검증을 통과할 수도 있습니다
-
-다만 주입 webhook과 최종 validator가 같은 장애 서버에 의존하면 검증 단계에서 다시 그 서버를 기다립니다
-변경과 검증의 역할을 나누는 것만으로 가용성이 개선되지는 않습니다
-
-무시할 수 있는 오류의 범위도 제한돼 있습니다
 구현은 호출 실패인 `ErrCallingWebhook`과 정책 거부인 `ErrWebhookRejection`을 구분합니다
 응답의 patch를 해석하지 못한 오류는 호출 오류지만, 해석한 JSONPatch를 객체에 적용하다 실패한 것은 내부 오류로 반환합니다
 후자는 `Ignore`여도 요청이 실패할 수 있습니다
@@ -121,7 +122,7 @@ webhook의 `failurePolicy`는 호출 오류 등으로 판단을 얻지 못했을
 
 판단을 받지 못했는데도 진행하는 방식을 fail-open이라고 합니다
 API 서버는 이를 로그·metric·admission audit annotation으로 남길 수 있지만, 실제 감사 로그 저장은 audit 설정에 달려 있습니다
-클라이언트의 성공 응답만으로 모든 판단자가 정상 응답했다고 확인할 수는 없습니다
+클라이언트가 성공 응답을 받았다고 모든 webhook이 정상 응답한 것은 아닙니다
 
 ## 재호출은 처음 제외한 webhook을 모두 찾아주지 않습니다
 
@@ -131,14 +132,14 @@ API 서버는 이를 로그·metric·admission audit annotation으로 남길 수
 추가 호출을 줄이기 위해 순서가 바뀔 수도 있습니다
 
 확인한 구현에서는 처음에 selector가 맞지 않아 호출하지 않은 webhook을 두 번째 단계에서 처음 호출하지 않습니다
-뒤 webhook이 라벨을 바꿔 이제 조건이 맞더라도, 재호출만으로 앞의 누락이 메워지지는 않습니다
+뒤 webhook이 라벨을 바꿔 조건에 맞게 되더라도, 처음 건너뛴 webhook이 재호출 과정에 새로 참여하지는 않습니다
 
 변경 로직은 같은 객체에 다시 적용해도 불필요한 중복을 만들지 않아야 합니다
 “sidecar가 없으면 추가한다”와 “항상 하나 추가한다”는 재호출 결과가 다릅니다
 재호출을 꺼도 사용자가 이미 sidecar가 있는 객체를 보낼 수 있으므로 멱등성은 여전히 필요합니다
 
 각 webhook이 멱등적이어도 서로의 변경을 되돌릴 수 있습니다
-개별 멱등성과 여러 변경의 순서·수렴은 별개입니다
+따라서 각각의 멱등성뿐 아니라 실행 순서와 여러 변경이 함께 안정된 결과에 도달하는지도 살펴야 합니다
 필수 조건은 변경이 끝난 뒤 validating 단계에서 확인해야 합니다
 
 [`reinvoker`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/reinvocation.go)는 추가 mutating 단계를 실행하고, 앞서 연결한 mutating dispatcher가 호출 대상을 고릅니다
@@ -159,7 +160,7 @@ API 서버는 원격 호출 전에 `rules`, selector, `matchConditions`로 대�
 `objectSelector`는 사용자가 라벨로 참여를 선택하는 정책에 적합합니다
 모두에게 강제할 정책을 그 라벨 하나에만 의존시키면, 처음부터 라벨 없이 생성해 검사를 피할 수 있습니다
 
-이미 붙은 라벨을 지우는 UPDATE는 기존 객체도 매칭하므로 그 삭제 요청 자체가 검사 대상이 됩니다
+이미 붙은 라벨을 지우는 UPDATE는 기존 객체도 매칭하므로 그 UPDATE 요청 자체가 검사 대상이 됩니다
 하지만 라벨이 사라진 뒤의 요청까지 자동으로 검사하지는 않습니다
 Namespace 라벨도 마찬가지로 누가 만들고 바꿀 수 있는지 확인해야 합니다
 
@@ -183,7 +184,7 @@ VAP는 v1.30부터 stable이며, 여기서는 `admissionregistration.k8s.io/v1`�
 Policy에 검증식과 범위를 적고, Binding으로 실제 적용 대상·파라미터·위반 처리를 연결합니다
 **Policy만 만들고 대응하는 Binding이 없으면 그 규칙은 요청에 적용되지 않습니다**
 
-요청은 Policy의 `matchConstraints`와 Binding의 `matchResources` 양쪽에 들어야 합니다
+요청이 Policy의 `matchConstraints`와 Binding의 `matchResources` 양쪽 조건에 맞아야 정책이 적용됩니다
 Binding은 범위를 좁힐 수 있지만 Policy가 대상으로 삼지 않은 리소스까지 넓히지는 못합니다
 `excludeResourceRules`에 맞으면 포함 규칙에 맞아도 제외합니다
 
@@ -227,7 +228,7 @@ CEL이 직접 HTTP 요청을 보내거나 다른 Deployment 전체를 조회하�
 파라미터는 주로 informer의 사본에서 읽습니다
 v1.37.1의 `CollectParams`에는 **이름으로 조회한 파라미터가 캐시에 없을 때 직접 API 조회로 보완하는 경로**도 있습니다
 selector 조회까지 항상 최신 API 조회로 바뀌는 것은 아닙니다
-어느 경로든 파라미터 읽기와 심사 대상 저장을 여러 객체에 대한 하나의 트랜잭션으로 묶지는 않습니다
+어느 경로든 파라미터를 읽는 작업과 심사 대상 객체를 저장하는 작업이 하나의 트랜잭션으로 묶이지는 않습니다
 
 ### 파라미터를 찾지 못한 경우를 구분합니다
 
@@ -264,7 +265,7 @@ Binding의 `validationActions`는 확인된 위반을 처리하는 방법입니�
 예를 들어 파라미터를 찾지 못했고 `parameterNotFoundAction: Deny`, `failurePolicy: Fail`이면 Binding이 Warn이어도 거부할 수 있습니다
 
 API 필드 설명은 Fail 오류를 actions에 따라 처리한다고 적지만, 이 구현 경로는 actions를 거치지 않습니다
-문서의 일반 설명과 v1.37.1의 실제 경로를 함께 남깁니다
+따라서 문서의 일반 설명만으로 v1.37.1의 이 오류 처리를 판단할 수는 없습니다
 Warn Binding을 모든 오류에서도 통과하는 설정으로 취급해서는 안 됩니다
 
 문법 오류는 Policy 등록 때 발견할 수 있고, 타입 검사에서 발견한 문제는 `status.typeChecking.expressionWarnings`에 기록됩니다
@@ -302,13 +303,13 @@ VAP의 `validationActions`도 없습니다
 변경 뒤 필수 조건은 validating 단계에서 확인합니다
 
 `failurePolicy`의 기본값은 `Fail`입니다
-`Ignore`는 정책 전체를 실행 전 상태로 되돌리는 약속이 아닙니다
+`Ignore`를 지정해도 정책 전체가 실행 전 상태로 되돌아가지는 않습니다
 첫 mutation으로 라벨을 추가하고 뒤 mutation의 오류를 무시했다면 앞의 라벨이 남을 수 있습니다
 객체 변환기 준비 실패 등 일부 내부 오류는 이 실패 정책을 거치지 않고 바로 반환됩니다(`StatusError`)
 이런 경우에는 Ignore여도 요청이 실패할 수 있습니다
 
 CEL을 내부에서 실행해도 계산 비용은 듭니다
-평가 예산은 수행한 계산량을 세는 단위이며 실제 초 단위 제한과 같지 않습니다
+평가 예산은 수행한 계산량을 제한하는 기준이며, 초 단위의 시간 제한과는 다릅니다
 개별 평가가 한도 안에 들어도 Policy·Binding·파라미터 조합이 많아지면 총 계산량이 늘어납니다
 
 근거는 [feature gate 이력](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/features/kube_features.go), [MAP 플러그인](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/plugin.go), [변경 dispatcher](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/dispatcher.go), [소유권을 추적하지 않는 병합 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/patch/smd.go)입니다
@@ -415,7 +416,7 @@ VAP는 기본 422 외에 reason으로 403·401·413도 지정할 수 있습니�
 Admission webhook에는 이들과 같은 일반적인 판단 결과 TTL 캐시 필드가 없습니다
 설정·연결 클라이언트의 캐시와 정책 판단의 재사용을 구분해야 합니다
 
-[인증](/essays/k8s-theory-authentication)·[인가](/essays/k8s-theory-authorization) 단계와 함께 보면, 어느 요청이 어느 판단자의 새 응답을 기다리는지 확인할 수 있습니다
+[인증](/essays/k8s-theory-authentication)·[인가](/essays/k8s-theory-authorization) 단계까지 함께 살펴야 어떤 요청이 외부 서비스의 새 판단을 기다리는지 구분할 수 있습니다
 호출 실패를 무시한 경우와 처음부터 검사 대상에서 빠진 경우를 나누는 것이 그 출발점입니다
 
 ## 공식 문서와 오류 코드 근거

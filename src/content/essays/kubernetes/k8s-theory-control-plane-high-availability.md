@@ -67,7 +67,7 @@ learner는 투표하지 않고 로그를 따라잡는 멤버입니다
 따라잡은 뒤 투표 멤버로 승격하기 전까지 quorum에 포함되지 않고 리더 역할도 맡지 않습니다
 
 [etcd v3.6 learner 설계 문서](https://etcd.io/docs/v3.6/learning/design-learner/)의 부록은 serializable 읽기와 member status API를 예외로 허용합니다
-따라서 모든 요청을 거절한다고 요약하면 범위가 넓습니다
+따라서 learner가 모든 종류의 요청을 거절한다고 볼 수는 없습니다
 Kubernetes 저장 경로가 사용하는 linearizable 읽기와 쓰기를 처리하는 멤버로 보아서는 안 됩니다
 
 멤버 추가가 언제나 그대로 승인되는 것도 아닙니다
@@ -106,7 +106,7 @@ API 서버의 etcd 읽기 경로는 serializable 옵션을 사용해 이 문제�
 
 progress notification은 watch 스트림이 어디까지 진행했는지 알려 줍니다
 그 revision은 [etcd 멤버가 적용한 지점](https://github.com/etcd-io/etcd/issues/9855)을 기준으로 하므로, 소수 파티션에 갇힌 멤버의 응답만으로 다수 쪽의 새 쓰기까지 확인할 수는 없습니다
-최신 읽기의 기준 revision을 얻는 과정과 그 지점까지 캐시가 따라왔는지 확인하는 과정을 섞지 않아야 합니다
+최신 읽기의 기준 revision을 얻는 일과 캐시가 그 지점까지 따라왔는지 확인하는 일은 구분해야 합니다
 
 ### 리더를 잃은 watch는 계속 유지되지 않습니다
 
@@ -135,7 +135,7 @@ etcd로 위임됐다는 사실도 quorum 없이 성공한다는 뜻은 아닙니
 
 API 서버끼리는 사용자 요청을 처리할 리더 하나를 선출하지 않습니다
 각 인스턴스가 요청을 검사하고 공유 etcd를 사용합니다
-같은 오브젝트의 조건부 갱신은 저장 단계에서 `resourceVersion` 충돌로 구분합니다
+같은 오브젝트를 동시에 조건부 갱신하려 하면 저장 단계에서 `resourceVersion` 충돌이 발생할 수 있습니다
 
 인스턴스를 늘리면 다음 상태도 함께 늘어납니다
 
@@ -194,7 +194,7 @@ v1.37.1에서는 [`UnknownVersionInteroperabilityProxy`](https://github.com/kube
 [`peerproxy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/peerproxy/peerproxy_handler.go)는 identity Lease informer를 사용해 다른 인스턴스의 discovery 정보를 관리합니다
 따라서 현재도 아무 기능이 읽지 않는 기록이라고 설명할 수는 없습니다
 
-API 서버끼리 일부 기능을 위해 상대를 발견하고 요청을 전달하는 것과, 저장 내용을 자체 합의하는 것은 별개입니다
+일부 기능에서 API 서버끼리 서로를 찾고 요청을 전달하더라도, 저장할 내용을 API 서버들이 직접 합의하는 것은 아닙니다
 `StorageVersionAPI`는 같은 고정 소스에서 여전히 Alpha·기본 off이며, 별도의 `CoordinatedLeaderElection`은 Beta·기본 off입니다
 
 ## 컨트롤러는 Lease를 다투지만 모든 동시 행동을 차단하지는 못합니다
@@ -226,7 +226,7 @@ client-go 패키지는 fencing을 보장하지 않는다고 명시합니다
 fencing은 이전 리더가 뒤늦게 작업하더라도 저장소나 작업 대상이 그 쓰기를 거절하게 하는 장치입니다
 
 같은 오브젝트의 같은 옛 버전을 조건부 갱신하면 `resourceVersion` 충돌로 한쪽을 거절할 수 있습니다
-서로 다른 오브젝트를 만들거나 외부 시스템에 효과를 내는 작업은 하나의 버전 충돌 검사로 묶이지 않습니다
+서로 다른 오브젝트를 만들거나 외부 시스템을 변경하는 작업은 하나의 버전 충돌 검사로 묶이지 않습니다
 컨트롤러는 자신의 동작 범위에 맞는 멱등성과 재조정을 함께 갖춰야 합니다
 
 ## 같은 Lease Kind라도 단독 갱신과 경쟁은 다릅니다
@@ -244,7 +244,7 @@ fencing은 이전 리더가 뒤늦게 작업하더라도 저장소나 작업 대
 여러 후보가 하나를 차지하려는 리더 선출은 다른 패키지와 판정 절차를 사용합니다
 Kind 이름만 보고 노드 하트비트를 리더 선출로 설명하거나, identity Lease에 투표가 들어 있다고 해석하면 역할이 바뀝니다
 
-## 외부 etcd도 저장소 장애와 API 서버의 연결을 없애지는 않습니다
+## 외부 etcd를 써도 API 서버의 저장소 의존성은 남습니다
 
 [kubeadm의 HA 토폴로지 문서](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/)는 stacked 구성과 external etcd 구성을 나눕니다
 문서의 권장 최소 구성에서는 전자는 컨트롤 플레인 호스트 3개, 후자는 컨트롤 플레인 3개와 etcd 호스트 3개를 사용합니다

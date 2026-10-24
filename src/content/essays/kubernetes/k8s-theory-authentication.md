@@ -31,15 +31,32 @@ bearer token은 문자열을 가진 쪽이 제시해 사용할 수 있는 자격
 
 ServiceAccount admission은 Pod의 volume **명세**를 바꿉니다
 JWT를 발급하거나 실행 중인 컨테이너의 파일을 직접 쓰지는 않습니다
-JWT(JSON Web Token)는 서명된 claim, 즉 신원과 유효 조건을 담은 토큰 형식입니다
+JWT(JSON Web Token)는 신원과 유효 조건을 claim으로 담아 서명한 토큰 형식입니다
 
-나중에 kubelet이 Pod에 묶인 TokenRequest를 보내고, API 서버에서 발급받은 토큰을 projected volume 파일에 투영합니다
-projected volume은 토큰 같은 정보를 컨테이너 안의 파일로 제공하는 방식입니다
+나중에 kubelet이 Pod에 묶인 토큰을 요청하는 TokenRequest를 보냅니다
+kubelet은 API 서버에서 발급받은 토큰을 projected volume을 통해 컨테이너 안의 파일로 제공합니다
+이처럼 Pod에 연결된 토큰을 Pod bound token이라고 합니다
 애플리케이션이 파일을 읽어 HTTP 요청에 실으면, 서버의 인증기가 이를 검사해 `user.Info`를 만듭니다
 
 `user.Info`는 이름·UID·그룹·extra를 전달하는 인터페이스입니다
 사용자를 저장하는 API 오브젝트와는 다릅니다
-인증기의 응답에는 검증한 audience도 들어갈 수 있지만, 그것이 모두 `user.Info`의 필드가 되는 것은 아닙니다
+인증기의 응답에는 검증한 audience도 들어갈 수 있습니다
+audience는 토큰을 받을 서비스의 식별자이며, `user.Info`와는 별도로 전달됩니다
+
+## 만들어진 신원은 어떻게 인가에 전달되나
+
+ServiceAccount `prod/web`의 토큰이 인증되면 다음과 같은 정보가 전달됩니다
+
+| 항목 | 값의 예 |
+|---|---|
+| username | `system:serviceaccount:prod:web` |
+| UID | ServiceAccount UID |
+| groups | `system:serviceaccounts`, `system:serviceaccounts:prod`, `system:authenticated` |
+| extra | Pod·Node·credential ID 등 `authentication.kubernetes.io/...` 정보 |
+
+인증기가 만든 사용자 정보는 요청 context에 들어갑니다
+인가는 여기에 verb·resource·namespace 같은 요청 속성을 붙여 판단합니다
+팀별로 권한을 나누려면 인증된 그룹 등 인가가 받는 정보에 그 구분이 있어야 합니다
 
 ## 파일이 갱신되면 요청의 토큰도 바뀔까
 
@@ -54,7 +71,7 @@ Pod와 ServiceAccount에 모두 설정돼 있으면 Pod 설정이 우선합니�
 
 projected token에는 만료 시각이 있으므로 kubelet token manager가 새 토큰을 요청합니다
 확인한 구현에서는 토큰 수명의 약 80%가 되는 시점과 발급 후 24시간이 되는 시점 중 먼저 오는 쪽을 기준으로 갱신을 요구합니다
-동시 갱신을 분산하기 위해 jitter만큼 이 기준 시점을 조금 앞당깁니다
+여러 토큰이 동시에 갱신되는 것을 줄이기 위해 무작위 시간 차이인 jitter를 두어 기준 시점을 조금 앞당깁니다
 
 갱신에 실패했어도 manager가 가진 토큰이 아직 유효하면 기존 토큰을 반환하고 오류를 기록합니다
 TokenRequest 응답의 `status.expirationTimestamp`까지 지났다면 오류를 반환합니다
@@ -83,7 +100,8 @@ client-go는 Kubernetes API용 Go 클라이언트입니다
 token source는 요청에 사용할 토큰을 돌려주는 구성요소입니다
 transport는 HTTP 요청을 전달하면서 인증 헤더 등을 처리합니다
 확인한 버전의 `BearerTokenFile` 경로는 요청 시 캐시된 token source를 조회합니다
-파일에서 읽은 값의 캐시 유효 시간을 1분으로 두고 10초의 사전 만료 여유를 적용하며, JWT의 `exp`를 파싱해 이 주기를 정하지는 않습니다
+파일에서 읽은 값은 1분 동안 캐시하되, 캐시 만료 10초 전부터 다시 읽을 수 있도록 여유를 둡니다
+이 주기를 JWT의 `exp`를 파싱해 정하지는 않습니다
 이 재읽기는 요청을 처리할 때 일어나며 파일을 항상 감시하는 별도 루프라는 뜻은 아닙니다
 
 이미 `Authorization` 헤더가 있으면 bearer transport는 토큰 삽입을 건너뜁니다
@@ -97,7 +115,7 @@ transport는 HTTP 요청을 전달하면서 인증 헤더 등을 처리합니다
 
 Secret 기반 장기 토큰은 보통 `exp`가 없고 audience별 제한을 표현하지 못합니다
 Secret을 읽을 권한이 있으면 토큰도 읽을 수 있으며, ServiceAccount·Secret과 연결되지만 Pod UID에는 묶이지 않습니다
-projected token은 TokenRequest로 발급하고 별도 토큰 오브젝트를 저장하지 않는 경로입니다
+projected token은 TokenRequest로 발급하며, 별도 토큰 오브젝트를 저장하지 않습니다
 
 v1.24부터 ServiceAccount마다 Secret 기반 토큰을 자동 생성하지 않으며, 수동 장기 토큰 Secret은 계속 지원됩니다
 자동 생성된 미사용 legacy token은 v1.29부터 별도 정리 대상입니다
@@ -107,7 +125,7 @@ legacy token을 아무 객체에도 묶이지 않은 영구 토큰이라고 일�
 ## Pod bound token은 서명만 맞으면 유효한가
 
 API 서버는 JWT의 서명·issuer·audience·시간 조건과, 토큰이 묶인 객체의 상태를 함께 확인합니다
-issuer는 토큰 발급자, audience는 토큰을 받을 서비스의 식별자입니다
+issuer는 토큰 발급자입니다
 
 여기서 다루는 것은 Pod projected volume에 들어가는 Pod bound token입니다
 TokenRequest에는 Secret이나 Node에 직접 묶는 경로도 있으므로 모든 단기 ServiceAccount token을 Pod bound token이라고 부를 수는 없습니다
@@ -139,7 +157,7 @@ Pod bound token 인증에서는 ServiceAccount와 Pod의 존재·UID를 확인�
 객체가 없거나 UID가 다르면 실패합니다
 객체가 남아 있어도 `metadata.deletionTimestamp`가 현재 시각에서 기본 허용 오차 60초를 뺀 시각보다 앞서면 실패합니다
 
-이는 삭제 중인 객체를 validator가 판정하는 시간 조건입니다
+이 60초는 validator가 삭제 중인 객체의 토큰을 거부할지 판단할 때 사용하는 허용 오차입니다
 모든 삭제에 반드시 60초를 기다린다는 뜻도, 삭제 후 60초 안에 모든 검증자에게 폐기가 반영된다는 보장도 아닙니다
 객체가 이미 없어졌다면 조회 실패로 거부될 수 있습니다
 
@@ -154,7 +172,7 @@ Node 정보가 claim에 있다는 사실과 Node가 bound object라는 사실은
 | `ServiceAccountTokenNodeBindingValidation` | Node bound token 인증 시 Node 검증 | v1.32 |
 
 확인한 v1.37.1 소스에서도 세 gate는 기본값 true에 잠긴 `LockToDefault` 상태입니다
-같은 Node 관련 기능이라고 한 가지 검사로 합쳐 설명하면 안 됩니다
+토큰에 Node 정보를 넣는 기능과, Node에 토큰을 묶고 그 상태를 검증하는 기능을 구분해야 합니다
 
 ### audience가 맞으면 권한도 생길까
 
@@ -185,25 +203,10 @@ TokenReview의 `spec.token`은 **검사 대상** 토큰입니다
 audience를 생략하면 API 서버 audience가 기본으로 사용됩니다
 
 API 서버가 객체 상태를 확인한다는 말도 매 요청마다 etcd 최신 값을 직접 읽는다는 뜻은 아닙니다
-informer가 유지하는 객체 사본, 토큰 인증 캐시, 외부 서비스의 결과 캐시가 폐기 반영에 영향을 줄 수 있습니다
+API의 변경을 따라가며 로컬 사본을 관리하는 informer와 토큰 인증 캐시, 외부 서비스의 결과 캐시 때문에 폐기 반영이 늦어질 수 있습니다
 앞의 60초 조건을 전역적인 폐기 완료 시간으로 해석할 수 없는 이유입니다
 
-## 만들어진 신원은 어떻게 인가에 전달되나
-
-ServiceAccount `prod/web`의 토큰이 인증되면 다음과 같은 정보가 전달됩니다
-
-| 항목 | 값의 예 |
-|---|---|
-| username | `system:serviceaccount:prod:web` |
-| UID | ServiceAccount UID |
-| groups | `system:serviceaccounts`, `system:serviceaccounts:prod`, `system:authenticated` |
-| extra | Pod·Node·credential ID 등 `authentication.kubernetes.io/...` 정보 |
-
-인증기가 만든 사용자 정보는 요청 context에 들어갑니다
-인가는 여기에 verb·resource·namespace 같은 요청 속성을 붙여 판단합니다
-팀별로 권한을 나누려면 인증된 그룹 등 인가가 받는 정보에 그 구분이 있어야 합니다
-
-### 사람의 이름과 그룹은 어디서 오나
+## 사람의 이름과 그룹은 어디서 오나
 
 사람 사용자도 요청마다 자격증명을 검사해 신원으로 바꿉니다
 인증서의 `CN`은 username, `O`는 groups로 이어질 수 있습니다
@@ -216,7 +219,8 @@ RBAC은 인증서 파일명이나 로그인 도구를 비교하지 않습니다
 
 자격증명 폐기와 권한 회수도 다릅니다
 ServiceAccount UID는 토큰의 객체 검증에 쓰이지만, RoleBinding의 ServiceAccount subject는 namespace와 이름으로 매칭됩니다
-같은 이름으로 ServiceAccount를 다시 만들면 옛 토큰은 UID 불일치로 거부되더라도 새 토큰은 남은 Binding의 권한을 얻을 수 있습니다
+같은 이름으로 ServiceAccount를 다시 만들면 옛 토큰은 UID 불일치로 거부됩니다
+그와 별개로 새 토큰은 남아 있는 Binding의 권한을 얻을 수 있습니다
 
 ### 자격증명마다 접근 중단 조건이 다르다
 
@@ -246,10 +250,11 @@ v1.37.1 소스에서는 예전 `StructuredAuthenticationConfiguration` gate 정�
 API 서버는 인증기의 실행 순서를 보장하지 않으므로 특정 수단의 우선순위에 의존하면 안 됩니다
 
 한 인증기가 자기 자격증명이 아니라고 답하는 것과 검증 오류를 반환하는 것은 다릅니다
-아무 인증기도 신원을 만들지 못했고 오류도 없다면 익명 인증 설정이 결과를 가릅니다
+아무 인증기도 신원을 만들지 못했고 오류도 없다면 익명 인증 설정에 따라 다음 처리가 달라집니다
 허용된 경로에서는 `system:anonymous`, `system:unauthenticated`가 붙고, 꺼져 있거나 허용되지 않은 경로라면 401입니다
 
-확인한 구성에서는 익명 인증기가 일반 인증기 union 바깥에 있으며, 바깥 union은 오류가 있으면 익명 fallback으로 넘어가지 않습니다
+확인한 구성에서는 일반 인증기들을 묶은 union 바깥에 익명 인증기가 있습니다
+바깥 union은 일반 인증기 쪽에서 오류가 나면 익명 인증으로 넘어가는 fallback을 실행하지 않습니다
 유효하지 않은 bearer token은 401이지만, 토큰 없는 요청은 익명 인증이 켜진 경로에서 익명 신원으로 진행할 수 있습니다
 그 익명 신원을 인가가 거부하면 403입니다
 

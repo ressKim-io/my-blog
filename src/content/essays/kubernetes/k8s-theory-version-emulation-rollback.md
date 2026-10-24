@@ -1,5 +1,5 @@
 ---
-title: "버전 셋과 롤백 — 바이너리 교체와 기능 활성화를 나누는 이유"
+title: "세 가지 버전과 롤백 — 바이너리 교체와 기능 활성화를 나누는 이유"
 excerpt: "컨트롤 플레인의 binary·emulated·min compat 버전이 현재 동작과 이후 데이터를 읽을 서버를 어떻게 구분하는지 살펴봅니다. 게이트 기본값, 저장 버전의 두 단계 선택, CEL 환경과 롤백의 한계를 연결합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "CompatibilityVersion", "FeatureGate", "CEL", "Upgrade", "concept"]
@@ -13,7 +13,7 @@ date: "2026-08-20"
 그 사이 이전 서버가 읽지 못하는 데이터를 저장했다면 바이너리 교체를 취소해도 문제가 남습니다
 
 Kubernetes는 실행 파일의 버전, 동작을 맞출 버전, 호환 범위를 정하는 최소 버전을 나눕니다
-[서빙 버전과 저장 버전을 구분한 앞 글](/essays/k8s-theory-serialization-version-conversion)에서 이어지는 질문은 이 두 버전의 선택 기준이 왜 다른가입니다
+[서빙 버전과 저장 버전을 구분한 앞 글](/essays/k8s-theory-serialization-version-conversion)에 이어, 이번에는 두 버전의 선택 기준이 다른 이유를 살펴봅니다
 
 > **근거**: Kubernetes v1.37.1 소스와 공식 문서를 바탕으로 설명합니다
 > 소스 ref: `f78e722310e50bcaca9276be22276d9e91d91308`
@@ -43,7 +43,7 @@ v1.37.1 바이너리도 emulated를 1.36으로 두고, min compat을 1.35로 두
 [공식 compatibility 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/cluster-administration/compatibility-version.md)는 버전 호환성과 emulation 옵션이 v1.32부터 도입되었다고 설명합니다
 소스의 최소 버전 상수 `1.31`은 설정 하한을 계산할 때 쓰는 값이며, 기능이 도입된 릴리스와 구분해야 합니다
 
-[`kubeEffectiveVersionFloors`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/compatibility/version.go)는 binary에서 minor 셋을 뺀 값과 `1.31` 중 더 높은 값을 하한으로 고릅니다
+[`kubeEffectiveVersionFloors`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/compatibility/version.go)는 binary보다 마이너 버전 세 단계 낮은 값과 `1.31` 중 더 높은 값을 하한으로 고릅니다
 v1.37 계열에서는 이 값이 `1.34`입니다
 
 | 값 | 설정 방법 | 기본값 | v1.37.1 바이너리의 허용 범위 |
@@ -172,7 +172,7 @@ v1.37.1의 [`emulatedStorageVersion`](https://github.com/kubernetes/kubernetes/b
 
 첫 탐색에서는 내부 버전과 Alpha 버전을 건너뜁니다
 남은 후보 중 도입 버전이 min compat 이하인 첫 버전을 선택합니다
-Alpha API에는 버전 간 호환 보장이 없으므로 롤백 호환성을 남길 대상으로 우선 선택하지 않습니다
+Alpha API에는 버전 간 호환 보장이 없으므로 롤백을 고려한 첫 탐색에서는 제외합니다
 
 첫 탐색에서 후보를 찾지 못하면 두 번째 탐색으로 넘어갑니다
 이번에는 내부 버전만 제외하고, emulated 이하에 도입된 버전 중 우선순위가 가장 높은 것을 고릅니다
@@ -210,9 +210,9 @@ API 서버는 커스텀 리소스의 생성·갱신 요청을 검증할 때 이 
 이전 바이너리에 존재하지 않았던 최신 함수를 롤백 뒤에도 처리해 준다는 뜻은 아닙니다
 min compat을 올려 최신 함수를 사용하는 규칙을 저장하면, 구버전이 그 규칙을 컴파일하지 못할 수 있습니다
 
-## min compat을 올리는 결정은 저장 데이터까지 남습니다
+## min compat 변경은 저장 데이터에도 영향을 줍니다
 
-min compat을 binary까지 올리면 지원하는 이전 버전으로의 롤백 범위를 남기지 않게 됩니다
+min compat을 binary까지 올리면 이전 버전으로의 롤백은 지원 범위에서 벗어납니다
 관계식상 이 설정을 하려면 emulated도 binary의 major·minor와 같아야 합니다
 
 [`registry.go`의 주석](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/compatibility/registry.go)은 모든 컨트롤 플레인 컴포넌트의 업그레이드 뒤 min compat을 binary와 같게 올릴 수 있다고 설명합니다
@@ -228,7 +228,7 @@ min compat을 다시 낮춰도 이미 저장된 바이트와 CEL 표현식이 �
 `StorageVersionMigration`은 이미 저장한 데이터를 현재 저장 버전으로 옮기는 장치이며, 이전 바이너리로 돌아가기 위한 자동 역변환 절차가 아닙니다
 
 이처럼 호환 범위를 남기기 위해 새 기능 사용을 미루는 것을 [초기 문서의 min compat 설명](https://github.com/kubernetes/website/commit/f0ca297ac692c70f20a0519a3e2d345707e4639d)에서는 *feature availability delay*라고 불렀습니다
-저장 버전, 새 CEL 표현식 환경, 호환 조건이 붙은 gate의 기본값에서 그 지연이 나타날 수 있습니다
+저장 버전 선택, 새 CEL 표현식에 허용하는 기능, 호환 조건이 붙은 gate의 기본값에서 새 기능 사용이 미뤄질 수 있습니다
 
 ## 구현과 문서, 실제 응답을 구분해야 합니다
 

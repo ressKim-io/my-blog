@@ -23,11 +23,11 @@ Admission은 디코딩된 오브젝트를 저장하기 전에 내용을 바꾸�
 ## Pod 생성 요청에서 검사하는 순서
 
 일반적인 내장 리소스의 CREATE에서는 API 기본값이 적용된 오브젝트가 mutating admission에 들어갑니다
-이 단계의 참여자는 값을 바꾸거나 요청을 거부할 수 있습니다
+mutating 플러그인은 값을 바꾸거나 요청을 거부할 수 있습니다
 
 그다음 저장 전략이 생성에 필요한 값을 정리하고, 타입과 메타데이터를 검증합니다
 저장 전략은 리소스마다 생성·갱신의 준비와 검증 방법을 정한 구현입니다
-이 준비를 지난 오브젝트에 validating admission을 적용하고, 통과하면 저장소에 씁니다
+준비와 검증을 마친 오브젝트에 validating admission을 적용하고, 통과하면 저장소에 씁니다
 
 ![일반 CREATE에서 mutating admission, 저장 전략, validating admission, 저장 쓰기가 이어지는 순서](/diagrams/k8s-theory-admission-order-1.svg)
 
@@ -43,7 +43,7 @@ PATCH는 변경안을 적용한 결과를 대상으로 UPDATE 또는 CREATE admi
 ## 플러그인 목록 하나를 두 단계에서 사용합니다
 
 kube-apiserver에는 실행 순서가 정해진 admission 플러그인 목록이 있습니다
-mutating 단계에서는 현재 operation을 처리하면서 `MutationInterface`를 구현한 플러그인의 `Admit`를 호출합니다
+mutating 단계에서는 현재 operation을 처리할 수 있고 `MutationInterface`를 구현한 플러그인의 `Admit`를 호출합니다
 validating 단계에서는 같은 목록에서 `ValidationInterface`를 구현한 플러그인의 `Validate`를 호출합니다
 
 각 단계는 참여한 플러그인이 오류를 반환하면 멈춥니다
@@ -96,10 +96,10 @@ ServiceAccount의 권한이나 TokenRequest API 자체를 없애는 설정은 �
 
 `LimitRanger`는 namespace의 LimitRange를 읽어 비어 있는 requests·limits에 기본값을 넣을 수 있습니다
 그런데 뒤의 mutator가 새 컨테이너를 추가하거나 자원 값을 바꿀 수 있습니다
-그래서 처음 기본값을 채웠다는 사실만으로 최종 자원 형태를 판단할 수는 없습니다
+그래서 처음 채운 기본값이 최종 requests·limits로 유지된다고 볼 수는 없습니다
 
 validating 단계에서는 최소·최대 자원과 limit/request 비율을 검사합니다
-최종 requests·limits는 QoS, 즉 Pod의 자원 서비스 등급을 정하는 입력에도 영향을 줍니다
+최종 requests·limits는 Pod의 자원 서비스 등급인 QoS를 정하는 데도 쓰입니다
 `LimitRanger` 하나가 언제나 특정 QoS를 강제하는 것은 아닙니다
 
 API 타입의 기본값 처리도 값을 채울 수 있습니다
@@ -128,7 +128,7 @@ API 타입의 기본값 처리도 값을 채울 수 있습니다
 ## 값을 바꾸지 않아도 mutating 단계에서 거부할 수 있습니다
 
 `NamespaceLifecycle`은 namespaced 요청의 namespace가 있는지 확인합니다
-생성 대상 namespace가 `Terminating`이면 새 내용을 만드는 요청을 거부합니다
+요청 대상 namespace가 `Terminating`이면 그 안에 새 객체를 만드는 요청을 거부합니다
 기존 객체를 정리하는 경로까지 같은 방식으로 막으면 namespace를 비울 수 있으므로, operation에 따라 판단이 다릅니다
 
 namespace 정보는 변경 이벤트를 받아 로컬 사본을 유지하는 informer에서 읽고 필요하면 실제 API 조회로 보완합니다
@@ -164,8 +164,8 @@ mutating 단계 안에서도 앞선 판단이 최종 결과를 보장하지는 �
 필수 조건은 뒤의 validating 단계에서 다시 확인해야 합니다
 
 저장 전략의 `PrepareForCreate`도 mutating 이후 값을 정리할 수 있습니다
-따라서 여기서 최종 내용은 **이 요청의 검증 대상**을 뜻합니다
-저장 시 채워지는 resourceVersion이나 이후 UPDATE까지 고정된다는 뜻은 아닙니다
+이 글에서 최종 내용은 **현재 요청에서 검증할 내용**을 가리킵니다
+저장 시 채워지는 resourceVersion이나 이후 UPDATE로 바뀔 값까지 고정된다는 뜻은 아닙니다
 
 근거는 [`reinvoker.Admit`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/reinvocation.go)와 [mutating dispatcher](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/mutating/dispatcher.go)입니다
 
@@ -183,7 +183,7 @@ quota admission은 예상 사용량을 계산하고 ResourceQuota status를 갱�
 사용량 반영 뒤 다른 검사나 저장이 실패하면 실제 객체와 사용량 기록이 어긋날 수 있습니다
 ResourceQuota controller는 실제 사용량을 다시 계산해 그 차이를 보정합니다
 
-quota를 뒤쪽에 배치하면 앞선 검사에서 거부될 요청의 사용량을 먼저 반영하는 일을 줄일 수 있습니다
+quota 검사를 뒤쪽에 배치하면 앞선 검사에서 거부될 요청의 사용량을 미리 반영하는 일을 줄일 수 있습니다
 그래도 저장 실패까지 없앨 수는 없습니다
 server dry-run은 quota 적합성을 검사하되 사용량을 갱신하지 않으므로, 성공했다고 quota를 예약한 것도 아닙니다
 
@@ -196,8 +196,7 @@ server dry-run은 quota 적합성을 검사하되 사용량을 갱신하지 않�
 일반 CREATE에서는 이 기록을 계산하는 field manager 처리가 mutating admission보다 앞에 있습니다
 따라서 admission이 필드를 추가해도 플러그인 이름의 관리자가 자동으로 생기지는 않습니다
 
-이것을 admission이 건드린 모든 필드는 무조건 소유자가 없다는 뜻으로 넓히면 안 됩니다
-이미 소유 기록이 있는 필드의 값을 바꿨다고 그 기록까지 자동으로 없어지는 것은 아닙니다
+다만 admission이 바꾼 필드에 이미 소유 기록이 있다면, 값을 바꿨다고 그 기록까지 자동으로 없어지지는 않습니다
 
 사용자가 보내지 않은 필드를 모두 사용자의 apply 의도로 처리하면, 다음 apply에서 그 필드를 생략했을 때 삭제·충돌의 의미가 달라질 수 있습니다
 필드 값과 소유 기록을 구분해야 하는 이유입니다
@@ -226,7 +225,7 @@ audit·warn은 적용할 수 있습니다
 
 두 요청의 사용자도 다릅니다
 원래 사용자를 username 면제로 지정해도 controller의 Pod 요청이 자동 면제되지는 않습니다
-반대로 controller 신원을 면제하면 그 controller를 통해 Pod를 만드는 여러 사용자에게 효과가 확장됩니다
+반대로 controller 신원을 면제하면 여러 사용자가 그 controller를 통해 만드는 Pod에도 면제가 적용됩니다
 
 namespace의 정책을 강화해도 기존 Pod 전체에 admission을 다시 실행하지는 않습니다
 namespace label 변경 때 기존 Pod의 위반을 살펴 경고할 수 있지만, 해당 Pod를 자동 삭제하는 기능은 아닙니다
@@ -250,7 +249,7 @@ namespace label 변경 때 기존 Pod의 위반을 살펴 경고할 수 있지�
 
 Admission은 저장 전에 조건을 만족시키거나 현재 요청을 거부합니다
 저장 뒤 controller가 고치는 방식이라면, 수정되기 전 상태를 다른 컴포넌트가 볼 수 있습니다
-그 대신 admission에 놓은 판단의 지연과 오류는 현재 API 요청에 직접 영향을 줍니다
+그 대신 admission 단계의 검사에 시간이 걸리거나 오류가 나면 현재 API 요청이 직접 영향을 받습니다
 [다음 편](/essays/k8s-theory-admission-webhook-failure)에서는 그 판단을 외부 webhook에 맡길 때의 실패 처리를 이어서 살펴봅니다
 
 ## 공식 문서

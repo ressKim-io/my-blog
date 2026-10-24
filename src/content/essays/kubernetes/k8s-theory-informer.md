@@ -23,7 +23,8 @@ date: "2026-08-09"
 
 ## 서버에서 읽고, 큐를 거쳐, 캐시에 반영합니다
 
-informer는 서버에서 변경을 받는 **Reflector**, 아직 반영하지 않은 변경을 보관하는 **큐**, 처리된 오브젝트를 저장하는 **Indexer**를 이어 씁니다
+informer에서는 **Reflector**가 서버에서 받은 변경을 **큐**에 넣습니다
+큐의 소비자는 변경을 꺼내 처리하고 오브젝트를 **Indexer**에 저장합니다
 Indexer는 키 조회와 함께 인덱스를 통한 조회도 제공하는 로컬 캐시입니다
 
 ![Reflector가 초기 snapshot과 watch 변경을 큐에 전달하고, 소비자가 Indexer를 갱신한 뒤 핸들러에 알리는 흐름](/diagrams/k8s-theory-informer-1.svg)
@@ -37,7 +38,7 @@ streaming list가 지원되지 않거나 해당 경로에서 폴백할 오류가
 재시도 가능한 오류는 streaming list 안에서 다시 시도할 수 있으므로, 모든 오류가 즉시 일반 LIST로 바뀌는 것은 아닙니다
 두 초기화 경로 모두 `Replace()`를 거치며, 이후 변경은 watch로 받습니다
 
-이 경계는 [`Reflector.ListAndWatchWithContext`와 `watchList`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/cache/reflector.go)에 있습니다
+두 초기화 경로를 선택하는 분기는 [`Reflector.ListAndWatchWithContext`와 `watchList`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/cache/reflector.go)에 있습니다
 커서와 `410 Gone` 이후의 번호 선택은 [watch 글](/essays/k8s-theory-watch)에서 다뤘습니다
 
 ## 기본 큐와 DeltaFIFO를 구분해야 합니다
@@ -51,7 +52,7 @@ v1.37.1의 shared informer는 기본으로 **RealFIFO**를 사용합니다
 `Resync()`도 `SyncAll`로 표현합니다
 
 [`newQueueFIFO`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/cache/controller.go)와 [client-go 기능 기본값](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/features/known_features.go)을 함께 확인해야 실제 처리 경로가 정해집니다
-이하에서 DeltaFIFO의 자료구조를 살펴볼 때는 이 별도 구현에 한정합니다
+아래의 DeltaFIFO 설명은 기본 RealFIFO와 구분해서 읽어야 합니다
 
 DeltaFIFO는 같은 `namespace/name` 키의 변경을 `Deltas` 목록에 모읍니다
 예를 들어 한 키에 `Added`, `Updated`, `Updated`가 차례로 쌓이면 `Pop()`은 마지막 변경 하나가 아니라 목록 전체를 전달합니다
@@ -62,49 +63,6 @@ DeltaFIFO는 같은 `namespace/name` 키의 변경을 `Deltas` 목록에 모읍�
 따라서 “키마다 변경 목록이 하나 있다”는 DeltaFIFO의 설명을 모든 informer의 내부 구조로 일반화하면 안 됩니다
 
 자료구조와 소비 방식은 [`DeltaFIFO.Pop`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/cache/delta_fifo.go), [`RealFIFO.Pop`·`PopBatch`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/cache/the_real_fifo.go)에서 확인할 수 있습니다
-
-## Indexer는 자식과 입양 후보를 따로 찾습니다
-
-Indexer는 오브젝트의 값에서 조회용 키를 만들어 역인덱스를 유지합니다
-ReplicaSet 컨트롤러가 Pod informer에 추가하는 `podController` 인덱스가 한 예입니다
-
-| Pod 상태 | 인덱스 키 | 조회하는 대상 |
-|---|---|---|
-| controller 참조가 있음 | `<namespace>/<Kind>/<Name>/<UID>` | 특정 부모가 소유한 자식 |
-| controller 참조가 없음 | `<namespace>` | 같은 namespace의 입양 후보 |
-
-가령 `default` namespace의 ReplicaSet `web`이 UID `aaa`를 가진다고 가정하면, 자식 키는 `default/ReplicaSet/web/aaa`입니다
-고아 Pod는 `default`라는 별도 키로 찾습니다
-
-`FilterPodsByOwner`는 자기 자식 키와, 필요할 때 고아 키를 각각 조회합니다
-매번 namespace의 모든 Pod를 가져와 소유자를 검사하는 범위를 줄이는 방식입니다
-노드 이름으로 Pod를 묶는 `spec.nodeName` 인덱스도 별도로 정의돼 있습니다
-
-이 키의 구성과 조회는 [`PodControllerIndexKey`와 `FilterPodsByOwner`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/controller_utils.go)에 있습니다
-이름과 UID를 함께 쓰는 이유는 [같은 이름의 다른 오브젝트를 구분하기 위해서](/essays/k8s-theory-object-identity-ownership)입니다
-
-## 자식의 이벤트로 부모의 키를 찾습니다
-
-Pod 이벤트가 들어와도 ReplicaSet의 작업 큐에는 대개 부모 ReplicaSet의 키가 들어갑니다
-핸들러는 `ownerReferences` 중 `controller: true`인 참조를 읽고 다음 순서로 부모를 찾습니다
-
-1. 참조가 가리키는 Kind가 맞는지 확인합니다
-2. 같은 namespace에서 참조의 이름으로 ReplicaSet을 조회합니다
-3. 조회한 ReplicaSet의 UID가 참조의 UID와 같은지 확인합니다
-4. 일치하면 부모의 `namespace/name` 키를 작업 큐에 넣습니다
-
-이름이 같아도 UID가 다르면 과거 부모의 이벤트로 새 부모를 깨우지 않습니다
-
-소유자가 없는 Pod는 이벤트 종류에 따라 다르게 처리합니다
-**고아 Pod의 add**, 또는 라벨·controller 참조가 바뀐 **update**는 selector가 맞는 ReplicaSet들을 깨워 입양을 검토하게 합니다
-반면 **고아 Pod의 delete는 무시합니다**
-이미 사라진 고아를 입양할 필요가 없기 때문입니다
-
-이 차이는 [`addPod`·`updatePod`·`deletePod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go)에 명시돼 있습니다
-고아 Pod의 모든 이벤트가 같은 부모 조회 경로를 타는 것은 아닙니다
-
-소유 관계가 두 단계라면 조회와 UID 검증도 두 번 필요합니다
-Deployment 컨트롤러의 [`getDeploymentForPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/deployment_controller.go)는 Pod의 ReplicaSet을 찾고 UID를 검증한 뒤, 그 ReplicaSet의 Deployment를 다시 찾고 UID를 검증합니다
 
 ## 초기 동기화와 핸들러 처리 완료는 다릅니다
 
@@ -141,11 +99,54 @@ v1.37.1에는 `HasSyncedChecker()`의 완료 채널을 기다리는 `WaitFor`도
 초기 동기화는 시작할 때의 빈 사본 문제를 줄입니다
 그 뒤의 모든 읽기가 API 서버의 최신 상태라는 보장까지 주지는 않습니다
 
+## Indexer는 자식과 입양 후보를 따로 찾습니다
+
+Indexer는 오브젝트의 값에서 조회용 키를 만들어 역인덱스를 유지합니다
+ReplicaSet 컨트롤러가 Pod informer에 추가하는 `podController` 인덱스가 한 예입니다
+
+| Pod 상태 | 인덱스 키 | 조회하는 대상 |
+|---|---|---|
+| controller 참조가 있음 | `<namespace>/<Kind>/<Name>/<UID>` | 특정 부모가 소유한 자식 |
+| controller 참조가 없음 | `<namespace>` | 같은 namespace의 입양 후보 |
+
+가령 `default` namespace의 ReplicaSet `web`이 UID `aaa`를 가진다고 가정하면, 자식 키는 `default/ReplicaSet/web/aaa`입니다
+고아 Pod는 `default`라는 별도 키로 찾습니다
+
+`FilterPodsByOwner`는 자기 자식 키와, 필요할 때 고아 키를 각각 조회합니다
+이렇게 찾으면 매번 namespace의 모든 Pod를 가져와 소유자를 검사할 필요가 줄어듭니다
+노드 이름으로 Pod를 묶는 `spec.nodeName` 인덱스도 별도로 정의돼 있습니다
+
+이 키의 구성과 조회는 [`PodControllerIndexKey`와 `FilterPodsByOwner`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/controller_utils.go)에 있습니다
+이름과 UID를 함께 쓰는 이유는 [같은 이름의 다른 오브젝트를 구분하기 위해서](/essays/k8s-theory-object-identity-ownership)입니다
+
+## 자식의 이벤트로 부모의 키를 찾습니다
+
+Pod 이벤트가 들어와도 ReplicaSet의 작업 큐에는 대개 부모 ReplicaSet의 키가 들어갑니다
+핸들러는 `ownerReferences` 중 `controller: true`인 참조를 읽고 다음 순서로 부모를 찾습니다
+
+1. 참조가 가리키는 Kind가 맞는지 확인합니다
+2. 같은 namespace에서 참조의 이름으로 ReplicaSet을 조회합니다
+3. 조회한 ReplicaSet의 UID가 참조의 UID와 같은지 확인합니다
+4. 일치하면 부모의 `namespace/name` 키를 작업 큐에 넣습니다
+
+이름이 같아도 UID가 다르면 과거 부모의 이벤트로 새 부모를 깨우지 않습니다
+
+소유자가 없는 Pod는 이벤트 종류에 따라 다르게 처리합니다
+**고아 Pod의 add**, 또는 라벨·controller 참조가 바뀐 **update**는 selector가 맞는 ReplicaSet들을 깨워 입양을 검토하게 합니다
+반면 **고아 Pod의 delete는 무시합니다**
+이미 사라진 고아를 입양할 필요가 없기 때문입니다
+
+이 차이는 [`addPod`·`updatePod`·`deletePod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go)에 명시돼 있습니다
+고아 Pod의 모든 이벤트가 같은 부모 조회 경로를 타는 것은 아닙니다
+
+소유 관계가 두 단계라면 조회와 UID 검증도 두 번 필요합니다
+Deployment 컨트롤러의 [`getDeploymentForPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/deployment_controller.go)는 Pod의 ReplicaSet을 찾고 UID를 검증한 뒤, 그 ReplicaSet의 Deployment를 다시 찾고 UID를 검증합니다
+
 ## 놓친 삭제는 새 snapshot에서 찾습니다
 
 watch가 끊긴 사이 Pod `c`가 삭제됐고 그 변경 이력도 사라졌다고 가정하겠습니다
 로컬 사본에는 `a`, `b`, `c`가 남아 있지만 새 snapshot에는 `a`, `b`만 있습니다
-이 차집합이 삭제를 복원할 재료가 됩니다
+이 차이를 비교하면 로컬 사본에서 `c`를 제거해야 한다는 것을 알 수 있습니다
 
 ![새 snapshot은 사라진 c를 발견하지만 로컬 상태만 다시 순회하는 resync는 c의 실제 삭제를 알 수 없는 비교](/diagrams/k8s-theory-informer-2.svg)
 
@@ -167,7 +168,7 @@ couldn't get object from tombstone
 tombstone contained object that is not a pod
 ```
 
-마지막으로 알던 값은 낡을 수 있습니다
+마지막으로 알던 값이 삭제 직전의 상태와 같지는 않을 수 있습니다
 그 사이 라벨이나 소유 관계가 바뀌었다면 올바른 새 부모를 즉시 깨우지 못할 수 있습니다
 ReplicaSet 소스 주석도 낡은 라벨 때문에 새 ReplicaSet이 periodic resync까지 깨어나지 못할 수 있다고 설명합니다
 

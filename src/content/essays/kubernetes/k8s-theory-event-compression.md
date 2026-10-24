@@ -55,7 +55,7 @@ events 키에는 그에 대응하는 `note`가 없습니다
 다른 키 필드가 같다면 설명 속 숫자가 바뀌어도 events 기록기에서는 같은 시리즈로 묶을 수 있습니다
 
 새 Event API는 동작·대상 같은 의미를 별도 필드로 표현해 설명 문자열에 덜 의존하도록 설계됐습니다
-설계 문서의 동형 이벤트 튜플은 여섯 항목을 나열하지만, 현재 구현은 `type`도 포함한 일곱 항목을 사용합니다
+설계 문서는 같은 이벤트로 묶을 필드 조합을 여섯 항목으로 설명하지만, 현재 구현은 `type`도 포함한 일곱 항목을 사용합니다
 키의 실제 기준은 [`getEventKey`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/record/events_cache.go)와 [`getKey`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/events/event_broadcaster.go), 설계 배경은 [KEP-383](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-instrumentation/383-new-event-api-ga-graduation/README.md)에서 확인할 수 있습니다
 
 ## core 기록기는 집계, 카운트, 필터 순으로 처리한다
@@ -79,7 +79,7 @@ events 키에는 그에 대응하는 `note`가 없습니다
 이를 같은 메시지를 열 번 기록하면 집계된다고 해석하면 안 됩니다
 동일한 메시지의 반복은 서로 다른 메시지 집합의 크기를 늘리지 않습니다
 
-시간 조건도 단순한 전체 10분 창과 다릅니다
+처음 메시지를 본 뒤 10분이 지나면 집계를 끝내는 방식도 아닙니다
 구현은 같은 집계키의 **마지막 관측 이후 600초를 초과했으면** 메시지 집합을 초기화합니다
 관측이 계속 이어지면 처음 메시지를 본 지 10분을 넘겼어도 그 집합이 유지될 수 있습니다
 
@@ -120,7 +120,8 @@ spam filter는 토큰 버킷을 사용합니다
 
 같은 주체가 같은 Pod에 대해 같은 `type`으로 기록하면 이유가 달라도 버킷을 공유합니다
 기존 실패로 토큰이 소진됐다면 다른 이유의 새 경고도 바로 버려질 수 있습니다
-한 번의 큰 묶음 뒤에도 관측이 계속되는 경우 보충 속도는 약 5분에 한 건이지만, 실제 화면 간격까지 정확히 5분으로 보장하는 것은 아닙니다
+토큰을 한꺼번에 소진한 뒤에도 관측이 계속된다면 약 5분마다 토큰 하나가 보충됩니다
+다만 화면에 Event가 나타나는 간격까지 정확히 5분으로 보장하는 것은 아닙니다
 키와 동작은 [`getSpamKey`·`EventSourceObjectSpamFilter.Filter`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/record/events_cache.go)에 정의돼 있습니다
 
 ## events 기록기는 셋째 관측부터 증가분을 메모리에 둔다
@@ -139,7 +140,7 @@ events 기록기는 같은 키의 첫 관측을 단발 Event로 전송하려고 
 종료 처리로 캐시에서 사라진 뒤 다시 나타나거나 프로세스가 재시작하면 새 관측으로 시작할 수 있습니다
 구현은 [`recordToSink`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/events/event_broadcaster.go)에 있습니다
 
-### 서버 숫자를 따라잡는 경로는 주기 갱신과 종료 검사다
+### 메모리의 카운트를 서버에 반영하는 두 경로
 
 | 백그라운드 처리 | 기본 주기 | 처리 대상 |
 |---|---|---|
@@ -151,16 +152,17 @@ events 기록기는 같은 키의 첫 관측을 단발 Event로 전송하려고 
 단발 Event도 충분히 오래되면 로컬 캐시에서 제거하지만, 이 처리가 서버 Event를 삭제하지는 않습니다
 
 쓰기 실패는 오류 종류에 따라 재시도하거나 중단합니다
-종료 처리에서 캐시를 제거하는 조건도 성공만이 아니라 **재시도가 더 필요하지 않다는 결과**이므로, 최종 숫자가 반드시 서버에 남는다고 보장할 수 없습니다
+종료 처리에서는 쓰기에 성공했을 때뿐 아니라 **더 이상 재시도가 필요하지 않다는 결과**를 받았을 때도 캐시를 제거합니다
+따라서 최종 숫자가 반드시 서버에 남는다고 보장할 수 없습니다
 분기는 [`refreshExistingEventSeries`·`finishSeries`·`recordEvent`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/events/event_broadcaster.go)에 있습니다
 
 서버의 `series.count`는 다음 전송 전까지 프로세스 메모리의 숫자보다 작을 수 있습니다
 정상적으로 계속 관측되는 시리즈도 주기적 반영은 기본 약 30분 간격입니다
 쓰기 지연·실패가 있으면 이를 최대 반영 지연으로 보장할 수 없고, 프로세스가 죽으면 아직 보내지 않은 증가분을 잃습니다
 
-이 구현에는 core 기록기의 메시지 집계와 같은 spam filter가 없습니다
+이 구현에는 core 기록기와 같은 메시지 집계 단계나 spam filter가 없습니다
 메시지를 키에서 빼고 같은 키의 반복을 시리즈로 묶어 매번 요청하지 않기 때문입니다
-다만 키 자체가 계속 달라지는 관측까지 같은 시리즈의 전송 감소 효과를 얻는 것은 아닙니다
+다만 관측마다 키가 달라지면 같은 시리즈로 묶을 수 없어 이 방식으로 전송 횟수를 줄이지는 못합니다
 
 ## 큐 입구의 대기와 처리기 채널의 드롭은 다른 문제다
 
@@ -187,7 +189,8 @@ events 구현은 별도 고루틴에서 큐에 넣으므로 `Eventf` 호출자�
 입구가 작아도 대기하는 고루틴이 쌓일 수 있으며, 작은 큐가 프로세스 전체의 대기 작업량까지 제한하는 것은 아닙니다
 
 두 구현 모두 처리기 채널에는 `DropIfChannelFull` 정책을 사용합니다
-한 처리기의 채널이 가득 차면 그 처리기에는 관측이 빠질 수 있고, 다른 처리기로의 전달 결과와도 다를 수 있습니다
+한 처리기의 채널이 가득 차면 그 처리기는 관측을 받지 못할 수 있습니다
+다른 처리기의 채널에 여유가 있다면 그쪽으로는 전달될 수 있습니다
 이 드롭 분기 자체에는 로그나 전용 카운터가 없습니다
 근거는 [`NewBroadcaster`·`NewLongQueueBroadcaster`·`ActionOrDrop`·`distribute`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/watch/mux.go)입니다
 

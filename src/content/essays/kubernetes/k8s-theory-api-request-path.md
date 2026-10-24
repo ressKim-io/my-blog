@@ -1,6 +1,6 @@
 ---
-title: "Kubernetes API 서버 요청 경로 전체"
-excerpt: "Deployment 생성 요청을 따라 인증·인가, 디코딩, admission, 검증과 저장의 경계를 살펴봅니다. 오류 메시지와 audit 로그, dry-run이 알려주는 범위도 구분합니다"
+title: "Kubernetes API 서버의 생성 요청 처리 과정"
+excerpt: "Deployment 생성 요청을 따라 인증·인가, 디코딩, admission, 검증과 저장의 순서를 살펴봅니다. 오류 메시지와 audit 로그, dry-run이 알려주는 범위도 구분합니다"
 category: "kubernetes"
 tags: ["kubernetes", "kube-apiserver", "admission", "concept"]
 series:
@@ -26,11 +26,11 @@ Deployment 하나를 만들면 API 서버는 무엇부터 판단할까요?
 ![Deployment 생성 요청에서 각 처리 주체가 받는 정보와 저장까지의 순서|tall](/diagrams/k8s-theory-api-request-path-1.svg)
 
 그림은 **내장 resource의 일반적인 CREATE 요청 한 건**을 나타냅니다
-HTTP 필터 전체를 펼친 그림은 아니며, impersonation 같은 별도 처리는 생략했습니다
+HTTP 필터를 모두 표시한 것은 아니며, 다른 신원으로 요청하는 impersonation 같은 별도 처리는 생략했습니다
 
-먼저 인증이 요청자의 신원을 만들고, 설정된 APF가 처리 자리를 배정합니다
-인가는 신원과 요청 동작·대상을 비교합니다
-이 구간에서는 요청 본문을 아직 타입 있는 오브젝트로 디코딩하지 않았으므로 `spec.replicas`는 판단에 쓰이지 않습니다
+먼저 인증기가 요청자의 신원 정보를 만들고, 설정된 APF가 우선순위에 따라 동시 처리량을 배분합니다
+이어서 인가는 그 요청자가 해당 대상에 대해 요청한 동작을 수행할 수 있는지 판단합니다
+이때는 요청 본문을 아직 타입이 정해진 오브젝트로 디코딩하지 않았으므로 `spec.replicas`는 판단에 쓰이지 않습니다
 
 인가를 통과한 뒤 본문을 디코딩하고 기본값을 채웁니다
 오브젝트를 바꿀 수 있는 mutating admission, 타입별 검증, 내용을 바꾸지 않는 validating admission을 거쳐 저장을 시도합니다
@@ -58,7 +58,7 @@ RBAC(Role-Based Access Control)은 역할에 적힌 허용 규칙과 이 속성�
 
 ### APF는 왜 인증과 인가 사이에 있나
 
-APF(API Priority and Fairness)는 요청을 분류해 우선순위별 처리 자리를 관리하고, 과부하 시 대기시키거나 거부합니다
+APF(API Priority and Fairness)는 요청을 분류해 우선순위별로 동시에 처리할 수 있는 양을 관리합니다
 분류 규칙인 FlowSchema가 요청자의 신원과 요청 속성을 사용하므로 인증 뒤에 실행됩니다
 인증된 요청이라도 지금 처리할 여유가 없으면 기다리거나 거부될 수 있습니다
 
@@ -67,7 +67,8 @@ APF가 인가 앞에 있으면 그 외부 호출 비용을 치르기 전에 과�
 여기서의 webhook은 API 서버가 외부 HTTP 서비스에 판단을 요청하는 방식입니다
 
 APF 거부에서는 429와 `Retry-After` 헤더가 단서가 됩니다
-처리 자리는 사용자마다 고정된 quota가 아니며, APF를 구성하지 않은 경로에서는 동시 요청 수 제한 필터가 사용됩니다
+이때 각 사용자에게 고정된 quota를 배정하는 것은 아닙니다
+APF를 구성하지 않은 경로에서는 동시 요청 수 제한 필터가 사용됩니다
 실제 위치는 [`DefaultBuildHandlerChain`](https://github.com/kubernetes/kubernetes/blob/8aaeb4e53d1a489570afe94ef5258554de68897a/staging/src/k8s.io/apiserver/pkg/server/config.go)에서 확인할 수 있습니다
 필터를 안쪽부터 감싸므로 소스의 대입 순서와 요청의 실행 순서는 반대입니다
 
@@ -75,13 +76,13 @@ APF 거부에서는 429와 `Retry-After` 헤더가 단서가 됩니다
 
 ### 디코딩과 defaulting
 
-API 서버는 요청 본문을 타입 있는 Go 오브젝트로 만들고 스킴에 등록된 기본값을 적용합니다
+API 서버는 요청 본문을 해당 타입의 Go 오브젝트로 만들고, 타입 정보를 관리하는 스킴에 등록된 기본값을 적용합니다
 Deployment의 `strategy`, Pod spec의 `terminationGracePeriodSeconds`, 컨테이너의 `imagePullPolicy` 등이 기본값을 가질 수 있습니다
 뒤의 mutating webhook이 받는 것은 사용자가 작성한 YAML 원문이 아니라 AdmissionReview에 담긴 오브젝트입니다
 AdmissionReview는 admission 요청·응답을 주고받는 API 형식입니다
 
 모든 기본값을 디코더가 채우는 것은 아닙니다
-스킴의 defaulter가 넣는 값과 `ServiceAccount`·`LimitRanger` 같은 mutating admission 플러그인이 넣는 값은 생기는 단계가 다릅니다
+스킴의 defaulter가 채우는 값도 있고, 이후 `ServiceAccount`·`LimitRanger` 같은 mutating admission 플러그인이 넣는 값도 있습니다
 
 ### mutating admission과 타입별 검증
 
@@ -104,7 +105,8 @@ validating webhook은 외부 서버에 판단을 맡깁니다
 기본 플러그인 순서에서는 policy가 webhook보다 앞에 있습니다
 
 왜 mutating 뒤에 validating이 있어야 할까요?
-모든 컨테이너에 limits가 있어야 한다는 정책을 먼저 통과한 뒤, limits가 없는 사이드카를 추가한다고 가정하면 저장할 모양이 검사한 모양과 달라집니다
+모든 컨테이너에 limits가 있어야 한다는 정책을 먼저 통과한 뒤, limits가 없는 사이드카를 추가한다고 가정하겠습니다
+그러면 검사할 때는 없던 컨테이너가 저장될 오브젝트에 들어갑니다
 
 mutator도 요청을 거부할 수 있지만, 자기 뒤의 mutator가 만든 결과까지 검사할 수는 없습니다
 변경을 마친 결과에 대한 validating 검사가 필요한 이유입니다
@@ -116,7 +118,7 @@ mutator도 요청을 거부할 수 있지만, 자기 뒤의 mutator가 만든 �
 
 ## 저장 성공이 Pod 실행 성공은 아니다
 
-admission 허용은 저장을 진행해도 된다는 판단입니다
+admission이 요청을 허용하면 저장을 시도할 수 있습니다
 같은 이름의 오브젝트가 이미 있으면 일반 CREATE는 409 `AlreadyExists`로 실패할 수 있고, 저장소 오류도 가능합니다
 
 Deployment 저장까지 성공해도 그 요청에서 Pod를 함께 저장한 것은 아닙니다
@@ -133,7 +135,7 @@ Deployment·ReplicaSet·Pod 생성은 하나의 트랜잭션이 아닙니다
 
 ## 오류 응답은 어느 경계를 가리키나
 
-상태코드는 후보를 좁히지만 거부 주체를 하나로 정하지는 못합니다
+상태코드로 실패 원인의 후보를 좁힐 수는 있지만, 어느 구성요소가 거부했는지까지 확정할 수는 없습니다
 다음 문구는 실행 결과를 옮긴 로그가 아니라 응답을 읽기 위한 대표 형태입니다
 
 | 코드 | 가능한 주체·조건 | 메시지나 응답의 단서 |
@@ -157,7 +159,7 @@ Deployment·ReplicaSet·Pod 생성은 하나의 트랜잭션이 아닙니다
 
 예를 들어 내장 Deployment의 `spec.replica`는 알려진 필드가 아닙니다
 `Warn`으로 요청이 성공해도 이 필드가 보존됐다는 뜻은 아닙니다
-CRD(CustomResourceDefinition)가 정의한 사용자 resource의 미지 필드는 해당 CRD의 스키마 설정도 확인해야 합니다
+CRD(CustomResourceDefinition)가 정의한 사용자 resource에서 알 수 없는 필드를 어떻게 처리하는지는 해당 CRD의 스키마 설정도 확인해야 합니다
 클라이언트가 다른 `fieldValidation`을 보낼 수 있으므로 서버 기본값을 모든 요청의 실제 설정으로 볼 수도 없습니다
 
 한편 알려진 필드에 `replicas: "three"`를 넣으면 정수로 디코딩할 수 없어 400이 됩니다
@@ -180,7 +182,7 @@ ValidatingAdmissionPolicy도 `reason`에 따라 코드가 달라집니다
 
 ## audit 로그는 내부 단계의 시간표가 아니다
 
-audit event는 요청 수신과 응답 등 HTTP 요청 수명의 구간을 기록합니다
+audit event는 HTTP 요청을 받아 응답하기까지의 주요 시점을 기록합니다
 일반 요청에서는 보통 `RequestReceived`와 `ResponseComplete`를 볼 수 있습니다
 `ResponseStarted`는 일반 audit 경로에서 watch 같은 장기 요청에 생성되며, `Panic`은 별도 stage입니다
 
@@ -202,7 +204,7 @@ audit stage는 authn·authz·admission 각각의 시작과 끝을 나타내지 �
 GET·LIST·WATCH에도 인증과 인가는 적용되지만, 모두 그림의 admission과 쓰기 저장 단계를 지나는 것은 아닙니다
 
 admission은 주로 CREATE·UPDATE·DELETE·CONNECT를 다룹니다
-HTTP PATCH는 변경안을 기존 객체에 적용한 뒤, 생성 또는 수정 결과를 심사할 operation으로 admission에 전달합니다
+HTTP PATCH는 변경안을 기존 객체에 적용한 뒤, 그 결과를 생성 또는 수정에 해당하는 operation으로 admission에 전달합니다
 하위 resource나 확장 API의 저장 구현도 일반 CREATE와 구분해야 합니다
 
 ### GVK와 GVR은 어디에서 쓰나
