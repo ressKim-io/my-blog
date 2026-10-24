@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    # 정적 export도 게시일에 맞춰 갱신하도록 매일 00:05 KST에 재빌드합니다.
+    - cron: '5 15 * * *'
 
 permissions:
   contents: read
@@ -37,6 +40,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Test publication dates
+        run: node --test scripts/publication.test.mjs
 
       - name: Restore Next.js cache
         uses: actions/cache@v4

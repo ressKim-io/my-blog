@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { getPublicationDate, isPostPublished } from './publication.mjs';
 
 const postsDirectory = path.join(process.cwd(), 'src/content');
 
@@ -85,25 +86,28 @@ function listMarkdownFiles(): string[] {
 }
 
 export function getAllPosts(): PostData[] {
-  if (cachedPosts) return cachedPosts;
-  if (!fs.existsSync(postsDirectory)) return [];
+  if (!cachedPosts) {
+    if (!fs.existsSync(postsDirectory)) return [];
 
-  const relativePaths = listMarkdownFiles();
-  slugIndex = new Map(
-    relativePaths.map((rel) => [path.basename(rel, '.md'), rel]),
-  );
-  const posts = relativePaths
-    .map(readPost)
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
-  cachedPosts = posts;
-  return posts;
+    const relativePaths = listMarkdownFiles();
+    slugIndex = new Map(
+      relativePaths.map((rel) => [path.basename(rel, '.md'), rel]),
+    );
+    cachedPosts = relativePaths
+      .map(readPost)
+      .sort((a, b) => (a.date < b.date ? 1 : -1));
+  }
+
+  const today = getPublicationDate();
+  return cachedPosts.filter((post) => isPostPublished(post.date, today));
 }
 
 export function getPostBySlug(slug: string): PostData | null {
   if (!slugIndex) getAllPosts();
   const relativePath = slugIndex?.get(slug);
   if (!relativePath) return null;
-  return readPost(relativePath);
+  const post = readPost(relativePath);
+  return isPostPublished(post.date) ? post : null;
 }
 
 export function getSeriesPosts(seriesName: string): PostData[] {
