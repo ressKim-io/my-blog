@@ -93,13 +93,13 @@ map 키는 원소 안의 스칼라 필드이며 required 또는 default로 값�
 
 set·map 리스트에는 중복 값·중복 키 검사도 붙습니다
 기존 스키마의 관리 단위를 바꾸면 이미 기록된 managedFields의 해석과 충돌 범위도 바뀔 수 있습니다
-필드 타입이 같다는 이유만으로 topology 변경을 안전한 설명 수정으로 취급하면 안 됩니다
+필드 타입이 같아도 리스트·맵의 관리 단위(topology)를 바꾸는 것은 단순한 설명 수정이 아닙니다
 
 ## pruning과 unknown-field 요청 거절은 다른 동작입니다
 
 **가지치기(pruning)**는 스키마에 없는 필드를 제거하는 동작입니다
 미선언 `someRandomField: 42`를 보냈을 때 요청이 수락돼도 그 값이 결과에 남지 않을 수 있습니다
-요청을 거절할지 알릴지는 `fieldValidation`으로 구분합니다
+이때 요청을 거절할지, 경고하고 진행할지 등은 `fieldValidation`으로 정합니다
 
 | 요청 값 | unknown field를 발견한 경우 |
 |---|---|
@@ -115,7 +115,7 @@ set·map 리스트에는 중복 값·중복 키 검사도 붙습니다
 kubectl은 서버의 fieldValidation 지원 여부에 따라 클라이언트 검증으로 보완할 수 있으며 모든 aggregated API의 지원 상태까지 같다고 가정하지 않습니다
 이 옵션은 스키마 검증 전체를 끄는 스위치가 아닙니다
 
-### 보존 표시는 하위의 모든 필드를 영원히 여는 설정이 아닙니다
+### 하위 구조를 선언한 곳에서는 가지치기가 다시 적용됩니다
 
 임의 JSON을 보존할 노드는 다음처럼 표시할 수 있습니다
 
@@ -128,7 +128,7 @@ properties:
 
 이 확장 값은 true 또는 미설정만 허용하고 false는 거절합니다
 그 아래에서 properties나 additionalProperties로 구조를 다시 선언하면 해당 선언을 따라 정상 가지치기가 재개됩니다
-임의 JSON을 보존하는 것과 그 내부를 CEL에서 필드로 참조할 수 있는 것도 다릅니다
+보존할 수 있는 데이터라도 CEL에서 필드로 참조할 수 있는 것은 아닙니다
 스키마가 모르는 보존 데이터는 CEL에서 접근할 수 없습니다
 
 CRD 전체의 옛 `spec.preserveUnknownFields`와 이 노드별 확장은 구분해야 합니다
@@ -148,7 +148,7 @@ mutating webhook 뒤에 항상 두 번째 가지치기가 실행된다고 말할
 
 defaulting은 별도 사용자 controller가 아니라 API 서버의 스키마 처리입니다
 요청에는 요청 버전의 기본값을, 저장소에서 읽을 때는 저장 버전의 기본값을 적용합니다
-mutating webhook의 비어 있지 않은 패치 결과에도 defaulter가 호출되며 현재 MAP의 패치 결과도 기본값 처리로 이어집니다
+mutating webhook의 비어 있지 않은 패치 결과에도 defaulter가 호출되며 현재 MutatingAdmissionPolicy(MAP)의 패치 결과도 기본값 처리로 이어집니다
 
 읽는 과정에서 붙은 기본값이 기존 etcd 바이트를 자동으로 다시 쓰지는 않습니다
 저장본을 바꾸려면 별도 쓰기가 필요합니다
@@ -252,7 +252,7 @@ status subresource가 있으면 metadata·status를 제외한 변경이 generati
 CRDObservedGenerationTracking은 CRD **정의 자체**의 상태 추적 기능이며, 현재 v1.36부터 beta·기본 활성입니다
 이 gate가 사용자 CR의 observedGeneration을 자동으로 채우는 것은 아닙니다
 
-### scale은 표준 타입으로 값을 투영합니다
+### scale은 지정한 필드를 표준 Scale 타입으로 제공합니다
 
 specReplicasPath와 statusReplicasPath는 각각 `.spec`·`.status` 아래 replicas를 가리키는 필수 경로입니다
 labelSelectorPath는 선택 사항이지만 HPA·VPA와 연결하려면 문자열 selector 경로가 필요합니다

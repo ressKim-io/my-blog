@@ -116,13 +116,13 @@ Manager가 제공하는 기본 cache-backed client의 구조체 `Get`·`List`는
 같은 client를 썼어도 쓰기 성공 직후의 캐시 조회에서 방금 만든 자식이 아직 보이지 않을 수 있습니다
 이때 자식을 다시 만들도록 판단하면 중복 생성 요청이 생깁니다
 
-부모에서 유도한 일정한 자식 이름은 이미 존재하는 이름의 재생성 요청을 검출할 수 있게 합니다
+부모 정보로 항상 같은 자식 이름을 만들면 같은 이름의 중복 생성 요청을 검출할 수 있습니다
 `generateName`으로 매번 새 이름을 받으면 이름 충돌을 통한 이 방어가 없습니다
 
 읽기가 항상 캐시로 가는 것은 아닙니다
 `CacheOptions.DisableFor`로 제외한 타입과 기본 설정의 unstructured 오브젝트는 직접 조회합니다. 캐시를 설정하지 않은 client도 직접 조회합니다
 
-### 자신의 쓰기를 기다리는 선택 기능은 별도입니다
+### 같은 client의 쓰기 반영을 기다리는 옵션도 있습니다
 
 v0.25.2에는 `CacheOptions.EnableReadYourWritesConsistency`가 있으며 기본값은 false입니다
 이를 켜면 같은 client가 추적한 쓰기를 캐시가 관찰한 뒤 읽기를 진행하도록 기다리는 기능을 사용합니다
@@ -193,7 +193,7 @@ CRD에서 `/status`를 선언한 버전은 주 자원 경로의 생성·수정�
 `/status`를 선언하지 않았다면 status도 주 자원의 일반 필드로 다룰 수 있습니다
 
 ‘spec은 사용자, status는 컨트롤러’라는 설명도 독점 권한을 뜻하지 않습니다
-기본값이나 HPA처럼 위임받은 컴포넌트가 spec을 쓸 수 있으므로 누가 어느 필드를 맡는지를 구분해야 합니다
+spec은 기본값 처리로 채워지거나 HPA처럼 위임받은 컴포넌트가 변경할 수도 있으므로, 누가 어느 필드를 맡는지 구분해야 합니다
 
 `/status` 쓰기도 같은 오브젝트의 업데이트이며 watch에 실릴 수 있습니다
 매 조정마다 달라지는 값을 status에 기록하면 자기 쓰기가 다음 조정을 계속 만드는 순환이 생길 수 있습니다
@@ -222,13 +222,14 @@ generation 증가 규칙은 타입과 subresource 구성에 따라 다릅니다
 | `observedGeneration` | 어느 generation을 보고 내린 판정인지, 선택 필드 |
 
 표준 형태에서 observedGeneration을 제외한 다섯 필드는 필수입니다
-이 값이 뒤처졌다면 condition의 상태가 현재 spec을 관찰한 결과인지 따로 확인해야 합니다
+observedGeneration이 뒤처졌다면 condition의 상태가 현재 spec을 관찰한 결과인지 따로 확인해야 합니다
 
 `SetStatusCondition` 헬퍼는 같은 type의 기존 condition에서 status가 바뀔 때만 전이 시각을 갱신합니다
 reason이나 message만 바꾸면 전이 시각은 유지합니다. 새 항목의 시각이 비어 있으면 현재 시각을 채웁니다
 
 이는 헬퍼의 동작이며 API 서버가 모든 condition 쓰기에 같은 갱신 규칙을 강제한다는 뜻은 아닙니다
-Ready처럼 True가 정상인 조건과 반대 극성의 조건도 있으므로 타입의 의미를 모른 채 True 개수로 전체 건강 상태를 계산할 수는 없습니다
+Ready처럼 True가 정상인 조건도 있고, True가 문제를 나타내는 조건도 있습니다
+타입의 의미를 모른 채 True 개수로 전체 건강 상태를 계산할 수는 없습니다
 
 conditions는 배열 형태지만 type을 키로 하는 map처럼 관리합니다
 스키마의 `listType: map`·`listMapKey: type`은 SSA에서 항목별 병합을 가능하게 하며, 일반 Update로 배열 전체를 덮는 것까지 막지는 않습니다

@@ -23,7 +23,7 @@ date: "2026-11-04"
 > 외부 구현은 Gatekeeper v3.23.1, Kyverno v1.19.2, Argo CD v3.5.6 및 고정한 Kyverno 문서를 기준으로 합니다
 > 설치된 정책 엔진의 버전이나 클러스터의 실제 거절 응답·지연·재조정 결과를 측정한 기록은 포함하지 않습니다
 
-## 요청의 동기 경로와 배경 controller를 나눕니다
+## 요청 처리 중인 admission과 저장 후 동작하는 controller를 나눕니다
 
 **Admission**은 인증·인가 이후, API 요청을 받아들일지 판단하거나 요청 오브젝트를 변경하는 처리입니다
 요청을 처리하는 동안 실행되므로 외부 호출과 평가 오류가 그 요청에 영향을 줍니다
@@ -80,7 +80,7 @@ DELETE에는 `object`가, CREATE에는 `oldObject`가 없습니다
 `authorizer`로 요청 주체의 권한을 확인하고, `variables`에 다른 입력으로 계산한 값을 둘 수 있습니다
 
 정책이 `paramKind`를 선언하고 바인딩의 `paramRef`가 가리키는 자원은 `params`로 전달합니다
-`paramRef`의 이름과 selector는 대안입니다
+`paramRef`에서는 이름과 selector 중 하나를 사용합니다
 VAP에서 selector로 여러 파라미터를 고르면 각 파라미터에 대한 검증 결과가 모두 허용되어야 합니다
 MAP의 여러 변경을 이 AND 규칙으로 설명할 수는 없습니다
 
@@ -106,7 +106,7 @@ false 없이 평가 오류가 남으면 `failurePolicy`에 따른 오류 처리�
 VAP는 이때 `Fail` 오류도 바인딩의 `validationActions`를 적용하므로 항상 직접 거절하는 것은 아닙니다
 조건에 맞지 않는 것과 조건 평가에 실패한 것은 다른 결과입니다
 
-### VAP의 설정 오류는 경고 전용 바인딩도 거절할 수 있습니다
+### VAP 설정 오류로 경고 전용 바인딩에서도 요청이 거절될 수 있습니다
 
 VAP의 바인딩은 `validationActions`로 `Deny`·`Warn`·`Audit`을 선택합니다
 `Deny`와 `Warn`은 함께 지정할 수 없으며 `Audit`은 다른 동작과 결합할 수 있습니다
@@ -189,7 +189,7 @@ mutating admission 뒤에는 `managedFields` 자체가 유효한지 검사하는
 망가졌으면 admission 이전 장부로 복원하고 경고하지만, 새 필드에 소유자를 붙여주는 처리는 아닙니다
 
 한편 배경 controller가 나중에 별도 API 쓰기를 보내면 일반 요청의 field manager 계산을 거칩니다
-관리자 이름은 요청의 `fieldManager` 또는 User-Agent에서 유래할 수 있으므로 실제 `managedFields`를 확인해야 합니다
+field manager 이름은 요청의 `fieldManager` 또는 User-Agent에서 유래할 수 있으므로 실제 `managedFields`를 확인해야 합니다
 
 다른 관리자가 소유한 필드를 SSA로 다른 값으로 바꾸면 충돌할 수 있습니다
 같은 값의 공유 소유, force를 통한 소유권 이전, 일반 Update까지 모두 HTTP 409로 묶을 수는 없습니다
@@ -290,7 +290,7 @@ GitOps의 추적 범위, generate의 동기화, GC의 수명을 맞춰 어느 �
 | 기존 위반을 계속 찾거나 고치기 | 검사·변경 controller | 보고와 복구의 차이, 검사 범위·주기·별도 쓰기 권한 |
 | 다른 자원 생성 | generate 또는 별도 controller | 추적·동기화·삭제·GC와 GitOps의 존재 여부 관리 |
 
-이름이 같은 오류나 OutOfSync라도 먼저 응답한 요청과 쓰기 시점을 확인합니다
+오류 이름이나 OutOfSync 표시가 같아도, 관련 요청의 응답과 쓰기 시점을 먼저 확인합니다
 검증 위반인지 설정 오류인지, 새 상태를 막은 것인지 나중에 다른 주체가 바꾼 것인지 구분하면 적용 범위와 복구 경로를 좁힐 수 있습니다
 
 ## 참고 자료

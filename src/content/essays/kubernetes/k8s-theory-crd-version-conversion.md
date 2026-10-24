@@ -55,7 +55,7 @@ served를 끄는 것과 저장된 옛 버전의 지원을 `spec.versions`에서 
 버전을 생략한 클라이언트가 사용하는 discovery의 선호 순서는 단순 사전순이 아닙니다
 Kubernetes 형식의 이름은 GA·beta·alpha 순으로 우선하고 그 안에서 버전 숫자를 비교하므로, v1이 v2beta1보다 앞섭니다
 
-Kubernetes 형식이 아닌 이름은 뒤로 가며 그끼리는 사전순입니다
+Kubernetes 형식이 아닌 이름은 그 뒤에 놓으며, 이 이름들끼리는 사전순으로 정합니다
 따라서 foo1이 foo10보다 앞서고, CRD의 선언 순서나 storage 표시가 선호 순서를 대신하지 않습니다
 
 deprecated 경고를 서버가 만들 때도 현재 버전보다 우선순위가 높고, served이며 deprecated가 아닌 후보가 있으면 그중 가장 높은 버전을 추천합니다
@@ -73,7 +73,7 @@ deprecated 경고를 서버가 만들 때도 현재 버전보다 우선순위가
 None 변환기 자체는 apiVersion을 바꾸고 CR의 필드를 다른 구조로 옮기지 않습니다
 같은 이름의 필드가 다른 의미·위치로 바뀌어도 알아서 대응시켜 주지 않습니다
 
-그러나 변환기만 필드를 건드리지 않는다는 것을 요청 경로 전체의 값 보존으로 읽으면 안 됩니다
+None 변환기가 필드를 건드리지 않는다고 해서 요청 처리 중에도 값이 모두 보존되는 것은 아닙니다
 schema coercing converter를 거치는 경로에서는 변환된 오브젝트의 버전 스키마로 가지치기(pruning)를 합니다
 목표 스키마에 없는 필드는 보존 예외가 없다면 제거될 수 있습니다
 
@@ -125,7 +125,7 @@ API 서버는 응답을 원래 목록의 해당 위치에 되넣습니다
 
 v1beta1 Review 응답은 호환성을 위해 Review GVK와 왕복 uid 검사를 생략합니다
 CR 자체의 kind·이름·namespace·metadata.uid 검사까지 생략한다는 뜻은 아닙니다
-응답 계약은 이 호환 분기에 기대지 않고 요청의 Review 버전과 uid를 그대로 맞춰야 합니다
+webhook은 이 호환 분기에 기대지 말고 요청의 Review 버전과 uid를 그대로 맞춰 응답해야 합니다
 
 metadata 내부의 변경 제한과 달리 spec·status 같은 본문은 목표 버전에 맞게 변환할 수 있습니다
 이 식별자·형식 검사와 이후의 스키마 가지치기를 구분해야 하며, webhook이 올바른 의미 변환을 했는지까지 서버가 증명해 주지는 않습니다
@@ -159,13 +159,13 @@ CRD에서 timeoutSeconds로 이 값을 조절할 수 없으며, 네트워크 오
 이 디코딩에 변환이 필요하고 실패하면 삭제도 막힐 수 있습니다
 삭제 응답에 항상 CR 본문을 반환하기 때문이라는 설명은 맞지 않습니다
 
-CRD 삭제의 정리 finalizer도 남은 CR을 목록 조회하고 삭제합니다
+CRD의 삭제 finalizer를 처리하는 컨트롤러도 남은 CR을 목록 조회하고 삭제합니다
 현재 저장 버전의 저장소를 이용하므로 옛 저장 형식이 남아 있으면 이 조회에서 변환이 필요할 수 있습니다
 CRD의 Terminating을 볼 때 conversion 오류와 남은 CR 자체의 finalizer를 함께 구분해야 합니다
 
 이 경로는 [일반 Store.Delete](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go), [CRD 정리 finalizer](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/controller/finalizer/crd_finalizer.go), [저장 버전 저장소 선택](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/customresource_handler.go)에 있습니다
 
-## storedVersions는 잔존 객체를 세는 목록이 아닙니다
+## storedVersions는 남아 있는 CR의 개수를 기록하지 않습니다
 
 `status.storedVersions`는 저장 버전으로 지정돼 사용됐을 수 있는 버전을 기록합니다
 CR을 저장할 때마다 개수를 세어 갱신하는 필드가 아닙니다

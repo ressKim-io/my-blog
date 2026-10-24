@@ -73,7 +73,7 @@ v1.37.1에서 `RemoteRequestHeaderUID`는 기본 활성인 Beta 기능입니다
 보통 `kube-system/extension-apiserver-authentication` ConfigMap에서 설정을 읽습니다
 여기에는 requestheader CA, 허용 CN, 헤더 이름이 담깁니다
 
-여기에는 두 방향의 신뢰가 있습니다
+TLS 신뢰는 두 방향으로 나뉩니다
 APIService의 `caBundle`은 **kube-apiserver가 확장 서버를 검증**하는 데 쓰입니다
 requestheader CA는 **확장 서버가 신원을 전달한 프록시를 검증**하는 데 쓰입니다
 
@@ -97,6 +97,8 @@ CA가 같다는 사실만으로 모든 인증서에 위조 권한이 생기는 �
 
 구현에는 허용 그룹·경로 예외와 허용·거절 결과 캐시도 있습니다
 따라서 모든 요청마다 새 SAR 호출이 반드시 발생한다고 단정할 수 없습니다
+
+사용자 인가 거절과 확장 서버의 SAR 호출 실패 역시 같은 오류라고 보장되지 않으며, 확장 서버의 401도 ConfigMap 읽기 실패 하나로 설명할 수는 없습니다
 
 이 동작은 확장 서버가 구현하고 설정해야 합니다
 APIService가 등록됐다는 이유만으로 모든 서버가 같은 위임 인증·인가 구성을 제공하는 것은 아닙니다
@@ -129,7 +131,7 @@ HTTP 요청을 감싼 대기에는 별도로 6초 제한이 있습니다
 주소를 구하는 처리는 그 대기 구문 앞에도 있으므로, 이 수치를 전체 검사나 사용자 요청의 보편적인 최대 지연으로 읽으면 안 됩니다
 
 검사는 `system:kube-aggregator` 사용자와 `system:masters` 그룹 헤더를 사용합니다
-응답 본문의 API 구현을 모두 검증하거나 일반 사용자의 권한을 시험하는 검사는 아닙니다
+API 구현 전체를 검증하거나 일반 사용자의 권한을 시험하는 검사는 아닙니다
 
 v1.37.1에서는 이 검사와 실제 프록시가 같은 `BuildTransportConfig`를 사용합니다
 `caBundle`, `insecureSkipTLSVerify`, `<service>.<namespace>.svc` 서버 이름과 프록시 클라이언트 인증서가 두 경로에 반영됩니다
@@ -199,7 +201,6 @@ Namespace condition을 통해 목록 조회 실패와 실제 내용·finalizer �
 | `NamespaceFinalizersRemaining` | 남은 객체에 finalizer가 있음 |
 
 이 상태들은 함께 나타날 수도 있습니다
-사용자 인가 거절과 확장 서버의 SAR 호출 실패 역시 같은 오류라고 보장되지 않으며, 확장 서버의 401도 ConfigMap 읽기 실패 하나로 설명할 수는 없습니다
 
 ## CRD 대신 별도 서버가 필요한 경계
 
@@ -210,7 +211,7 @@ CRD는 Kubernetes API 서버의 저장 경로를 사용합니다
 `logs`·`exec` 같은 추가 subresource와 다른 이름 규칙도 포함됩니다
 실제로 무엇을 지원하는지는 확장 서버 구현마다 확인해야 합니다
 
-여기서 추가 subresource를 “새로운 verb”로 설명하면 범위가 넓어집니다
+추가 subresource를 만든다고 새로운 요청 verb까지 생기는 것은 아닙니다
 kube-apiserver의 일반 자원 요청은 아래 verb로 분류합니다
 `create`, `get`, `update`, `patch`, `delete`, `list`, `watch`, `deletecollection`입니다
 
