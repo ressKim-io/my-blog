@@ -10,10 +10,11 @@ date: "2026-10-25"
 ---
 
 PVC의 요청 용량을 늘리는 API 갱신이 성공해도 애플리케이션이 바로 그 공간을 쓸 수 있는 것은 아닙니다
-백엔드 볼륨과 필요한 노드 작업이 끝나야 하며, 명세와 용량 상태 사이에 진행 중인 차이가 남을 수 있습니다
+백엔드 볼륨 확장과 필요한 노드 작업이 끝나야 하며, 처리하는 동안 요청한 용량과 상태에 기록된 용량이 다를 수 있습니다
 
 [CSI 구조](/essays/k8s-theory-csi-architecture)에서 구분한 외부 controller와 kubelet의 호출 책임이 확장에서도 이어집니다
-스냅샷은 요청·실물·클래스의 대응을, 임시 볼륨은 Pod 소유 참조나 노드 호출을 이용해 수명을 정합니다
+스냅샷은 요청·실물·클래스를 나눠 관리합니다
+임시 볼륨은 방식에 따라 Pod 소유 참조나 노드 호출로 수명을 관리합니다
 
 > **근거**: Kubernetes v1.37.1 `f78e722310e50bcaca9276be22276d9e91d91308`과 공식 문서 저장본 `7fde177e22dc98390a6d55d215dd0301b5f6d0bb`를 대조했습니다
 > 코어의 CSI 의존 commit과 외부 spec v1.13.0, external-resizer v2.3.0·external-provisioner v6.4.0·external-snapshotter v8.7.0은 별도 버전입니다
@@ -34,7 +35,7 @@ Pending이라는 이유만으로 `volumeMode`나 기존 `dataSource`를 임의�
 - 이전·새 PVC가 같은 비어 있지 않은 StorageClass를 참조하는지
 - 현재 그 StorageClass의 `allowVolumeExpansion`이 true인지
 
-false·미설정이거나 클래스를 읽지 못하면 증가 요청을 거절합니다
+`allowVolumeExpansion`이 false이거나 설정되지 않았거나, 클래스를 읽지 못하면 증가 요청을 거절합니다
 이 admission을 비활성화한 환경과 별개로, API가 요청을 받는 것과 드라이버가 실제 확장을 지원하는 것도 나눠야 합니다
 
 판단은 [PVC update 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go)과 [resize admission](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/storage/persistentvolume/resize/admission.go)에 있습니다
@@ -84,7 +85,8 @@ PVC를 수정하는 행위만으로 드라이버의 지원 조건이나 볼륨 �
 ## 용량 상태와 오류는 어느 작업이 남았는지 알려 줍니다
 
 PVC의 `conditions`와 `allocatedResourceStatuses.storage`는 같은 확장 과정의 상태를 다른 형태로 나타냅니다
-다음은 API가 정의한 의미이며 모든 오류에서 두 열이 일대일로 함께 기록된다는 표는 아닙니다
+다음은 API가 정의한 의미입니다
+모든 오류에서 두 상태가 표의 짝대로 함께 기록되는 것은 아닙니다
 
 | 진행·분류 | condition | allocatedResourceStatuses.storage |
 |---|---|---|
@@ -156,7 +158,7 @@ Kubernetes 저장소의 `cluster/addons/volumesnapshots/`에는 CRD와 controlle
 `readyToUse`가 false인 이유도 controller 부재, 진행 중인 작업, CSI 오류 등으로 나눠 확인해야 합니다
 스냅샷 기능의 존재가 애플리케이션 일관성을 자동으로 보장하지는 않습니다
 
-CRD의 `api-approved.kubernetes.io`도 설치 시의 검증 경계입니다
+`api-approved.kubernetes.io`는 CRD를 설치할 때 API 서버가 검사하는 어노테이션입니다
 신규 CRD가 `k8s.io`·`kubernetes.io` 또는 그 하위 그룹이면 승인 URL이나 `unapproved`로 시작하는 사유가 필요합니다
 누락 시 Required 오류가 나지만 서버가 링크를 열어 승인 여부를 심사하지는 않습니다
 기존 CRD 갱신에서는 승인 상태가 바뀌지 않은 경우의 호환 예외도 있습니다

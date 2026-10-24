@@ -1,6 +1,6 @@
 ---
 title: "CSI 구조 — sidecar의 Controller 호출과 kubelet의 Node 호출"
-excerpt: "CSI 규격과 Kubernetes 어댑터, 외부 sidecar의 책임을 나눕니다. 두 등록 소켓과 CSINode 기록, CSIDriver의 설정, VolumeAttachment의 의도·결과를 따라가며 capability·inline·migration의 경계도 구분합니다"
+excerpt: "CSI 규격과 Kubernetes 어댑터, 외부 sidecar의 책임을 나눕니다. 등록용·CSI 호출용 소켓과 CSINode 기록, CSIDriver의 설정, VolumeAttachment의 의도·결과를 따라가며 capability·inline·migration의 경계도 구분합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "CSI", "Storage", "Kubelet", "Sidecar", "concept"]
 series:
@@ -33,7 +33,7 @@ Kubernetes 오브젝트를 읽는 코드와 실제 스토리지 작업을 하는
 
 그림의 왼쪽 sidecar가 오른쪽 kubelet을 순서대로 호출하는 것은 아닙니다
 각 주체가 Kubernetes 상태와 자기 역할에 맞춰 드라이버를 부릅니다
-attach가 필요한 경우에는 그 사이의 의도와 결과를 VolumeAttachment로 전달합니다
+attach가 필요한 경우에는 연결 요청과 처리 결과를 VolumeAttachment로 전달합니다
 
 Kubernetes 안에도 **in-tree CSI 플러그인**은 남아 있습니다
 이는 벤더의 스토리지 구현 자체가 아니라 외부 CSI 드라이버를 연결하는 코어 어댑터입니다
@@ -114,7 +114,7 @@ controller sidecar의 API RBAC과 node 드라이버의 호스트·mount 권한�
 같은 Pod로 배치했다는 이유만으로 모든 컨테이너가 같은 호스트 권한을 필요로 하는 것은 아닙니다
 실제 권한과 소켓·mount 구성은 드라이버 배포 방식에 맞춰 확인해야 합니다
 
-## 등록용 소켓과 CSI 호출용 소켓은 다른 서버입니다
+## 등록용 소켓과 CSI 호출용 소켓은 역할이 다릅니다
 
 노드의 일반적인 경로는 다음과 같습니다
 
@@ -180,7 +180,7 @@ kubelet이 NodeGetInfo로 받은 이 값을 API에 기록하면 다른 노드에
 PV의 `spec.csi.volumeHandle`도 같은 역할을 합니다
 이는 스토리지 볼륨의 식별자이며 후속 CSI 요청의 `volume_id`로 전달됩니다
 
-두 식별자는 Kubernetes 오브젝트 이름을 스토리지 이름으로 추정하지 않도록 하는 대응 정보입니다
+스토리지 시스템의 노드·볼륨 식별자를 Kubernetes 오브젝트 이름에서 추정하지 않도록 두 식별자를 따로 기록합니다
 등록 성공과 볼륨 attach 완료가 다른 상태라는 점도 이 구분에서 드러납니다
 
 ### VolumeAttachment는 코어의 의도와 외부 작업 결과를 잇습니다
@@ -213,7 +213,7 @@ Pod의 `volumes[].csi`로 지정하는 이 방식은 해당 드라이버의 `Eph
 Pod를 위해 PVC를 만들고 일반 프로비저닝·바인딩 경로를 사용합니다
 [공식 ephemeral volumes 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/storage/ephemeral-volumes.md)가 두 경로를 구분합니다
 
-또 하나의 inline은 **CSI migration**에서 나옵니다
+inline이라는 이름은 **CSI migration**에서도 나옵니다
 기존 in-tree 볼륨 표현을 CSI spec으로 변환하는 경로에서는 VolumeAttachment의 `source.inlineVolumeSpec`를 사용할 수 있습니다
 이는 앞의 CSI inline ephemeral과 같은 뜻이 아닙니다
 

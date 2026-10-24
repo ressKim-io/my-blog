@@ -42,7 +42,7 @@ PVC에는 `spec.resources.requests.storage`와 하나 이상의 `spec.accessMode
 `storageClassName: ""`는 값을 지정하지 않은 상태가 아닙니다
 기본 클래스가 있어도 클래스 없는 정적 PV에 연결하려는 의도를 표현합니다
 
-기본 클래스를 채우는 자리는 둘입니다
+기본 클래스는 두 경로에서 채웁니다
 생성 admission이 채울 수 있고, PV 컨트롤러가 나중에 기본 클래스를 소급 지정하는 경로도 있습니다
 
 현행 [`syncUnboundClaim`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/pv_controller.go#L332-L392)은 `volumeName`이 없는 미바인딩 PVC에서 맞는 PV를 찾지 못했을 때 소급 지정을 시도합니다
@@ -63,7 +63,7 @@ PVC에는 `spec.resources.requests.storage`와 하나 이상의 `spec.accessMode
 ## 기존 PV는 접근 방식과 용량을 함께 보고 고릅니다
 
 일반적인 미예약 PV 탐색은 다음 조건을 확인합니다
-다른 PVC를 가리키는 `claimRef`가 있으면 그 PVC의 후보로 가져오지 않습니다
+다른 PVC를 가리키는 `claimRef`가 있으면 현재 요청한 PVC의 후보로 선택하지 않습니다
 
 | 조건 | 일반 후보의 통과 기준 |
 |---|---|
@@ -85,8 +85,7 @@ PV 컨트롤러는 요청 모드를 포함하는 조합을 모드 수가 적은 
 이 탐색은 [`persistentVolumeOrderedIndex`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/index.go)와 공통 [`FindMatchingVolume`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-helpers/storage/volume/pv_helpers.go#L186-L326)에 나뉘어 있습니다
 스케줄러가 같은 헬퍼에 Node를 전달하는 경로에서는 PV의 `nodeAffinity`와 그 노드의 라벨도 대조합니다
 
-1Gi를 요청한 PVC의 가장 작은 적합 후보가 100Gi PV라고 가정하겠습니다
-그 PV에 연결될 수 있습니다
+1Gi를 요청한 PVC에 맞는 가장 작은 후보가 100Gi PV라면, 그 PV에 연결될 수 있습니다
 PVC spec의 요청이 100Gi로 바뀌는 것이 아니라, Bound로 진입할 때 status에 연결된 PV의 용량·접근 방식을 보고합니다
 
 이것도 status를 매번 PV 용량으로 덮어쓴다는 뜻은 아닙니다
@@ -119,7 +118,7 @@ PV 컨트롤러의 `bind`는 네 처리 순서로 PV와 PVC를 연결합니다
 | 4 | PVC의 `status.phase: Bound`와 관련 status |
 
 PV는 여러 네임스페이스의 PVC가 함께 탐색하는 자원입니다
-경쟁이 생기는 PV의 참조를 먼저 기록해야 다른 PVC가 같은 PV를 계속 자유 후보로 보지 않게 됩니다
+PV의 참조를 먼저 기록해야 다른 PVC가 같은 PV를 미예약 후보로 보지 않게 됩니다
 API 갱신의 충돌과 재처리가 이 경쟁을 조정하며, 두 오브젝트를 한 트랜잭션으로 바꾸는 것은 아닙니다
 
 `claimRef`의 UID는 특정 PVC의 신원을 구분합니다
@@ -194,9 +193,9 @@ WFFC의 모든 PVC가 반드시 새 볼륨 생성을 기다린다고 해석하�
 |---|---|
 | PreFilter | Pod의 PVC를 바인딩 여부 등으로 분류 |
 | Filter | 노드별 PV 후보·nodeAffinity·공급 가능 조건 검사 |
-| Reserve | 선택한 PV·PVC를 스케줄러 캐시에 가정 |
+| Reserve | 선택한 PV·PVC를 스케줄러 캐시에 임시 반영 |
 | PreBind | PV 예약 또는 PVC selected-node를 API에 쓰고 관측 조건 대기 |
-| Unreserve | 가정한 캐시 상태 해제. 성공한 API 쓰기 전체의 rollback은 아님 |
+| Unreserve | 임시 반영한 캐시 상태 해제. 성공한 API 쓰기 전체의 rollback은 아님 |
 
 기존 PV를 사용한다면 PreBind가 PV의 claimRef를 기록합니다
 동적 생성이 필요하다면 PVC에 `volume.kubernetes.io/selected-node`로 노드 이름을 기록해 그 노드에서 사용할 볼륨 공급을 요청합니다
@@ -225,7 +224,7 @@ selected-node를 적는 경로가 실행되지 않아 PVC가 Pending으로 남�
 
 또한 CSI capacity 검사는 `CSIDriver.spec.storageCapacity`로 옵트인한 드라이버의 정보를 사용합니다
 스케줄러가 본 용량 정보가 낡을 수 있으므로 Filter 통과가 실제 CreateVolume 성공을 보장하지는 않습니다
-Immediate 또는 capacity 미옵트인 경로의 생성 실패도 구분해야 합니다
+Immediate 방식이나 capacity 검사를 활성화하지 않은 경로에서 발생한 생성 실패도 구분해야 합니다
 
 ## 접근 방식의 매칭과 실제 사용 제약은 다릅니다
 
@@ -241,7 +240,7 @@ accessModes는 PV 매칭 조건이며, 마운트 뒤의 쓰기 보호를 이 필
 RWO에서 Once가 뜻하는 단위는 Pod가 아니라 노드입니다
 
 RWOP는 CSI 볼륨에서 지원하며, 스케줄러와 kubelet의 실제 사용 검사가 있습니다
-스케줄러의 `VolumeRestrictions`가 다른 Pod의 사용을 확인한 실패는 `Unschedulable`이며, 점유 Pod가 없어지면 조건이 달라질 수 있습니다
+스케줄러의 `VolumeRestrictions`가 다른 Pod의 사용을 확인해 배치를 막으면 `Unschedulable`로 처리하며, 점유 Pod가 없어지면 조건이 달라질 수 있습니다
 반면 PV 후보 부족·nodeAffinity 불일치 같은 VolumeBinding Filter의 사유는 `UnschedulableAndUnresolvable`로 처리됩니다
 
 RWX를 적었다고 모든 저장소가 다중 노드 쓰기를 지원하게 되지도 않습니다

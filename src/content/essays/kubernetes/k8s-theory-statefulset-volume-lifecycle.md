@@ -40,7 +40,7 @@ Pod가 삭제된 뒤 같은 서수로 다시 만들어져도 이름은 같습니
 그림은 교체 전과 후의 관계를 나누어 표시한 것입니다
 두 Pod가 동시에 볼륨을 사용한다는 뜻은 아닙니다. PVC가 보존됐을 때 새 Pod가 같은 PVC를 다시 찾는 과정을 보여 줍니다
 
-공식 문서에서 안정된 신원과 저장소라고 설명하는 범위도 Pod의 재스케줄링을 거쳐 이 대응이 유지된다는 의미입니다
+공식 문서에서 말하는 신원·저장소의 안정성은 Pod를 다시 스케줄해도 이 대응이 유지된다는 의미입니다
 Pod나 데이터가 영구히 삭제되지 않는다는 보장은 아닙니다
 
 DNS 이름에는 별도 조건이 있습니다
@@ -132,7 +132,7 @@ StatefulSet 컨트롤러는 보존 정책에 따라 PVC의 이 참조를 바꾸�
 범위 안에서는 `data-web-2`의 소유자가 StatefulSet이지만, 스케일다운 대상이 되면 소유자를 `web-2` Pod로 바꿉니다
 
 StatefulSet이 계속 존재해도 해당 Pod를 지우면 PVC를 정리할 수 있어야 하기 때문입니다
-GC는 삭제를 기다리지 않는 유효한 소유자가 남아 있으면 종속 오브젝트를 보존할 수 있습니다
+GC는 삭제 중이 아닌 유효한 소유자가 남아 있으면 종속 오브젝트를 보존할 수 있습니다
 두 정책이 `Delete`라고 해서 StatefulSet과 Pod를 동시에 소유자로 남기지는 않습니다
 
 ![두 정책이 Delete일 때 StatefulSet 컨트롤러가 PVC 소유자를 Pod로 바꾼 뒤 Pod 삭제를 요청하고 GC와 PVC 보호가 삭제를 처리하는 흐름|tall](/diagrams/k8s-theory-statefulset-volume-lifecycle-2.svg)
@@ -154,14 +154,14 @@ GC는 삭제를 기다리지 않는 유효한 소유자가 남아 있으면 종�
 
 기본 `podManagementPolicy: OrderedReady`에서는 낮은 서수부터 Pod를 생성합니다
 앞선 Pod가 `Running`·`Ready`이고, `minReadySeconds`를 지정했다면 그 시간 동안 준비된 상태인 `Available`이어야 다음 진행이 가능합니다
+이 때문에 `web-0`이 준비되지 않으면 뒤의 복제본 생성이 멈출 수 있습니다
 
 스케일다운은 높은 서수부터 처리하며 앞선 삭제 대상의 종료를 기다립니다
-이 때문에 `web-0`이 준비되지 않으면 뒤의 복제본 생성이 멈출 수 있습니다
 
 `Parallel`은 스케일 과정에서 다른 Pod의 준비·종료를 기다리는 제약을 풉니다
 복제본의 이름과 신원 대응은 유지합니다
 
-롤링 업데이트의 동시 교체 범위는 `updateStrategy`와 `rollingUpdate.maxUnavailable` 등 해당 설정도 따로 관여합니다
+롤링 업데이트에서 동시에 교체할 수 있는 범위에는 `updateStrategy`와 `rollingUpdate.maxUnavailable` 등 별도 설정도 관여합니다
 
 StatefulSet 오브젝트 자체를 삭제할 때에는 `OrderedReady`여도 Pod 종료 순서를 보장하지 않습니다
 순서 있는 축소가 필요하다면 `replicas: 0`으로 줄이는 과정과 StatefulSet 삭제를 구분해야 합니다
@@ -172,7 +172,7 @@ finalizer는 삭제 전 필요한 정리가 끝날 때까지 오브젝트를 남
 `kubernetes.io/pvc-protection` finalizer는 보호 컨트롤러가 PVC를 사용 중이라고 판단하는 동안 PVC의 최종 삭제를 늦춥니다
 
 이 검사는 노드에서 실제 unmount가 끝났다는 응답을 직접 받는 방식은 아닙니다
-확인한 구현은 스케줄된 Pod의 PVC 참조를 informer 캐시에서 찾고, 사용자를 찾지 못하면 API 조회도 확인합니다
+확인한 구현은 스케줄된 Pod의 PVC 참조를 informer 캐시에서 찾고, 사용하는 Pod를 찾지 못하면 API 조회도 확인합니다
 소유 참조와 이 보호 장치를 kubelet의 볼륨 정리 완료 증명으로 읽으면 안 됩니다
 
 강제 삭제에서는 API 서버가 kubelet의 종료 확인을 기다리지 않고 Pod 오브젝트를 없앨 수 있습니다

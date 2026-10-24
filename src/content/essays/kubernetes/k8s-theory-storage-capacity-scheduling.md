@@ -13,7 +13,7 @@ date: "2026-10-30"
 조건에 맞는 기존 PV(PersistentVolume, 영속 볼륨 오브젝트)가 없다면 새 볼륨을 만들어야 합니다
 
 그 볼륨을 쓸 노드를 먼저 골랐는데 접근 가능한 저장소에 공간이 부족하면, 볼륨 생성 단계에서 실패할 수 있습니다
-스케줄러는 저장소를 직접 측정하는 대신 CSI 드라이버 배포물이 기록한 `CSIStorageCapacity`를 읽어 후보 노드를 판단합니다
+스케줄러는 저장소를 직접 측정하는 대신 CSI 드라이버 측에서 기록한 `CSIStorageCapacity`를 읽어 후보 노드를 판단합니다
 
 > Kubernetes v1.37.1 소스와 공식 문서 고정본을 대조한 개념 설명입니다
 > 외부 구현은 external-provisioner v6.4.0을 별도로 확인했습니다. 실제 설치 버전·클러스터 실험·지연 측정 결과는 포함하지 않습니다
@@ -44,7 +44,7 @@ StorageClass의 프로비저너가 동적 생성을 지원하는지, `allowedTop
 접근할 수 없는 노드에서는 용량이 많아도 볼륨을 사용할 수 없기 때문입니다
 다만 용량 오브젝트를 고르는 내부 비교 순서는 StorageClass 이름, 크기, `nodeTopology` 순서입니다. 모든 위치 검사가 모든 크기 검사보다 앞선다는 뜻은 아닙니다. [VolumeBinding의 분기](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/volumebinding/binder.go)
 
-## 용량을 기록하는 주체는 드라이버 배포물입니다
+## 일반적인 CSI 배포에서는 external-provisioner가 용량을 기록합니다
 
 `CSIStorageCapacity`는 한 StorageClass와 토폴로지 구간에 대한 CSI `GetCapacity` 응답을 담는 네임스페이스 오브젝트입니다
 현재 사용하는 API는 `storage.k8s.io/v1`입니다
@@ -56,7 +56,7 @@ StorageClass는 볼륨을 공급할 드라이버와 생성 조건을 지정합�
 ![external-provisioner가 CSI 드라이버에 GetCapacity를 호출해 API에 용량을 기록하고 스케줄러가 그 오브젝트를 읽는 흐름|tall](/diagrams/k8s-theory-storage-capacity-scheduling-1.svg)
 
 볼륨 **개수**를 제한하는 [CSINode의 `allocatable.count`](/essays/k8s-theory-volume-attachment-limits)와는 단위도 기록 주체도 다릅니다
-그 값은 kubelet이 노드별 `NodeGetInfo` 응답에서 기록하지만, 여기서는 드라이버 배포물이 저장소의 가용 **바이트**를 기록합니다
+그 값은 kubelet이 노드별 `NodeGetInfo` 응답에서 기록하지만, 여기서는 external-provisioner 같은 드라이버 측 구성요소가 저장소의 가용 **바이트**를 기록합니다
 
 핵심 필드는 다음 네 개입니다
 
@@ -68,7 +68,7 @@ StorageClass는 볼륨을 공급할 드라이버와 생성 조건을 지정합�
 | `maximumVolumeSize` | 같은 조건으로 생성할 수 있는 단일 볼륨의 최대 크기 | 변경 가능 |
 
 앞의 두 필드가 조회 조건을, 뒤의 두 필드가 바뀌는 용량 값을 나타냅니다
-조회 조건이 달라지면 같은 오브젝트의 좌표를 고치는 대신 새 오브젝트로 표현해야 합니다
+조회 조건이 달라지면 기존 오브젝트의 필드를 고치는 대신 새 오브젝트로 표현해야 합니다
 
 이름은 용량이나 위치를 나타내지 않습니다
 확인한 external-provisioner는 `csisc-` 접두어로 이름을 생성하지만 API가 그 접두어를 강제하지는 않습니다
@@ -169,7 +169,7 @@ Filter가 단일 볼륨 한도인 `maximumVolumeSize`를 먼저 보는 것과 �
 점수 함수는 클래스별 요청량/용량 비율을 설정된 곡선에 대입하고 클래스 점수의 평균을 냅니다
 현재 기본 곡선은 비율 0%에서 최고점, 100%에서 0점입니다
 
-0 용량이거나 합산 요청량이 용량을 초과해도 점수 입력을 100%로 처리합니다
+용량이 0이거나 합산 요청량이 용량을 초과해도 점수 입력을 100%로 처리합니다
 이 Score가 별도의 Filter 거절을 내리는 것은 아닙니다
 
 `StorageCapacityScoring`을 끄더라도 드라이버의 용량 추적 참여 선언까지 꺼지는 것은 아닙니다
@@ -224,7 +224,8 @@ external-provisioner v6.4.0은 topology 지원과 선택 노드가 있는지를 
 모든 오류가 이 재선택을 뜻하지는 않습니다. 예를 들어 `DeadlineExceeded`는 이전 생성 작업이 진행 중일 가능성을 고려하는 다른 오류 경로입니다
 
 한 Pod에 볼륨이 여러 개일 때는 먼저 만든 볼륨이 용량을 차지한 뒤 다음 볼륨을 만들지 못할 수도 있습니다
-Filter는 각 PVC를 저장된 용량과 비교하므로 전체 요청을 한 번에 예약하지 않으며, Score에서 요청량을 합산해도 이 문제가 예약으로 해결되지는 않습니다
+Filter는 각 PVC를 저장된 용량과 비교하므로 전체 요청을 한 번에 예약하지 않습니다
+Score에서 요청량을 합산해도 실제 공간이 예약되는 것은 아닙니다
 
 가용량이나 접근 조건이 달라지지 않으면 재시도만으로 풀리지 않을 수 있습니다
 공식 문서도 용량을 늘리거나 이미 생성된 볼륨을 정리하는 등 운영자의 개입이 필요한 경우로 설명합니다. [공식 용량 추적의 한계](https://kubernetes.io/docs/concepts/storage/storage-capacity/#limitations)
@@ -240,7 +241,7 @@ Filter는 각 PVC를 저장된 용량과 비교하므로 전체 요청을 한 �
 | Filter 통과 뒤 생성 실패 | 갱신 시차·다른 요청의 경쟁·드라이버 오류와 재선택 조건 |
 | 볼륨 일부만 생성되고 계속 대기 | 먼저 만든 볼륨의 위치·소모 용량과 남은 요청을 함께 확인 |
 
-용량 부족 문자열 하나로 실제 저장소가 꽉 찼다고 단정할 수는 없습니다
+용량 부족이라는 오류 문구만으로 실제 저장소가 꽉 찼다고 단정할 수는 없습니다
 정보를 보고하기로 했는지, 사용할 정보가 있는지, 그 정보가 어떤 단계에서 쓰였는지를 나눠 확인해야 합니다
 
 ## 확인한 근거

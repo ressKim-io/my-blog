@@ -1,6 +1,6 @@
 ---
-title: "attach·stage·publish — 한 번씩 준비하는 대상이 다릅니다"
-excerpt: "볼륨-노드 연결과 노드의 staging target, Pod별 target path를 구분합니다. kubelet의 상태 대조와 정상 해제 순서, Multi-Attach 사전 검사, force-detach의 시간·상태 조건을 현재 소스로 확인합니다"
+title: "attach·stage·publish — 볼륨 연결부터 Pod가 사용할 경로까지"
+excerpt: "볼륨을 노드에 연결하고 노드의 공통 경로와 Pod별 사용 경로를 준비하는 과정을 살펴봅니다. kubelet이 상태를 확인하는 방법과 정상 해제 순서, Multi-Attach 검사, 강제 분리의 시간·상태 조건을 현재 소스로 확인합니다"
 category: "kubernetes"
 tags: ["Kubernetes", "CSI", "Volume", "Storage", "concept"]
 series:
@@ -9,18 +9,16 @@ series:
 date: "2026-10-23"
 ---
 
-같은 볼륨을 같은 노드의 두 Pod가 쓴다면 노드에서 공유하는 준비와 Pod마다 필요한 준비가 다릅니다
-attach는 볼륨과 노드의 연결을, stage는 노드의 볼륨 준비 경로를, publish는 각 target path를 준비합니다
-
-세 단계의 ‘한 번’은 RPC 호출 횟수를 보장하는 표현이 아닙니다
-실패·응답 유실 뒤 재시도하거나 이미 준비된 대상에 다시 요청할 수 있으며, CSI는 호환되는 반복 요청을 처리하는 멱등성을 요구합니다
+같은 볼륨을 같은 노드의 두 Pod가 쓴다면, 노드에서 함께 쓰는 준비 작업과 Pod마다 따로 필요한 작업이 있습니다
+파일시스템 볼륨을 예로 들면 attach는 볼륨을 노드에 연결합니다
+stage는 그 노드에서 공유할 볼륨 경로를 준비하고, publish는 각 Pod가 사용할 호스트 경로에 볼륨을 제공합니다
 
 > **근거**: Kubernetes v1.37.1 `f78e722310e50bcaca9276be22276d9e91d91308`과 공식 문서 저장본 `7fde177e22dc98390a6d55d215dd0301b5f6d0bb` 기준입니다
 > CSI 계약은 Kubernetes가 의존하는 spec `cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f`를 읽고 최신 릴리스 v1.13.0의 같은 RPC 계약과 대조했습니다
 > external-attacher 구현 예시는 v4.13.0이며 실제 설치 버전·capability·클러스터 동작을 확인한 기록은 아닙니다
 > attach·mount·강제 분리의 실습이나 지연 측정은 포함하지 않습니다
 
-## 노드의 준비를 공유해도 Pod의 target은 각각 필요합니다
+## 노드에서 준비한 볼륨을 Pod별 경로에 제공합니다
 
 그림은 파일시스템 CSI persistent volume을 같은 노드의 두 Pod가 사용할 수 있는 조건의 예시입니다
 attach와 stage는 지원·설정에 따라 생략할 수 있고, publish의 호스트 target을 준비한 뒤 runtime이 컨테이너에 경로를 노출합니다
@@ -32,12 +30,12 @@ attach와 stage는 지원·설정에 따라 생략할 수 있고, publish의 호
 attach/detach controller가 연결의 필요를 판단하고 CSI 플러그인을 통해 VolumeAttachment를 만듭니다
 external-attacher가 이를 관찰해 드라이버의 `ControllerPublishVolume`을 호출하고 결과를 status에 반영합니다
 
-kubelet의 CSI attach 구현은 `attaching volumes from the kubelet is not supported`로 직접 연결 요청을 거절합니다
+kubelet의 CSI attach 구현은 직접 연결을 요청받으면 `attaching volumes from the kubelet is not supported` 오류를 반환합니다
 kubelet은 `WaitForAttach`에서 VolumeAttachment의 `status.attached`와 오류·삭제 상태를 확인합니다
 `enableControllerAttachDetach`의 기본값도 true입니다
 
 연결 제어를 노드 바깥에 두면 해당 노드의 kubelet이 응답하지 않아도 컨트롤 플레인에서 분리를 조정할 수 있습니다
-대신 kubelet의 사용 준비는 다른 컨트롤러와 드라이버가 연결을 완료하는 과정에 의존합니다
+kubelet은 다른 컨트롤러와 드라이버가 연결을 완료해야 볼륨 사용을 준비할 수 있습니다
 
 호출 경계는 [csiAttacher.Attach·WaitForAttach](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_attacher.go), sidecar의 결과 처리는 [external-attacher csi_handler](https://github.com/kubernetes-csi/external-attacher/blob/40d44ae14961a415348180a0e666651e82e44eb7/pkg/controller/csi_handler.go)에 있습니다
 
@@ -48,7 +46,7 @@ kubelet은 드라이버의 NodeGetCapabilities에서 `STAGE_UNSTAGE_VOLUME` 지�
 
 파일시스템 준비·검사·장치 연결·마운트 중 실제 작업은 드라이버에 따라 다릅니다
 stage를 쓴다는 이유만으로 모든 드라이버가 같은 마운트 작업과 비용을 갖는 것은 아닙니다
-공유할 수 있는 노드 준비와 Pod별 경로를 분리하는 것이 이 단계의 역할입니다
+이 단계에서 준비한 노드의 경로는 Pod별 사용 경로와 따로 관리합니다
 
 ### publish는 target path마다 볼륨을 제공합니다
 
@@ -59,8 +57,11 @@ kubelet은 `NodePublishVolume`에 Pod가 사용할 호스트 target path를 전�
 CSI 계약은 요청한 target에 볼륨을 제공하도록 요구하며, 모든 publish를 같은 bind mount 구현으로 고정하지 않습니다
 그 뒤 컨테이너에 호스트 경로를 노출하는 일은 runtime의 역할입니다
 
+실패하거나 응답을 받지 못하면 같은 요청을 다시 보낼 수 있고, 이미 준비된 대상에 재요청할 수도 있습니다
+CSI는 이런 호환되는 반복 요청을 처리하는 멱등성을 요구합니다
+
 `CSIDriver.spec.requiresRepublish`를 사용하면 초기 성공 뒤에도 같은 target에 NodePublishVolume이 다시 호출될 수 있습니다
-타임아웃 뒤 재시도까지 포함하면 노드당 한 번·Pod당 한 번이라는 설명은 준비 상태의 범위를 뜻해야 합니다
+이 세 단계는 준비 대상을 기준으로 나눈 것이며, 각 RPC를 한 번만 호출한다는 뜻은 아닙니다
 
 | 파일시스템 경로의 예 | 단위를 구분하는 부분 |
 |---|---|
@@ -70,7 +71,7 @@ CSI 계약은 요청한 target에 볼륨을 제공하도록 요구하며, 모든
 실제 생성은 [makeDeviceMountPath](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_attacher.go)와 [csiMountMgr.GetPath·getTargetPath](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_mounter.go)에 있습니다
 기본 루트 경로를 모든 노드의 실제 설정으로 가정하지는 않습니다
 
-## attach와 stage를 건너뛰는 입력은 서로 다릅니다
+## attach와 stage는 서로 다른 조건에서 생략합니다
 
 | 준비 단계 | 생략을 판단하는 입력 |
 |---|---|
@@ -106,7 +107,7 @@ reconciler가 차이를 보고 필요한 작업을 operation executor에 맡깁�
 실행 중인 관련 작업이 겹치지 않게 pending operation을 검사하고, 실패한 작업은 재시도와 backoff를 거칩니다
 호출을 시작했다는 로그가 작업 완료나 실제 장치 준비까지 의미하지는 않습니다
 
-직렬화의 범위도 작업에 따라 다릅니다
+다른 작업이 끝날 때까지 기다려야 하는 범위도 작업에 따라 다릅니다
 앞의 attachable 또는 device-mountable 볼륨은 mount/device 준비를 볼륨 단위로 조정합니다
 두 조건에 모두 해당하지 않는 플러그인의 mount는 Pod별로 구분하며, Pod별 unmount/unmap도 서로 다른 Pod target에서 병렬 실행할 수 있습니다
 이 제어는 관련 볼륨 작업의 순서를 조정하는 것이며 여러 CSI 단계와 백엔드 변경을 하나의 원자적 작업으로 만들지는 않습니다
@@ -132,7 +133,7 @@ VolumeAttachment 삭제 요청의 접수와 백엔드의 분리 완료도 같은
 이 순서는 [kubelet reconciler](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/reconciler/reconciler_common.go)와 [CSI 참조 계수·해제 계약](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/spec.md#rpc-interactions-and-reference-counting)에 근거합니다
 노드가 응답하지 않아 정상 해제를 끝낼 수 없는 경우는 뒤의 강제 분리 조건과 구분해야 합니다
 
-## Multi-Attach 오류는 코어의 사전 검사와 드라이버 검사를 나눕니다
+## 코어의 Multi-Attach 검사를 통과해도 드라이버가 거절할 수 있습니다
 
 attach/detach controller는 attach를 시작하기 전에 다른 노드에 이미 붙어 있는지 확인합니다
 CSI persistent volume의 PV accessModes에 대한 코어의 사전 판단은 다음과 같습니다
@@ -148,7 +149,6 @@ CSI persistent volume의 PV accessModes에 대한 코어의 사전 판단은 다
 
 이 검사를 통과했다고 백엔드의 실제 multi-attach 지원까지 증명되는 것은 아닙니다
 드라이버는 요청 capability나 이미 연결된 노드에 따라 ControllerPublishVolume을 거절할 수 있습니다
-코어 사전 검사와 드라이버의 검사는 모두 존재합니다
 
 RWO는 한 노드의 여러 Pod가 함께 사용하는 것까지 금지하는 모드가 아닙니다
 반면 RWOP는 스케줄러와 kubelet의 별도 Pod 사용 검사도 있으므로 같은 노드 공유의 설명에 함께 묶으면 안 됩니다
@@ -174,7 +174,7 @@ Pod phase인 Pending과 컨테이너 Waiting reason인 ContainerCreating은 다�
 | MountVolume.SetUp failed | Pod target 준비와 NodePublish 경로, 권한·입력·Pod 사용 제약 |
 | UnmountDevice failed | 노드 준비 해제, 남은 참조·마운트·드라이버 오류 |
 
-접두어는 실제 CSI RPC에 진입했다는 증거 자체는 아닙니다
+이 접두어만으로 CSI RPC가 실제로 호출됐다고 판단할 수는 없습니다
 capability 조회나 자격 증명·경로 준비가 먼저 실패할 수도 있으므로 뒤의 오류와 드라이버 로그를 함께 확인해야 합니다
 subPath 처리나 runtime의 경로 노출도 NodePublish 호출 하나로 모두 설명할 수 없습니다
 
@@ -187,7 +187,8 @@ attach가 불필요하거나 생략된 경로일 수도 있습니다
 스케줄러는 CSINode의 allocatable.count를 배치 판단에 사용합니다
 하지만 kubelet이 모든 Pod admission에서 같은 숫자를 다시 세어 거절하는 흐름은 아닙니다
 
-현재 WaitForAttachAndMount 실패 뒤 attachable volume의 VerifyExhaustedResource가 드라이버 갱신 주기 설정과 VolumeAttachment의 `ResourceExhausted` 오류 코드를 확인하면 별도 오류를 반환합니다
+현재 구현에서 WaitForAttachAndMount가 실패한 뒤에는 attachable volume의 VerifyExhaustedResource가 별도 오류를 반환할 수 있습니다
+드라이버 갱신 주기 설정과 VolumeAttachment의 `ResourceExhausted` 오류 코드가 조건에 맞을 때입니다
 kubelet은 이를 `VolumeAttachmentLimitExceeded`로 Pod 거절·종료 처리에 넘깁니다
 `MutableCSINodeAllocatableCount`는 v1.35의 beta와 달리 현재 GA·true로 잠겨 있지만, 갱신 설정과 실제 오류 확인 조건은 여전히 필요합니다
 
@@ -197,7 +198,7 @@ kubelet은 이를 `VolumeAttachmentLimitExceeded`로 Pod 거절·종료 처리�
 
 현재 DefaultTimerConfig의 `ReconcilerMaxWaitForUnmountDuration`은 6분입니다
 controller-manager가 실제로 이 기본 설정을 attach/detach controller에 전달합니다
-다만 노드가 꺼진 순간이나 Pod DELETE가 접수된 순간에 무조건 시작하는 시계가 아닙니다
+이 시간은 노드가 꺼지거나 Pod DELETE가 접수된 순간부터 재는 것이 아닙니다
 
 controller는 attached 상태인데 더 이상 desired 상태에 없는 볼륨-노드 쌍에 detach 요청 시각을 기록합니다
 이전에 기록한 시각이 없으면 SetDetachRequestTime이 그때의 현재 시각을 넣고, 이후 그 시각부터의 경과 시간을 계산합니다
@@ -220,7 +221,7 @@ controller는 attached 상태인데 더 이상 desired 상태에 없는 볼륨-�
 true로 지정하면 timeout에 의한 강제 분리 경로를 끄지만 out-of-service를 통한 별도 복구 경로까지 같은 조건으로 끄는 것은 아닙니다
 
 이 조건을 만족해도 진행 중인 작업·backoff, Node status 갱신, VolumeAttachment 처리, 드라이버·백엔드 분리가 남습니다
-6분은 분리 요청이나 실제 완료 시각의 보편적인 보장이 아닙니다
+따라서 6분이 지난 시각에 분리 요청이 전송되거나 실제 분리가 완료된다고 보장할 수는 없습니다
 
 기본값과 시계는 [DefaultTimerConfig](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/attachdetach/attach_detach_controller.go)·[SetDetachRequestTime](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/attachdetach/cache/actual_state_of_world.go), 분기는 [attach/detach reconciler](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/attachdetach/reconciler/reconciler.go), 플래그는 [controller-manager 옵션](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-controller-manager/app/options/attachdetachcontroller.go)에 있습니다
 

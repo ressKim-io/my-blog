@@ -87,7 +87,7 @@ attach와 mount가 모두 있다는 이유로 두 개가 되지도 않습니다
 이 단위는 [attach·stage·publish의 준비 단위](/essays/k8s-theory-volume-attach-stage-publish)와 다릅니다
 Pod마다 publish target이 생겨도 그 경로 수를 볼륨 상한에 더하는 방식은 아닙니다
 
-현재 Filter는 세 자료를 대조합니다
+현재 Filter는 새 Pod, 기존 Pod 목록, VolumeAttachment를 다음 순서로 대조합니다
 
 1. 새 Pod의 볼륨 키를 모읍니다
 2. 해당 노드의 기존 Pod 볼륨을 중복 제거해 세고, 같은 키를 새 요구에서 제거합니다
@@ -111,9 +111,9 @@ generic ephemeral volume은 생성되는 PVC 이름과 Pod 소유 관계를 확�
 Pod의 `volumes[].csi`로 직접 지정하는 CSI inline ephemeral과 같은 경로는 아닙니다
 마이그레이션 대상 in-tree 볼륨도 변환·활성 조건을 거쳐 CSI 키로 계산할 수 있습니다
 
-세기·중복 제거·설치 확인의 실제 분기는 [CSILimits.Filter·filterAttachableVolumes·getNodeVolumeAttachmentInfo](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/nodevolumelimits/csi.go)에 있습니다
+볼륨 수 계산과 중복 제거, 설치 확인의 실제 분기는 [CSILimits.Filter·filterAttachableVolumes·getNodeVolumeAttachmentInfo](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/nodevolumelimits/csi.go)에 있습니다
 
-## 숫자 상한 누락과 드라이버 누락 차단은 별도입니다
+## 상한 검사와 드라이버 설치 확인은 별도입니다
 
 v1.37의 `VolumeLimitScaling`은 beta·기본 활성입니다
 하지만 드라이버가 없는 노드로의 배치를 막으려면 CSIDriver의 `spec.preventPodSchedulingIfMissing: true`도 필요합니다
@@ -153,7 +153,7 @@ Cluster Autoscaler를 함께 쓴다면 새 노드의 배치 시뮬레이션에 �
 | 10초 미만 설정 | API 검증에서 거절 |
 
 주기 갱신기는 로컬에 드라이버가 설치됐는지와 CSIDriver 오브젝트·주기를 확인합니다
-주기가 바뀌면 기존 고리를 멈추고 새 주기로 시작하며, 드라이버 해제나 오브젝트 삭제도 중단 조건입니다
+주기가 바뀌면 기존 갱신 작업을 멈추고 새 주기로 시작하며, 드라이버 해제나 오브젝트 삭제도 중단 조건입니다
 
 조회가 곧 API 쓰기는 아닙니다
 보고된 nodeID·topology 키·상한과 관리 어노테이션이 그대로면 CSINode 갱신을 생략합니다
@@ -171,7 +171,7 @@ count의 갱신은 이후 판단에 쓰일 숫자를 바꾸며 이미 붙은 볼
 
 주기·미변경 쓰기 생략은 [csi_node_updater.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_node_updater.go)와 [nodeinfomanager.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go), 단계·기본값은 [feature gate 정의](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/features/kube_features.go)에 근거합니다
 
-## attach 고갈 반응은 볼륨 대기가 실패한 뒤에 일어납니다
+## attach의 ResourceExhausted는 볼륨 대기 실패 뒤에 확인합니다
 
 주기 갱신 외에 attach의 `ResourceExhausted` 오류로 재조회를 시도하는 경로가 있습니다
 현재 kubelet은 모든 Pod의 admission에서 볼륨 개수를 다시 세는 대신, WaitForAttachAndMount가 실패한 뒤 아직 미부착인 볼륨의 원인을 확인합니다
