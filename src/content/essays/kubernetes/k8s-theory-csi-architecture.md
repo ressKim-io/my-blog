@@ -39,43 +39,6 @@ Kubernetes 안에도 **in-tree CSI 플러그인**은 남아 있습니다
 이는 벤더의 스토리지 구현 자체가 아니라 외부 CSI 드라이버를 연결하는 코어 어댑터입니다
 in-tree 어댑터와 out-of-tree 드라이버를 같은 플러그인 코드로 취급하면 호출 책임이 흐려집니다
 
-### 릴리스와 권한을 함께 나누려는 구조입니다
-
-[초기 CSI 설계 문서](https://github.com/kubernetes/design-proposals-archive/blob/acc25e14ca83dfda4f66d8cb1f1b491f26e78ffe/storage/container-storage-interface.md)는 당시 in-tree 볼륨 구현의 문제를 설명합니다
-벤더의 개발이 Kubernetes 릴리스에 묶이고, 코어 커뮤니티가 여러 구현의 테스트·유지보수를 맡으며, 플러그인 버그가 코어 프로세스에 영향을 줄 수 있다는 문제입니다
-
-같은 프로세스의 권한을 플러그인이 그대로 사용한다는 점과 바이너리만 배포하기 어려운 점도 들고 있습니다
-외부 드라이버와 공통 sidecar를 나누면 벤더의 스토리지 코드와 Kubernetes API 연결 코드를 별도 이미지·릴리스로 관리할 수 있습니다
-그렇다고 노드 드라이버의 호스트 접근 권한까지 자동으로 사라지는 것은 아닙니다
-
-FlexVolume도 실행 파일로 드라이버를 외부화했지만 호스트에 파일과 mount·파일시스템 도구를 준비해야 했습니다
-CSI의 서비스·컨테이너 배치는 이런 의존성을 드라이버 배포에 묶는 데 도움이 됩니다
-과거 설계 문서의 FlexVolume 공존 설명과 별개로 [현재 Volumes 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/storage/volumes.md)는 FlexVolume을 deprecated로 분류합니다
-
-## 규격의 선언과 코어의 호출 범위를 나눕니다
-
-Kubernetes v1.37.1의 [`go.mod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/go.mod)는 CSI spec을 `v1.12.1-0.20260720052920-cd9e7ad1ae09`로 고정합니다
-이는 외부 spec의 최신 릴리스 v1.13.0과 다른 버전 표기입니다
-
-코어가 vendor한 [`csi_grpc.pb.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/github.com/container-storage-interface/spec/lib/go/csi/csi_grpc.pb.go)의 서비스 선언은 다음과 같습니다
-실험 서비스까지 포함한 선언 수이며 드라이버의 필수 구현 수나 Kubernetes의 활성 기능 수는 아닙니다
-
-| 서비스 | 선언된 RPC 수 | 역할 |
-|---|---:|---|
-| Identity | 3 | 드라이버 이름·capability·생존 상태 조회 |
-| Controller | 17 | 생성·삭제·attach·확장·스냅샷 등 |
-| GroupController | 4 | 볼륨 그룹 스냅샷 관련 작업 |
-| SnapshotMetadata | 2 | alpha 서비스의 스냅샷 메타데이터 조회 |
-| Node | 10 | 노드의 사용 경로 준비·해제·정보·건강 조회 |
-
-합계는 5서비스·36 RPC입니다
-SnapshotMetadata는 고정 [`csi.proto`](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/csi.proto)에서 `alpha_service`로 표시돼 있습니다
-다른 서비스에도 실험 메서드가 있으므로 선언이 있다는 이유만으로 모든 기능을 사용한다고 판단하면 안 됩니다
-
-코어의 [`csi_client.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_client.go)는 `NewNodeClient`를 만들고 Node 서비스의 요청을 구현합니다
-여기에는 stage·publish·해제·확장·통계·capability·노드 정보와 건강 조회가 포함됩니다
-Controller 작업은 이 어댑터가 직접 요청하는 대신 외부 호출자가 Kubernetes 오브젝트를 통해 이어받습니다
-
 ## sidecar는 오브젝트와 CSI 호출을 연결합니다
 
 [공식 sidecar 문서](https://github.com/kubernetes-csi/docs/blob/67fe654a3246ad5c5cd212a0f4859706f9970353/book/src/sidecar-containers.md)는 공통 컨테이너 사용을 선택 사항으로 설명합니다
@@ -100,22 +63,46 @@ registrar의 `GetInfo`도 CSI Identity의 `GetPluginInfo`와는 다른 등록 �
 각 릴리스의 go.mod는 CSI spec v1.13.0을 직접 또는 간접 의존합니다
 이 의존 버전과 개별 드라이버의 capability·Kubernetes 지원 범위·실제 설치 버전은 별도입니다
 
-### 일반 배치에서는 소켓과 권한도 갈립니다
+## CSIDriver는 코어가 작업 전에 알아야 할 설정입니다
 
-[배포 문서](https://github.com/kubernetes-csi/docs/blob/67fe654a3246ad5c5cd212a0f4859706f9970353/book/src/deploying.md)의 controller 구성은 보통 Deployment나 StatefulSet입니다
-sidecar와 드라이버는 `emptyDir`로 UNIX 소켓을 공유하며, controller가 호스트 파일시스템에 직접 접근할 필요는 일반적으로 적습니다
-여러 복제본을 실행할 때는 해당 controller의 leader election 설정을 확인해야 합니다
+sidecar와 kubelet의 호출은 드라이버 설정과 실제 지원 범위에 따라 달라집니다
+CSIDriver는 클러스터 범위의 드라이버 설정입니다
+주요 필드와 현재 [`SetDefaults_CSIDriver`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/storage/v1/defaults.go)의 기본값은 다음과 같습니다
 
-node 구성은 보통 각 노드의 DaemonSet입니다
-kubelet이 접속할 소켓과 mount 경로를 hostPath로 공유합니다
-컨테이너에서 만든 mount를 호스트에 전달하는 구성에는 `mountPropagation: Bidirectional` 같은 전파 설정이 필요합니다
+| 필드 | 기본값·역할 |
+|---|---|
+| `attachRequired` | true, 코어의 attach 의도·확인 단계를 사용할지 결정 |
+| `podInfoOnMount` | false, NodePublishVolume의 VolumeContext에 Pod 정보를 넘길지 결정 |
+| `storageCapacity` | false, 보고된 용량 정보를 스케줄링에 반영하도록 선택 |
+| `volumeLifecycleModes` | `[Persistent]`, 지원할 persistent·CSI inline ephemeral 사용 방식 |
 
-controller sidecar의 API RBAC과 node 드라이버의 호스트·mount 권한은 서로 다른 요구입니다
-같은 Pod로 배치했다는 이유만으로 모든 컨테이너가 같은 호스트 권한을 필요로 하는 것은 아닙니다
-실제 권한과 소켓·mount 구성은 드라이버 배포 방식에 맞춰 확인해야 합니다
+`attachRequired: false`는 Kubernetes가 attach 단계를 생략하도록 하는 설정입니다
+CSI Controller capability를 조회해 자동으로 채워지는 값과는 다릅니다
+드라이버 동작과 배포 설정이 맞아야 하며 CSIDriver가 없다고 attach 생략으로 처리하지도 않습니다
+
+현재 [`skipAttach`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_plugin.go)는 CSIDriver NotFound이면 attach를 생략하지 않습니다
+그 외 조회 오류는 반환합니다
+storageCapacity를 켜는 것도 용량 보고 오브젝트를 자동으로 만드는 동작과 구분해야 합니다
+
+## VolumeAttachment는 코어의 의도와 외부 작업 결과를 잇습니다
+
+일반적인 persistent CSI attach에서는 코어의 attach/detach controller 경로가 VolumeAttachment를 만듭니다
+[`csiAttacher.Attach`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_attacher.go)는 kubelet에서 이 attach 생성 경로를 호출하면 `attaching volumes from the kubelet is not supported` 오류를 반환합니다
+
+`spec`에는 드라이버·노드·볼륨 참조가 들어갑니다
+external-attacher는 이 의도를 보고 ControllerPublishVolume 등을 호출합니다
+그 결과를 `status.attached`·`attachmentMetadata`·`attachError` 등에 반영합니다
+코어가 드라이버 소켓을 원격으로 직접 찾아 호출하는 대신 API 오브젝트가 두 주체 사이를 잇습니다
+
+이름은 현재 `csi-` 뒤에 `sha256(volumeHandle + driverName + nodeName)`의 16진 표현을 붙여 만듭니다
+해시 이름에서 노드·볼륨 문자열을 찾아 관계를 추정하기보다 `spec.nodeName`과 `spec.source`를 확인해야 합니다
+
+VolumeAttachment가 없다는 것만으로 external-attacher가 실패했다고 판단할 수는 없습니다
+attach 생략 설정이나 볼륨 사용 방식에 따라 이 오브젝트가 필요하지 않을 수 있습니다
 
 ## 등록용 소켓과 CSI 호출용 소켓은 역할이 다릅니다
 
+kubelet이 Node 요청을 보내려면 먼저 해당 노드의 드라이버 endpoint를 알아야 합니다
 노드의 일반적인 경로는 다음과 같습니다
 
 | 소켓 | 누가 여는가·용도 |
@@ -139,6 +126,7 @@ registrar의 `--csi-address`는 컨테이너 안에서 이름 조회에 사용�
 
 kubelet의 등록 처리기는 이름·지원 버전 등을 검증하고 드라이버 endpoint를 기억합니다
 이어 실제 CSI 소켓에 `NodeGetInfo`를 호출해 nodeID·노드의 볼륨 상한·접근 가능한 topology를 받습니다
+CSINode는 노드 이름으로 존재하며 그 노드에 등록된 드라이버 정보를 담는 오브젝트입니다
 이 결과를 [`InstallCSIDriver`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go)가 Node와 CSINode에 기록합니다
 
 topology의 **값**은 Node 라벨로, **키**는 CSINode의 `topologyKeys`로 전달됩니다
@@ -149,31 +137,8 @@ CSINode를 쓰는 주체는 registrar나 드라이버가 아니라 kubelet입니
 정리 중 오류도 발생할 수 있으며 로컬 등록 상태·Node·CSINode의 변경 전체가 하나의 원자적 트랜잭션인 것은 아닙니다
 등록 소켓의 존재만으로 CSINode 반영과 모든 볼륨 호출의 성공까지 판단하면 안 됩니다
 
-## Kubernetes 오브젝트는 서로 다른 경계를 기록합니다
-
-### CSIDriver는 코어가 작업 전에 알아야 할 설정입니다
-
-CSIDriver는 클러스터 범위의 드라이버 설정입니다
-주요 필드와 현재 [`SetDefaults_CSIDriver`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/storage/v1/defaults.go)의 기본값은 다음과 같습니다
-
-| 필드 | 기본값·역할 |
-|---|---|
-| `attachRequired` | true, 코어의 attach 의도·확인 단계를 사용할지 결정 |
-| `podInfoOnMount` | false, NodePublishVolume의 VolumeContext에 Pod 정보를 넘길지 결정 |
-| `storageCapacity` | false, 보고된 용량 정보를 스케줄링에 반영하도록 선택 |
-| `volumeLifecycleModes` | `[Persistent]`, 지원할 persistent·CSI inline ephemeral 사용 방식 |
-
-`attachRequired: false`는 Kubernetes가 attach 단계를 생략하도록 하는 설정입니다
-CSI Controller capability를 조회해 자동으로 채워지는 값과는 다릅니다
-드라이버 동작과 배포 설정이 맞아야 하며 CSIDriver가 없다고 attach 생략으로 처리하지도 않습니다
-
-현재 [`skipAttach`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_plugin.go)는 CSIDriver NotFound이면 attach를 생략하지 않습니다
-그 외 조회 오류는 반환합니다
-storageCapacity를 켜는 것도 용량 보고 오브젝트를 자동으로 만드는 동작과 구분해야 합니다
-
 ### CSINode는 노드 식별자의 대응을 기록합니다
 
-CSINode는 노드 이름으로 존재하고 그 노드에 등록된 드라이버 정보를 담습니다
 `spec.drivers[].nodeID`는 스토리지 시스템에서 사용하는 노드 식별자이므로 Kubernetes Node 이름과 다를 수 있습니다
 
 kubelet이 NodeGetInfo로 받은 이 값을 API에 기록하면 다른 노드에서 동작하는 external-attacher도 사용할 수 있습니다
@@ -182,22 +147,6 @@ PV의 `spec.csi.volumeHandle`도 같은 역할을 합니다
 
 스토리지 시스템의 노드·볼륨 식별자를 Kubernetes 오브젝트 이름에서 추정하지 않도록 두 식별자를 따로 기록합니다
 등록 성공과 볼륨 attach 완료가 다른 상태라는 점도 이 구분에서 드러납니다
-
-### VolumeAttachment는 코어의 의도와 외부 작업 결과를 잇습니다
-
-일반적인 persistent CSI attach에서는 코어의 attach/detach controller 경로가 VolumeAttachment를 만듭니다
-[`csiAttacher.Attach`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_attacher.go)는 kubelet에서 이 attach 생성 경로를 호출하면 `attaching volumes from the kubelet is not supported` 오류를 반환합니다
-
-`spec`에는 드라이버·노드·볼륨 참조가 들어갑니다
-external-attacher는 이 의도를 보고 ControllerPublishVolume 등을 호출합니다
-그 결과를 `status.attached`·`attachmentMetadata`·`attachError` 등에 반영합니다
-코어가 드라이버 소켓을 원격으로 직접 찾아 호출하는 대신 API 오브젝트가 두 주체 사이를 잇습니다
-
-이름은 현재 `csi-` 뒤에 `sha256(volumeHandle + driverName + nodeName)`의 16진 표현을 붙여 만듭니다
-해시 이름에서 노드·볼륨 문자열을 찾아 관계를 추정하기보다 `spec.nodeName`과 `spec.source`를 확인해야 합니다
-
-VolumeAttachment가 없다는 것만으로 external-attacher가 실패했다고 판단할 수는 없습니다
-attach 생략 설정이나 볼륨 사용 방식에 따라 이 오브젝트가 필요하지 않을 수 있습니다
 
 ## capability와 inline·migration 조건이 호출을 바꿉니다
 
@@ -224,6 +173,57 @@ inline이라는 이름은 **CSI migration**에서도 나옵니다
 [CNI 계약](/essays/k8s-theory-cni-contract)과 비교할 때도 범위를 구분해야 합니다
 CNI의 실행 파일 진입점이 daemon·controller·상태 저장소의 부재를 뜻하지 않듯, CSI의 서비스 계약도 모든 드라이버의 동일한 배치를 강제하지 않습니다
 CSI는 볼륨 생성·노드 연결과 노드의 사용 경로 준비를 서로 다른 서비스 호출로 드러낸다는 차이가 있습니다
+
+## 일반 배치에서는 소켓과 권한도 갈립니다
+
+[배포 문서](https://github.com/kubernetes-csi/docs/blob/67fe654a3246ad5c5cd212a0f4859706f9970353/book/src/deploying.md)의 controller 구성은 보통 Deployment나 StatefulSet입니다
+sidecar와 드라이버는 `emptyDir`로 UNIX 소켓을 공유하며, controller가 호스트 파일시스템에 직접 접근할 필요는 일반적으로 적습니다
+여러 복제본을 실행할 때는 해당 controller의 leader election 설정을 확인해야 합니다
+
+node 구성은 보통 각 노드의 DaemonSet입니다
+kubelet이 접속할 소켓과 mount 경로를 hostPath로 공유합니다
+컨테이너에서 만든 mount를 호스트에 전달하는 구성에는 `mountPropagation: Bidirectional` 같은 전파 설정이 필요합니다
+
+controller sidecar의 API RBAC과 node 드라이버의 호스트·mount 권한은 서로 다른 요구입니다
+같은 Pod로 배치했다는 이유만으로 모든 컨테이너가 같은 호스트 권한을 필요로 하는 것은 아닙니다
+실제 권한과 소켓·mount 구성은 드라이버 배포 방식에 맞춰 확인해야 합니다
+
+## 규격의 선언과 코어의 호출 범위를 나눕니다
+
+Kubernetes v1.37.1의 [`go.mod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/go.mod)는 CSI spec을 `v1.12.1-0.20260720052920-cd9e7ad1ae09`로 고정합니다
+이는 외부 spec의 최신 릴리스 v1.13.0과 다른 버전 표기입니다
+
+코어가 vendor한 [`csi_grpc.pb.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/github.com/container-storage-interface/spec/lib/go/csi/csi_grpc.pb.go)의 서비스 선언은 다음과 같습니다
+실험 서비스까지 포함한 선언 수이며 드라이버의 필수 구현 수나 Kubernetes의 활성 기능 수는 아닙니다
+
+| 서비스 | 선언된 RPC 수 | 역할 |
+|---|---:|---|
+| Identity | 3 | 드라이버 이름·capability·생존 상태 조회 |
+| Controller | 17 | 생성·삭제·attach·확장·스냅샷 등 |
+| GroupController | 4 | 볼륨 그룹 스냅샷 관련 작업 |
+| SnapshotMetadata | 2 | alpha 서비스의 스냅샷 메타데이터 조회 |
+| Node | 10 | 노드의 사용 경로 준비·해제·정보·건강 조회 |
+
+합계는 5서비스·36 RPC입니다
+SnapshotMetadata는 고정 [`csi.proto`](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/csi.proto)에서 `alpha_service`로 표시돼 있습니다
+다른 서비스에도 실험 메서드가 있으므로 선언이 있다는 이유만으로 모든 기능을 사용한다고 판단하면 안 됩니다
+
+코어의 [`csi_client.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_client.go)는 `NewNodeClient`를 만들고 Node 서비스의 요청을 구현합니다
+여기에는 stage·publish·해제·확장·통계·capability·노드 정보와 건강 조회가 포함됩니다
+Controller 작업은 이 어댑터가 직접 요청하는 대신 외부 호출자가 Kubernetes 오브젝트를 통해 이어받습니다
+
+## 릴리스와 권한을 함께 나누려는 구조입니다
+
+[초기 CSI 설계 문서](https://github.com/kubernetes/design-proposals-archive/blob/acc25e14ca83dfda4f66d8cb1f1b491f26e78ffe/storage/container-storage-interface.md)는 당시 in-tree 볼륨 구현의 문제를 설명합니다
+벤더의 개발이 Kubernetes 릴리스에 묶이고, 코어 커뮤니티가 여러 구현의 테스트·유지보수를 맡으며, 플러그인 버그가 코어 프로세스에 영향을 줄 수 있다는 문제입니다
+
+같은 프로세스의 권한을 플러그인이 그대로 사용한다는 점과 바이너리만 배포하기 어려운 점도 들고 있습니다
+외부 드라이버와 공통 sidecar를 나누면 벤더의 스토리지 코드와 Kubernetes API 연결 코드를 별도 이미지·릴리스로 관리할 수 있습니다
+그렇다고 노드 드라이버의 호스트 접근 권한까지 자동으로 사라지는 것은 아닙니다
+
+FlexVolume도 실행 파일로 드라이버를 외부화했지만 호스트에 파일과 mount·파일시스템 도구를 준비해야 했습니다
+CSI의 서비스·컨테이너 배치는 이런 의존성을 드라이버 배포에 묶는 데 도움이 됩니다
+과거 설계 문서의 FlexVolume 공존 설명과 별개로 [현재 Volumes 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/storage/volumes.md)는 FlexVolume을 deprecated로 분류합니다
 
 ## 실패 위치는 오브젝트와 호출 주체를 함께 봅니다
 

@@ -22,6 +22,7 @@ PVC의 요청 용량을 늘리는 API 갱신이 성공해도 애플리케이션�
 
 ## PVC 요청 변경에는 검증과 admission 조건이 붙습니다
 
+PVC 요청을 10Gi에서 20Gi로 늘리는 경우를 가정하겠습니다
 Bound PVC에서 일반적으로 변경하는 명세는 `resources.requests.storage`와 `volumeAttributesClassName`입니다
 앞은 용량이고 뒤는 드라이버가 제공하는 속성 클래스입니다
 
@@ -43,7 +44,7 @@ Pending이라는 이유만으로 `volumeMode`나 기존 `dataSource`를 임의�
 
 ## 백엔드 확장과 노드 작업은 다른 호출입니다
 
-아래는 10Gi에서 20Gi로 늘리는 가정 예시입니다
+아래는 앞의 용량 변경 요청이 백엔드와 노드 작업으로 이어지는 예시입니다
 ControllerExpand와 노드의 파일시스템 확장이 모두 필요한 경로를 그린 것이며 모든 드라이버의 공통 순서는 아닙니다
 
 ![PVC 요청이 10Gi에서 20Gi로 바뀐 뒤 external-resizer의 백엔드 확장과 kubelet의 필요한 노드 확장을 거쳐 용량 상태가 갱신되는 예시|tall](/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-1.svg)
@@ -124,6 +125,28 @@ PVC의 용량 숫자 하나가 모든 노드 작업의 완료를 뜻하지는 �
 
 `RecoverVolumeExpansionFailure`는 v1.34에서 GA·true로 잠겼습니다
 
+## VolumeAttributesClass는 크기와 다른 속성을 바꿉니다
+
+용량 외에 드라이버가 제공하는 성능 속성을 바꾸는 요청도 있습니다
+**VolumeAttributesClass**는 드라이버별 IOPS·처리량 같은 속성을 표현하는 클러스터 범위 오브젝트입니다
+IOPS는 초당 입출력 횟수이며 어떤 매개변수를 받을지는 드라이버가 정합니다
+
+기존 PVC의 `volumeAttributesClassName`을 새 클래스로 바꾸면 이를 지원하는 external-resizer가 `ControllerModifyVolume`을 요청합니다
+이때 드라이버의 MODIFY_VOLUME capability가 필요합니다
+생성 시 클래스 매개변수를 전달하는 external-provisioner의 역할과 기존 볼륨을 수정하는 resizer의 역할도 나눠야 합니다
+
+클래스의 `driverName`과 `parameters`는 불변입니다
+값을 바꾸려면 새 클래스를 만들고 PVC가 그 이름을 참조하도록 합니다
+성공적으로 적용된 클래스가 있으면 PVC 참조를 nil이나 빈 문자열로 제거하는 갱신은 거절합니다
+
+진행은 `status.modifyVolumeStatus`와 `currentVolumeAttributesClassName` 등에서 확인합니다
+Pending은 클래스 부재 같은 선행 조건 미충족, InProgress는 진행 중, Infeasible은 드라이버가 요청을 유효하지 않다고 거절한 상태를 나타냅니다
+현재 resizer는 InvalidArgument를 Infeasible로 분류하며 모든 오류를 이 상태로 기록하지 않습니다
+
+core의 VolumeAttributesClass는 v1.34 GA이고 v1.36부터 true로 잠겨 있습니다
+별도 릴리스인 resizer v2.3.0의 같은 이름 gate는 GA·기본 true이지만 코어와 설정 상태를 동일시하면 안 됩니다
+API가 활성화됐어도 sidecar의 설정과 드라이버의 실제 기능 지원은 확인해야 합니다
+
 ## 스냅샷은 요청·실물·클래스를 별도 API로 둡니다
 
 **VolumeSnapshot**은 스냅샷 요청이고 **VolumeSnapshotContent**는 스토리지 시스템의 스냅샷을 나타내는 오브젝트입니다
@@ -148,21 +171,6 @@ API 서버가 이 리소스를 받아들이는 것과 실제 스냅샷을 만드
 `deletionPolicy: Delete`와 `Retain`은 Snapshot 삭제 뒤 스토리지 스냅샷·Content를 지울지 남길지를 구분합니다
 실제 삭제 완료에는 controller·sidecar 처리와 보호 finalizer 등이 관여합니다
 
-### CRD와 controller 설치는 드라이버의 RPC 지원과 별개입니다
-
-Kubernetes 저장소의 `cluster/addons/volumesnapshots/`에는 CRD와 controller 배포 예시가 있습니다
-현재 고정본의 예시 이미지는 `snapshot-controller:v8.6.0`이며 별도로 확인한 external-snapshotter 릴리스는 v8.7.0입니다
-저장소에 매니페스트가 있다는 사실이 모든 클러스터의 자동 설치나 같은 버전 설치를 보장하지 않습니다
-
-공통 CRD·snapshot-controller와 드라이버별 sidecar를 준비해야 하며, 드라이버에도 스냅샷 capability가 필요합니다
-`readyToUse`가 false인 이유도 controller 부재, 진행 중인 작업, CSI 오류 등으로 나눠 확인해야 합니다
-스냅샷 기능의 존재가 애플리케이션 일관성을 자동으로 보장하지는 않습니다
-
-`api-approved.kubernetes.io`는 CRD를 설치할 때 API 서버가 검사하는 어노테이션입니다
-신규 CRD가 `k8s.io`·`kubernetes.io` 또는 그 하위 그룹이면 승인 URL이나 `unapproved`로 시작하는 사유가 필요합니다
-누락 시 Required 오류가 나지만 서버가 링크를 열어 승인 여부를 심사하지는 않습니다
-기존 CRD 갱신에서는 승인 상태가 바뀌지 않은 경우의 호환 예외도 있습니다
-
 ### 복원은 새 PVC를 채우는 요청입니다
 
 같은 네임스페이스의 스냅샷을 소스로 지정하는 PVC 명세 조각은 다음과 같습니다
@@ -182,6 +190,21 @@ external-provisioner가 스냅샷을 소스로 하는 CreateVolume을 요청해 
 `dataSource`는 VolumeSnapshot과 PVC를 받을 수 있고, `dataSourceRef`는 더 넓은 non-core 소스도 표현합니다
 더 넓은 참조 필드가 있다고 어떤 소스든 자동으로 복원되는 것은 아닙니다
 해당 타입을 처리하는 provisioner·populator와 기능 조건이 필요합니다
+
+### CRD와 controller 설치는 드라이버의 RPC 지원과 별개입니다
+
+Kubernetes 저장소의 `cluster/addons/volumesnapshots/`에는 CRD와 controller 배포 예시가 있습니다
+현재 고정본의 예시 이미지는 `snapshot-controller:v8.6.0`이며 별도로 확인한 external-snapshotter 릴리스는 v8.7.0입니다
+저장소에 매니페스트가 있다는 사실이 모든 클러스터의 자동 설치나 같은 버전 설치를 보장하지 않습니다
+
+공통 CRD·snapshot-controller와 드라이버별 sidecar를 준비해야 하며, 드라이버에도 스냅샷 capability가 필요합니다
+`readyToUse`가 false인 이유도 controller 부재, 진행 중인 작업, CSI 오류 등으로 나눠 확인해야 합니다
+스냅샷 기능의 존재가 애플리케이션 일관성을 자동으로 보장하지는 않습니다
+
+`api-approved.kubernetes.io`는 CRD를 설치할 때 API 서버가 검사하는 어노테이션입니다
+신규 CRD가 `k8s.io`·`kubernetes.io` 또는 그 하위 그룹이면 승인 URL이나 `unapproved`로 시작하는 사유가 필요합니다
+누락 시 Required 오류가 나지만 서버가 링크를 열어 승인 여부를 심사하지는 않습니다
+기존 CRD 갱신에서는 승인 상태가 바뀌지 않은 경우의 호환 예외도 있습니다
 
 ## 두 임시 볼륨은 정리 경로와 권한이 다릅니다
 
@@ -230,27 +253,6 @@ CSI inline에서는 사용자가 `volumeAttributes`를 드라이버에 직접 �
 
 ConfigMap·Secret·projected·emptyDir 같은 Pod 볼륨도 PVC 없이 동작하지만 준비하는 주체와 데이터의 출처가 다릅니다
 같은 ‘임시’라는 이름만으로 CSI RPC, PVC 쿼터, 로컬 스토리지 계측을 하나의 경로로 묶지는 않습니다
-
-## VolumeAttributesClass는 크기와 다른 속성을 바꿉니다
-
-**VolumeAttributesClass**는 드라이버별 IOPS·처리량 같은 속성을 표현하는 클러스터 범위 오브젝트입니다
-IOPS는 초당 입출력 횟수이며 어떤 매개변수를 받을지는 드라이버가 정합니다
-
-기존 PVC의 `volumeAttributesClassName`을 새 클래스로 바꾸면 이를 지원하는 external-resizer가 `ControllerModifyVolume`을 요청합니다
-이때 드라이버의 MODIFY_VOLUME capability가 필요합니다
-생성 시 클래스 매개변수를 전달하는 external-provisioner의 역할과 기존 볼륨을 수정하는 resizer의 역할도 나눠야 합니다
-
-클래스의 `driverName`과 `parameters`는 불변입니다
-값을 바꾸려면 새 클래스를 만들고 PVC가 그 이름을 참조하도록 합니다
-성공적으로 적용된 클래스가 있으면 PVC 참조를 nil이나 빈 문자열로 제거하는 갱신은 거절합니다
-
-진행은 `status.modifyVolumeStatus`와 `currentVolumeAttributesClassName` 등에서 확인합니다
-Pending은 클래스 부재 같은 선행 조건 미충족, InProgress는 진행 중, Infeasible은 드라이버가 요청을 유효하지 않다고 거절한 상태를 나타냅니다
-현재 resizer는 InvalidArgument를 Infeasible로 분류하며 모든 오류를 이 상태로 기록하지 않습니다
-
-core의 VolumeAttributesClass는 v1.34 GA이고 v1.36부터 true로 잠겨 있습니다
-별도 릴리스인 resizer v2.3.0의 같은 이름 gate는 GA·기본 true이지만 코어와 설정 상태를 동일시하면 안 됩니다
-API가 활성화됐어도 sidecar의 설정과 드라이버의 실제 기능 지원은 확인해야 합니다
 
 ## 확인할 상태를 호출 주체와 연결합니다
 

@@ -25,12 +25,202 @@ PVC를 생성하면 앱이 필요한 저장소를 요청한 것이며, 사용할
 > 외부 공급 경로는 external-provisioner v6.4.0의 별도 구현을 확인했습니다
 > 실제 클러스터의 볼륨 생성·바인딩·마운트·삭제를 실행한 기록은 포함하지 않습니다
 
-## 클래스 미지정과 빈 문자열은 다른 요청입니다
+## 클래스를 명시한 PVC가 기존 PV를 고르는 경우
 
 PVC에는 `spec.resources.requests.storage`와 하나 이상의 `spec.accessModes`가 필요합니다
 `volumeMode`는 기본 `Filesystem`이며, `selector`로 PV 라벨을 고르거나 `volumeName`으로 특정 PV를 지목할 수 있습니다
 
-`storageClassName`의 생략과 빈 문자열은 구분해야 합니다
+이름이 `fast`인 StorageClass를 명시한 PVC가 1Gi를 요청했다고 가정하겠습니다
+이 클래스는 Pod 배치를 기다리지 않는 `Immediate` 모드이며, 요청 조건에 맞아 선택된 기존 PV의 용량이 100Gi라고 가정합니다
+여기서 조건이 맞는다는 것은 용량뿐 아니라 클래스·접근 방식·볼륨 모드·라벨 등도 요청을 만족한다는 뜻입니다
+다른 PVC에 예약되지 않았고 삭제 예정도 아닌 `Available` PV라면, PV 컨트롤러가 이 후보를 골라 PVC와 연결하는 바인딩을 진행할 수 있습니다
+
+이제 선택한 PV와 PVC에 서로의 참조와 연결 상태를 기록해야 합니다
+
+## 바인딩은 PV 쪽 참조를 먼저 기록합니다
+
+PV를 골랐어도 다른 PVC가 같은 PV를 후보로 고를 수 있습니다
+PV는 여러 네임스페이스의 PVC가 함께 탐색하는 자원이므로, 어느 PVC에 연결할지 PV 쪽에 먼저 기록합니다
+
+PV 컨트롤러의 `bind`는 네 처리 순서로 PV와 PVC를 연결합니다
+각각 별도 API 쓰기이며, 이미 같은 값이면 해당 쓰기를 생략할 수 있습니다
+
+![PV claimRef·PV Bound·PVC volumeName과 완료 어노테이션·PVC Bound를 별도 쓰기로 반영하는 순서|tall](/diagrams/k8s-theory-pvc-storageclass-binding-1.svg)
+
+| 순서 | 반영할 값 |
+|---|---|
+| 1 | PV의 `spec.claimRef`에 PVC 이름·네임스페이스·UID |
+| 2 | PV의 `status.phase: Bound` |
+| 3 | PVC의 `spec.volumeName`과 `pv.kubernetes.io/bind-completed` 어노테이션 |
+| 4 | PVC의 `status.phase: Bound`와 관련 status |
+
+첫 쓰기의 `claimRef`가 PV에서 PVC를 가리키는 참조입니다
+이 참조를 기록해야 다른 PVC가 같은 PV를 미예약 후보로 보지 않게 됩니다
+API 갱신의 충돌과 재처리가 이 경쟁을 조정하며, 두 오브젝트를 한 트랜잭션으로 바꾸는 것은 아닙니다
+
+`claimRef`의 UID는 특정 PVC의 신원을 구분합니다
+같은 이름의 PVC를 삭제하고 다시 만들었어도 UID가 다르면 이전 PVC와 같은 대상으로 보지 않습니다
+
+| PV의 `claimRef` | 의미 |
+|---|---|
+| 없음 | 특정 PVC 참조 없음 |
+| 이름·네임스페이스만 있고 UID 없음 | 그 이름의 PVC를 위한 예약 |
+| UID까지 있음 | 특정 PVC의 신원 참조. 전체 바인딩 완료나 phase를 이것만으로 확정하지 않음 |
+
+UID 없는 예약 PV도 Available로 표시될 수 있지만 다른 PVC는 가져갈 수 없습니다
+스케줄러의 임시 가정이나 API 쓰기 중간에도 UID가 채워질 수 있어, UID 유무와 전체 완료를 같게 보면 안 됩니다
+
+중간 쓰기에서 실패하면 컨트롤러가 현재 참조·상태를 다시 확인하는 다음 reconcile에서 남은 작업을 이어갑니다
+PV 컨트롤러에는 기본 15초의 `--pvclaimbinder-sync-period`로 PV·PVC를 다시 큐에 넣는 경로도 있습니다
+이 주기는 완료 시간 상한은 아닙니다
+
+같은 PVC에 다른 PV가 먼저 연결된 경우의 되돌림도 있습니다
+`pv.kubernetes.io/bound-by-controller`가 있는 PV는 claimRef를 지우고 Available로 돌립니다
+사람이 미리 예약한 PV라면 UID만 지워 이름·네임스페이스 예약을 유지합니다
+
+쓰기·되돌림의 기준은 [`bind`와 `unbindVolume`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/pv_controller.go#L1095-L1176)입니다
+
+## StorageClass는 공급 방식과 시점을 정합니다
+
+기존 PV를 사용할 수 없다면 동적 공급으로 볼륨과 PV를 새로 준비할 수 있습니다
+이때 StorageClass는 공급할 구현과 공급 시점 등의 조건을 정합니다
+
+| 필드 | 역할·기본값 |
+|---|---|
+| `provisioner` | 공급을 담당할 구현 이름. 필수 |
+| `volumeBindingMode` | Immediate 또는 WaitForFirstConsumer. 기본 Immediate |
+| `reclaimPolicy` | 동적으로 만든 PV의 Delete 또는 Retain 정책. 기본 Delete |
+| `allowVolumeExpansion` | PVC 확장 허용 여부. 실제 드라이버 지원도 필요 |
+| `allowedTopologies` | 공급 가능한 위치 제한 |
+| `parameters` | provisioner별 설정. API는 최대 512개 키를 허용 |
+
+CSI는 저장소 드라이버와 통신하는 인터페이스입니다
+외부 프로비저닝에서 코어 PV 컨트롤러가 CSI `CreateVolume`을 직접 호출하지는 않습니다
+PVC에 `volume.kubernetes.io/storage-provisioner`로 담당 이름을 알리고 `ExternalProvisioning` 이벤트를 남깁니다
+이벤트는 외부 공급을 기다린다는 단서이며, 처리자가 없다는 판정은 아닙니다
+
+external-provisioner는 CSI 드라이버를 호출하고 결과를 PV로 등록하는 외부 구성요소입니다
+새 PV가 준비되면 PV 컨트롤러가 앞에서 본 참조와 상태를 맞춰 바인딩을 완성합니다
+이 글에서 확인한 [v6.4.0](https://github.com/kubernetes-csi/external-provisioner/tree/72f13ee46fb93c11a72ef91549e70158283c03af)의 기본 생성 이름은 `pvc-<PVC UID>` 형태입니다
+다만 `--volume-name-prefix`·`--volume-name-uuid-length`로 형식이 달라질 수 있으므로 Kubernetes의 모든 동적 PV 이름에 대한 보장은 아닙니다
+
+## WaitForFirstConsumer는 노드 선택과 볼륨 위치를 함께 봅니다
+
+Immediate는 소비할 Pod의 배치 전에 볼륨을 선택·공급할 수 있습니다
+특정 zone의 볼륨이 먼저 준비되면 이후 Pod는 그 위치 제약 안에서 노드를 찾아야 합니다
+
+WaitForFirstConsumer(WFFC)는 소비할 Pod의 배치를 고려할 때까지 그 결정을 미룹니다
+노드 자원·Pod 배치 조건·볼륨 위치가 함께 맞는지 스케줄러가 볼 수 있도록 순서를 정한 것입니다
+
+PV 컨트롤러는 지연 바인딩 모드에서 아직 예약되지 않은 일반 PV를 바로 바인딩하지 않습니다
+반면 그 PVC를 위해 이미 예약된 PV는 처리할 수 있습니다
+WFFC의 모든 PVC가 반드시 새 볼륨 생성을 기다린다고 해석하면 이 예외를 놓칩니다
+
+![WFFC에서 스케줄러의 캐시 예약과 PreBind API 쓰기, 외부 공급·PV 컨트롤러·스케줄러 관측의 분업|tall](/diagrams/k8s-theory-pvc-storageclass-binding-2.svg)
+
+스케줄러의 VolumeBinding 플러그인은 노드를 고르는 과정에 볼륨 조건을 함께 검사합니다
+플러그인을 호출하는 단계인 확장점 중 바인딩 쓰기와 관련된 것은 다음과 같습니다
+현재 VolumeBinding 플러그인의 모든 확장점 목록을 나열한 표는 아닙니다
+
+| 확장점 | 이 흐름에서의 역할 |
+|---|---|
+| PreFilter | Pod의 PVC를 바인딩 여부 등으로 분류 |
+| Filter | 노드별 PV 후보·nodeAffinity·공급 가능 조건 검사 |
+| Reserve | 선택한 PV·PVC를 스케줄러 캐시에 임시 반영 |
+| PreBind | PV 예약 또는 PVC selected-node를 API에 쓰고 관측 조건 대기 |
+| Unreserve | 임시 반영한 캐시 상태 해제. 성공한 API 쓰기 전체의 rollback은 아님 |
+
+기존 PV를 사용한다면 PreBind가 PV의 claimRef를 기록합니다
+동적 생성이 필요하다면 PVC에 `volume.kubernetes.io/selected-node`로 노드 이름을 기록해 그 노드에서 사용할 볼륨 공급을 요청합니다
+PV 컨트롤러는 PV·PVC 참조와 바인딩 완료 표시를 이어서 반영합니다
+
+스케줄러는 이 결과를 기다리지만 관측 조건을 정확히 구분해야 합니다
+v1.37.1 `BindPodVolumes`는 기본 600초 상한 안에서 1초 간격으로 **API 반영을 관측하는 캐시**를 확인합니다
+매초 PV·PVC에 직접 GET 요청을 보내는 구조는 아닙니다
+
+`isPVCFullyBound`의 조건은 `volumeName`이 있고 `pv.kubernetes.io/bind-completed` 어노테이션이 존재하는 것입니다
+정적 예약의 claimRef UID·노드 적합성 등도 확인하지만, PVC의 마지막 `status.phase: Bound` 쓰기 자체를 직접 검사하는 것은 아닙니다
+PV 컨트롤러의 전체 처리 순서와 스케줄러가 다음 단계로 진행하는 관측 조건은 이렇게 구분됩니다
+
+이 구현은 [`bindAPIUpdate`·`checkBindings`·`isPVCFullyBound`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/volumebinding/binder.go#L515-L776)에 있습니다
+완료 조건을 확인한 다음 Pod를 Node에 바인딩하는 단계로 진행합니다
+
+Unreserve가 해제하는 것은 스케줄러 캐시의 임시 상태입니다
+앞에서 본 PV 컨트롤러의 되돌림과 구분해야 하며, 이미 성공한 API 쓰기를 모두 되돌려 준다고 해석해서는 안 됩니다
+
+### nodeName 직접 지정과 프로비저닝 실패
+
+동적 WFFC 경로에서 Pod에 `nodeName`을 직접 지정하면 스케줄러를 건너뜁니다
+selected-node를 적는 경로가 실행되지 않아 PVC가 Pending으로 남을 수 있습니다
+노드 선택을 제한하면서 스케줄러를 거치려면 `kubernetes.io/hostname` 라벨 조건 같은 배치 제약을 사용할 수 있습니다
+
+생성 실패가 모두 다른 노드 재선택으로 이어지는 것도 아닙니다
+확인한 external-provisioner는 topology 지원·selected node·오류 유형을 함께 보고 재배치 가능 여부를 판단합니다
+재배치 경로에서는 라이브러리가 selected-node를 제거하고, 스케줄러가 그 변화를 보고 다시 시도할 수 있게 합니다
+
+또한 CSI capacity 검사는 `CSIDriver.spec.storageCapacity`로 옵트인한 드라이버의 정보를 사용합니다
+스케줄러가 본 용량 정보가 낡을 수 있으므로 Filter 통과가 실제 CreateVolume 성공을 보장하지는 않습니다
+Immediate 방식이나 capacity 검사를 활성화하지 않은 경로에서 발생한 생성 실패도 구분해야 합니다
+
+## 기존 PV를 고르는 세부 조건과 직접 지목의 차이
+
+앞의 기본 사례는 요청에 맞는 PV가 있다고 가정했습니다
+실제로 어떤 PV를 후보로 남길지는 다음 조건을 함께 확인해 결정합니다
+다른 PVC를 가리키는 `claimRef`가 있으면 현재 요청한 PVC의 후보로 선택하지 않습니다
+
+StorageClass가 공급 방식과 시점을 정한다면, **VolumeAttributesClass**는 드라이버별 처리량 같은 볼륨 속성을 표현하는 별도 오브젝트입니다
+PV를 고를 때는 이 속성 클래스의 이름도 PVC의 요청과 비교합니다
+
+| 조건 | 일반 후보의 통과 기준 |
+|---|---|
+| 용량 | PV 용량이 PVC 요청 이상 |
+| 클래스 | 요청한 클래스와 일치 |
+| `volumeMode` | 일치. 생략은 Filesystem 기본값 적용 |
+| `volumeAttributesClassName` | 일치. nil·빈 값은 빈 이름으로 비교 |
+| accessModes | PV의 모드 집합이 PVC 요청을 포함 |
+| 라벨 | PVC의 selector와 일치 |
+| 상태·삭제 | Available이며 삭제 예정이 아님 |
+
+`VolumeAttributesClass`는 v1.34 GA이며, 확인한 v1.37.1에서는 기본 활성 상태로 고정돼 있습니다
+
+accessModes는 완전 일치가 아니라 포함 관계입니다
+PV 컨트롤러는 요청 모드를 포함하는 조합을 모드 수가 적은 순서로 확인하고, **처음 매칭되는 조합 안에서** 요청 이상인 가장 작은 PV를 고릅니다
+전체 PV 재고에서 용량만 비교해 무조건 가장 작은 것을 고르는 것은 아닙니다
+
+이 탐색은 [`persistentVolumeOrderedIndex`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/index.go)와 공통 [`FindMatchingVolume`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-helpers/storage/volume/pv_helpers.go#L186-L326)에 나뉘어 있습니다
+스케줄러가 같은 헬퍼에 Node를 전달하는 경로에서는 PV의 `nodeAffinity`와 그 노드의 라벨도 대조합니다
+
+처음의 1Gi 요청과 100Gi 후보 사례도 이 선택 순서 안에서 성립합니다
+PVC spec의 요청이 100Gi로 바뀌는 것이 아니라, Bound로 진입할 때 status에 연결된 PV의 용량·접근 방식을 보고합니다
+
+이것도 status를 매번 PV 용량으로 덮어쓴다는 뜻은 아닙니다
+이미 Bound인 PVC의 용량 불일치는 파일시스템 확장 과정에서 의미가 있을 수 있어 보존하며, pre-resize 용량 어노테이션이 있으면 바인딩 상태 반영에도 그 값을 사용하는 예외가 있습니다
+
+### volumeName 지목과 예약된 PV는 별도 분기입니다
+
+PVC의 `spec.volumeName`으로 PV를 직접 지목하면 일반 후보 탐색을 건너뜁니다
+그 PV의 `claimRef`가 비어 있다면 삭제 예정 여부·용량·클래스·volumeMode·속성 클래스·accessModes를 검사합니다
+
+이 바인딩 검사에는 PVC 라벨 selector와 PV nodeAffinity를 넣지 않습니다
+이미 같은 PVC를 가리키는 `claimRef`가 있으면 그 검사를 다시 수행하지 않고 바인딩을 완성하는 분기도 있습니다
+그러나 Pod 스케줄링에서는 PV nodeAffinity가 별도로 적용됩니다
+
+따라서 특정 PV에 바인딩됐어도 그 볼륨의 위치에서 Pod를 배치할 수 없는 상태는 가능합니다
+이 경계는 [`checkVolumeSatisfyClaim`과 지목 분기](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/pv_controller.go#L260-L480)를 함께 봐야 합니다
+
+### PVC spec의 불변성과 컨트롤러 쓰기 예외
+
+PVC spec은 쿼터·범위 검사를 우회하지 못하도록 대부분의 변경을 제한합니다
+바인딩 컨트롤러가 써야 하는 `volumeName`은 기존 값이 비었을 때 채울 수 있도록 예외를 둡니다
+
+기본 클래스의 nil 값 보완, Bound PVC의 용량 요청과 속성 클래스 변경 등에도 별도 검증 조건이 있습니다
+따라서 volumeName이 유일한 예외라거나 바인딩된 PVC의 모든 필드를 자유롭게 고칠 수 있다고 설명하면 부정확합니다
+실제 조건은 [`ValidatePersistentVolumeClaimUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go#L2566-L2619)에 있습니다
+
+## 클래스 미지정과 빈 문자열은 다른 요청입니다
+
+앞에서는 이름이 `fast`인 클래스를 명시했습니다
+클래스를 적지 않은 요청을 읽을 때는 `storageClassName`의 생략과 빈 문자열을 구분해야 합니다
 옛 beta 클래스 어노테이션이 없는 PVC에서의 의미는 다음과 같습니다
 
 | PVC의 `storageClassName` | 의미 |
@@ -59,172 +249,6 @@ PVC에는 `spec.resources.requests.storage`와 하나 이상의 `spec.accessMode
 
 문서의 소급 지정 설명에는 empty value라는 느슨한 표현도 있지만, 같은 절은 명시적인 `""`를 갱신하지 않는다고 구분합니다
 실제 판단은 [`PersistentVolumeClaimHasClass`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-helpers/storage/volume/helpers.go#L27-L57)와 포인터·호환 어노테이션 조건으로 읽는 편이 정확합니다
-
-## 기존 PV는 접근 방식과 용량을 함께 보고 고릅니다
-
-일반적인 미예약 PV 탐색은 다음 조건을 확인합니다
-다른 PVC를 가리키는 `claimRef`가 있으면 현재 요청한 PVC의 후보로 선택하지 않습니다
-
-| 조건 | 일반 후보의 통과 기준 |
-|---|---|
-| 용량 | PV 용량이 PVC 요청 이상 |
-| 클래스 | 요청한 클래스와 일치 |
-| `volumeMode` | 일치. 생략은 Filesystem 기본값 적용 |
-| `volumeAttributesClassName` | 일치. nil·빈 값은 빈 이름으로 비교 |
-| accessModes | PV의 모드 집합이 PVC 요청을 포함 |
-| 라벨 | PVC의 selector와 일치 |
-| 상태·삭제 | Available이며 삭제 예정이 아님 |
-
-`VolumeAttributesClass`는 v1.34 GA이며, 확인한 v1.37.1에서는 기본 활성 상태로 고정돼 있습니다
-볼륨 속성 클래스도 현재 짝짓기 조건에 포함됩니다
-
-accessModes는 완전 일치가 아니라 포함 관계입니다
-PV 컨트롤러는 요청 모드를 포함하는 조합을 모드 수가 적은 순서로 확인하고, **처음 매칭되는 조합 안에서** 요청 이상인 가장 작은 PV를 고릅니다
-전체 PV 재고에서 용량만 비교해 무조건 가장 작은 것을 고르는 것은 아닙니다
-
-이 탐색은 [`persistentVolumeOrderedIndex`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/index.go)와 공통 [`FindMatchingVolume`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-helpers/storage/volume/pv_helpers.go#L186-L326)에 나뉘어 있습니다
-스케줄러가 같은 헬퍼에 Node를 전달하는 경로에서는 PV의 `nodeAffinity`와 그 노드의 라벨도 대조합니다
-
-1Gi를 요청한 PVC에 맞는 가장 작은 후보가 100Gi PV라면, 그 PV에 연결될 수 있습니다
-PVC spec의 요청이 100Gi로 바뀌는 것이 아니라, Bound로 진입할 때 status에 연결된 PV의 용량·접근 방식을 보고합니다
-
-이것도 status를 매번 PV 용량으로 덮어쓴다는 뜻은 아닙니다
-이미 Bound인 PVC의 용량 불일치는 파일시스템 확장 과정에서 의미가 있을 수 있어 보존하며, pre-resize 용량 어노테이션이 있으면 바인딩 상태 반영에도 그 값을 사용하는 예외가 있습니다
-
-### volumeName 지목과 예약된 PV는 별도 분기입니다
-
-PVC의 `spec.volumeName`으로 PV를 직접 지목하면 일반 후보 탐색을 건너뜁니다
-그 PV의 `claimRef`가 비어 있다면 삭제 예정 여부·용량·클래스·volumeMode·속성 클래스·accessModes를 검사합니다
-
-이 바인딩 검사에는 PVC 라벨 selector와 PV nodeAffinity를 넣지 않습니다
-이미 같은 PVC를 가리키는 `claimRef`가 있으면 그 검사를 다시 수행하지 않고 바인딩을 완성하는 분기도 있습니다
-그러나 Pod 스케줄링에서는 PV nodeAffinity가 별도로 적용됩니다
-
-따라서 특정 PV에 바인딩됐어도 그 볼륨의 위치에서 Pod를 배치할 수 없는 상태는 가능합니다
-이 경계는 [`checkVolumeSatisfyClaim`과 지목 분기](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/pv_controller.go#L260-L480)를 함께 봐야 합니다
-
-## 바인딩은 PV 쪽 참조를 먼저 기록합니다
-
-PV 컨트롤러의 `bind`는 네 처리 순서로 PV와 PVC를 연결합니다
-각각 별도 API 쓰기이며, 이미 같은 값이면 해당 쓰기를 생략할 수 있습니다
-
-![PV claimRef·PV Bound·PVC volumeName과 완료 어노테이션·PVC Bound를 별도 쓰기로 반영하는 순서|tall](/diagrams/k8s-theory-pvc-storageclass-binding-1.svg)
-
-| 순서 | 반영할 값 |
-|---|---|
-| 1 | PV의 `spec.claimRef`에 PVC 이름·네임스페이스·UID |
-| 2 | PV의 `status.phase: Bound` |
-| 3 | PVC의 `spec.volumeName`과 `pv.kubernetes.io/bind-completed` 어노테이션 |
-| 4 | PVC의 `status.phase: Bound`와 관련 status |
-
-PV는 여러 네임스페이스의 PVC가 함께 탐색하는 자원입니다
-PV의 참조를 먼저 기록해야 다른 PVC가 같은 PV를 미예약 후보로 보지 않게 됩니다
-API 갱신의 충돌과 재처리가 이 경쟁을 조정하며, 두 오브젝트를 한 트랜잭션으로 바꾸는 것은 아닙니다
-
-`claimRef`의 UID는 특정 PVC의 신원을 구분합니다
-같은 이름의 PVC를 삭제하고 다시 만들었어도 UID가 다르면 이전 PVC와 같은 대상으로 보지 않습니다
-
-| PV의 `claimRef` | 의미 |
-|---|---|
-| 없음 | 특정 PVC 참조 없음 |
-| 이름·네임스페이스만 있고 UID 없음 | 그 이름의 PVC를 위한 예약 |
-| UID까지 있음 | 특정 PVC의 신원 참조. 전체 바인딩 완료나 phase를 이것만으로 확정하지 않음 |
-
-UID 없는 예약 PV도 Available로 표시될 수 있지만 다른 PVC는 가져갈 수 없습니다
-스케줄러의 임시 가정이나 API 쓰기 중간에도 UID가 채워질 수 있어, UID 유무와 전체 완료를 같게 보면 안 됩니다
-
-중간 쓰기에서 실패하면 다음 reconcile이 현재 참조·상태를 보고 남은 작업을 이어갑니다
-PV 컨트롤러에는 기본 15초의 `--pvclaimbinder-sync-period`로 PV·PVC를 다시 큐에 넣는 경로도 있습니다
-이 주기는 완료 시간 상한은 아닙니다
-
-같은 PVC에 다른 PV가 먼저 연결된 경우의 되돌림도 있습니다
-`pv.kubernetes.io/bound-by-controller`가 있는 PV는 claimRef를 지우고 Available로 돌립니다
-사람이 미리 예약한 PV라면 UID만 지워 이름·네임스페이스 예약을 유지합니다
-
-쓰기·되돌림의 기준은 [`bind`와 `unbindVolume`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/pv_controller.go#L1095-L1176)입니다
-스케줄러의 Unreserve가 이미 성공한 API 쓰기를 모두 되돌려 준다고 해석해서는 안 됩니다
-
-### PVC spec의 불변성과 컨트롤러 쓰기 예외
-
-PVC spec은 쿼터·범위 검사를 우회하지 못하도록 대부분의 변경을 제한합니다
-바인딩 컨트롤러가 써야 하는 `volumeName`은 기존 값이 비었을 때 채울 수 있도록 예외를 둡니다
-
-기본 클래스의 nil 값 보완, Bound PVC의 용량 요청과 속성 클래스 변경 등에도 별도 검증 조건이 있습니다
-따라서 volumeName이 유일한 예외라거나 바인딩된 PVC의 모든 필드를 자유롭게 고칠 수 있다고 설명하면 부정확합니다
-실제 조건은 [`ValidatePersistentVolumeClaimUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go#L2566-L2619)에 있습니다
-
-## StorageClass는 공급 방식과 시점을 정합니다
-
-| 필드 | 역할·기본값 |
-|---|---|
-| `provisioner` | 공급을 담당할 구현 이름. 필수 |
-| `volumeBindingMode` | Immediate 또는 WaitForFirstConsumer. 기본 Immediate |
-| `reclaimPolicy` | 동적으로 만든 PV의 Delete 또는 Retain 정책. 기본 Delete |
-| `allowVolumeExpansion` | PVC 확장 허용 여부. 실제 드라이버 지원도 필요 |
-| `allowedTopologies` | 공급 가능한 위치 제한 |
-| `parameters` | provisioner별 설정. API는 최대 512개 키를 허용 |
-
-외부 프로비저닝에서 코어 PV 컨트롤러가 CSI `CreateVolume`을 직접 호출하지는 않습니다
-PVC에 `volume.kubernetes.io/storage-provisioner`로 담당 이름을 알리고 `ExternalProvisioning` 이벤트를 남깁니다
-이벤트는 외부 공급을 기다린다는 단서이며, 처리자가 없다는 판정은 아닙니다
-
-external-provisioner는 CSI 드라이버를 호출하고 결과를 PV로 등록하는 외부 구성요소입니다
-이 글에서 확인한 [v6.4.0](https://github.com/kubernetes-csi/external-provisioner/tree/72f13ee46fb93c11a72ef91549e70158283c03af)의 기본 생성 이름은 `pvc-<PVC UID>` 형태입니다
-다만 `--volume-name-prefix`·`--volume-name-uuid-length`로 형식이 달라질 수 있으므로 Kubernetes의 모든 동적 PV 이름에 대한 보장은 아닙니다
-
-## WaitForFirstConsumer는 노드 선택과 볼륨 위치를 함께 봅니다
-
-Immediate는 소비할 Pod의 배치 전에 볼륨을 선택·공급할 수 있습니다
-특정 zone의 볼륨이 먼저 준비되면 이후 Pod는 그 위치 제약 안에서 노드를 찾아야 합니다
-
-WaitForFirstConsumer(WFFC)는 소비할 Pod의 배치를 고려할 때까지 그 결정을 미룹니다
-노드 자원·Pod 배치 조건·볼륨 위치가 함께 맞는지 스케줄러가 볼 수 있도록 순서를 정한 것입니다
-
-PV 컨트롤러는 지연 바인딩 모드에서 아직 예약되지 않은 일반 PV를 바로 바인딩하지 않습니다
-반면 그 PVC를 위해 이미 예약된 PV는 처리할 수 있습니다
-WFFC의 모든 PVC가 반드시 새 볼륨 생성을 기다린다고 해석하면 이 예외를 놓칩니다
-
-![WFFC에서 스케줄러의 캐시 예약과 PreBind API 쓰기, 외부 공급·PV 컨트롤러·스케줄러 관측의 분업|tall](/diagrams/k8s-theory-pvc-storageclass-binding-2.svg)
-
-바인딩 쓰기와 관련된 주요 확장점은 다음과 같습니다
-현재 VolumeBinding 플러그인의 모든 확장점 목록을 나열한 표는 아닙니다
-
-| 확장점 | 이 흐름에서의 역할 |
-|---|---|
-| PreFilter | Pod의 PVC를 바인딩 여부 등으로 분류 |
-| Filter | 노드별 PV 후보·nodeAffinity·공급 가능 조건 검사 |
-| Reserve | 선택한 PV·PVC를 스케줄러 캐시에 임시 반영 |
-| PreBind | PV 예약 또는 PVC selected-node를 API에 쓰고 관측 조건 대기 |
-| Unreserve | 임시 반영한 캐시 상태 해제. 성공한 API 쓰기 전체의 rollback은 아님 |
-
-기존 PV를 사용한다면 PreBind가 PV의 claimRef를 기록합니다
-동적 생성이 필요하다면 PVC에 `volume.kubernetes.io/selected-node`로 노드 이름을 기록해 그 노드에서 사용할 볼륨 공급을 요청합니다
-PV 컨트롤러는 PV·PVC 참조와 바인딩 완료 표시를 이어서 반영합니다
-
-스케줄러는 이 결과를 기다리지만 관측 조건을 정확히 구분해야 합니다
-v1.37.1 `BindPodVolumes`는 기본 600초 상한 안에서 1초 간격으로 **API 반영을 관측하는 캐시**를 확인합니다
-매초 PV·PVC에 직접 GET 요청을 보내는 구조는 아닙니다
-
-`isPVCFullyBound`의 조건은 `volumeName`이 있고 `pv.kubernetes.io/bind-completed` 어노테이션이 존재하는 것입니다
-정적 예약의 claimRef UID·노드 적합성 등도 확인하지만, PVC의 마지막 `status.phase: Bound` 쓰기 자체를 직접 검사하는 것은 아닙니다
-PV 컨트롤러의 전체 처리 순서와 스케줄러가 다음 단계로 진행하는 관측 조건은 이렇게 구분됩니다
-
-이 구현은 [`bindAPIUpdate`·`checkBindings`·`isPVCFullyBound`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/volumebinding/binder.go#L515-L776)에 있습니다
-완료 조건을 확인한 다음 Pod를 Node에 바인딩하는 단계로 진행합니다
-
-### nodeName 직접 지정과 프로비저닝 실패
-
-동적 WFFC 경로에서 Pod에 `nodeName`을 직접 지정하면 스케줄러를 건너뜁니다
-selected-node를 적는 경로가 실행되지 않아 PVC가 Pending으로 남을 수 있습니다
-노드 선택을 제한하면서 스케줄러를 거치려면 `kubernetes.io/hostname` 라벨 조건 같은 배치 제약을 사용할 수 있습니다
-
-생성 실패가 모두 다른 노드 재선택으로 이어지는 것도 아닙니다
-확인한 external-provisioner는 topology 지원·selected node·오류 유형을 함께 보고 재배치 가능 여부를 판단합니다
-재배치 경로에서는 라이브러리가 selected-node를 제거하고, 스케줄러가 그 변화를 보고 다시 시도할 수 있게 합니다
-
-또한 CSI capacity 검사는 `CSIDriver.spec.storageCapacity`로 옵트인한 드라이버의 정보를 사용합니다
-스케줄러가 본 용량 정보가 낡을 수 있으므로 Filter 통과가 실제 CreateVolume 성공을 보장하지는 않습니다
-Immediate 방식이나 capacity 검사를 활성화하지 않은 경로에서 발생한 생성 실패도 구분해야 합니다
 
 ## 접근 방식의 매칭과 실제 사용 제약은 다릅니다
 

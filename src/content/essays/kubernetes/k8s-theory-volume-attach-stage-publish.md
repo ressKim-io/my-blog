@@ -71,6 +71,44 @@ CSI는 이런 호환되는 반복 요청을 처리하는 멱등성을 요구합�
 실제 생성은 [makeDeviceMountPath](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_attacher.go)와 [csiMountMgr.GetPath·getTargetPath](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_mounter.go)에 있습니다
 기본 루트 경로를 모든 노드의 실제 설정으로 가정하지는 않습니다
 
+## 정상 해제는 Pod target부터 되돌립니다
+
+같은 노드의 다른 Pod가 볼륨을 계속 쓴다면 한 Pod의 사용 종료만으로 노드의 준비까지 해제하면 안 됩니다
+CSI는 NodeStage를 사용하는 볼륨에서 모든 NodeUnpublishVolume이 성공한 뒤 NodeUnstageVolume을 호출하도록 요구합니다
+ControllerUnpublishVolume도 필요한 노드 사용 해제가 끝난 뒤 호출하는 계약입니다
+
+![정상 해제에서 각 Pod target의 NodeUnpublishVolume이 성공한 뒤 선택적인 NodeUnstageVolume으로 노드 준비를 해제하고 ControllerUnpublishVolume으로 볼륨-노드 연결을 해제하는 순서|tall](/diagrams/k8s-theory-volume-attach-stage-publish-2.svg)
+
+## kubelet은 목표 상태와 준비 상태를 계속 대조합니다
+
+kubelet의 DesiredStateOfWorld는 어떤 Pod가 어떤 볼륨을 필요로 하는지 기록합니다
+ActualStateOfWorld는 kubelet이 파악한 attachment·노드 준비·Pod별 사용 상태를 기록하며, 결과가 불확실한 상태도 구분합니다
+이 둘은 attach/detach controller가 따로 유지하는 같은 이름의 상태 캐시와 다릅니다
+
+reconciler가 차이를 보고 필요한 작업을 operation executor에 맡깁니다
+실행 중인 관련 작업이 겹치지 않게 pending operation을 검사하고, 실패한 작업은 재시도와 backoff를 거칩니다
+호출을 시작했다는 로그가 작업 완료나 실제 장치 준비까지 의미하지는 않습니다
+
+다른 작업이 끝날 때까지 기다려야 하는 범위도 작업에 따라 다릅니다
+attachable 또는 device-mountable 볼륨은 mount/device 준비를 볼륨 단위로 조정합니다
+두 조건에 모두 해당하지 않는 플러그인의 mount는 Pod별로 구분하며, Pod별 unmount/unmap도 서로 다른 Pod target에서 병렬 실행할 수 있습니다
+이 제어는 관련 볼륨 작업의 순서를 조정하는 것이며 여러 CSI 단계와 백엔드 변경을 하나의 원자적 작업으로 만들지는 않습니다
+
+캐시의 정의는 [DSW](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/cache/desired_state_of_world.go)·[ASW](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/cache/actual_state_of_world.go), 작업 키와 backoff는 [NestedPendingOperations](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/util/nestedpendingoperations/nestedpendingoperations.go)에 있습니다
+
+### 준비 상태를 대조해 해제 작업을 시작합니다
+
+현재 kubelet reconciler는 Pod 사용 참조가 사라졌는지 확인해 UnmountVolume을 실행합니다
+노드 준비 해제는 ASW의 mounted Pod 참조가 없고 DSW에도 더 필요한 볼륨이 없으며 관련 작업이 진행 중이지 않을 때 판단합니다
+시작 시 상태 복구가 덜 끝난 것을 미사용으로 오인하지 않도록 해제 준비 조건도 확인합니다
+
+파일시스템 CSI 구현의 TearDownAt은 NodeUnpublishVolume을, UnmountDevice는 지원되는 경우 NodeUnstageVolume을 호출합니다
+그 뒤 controller가 VolumeAttachment 삭제를 요청하고 external-attacher가 ControllerUnpublishVolume을 수행합니다
+VolumeAttachment 삭제 요청의 접수와 백엔드의 분리 완료도 같은 시점은 아닙니다
+
+이 순서는 [kubelet reconciler](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/reconciler/reconciler_common.go)와 [CSI 참조 계수·해제 계약](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/spec.md#rpc-interactions-and-reference-counting)에 근거합니다
+노드가 응답하지 않아 정상 해제를 끝낼 수 없는 경우는 뒤의 강제 분리 조건과 구분해야 합니다
+
 ## attach와 stage는 서로 다른 조건에서 생략합니다
 
 | 준비 단계 | 생략을 판단하는 입력 |
@@ -97,42 +135,6 @@ operation executor도 Filesystem이면 mount/unmount, Block이면 map/unmap 연�
 따라서 ‘볼륨이 마운트됐다’는 표현만으로 파일시스템 생성이나 bind mount가 실행됐다고 단정할 수 없습니다
 근거는 [csi_block.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_block.go)와 [OperationExecutor](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/util/operationexecutor/operation_executor.go)입니다
 
-## kubelet은 목표 상태와 준비 상태를 계속 대조합니다
-
-kubelet의 DesiredStateOfWorld는 어떤 Pod가 어떤 볼륨을 필요로 하는지 기록합니다
-ActualStateOfWorld는 kubelet이 파악한 attachment·노드 준비·Pod별 사용 상태를 기록하며, 결과가 불확실한 상태도 구분합니다
-이 둘은 attach/detach controller가 따로 유지하는 같은 이름의 상태 캐시와 다릅니다
-
-reconciler가 차이를 보고 필요한 작업을 operation executor에 맡깁니다
-실행 중인 관련 작업이 겹치지 않게 pending operation을 검사하고, 실패한 작업은 재시도와 backoff를 거칩니다
-호출을 시작했다는 로그가 작업 완료나 실제 장치 준비까지 의미하지는 않습니다
-
-다른 작업이 끝날 때까지 기다려야 하는 범위도 작업에 따라 다릅니다
-앞의 attachable 또는 device-mountable 볼륨은 mount/device 준비를 볼륨 단위로 조정합니다
-두 조건에 모두 해당하지 않는 플러그인의 mount는 Pod별로 구분하며, Pod별 unmount/unmap도 서로 다른 Pod target에서 병렬 실행할 수 있습니다
-이 제어는 관련 볼륨 작업의 순서를 조정하는 것이며 여러 CSI 단계와 백엔드 변경을 하나의 원자적 작업으로 만들지는 않습니다
-
-캐시의 정의는 [DSW](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/cache/desired_state_of_world.go)·[ASW](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/cache/actual_state_of_world.go), 작업 키와 backoff는 [NestedPendingOperations](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/util/nestedpendingoperations/nestedpendingoperations.go)에 있습니다
-
-## 정상 해제는 Pod target부터 되돌립니다
-
-같은 노드의 다른 Pod가 볼륨을 계속 쓴다면 한 Pod의 사용 종료만으로 노드의 준비까지 해제하면 안 됩니다
-CSI는 NodeStage를 사용하는 볼륨에서 모든 NodeUnpublishVolume이 성공한 뒤 NodeUnstageVolume을 호출하도록 요구합니다
-ControllerUnpublishVolume도 필요한 노드 사용 해제가 끝난 뒤 호출하는 계약입니다
-
-![정상 해제에서 각 Pod target의 NodeUnpublishVolume이 성공한 뒤 선택적인 NodeUnstageVolume으로 노드 준비를 해제하고 ControllerUnpublishVolume으로 볼륨-노드 연결을 해제하는 순서|tall](/diagrams/k8s-theory-volume-attach-stage-publish-2.svg)
-
-현재 kubelet reconciler는 Pod 사용 참조가 사라졌는지 확인해 UnmountVolume을 실행합니다
-노드 준비 해제는 ASW의 mounted Pod 참조가 없고 DSW에도 더 필요한 볼륨이 없으며 관련 작업이 진행 중이지 않을 때 판단합니다
-시작 시 상태 복구가 덜 끝난 것을 미사용으로 오인하지 않도록 해제 준비 조건도 확인합니다
-
-파일시스템 CSI 구현의 TearDownAt은 NodeUnpublishVolume을, UnmountDevice는 지원되는 경우 NodeUnstageVolume을 호출합니다
-그 뒤 controller가 VolumeAttachment 삭제를 요청하고 external-attacher가 ControllerUnpublishVolume을 수행합니다
-VolumeAttachment 삭제 요청의 접수와 백엔드의 분리 완료도 같은 시점은 아닙니다
-
-이 순서는 [kubelet reconciler](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/reconciler/reconciler_common.go)와 [CSI 참조 계수·해제 계약](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/spec.md#rpc-interactions-and-reference-counting)에 근거합니다
-노드가 응답하지 않아 정상 해제를 끝낼 수 없는 경우는 뒤의 강제 분리 조건과 구분해야 합니다
-
 ## 코어의 Multi-Attach 검사를 통과해도 드라이버가 거절할 수 있습니다
 
 attach/detach controller는 attach를 시작하기 전에 다른 노드에 이미 붙어 있는지 확인합니다
@@ -153,46 +155,6 @@ CSI persistent volume의 PV accessModes에 대한 코어의 사전 판단은 다
 RWO는 한 노드의 여러 Pod가 함께 사용하는 것까지 금지하는 모드가 아닙니다
 반면 RWOP는 스케줄러와 kubelet의 별도 Pod 사용 검사도 있으므로 같은 노드 공유의 설명에 함께 묶으면 안 됩니다
 현재 사전 검사는 [IsMultiAttachAllowed](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/util/util.go), Pod 사용 검사는 [operation generator](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/util/operationexecutor/operation_generator.go)에 있습니다
-
-## ContainerCreating만으로 어느 준비가 남았는지 알 수 없습니다
-
-kubelet은 컨테이너를 만들기 전에 WaitForAttachAndMount로 볼륨 준비 상태를 기다립니다
-현재 한 번의 대기 상한은 2분 3초이며 300ms 간격으로 상태를 확인합니다
-이는 CSI RPC를 300ms마다 재호출한다는 뜻이나 전체 Pod 기동이 그 시간에 끝난다는 뜻이 아닙니다
-상위 context 종료로 대기가 더 일찍 끝날 수도 있습니다
-
-Pod phase인 Pending과 컨테이너 Waiting reason인 ContainerCreating은 다른 필드입니다
-이 표시만으로 attach·stage·publish 중 어느 단계가 실행됐거나 실패했는지 확정할 수 없습니다
-
-파일시스템 경로에서 다음 접두어는 Kubernetes가 어느 작업을 수행하다 실패했는지 좁히는 단서입니다
-
-| 접두어·표시 | 확인할 주체와 조건 |
-|---|---|
-| AttachVolume.Attach failed | attach/detach controller, external-attacher, 드라이버 Controller 서비스 |
-| MountVolume.WaitForAttach failed | VolumeAttachment의 attached·attachError·삭제 상태 |
-| MountVolume.MountDevice failed | NodeStage 연결 경로, node 드라이버·장치·입력 조건 |
-| MountVolume.SetUp failed | Pod target 준비와 NodePublish 경로, 권한·입력·Pod 사용 제약 |
-| UnmountDevice failed | 노드 준비 해제, 남은 참조·마운트·드라이버 오류 |
-
-이 접두어만으로 CSI RPC가 실제로 호출됐다고 판단할 수는 없습니다
-capability 조회나 자격 증명·경로 준비가 먼저 실패할 수도 있으므로 뒤의 오류와 드라이버 로그를 함께 확인해야 합니다
-subPath 처리나 runtime의 경로 노출도 NodePublish 호출 하나로 모두 설명할 수 없습니다
-
-타임아웃의 `unattached volumes`는 attach 준비가 남은 대상을, `unmounted volumes`는 Pod 사용 준비가 남은 대상을 구분합니다
-unattached가 비어 있어도 attach RPC가 반드시 실행돼 성공했다는 뜻은 아닙니다
-attach가 불필요하거나 생략된 경로일 수도 있습니다
-
-### 등록 상한과 실제 자원 고갈 응답도 다릅니다
-
-스케줄러는 CSINode의 allocatable.count를 배치 판단에 사용합니다
-하지만 kubelet이 모든 Pod admission에서 같은 숫자를 다시 세어 거절하는 흐름은 아닙니다
-
-현재 구현에서 WaitForAttachAndMount가 실패한 뒤에는 attachable volume의 VerifyExhaustedResource가 별도 오류를 반환할 수 있습니다
-드라이버 갱신 주기 설정과 VolumeAttachment의 `ResourceExhausted` 오류 코드가 조건에 맞을 때입니다
-kubelet은 이를 `VolumeAttachmentLimitExceeded`로 Pod 거절·종료 처리에 넘깁니다
-`MutableCSINodeAllocatableCount`는 v1.35의 beta와 달리 현재 GA·true로 잠겨 있지만, 갱신 설정과 실제 오류 확인 조건은 여전히 필요합니다
-
-대기·오류의 근거는 [volume_manager.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/volume_manager.go), [VerifyExhaustedResource](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_plugin.go), [현재 gate](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/features/kube_features.go)에 있습니다
 
 ## force-detach의 6분은 장애 발생부터 재는 시간이 아닙니다
 
@@ -236,6 +198,46 @@ taint가 물리적인 전원 차단이나 남은 쓰기의 중단까지 수행�
 
 근거는 [Node Shutdowns의 비정상 종료·강제 분리](https://kubernetes.io/docs/concepts/cluster-administration/node-shutdown/#storage-force-detach-on-timeout)와 [ControllerUnpublishVolume 계약](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/spec.md#controllerunpublishvolume)입니다
 실제 노드의 전원·마운트·백엔드 상태와 분리 완료는 이 글에서 확인하지 않았습니다
+
+## ContainerCreating만으로 어느 준비가 남았는지 알 수 없습니다
+
+kubelet은 컨테이너를 만들기 전에 WaitForAttachAndMount로 볼륨 준비 상태를 기다립니다
+현재 한 번의 대기 상한은 2분 3초이며 300ms 간격으로 상태를 확인합니다
+이는 CSI RPC를 300ms마다 재호출한다는 뜻이나 전체 Pod 기동이 그 시간에 끝난다는 뜻이 아닙니다
+상위 context 종료로 대기가 더 일찍 끝날 수도 있습니다
+
+Pod phase인 Pending과 컨테이너 Waiting reason인 ContainerCreating은 다른 필드입니다
+이 표시만으로 attach·stage·publish 중 어느 단계가 실행됐거나 실패했는지 확정할 수 없습니다
+
+파일시스템 경로에서 다음 접두어는 Kubernetes가 어느 작업을 수행하다 실패했는지 좁히는 단서입니다
+
+| 접두어·표시 | 확인할 주체와 조건 |
+|---|---|
+| AttachVolume.Attach failed | attach/detach controller, external-attacher, 드라이버 Controller 서비스 |
+| MountVolume.WaitForAttach failed | VolumeAttachment의 attached·attachError·삭제 상태 |
+| MountVolume.MountDevice failed | NodeStage 연결 경로, node 드라이버·장치·입력 조건 |
+| MountVolume.SetUp failed | Pod target 준비와 NodePublish 경로, 권한·입력·Pod 사용 제약 |
+| UnmountDevice failed | 노드 준비 해제, 남은 참조·마운트·드라이버 오류 |
+
+이 접두어만으로 CSI RPC가 실제로 호출됐다고 판단할 수는 없습니다
+capability 조회나 자격 증명·경로 준비가 먼저 실패할 수도 있으므로 뒤의 오류와 드라이버 로그를 함께 확인해야 합니다
+subPath 처리나 runtime의 경로 노출도 NodePublish 호출 하나로 모두 설명할 수 없습니다
+
+타임아웃의 `unattached volumes`는 attach 준비가 남은 대상을, `unmounted volumes`는 Pod 사용 준비가 남은 대상을 구분합니다
+unattached가 비어 있어도 attach RPC가 반드시 실행돼 성공했다는 뜻은 아닙니다
+attach가 불필요하거나 생략된 경로일 수도 있습니다
+
+### 등록 상한과 실제 자원 고갈 응답도 다릅니다
+
+스케줄러는 CSINode의 allocatable.count를 배치 판단에 사용합니다
+하지만 kubelet이 모든 Pod admission에서 같은 숫자를 다시 세어 거절하는 흐름은 아닙니다
+
+현재 구현에서 WaitForAttachAndMount가 실패한 뒤에는 attachable volume의 VerifyExhaustedResource가 별도 오류를 반환할 수 있습니다
+드라이버 갱신 주기 설정과 VolumeAttachment의 `ResourceExhausted` 오류 코드가 조건에 맞을 때입니다
+kubelet은 이를 `VolumeAttachmentLimitExceeded`로 Pod 거절·종료 처리에 넘깁니다
+`MutableCSINodeAllocatableCount`는 v1.35의 beta와 달리 현재 GA·true로 잠겨 있지만, 갱신 설정과 실제 오류 확인 조건은 여전히 필요합니다
+
+대기·오류의 근거는 [volume_manager.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/volume_manager.go), [VerifyExhaustedResource](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_plugin.go), [현재 gate](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/features/kube_features.go)에 있습니다
 
 ## 참고 자료
 

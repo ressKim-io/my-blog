@@ -50,6 +50,7 @@ StorageClass의 프로비저너가 동적 생성을 지원하는지, `allowedTop
 현재 사용하는 API는 `storage.k8s.io/v1`입니다
 StorageClass는 볼륨을 공급할 드라이버와 생성 조건을 지정합니다
 
+이 글에서 확인한 external-provisioner v6.4.0은 `--enable-capacity`의 기본값이 false이므로 용량 정보 생산을 활성화해야 합니다
 일반적인 CSI 배포에서는 external-provisioner가 드라이버에 `GetCapacity`를 호출하고 응답을 API 오브젝트에 기록합니다
 스케줄러는 API 상태를 유지하는 informer 캐시로 그 정보를 읽습니다. 이 VolumeBinding 경로가 스케줄링 중 드라이버 RPC를 직접 호출하는 것은 아닙니다
 
@@ -138,6 +139,27 @@ PVC가 요청하는 것도 볼륨 하나의 크기이므로 단일 볼륨 한도
 공용 `LabelSelectorAsSelector`도 nil을 `Nothing`, 빈 셀렉터를 `Everything`으로 변환합니다
 필드가 비어 보인다는 이유로 두 상태를 같게 처리할 수 없습니다
 
+## 후보 노드 선택은 공간 예약이 아닙니다
+
+용량 검사는 `CSIStorageCapacity`의 값을 차감하거나 실제 저장소 공간을 예약하지 않습니다
+Reserve 확장점에서 PV·PVC의 선택을 스케줄러 캐시에 가정해 두는 일과 백엔드 공간을 확보하는 일은 다릅니다
+
+WFFC 동적 생성에서는 선택한 노드가 PVC의 `volume.kubernetes.io/selected-node` 힌트로 전달됩니다
+PreBind는 이 선택을 API에 반영하고 볼륨 바인딩 완료를 기다립니다. 볼륨 생성이 시작될 때 이미 Pod의 최종 노드 바인딩까지 끝났다고 단정하면 안 됩니다
+
+그 사이 다른 요청이 공간을 사용하거나 조회 정보가 낡았다면 Filter를 통과했어도 생성에 실패할 수 있습니다
+external-provisioner v6.4.0은 topology 지원과 선택 노드가 있는지를 확인합니다
+이 조건에서 `CreateVolume`의 `ResourceExhausted`를 받으면 `ProvisioningReschedule`로 넘길 수 있습니다
+
+연결된 프로비저닝 라이브러리가 선택 노드 힌트를 해제하면 스케줄러가 다시 후보를 찾습니다
+모든 오류가 이 재선택을 뜻하지는 않습니다. 예를 들어 `DeadlineExceeded`는 이전 생성 작업이 진행 중일 가능성을 고려하는 다른 오류 경로입니다
+
+한 Pod에 볼륨이 여러 개일 때는 먼저 만든 볼륨이 용량을 차지한 뒤 다음 볼륨을 만들지 못할 수도 있습니다
+Filter는 각 PVC를 저장된 용량과 비교하므로 전체 요청을 한 번에 예약하지 않습니다
+
+가용량이나 접근 조건이 달라지지 않으면 재시도만으로 풀리지 않을 수 있습니다
+공식 문서도 용량을 늘리거나 이미 생성된 볼륨을 정리하는 등 운영자의 개입이 필요한 경우로 설명합니다. [공식 용량 추적의 한계](https://kubernetes.io/docs/concepts/storage/storage-capacity/#limitations)
+
 ## v1.37에서는 용량 점수도 기본으로 사용합니다
 
 용량 추적 API는 v1.24에서 stable이 됐습니다
@@ -168,6 +190,8 @@ Filter가 단일 볼륨 한도인 `maximumVolumeSize`를 먼저 보는 것과 �
 
 점수 함수는 클래스별 요청량/용량 비율을 설정된 곡선에 대입하고 클래스 점수의 평균을 냅니다
 현재 기본 곡선은 비율 0%에서 최고점, 100%에서 0점입니다
+
+Score에서 요청량을 합산해도 실제 공간이 예약되는 것은 아닙니다
 
 용량이 0이거나 합산 요청량이 용량을 초과해도 점수 입력을 100%로 처리합니다
 이 Score가 별도의 Filter 거절을 내리는 것은 아닙니다
@@ -207,28 +231,6 @@ StorageClass나 토폴로지 구간이 없어지면 용량 컨트롤러도 불�
 이 소유 참조는 **용량 정보의 수명**을 위한 것이며 [StatefulSet PVC 보존 정책](/essays/k8s-theory-statefulset-volume-lifecycle)이나 실제 볼륨의 소유권을 뜻하지 않습니다
 
 설정·생성·owner 처리 근거는 [현재 external-provisioner 명령 옵션](https://github.com/kubernetes-csi/external-provisioner/blob/72f13ee46fb93c11a72ef91549e70158283c03af/cmd/csi-provisioner/csi-provisioner.go)과 [용량 컨트롤러](https://github.com/kubernetes-csi/external-provisioner/blob/72f13ee46fb93c11a72ef91549e70158283c03af/pkg/capacity/capacity.go)입니다
-
-## 후보 노드 선택은 공간 예약이 아닙니다
-
-용량 검사는 `CSIStorageCapacity`의 값을 차감하거나 실제 저장소 공간을 예약하지 않습니다
-Reserve 확장점에서 PV·PVC의 선택을 스케줄러 캐시에 가정해 두는 일과 백엔드 공간을 확보하는 일은 다릅니다
-
-WFFC 동적 생성에서는 선택한 노드가 PVC의 `volume.kubernetes.io/selected-node` 힌트로 전달됩니다
-PreBind는 이 선택을 API에 반영하고 볼륨 바인딩 완료를 기다립니다. 볼륨 생성이 시작될 때 이미 Pod의 최종 노드 바인딩까지 끝났다고 단정하면 안 됩니다
-
-그 사이 다른 요청이 공간을 사용하거나 조회 정보가 낡았다면 Filter를 통과했어도 생성에 실패할 수 있습니다
-external-provisioner v6.4.0은 topology 지원과 선택 노드가 있는지를 확인합니다
-이 조건에서 `CreateVolume`의 `ResourceExhausted`를 받으면 `ProvisioningReschedule`로 넘길 수 있습니다
-
-연결된 프로비저닝 라이브러리가 선택 노드 힌트를 해제하면 스케줄러가 다시 후보를 찾습니다
-모든 오류가 이 재선택을 뜻하지는 않습니다. 예를 들어 `DeadlineExceeded`는 이전 생성 작업이 진행 중일 가능성을 고려하는 다른 오류 경로입니다
-
-한 Pod에 볼륨이 여러 개일 때는 먼저 만든 볼륨이 용량을 차지한 뒤 다음 볼륨을 만들지 못할 수도 있습니다
-Filter는 각 PVC를 저장된 용량과 비교하므로 전체 요청을 한 번에 예약하지 않습니다
-Score에서 요청량을 합산해도 실제 공간이 예약되는 것은 아닙니다
-
-가용량이나 접근 조건이 달라지지 않으면 재시도만으로 풀리지 않을 수 있습니다
-공식 문서도 용량을 늘리거나 이미 생성된 볼륨을 정리하는 등 운영자의 개입이 필요한 경우로 설명합니다. [공식 용량 추적의 한계](https://kubernetes.io/docs/concepts/storage/storage-capacity/#limitations)
 
 ## Pending 사유에서 다음 확인으로 이어갑니다
 

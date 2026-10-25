@@ -53,33 +53,9 @@ spec:
 공식 문서의 클라우드별 숫자 표를 모든 CSI 드라이버의 한도로 적용하면 안 됩니다
 CSI 경로에서는 [NodeGetInfo로 보고한 상한](https://kubernetes.io/docs/concepts/storage/storage-limits/#dynamic-volume-limits)을 읽습니다
 
-## CSI의 0과 CSINode의 0은 다릅니다
-
-CSI의 `max_volumes_per_node`는 생략하거나 0으로 보내면 오케스트레이터가 한도를 결정하도록 맡긴다는 뜻입니다
-음수는 CSI 계약에서 허용하지 않습니다
-
-반면 CSINode의 `count`는 포인터 필드입니다
-`allocatable` 자체도 포인터이므로 숫자 상한의 미설정은 두 위치에서 생길 수 있습니다
-
-| 값이 있는 위치 | 의미·현재 변환 |
-|---|---|
-| NodeGetInfo의 0·미설정 | kubelet이 allocatable을 만들지 않음 |
-| NodeGetInfo의 음수 | 오류 로그를 남기고 상한 없이 드라이버 항목 저장 |
-| NodeGetInfo의 양수 | count로 기록, int32 최댓값 초과는 2147483647로 제한 |
-| CSINode의 allocatable 또는 count 미설정 | 이 드라이버의 숫자 상한 표에 넣지 않음 |
-| CSINode의 count: 0 | 명시적인 상한 0, 음수만 거절하는 API 검증상 유효 |
-
-따라서 앞의 kubelet 변환 경로로는 `count: 0`이 생기지 않습니다
-다른 API 작성자가 기록할 수 있지만, 값 하나만 보고 누가 작성했는지 단정할 수는 없습니다
-
-미설정이면 이 필터가 숫자로 제한하지 않는다는 뜻입니다
-실제 백엔드가 무제한이거나 드라이버가 노드에 설치됐거나 attach가 성공한다는 보장은 아닙니다
-상한을 0으로 바꾸는 것도 이미 사용하는 볼륨을 떼거나 기존 Pod를 퇴거시키는 동작은 아닙니다
-
-근거는 [CSI NodeGetInfo 계약](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/spec.md#nodegetinfo), [kubelet의 변환](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go), [스토리지 API 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/storage/validation/validation.go)입니다
-
 ## 세는 것은 Pod나 마운트 횟수가 아니라 볼륨 키입니다
 
+먼저 앞의 예시처럼 양수 상한이 기록된 드라이버의 계산을 보겠습니다
 바인딩된 CSI PV의 키는 `드라이버이름/볼륨핸들`입니다
 같은 볼륨을 같은 노드의 여러 Pod가 사용해도 기존 Pod 목록에서는 하나로 셉니다
 attach와 mount가 모두 있다는 이유로 두 개가 되지도 않습니다
@@ -112,29 +88,6 @@ Pod의 `volumes[].csi`로 직접 지정하는 CSI inline ephemeral과 같은 경
 마이그레이션 대상 in-tree 볼륨도 변환·활성 조건을 거쳐 CSI 키로 계산할 수 있습니다
 
 볼륨 수 계산과 중복 제거, 설치 확인의 실제 분기는 [CSILimits.Filter·filterAttachableVolumes·getNodeVolumeAttachmentInfo](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/nodevolumelimits/csi.go)에 있습니다
-
-## 상한 검사와 드라이버 설치 확인은 별도입니다
-
-v1.37의 `VolumeLimitScaling`은 beta·기본 활성입니다
-하지만 드라이버가 없는 노드로의 배치를 막으려면 CSIDriver의 `spec.preventPodSchedulingIfMissing: true`도 필요합니다
-이 필드의 기본값은 false입니다
-
-현재 설치 확인은 다음 순서로 동작합니다
-
-| 조건 | 이 설치 확인의 결과 |
-|---|---|
-| CSIDriver 조회가 NotFound | 이 확인으로 막지 않음 |
-| CSIDriver 조회에서 다른 오류 | 오류 반환 |
-| preventPodSchedulingIfMissing이 true가 아님 | 이 확인으로 막지 않음 |
-| true인데 CSINode가 없거나 해당 드라이버 항목이 없음 | Unschedulable |
-| true이고 해당 드라이버 항목이 있음 | 숫자 상한 등 다음 판단 진행 |
-
-이 확인은 숫자 상한 표를 읽기 전에 있습니다
-그러므로 count가 없으면 숫자 검사를 하지 않는다는 설명을 드라이버 설치 확인까지 생략한다는 뜻으로 넓히면 안 됩니다
-v1.35의 alpha·기본 비활성과 현행의 beta·기본 활성도 구분해야 합니다
-
-Cluster Autoscaler를 함께 쓴다면 새 노드의 배치 시뮬레이션에 필요한 CSI 정보를 포함하는 설정도 확인해야 합니다
-[공식 문서](https://kubernetes.io/docs/concepts/storage/storage-limits/#csi-volume-attach-limits-and-cluster-autoscaler)는 이 설치 확인 옵트인을 CSI node-aware scheduling 설정과 함께 쓰도록 안내합니다
 
 ## 상한 갱신은 같은 드라이버에게 다시 묻는 과정입니다
 
@@ -205,6 +158,65 @@ external-attacher 같은 상태 작성자가 실제 숫자 코드를 기록해�
 
 이 조건과 실패 순서는 [WaitForAttachAndMount](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/volumemanager/volume_manager.go), [VerifyExhaustedResource](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/csi_plugin.go), [SyncPod·rejectPod](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet.go)에서 확인할 수 있습니다
 
+## CSI의 0과 CSINode의 0은 다릅니다
+
+CSI의 `max_volumes_per_node`는 생략하거나 0으로 보내면 오케스트레이터가 한도를 결정하도록 맡긴다는 뜻입니다
+음수는 CSI 계약에서 허용하지 않습니다
+
+반면 CSINode의 `count`는 포인터 필드입니다
+`allocatable` 자체도 포인터이므로 숫자 상한의 미설정은 두 위치에서 생길 수 있습니다
+
+| 값이 있는 위치 | 의미·현재 변환 |
+|---|---|
+| NodeGetInfo의 0·미설정 | kubelet이 allocatable을 만들지 않음 |
+| NodeGetInfo의 음수 | 오류 로그를 남기고 상한 없이 드라이버 항목 저장 |
+| NodeGetInfo의 양수 | count로 기록, int32 최댓값 초과는 2147483647로 제한 |
+| CSINode의 allocatable 또는 count 미설정 | 이 드라이버의 숫자 상한 표에 넣지 않음 |
+| CSINode의 count: 0 | 명시적인 상한 0, 음수만 거절하는 API 검증상 유효 |
+
+따라서 앞의 kubelet 변환 경로로는 `count: 0`이 생기지 않습니다
+다른 API 작성자가 기록할 수 있지만, 값 하나만 보고 누가 작성했는지 단정할 수는 없습니다
+
+미설정이면 이 필터가 숫자로 제한하지 않는다는 뜻입니다
+실제 백엔드가 무제한이거나 드라이버가 노드에 설치됐거나 attach가 성공한다는 보장은 아닙니다
+상한을 0으로 바꾸는 것도 이미 사용하는 볼륨을 떼거나 기존 Pod를 퇴거시키는 동작은 아닙니다
+
+근거는 [CSI NodeGetInfo 계약](https://github.com/container-storage-interface/spec/blob/cd9e7ad1ae0915cabcad179f2b8a660c0cb6eb9f/spec.md#nodegetinfo), [kubelet의 변환](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go), [스토리지 API 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/storage/validation/validation.go)입니다
+
+## 상한 검사와 드라이버 설치 확인은 별도입니다
+
+v1.37의 `VolumeLimitScaling`은 beta·기본 활성입니다
+하지만 드라이버가 없는 노드로의 배치를 막으려면 CSIDriver의 `spec.preventPodSchedulingIfMissing: true`도 필요합니다
+이 필드의 기본값은 false입니다
+
+현재 설치 확인은 다음 순서로 동작합니다
+
+| 조건 | 이 설치 확인의 결과 |
+|---|---|
+| CSIDriver 조회가 NotFound | 이 확인으로 막지 않음 |
+| CSIDriver 조회에서 다른 오류 | 오류 반환 |
+| preventPodSchedulingIfMissing이 true가 아님 | 이 확인으로 막지 않음 |
+| true인데 CSINode가 없거나 해당 드라이버 항목이 없음 | Unschedulable |
+| true이고 해당 드라이버 항목이 있음 | 숫자 상한 등 다음 판단 진행 |
+
+이 확인은 숫자 상한 표를 읽기 전에 있습니다
+그러므로 count가 없으면 숫자 검사를 하지 않는다는 설명을 드라이버 설치 확인까지 생략한다는 뜻으로 넓히면 안 됩니다
+v1.35의 alpha·기본 비활성과 현행의 beta·기본 활성도 구분해야 합니다
+
+Cluster Autoscaler를 함께 쓴다면 새 노드의 배치 시뮬레이션에 필요한 CSI 정보를 포함하는 설정도 확인해야 합니다
+[공식 문서](https://kubernetes.io/docs/concepts/storage/storage-limits/#csi-volume-attach-limits-and-cluster-autoscaler)는 이 설치 확인 옵트인을 CSI node-aware scheduling 설정과 함께 쓰도록 안내합니다
+
+## Node의 옛 확장 자원 키를 현재 상한으로 읽지 않습니다
+
+과거에는 `Node.status.allocatable`에 `attachable-volumes-csi-<driver>` 형태의 키가 사용됐습니다
+v1.35 고정 소스에는 kubelet 등록·해제 때 그 키를 지우는 removeMaxAttachLimit 함수가 남아 있었습니다
+같은 함수의 제거 예정 주석과 그 릴리스에 실제 코드가 남아 있는 것은 구분해야 합니다
+
+현재 v1.37의 등록·해제 구현에는 그 정리 함수가 없으며, 앞에서 확인한 NodeVolumeLimits는 CSINode의 숫자 필드를 읽습니다
+Node에 옛 키가 남아 있다고 이 플러그인이 두 위치의 상한을 합치거나 CPU·memory처럼 일반 자원 수요로 계산하지는 않습니다
+
+과거 경로는 [v1.35 nodeinfomanager](https://github.com/kubernetes/kubernetes/blob/5671697925fe8d7222c4ab09cb15f28f5f9d0383/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go), 현재 경로는 [v1.37.1 nodeinfomanager](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go)와 대조했습니다
+
 ## 같은 Pending이라도 개수·바인딩·위치를 나눕니다
 
 | 상태·사유 | 구분할 조건 |
@@ -221,17 +233,6 @@ external-attacher 같은 상태 작성자가 실제 숫자 코드를 기록해�
 스케줄러가 관련 이벤트를 받아 다시 시도하는 것과, 배치된 Pod를 kubelet이 실패 처리하고 컨트롤러가 대체하는 것은 다른 흐름입니다
 
 바인딩·위치 사유의 원문은 [volumebinding/binder.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/volumebinding/binder.go), 숫자 상한·PVC 오류·재평가 이벤트는 [nodevolumelimits/csi.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/nodevolumelimits/csi.go)에 있습니다
-
-## Node의 옛 확장 자원 키를 현재 상한으로 읽지 않습니다
-
-과거에는 `Node.status.allocatable`에 `attachable-volumes-csi-<driver>` 형태의 키가 사용됐습니다
-v1.35 고정 소스에는 kubelet 등록·해제 때 그 키를 지우는 removeMaxAttachLimit 함수가 남아 있었습니다
-같은 함수의 제거 예정 주석과 그 릴리스에 실제 코드가 남아 있는 것은 구분해야 합니다
-
-현재 v1.37의 등록·해제 구현에는 그 정리 함수가 없으며, 앞에서 확인한 NodeVolumeLimits는 CSINode의 숫자 필드를 읽습니다
-Node에 옛 키가 남아 있다고 이 플러그인이 두 위치의 상한을 합치거나 CPU·memory처럼 일반 자원 수요로 계산하지는 않습니다
-
-과거 경로는 [v1.35 nodeinfomanager](https://github.com/kubernetes/kubernetes/blob/5671697925fe8d7222c4ab09cb15f28f5f9d0383/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go), 현재 경로는 [v1.37.1 nodeinfomanager](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/csi/nodeinfomanager/nodeinfomanager.go)와 대조했습니다
 
 ## 확인한 근거
 

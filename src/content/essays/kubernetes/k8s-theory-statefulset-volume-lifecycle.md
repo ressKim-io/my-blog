@@ -43,19 +43,6 @@ Pod가 삭제된 뒤 같은 서수로 다시 만들어져도 이름은 같습니
 공식 문서에서 말하는 신원·저장소의 안정성은 Pod를 다시 스케줄해도 이 대응이 유지된다는 의미입니다
 Pod나 데이터가 영구히 삭제되지 않는다는 보장은 아닙니다
 
-DNS 이름에는 별도 조건이 있습니다
-예시의 `nginx`는 `spec.serviceName`이 가리키는 headless Service이며 사용자가 만들어야 합니다
-headless Service는 대표 IP 대신 개별 Pod의 주소를 노출합니다
-StatefulSet이 Service까지 생성하지는 않습니다
-
-`serviceName`은 API에서 선택 필드이고, 현재 검증은 값이 있을 때 이름 형식을 검사합니다
-따라서 StatefulSet 생성이 허용됐다는 사실만으로 governing Service가 존재하거나 DNS가 준비됐다고 판단할 수 없습니다
-
-Service의 selector와 엔드포인트가 맞아야 하며, Pod별 DNS 레코드는 기본적으로 readiness 조건의 영향도 받습니다
-`publishNotReadyAddresses: true`인 Service는 준비되지 않은 주소도 게시할 수 있습니다
-
-이전 조회 실패를 DNS가 캐시했다면 Pod가 준비된 뒤에도 이름 조회가 잠시 실패할 수 있습니다. [공식 DNS 문서](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-hostname-and-subdomain-field)
-
 ## PVC를 먼저 만들고 Pod를 생성합니다
 
 `volumeClaimTemplates`는 복제본별 PVC를 만드는 템플릿입니다
@@ -74,12 +61,6 @@ pvc <name> is being deleted
 
 기존 StatefulSet의 `volumeClaimTemplates` 자체를 수정하는 것도 현재 API 검증에서 허용하지 않습니다
 템플릿 크기를 바꿔 기존 PVC나 앞으로 생성될 PVC에 적용하는 경로로 생각하면 안 됩니다. 이미 만들어진 PVC의 확장은 별도 작업입니다
-
-같은 이름만으로 재사용해도 되는지 추가 검사하는 경우도 있습니다
-`whenScaled: Delete`에서 PVC가 이전 `web-2`의 UID를 소유 참조로 갖고 있다면, `PodClaimIsStale`은 새 Pod 생성을 기다리게 합니다
-
-이 PVC는 이전 Pod를 따라 GC가 삭제할 수 있는 대상입니다
-새 UID의 Pod가 삭제 예정 PVC를 먼저 재사용하지 않도록 막는 검사이며, `whenScaled: Retain`에서는 이 재사용 차단을 적용하지 않습니다. [PVC 생성·정책 처리 소스](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/statefulset/stateful_pod_control.go)
 
 ## 두 보존 정책은 삭제 계기를 나눕니다
 
@@ -150,6 +131,14 @@ GC는 삭제 중이 아닌 유효한 소유자가 남아 있으면 종속 오브
 
 따라서 정책 필드만 읽고 실제 삭제 결과를 단정하기보다 PVC의 참조와 UID, 이벤트를 함께 봐야 합니다. [소유 참조를 계산하는 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/statefulset/stateful_set_utils.go), [스케일다운 처리 순서](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/statefulset/stateful_set_control.go)
 
+## 이전 Pod를 따라 삭제될 PVC는 재사용을 기다립니다
+
+같은 이름만으로 재사용해도 되는지 추가 검사하는 경우도 있습니다
+`whenScaled: Delete`에서 PVC가 이전 `web-2`의 UID를 소유 참조로 갖고 있다면, `PodClaimIsStale`은 새 Pod 생성을 기다리게 합니다
+
+이 PVC는 이전 Pod를 따라 GC가 삭제할 수 있는 대상입니다
+새 UID의 Pod가 삭제 예정 PVC를 먼저 재사용하지 않도록 막는 검사이며, `whenScaled: Retain`에서는 이 재사용 차단을 적용하지 않습니다. [PVC 생성·정책 처리 소스](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/statefulset/stateful_pod_control.go)
+
 ## Pod의 종료 순서와 PVC 삭제 조건을 구분합니다
 
 기본 `podManagementPolicy: OrderedReady`에서는 낮은 서수부터 Pod를 생성합니다
@@ -201,6 +190,21 @@ StatefulSet 컨트롤러나 GC가 실제 디스크 삭제까지 완료하는 것
 
 `Retain`은 데이터 복제나 백업도 아닙니다
 정책을 통해 자동 삭제를 피하는 일과 장애 뒤 데이터를 복구할 수 있는 일은 별도로 준비해야 합니다. [PV 회수 정책과 삭제 보호](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#reclaiming)
+
+## 같은 Pod 이름의 DNS에도 조건이 있습니다
+
+DNS 이름에는 별도 조건이 있습니다
+예시의 `nginx`는 `spec.serviceName`이 가리키는 headless Service이며 사용자가 만들어야 합니다
+headless Service는 대표 IP 대신 개별 Pod의 주소를 노출합니다
+StatefulSet이 Service까지 생성하지는 않습니다
+
+`serviceName`은 API에서 선택 필드이고, 현재 검증은 값이 있을 때 이름 형식을 검사합니다
+따라서 StatefulSet 생성이 허용됐다는 사실만으로 governing Service가 존재하거나 DNS가 준비됐다고 판단할 수 없습니다
+
+Service의 selector와 엔드포인트가 맞아야 하며, Pod별 DNS 레코드는 기본적으로 readiness 조건의 영향도 받습니다
+`publishNotReadyAddresses: true`인 Service는 준비되지 않은 주소도 게시할 수 있습니다
+
+이전 조회 실패를 DNS가 캐시했다면 Pod가 준비된 뒤에도 이름 조회가 잠시 실패할 수 있습니다. [공식 DNS 문서](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-hostname-and-subdomain-field)
 
 ## Deployment와 비교할 기준은 복제본과 PVC의 대응입니다
 
