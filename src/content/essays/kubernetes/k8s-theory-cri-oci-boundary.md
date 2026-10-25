@@ -46,26 +46,10 @@ containerd·CRI-O·Podman은 직접 호출자의 예이고 Kubernetes는 간접 
 shim 하나가 반드시 컨테이너 하나만 관리해야 하는 것도 아닙니다
 이 구조는 containerd+runc의 예이며 모든 CRI 구현이 같은 프로세스 구성을 쓰도록 OCI가 요구하지는 않습니다
 
-## CRI는 실행 관리와 이미지 관리를 별도 서비스로 정의합니다
-
-확인한 [`api.proto`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-api/pkg/apis/runtime/v1/api.proto)에는 `RuntimeService`와 `ImageService`가 있습니다
+CRI는 실행 관리와 이미지 관리를 두 서비스로 나눕니다
 
 - **RuntimeService** — sandbox·컨테이너 생성과 종료, exec·attach, 상태·통계, 자원 갱신 등의 요청
 - **ImageService** — 이미지 조회·pull·삭제·파일시스템 정보 요청
-
-현재 ImageService는 `ListImages`, `StreamImages`, `ImageStatus`, `PullImage`, `RemoveImage`, `ImageFsInfo`를 정의합니다
-이미지 조회의 스트리밍 RPC도 추가돼 있으므로 오래된 RPC 개수를 서비스의 고정 속성으로 읽으면 안 됩니다
-
-kubelet의 `containerRuntimeEndpoint`와 `imageServiceEndpoint`는 두 서비스의 위치를 각각 지정합니다
-이미지 엔드포인트가 비어 있으면 런타임 엔드포인트를 사용합니다
-확인한 kubelet 설정의 런타임 엔드포인트 기본값은 `unix:///run/containerd/containerd.sock`입니다
-
-두 서비스를 같은 프로세스나 소켓에 묶어야 하는 계약은 아닙니다
-이미지 저장·전송과 컨테이너 실행 관리의 책임을 나누고 필요하면 다른 엔드포인트에 연결할 수 있습니다
-
-[공식 CRI 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/containers/cri.md)는 v1.26부터 CRI `v1` 지원이 필수라고 설명합니다
-런타임이 이를 지원하지 않으면 kubelet이 노드를 등록하지 못합니다
-하지만 노드 등록 실패라는 증상만으로 CRI 버전 불일치를 확정할 수는 없으므로 실제 연결 오류도 함께 봐야 합니다
 
 ## sandbox를 먼저 준비하고 컨테이너를 생성합니다
 
@@ -78,27 +62,6 @@ proto는 `RunPodSandbox`가 sandbox를 생성하고 시작하며, 성공 응답 
 
 공유 환경을 먼저 준비하면 애플리케이션 컨테이너 하나의 재시작과 Pod 네트워크 환경의 수명을 분리할 수 있습니다
 컨테이너의 `CrashLoopBackOff`와 sandbox 재생성을 같은 사건으로 읽으면 안 됩니다
-
-### 모든 namespace를 새로 만들어 공유하는 것은 아닙니다
-
-kubelet이 보내는 Linux sandbox 설정에는 `CgroupParent`와 namespace 옵션 등이 들어 있습니다
-[`NamespacesForPod`와 관련 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/util/util.go)는 Pod 설정에 따라 범위를 고릅니다
-
-| 설정 예 | CRI namespace 범위 |
-|---|---|
-| 일반 Pod의 network | `POD` |
-| `hostNetwork: true` | network는 `NODE` |
-| 일반 Pod의 PID | `CONTAINER` |
-| `shareProcessNamespace: true` | PID는 `POD` |
-| `hostPID: true` | PID는 `NODE` |
-
-Pod의 컨테이너가 network namespace를 공유한다고 해서 PID namespace까지 기본으로 모두 공유하는 것은 아닙니다
-namespace를 공유하는 것과 cgroup의 자원 한도를 적용하는 것도 다른 역할입니다
-kubelet은 관련 설정을 만들고 CRI 구현은 이를 자기 실행 설정으로 옮깁니다
-
-현재 [`SyncPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_manager.go) 주석은 sandbox·컨테이너 변경 계산부터 일반 컨테이너 생성까지 아홉 단계를 적고 있습니다
-sandbox 생성 뒤에는 Pod 상태 갱신을 알리는 `OnPodSandboxReady`가 있고, 자원 resize와 ephemeral·init·일반 컨테이너 처리가 이어집니다
-이 단계들을 모든 Pod 동기화에서 무조건 새로 실행하는 것은 아니며 필요한 변경에 따라 처리합니다
 
 ## CRI create와 start 사이에는 컨테이너 ID 등록이 있습니다
 
@@ -120,6 +83,17 @@ containerd 구현에서는 같은 create라는 단어에 특히 주의해야 합
 
 이 일반 경로에서 shim의 task 생성은 runc의 OCI create로, task 시작은 OCI start로 이어집니다
 따라서 CRI `CreateContainer`가 곧 OCI create를 호출하는 시점이라고 일대일로 대응시키면 실제 구현을 잘못 설명하게 됩니다
+
+## 이미지 관리가 끝나야 실행기에 root 파일시스템을 줄 수 있습니다
+
+OCI runtime 규격은 준비된 bundle로 컨테이너를 실행하는 계약입니다
+레지스트리에서 이미지를 pull하라는 CRI 요청을 runc가 받는 구조가 아닙니다
+OCI image specification은 이미지 형식의 별도 규격입니다
+runtime 설정에 이미지 관련 annotation이 들어갈 수 있다는 사실도 pull 책임을 실행기로 옮기지는 않습니다
+
+확인한 containerd의 [이미지 pull 구현](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/internal/cri/server/images/image_pull.go)은 pull과 unpack을 처리합니다
+이후 snapshot과 root 파일시스템, 실행 설정을 준비해 실행 경로에 전달합니다
+이미지 문제를 OCI 실행기의 create 오류와 같은 단계로 묶지 않아야 합니다
 
 ## OCI bundle은 실행 설정이며 명령줄 API가 아닙니다
 
@@ -168,18 +142,46 @@ type 자체가 빠져 있으면 실행기의 해당 namespace를 상속합니다
 따라서 Pod 설정, CRI의 자원 구조체, OCI의 Linux 설정, 실제 cgroup 파일은 역할이 다른 단계입니다
 [QoS와 cgroup 변환](/essays/k8s-theory-qos-cgroups)에서 본 kubelet의 값을 런타임 입력에 담았다는 것과 실제 노드의 파일 값까지 확인했다는 것은 다릅니다
 
-## 이미지 관리가 끝나야 실행기에 root 파일시스템을 줄 수 있습니다
+## 모든 namespace를 새로 만들어 공유하는 것은 아닙니다
 
-OCI runtime 규격은 준비된 bundle로 컨테이너를 실행하는 계약입니다
-레지스트리에서 이미지를 pull하라는 CRI 요청을 runc가 받는 구조가 아닙니다
-OCI image specification은 이미지 형식의 별도 규격입니다
-runtime 설정에 이미지 관련 annotation이 들어갈 수 있다는 사실도 pull 책임을 실행기로 옮기지는 않습니다
+kubelet이 보내는 Linux sandbox 설정에는 `CgroupParent`와 namespace 옵션 등이 들어 있습니다
+[`NamespacesForPod`와 관련 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/util/util.go)는 Pod 설정에 따라 범위를 고릅니다
 
-확인한 containerd의 [이미지 pull 구현](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/internal/cri/server/images/image_pull.go)은 pull과 unpack을 처리합니다
-이후 snapshot과 root 파일시스템, 실행 설정을 준비해 실행 경로에 전달합니다
-이미지 문제를 OCI 실행기의 create 오류와 같은 단계로 묶지 않아야 합니다
+| 설정 예 | CRI namespace 범위 |
+|---|---|
+| 일반 Pod의 network | `POD` |
+| `hostNetwork: true` | network는 `NODE` |
+| 일반 Pod의 PID | `CONTAINER` |
+| `shareProcessNamespace: true` | PID는 `POD` |
+| `hostPID: true` | PID는 `NODE` |
 
-### imagePullPolicy의 기본값은 이미지 이름으로 정합니다
+Pod의 컨테이너가 network namespace를 공유한다고 해서 PID namespace까지 기본으로 모두 공유하는 것은 아닙니다
+namespace를 공유하는 것과 cgroup의 자원 한도를 적용하는 것도 다른 역할입니다
+kubelet은 관련 설정을 만들고 CRI 구현은 이를 자기 실행 설정으로 옮깁니다
+
+현재 [`SyncPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_manager.go) 주석은 sandbox·컨테이너 변경 계산부터 일반 컨테이너 생성까지 아홉 단계를 적고 있습니다
+sandbox 생성 뒤에는 Pod 상태 갱신을 알리는 `OnPodSandboxReady`가 있고, 자원 resize와 ephemeral·init·일반 컨테이너 처리가 이어집니다
+이 단계들을 모든 Pod 동기화에서 무조건 새로 실행하는 것은 아니며 필요한 변경에 따라 처리합니다
+
+## CRI는 실행 관리와 이미지 관리를 별도 서비스로 정의합니다
+
+확인한 [`api.proto`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-api/pkg/apis/runtime/v1/api.proto)에는 `RuntimeService`와 `ImageService`가 있습니다
+
+현재 ImageService는 `ListImages`, `StreamImages`, `ImageStatus`, `PullImage`, `RemoveImage`, `ImageFsInfo`를 정의합니다
+이미지 조회의 스트리밍 RPC도 추가돼 있으므로 오래된 RPC 개수를 서비스의 고정 속성으로 읽으면 안 됩니다
+
+kubelet의 `containerRuntimeEndpoint`와 `imageServiceEndpoint`는 두 서비스의 위치를 각각 지정합니다
+이미지 엔드포인트가 비어 있으면 런타임 엔드포인트를 사용합니다
+확인한 kubelet 설정의 런타임 엔드포인트 기본값은 `unix:///run/containerd/containerd.sock`입니다
+
+두 서비스를 같은 프로세스나 소켓에 묶어야 하는 계약은 아닙니다
+이미지 저장·전송과 컨테이너 실행 관리의 책임을 나누고 필요하면 다른 엔드포인트에 연결할 수 있습니다
+
+[공식 CRI 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/containers/cri.md)는 v1.26부터 CRI `v1` 지원이 필수라고 설명합니다
+런타임이 이를 지원하지 않으면 kubelet이 노드를 등록하지 못합니다
+하지만 노드 등록 실패라는 증상만으로 CRI 버전 불일치를 확정할 수는 없으므로 실제 연결 오류도 함께 봐야 합니다
+
+## imagePullPolicy의 기본값은 이미지 이름으로 정합니다
 
 [`SetDefaults_Container`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/defaults.go)는 정책이 비어 있으면 이미지 이름의 태그를 확인합니다
 태그와 digest가 모두 없으면 파서가 `latest`로 해석합니다

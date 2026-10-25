@@ -20,6 +20,34 @@ init container가 실행되는 순서, Pod 수준 자원 선언, 런타임의 sa
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 수치 예시는 계산 조건을 가정한 것이며 클러스터에서 재현한 실측 기록은 포함하지 않습니다
 
+## Pod 요청은 실행 시점별로 계산합니다
+
+컨테이너 수준 자원을 계산할 때 일반 애플리케이션 컨테이너는 함께 실행하므로 요청을 합산합니다
+반면 일반 init container는 차례로 실행되므로 모든 init 요청을 한꺼번에 합산하지 않습니다
+
+restartable init container인 sidecar는 `restartPolicy: Always`로 선언하며, 시작한 뒤에도 후속 init과 애플리케이션 실행 중 계속 동작할 수 있습니다
+따라서 공통 자원 helper는 자원별로 다음 두 경우를 비교합니다
+
+1. 일반 컨테이너와 계속 실행되는 sidecar의 요청 합계
+2. 각 init 실행 단계에서 해당 init과 그보다 먼저 시작한 sidecar의 요청 합계
+
+각 자원에서 더 큰 값을 선택하므로 CPU 최대량과 메모리 최대량이 서로 다른 실행 단계에서 나올 수도 있습니다
+sidecar를 일반 init처럼 최대값 하나로만 계산하거나, 모든 init을 동시에 실행하는 것처럼 더하면 이 계산과 달라집니다
+
+기본 활성인 `PodLevelResources`를 사용하는 호출에서는 지원되는 자원의 Pod-level request가 해당 자원의 컨테이너 집계값을 대체합니다
+현재 지원 대상은 CPU·메모리·hugepages이며, Pod-level request가 없는 자원까지 일괄 대체하는 것은 아닙니다
+overhead는 이 선택을 마친 뒤 더합니다
+
+DRA(Dynamic Resource Allocation)는 장치 등의 자원을 claim으로 요청하는 기능입니다
+이 기능을 사용한다고 모든 claim의 양이 일반 CPU·메모리 요청 합계에 자동으로 추가되지는 않습니다
+`DRANodeAllocatableResources`는 현재 alpha·기본 off입니다
+이 기능을 켜고 관련 Pod status와 helper 옵션을 사용하는 호출에서 추가 자원 집계가 적용됩니다
+
+스케줄러는 DRA로 처리하는 extended resource를 일반 scalar 자원 검사에서 DRA 경로로 넘기기도 합니다
+따라서 claim 기반 장치 할당과 노드 allocatable의 자원 합산을 같은 계산으로 취급하면 안 됩니다
+
+기본 집계는 [`PodRequests`·`AggregateContainerRequests`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-helpers/resource/helpers.go), 스케줄러의 DRA 조건은 [`NodeResourcesFit`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/fit.go)에 있습니다
+
 ## RuntimeClass가 채운 값도 요청에 포함됩니다
 
 [앞 편](/essays/k8s-theory-runtime-isolation)에서 RuntimeClass의 `handler`는 실행 환경을 고르는 이름이었습니다
@@ -71,34 +99,6 @@ RuntimeClass 플러그인을 비활성화하면 이 대조도 수행되지 않�
 
 이 경로는 [`RuntimeClass` admission](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/runtimeclass/admission.go)과 [RuntimeClass 변경 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/node/validation/validation.go)에 있습니다
 
-## Pod 요청은 실행 시점별로 계산합니다
-
-컨테이너 수준 자원을 계산할 때 일반 애플리케이션 컨테이너는 함께 실행하므로 요청을 합산합니다
-반면 일반 init container는 차례로 실행되므로 모든 init 요청을 한꺼번에 합산하지 않습니다
-
-restartable init container인 sidecar는 `restartPolicy: Always`로 선언하며, 시작한 뒤에도 후속 init과 애플리케이션 실행 중 계속 동작할 수 있습니다
-따라서 공통 자원 helper는 자원별로 다음 두 경우를 비교합니다
-
-1. 일반 컨테이너와 계속 실행되는 sidecar의 요청 합계
-2. 각 init 실행 단계에서 해당 init과 그보다 먼저 시작한 sidecar의 요청 합계
-
-각 자원에서 더 큰 값을 선택하므로 CPU 최대량과 메모리 최대량이 서로 다른 실행 단계에서 나올 수도 있습니다
-sidecar를 일반 init처럼 최대값 하나로만 계산하거나, 모든 init을 동시에 실행하는 것처럼 더하면 이 계산과 달라집니다
-
-기본 활성인 `PodLevelResources`를 사용하는 호출에서는 지원되는 자원의 Pod-level request가 해당 자원의 컨테이너 집계값을 대체합니다
-현재 지원 대상은 CPU·메모리·hugepages이며, Pod-level request가 없는 자원까지 일괄 대체하는 것은 아닙니다
-overhead는 이 선택을 마친 뒤 더합니다
-
-DRA(Dynamic Resource Allocation)는 장치 등의 자원을 claim으로 요청하는 기능입니다
-이 기능을 사용한다고 모든 claim의 양이 일반 CPU·메모리 요청 합계에 자동으로 추가되지는 않습니다
-`DRANodeAllocatableResources`는 현재 alpha·기본 off입니다
-이 기능을 켜고 관련 Pod status와 helper 옵션을 사용하는 호출에서 추가 자원 집계가 적용됩니다
-
-스케줄러는 DRA로 처리하는 extended resource를 일반 scalar 자원 검사에서 DRA 경로로 넘기기도 합니다
-따라서 claim 기반 장치 할당과 노드 allocatable의 자원 합산을 같은 계산으로 취급하면 안 됩니다
-
-기본 집계는 [`PodRequests`·`AggregateContainerRequests`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-helpers/resource/helpers.go), 스케줄러의 DRA 조건은 [`NodeResourcesFit`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/fit.go)에 있습니다
-
 ## overhead는 requests·limits·QoS에서 다르게 쓰입니다
 
 | 계산 목적 | overhead 반영 방식 |
@@ -130,17 +130,6 @@ CRI sandbox 설정은 런타임에 자원과 overhead를 따로 알려주기 위
 
 구현은 [QoS 계산](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/helper/qos/qos.go), [eviction용 요청 helper](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/api/v1/resource/helpers.go), [Pod cgroup 설정](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/cm/helpers_linux.go), [CRI sandbox 자원 설정](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_sandbox_linux.go)에 있습니다
 
-### kubectl 표시도 호출 옵션을 봐야 합니다
-
-현재 `kubectl describe node`는 공통 자원 helper를 호출하며 Pod-level 자원도 읽습니다
-과거 v1.35의 별도 축약 구현이 Pod-level 자원을 읽지 않았던 동작을 현재 버전에 그대로 적용하면 안 됩니다
-
-다만 Pod별 행의 계산은 `UseStatusResources: true`로 status에 기록된 resize 자원을 고려하고, 노드의 전체 요청 합계는 다른 옵션으로 계산합니다
-같은 helper를 사용한다는 사실만으로 resize 중인 Pod의 표시값과 스케줄러의 모든 집계값이 항상 같다고 단정할 수는 없습니다
-표시가 다르면 자원 선언뿐 아니라 호출부의 Pod-level·status·DRA 옵션을 함께 확인해야 합니다
-
-관련 호출은 [`describeNodeResource`·`getPodsTotalRequestsAndLimits`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/describe/describe.go)에 있습니다
-
 ## Filter와 Score는 누락된 요청을 다르게 셉니다
 
 Filter는 새 Pod의 요청이 노드의 남은 allocatable 안에 들어가는지 확인합니다
@@ -165,6 +154,13 @@ overhead는 각 경로가 선택한 요청에 더합니다
 다른 자원 Score 플러그인까지 모두 같은 누락 요청 보정을 쓴다는 뜻은 아닙니다
 
 ## NodeResourcesFit은 세 가지 전략을 제공합니다
+
+`scoringStrategy`는 kube-scheduler가 `--config`로 읽는 `KubeSchedulerConfiguration` 파일에 둡니다
+API 서버가 etcd에 저장하는 오브젝트가 아니므로, 이 파일을 바꾸는 행위 자체에는 Kubernetes API의 RBAC·audit이 적용되지 않습니다
+설정 적용은 스케줄러 실행 구성과 재시작 절차에서 관리합니다
+
+Pod의 `spec.schedulerName`은 파일의 `profiles[].schedulerName`을 선택합니다
+워크로드가 이름을 적는 것만으로 새 프로파일이나 점수 정책을 만들 수는 없습니다
 
 자원 점수의 요청 비율은 **기존 Pod의 점수 계산용 요청 합계와 새 Pod 요청을 더한 값 / 노드 allocatable**입니다
 새 Pod를 그 노드에 넣는다고 가정한 비율이며 아직 바인딩이 끝났다는 뜻은 아닙니다
@@ -244,14 +240,7 @@ DRA가 활성인 구성은 DynamicResources 가중치 2도 등록하며, 기능 
 후보를 먼저 제외하는 Filter, 플러그인 내부 자원 가중치, 최종 합계에 적용하는 플러그인 가중치를 구분해야 합니다
 등록과 기본 가중치는 [기본 플러그인 구성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/apis/config/v1/default_plugins.go)에 있습니다
 
-## Pod는 점수 전략 대신 프로파일 이름을 참조합니다
-
-`scoringStrategy`는 kube-scheduler가 `--config`로 읽는 `KubeSchedulerConfiguration` 파일에 둡니다
-API 서버가 etcd에 저장하는 오브젝트가 아니므로, 이 파일을 바꾸는 행위 자체에는 Kubernetes API의 RBAC·audit이 적용되지 않습니다
-설정 적용은 스케줄러 실행 구성과 재시작 절차에서 관리합니다
-
-Pod의 `spec.schedulerName`은 파일의 `profiles[].schedulerName`을 선택합니다
-워크로드가 이름을 적는 것만으로 새 프로파일이나 점수 정책을 만들 수는 없습니다
+## 여러 프로파일도 스케줄링 큐는 공유합니다
 
 한 프로세스에서 여러 프로파일을 사용할 수 있지만 이름은 중복될 수 없습니다
 하나의 스케줄링 큐를 공유하므로 QueueSort 플러그인과 그 인자도 같아야 합니다
@@ -261,6 +250,17 @@ Pod의 `spec.schedulerName`은 파일의 `profiles[].schedulerName`을 선택합
 다만 이벤트가 없다는 사실 하나로 이름 불일치를 확정할 수는 없으므로 담당 스케줄러와 설정을 함께 확인합니다
 
 자세한 구조는 [Scheduler Configuration 공식 문서](https://kubernetes.io/docs/reference/scheduling/config/), [프로파일 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/apis/config/validation/validation.go), [Pod 이벤트 핸들러](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/eventhandlers.go)에서 확인할 수 있습니다
+
+## kubectl 표시도 호출 옵션을 봐야 합니다
+
+현재 `kubectl describe node`는 공통 자원 helper를 호출하며 Pod-level 자원도 읽습니다
+과거 v1.35의 별도 축약 구현이 Pod-level 자원을 읽지 않았던 동작을 현재 버전에 그대로 적용하면 안 됩니다
+
+다만 Pod별 행의 계산은 `UseStatusResources: true`로 status에 기록된 resize 자원을 고려하고, 노드의 전체 요청 합계는 다른 옵션으로 계산합니다
+같은 helper를 사용한다는 사실만으로 resize 중인 Pod의 표시값과 스케줄러의 모든 집계값이 항상 같다고 단정할 수는 없습니다
+표시가 다르면 자원 선언뿐 아니라 호출부의 Pod-level·status·DRA 옵션을 함께 확인해야 합니다
+
+관련 호출은 [`describeNodeResource`·`getPodsTotalRequestsAndLimits`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/describe/describe.go)에 있습니다
 
 ## 실패한 위치와 자원 계산을 함께 확인합니다
 

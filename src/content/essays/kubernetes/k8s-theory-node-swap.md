@@ -69,6 +69,8 @@ cgroup v1 노드에 `LimitedSwap`을 설정하면 조용히 무시하지 않고 
 v1.37.1은 별도의 `failCgroupV1`도 기본 `true`이므로, cgroup v1 자체를 기본으로 허용하지 않습니다
 그 뒤의 자격 검사는 실제 컨테이너에 적용할 정책을 결정하는 단계입니다
 
+여기서 QoS는 CPU·메모리 자원 선언으로 계산하는 Pod 등급입니다
+
 [`GetContainerSwapBehavior`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container_linux.go)는 다음 조건에 걸리면 `NoSwap`을 반환합니다
 
 | 판정 단위 | 제외 조건 |
@@ -79,18 +81,6 @@ v1.37.1은 별도의 `failCgroupV1`도 기본 `true`이므로, cgroup v1 자체�
 | Pod | critical Pod에 해당 |
 | Pod | QoS가 Burstable이 아님 |
 | 컨테이너 | memory request와 limit이 모두 0이거나, 둘의 값이 같음 |
-
-여기서 QoS는 CPU·메모리 자원 선언으로 계산하는 Pod 등급입니다
-현재 기본 설정의 [`ComputePodQOS`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/helper/qos/qos.go)는 Pod 수준 자원이 설정돼 있으면 `spec.resources`로 먼저 등급을 계산합니다
-Pod 수준 계산 경로를 사용하지 않을 때는 컨테이너별 선언을 기준으로 모든 대상에 CPU·메모리 양쪽의 양수 request=limit이 있으면 Guaranteed, 두 자원의 선언이 모두 없거나 0이면 BestEffort, 나머지는 Burstable입니다
-
-`LimitedSwap`은 정책상 Guaranteed와 BestEffort를 제외합니다
-컨테이너 수준 선언으로 QoS를 계산한 BestEffort는 memory request도 0이어서 비례식에 넣어도 한도가 0입니다
-
-Guaranteed여도 메모리가 항상 RAM에 머무른다는 뜻은 아니며, Pod가 OOM·축출에서 반드시 살아남는 것도 아닙니다
-
-critical 판정도 단순히 우선순위가 높은 Pod라는 설명보다 넓습니다
-[`IsCriticalPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/types/pod_update.go)는 static Pod, mirror Pod, `spec.priority`가 시스템 critical 기준 이상인 Pod를 포함합니다
 
 ### Pod의 QoS와 컨테이너의 request를 구분합니다
 
@@ -104,6 +94,19 @@ request가 명시적인 0이고 limit만 양수라면 자격 검사를 통과해
 Pod 단위 자원 선언인 `spec.resources`만 보고 swap 한도를 계산하지도 않습니다
 Pod QoS를 통과한 뒤의 비교와 계산은 `container.resources.requests.memory`와 `limits.memory`를 직접 읽습니다
 Pod-level memory request가 있어도 컨테이너 양쪽 값이 0이면 이 조건에서 제외됩니다
+
+### Pod 등급과 critical 제외 조건
+
+현재 기본 설정의 [`ComputePodQOS`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/helper/qos/qos.go)는 Pod 수준 자원이 설정돼 있으면 `spec.resources`로 먼저 등급을 계산합니다
+Pod 수준 계산 경로를 사용하지 않을 때는 컨테이너별 선언을 기준으로 모든 대상에 CPU·메모리 양쪽의 양수 request=limit이 있으면 Guaranteed, 두 자원의 선언이 모두 없거나 0이면 BestEffort, 나머지는 Burstable입니다
+
+`LimitedSwap`은 정책상 Guaranteed와 BestEffort를 제외합니다
+컨테이너 수준 선언으로 QoS를 계산한 BestEffort는 memory request도 0이어서 비례식에 넣어도 한도가 0입니다
+
+Guaranteed여도 메모리가 항상 RAM에 머무른다는 뜻은 아니며, Pod가 OOM·축출에서 반드시 살아남는 것도 아닙니다
+
+critical 판정도 단순히 우선순위가 높은 Pod라는 설명보다 넓습니다
+[`IsCriticalPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/types/pod_update.go)는 static Pod, mirror Pod, `spec.priority`가 시스템 critical 기준 이상인 Pod를 포함합니다
 
 ## 한도는 memory request 비율로 계산합니다
 
@@ -153,44 +156,6 @@ RAM 사용 상한인 `memory.max`와 별도이며, 메모리와 swap을 합한 �
 swap controller를 감지하지 못하면 이 설정 경로는 값을 보내지 않고 반환합니다
 따라서 `NoSwap`이라는 정책명만 보고 어떤 노드에서든 동일한 파일에 `0`이 쓰였다고 단정할 수는 없습니다
 
-### cgroup v1의 NoSwap은 제어 방식이 다릅니다
-
-cgroup v1 기동을 별도로 허용한 환경에서 controller가 있으면 `ConfigureNoSwap`은 CRI의 `MemorySwapLimitInBytes`를 `MemoryLimitInBytes`와 같게 둡니다
-이때 해당 값은 메모리와 swap을 합한 한도입니다
-메모리 상한을 넘는 추가 swap 여유를 없애는 방식이며, 소스 주석도 일부 swap이 가능하다고 설명합니다
-
-또한 메모리 한도가 0이면 이 swap 한도는 무시됩니다
-cgroup v2의 `memory.swap.max=0`과 cgroup v1의 동작을 같은 보장으로 취급하지 않아야 합니다
-워크로드의 `LimitedSwap` 지원 범위는 앞서 본 것처럼 cgroup v2입니다
-
-## 메모리 볼륨에는 tmpfs noswap을 확인합니다
-
-`emptyDir.medium: Memory`와 Secret 볼륨은 Linux에서 tmpfs를 사용합니다
-tmpfs는 메모리를 사용하는 파일시스템이지만, 그 이름만으로 내용이 디스크 swap에 나가지 않는다고 보장하지는 않습니다
-kubelet은 지원되는 환경에서 tmpfs 마운트에 `noswap` 옵션을 붙입니다
-
-[`IsTmpfsNoswapOptionSupported`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/util/swap/swap_util.go)의 판정 순서는 다음과 같습니다
-
-1. kubelet 프로세스가 사용자 네임스페이스 안에서 실행되면 미지원으로 판단합니다
-2. 커널 버전을 읽지 못하면 미지원으로 판단합니다
-3. 커널 버전이 소스 상수 `6.4` 이상이면 지원한다고 판단합니다
-4. 더 낮은 버전이면 임시 디렉토리에 `noswap` tmpfs 마운트를 시험합니다. 성공하면 지원으로 판정하고 마운트를 해제합니다
-
-구버전 배포판이 옵션을 백포트했을 수 있으므로 버전 숫자만으로 모두 거부하지 않는 구조입니다
-여기서 사용자 네임스페이스 검사는 kubelet 자신이 실행되는 환경에 대한 판정입니다
-Pod에 user namespace를 사용한다는 이유만으로 곧바로 같은 분기에 들어가는 것은 아닙니다
-
-공식 [Swap memory management](https://kubernetes.io/docs/concepts/cluster-administration/swap-memory-management/)와 [Linux Kernel Version Requirements](https://kubernetes.io/docs/reference/node/kernel-version-requirements/)는 지원 버전을 `6.3`으로 적고 있습니다
-그러나 kubelet의 [`TmpfsNoswapSupportKernelVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/util/kernel/constants.go)은 `6.4`이며, Linux [`v6.3`](https://github.com/torvalds/linux/blob/v6.3/mm/shmem.c)에는 없던 `noswap` 파서가 [`v6.4`](https://github.com/torvalds/linux/blob/v6.4/mm/shmem.c)에 있습니다
-이 글에서는 실제 kubelet의 `6.4` 기준과 낮은 버전에서의 마운트 시험을 기준으로 설명합니다
-
-swap이 켜진 노드에서 기동을 허용했는데 `noswap`을 지원하지 않으면 kubelet은 `PossibleMemoryBackedVolumesOnDisk` Warning 이벤트를 남깁니다
-이 경고만으로 기동을 중단하지는 않습니다
-이때는 메모리 볼륨의 내용이 디스크로 나갈 수 있습니다
-swap 암호화는 kubelet 설정 밖의 OS 구성입니다
-
-실제 마운트 옵션 추가는 [`emptyDir.setupTmpfs`와 `generateTmpfsMountOptions`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/emptydir/empty_dir.go), Secret의 메모리 emptyDir 사용은 [`wrappedVolumeSpec`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/secret/secret.go)에서 확인했습니다
-
 ## 스케줄러의 메모리 배치 계산에는 swap이 더해지지 않습니다
 
 스케줄러는 Pod의 memory request를 노드 allocatable과 이미 배치한 요청량에 대조합니다
@@ -230,6 +195,44 @@ kubelet의 working set 기반 `memory.available`과 같은 지표가 아니므�
 
 커널 OOM, cgroup의 메모리 상한, kubelet의 node-pressure eviction은 각각 별도 경로입니다
 Guaranteed나 높은 Pod priority만으로 모든 경로에서 살아남는다고 해석하지 않아야 합니다
+
+## cgroup v1의 NoSwap은 제어 방식이 다릅니다
+
+cgroup v1 기동을 별도로 허용한 환경에서 controller가 있으면 `ConfigureNoSwap`은 CRI의 `MemorySwapLimitInBytes`를 `MemoryLimitInBytes`와 같게 둡니다
+이때 해당 값은 메모리와 swap을 합한 한도입니다
+메모리 상한을 넘는 추가 swap 여유를 없애는 방식이며, 소스 주석도 일부 swap이 가능하다고 설명합니다
+
+또한 메모리 한도가 0이면 이 swap 한도는 무시됩니다
+cgroup v2의 `memory.swap.max=0`과 cgroup v1의 동작을 같은 보장으로 취급하지 않아야 합니다
+워크로드의 `LimitedSwap` 지원 범위는 앞서 본 것처럼 cgroup v2입니다
+
+## 메모리 볼륨에는 tmpfs noswap을 확인합니다
+
+`emptyDir.medium: Memory`와 Secret 볼륨은 Linux에서 tmpfs를 사용합니다
+tmpfs는 메모리를 사용하는 파일시스템이지만, 그 이름만으로 내용이 디스크 swap에 나가지 않는다고 보장하지는 않습니다
+kubelet은 지원되는 환경에서 tmpfs 마운트에 `noswap` 옵션을 붙입니다
+
+[`IsTmpfsNoswapOptionSupported`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/util/swap/swap_util.go)의 판정 순서는 다음과 같습니다
+
+1. kubelet 프로세스가 사용자 네임스페이스 안에서 실행되면 미지원으로 판단합니다
+2. 커널 버전을 읽지 못하면 미지원으로 판단합니다
+3. 커널 버전이 소스 상수 `6.4` 이상이면 지원한다고 판단합니다
+4. 더 낮은 버전이면 임시 디렉토리에 `noswap` tmpfs 마운트를 시험합니다. 성공하면 지원으로 판정하고 마운트를 해제합니다
+
+구버전 배포판이 옵션을 백포트했을 수 있으므로 버전 숫자만으로 모두 거부하지 않는 구조입니다
+여기서 사용자 네임스페이스 검사는 kubelet 자신이 실행되는 환경에 대한 판정입니다
+Pod에 user namespace를 사용한다는 이유만으로 곧바로 같은 분기에 들어가는 것은 아닙니다
+
+공식 [Swap memory management](https://kubernetes.io/docs/concepts/cluster-administration/swap-memory-management/)와 [Linux Kernel Version Requirements](https://kubernetes.io/docs/reference/node/kernel-version-requirements/)는 지원 버전을 `6.3`으로 적고 있습니다
+그러나 kubelet의 [`TmpfsNoswapSupportKernelVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/util/kernel/constants.go)은 `6.4`이며, Linux [`v6.3`](https://github.com/torvalds/linux/blob/v6.3/mm/shmem.c)에는 없던 `noswap` 파서가 [`v6.4`](https://github.com/torvalds/linux/blob/v6.4/mm/shmem.c)에 있습니다
+이 글에서는 실제 kubelet의 `6.4` 기준과 낮은 버전에서의 마운트 시험을 기준으로 설명합니다
+
+swap이 켜진 노드에서 기동을 허용했는데 `noswap`을 지원하지 않으면 kubelet은 `PossibleMemoryBackedVolumesOnDisk` Warning 이벤트를 남깁니다
+이 경고만으로 기동을 중단하지는 않습니다
+이때는 메모리 볼륨의 내용이 디스크로 나갈 수 있습니다
+swap 암호화는 kubelet 설정 밖의 OS 구성입니다
+
+실제 마운트 옵션 추가는 [`emptyDir.setupTmpfs`와 `generateTmpfsMountOptions`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/emptydir/empty_dir.go), Secret의 메모리 emptyDir 사용은 [`wrappedVolumeSpec`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/secret/secret.go)에서 확인했습니다
 
 ## 용량 정보와 사용량 통계를 구분합니다
 

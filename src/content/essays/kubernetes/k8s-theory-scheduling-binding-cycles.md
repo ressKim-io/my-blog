@@ -36,22 +36,10 @@ Pod를 배치할 노드를 골랐다고 해서 API 서버의 `spec.nodeName`이 
 이 글은 기본값에서 사용하는 Pod별 경로를 설명합니다
 v1.37.1의 `GenericWorkload`는 Beta·기본 off이며, 활성화한 PodGroup 경로는 뒤에서 별도로 구분합니다
 
-## PreEnqueue는 노드 검사를 시작하기 전의 관문입니다
+## Filter는 가능한 노드를 남기고 Score는 그 안에서 고릅니다
 
 **확장점(extension point)**은 스케줄링 프레임워크가 플러그인을 호출하는 단계입니다
 플러그인마다 같은 확장점에서 다른 조건을 검사하거나 자기 상태를 갱신할 수 있습니다
-
-`PreEnqueue`는 Pod가 실행 대기열인 activeQ에 들어가기 전에 호출합니다
-기본 [`SchedulingGates.PreEnqueue`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/schedulinggates/scheduling_gates.go)는 `spec.schedulingGates`가 남아 있으면 진입을 막습니다
-
-이 Pod는 스케줄러 내부 대기 목록에는 있을 수 있지만, 노드 선택을 시작하지는 않습니다
-노드를 검사한 끝에 자리가 없어 거절한 경우와 구분해야 합니다
-
-API 서버는 게이트가 있는 Pod를 생성할 때 [`applySchedulingGatedCondition`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)으로 `PodScheduled=False`, `reason=SchedulingGated`를 기록합니다
-메시지는 `Scheduling is blocked due to non-empty scheduling gates`입니다
-스케줄러의 기본 PreEnqueue 차단이 `FailedScheduling` 실패 처리 경로를 거치는 것은 아닙니다
-
-## Filter는 가능한 노드를 남기고 Score는 그 안에서 고릅니다
 
 **Feasible node**는 현재 판단에서 Pod를 배치할 수 있다고 통과한 노드입니다
 Filter는 불가능한 노드를 제외하고, Score는 남은 후보의 우선순위를 비교합니다
@@ -69,40 +57,6 @@ Filter는 불가능한 노드를 제외하고, Score는 남은 후보의 우선�
 preemption도 여기서 동작하지만, PostFilter 성공이 현재 시도에서 곧바로 바인딩 성공을 뜻하지는 않습니다
 
 Score 플러그인의 최종 점수 범위는 0~100이며, 플러그인 가중치를 적용한 총점으로 비교합니다
-`NormalizeScore`는 Score 플러그인이 선택적으로 구현하는 `ScoreExtensions`의 callback입니다
-설정 파일의 독립 `Plugins` 필드로 등록하는 단계와 구분해야 합니다
-
-현재 [`sorted_nodes.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/sorted_nodes.go)는 총점이 높은 노드를 먼저 꺼내는 힙을 구성합니다
-총점이 같으면 점수 항목의 `Randomizer` 값으로 순서를 정합니다
-후보가 하나만 남으면 점수 비교 없이 그 노드를 사용합니다
-
-### 전체 노드를 다 검사하기 전에 후보 탐색을 끝낼 수 있습니다
-
-[`numFeasibleNodesToFind`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/schedule_one.go)는 `percentageOfNodesToScore`로 찾을 feasible 노드의 목표 수를 계산합니다
-100개 미만이면 전체 수를 목표로 삼고, 100개 이상이면 비율로 계산하되 최소 100개를 찾도록 합니다
-
-비율이 0이면 다음 식으로 자동 계산합니다
-다음은 소스의 계산을 정리한 식이며 실행한 측정값이 아닙니다
-
-```text
-percentage = max(50 - numAllNodes / 125, 5)
-numNodesToFind = max(numAllNodes * percentage / 100, 100)
-```
-
-예를 들어 후보 집합이 5,000노드이면 비율은 10%, 목표는 500개의 feasible 노드입니다
-이는 노드 500개를 검사한 뒤 멈춘다는 뜻이 아닙니다
-통과한 노드가 부족하면 더 검사해야 하며, Filter 내부의 오류도 탐색을 중단할 수 있습니다
-
-Score를 수행할 구성도, 노드를 걸러내는 extender도 없다면 목표를 1개로 줄입니다
-extender는 프레임워크 밖의 서비스에 노드 검사 등을 위임하는 연동 방식입니다
-따라서 노드가 100개 미만이라는 이유만으로 모든 경로가 항상 모든 노드의 Filter를 실행하는 것도 아닙니다
-
-스케줄러는 다음 탐색의 시작 위치도 옮깁니다
-직전 사이클에서 처리한 위치를 반영해 원형으로 탐색하므로, 늘 목록 앞의 노드만 후보가 되는 편향을 줄입니다
-
-후보 수를 줄이면 노드를 고르는 직렬 구간을 짧게 할 수 있습니다
-대신 점수를 비교하는 노드의 범위도 줄어듭니다
-
 ## assume과 Reserve는 서로 다른 상태를 반영합니다
 
 노드를 고르면 [`assumeAndReserve`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/schedule_one.go)는 Pod 사본의 `spec.nodeName`을 채운 뒤 assume과 Reserve를 실행합니다
@@ -169,7 +123,7 @@ VolumeBinding은 필요한 PV·PVC 정보를 API에 쓰고 PV controller가 바�
 
 API 서버는 저장소 갱신을 통해 Pod의 `spec.nodeName`을 채웁니다
 이미 노드가 지정됐거나 삭제 중이거나 schedulingGates가 남은 Pod는 거절합니다
-PreEnqueue의 검사와 API 서버의 검사는 서로 다른 경계이므로, 커스텀 스케줄러가 게이트를 무시해도 Binding 경로의 검사가 남습니다
+대기열 진입 전 PreEnqueue의 검사와 API 서버의 검사는 서로 다른 경계이므로, 커스텀 스케줄러가 게이트를 무시해도 Binding 경로의 검사가 남습니다
 
 `pods/binding`은 별도 REST handler와 권한을 갖는 서브리소스입니다
 바인딩 성공은 노드 선택이 기록됐다는 뜻이며, 컨테이너의 실행 완료를 뜻하지는 않습니다
@@ -207,6 +161,57 @@ Permit의 거절이나 대기 중 거절은 `Unschedulable`로 기록될 수 있
 따라서 모든 플러그인에 대해 Permit 뒤의 실패가 반드시 SchedulerError라고 일반화하면 안 됩니다
 
 소스에는 Permit을 스케줄 불가 판정의 마지막 단계로 설명한 주석이 남아 있지만, 오류를 판별할 때는 현재 플러그인의 반환 코드와 실제 처리 분기를 함께 봐야 합니다
+
+## 전체 노드를 다 검사하기 전에 후보 탐색을 끝낼 수 있습니다
+
+선택한 노드를 캐시에 반영하고 API에 기록하는 경로를 살펴봤습니다
+이제 그 경로의 첫 단계인 후보 탐색을 얼마나 오래 수행할지 구분합니다
+
+[`numFeasibleNodesToFind`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/schedule_one.go)는 `percentageOfNodesToScore`로 찾을 feasible 노드의 목표 수를 계산합니다
+100개 미만이면 전체 수를 목표로 삼고, 100개 이상이면 비율로 계산하되 최소 100개를 찾도록 합니다
+
+비율이 0이면 다음 식으로 자동 계산합니다
+다음은 소스의 계산을 정리한 식이며 실행한 측정값이 아닙니다
+
+```text
+percentage = max(50 - numAllNodes / 125, 5)
+numNodesToFind = max(numAllNodes * percentage / 100, 100)
+```
+
+예를 들어 후보 집합이 5,000노드이면 비율은 10%, 목표는 500개의 feasible 노드입니다
+이는 노드 500개를 검사한 뒤 멈춘다는 뜻이 아닙니다
+통과한 노드가 부족하면 더 검사해야 하며, Filter 내부의 오류도 탐색을 중단할 수 있습니다
+
+Score를 수행할 구성도, 노드를 걸러내는 extender도 없다면 목표를 1개로 줄입니다
+extender는 프레임워크 밖의 서비스에 노드 검사 등을 위임하는 연동 방식입니다
+따라서 노드가 100개 미만이라는 이유만으로 모든 경로가 항상 모든 노드의 Filter를 실행하는 것도 아닙니다
+
+스케줄러는 다음 탐색의 시작 위치도 옮깁니다
+직전 사이클에서 처리한 위치를 반영해 원형으로 탐색하므로, 늘 목록 앞의 노드만 후보가 되는 편향을 줄입니다
+
+후보 수를 줄이면 노드를 고르는 직렬 구간을 짧게 할 수 있습니다
+대신 점수를 비교하는 노드의 범위도 줄어듭니다
+
+### 선택 점수의 비교와 정규화 구현
+
+`NormalizeScore`는 Score 플러그인이 선택적으로 구현하는 `ScoreExtensions`의 callback입니다
+설정 파일의 독립 `Plugins` 필드로 등록하는 단계와 구분해야 합니다
+
+현재 [`sorted_nodes.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/sorted_nodes.go)는 총점이 높은 노드를 먼저 꺼내는 힙을 구성합니다
+총점이 같으면 점수 항목의 `Randomizer` 값으로 순서를 정합니다
+후보가 하나만 남으면 점수 비교 없이 그 노드를 사용합니다
+
+## PreEnqueue는 노드 검사를 시작하기 전의 관문입니다
+
+`PreEnqueue`는 Pod가 실행 대기열인 activeQ에 들어가기 전에 호출합니다
+기본 [`SchedulingGates.PreEnqueue`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/schedulinggates/scheduling_gates.go)는 `spec.schedulingGates`가 남아 있으면 진입을 막습니다
+
+이 Pod는 스케줄러 내부 대기 목록에는 있을 수 있지만, 노드 선택을 시작하지는 않습니다
+노드를 검사한 끝에 자리가 없어 거절한 경우와 구분해야 합니다
+
+API 서버는 게이트가 있는 Pod를 생성할 때 [`applySchedulingGatedCondition`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)으로 `PodScheduled=False`, `reason=SchedulingGated`를 기록합니다
+메시지는 `Scheduling is blocked due to non-empty scheduling gates`입니다
+스케줄러의 기본 PreEnqueue 차단이 `FailedScheduling` 실패 처리 경로를 거치는 것은 아닙니다
 
 ## 재시도할 Pod를 모두 같은 대기열에 넣지는 않습니다
 

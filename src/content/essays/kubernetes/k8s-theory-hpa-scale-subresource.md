@@ -41,6 +41,41 @@ HPA가 목표를 저장해도 그 수만큼의 Pod가 즉시 Running이 된다�
 
 실제 조회는 [메트릭 클라이언트](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/podautoscaler/metrics/client.go), 대상과 조정 루프는 [`scaleForResourceMappings`·`reconcileAutoscaler`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/podautoscaler/horizontal.go)에 있습니다
 
+## scale은 본체의 replica 정보를 별도 API로 보여 줍니다
+
+HPA는 scale 경로의 일반 갱신 요청으로 목표 replica 수를 기록합니다
+
+Deployment 본체와 `/scale`은 같은 저장 오브젝트와 etcd 키를 사용합니다
+`/scale` GET의 `autoscaling/v1 Scale`은 별도로 저장한 복사본이 아니라 Deployment의 replica 값과 selector를 뽑아 만든 표현입니다
+메타데이터의 resourceVersion도 본체에서 가져옵니다
+
+| 요청 경로 | API 리소스 이름 | 다루는 내용 |
+|---|---|---|
+| Deployment 본체 | `deployments` | Deployment 전체 표현 |
+| Deployment의 `/scale` | `deployments/scale` | 목표·상태 replica 수와 selector를 읽고 목표 replica 수 갱신 |
+
+별도 subresource이므로 RBAC 권한을 나눌 수 있습니다
+`deployments/scale`의 갱신 권한만으로 이미지나 Deployment selector를 고칠 수는 없습니다
+본체 갱신 권한이 있더라도 개별 필드의 변경 가능 여부는 validation을 따릅니다
+
+![GitOps의 Deployment Apply와 HPA의 scale Update가 같은 Deployment의 replicas와 managedFields로 합쳐지고 Deployment 컨트롤러는 ReplicaSet을 갱신하는 관계](/diagrams/k8s-theory-hpa-scale-subresource-2.svg)
+
+Deployment·ReplicaSet·StatefulSet이나 scale을 제공하는 CRD는 본체 모양이 달라도 Scale 표현으로 조정할 수 있습니다
+HPA는 대상 Kind마다 전체 오브젝트를 수정하는 대신 이 공통 경로를 사용합니다
+Deployment 구현은 [`ScaleREST`·`scaleFromDeployment`·`scaleUpdatedObjectInfo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/deployment/storage/storage.go)에 있습니다
+
+## 롤아웃은 ReplicaSet에 개수를 배분합니다
+
+HPA가 Deployment의 목표 수를 바꾸면 Deployment 컨트롤러는 그 값을 읽고 ReplicaSet들에 나눠 적용합니다
+이때 쓰는 대상은 Deployment의 `/scale`이 아니라 ReplicaSet 본체의 `spec.replicas`입니다
+
+ReplicaSet에 `deployment.kubernetes.io/desired-replicas`와 `max-replicas` 어노테이션도 기록합니다
+기록한 목표는 현재 Deployment 목표와 비교해 스케일 변경 등을 판단하는 데 사용합니다
+HPA의 입력으로 쓰는 별도 목표값은 아닙니다
+
+따라서 HPA와 Deployment 컨트롤러가 같은 Deployment replica 필드를 서로 되돌리는 구조로 보면 안 됩니다
+ReplicaSet 갱신은 [`scaleReplicaSet`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/sync.go), 어노테이션은 [`SetReplicasAnnotations`·`DesiredReplicasAnnotation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/util/deployment_util.go)에 있습니다
+
 ## 비율을 개수로 바꾸기 전에 계산 대상을 고릅니다
 
 단순한 계산 관계는 `desiredReplicas = ceil(currentReplicas × 현재 지표값 / 목표 지표값)`입니다
@@ -160,27 +195,6 @@ API의 기본 behavior는 [`SetDefaults_HorizontalPodAutoscalerBehavior`](https:
 
 관련 처리는 [`recordInitialRecommendation`과 이력 맵 초기화](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/podautoscaler/horizontal.go)에 있습니다
 
-## scale은 본체의 replica 정보를 별도 API로 보여 줍니다
-
-Deployment 본체와 `/scale`은 같은 저장 오브젝트와 etcd 키를 사용합니다
-`/scale` GET의 `autoscaling/v1 Scale`은 별도로 저장한 복사본이 아니라 Deployment의 replica 값과 selector를 뽑아 만든 표현입니다
-메타데이터의 resourceVersion도 본체에서 가져옵니다
-
-| 요청 경로 | API 리소스 이름 | 다루는 내용 |
-|---|---|---|
-| Deployment 본체 | `deployments` | Deployment 전체 표현 |
-| Deployment의 `/scale` | `deployments/scale` | 목표·상태 replica 수와 selector를 읽고 목표 replica 수 갱신 |
-
-별도 subresource이므로 RBAC 권한을 나눌 수 있습니다
-`deployments/scale`의 갱신 권한만으로 이미지나 Deployment selector를 고칠 수는 없습니다
-본체 갱신 권한이 있더라도 개별 필드의 변경 가능 여부는 validation을 따릅니다
-
-![GitOps의 Deployment Apply와 HPA의 scale Update가 같은 Deployment의 replicas와 managedFields로 합쳐지고 Deployment 컨트롤러는 ReplicaSet을 갱신하는 관계](/diagrams/k8s-theory-hpa-scale-subresource-2.svg)
-
-Deployment·ReplicaSet·StatefulSet이나 scale을 제공하는 CRD는 본체 모양이 달라도 Scale 표현으로 조정할 수 있습니다
-HPA는 대상 Kind마다 전체 오브젝트를 수정하는 대신 이 공통 경로를 사용합니다
-Deployment 구현은 [`ScaleREST`·`scaleFromDeployment`·`scaleUpdatedObjectInfo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/deployment/storage/storage.go)에 있습니다
-
 ## HPA의 Update와 GitOps의 Apply는 충돌 방식이 다릅니다
 
 `metadata.managedFields`는 어느 매니저가 어떤 필드를 관리하는지 서버가 기록한 목록입니다
@@ -191,6 +205,7 @@ SSA(Server-Side Apply)는 Apply 요청이 다른 매니저가 관리하는 필�
 필드를 관리한다는 기록이 RBAC 권한을 부여하는 것도, 다른 작성자의 일반 Update를 막는 것도 아닙니다
 
 HPA는 `Scales(ns).Update(...)`를 사용하며 SSA Apply를 보내지 않습니다
+
 실제로 replica 값을 바꾼 Update는 다른 매니저의 SSA 소유권 때문에 거절되지 않으며 필드 관리 기록에도 반영됩니다
 
 서버는 본체의 replica 소유권을 Scale의 managedFields로 변환하고, 처리 후 다시 본체로 합칩니다
@@ -238,18 +253,6 @@ HPA가 replica를 맡는 구성이라면 GitOps가 계속 그 값을 쓰는지 �
 기존 매니저가 유일한 소유자일 때 HPA가 인계받기 전에 빼면 Deployment의 기본값 1로 돌아갈 수 있으므로, 소유권 인계를 확인하고 제거해야 합니다
 
 이 차이와 인계 조건은 [공식 SSA 문서의 HPA 인계 절](https://kubernetes.io/docs/reference/using-api/server-side-apply/#transferring-ownership-between-managers)에서 설명합니다
-
-## 롤아웃은 ReplicaSet에 개수를 배분합니다
-
-HPA가 Deployment의 목표 수를 바꾸면 Deployment 컨트롤러는 그 값을 읽고 ReplicaSet들에 나눠 적용합니다
-이때 쓰는 대상은 Deployment의 `/scale`이 아니라 ReplicaSet 본체의 `spec.replicas`입니다
-
-ReplicaSet에 `deployment.kubernetes.io/desired-replicas`와 `max-replicas` 어노테이션도 기록합니다
-기록한 목표는 현재 Deployment 목표와 비교해 스케일 변경 등을 판단하는 데 사용합니다
-HPA의 입력으로 쓰는 별도 목표값은 아닙니다
-
-따라서 HPA와 Deployment 컨트롤러가 같은 Deployment replica 필드를 서로 되돌리는 구조로 보면 안 됩니다
-ReplicaSet 갱신은 [`scaleReplicaSet`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/sync.go), 어노테이션은 [`SetReplicasAnnotations`·`DesiredReplicasAnnotation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/util/deployment_util.go)에 있습니다
 
 ## CRD는 Scale에 대응시킬 경로를 선언합니다
 

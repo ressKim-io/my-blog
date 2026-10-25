@@ -44,46 +44,6 @@ limit 합계가 아닌 request로 계산하므로 오버커밋이 가능합니�
 CPU request가 특정 코어를 미리 떼어 놓는다는 뜻은 아닙니다
 일반적인 CPU 배분에서는 경합 시 상대 가중치로 작용하며, CPU Manager의 전용 CPU 할당은 별도 정책과 조건을 따릅니다
 
-### 요청이 없으면 Filter와 Score의 계산이 달라집니다
-
-Filter는 후보 노드를 제외하는 단계이고, Score는 통과한 후보 사이에 점수를 매기는 단계입니다
-CPU·메모리 request가 없으면 해당 자원의 Filter 요청량은 0입니다
-그 자원 요청 때문에 노드를 제외하지 않는다는 뜻이며, 다른 배치 조건까지 통과한다는 뜻은 아닙니다
-
-자원 Score에서 누락 요청을 보정하는 경로는 컨테이너당 CPU `100m`·메모리 `200Mi`를 가정값으로 씁니다
-Pod-level request가 있으면 그 값도 계산에 반영하므로, 이 경우까지 항상 가정값을 더하는 것은 아닙니다
-
-이 가정값은 request가 없는 Pod가 이미 많이 배치된 노드를 자원 계산상 비어 있는 것처럼 보는 문제를 줄입니다
-실제 사용량을 측정한 값도, Pod 오브젝트에 채워 넣는 기본 request도 아닙니다
-
-구현은 [`computePodResourceRequest`·`fitsRequest`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/fit.go), [`calculatePodResourceRequest`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/resource_allocation.go), [`getNonMissingContainerRequests`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/types.go)에서 확인할 수 있습니다
-
-## limit만 써도 같은 자원의 request가 생깁니다
-
-API 서버의 [`SetDefaults_Pod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/defaults.go)는 일반 컨테이너와 init container의 자원 선언을 각각 확인합니다
-limit에는 있고 request에는 없는 키를 찾아 같은 값을 request에 복사합니다
-
-다음은 이 기본값 처리를 설명하는 컨테이너 설정 조각입니다
-실제 API 응답을 수집한 출력은 아닙니다
-
-```yaml
-resources:
-  limits:
-    cpu: "500m"
-    memory: "256Mi"
-```
-
-다른 기본값 처리로 request가 지정되지 않았다면 CPU request는 `500m`, 메모리 request는 `256Mi`가 됩니다
-이렇게 생긴 request는 실제 Pod 선언의 일부이므로 배치와 QoS 계산에도 사용합니다
-앞 절의 Score 전용 가정값과 다릅니다
-
-이 처리는 Pod 생성에서 적용하며 Deployment 등의 Pod template에 같은 방식으로 값을 채우는 것은 아닙니다
-또한 v1.37의 Pod-level 기본값 계산은 별도입니다
-기본 on인 `PodLevelResourcesFixDefaulting` 경로에서는 admission이 컨테이너를 추가한 뒤의 전체 Pod를 보도록 [`PrepareForCreate`의 `DefaultPodLevelResources`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)에서 처리합니다
-
-limit을 썼다는 사실만으로 Guaranteed가 되지는 않습니다
-모든 QoS 계산 대상에 CPU와 메모리 양쪽 조건이 충족되어야 합니다
-
 ## QoS는 자원 선언의 관계로 계산합니다
 
 QoS는 Quality of Service의 약자로, 여기서는 Pod의 CPU·메모리 request와 limit 관계에 따른 분류입니다
@@ -194,6 +154,64 @@ v1.37.1의 `MemoryQoS`는 Beta·기본 on입니다
 
 이 구분은 [QoS 공식 문서의 MemoryQoS 절](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/workloads/pods/pod-qos.md#memory-qos-with-cgroup-v2)과 [`generateLinuxContainerResources`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container_linux.go)에 나와 있습니다
 
+## allocatable과 kubepods 한도는 같은 숫자가 아닙니다
+
+시스템용 예약과 eviction 임계값을 Pod 배치 계산에서 제외하는 일, 노드 cgroup에 상한을 거는 일은 다른 경로입니다
+다음은 Node Allocatable 집행을 사용하는 구성에서 메모리 계산 항목을 비교한 것입니다
+
+| 값 | 계산에 반영하는 예약 |
+|---|---|
+| `node.status.allocatable` | capacity에서 system-reserved·kube-reserved·hard eviction 예약 차감 |
+| kubepods cgroup 한도 | capacity에서 system-reserved·kube-reserved 차감 |
+
+[`getNodeAllocatableAbsoluteImpl`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/cm/node_container_manager_linux.go)은 cgroup 집행에 쓸 값에서 eviction 예약을 빼지 않습니다
+배치에서 제외할 예약량을 계산하는 `GetNodeAllocatableReservation`은 `hardEvictionReservation`까지 더합니다
+실제 집행 값은 `cgroupsPerQOS`와 `enforceNodeAllocatable` 설정 조건도 따릅니다
+
+따라서 Pod가 request를 초과해 메모리를 쓰면 배치 계산에서 제외했던 eviction 예약분까지 사용할 수 있습니다
+그 결과 노드 압박이 임계값에 도달하면 kubelet의 node-pressure eviction이 개입합니다
+allocatable 자체가 노드 메모리 사용을 그 숫자에서 바로 멈추게 하는 cgroup 상한은 아닙니다
+
+## 요청이 없으면 Filter와 Score의 계산이 달라집니다
+
+Filter는 후보 노드를 제외하는 단계이고, Score는 통과한 후보 사이에 점수를 매기는 단계입니다
+CPU·메모리 request가 없으면 해당 자원의 Filter 요청량은 0입니다
+그 자원 요청 때문에 노드를 제외하지 않는다는 뜻이며, 다른 배치 조건까지 통과한다는 뜻은 아닙니다
+
+자원 Score에서 누락 요청을 보정하는 경로는 컨테이너당 CPU `100m`·메모리 `200Mi`를 가정값으로 씁니다
+Pod-level request가 있으면 그 값도 계산에 반영하므로, 이 경우까지 항상 가정값을 더하는 것은 아닙니다
+
+이 가정값은 request가 없는 Pod가 이미 많이 배치된 노드를 자원 계산상 비어 있는 것처럼 보는 문제를 줄입니다
+실제 사용량을 측정한 값도, Pod 오브젝트에 채워 넣는 기본 request도 아닙니다
+
+구현은 [`computePodResourceRequest`·`fitsRequest`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/fit.go), [`calculatePodResourceRequest`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/resource_allocation.go), [`getNonMissingContainerRequests`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/types.go)에서 확인할 수 있습니다
+
+## limit만 써도 같은 자원의 request가 생깁니다
+
+API 서버의 [`SetDefaults_Pod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/defaults.go)는 일반 컨테이너와 init container의 자원 선언을 각각 확인합니다
+limit에는 있고 request에는 없는 키를 찾아 같은 값을 request에 복사합니다
+
+다음은 이 기본값 처리를 설명하는 컨테이너 설정 조각입니다
+실제 API 응답을 수집한 출력은 아닙니다
+
+```yaml
+resources:
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+```
+
+다른 기본값 처리로 request가 지정되지 않았다면 CPU request는 `500m`, 메모리 request는 `256Mi`가 됩니다
+이렇게 생긴 request는 실제 Pod 선언의 일부이므로 배치와 QoS 계산에도 사용합니다
+앞 절의 Score 전용 가정값과 다릅니다
+
+이 처리는 Pod 생성에서 적용하며 Deployment 등의 Pod template에 같은 방식으로 값을 채우는 것은 아닙니다
+또한 v1.37의 Pod-level 기본값 계산은 별도입니다
+기본 on인 `PodLevelResourcesFixDefaulting` 경로에서는 admission이 컨테이너를 추가한 뒤의 전체 Pod를 보도록 [`PrepareForCreate`의 `DefaultPodLevelResources`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)에서 처리합니다
+
+limit을 썼다는 사실만으로 Guaranteed가 되지는 않습니다
+모든 QoS 계산 대상에 CPU와 메모리 양쪽 조건이 충족되어야 합니다
+
 ## OOM 보정값은 종료 순서를 보장하지 않습니다
 
 `oom_score_adj`는 커널이 OOM 희생 프로세스를 선택할 때 사용하는 점수의 보정값입니다
@@ -241,24 +259,6 @@ kubelet의 [`isInitContainerFailed`](https://github.com/kubernetes/kubernetes/bl
 cgroup v2에서는 `SingleProcessOOMKill` 설정에 따라 kubelet이 `memory.oom.group=1`을 전달하는 경로도 있습니다
 이는 컨테이너의 프로세스들을 묶어 OOM 처리하도록 요청하는 설정이며, 같은 Pod의 다른 컨테이너까지 반드시 종료한다는 뜻은 아닙니다
 그룹 처리에도 예외가 있으므로 [Linux의 `memory.oom.group` 정의](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files)를 함께 확인해야 합니다
-
-## allocatable과 kubepods 한도는 같은 숫자가 아닙니다
-
-시스템용 예약과 eviction 임계값을 Pod 배치 계산에서 제외하는 일, 노드 cgroup에 상한을 거는 일은 다른 경로입니다
-다음은 Node Allocatable 집행을 사용하는 구성에서 메모리 계산 항목을 비교한 것입니다
-
-| 값 | 계산에 반영하는 예약 |
-|---|---|
-| `node.status.allocatable` | capacity에서 system-reserved·kube-reserved·hard eviction 예약 차감 |
-| kubepods cgroup 한도 | capacity에서 system-reserved·kube-reserved 차감 |
-
-[`getNodeAllocatableAbsoluteImpl`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/cm/node_container_manager_linux.go)은 cgroup 집행에 쓸 값에서 eviction 예약을 빼지 않습니다
-배치에서 제외할 예약량을 계산하는 `GetNodeAllocatableReservation`은 `hardEvictionReservation`까지 더합니다
-실제 집행 값은 `cgroupsPerQOS`와 `enforceNodeAllocatable` 설정 조건도 따릅니다
-
-따라서 Pod가 request를 초과해 메모리를 쓰면 배치 계산에서 제외했던 eviction 예약분까지 사용할 수 있습니다
-그 결과 노드 압박이 임계값에 도달하면 kubelet의 node-pressure eviction이 개입합니다
-allocatable 자체가 노드 메모리 사용을 그 숫자에서 바로 멈추게 하는 cgroup 상한은 아닙니다
 
 ## 자원 변경은 pods/resize로 처리합니다
 

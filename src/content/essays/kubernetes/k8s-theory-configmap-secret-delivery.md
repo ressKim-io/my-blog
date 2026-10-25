@@ -38,53 +38,7 @@ kubelet은 Pod가 참조한 오브젝트를 읽어 컨테이너 생성 설정이
 파일이 갱신되었다는 사실과 애플리케이션이 설정을 다시 읽었다는 사실도 다릅니다
 프로세스가 내용을 메모리에 캐시하거나 이전 파일을 계속 열어 둔다면, 새 경로가 준비되어도 이전 설정을 계속 사용할 수 있습니다
 
-## envFrom으로 가져온 값은 env로 덮어쓸 수 있습니다
-
-`envFrom`은 ConfigMap이나 Secret의 키와 값을 한꺼번에 환경 변수로 가져옵니다
-`prefix`가 있으면 변수 이름 앞에 그 문자열을 붙입니다
-`env`는 변수 이름을 하나씩 지정하고 직접 값이나 `configMapKeyRef`·`secretKeyRef` 같은 source를 선택합니다
-
-[`makeEnvironmentVariables`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)는 `envFrom`을 먼저 처리하고 이후 `env`를 같은 이름에 덮어씁니다
-여러 `envFrom`에서 이름이 겹치면 뒤 source가 앞 source를 덮습니다
-
-예를 들어 source의 값이 `LOG_LEVEL=info`, `PORT=8080`이고 같은 컨테이너의 `env`에 `LOG_LEVEL=debug`를 선언했다고 가정하겠습니다
-생성 시 최종 값은 `LOG_LEVEL=debug`, `PORT=8080`입니다
-이는 조립 규칙을 설명하는 예시이며 실행 중 갱신을 뜻하지 않습니다
-
-`env.value`의 `$(VAR)`도 이 조립 단계에서 펼칩니다
-해당 컨테이너에서 앞서 조립한 변수와 Service 환경 변수를 참조합니다
-따라서 변수 선언 순서와 참조 시점을 구분해야 합니다
-
-### 없는 오브젝트와 없는 키는 별도로 처리합니다
-
-`optional`은 참조가 없을 때 생성 실패로 볼지 생략할지 정합니다
-기본적으로 필수인 참조와 `optional: true`를 나누면 다음과 같습니다
-
-| 없는 대상 | 필수 참조 | optional 참조 |
-|---|---|---|
-| ConfigMap·Secret 자체 | 환경 변수 조립이나 볼륨 준비 실패 | 해당 참조의 데이터 없이 진행 가능 |
-| `env`가 지정한 키 | 컨테이너 설정 생성 실패 | 해당 변수 생략 |
-| 볼륨 `items`가 지정한 키 | 볼륨 payload 생성 실패 | 해당 파일 생략 |
-
-`items`를 생략하면 존재하는 전체 키를 파일로 만듭니다
-특정 키를 지목하지 않았으므로 지정한 키의 부재 검사는 하지 않습니다
-
-다음은 실제 수집한 로그가 아니라 소스에 정의된 판별 메시지입니다
-
-```text
-couldn't find key <key> in ConfigMap <namespace>/<name>
-configmap references non-existent config key: <key>
-```
-
-첫 메시지는 환경 변수 조립, 둘째는 [`configmap.MakePayload`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/configmap/configmap.go)에서 나옵니다
-앞의 실패는 `CreateContainerConfigError`, 볼륨 쪽은 마운트 실패 등의 상태로 확인할 수 있습니다
-권한 오류 같은 다른 실패까지 optional이 모두 무시하는 것은 아닙니다
-
-환경 변수 이름은 `=`를 제외한 출력 가능한 ASCII를 허용합니다
-v1.34부터 GA·기본 on·잠김인 `RelaxedEnvironmentVariableValidation`과 [`IsRelaxedEnvVarName`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/util/validation/validation.go)의 규칙입니다
-ConfigMap에서 허용하는 `key.name`·`KEY_NAME`·`key-name`을 옛 환경 변수 이름 규칙만 보고 제외해서는 안 됩니다
-
-### 설정 오브젝트 변경만으로 롤아웃하지는 않습니다
+## 설정 오브젝트 변경만으로 롤아웃하지는 않습니다
 
 kubelet의 [`pickFieldsToHash`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/container/helpers.go)는 컨테이너 변경 비교에 `name`과 `image`를 사용합니다
 외부 ConfigMap의 데이터를 바꿔도 이 해시는 바뀌지 않으며 그 변경만으로 컨테이너를 다시 만들지 않습니다
@@ -168,6 +122,81 @@ watch 기반 캐시는 읽은 오브젝트가 immutable이면 reflector를 멈�
 같은 이름으로 오브젝트를 다시 만들어도 기존 Pod에 새 데이터가 전달될 것이라고 기대해서는 안 됩니다
 공식 문서는 해당 Pod도 다시 만들도록 권고합니다
 
+## envFrom으로 가져온 값은 env로 덮어쓸 수 있습니다
+
+`envFrom`은 ConfigMap이나 Secret의 키와 값을 한꺼번에 환경 변수로 가져옵니다
+`prefix`가 있으면 변수 이름 앞에 그 문자열을 붙입니다
+`env`는 변수 이름을 하나씩 지정하고 직접 값이나 `configMapKeyRef`·`secretKeyRef` 같은 source를 선택합니다
+
+[`makeEnvironmentVariables`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)는 `envFrom`을 먼저 처리하고 이후 `env`를 같은 이름에 덮어씁니다
+여러 `envFrom`에서 이름이 겹치면 뒤 source가 앞 source를 덮습니다
+
+예를 들어 source의 값이 `LOG_LEVEL=info`, `PORT=8080`이고 같은 컨테이너의 `env`에 `LOG_LEVEL=debug`를 선언했다고 가정하겠습니다
+생성 시 최종 값은 `LOG_LEVEL=debug`, `PORT=8080`입니다
+이는 조립 규칙을 설명하는 예시이며 실행 중 갱신을 뜻하지 않습니다
+
+`env.value`의 `$(VAR)`도 이 조립 단계에서 펼칩니다
+해당 컨테이너에서 앞서 조립한 변수와 Service 환경 변수를 참조합니다
+따라서 변수 선언 순서와 참조 시점을 구분해야 합니다
+
+### 없는 오브젝트와 없는 키는 별도로 처리합니다
+
+`optional`은 참조가 없을 때 생성 실패로 볼지 생략할지 정합니다
+기본적으로 필수인 참조와 `optional: true`를 나누면 다음과 같습니다
+
+| 없는 대상 | 필수 참조 | optional 참조 |
+|---|---|---|
+| ConfigMap·Secret 자체 | 환경 변수 조립이나 볼륨 준비 실패 | 해당 참조의 데이터 없이 진행 가능 |
+| `env`가 지정한 키 | 컨테이너 설정 생성 실패 | 해당 변수 생략 |
+| 볼륨 `items`가 지정한 키 | 볼륨 payload 생성 실패 | 해당 파일 생략 |
+
+`items`를 생략하면 존재하는 전체 키를 파일로 만듭니다
+특정 키를 지목하지 않았으므로 지정한 키의 부재 검사는 하지 않습니다
+
+다음은 실제 수집한 로그가 아니라 소스에 정의된 판별 메시지입니다
+
+```text
+couldn't find key <key> in ConfigMap <namespace>/<name>
+configmap references non-existent config key: <key>
+```
+
+첫 메시지는 환경 변수 조립, 둘째는 [`configmap.MakePayload`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/volume/configmap/configmap.go)에서 나옵니다
+앞의 실패는 `CreateContainerConfigError`, 볼륨 쪽은 마운트 실패 등의 상태로 확인할 수 있습니다
+권한 오류 같은 다른 실패까지 optional이 모두 무시하는 것은 아닙니다
+
+환경 변수 이름은 `=`를 제외한 출력 가능한 ASCII를 허용합니다
+v1.34부터 GA·기본 on·잠김인 `RelaxedEnvironmentVariableValidation`과 [`IsRelaxedEnvVarName`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/util/validation/validation.go)의 규칙입니다
+ConfigMap에서 허용하는 `key.name`·`KEY_NAME`·`key-name`을 옛 환경 변수 이름 규칙만 보고 제외해서는 안 됩니다
+
+## EnvFiles도 실행 중 환경 변수를 갱신하지는 않습니다
+
+v1.37.1의 `EnvFiles`는 Beta·기본 on입니다
+`env.valueFrom.fileKeyRef`로 같은 Pod의 emptyDir에 있는 파일에서 변수 값을 읽을 수 있습니다
+init container가 파일을 쓰고 일반 컨테이너가 그 값을 환경 변수로 소비하는 경로입니다
+소비하는 컨테이너에 그 볼륨을 직접 마운트할 필요는 없습니다
+
+```yaml
+env:
+  - name: LOG_LEVEL
+    valueFrom:
+      fileKeyRef:
+        volumeName: generated-env
+        path: app.env
+        key: LOG_LEVEL
+```
+
+이 조각은 `generated-env`라는 emptyDir을 별도로 선언하고 파일을 준비했다는 전제입니다
+[`validateFileKeyRefVolumes`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go)는 참조 볼륨이 존재하고 emptyDir인지 확인합니다
+ConfigMap·Secret 볼륨의 파일을 이름만 지정해 직접 읽는 범용 파일 참조 필드는 아닙니다
+
+환경 파일 형식은 일반적인 shell 스크립트 전체가 아닙니다
+현재 [공식 EnvFiles 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/tasks/inject-data-application/define-environment-variable-via-file.md)는 `LOG_LEVEL='info'`처럼 작은따옴표로 값을 감싸는 형식을 정의하며 shell 확장이나 큰따옴표 값을 허용하지 않습니다
+
+파일은 컨테이너 생성용 환경 변수를 조립할 때 읽습니다
+나중에 파일이 바뀌어도 이미 실행 중인 환경 변수까지 갱신하지는 않습니다
+또한 고정 소스의 처리는 파일 파싱 오류를 optional로 무시하지 않으며, 읽은 값이 빈 문자열인 경우에도 키 부재와 같은 분기로 처리합니다
+API 주석의 optional 설명과 실제 적용 조건을 구분해서 보아야 합니다
+
 ## Secret의 비밀성은 저장·권한·전달을 나눠 봅니다
 
 Secret의 JSON `data`는 base64로 표현합니다
@@ -243,7 +272,7 @@ downwardAPI는 Pod 자신의 정보를 환경 변수나 파일로 전달합니�
 모든 env 전용 필드가 볼륨을 준비할 때 아직 없어서 생긴 차이라고 설명할 수는 없습니다
 이미 Pod spec에 있는 nodeName과 serviceAccountName도 env 전용 목록에 있기 때문입니다
 
-### emptyDir과 hostPath도 PVC를 거치지 않습니다
+## emptyDir과 hostPath도 PVC를 거치지 않습니다
 
 `medium: Memory` emptyDir의 tmpfs 크기는 노드 allocatable을 기본 상한으로 두고, 유효한 Pod 메모리 상한이나 양수 `sizeLimit`이 더 작으면 그 값으로 낮춥니다
 Pod 상한을 도출할 수 없는 경우까지 선언한 컨테이너 limit을 무조건 합산해 적용하는 것은 아닙니다
@@ -255,35 +284,6 @@ tmpfs 파일에 사용한 메모리는 로컬 ephemeral storage 대신 컨테이
 hostPath는 노드의 실제 경로를 컨테이너에 노출합니다
 hostPath 자체의 사용량 상한이나 스케줄러 자원 계산이 있다는 뜻은 아닙니다
 Pod Security Admission의 baseline을 집행하는 구성은 [`hostPath` 볼륨 사용을 거부](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/pod-security-admission/policy/check_hostPathVolumes.go)합니다
-
-## EnvFiles도 실행 중 환경 변수를 갱신하지는 않습니다
-
-v1.37.1의 `EnvFiles`는 Beta·기본 on입니다
-`env.valueFrom.fileKeyRef`로 같은 Pod의 emptyDir에 있는 파일에서 변수 값을 읽을 수 있습니다
-init container가 파일을 쓰고 일반 컨테이너가 그 값을 환경 변수로 소비하는 경로입니다
-소비하는 컨테이너에 그 볼륨을 직접 마운트할 필요는 없습니다
-
-```yaml
-env:
-  - name: LOG_LEVEL
-    valueFrom:
-      fileKeyRef:
-        volumeName: generated-env
-        path: app.env
-        key: LOG_LEVEL
-```
-
-이 조각은 `generated-env`라는 emptyDir을 별도로 선언하고 파일을 준비했다는 전제입니다
-[`validateFileKeyRefVolumes`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go)는 참조 볼륨이 존재하고 emptyDir인지 확인합니다
-ConfigMap·Secret 볼륨의 파일을 이름만 지정해 직접 읽는 범용 파일 참조 필드는 아닙니다
-
-환경 파일 형식은 일반적인 shell 스크립트 전체가 아닙니다
-현재 [공식 EnvFiles 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/tasks/inject-data-application/define-environment-variable-via-file.md)는 `LOG_LEVEL='info'`처럼 작은따옴표로 값을 감싸는 형식을 정의하며 shell 확장이나 큰따옴표 값을 허용하지 않습니다
-
-파일은 컨테이너 생성용 환경 변수를 조립할 때 읽습니다
-나중에 파일이 바뀌어도 이미 실행 중인 환경 변수까지 갱신하지는 않습니다
-또한 고정 소스의 처리는 파일 파싱 오류를 optional로 무시하지 않으며, 읽은 값이 빈 문자열인 경우에도 키 부재와 같은 분기로 처리합니다
-API 주석의 optional 설명과 실제 적용 조건을 구분해서 보아야 합니다
 
 ## 갱신되지 않는 증상은 서로 다른 경계에서 발생합니다
 

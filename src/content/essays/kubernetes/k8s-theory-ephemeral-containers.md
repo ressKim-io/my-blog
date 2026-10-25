@@ -23,6 +23,13 @@ v1.25에서 stable이 됐으며, 일반 컨테이너처럼 자원 배정이나 �
 > kubectl 동작도 같은 v1.37.1 소스를 확인했습니다
 > 클러스터에서 재현한 실측 기록은 포함하지 않습니다
 
+`kubectl debug`는 Kubernetes API 자체와 구분해야 하는 클라이언트 기능입니다
+[`debugByEphemeralContainer`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/debug/debug.go)는 임시 명세를 추가한 변경분을 만들고, `ephemeralcontainers` 서브리소스로 strategic merge patch를 보냅니다
+`--target`은 이 명세의 `targetContainerName`으로 들어갑니다
+
+`--copy-to`를 지정하는 작업은 기존 Pod의 변경이 아니라 새 Pod 생성입니다
+이 글의 기본 경로는 기존 Pod에 임시 항목을 추가하는 경우입니다
+
 ## 임시 컨테이너를 추가하는 서브리소스가 따로 있습니다
 
 임시 컨테이너 명세는 `spec.ephemeralContainers`에 저장합니다
@@ -37,22 +44,7 @@ v1.25에서 stable이 됐으며, 일반 컨테이너처럼 자원 배정이나 �
 이 경로의 요청·응답 오브젝트는 `Pod`이며, [`EphemeralContainersREST`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/storage/storage.go)는 `get`·`update`·`patch`를 지원합니다
 없는 Pod를 생성하는 `create`는 제공하지 않고, update에서도 새 Pod 생성은 허용하지 않습니다
 
-Pod에는 이 경로 외에도 서로 다른 역할을 맡은 서브리소스가 있습니다
-[`NewRESTStorage`의 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/rest/storage_core.go)을 변경 대상별로 보면 다음과 같습니다
-
-| 경로 | 변경하거나 제공하는 것 |
-|---|---|
-| `pods` | 본체 검증에서 허용하는 spec 필드와 metadata 수정 |
-| `pods/binding` | 바인더의 노드 배정. metadata·status 갱신도 포함할 수 있음 |
-| `pods/eviction` | 정책 검사를 거친 삭제 요청 |
-| `pods/resize` | 자원 크기 변경을 위한 별도 경로 |
-| `pods/ephemeralcontainers` | 임시 컨테이너 명세 추가 |
-| `pods/status` | 관측한 상태 갱신 |
-| `log`·`exec`·`attach`·`portforward`·`proxy` | 조회·접속·중계 |
-
-마지막 행의 API 처리가 Pod spec을 갱신하는 것은 아닙니다
-그렇다고 `exec`로 실행한 명령이 파일이나 프로세스의 상태까지 바꾸지 못한다는 뜻은 아닙니다
-저장 오브젝트에 대한 쓰기와 실행 중인 프로세스의 동작은 구분해야 합니다
+새 임시 컨테이너를 추가할 수 있어도, 기존 임시 컨테이너 명세를 수정하거나 제거할 수는 없습니다
 
 ### 별도 경로로 디버깅 권한을 나눕니다
 
@@ -65,6 +57,90 @@ Pod에는 이 경로 외에도 서로 다른 역할을 맡은 서브리소스가
 
 `kubectl debug`의 전체 작업은 추가 요청 외에 Pod 조회나 attach 접속을 포함할 수 있습니다
 서브리소스의 쓰기 권한을 줬다는 사실만으로 이 모든 동작의 권한이 함께 생기지는 않습니다
+
+![API 서버가 임시 컨테이너 추가를 검증해 저장하고 kubelet이 별도 동기화에서 시작 대상을 계산한 뒤 런타임에 실행을 요청하는 과정|tall](/diagrams/k8s-theory-ephemeral-containers-1.svg)
+
+## kubelet은 init 완료 전에도 시작할 수 있지만 재시작하지 않습니다
+
+API 저장 뒤 kubelet이 명세를 처리하는 시점은 별도입니다
+v1.37.1의 `kubeGenericRuntimeManager.SyncPod`는 총 아홉 단계이며, 앞의 sandbox 준비와 자원 갱신 이후 임시 컨테이너를 처리합니다
+
+7. 임시 컨테이너 시작
+8. init 컨테이너 시작
+9. 일반 컨테이너 시작
+
+[`SyncPod`와 `computePodActions`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_manager.go)는 init이 막힌 Pod에도 조사 수단을 제공하도록 임시 컨테이너의 시작 판단을 초기화 완료 검사보다 앞에 둡니다
+다만 Pod 생성 때는 임시 명세를 넣을 수 없어, 정상적인 최초 생성에서 임시 컨테이너가 init보다 먼저 생긴다는 뜻은 아닙니다
+
+sandbox를 새로 만들어야 하는 동기화 회차는 임시 시작 목록을 계산하기 전에 반환할 수 있습니다
+앞선 실행 단계의 오류나 이미지·런타임 실패도 가능하므로, 추가 요청의 저장 성공이 그 회차의 실행을 보장하지 않습니다
+
+kubelet은 같은 이름의 런타임 컨테이너 상태가 없을 때 시작 목록에 넣습니다
+상태가 이미 있으면 종료 상태여도 목록에 넣지 않으므로, 일반 컨테이너의 재시작 정책처럼 다시 실행하지 않습니다
+아직 한 번도 시작하지 못한 컨테이너의 생성 재시도와, 실행 후 종료한 컨테이너의 재시작을 혼동하지 않아야 합니다
+
+기본 컨테이너 GC 정책은 `(Pod UID, 컨테이너 이름)`별로 종료 컨테이너를 최대 한 개 보관합니다
+종료 상태가 남아 있는 동안 kubelet은 그 기록을 보고 같은 이름의 임시 컨테이너를 다시 시작하지 않습니다
+API의 임시 명세를 지우거나 같은 이름을 바꿔 재사용하는 것은 앞에서 본 추가 전용 검증이 막습니다
+
+## targetContainerName은 PID namespace 대상을 선택합니다
+
+PID namespace는 프로세스 번호와 어떤 프로세스를 볼 수 있는지의 범위를 격리합니다
+컨테이너마다 PID namespace가 다르면 디버그 컨테이너의 `ps`가 자기 범위의 프로세스만 보여 줄 수 있습니다
+`targetContainerName`은 조사할 일반 컨테이너나 init container의 이름을 지정합니다
+
+API 서버는 이 이름이 Pod 명세의 일반·init 컨테이너에 있는지 확인합니다
+다른 임시 컨테이너를 대상으로 지정할 수는 없으며, 임시 컨테이너 자신의 이름은 모든 컨테이너 종류에서 유일해야 합니다
+
+명세에 이름이 있어도 런타임에서 해당 컨테이너 ID를 찾을 수 있다는 보장은 없습니다
+kubelet의 [`getTargetID`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container.go)는 런타임 상태에서 이름을 찾아 컨테이너 ID로 바꿉니다
+상태에 없으면 `unable to find target container`로 시작 요청을 진행하지 못합니다
+
+대상 ID를 얻으면 [`generateLinuxContainerConfig`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container_linux.go)가 PID 모드를 조건부로 바꿉니다
+
+| 기존 PID 모드 | 대상을 지정했을 때 kubelet의 처리 |
+|---|---|
+| `CONTAINER` | `TARGET`으로 바꾸고 `target_id` 설정 |
+| `POD` | Pod의 공유 모드 유지 |
+| `NODE` | 노드 PID 모드 유지 |
+
+`shareProcessNamespace: true`인 Pod는 PID 모드가 이미 `POD`입니다
+`hostPID: true`이면 `NODE`이며, 그 외에는 기본적으로 `CONTAINER`입니다
+현재 선택은 [`PidNamespaceForPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/util/util.go)에서 확인할 수 있습니다
+
+API 타입 주석에는 namespace를 넓게 설명하지만, 이 kubelet 경로가 대상 ID에 맞춰 바꾸는 것은 PID namespace입니다
+네트워크와 IPC는 Pod 설정의 `POD` 또는 `NODE` 모드를 사용하며, 컨테이너 범위의 IPC를 고르는 Kubernetes API는 없습니다
+
+설정한 `TARGET`을 실제로 구현하는 주체는 컨테이너 런타임입니다
+[`CRI NamespaceOption`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-api/pkg/apis/runtime/v1/api.proto)과 [공식 디버깅 문서](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container)는 런타임이 이를 지원해야 한다고 설명합니다
+지원하지 않으면 시작에 실패하거나 분리된 PID namespace로 실행될 수 있습니다
+
+프로세스가 보이는 범위와 그 프로세스에 접근·조작할 권한도 다릅니다
+공유한 `/proc` 정보와 파일 접근에는 Unix 권한이 적용됩니다
+`--target`을 지정했다는 이유만으로 필요한 권한을 모두 얻는 것은 아닙니다
+
+## 상태 집계에서 빠져도 Pod 자원을 소비합니다
+
+임시 컨테이너의 실행·종료 상태는 `status.ephemeralContainerStatuses`에 기록합니다
+하지만 이 목록은 Pod의 phase나 `Ready`·`ContainersReady`·`Initialized`를 만드는 직접 집계에 넣지 않습니다
+
+[`generateAPIPodStatus`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)는 phase 계산에 일반·init 컨테이너 상태를 전달합니다
+[`준비·초기화 조건 계산`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/status/generate.go)도 일반·init 명세를 대상으로 합니다
+임시 컨테이너의 종료나 `Ready: False`라는 상태 자체를 일반 워크로드의 준비 실패로 합산하지 않습니다
+
+QoS 역시 임시 컨테이너 자원을 계산하지 않습니다
+[`ComputePodQOS`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/helper/qos/qos.go)는 Pod-level 자원이 있으면 그 값을 사용하고, 컨테이너별 계산에서는 일반·init 명세를 읽습니다
+임시 컨테이너를 추가해 BestEffort·Burstable 등의 등급을 바꾸는 경로가 아닙니다
+
+![일반·init 컨테이너 상태는 Pod의 phase와 준비 조건에 집계하고 임시 상태는 별도로 기록하지만 두 프로세스가 모두 Pod cgroup의 자원을 소비하는 구조](/diagrams/k8s-theory-ephemeral-containers-2.svg)
+
+상태 집계에서 제외돼도 다른 컨테이너에 영향을 줄 수 있습니다
+Linux에서 임시 컨테이너의 프로세스도 Pod cgroup의 자원 범위 안에서 실행합니다
+한도가 설정된 Pod에서는 그 소비가 공유 한도와 메모리 압박에 영향을 줄 수 있습니다
+
+API 타입은 임시 컨테이너의 자원 소비 때문에 Pod가 할당을 넘으면 kubelet이 축출할 수 있다고 설명합니다
+실제 결과는 자원 한도·노드 압박·OOM·축출 경로의 조건에 따릅니다
+직접 상태 집계에서 제외된다는 설명을 OOM이나 축출, sandbox 영향까지 없다는 보장으로 넓히면 안 됩니다
 
 ## 서버는 새 임시 목록을 선택하고 나머지를 복원합니다
 
@@ -92,11 +168,8 @@ Pod에는 이 경로 외에도 서로 다른 역할을 맡은 서브리소스가
 `PrepareForUpdate`의 `updatePodGeneration`은 새 spec이 기존과 다르면 `metadata.generation`을 1 증가시킵니다
 목록 추가가 단순한 접속 세션이 아니라 API에 저장하는 변경이라는 사실을 보여 줍니다
 
-![API 서버가 임시 컨테이너 추가를 검증해 저장하고 kubelet이 별도 동기화에서 시작 대상을 계산한 뒤 런타임에 실행을 요청하는 과정|tall](/diagrams/k8s-theory-ephemeral-containers-1.svg)
-
 ## 기존 임시 항목은 이름과 내용이 유지돼야 합니다
 
-새 임시 컨테이너를 추가할 수 있어도, 기존 임시 컨테이너 명세를 수정하거나 제거할 수는 없습니다
 [`ValidatePodEphemeralContainersUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go)는 새 목록을 이름으로 찾을 수 있게 만든 뒤 기존 항목을 하나씩 대조합니다
 
 | 기존 목록 | 새 목록 | 기존 항목 대조 결과 |
@@ -154,93 +227,26 @@ kubelet의 [`prober manager`](https://github.com/kubernetes/kubernetes/blob/f78e
 해당 bind mount가 Pod 종료까지 정리되지 않아 자원을 남길 수 있다는 것이 검증 코드의 이유입니다
 기존 Pod의 볼륨을 마운트할 수 있다는 사실과 이 요청으로 새 Pod 볼륨을 추가할 수 있다는 주장은 다릅니다
 
-## targetContainerName은 PID namespace 대상을 선택합니다
+## 다른 Pod 변경 경로와 쓰기 범위 비교
 
-PID namespace는 프로세스 번호와 어떤 프로세스를 볼 수 있는지의 범위를 격리합니다
-컨테이너마다 PID namespace가 다르면 디버그 컨테이너의 `ps`가 자기 범위의 프로세스만 보여 줄 수 있습니다
-`targetContainerName`은 조사할 일반 컨테이너나 init container의 이름을 지정합니다
+Pod에는 이 경로 외에도 서로 다른 역할을 맡은 서브리소스가 있습니다
+[`NewRESTStorage`의 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/rest/storage_core.go)을 변경 대상별로 보면 다음과 같습니다
 
-API 서버는 이 이름이 Pod 명세의 일반·init 컨테이너에 있는지 확인합니다
-다른 임시 컨테이너를 대상으로 지정할 수는 없으며, 임시 컨테이너 자신의 이름은 모든 컨테이너 종류에서 유일해야 합니다
-
-명세에 이름이 있어도 런타임에서 해당 컨테이너 ID를 찾을 수 있다는 보장은 없습니다
-kubelet의 [`getTargetID`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container.go)는 런타임 상태에서 이름을 찾아 컨테이너 ID로 바꿉니다
-상태에 없으면 `unable to find target container`로 시작 요청을 진행하지 못합니다
-
-대상 ID를 얻으면 [`generateLinuxContainerConfig`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container_linux.go)가 PID 모드를 조건부로 바꿉니다
-
-| 기존 PID 모드 | 대상을 지정했을 때 kubelet의 처리 |
+| 경로 | 변경하거나 제공하는 것 |
 |---|---|
-| `CONTAINER` | `TARGET`으로 바꾸고 `target_id` 설정 |
-| `POD` | Pod의 공유 모드 유지 |
-| `NODE` | 노드 PID 모드 유지 |
+| `pods` | 본체 검증에서 허용하는 spec 필드와 metadata 수정 |
+| `pods/binding` | 바인더의 노드 배정. metadata·status 갱신도 포함할 수 있음 |
+| `pods/eviction` | 정책 검사를 거친 삭제 요청 |
+| `pods/resize` | 자원 크기 변경을 위한 별도 경로 |
+| `pods/ephemeralcontainers` | 임시 컨테이너 명세 추가 |
+| `pods/status` | 관측한 상태 갱신 |
+| `log`·`exec`·`attach`·`portforward`·`proxy` | 조회·접속·중계 |
 
-`shareProcessNamespace: true`인 Pod는 PID 모드가 이미 `POD`입니다
-`hostPID: true`이면 `NODE`이며, 그 외에는 기본적으로 `CONTAINER`입니다
-현재 선택은 [`PidNamespaceForPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/util/util.go)에서 확인할 수 있습니다
-
-API 타입 주석에는 namespace를 넓게 설명하지만, 이 kubelet 경로가 대상 ID에 맞춰 바꾸는 것은 PID namespace입니다
-네트워크와 IPC는 Pod 설정의 `POD` 또는 `NODE` 모드를 사용하며, 컨테이너 범위의 IPC를 고르는 Kubernetes API는 없습니다
-
-설정한 `TARGET`을 실제로 구현하는 주체는 컨테이너 런타임입니다
-[`CRI NamespaceOption`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-api/pkg/apis/runtime/v1/api.proto)과 [공식 디버깅 문서](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container)는 런타임이 이를 지원해야 한다고 설명합니다
-지원하지 않으면 시작에 실패하거나 분리된 PID namespace로 실행될 수 있습니다
-
-프로세스가 보이는 범위와 그 프로세스에 접근·조작할 권한도 다릅니다
-공유한 `/proc` 정보와 파일 접근에는 Unix 권한이 적용됩니다
-`--target`을 지정했다는 이유만으로 필요한 권한을 모두 얻는 것은 아닙니다
-
-## kubelet은 init 완료 전에도 시작할 수 있지만 재시작하지 않습니다
-
-API 저장 뒤 kubelet이 명세를 처리하는 시점은 별도입니다
-v1.37.1의 `kubeGenericRuntimeManager.SyncPod`는 총 아홉 단계이며, 앞의 sandbox 준비와 자원 갱신 이후 임시 컨테이너를 처리합니다
-
-7. 임시 컨테이너 시작
-8. init 컨테이너 시작
-9. 일반 컨테이너 시작
-
-[`SyncPod`와 `computePodActions`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_manager.go)는 init이 막힌 Pod에도 조사 수단을 제공하도록 임시 컨테이너의 시작 판단을 초기화 완료 검사보다 앞에 둡니다
-다만 Pod 생성 때는 임시 명세를 넣을 수 없어, 정상적인 최초 생성에서 임시 컨테이너가 init보다 먼저 생긴다는 뜻은 아닙니다
-
-sandbox를 새로 만들어야 하는 동기화 회차는 임시 시작 목록을 계산하기 전에 반환할 수 있습니다
-앞선 실행 단계의 오류나 이미지·런타임 실패도 가능하므로, 추가 요청의 저장 성공이 그 회차의 실행을 보장하지 않습니다
-
-kubelet은 같은 이름의 런타임 컨테이너 상태가 없을 때 시작 목록에 넣습니다
-상태가 이미 있으면 종료 상태여도 목록에 넣지 않으므로, 일반 컨테이너의 재시작 정책처럼 다시 실행하지 않습니다
-아직 한 번도 시작하지 못한 컨테이너의 생성 재시도와, 실행 후 종료한 컨테이너의 재시작을 혼동하지 않아야 합니다
-
-기본 컨테이너 GC 정책은 `(Pod UID, 컨테이너 이름)`별로 종료 컨테이너를 최대 한 개 보관합니다
-종료 상태가 남아 있는 동안 kubelet은 그 기록을 보고 같은 이름의 임시 컨테이너를 다시 시작하지 않습니다
-API의 임시 명세를 지우거나 같은 이름을 바꿔 재사용하는 것은 앞에서 본 추가 전용 검증이 막습니다
-
-## 상태 집계에서 빠져도 Pod 자원을 소비합니다
-
-임시 컨테이너의 실행·종료 상태는 `status.ephemeralContainerStatuses`에 기록합니다
-하지만 이 목록은 Pod의 phase나 `Ready`·`ContainersReady`·`Initialized`를 만드는 직접 집계에 넣지 않습니다
-
-[`generateAPIPodStatus`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)는 phase 계산에 일반·init 컨테이너 상태를 전달합니다
-[`준비·초기화 조건 계산`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/status/generate.go)도 일반·init 명세를 대상으로 합니다
-임시 컨테이너의 종료나 `Ready: False`라는 상태 자체를 일반 워크로드의 준비 실패로 합산하지 않습니다
-
-QoS 역시 임시 컨테이너 자원을 계산하지 않습니다
-[`ComputePodQOS`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/helper/qos/qos.go)는 Pod-level 자원이 있으면 그 값을 사용하고, 컨테이너별 계산에서는 일반·init 명세를 읽습니다
-임시 컨테이너를 추가해 BestEffort·Burstable 등의 등급을 바꾸는 경로가 아닙니다
-
-![일반·init 컨테이너 상태는 Pod의 phase와 준비 조건에 집계하고 임시 상태는 별도로 기록하지만 두 프로세스가 모두 Pod cgroup의 자원을 소비하는 구조](/diagrams/k8s-theory-ephemeral-containers-2.svg)
-
-상태 집계에서 제외돼도 다른 컨테이너에 영향을 줄 수 있습니다
-Linux에서 임시 컨테이너의 프로세스도 Pod cgroup의 자원 범위 안에서 실행합니다
-한도가 설정된 Pod에서는 그 소비가 공유 한도와 메모리 압박에 영향을 줄 수 있습니다
-
-API 타입은 임시 컨테이너의 자원 소비 때문에 Pod가 할당을 넘으면 kubelet이 축출할 수 있다고 설명합니다
-실제 결과는 자원 한도·노드 압박·OOM·축출 경로의 조건에 따릅니다
-직접 상태 집계에서 제외된다는 설명을 OOM이나 축출, sandbox 영향까지 없다는 보장으로 넓히면 안 됩니다
+마지막 행의 API 처리가 Pod spec을 갱신하는 것은 아닙니다
+그렇다고 `exec`로 실행한 명령이 파일이나 프로세스의 상태까지 바꾸지 못한다는 뜻은 아닙니다
+저장 오브젝트에 대한 쓰기와 실행 중인 프로세스의 동작은 구분해야 합니다
 
 ## kubectl debug의 프로파일은 API 권한을 대신하지 않습니다
-
-`kubectl debug`는 Kubernetes API 자체와 구분해야 하는 클라이언트 기능입니다
-[`debugByEphemeralContainer`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/debug/debug.go)는 임시 명세를 추가한 변경분을 만들고, `ephemeralcontainers` 서브리소스로 strategic merge patch를 보냅니다
-`--target`은 이 명세의 `targetContainerName`으로 들어갑니다
 
 `--profile`은 디버그 컨테이너에 적용할 `securityContext` 등의 속성을 구성합니다
 같은 v1.37.1 kubectl 소스에서 기본값은 `general`입니다

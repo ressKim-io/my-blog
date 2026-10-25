@@ -35,27 +35,64 @@ provider는 해당 통계를 실제로 가져와 구성하는 구현입니다
 세 도구가 각각 같은 값을 측정하는 것은 아닙니다
 metrics-server의 값도 kubelet의 자원 지표에서 출발하지만, 다시 수집하고 캐시에 보관하는 동안 시점 차이가 생깁니다
 
-## kube-state-metrics는 API에 기록된 필드를 읽습니다
+## working set은 usage에서 모든 캐시를 뺀 값이 아닙니다
 
-[`kube-state-metrics`의 README](https://github.com/kubernetes/kube-state-metrics/blob/4ffeda2ef866b0fef372849825a803296483b336/README.md)는 API 오브젝트의 원시 데이터를 지표로 노출하는 역할을 설명합니다
-노드의 cgroup을 읽어 실제 메모리 사용량을 재는 컴포넌트는 아닙니다
+**cgroup**은 프로세스 묶음에 자원 사용량을 집계하고 한도를 적용하는 Linux의 단위입니다
+cAdvisor가 읽는 사용량에는 페이지 캐시도 들어 있습니다
+working set은 이 전체 사용량과 구분하기 위해 계산하는 값입니다
 
-Deployment를 예로 들면 다음 값은 각각 다른 필드를 나타냅니다
+Kubernetes가 의존하는 cAdvisor/lib v0.60.5의 [`setMemoryStats`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/github.com/google/cadvisor/lib/container/libcontainer/handler.go)는 다음 관계를 사용합니다
 
-| 지표 | 오브젝트에서 읽는 값 |
+```text
+workingSet = max(usage - inactive_file, 0)
+```
+
+cgroup v2에서는 `inactive_file`, 계층 통계를 사용하는 cgroup v1에서는 `total_inactive_file` 값을 읽습니다
+이 비활성 파일 페이지를 회수 가능한 쪽으로 보고 빼는 것이며, 모든 페이지 캐시를 제외하지는 않습니다
+활성 파일 페이지 등은 working set에 남을 수 있습니다
+
+| cAdvisor 지표 | 여기서 구분할 범위 |
 |---|---|
-| `kube_deployment_spec_replicas` | 원하는 replica 수 |
-| `kube_deployment_status_replicas_available` | controller가 사용 가능하다고 보고한 replica 수 |
-| `kube_deployment_metadata_generation` | 현재 선언의 generation |
-| `kube_deployment_status_observed_generation` | controller가 관찰했다고 보고한 generation |
+| `container_memory_usage_bytes` | 캐시를 포함한 전체 사용량 |
+| `container_memory_working_set_bytes` | 위 식으로 비활성 파일 페이지를 제외한 값 |
+| `container_memory_rss` | Linux cgroup v2 경로에서는 `memory.stat`의 `anon` 값. usage보다 좁은 범위 |
 
-**generation**은 선언이 바뀌었는지 구분하는 오브젝트의 세대 번호입니다
-현재 generation보다 observed generation이 낮다면 controller가 아직 그 선언을 관찰한 상태를 보고하지 못한 것입니다
-같다고 해서 모든 replica가 준비됐다는 뜻은 아니므로 가용 replica 수는 따로 봐야 합니다
+이 식은 실제로 회수하는 데 드는 비용이나 앱이 앞으로 필요로 할 메모리까지 계산하지 않습니다
+working set 하나로 cgroup OOM 발생 여부를 확정할 수 없고, usage가 limit에 가깝다는 이유만으로 즉시 OOM이라고 결론낼 수도 없습니다
+커널은 회수 가능한 메모리를 회수한 뒤에도 한도 안에서 할당을 수용할 수 없는지 판단합니다
 
-이 지표에도 API 변경이 반영되기까지 시간이 걸립니다
-API watch와 Prometheus 등의 수집 시각이 다르면, API 서버의 최신 값과 잠시 차이가 날 수 있습니다
-오브젝트가 삭제된 사실을 반영한 뒤에는 해당 오브젝트의 지표도 더 이상 노출하지 않습니다
+## metrics-server는 최근 두 표본으로 자원 사용량을 구합니다
+
+확인한 metrics-server v0.9.0은 기본적으로 kubelet의 `/metrics/resource`를 읽습니다
+Node 어노테이션으로 수집 경로를 바꿀 수도 있으므로, 여기서도 실제 구성을 확인해야 합니다
+기본 배포 매니페스트에는 `--metric-resolution=15s`가 지정돼 있습니다
+
+[`storage`](https://github.com/kubernetes-sigs/metrics-server/blob/2a7c4b2c7d46552ff47f4aeaa3a735c582587ecd/pkg/storage/storage.go)는 사용량을 디스크에 누적하지 않고, 메모리에 최근 표본과 그 이전 표본을 보관합니다
+이 두 표본은 CPU 누적 카운터의 차이를 계산하는 데 필요합니다
+
+| Metrics API 값 | 확인한 계산 방식 |
+|---|---|
+| CPU 사용량 | 두 표본의 누적 CPU 사용량 차이를 경과 시간으로 나눈 평균 |
+| 메모리 사용량 | 마지막 표본의 working set |
+| `Timestamp` | 반환한 사용량의 기준 시각 |
+| `Window` | CPU 평균 계산 등에 사용한 시간 구간 |
+
+CPU는 구간 평균이고 메모리는 표본 시점의 값입니다
+수집 간격이 15초라는 설정만으로 모든 반환값의 `Window`가 정확히 15초라고 가정해서도 안 됩니다
+
+### kubectl top과 resource HPA는 Metrics API를 읽습니다
+
+`kubectl top pod`는 `metrics.k8s.io`의 PodMetrics 목록을 읽습니다
+HPA와 VPA도 resource 지표를 사용하는 경로에서 이 API를 이용합니다
+이는 HPA가 현재 replica 수를 결정하는 모든 과정을 metrics-server가 수행한다는 뜻은 아닙니다
+
+[`NewRESTMetricsClient`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/podautoscaler/metrics/client.go)는 resource·custom·external 지표용 클라이언트를 구분합니다
+metrics-server는 그중 CPU·메모리 resource 지표를 제공합니다
+custom·external 지표를 사용하는 HPA는 다른 공급 경로를 사용할 수 있습니다
+
+Prometheus를 설치했다는 사실만으로 `metrics.k8s.io`가 채워지지는 않습니다
+반대로 metrics-server가 없다는 이유만으로 모든 HPA가 동작하지 않는다고 결론낼 수도 없습니다
+어느 API의 어느 지표를 읽도록 설정했는지 확인해야 합니다
 
 ## kubelet 엔드포인트 이름과 통계 원본을 나눠 봅니다
 
@@ -100,33 +137,7 @@ Prometheus가 두 엔드포인트를 모두 수집하면 같은 이름의 시계
 수집 target·job·endpoint 등의 구분을 놓친 채 합산하면 같은 컨테이너를 중복 계산할 수 있습니다
 지표 이름만 보고 묶기 전에 어느 엔드포인트에서 왔는지부터 확인해야 합니다
 
-## working set은 usage에서 모든 캐시를 뺀 값이 아닙니다
-
-**cgroup**은 프로세스 묶음에 자원 사용량을 집계하고 한도를 적용하는 Linux의 단위입니다
-cAdvisor가 읽는 사용량에는 페이지 캐시도 들어 있습니다
-working set은 이 전체 사용량과 구분하기 위해 계산하는 값입니다
-
-Kubernetes가 의존하는 cAdvisor/lib v0.60.5의 [`setMemoryStats`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/github.com/google/cadvisor/lib/container/libcontainer/handler.go)는 다음 관계를 사용합니다
-
-```text
-workingSet = max(usage - inactive_file, 0)
-```
-
-cgroup v2에서는 `inactive_file`, 계층 통계를 사용하는 cgroup v1에서는 `total_inactive_file` 값을 읽습니다
-이 비활성 파일 페이지를 회수 가능한 쪽으로 보고 빼는 것이며, 모든 페이지 캐시를 제외하지는 않습니다
-활성 파일 페이지 등은 working set에 남을 수 있습니다
-
-| cAdvisor 지표 | 여기서 구분할 범위 |
-|---|---|
-| `container_memory_usage_bytes` | 캐시를 포함한 전체 사용량 |
-| `container_memory_working_set_bytes` | 위 식으로 비활성 파일 페이지를 제외한 값 |
-| `container_memory_rss` | Linux cgroup v2 경로에서는 `memory.stat`의 `anon` 값. usage보다 좁은 범위 |
-
-이 식은 실제로 회수하는 데 드는 비용이나 앱이 앞으로 필요로 할 메모리까지 계산하지 않습니다
-working set 하나로 cgroup OOM 발생 여부를 확정할 수 없고, usage가 limit에 가깝다는 이유만으로 즉시 OOM이라고 결론낼 수도 없습니다
-커널은 회수 가능한 메모리를 회수한 뒤에도 한도 안에서 할당을 수용할 수 없는지 판단합니다
-
-### node-pressure 판단은 노드 범위와 보정도 확인합니다
+## node-pressure 판단은 노드 범위와 보정도 확인합니다
 
 [Eviction과 OOM](/essays/k8s-theory-eviction-oom)에서 살핀 `memory.available`의 기본 관계는 `capacity - workingSet`입니다
 하지만 컨테이너 working set 하나를 노드 용량에서 빼면 된다는 뜻은 아닙니다
@@ -136,38 +147,27 @@ eviction manager는 노드 범위의 Summary 통계를 읽고, Pod 간 축출 �
 이 조건에서는 단순한 기본 식만으로 실제 축출 입력값을 설명할 수 없습니다
 대시보드의 컨테이너 메모리 숫자와 노드 압박 신호를 비교할 때는 범위와 보정을 함께 맞춰야 합니다
 
-## metrics-server는 최근 두 표본으로 자원 사용량을 구합니다
+## kube-state-metrics는 API에 기록된 필드를 읽습니다
 
-확인한 metrics-server v0.9.0은 기본적으로 kubelet의 `/metrics/resource`를 읽습니다
-Node 어노테이션으로 수집 경로를 바꿀 수도 있으므로, 여기서도 실제 구성을 확인해야 합니다
-기본 배포 매니페스트에는 `--metric-resolution=15s`가 지정돼 있습니다
+[`kube-state-metrics`의 README](https://github.com/kubernetes/kube-state-metrics/blob/4ffeda2ef866b0fef372849825a803296483b336/README.md)는 API 오브젝트의 원시 데이터를 지표로 노출하는 역할을 설명합니다
+노드의 cgroup을 읽어 실제 메모리 사용량을 재는 컴포넌트는 아닙니다
 
-[`storage`](https://github.com/kubernetes-sigs/metrics-server/blob/2a7c4b2c7d46552ff47f4aeaa3a735c582587ecd/pkg/storage/storage.go)는 사용량을 디스크에 누적하지 않고, 메모리에 최근 표본과 그 이전 표본을 보관합니다
-이 두 표본은 CPU 누적 카운터의 차이를 계산하는 데 필요합니다
+Deployment를 예로 들면 다음 값은 각각 다른 필드를 나타냅니다
 
-| Metrics API 값 | 확인한 계산 방식 |
+| 지표 | 오브젝트에서 읽는 값 |
 |---|---|
-| CPU 사용량 | 두 표본의 누적 CPU 사용량 차이를 경과 시간으로 나눈 평균 |
-| 메모리 사용량 | 마지막 표본의 working set |
-| `Timestamp` | 반환한 사용량의 기준 시각 |
-| `Window` | CPU 평균 계산 등에 사용한 시간 구간 |
+| `kube_deployment_spec_replicas` | 원하는 replica 수 |
+| `kube_deployment_status_replicas_available` | controller가 사용 가능하다고 보고한 replica 수 |
+| `kube_deployment_metadata_generation` | 현재 선언의 generation |
+| `kube_deployment_status_observed_generation` | controller가 관찰했다고 보고한 generation |
 
-CPU는 구간 평균이고 메모리는 표본 시점의 값입니다
-수집 간격이 15초라는 설정만으로 모든 반환값의 `Window`가 정확히 15초라고 가정해서도 안 됩니다
+**generation**은 선언이 바뀌었는지 구분하는 오브젝트의 세대 번호입니다
+현재 generation보다 observed generation이 낮다면 controller가 아직 그 선언을 관찰한 상태를 보고하지 못한 것입니다
+같다고 해서 모든 replica가 준비됐다는 뜻은 아니므로 가용 replica 수는 따로 봐야 합니다
 
-### kubectl top과 resource HPA는 Metrics API를 읽습니다
-
-`kubectl top pod`는 `metrics.k8s.io`의 PodMetrics 목록을 읽습니다
-HPA와 VPA도 resource 지표를 사용하는 경로에서 이 API를 이용합니다
-이는 HPA가 현재 replica 수를 결정하는 모든 과정을 metrics-server가 수행한다는 뜻은 아닙니다
-
-[`NewRESTMetricsClient`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/podautoscaler/metrics/client.go)는 resource·custom·external 지표용 클라이언트를 구분합니다
-metrics-server는 그중 CPU·메모리 resource 지표를 제공합니다
-custom·external 지표를 사용하는 HPA는 다른 공급 경로를 사용할 수 있습니다
-
-Prometheus를 설치했다는 사실만으로 `metrics.k8s.io`가 채워지지는 않습니다
-반대로 metrics-server가 없다는 이유만으로 모든 HPA가 동작하지 않는다고 결론낼 수도 없습니다
-어느 API의 어느 지표를 읽도록 설정했는지 확인해야 합니다
+이 지표에도 API 변경이 반영되기까지 시간이 걸립니다
+API watch와 Prometheus 등의 수집 시각이 다르면, API 서버의 최신 값과 잠시 차이가 날 수 있습니다
+오브젝트가 삭제된 사실을 반영한 뒤에는 해당 오브젝트의 지표도 더 이상 노출하지 않습니다
 
 ## 과거 사용량을 확인하려면 별도로 수집·보관해야 합니다
 

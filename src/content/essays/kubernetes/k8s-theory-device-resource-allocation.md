@@ -10,7 +10,7 @@ date: "2026-09-18"
 ---
 
 Pod가 `nvidia.com/gpu: 2`를 요청하면 기본 개수 모델의 스케줄러는 GPU가 두 개 남은 노드를 찾습니다
-하지만 그 숫자만으로 어느 모델의 GPU인지, 두 장치가 같은 NUMA 위치에 있는지 알 수는 없습니다
+하지만 그 숫자만으로 어느 모델의 GPU인지, 두 장치가 서버 안에서 CPU·메모리와 같은 NUMA 위치에 있는지 알 수는 없습니다
 
 노드의 남은 수량을 비교하는 일과 실제 장치 ID를 고르는 일은 다른 단계입니다
 device plugin 경로는 kubelet이 노드에서 장치를 고르고, DRA는 장치 목록과 선택 조건·할당 결과를 API에 표현해 스케줄러가 선택할 수 있게 합니다
@@ -66,15 +66,6 @@ limits만 작성했다면 기본값 처리로 requests도 같은 값이 됩니�
 hugepages도 일반 CPU·메모리와 달리 overcommit이 금지돼 request와 limit이 같아야 합니다
 다만 hugepages는 `hugepages-2Mi`처럼 페이지 크기별로 미리 확보한 메모리를 따로 집계하는 자원이며, GPU 장치 수와는 구분해야 합니다
 
-### 장치만 요청해도 CPU·메모리 QoS는 올라가지 않습니다
-
-[QoS 계산](/essays/k8s-theory-qos-cgroups)은 CPU와 메모리를 사용하며 장치 요청을 포함하지 않습니다
-다른 CPU·메모리 요청이나 한도가 없다면 장치만 요청한 Pod는 BestEffort입니다
-
-메모리 압박의 축출 순위도 장치를 보유했다는 이유로 별도 보호하지 않습니다
-요청 초과 여부, Pod priority, 요청 대비 사용량을 비교하므로 장치만 요청한 Pod가 항상 첫 대상이라고 단정할 수는 없습니다
-CPU·메모리의 예약과 배치 조건을 충족하려면 그 자원을 따로 선언해야 합니다
-
 ## NodeResourcesFit은 수량을 검사하고 장치 ID를 고르지 않습니다
 
 [`fitsRequest`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/plugins/noderesources/fit.go)의 기본 스칼라 검사는 요청을 `allocatable - requested`와 비교합니다
@@ -119,66 +110,11 @@ Pod 이름이나 컨테이너 이름을 전달하는 필드는 없습니다
 | `annotations` | 런타임에 전달할 어노테이션 |
 | `cdi_devices` | CDI 장치 이름 |
 
+**CDI(Container Device Interface)**는 이름으로 지정한 장치에 필요한 컨테이너 설정을 런타임이 적용하는 규격입니다
+
 이 결과는 [CRI 컨테이너 설정](/essays/k8s-theory-cri-oci-boundary)으로 이어지고, 런타임이 실제 컨테이너 실행 설정을 준비합니다
 Node를 골랐다는 사실만으로 할당 성공까지 보장하지는 않습니다
 노드에서 `requested number of devices unavailable for <이름>`으로 실패하면 kubelet admission이 `UnexpectedAdmissionError`로 거절할 수 있습니다
-
-### unhealthy 보고는 새 할당 수량을 줄이며 기존 Pod를 옮기지는 않습니다
-
-플러그인이 장치를 unhealthy로 보고하면 해당 자원의 allocatable은 줄지만 capacity는 유지됩니다
-[`GetCapacity`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/cm/devicemanager/manager.go)는 건강한 장치를 allocatable에, 건강한 장치와 unhealthy 장치를 합한 수를 capacity에 반영합니다
-
-이미 할당한 Pod는 그 장치에 계속 연결됩니다
-기본 device plugin의 건강 상태 통지만으로 자동 재배치가 일어나는 것은 아닙니다
-장치에 의존하는 앱이 이후 실패하거나 재시작하는 것과 장치 재선택도 별도입니다
-
-노드의 PodResources API로 할당 ID를 조사할 수 있으며, 현재 Beta·기본 on인 `ResourceHealthStatus`에서는 Pod의 `containerStatuses[].allocatedResourcesStatus`로 할당 장치 ID와 건강 상태를 보고할 수도 있습니다
-따라서 현재 구현을 설명하면서 장치 정보가 API에 전혀 남지 않는다고 단정하면 안 됩니다
-다만 이 보고가 DRA처럼 스케줄러가 참조하는 별도 장치 목록·할당 claim을 만든다는 뜻은 아닙니다
-
-## NUMA 정렬은 개수 검사 뒤의 노드 내부 판단입니다
-
-**NUMA node**는 한 서버 안에서 CPU·메모리·I/O의 위치 관계를 구분하는 하드웨어 자원 단위입니다
-Pod를 실행할 서버를 나타내는 Kubernetes Node와 다르며 한 Kubernetes Node 안에 여러 NUMA node가 있을 수 있습니다
-
-CPU가 어느 위치의 메모리나 장치에 접근하는지에 따라 접근 거리와 비용이 달라집니다
-따라서 GPU 두 개가 남았다는 사실과 CPU·메모리·장치를 가까운 위치에 함께 할당할 수 있다는 사실은 다른 조건입니다
-
-![device manager·CPU manager·memory manager의 NUMA 힌트를 Topology Manager가 scope와 정책에 따라 병합해 admission을 판단하는 관계](/diagrams/k8s-theory-device-resource-allocation-2.svg)
-
-**Topology Manager**는 각 manager의 NUMA 배치 힌트를 결합합니다
-`container` scope는 컨테이너별로, `pod` scope는 Pod 전체를 정렬 단위로 봅니다
-기본 scope는 container입니다
-
-| 정책 | NUMA 정렬에 따른 admission |
-|---|---|
-| `none` | 정렬 조건을 적용하지 않음 |
-| `best-effort` | 가능한 정렬을 선택하지만 정렬 실패로 거절하지 않음 |
-| `restricted` | 병합한 힌트가 preferred가 아니면 거절 |
-| `single-numa-node` | 자원을 하나의 NUMA node에 맞춘 preferred 힌트를 얻지 못하면 거절 |
-
-뒤의 두 정책에서 거절하면 `TopologyAffinityError`로 나타납니다
-single-numa-node의 한 노드는 서버 한 대가 아니라 그 안의 NUMA node 하나입니다
-토폴로지 제약을 주지 않는 자원의 힌트까지 억지로 다른 자원처럼 제한하는 뜻은 아닙니다
-
-### CPU·Memory Manager의 전용 할당 조건은 서로 다릅니다
-
-CPU Manager의 `static` 정책은 기본 컨테이너 경로에서 Guaranteed QoS와 정수 CPU 요청을 요구합니다
-조건을 만족하지 못하면 전용 CPU를 받지 않고 공유 풀을 사용합니다
-이 전용 CPU를 항상 물리 코어 전체 할당으로 해석하지는 않습니다
-정책 옵션과 CPU 토폴로지도 실제 할당에 영향을 줍니다
-
-CPU 예약을 남기는 노드 설정도 필요합니다
-GPU를 받았다는 사실만으로 CPU가 전용으로 배정되는 것은 아닙니다
-
-Linux Memory Manager의 `Static`도 Guaranteed를 전제로 하지만 CPU 요청의 정수 조건을 그대로 적용하지는 않습니다
-NUMA별 시스템 예약량을 `reservedMemory`로 구성해야 하며, 예약 합계와 Node Allocatable의 예약 조건도 맞아야 합니다
-Windows의 Static은 지원되지 않고 별도 BestEffort 정책 분기가 있습니다
-
-Pod 수준 자원을 사용한다면 한 조건이 더 있습니다
-현재 Beta·기본 off인 `PodLevelResourceManagers`를 켜지 않은 기본 구성에서는 CPU·Memory Static이 Pod 수준 자원을 사용하는 Pod의 할당·힌트를 건너뛰는 경로가 있습니다
-Guaranteed여도 이 생략 조건은 적용됩니다
-이 게이트를 켜는 경우에는 Pod 단위 할당과 컨테이너별 자격 조건도 추가되므로 기본 컨테이너 경로와 구분해야 합니다
 
 ## DRA는 목록·요구·할당 결과를 API로 표현합니다
 
@@ -252,7 +188,6 @@ PreBind가 실패하면 Unreserve 정리를 거쳐 Pod가 backoff 큐로 돌아�
 claim별 오류나 요청한 claim의 결과 누락이 있으면 준비 성공으로 처리하지 않습니다
 따라서 API에 allocation이 있어도 노드의 준비나 컨테이너 시작은 실패할 수 있습니다
 
-**CDI(Container Device Interface)**는 이름으로 지정한 장치에 필요한 컨테이너 설정을 런타임이 적용하는 규격입니다
 런타임은 노드의 CDI 명세에서 이름에 해당하는 항목을 찾아 장치 노드·마운트·환경 변수 등의 OCI 설정을 반영합니다
 해당 CDI 설정과 런타임 지원이 전제입니다
 
@@ -263,6 +198,72 @@ DRA의 kubelet 경로는 준비 응답에서 CDI 이름을 모아 CRI `Container
 
 선택 기능인 optional node operations를 사용하는 장치는 노드 준비·정리 RPC를 생략하는 경로도 있습니다
 이 예외를 사용하는 드라이버와 설정을 기본 준비 흐름과 섞어 판단해서는 안 됩니다
+
+## NUMA 정렬은 개수 검사 뒤의 노드 내부 판단입니다
+
+**NUMA node**는 한 서버 안에서 CPU·메모리·I/O의 위치 관계를 구분하는 하드웨어 자원 단위입니다
+Pod를 실행할 서버를 나타내는 Kubernetes Node와 다르며 한 Kubernetes Node 안에 여러 NUMA node가 있을 수 있습니다
+
+CPU가 어느 위치의 메모리나 장치에 접근하는지에 따라 접근 거리와 비용이 달라집니다
+따라서 GPU 두 개가 남았다는 사실과 CPU·메모리·장치를 가까운 위치에 함께 할당할 수 있다는 사실은 다른 조건입니다
+
+![device manager·CPU manager·memory manager의 NUMA 힌트를 Topology Manager가 scope와 정책에 따라 병합해 admission을 판단하는 관계](/diagrams/k8s-theory-device-resource-allocation-2.svg)
+
+**Topology Manager**는 각 manager의 NUMA 배치 힌트를 결합합니다
+`container` scope는 컨테이너별로, `pod` scope는 Pod 전체를 정렬 단위로 봅니다
+기본 scope는 container입니다
+
+| 정책 | NUMA 정렬에 따른 admission |
+|---|---|
+| `none` | 정렬 조건을 적용하지 않음 |
+| `best-effort` | 가능한 정렬을 선택하지만 정렬 실패로 거절하지 않음 |
+| `restricted` | 병합한 힌트가 preferred가 아니면 거절 |
+| `single-numa-node` | 자원을 하나의 NUMA node에 맞춘 preferred 힌트를 얻지 못하면 거절 |
+
+뒤의 두 정책에서 거절하면 `TopologyAffinityError`로 나타납니다
+single-numa-node의 한 노드는 서버 한 대가 아니라 그 안의 NUMA node 하나입니다
+토폴로지 제약을 주지 않는 자원의 힌트까지 억지로 다른 자원처럼 제한하는 뜻은 아닙니다
+
+### CPU·Memory Manager의 전용 할당 조건은 서로 다릅니다
+
+CPU Manager의 `static` 정책은 기본 컨테이너 경로에서 Guaranteed QoS와 정수 CPU 요청을 요구합니다
+조건을 만족하지 못하면 전용 CPU를 받지 않고 공유 풀을 사용합니다
+이 전용 CPU를 항상 물리 코어 전체 할당으로 해석하지는 않습니다
+정책 옵션과 CPU 토폴로지도 실제 할당에 영향을 줍니다
+
+CPU 예약을 남기는 노드 설정도 필요합니다
+GPU를 받았다는 사실만으로 CPU가 전용으로 배정되는 것은 아닙니다
+
+Linux Memory Manager의 `Static`도 Guaranteed를 전제로 하지만 CPU 요청의 정수 조건을 그대로 적용하지는 않습니다
+NUMA별 시스템 예약량을 `reservedMemory`로 구성해야 하며, 예약 합계와 Node Allocatable의 예약 조건도 맞아야 합니다
+Windows의 Static은 지원되지 않고 별도 BestEffort 정책 분기가 있습니다
+
+Pod 수준 자원을 사용한다면 한 조건이 더 있습니다
+현재 Beta·기본 off인 `PodLevelResourceManagers`를 켜지 않은 기본 구성에서는 CPU·Memory Static이 Pod 수준 자원을 사용하는 Pod의 할당·힌트를 건너뛰는 경로가 있습니다
+Guaranteed여도 이 생략 조건은 적용됩니다
+이 게이트를 켜는 경우에는 Pod 단위 할당과 컨테이너별 자격 조건도 추가되므로 기본 컨테이너 경로와 구분해야 합니다
+
+## 장치만 요청해도 CPU·메모리 QoS는 올라가지 않습니다
+
+[QoS 계산](/essays/k8s-theory-qos-cgroups)은 CPU와 메모리를 사용하며 장치 요청을 포함하지 않습니다
+다른 CPU·메모리 요청이나 한도가 없다면 장치만 요청한 Pod는 BestEffort입니다
+
+메모리 압박의 축출 순위도 장치를 보유했다는 이유로 별도 보호하지 않습니다
+요청 초과 여부, Pod priority, 요청 대비 사용량을 비교하므로 장치만 요청한 Pod가 항상 첫 대상이라고 단정할 수는 없습니다
+CPU·메모리의 예약과 배치 조건을 충족하려면 그 자원을 따로 선언해야 합니다
+
+## unhealthy 보고는 새 할당 수량을 줄이며 기존 Pod를 옮기지는 않습니다
+
+플러그인이 장치를 unhealthy로 보고하면 해당 자원의 allocatable은 줄지만 capacity는 유지됩니다
+[`GetCapacity`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/cm/devicemanager/manager.go)는 건강한 장치를 allocatable에, 건강한 장치와 unhealthy 장치를 합한 수를 capacity에 반영합니다
+
+이미 할당한 Pod는 그 장치에 계속 연결됩니다
+기본 device plugin의 건강 상태 통지만으로 자동 재배치가 일어나는 것은 아닙니다
+장치에 의존하는 앱이 이후 실패하거나 재시작하는 것과 장치 재선택도 별도입니다
+
+노드의 PodResources API로 할당 ID를 조사할 수 있으며, 현재 Beta·기본 on인 `ResourceHealthStatus`에서는 Pod의 `containerStatuses[].allocatedResourcesStatus`로 할당 장치 ID와 건강 상태를 보고할 수도 있습니다
+따라서 현재 구현을 설명하면서 장치 정보가 API에 전혀 남지 않는다고 단정하면 안 됩니다
+다만 이 보고가 DRA처럼 스케줄러가 참조하는 별도 장치 목록·할당 claim을 만든다는 뜻은 아닙니다
 
 ## 정수 요청도 DRA에 위임할 수 있습니다
 

@@ -56,23 +56,6 @@ status를 10초마다 계산한다고 매번 API 서버에 보내지는 않습�
 변경을 발견하면 report 간격을 기다리지 않고 보내고, 변경이 없으면 보고 주기의 만료를 봅니다
 조건의 `lastHeartbeatTime`만 달라진 것은 비교에서 제외합니다
 
-[`tryUpdateNodeStatus`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_node_status.go)는 첫 조회에 로컬 캐시를 사용하고 재시도에서는 API 서버를 직접 조회합니다
-Lease 갱신도 직전에 쓴 사본을 재사용해 갱신 전 조회를 줄입니다
-현재 구현의 Node status 보고는 상태 변경이나 kubelet 재시작 뒤 **다음 보고 간격에 한 번** 무작위 지연을 적용하며, 이후 변경 없는 주기 보고는 기준 간격으로 돌아갑니다
-
-### update만 명시해도 report 기본값이 달라집니다
-
-[`KubeletConfiguration` 기본값 처리](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/apis/config/v1beta1/defaults.go)는 두 필드가 모두 없을 때 update 10초·report 5분을 채웁니다
-report를 생략하고 update만 명시하면 report도 그 값으로 채웁니다
-update를 10초로 직접 지정한 경우도 변경 없는 상태 보고가 기본 5분 대신 10초 기준이 될 수 있습니다
-
-이 둘은 모두 kubelet 설정 필드입니다
-`--node-status-update-frequency`라는 CLI 별칭이 있다는 사실로 계산과 보고를 필드·플래그의 차이로 나누면 안 됩니다
-
-하트비트용 클라이언트는 일반 클라이언트와도 분리합니다
-클라이언트 속도 제한을 끄고, 요청 타임아웃은 status 계산 간격과 Lease 수명 중 짧은 값으로 잡습니다
-이는 하트비트가 클라이언트의 요청 제한 때문에 기다리는 일을 줄이는 처리이며, 서버 쪽 처리가 항상 즉시 끝난다는 보장은 아닙니다
-
 ## 판정 시간은 컨트롤러의 마지막 관찰 시각으로 계산합니다
 
 [`tryUpdateNodeHealth`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/nodelifecycle/node_lifecycle_controller.go)는 Lease의 `renewTime`이 직전 관찰보다 새로워졌는지 확인합니다
@@ -99,15 +82,6 @@ Lease 갱신 자체가 kubelet의 `Ready=False`를 `True`로 바꿔 주는 것�
 관찰 시각은 컨트롤러 메모리에 있으므로 재시작이나 리더 교체 뒤 다시 만들어집니다
 기존 Node를 새로 관찰하는 경우 현재 시각부터 관찰을 시작해 판정이 늦어질 수 있습니다
 
-### 유예를 넘기면 네 조건을 Unknown으로 바꿉니다
-
-판정 대상은 `Ready`, `MemoryPressure`, `DiskPressure`, `PIDPressure`입니다
-기존 조건이 Unknown이 아니었다면 이유 `NodeStatusUnknown`과 메시지 `Kubelet stopped posting node status.`를 기록합니다
-아예 조건을 보고한 적이 없다면 `NodeStatusNeverUpdated`라는 이유로 조건을 만듭니다
-
-`NetworkUnavailable`은 이 경로가 바꾸지 않습니다
-따라서 하트비트 부재가 모든 Node 조건을 같은 값으로 덮는다고 일반화할 수는 없습니다
-
 ### 50초는 노드 재시도뿐 아니라 관찰 연결도 고려한 값입니다
 
 컨트롤러의 watch 연결이 조용히 끊기면 노드가 Lease를 갱신해도 캐시에 새 값이 도착하지 않을 수 있습니다
@@ -131,6 +105,15 @@ GET 자체가 실패해도 오류를 무시하고 Unknown 판정으로 진행하
 이 대조는 캐시가 뒤처진 것을 노드의 하트비트 중단으로 오인하지 않도록 하는 보호입니다
 Lease 갱신을 볼 수 없다는 사실만으로 노드의 실제 전원 상태까지 증명하지는 못합니다
 
+### 유예를 넘기면 네 조건을 Unknown으로 바꿉니다
+
+판정 대상은 `Ready`, `MemoryPressure`, `DiskPressure`, `PIDPressure`입니다
+기존 조건이 Unknown이 아니었다면 이유 `NodeStatusUnknown`과 메시지 `Kubelet stopped posting node status.`를 기록합니다
+아예 조건을 보고한 적이 없다면 `NodeStatusNeverUpdated`라는 이유로 조건을 만듭니다
+
+`NetworkUnavailable`은 이 경로가 바꾸지 않습니다
+따라서 하트비트 부재가 모든 Node 조건을 같은 값으로 덮는다고 일반화할 수는 없습니다
+
 ## Ready=False와 Unknown은 다른 taint로 이어집니다
 
 | Node Ready 조건 | 이 경로의 대표 작성 주체 | 대응 taint 키 |
@@ -151,36 +134,6 @@ Unknown에서 False로 바뀌면 unreachable을 제거하고 not-ready를 추가
 
 이 두 컨트롤러의 분리는 v1.29에 도입됐고 v1.34부터 GA로 잠겼습니다
 기능 분리가 고정됐다는 것과 별도 컨트롤러의 실행을 구성에서 제외할 수 있다는 것은 다른 조건입니다
-
-## 속도 제한은 Pod 수가 아니라 NoExecute를 붙이는 노드 수에 적용합니다
-
-taint를 붙이는 주체와 Pod를 삭제하는 주체가 다르므로 속도 제한도 적용 위치를 구분해야 합니다
-node lifecycle controller는 zone마다 `NoExecute` taint를 붙이는 노드 수를 제한합니다
-정상 속도 `--node-eviction-rate=0.1`은 초당 0.1개 노드이며 토큰 버킷 burst는 1입니다
-
-**zone**은 장애 범위를 나눠 처리하는 구역입니다
-여기서 상태는 실제 전원 장애 원인을 분석한 결과가 아니라 컨트롤러가 관찰한 Ready 노드 수로 계산합니다
-
-| zone 상태 | 소스의 판정 | 해당 zone의 NoExecute 추가 속도 |
-|---|---|---|
-| 정상 | 아래 두 상태가 아님 | 기본 초당 0.1개 노드 |
-| 부분 장애 | Ready가 아닌 노드 3개 이상이고 비율이 기본 0.55 이상 | zone 노드 수가 50 초과면 기본 0.01, 50 이하면 0 |
-| 전면 장애 | Ready 노드가 0이고 Ready가 아닌 노드가 있음 | 다른 zone이 전면 장애가 아니라면 정상 속도 |
-
-부분 장애의 비율은 `--unhealthy-zone-threshold`, 속도는 `--secondary-node-eviction-rate`, 크기 경계는 `--large-cluster-size-threshold`로 정합니다
-이 크기 비교는 다중 zone 구성에서 전체 클러스터 합계가 아니라 해당 zone의 노드 수를 사용합니다
-
-한 노드의 taint를 본 뒤 여러 Pod가 각각 삭제될 수 있으므로, 초당 0.1개 노드는 Pod DELETE 요청을 초당 0.1개로 제한한다는 뜻이 아닙니다
-노드 수가 많으면 taint 추가 대기만으로도 Pod의 toleration 시간을 세기 시작하는 시점이 늦어질 수 있습니다
-
-### 모든 zone이 전면 장애면 이 경로의 taint 추가를 멈춥니다
-
-[`handleDisruption`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/nodelifecycle/node_lifecycle_controller.go)은 모든 zone에서 Ready 노드가 사라진 상태로 들어가면 관리하던 두 `NoExecute` taint를 제거하고 추가 속도를 0으로 둡니다
-노드 전체가 실제로 종료된 것인지, 컨트롤 플레인의 관찰 경로가 끊긴 것인지 이 상태만으로 구분하지 못하기 때문입니다
-
-이는 모든 Pod 삭제 기능을 전역으로 끄는 설정이 아닙니다
-다른 컨트롤러의 삭제나 사용자가 붙인 다른 NoExecute taint까지 같은 정책으로 멈춘다고 해석하면 안 됩니다
-일부 Node가 다시 Ready로 관찰되면 관찰 시각과 zone별 속도를 다시 설정하며 이 모드에서 나옵니다
 
 ## 기본 300초는 admission이 Pod에 기록합니다
 
@@ -273,6 +226,55 @@ Pod에는 마지막 Running이 남을 수 있으며, 위 podGC 정리 시 미종
 볼륨 attach/detach 조정 경로도 이 taint를 읽습니다
 일반적인 비정상 노드의 언마운트 타임아웃 경로와 달리, 이 taint가 있으면 그 대기 시간과 별개로 강제 분리를 진행할 수 있습니다
 Pod 정리와 볼륨 분리는 같은 사건이 아니지만 둘 다 대체 Pod의 시작에 영향을 줍니다
+
+## 속도 제한은 Pod 수가 아니라 NoExecute를 붙이는 노드 수에 적용합니다
+
+taint를 붙이는 주체와 Pod를 삭제하는 주체가 다르므로 속도 제한도 적용 위치를 구분해야 합니다
+node lifecycle controller는 zone마다 `NoExecute` taint를 붙이는 노드 수를 제한합니다
+정상 속도 `--node-eviction-rate=0.1`은 초당 0.1개 노드이며 토큰 버킷 burst는 1입니다
+
+**zone**은 장애 범위를 나눠 처리하는 구역입니다
+여기서 상태는 실제 전원 장애 원인을 분석한 결과가 아니라 컨트롤러가 관찰한 Ready 노드 수로 계산합니다
+
+| zone 상태 | 소스의 판정 | 해당 zone의 NoExecute 추가 속도 |
+|---|---|---|
+| 정상 | 아래 두 상태가 아님 | 기본 초당 0.1개 노드 |
+| 부분 장애 | Ready가 아닌 노드 3개 이상이고 비율이 기본 0.55 이상 | zone 노드 수가 50 초과면 기본 0.01, 50 이하면 0 |
+| 전면 장애 | Ready 노드가 0이고 Ready가 아닌 노드가 있음 | 다른 zone이 전면 장애가 아니라면 정상 속도 |
+
+부분 장애의 비율은 `--unhealthy-zone-threshold`, 속도는 `--secondary-node-eviction-rate`, 크기 경계는 `--large-cluster-size-threshold`로 정합니다
+이 크기 비교는 다중 zone 구성에서 전체 클러스터 합계가 아니라 해당 zone의 노드 수를 사용합니다
+
+한 노드의 taint를 본 뒤 여러 Pod가 각각 삭제될 수 있으므로, 초당 0.1개 노드는 Pod DELETE 요청을 초당 0.1개로 제한한다는 뜻이 아닙니다
+노드 수가 많으면 taint 추가 대기만으로도 Pod의 toleration 시간을 세기 시작하는 시점이 늦어질 수 있습니다
+
+### 모든 zone이 전면 장애면 이 경로의 taint 추가를 멈춥니다
+
+[`handleDisruption`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/nodelifecycle/node_lifecycle_controller.go)은 모든 zone에서 Ready 노드가 사라진 상태로 들어가면 관리하던 두 `NoExecute` taint를 제거하고 추가 속도를 0으로 둡니다
+노드 전체가 실제로 종료된 것인지, 컨트롤 플레인의 관찰 경로가 끊긴 것인지 이 상태만으로 구분하지 못하기 때문입니다
+
+이는 모든 Pod 삭제 기능을 전역으로 끄는 설정이 아닙니다
+다른 컨트롤러의 삭제나 사용자가 붙인 다른 NoExecute taint까지 같은 정책으로 멈춘다고 해석하면 안 됩니다
+일부 Node가 다시 Ready로 관찰되면 관찰 시각과 zone별 속도를 다시 설정하며 이 모드에서 나옵니다
+
+## 상태 보고의 조회와 기본값에는 별도 조건이 있습니다
+
+[`tryUpdateNodeStatus`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_node_status.go)는 첫 조회에 로컬 캐시를 사용하고 재시도에서는 API 서버를 직접 조회합니다
+Lease 갱신도 직전에 쓴 사본을 재사용해 갱신 전 조회를 줄입니다
+현재 구현의 Node status 보고는 상태 변경이나 kubelet 재시작 뒤 **다음 보고 간격에 한 번** 무작위 지연을 적용하며, 이후 변경 없는 주기 보고는 기준 간격으로 돌아갑니다
+
+### update만 명시해도 report 기본값이 달라집니다
+
+[`KubeletConfiguration` 기본값 처리](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/apis/config/v1beta1/defaults.go)는 두 필드가 모두 없을 때 update 10초·report 5분을 채웁니다
+report를 생략하고 update만 명시하면 report도 그 값으로 채웁니다
+update를 10초로 직접 지정한 경우도 변경 없는 상태 보고가 기본 5분 대신 10초 기준이 될 수 있습니다
+
+이 둘은 모두 kubelet 설정 필드입니다
+`--node-status-update-frequency`라는 CLI 별칭이 있다는 사실로 계산과 보고를 필드·플래그의 차이로 나누면 안 됩니다
+
+하트비트용 클라이언트는 일반 클라이언트와도 분리합니다
+클라이언트 속도 제한을 끄고, 요청 타임아웃은 status 계산 간격과 Lease 수명 중 짧은 값으로 잡습니다
+이는 하트비트가 클라이언트의 요청 제한 때문에 기다리는 일을 줄이는 처리이며, 서버 쪽 처리가 항상 즉시 끝난다는 보장은 아닙니다
 
 ## 예고된 노드 종료는 kubelet이 먼저 알립니다
 

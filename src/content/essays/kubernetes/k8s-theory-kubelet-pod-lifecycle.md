@@ -26,56 +26,6 @@ kubelet은 컨테이너의 실행 상태를 관찰하고, Pod의 전체 상태�
 컨트롤러가 API 오브젝트 사이의 관계를 맞춘다면, kubelet은 Pod 오브젝트의 구성과 노드에서 실행되는 컨테이너 상태를 맞춥니다
 변화가 오거나 동기화할 시점이 되면 관찰한 상태를 비교하고, 필요한 컨테이너를 시작하거나 중지하고, 상태를 보고합니다
 
-![Pod 구성·런타임·probe의 변화를 받아 kubelet이 동기화하고 런타임에 작업을 요청한 뒤 관찰 상태를 보고하는 반복 흐름|tall](/diagrams/k8s-theory-kubelet-pod-lifecycle-1.svg)
-
-[`syncLoopIteration`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet.go)은 여러 채널 중 준비된 이벤트 하나를 선택해 해당 처리를 수행합니다
-여러 채널이 동시에 준비돼도 코드에 적힌 순서대로 처리한다는 보장은 없습니다
-
-| 입력 | 처리하는 변화 | 주기·조건 |
-|---|---|---|
-| config | Pod 구성 추가·수정·삭제 | 구성 소스의 변화 |
-| PLEG | 런타임에서 관찰한 컨테이너 상태 변화 | 기본 Generic PLEG의 전체 조회 간격은 1초 |
-| sync | 동기화할 시점이 된 Pod | 1초마다 대상을 확인 |
-| liveness | 생존 검사 결과 | 실패 결과만 동기화에 연결 |
-| readiness | 요청 준비 검사 결과 | 성공·실패 모두 준비 상태에 반영 |
-| startup | 시작 검사 결과 | 성공·실패 모두 시작 상태에 반영 |
-| container manager | 장치 관련 변화가 영향을 주는 Pod | 해당 업데이트가 올 때 |
-| housekeeping | 남은 Pod·볼륨 등의 정리 | 2초 티커. 구성 소스가 준비된 뒤 수행 |
-
-현재 확인한 구현에는 container manager 업데이트까지 여덟 입력 분기가 있습니다
-구성 변화, 런타임 관찰, probe 결과, 주기 처리가 서로 다른 경로로 동기화를 요청합니다
-
-### 1초 티커와 1분 동기화 설정은 다른 값입니다
-
-sync 티커가 1초마다 울린다고 모든 Pod를 매초 동기화하지는 않습니다
-`getPodsToSync`는 작업 큐에서 시점이 된 Pod와 `ShouldSync`로 선택한 Pod를 찾습니다
-
-[`SyncFrequency`의 설정 기본값](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/apis/config/v1beta1/defaults.go)은 1분입니다
-이 값은 Pod worker의 `resyncInterval`로 전달됩니다
-정상적으로 동기화를 마쳤고 상태 전이가 없으면 이 간격에 jitter, 즉 무작위 지연을 더해 다시 예약합니다
-
-상태 전이, 처리 대기 중인 업데이트, 오류, 다른 이벤트는 별도 경로를 따릅니다
-따라서 모든 Pod의 동기화가 정확히 1분마다 이뤄진다는 시간 보장도 아닙니다
-`syncLoop` 주석의 기본 10초라는 설명 대신 실제 설정 기본값과 [`completeWork`의 재예약](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/pod_workers.go)을 함께 봐야 합니다
-
-### Generic PLEG는 런타임을 조회해 변화를 찾습니다
-
-**PLEG(Pod Lifecycle Event Generator)**는 런타임에서 관찰한 상태 변화로 Pod 수명주기 이벤트를 만드는 컴포넌트입니다
-기본 Generic PLEG는 런타임에 Pod 목록을 요청하고 이전 결과와 비교합니다
-변화에 따라 `ContainerStarted`, `ContainerDied`, `ContainerRemoved`, `ContainerChanged` 이벤트를 만듭니다
-
-현재는 전체 조회 외에 특정 Pod의 재조회를 요청하는 경로도 있습니다
-`PLEGOnDemandRelist`는 v1.37에서 GA이며 기본 on으로 잠겨 있습니다
-이 경로가 추가됐어도 Generic PLEG의 주기 조회와 캐시 갱신 역할은 유지됩니다
-
-[`GenericPLEG.Healthy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/pleg/generic.go)는 저장된 마지막 전체 relist 시각으로부터 지난 시간을 기본 임계값 3분과 비교합니다
-한 번의 조회 수행시간만을 재는 검사는 아닙니다
-런타임 조회 실패로 이 시각이 갱신되지 않거나 조회가 오래 걸리면 unhealthy가 될 수 있습니다
-
-이 결과는 kubelet의 런타임 상태 검사에 들어가며, 노드 `Ready` 판정에도 영향을 줍니다
-런타임이 이벤트를 먼저 전달하는 `EventedPLEG`는 현재도 Alpha·기본 off입니다
-이를 켰을 때의 300초 relist 간격을 기본 Generic PLEG의 1초 간격과 섞으면 안 됩니다
-
 ## container state, Pod phase, Ready를 나눠 읽습니다
 
 **container state**는 컨테이너마다 있는 `Waiting`, `Running`, `Terminated` 실행 상태입니다
@@ -155,6 +105,7 @@ Pod에 `deletionTimestamp`가 있으면 liveness·startup 워커는 결과를 �
 이 상태를 liveness 실패로 연결하면 앱 컨테이너들이 종료되고, 재시작 정책에 따라 다시 시작하면서 DB 연결을 다시 요청할 수 있습니다
 
 readiness 실패는 프로세스를 유지하면서 요청 준비 상태를 바꿉니다
+Service의 대상 주소와 준비 상태를 담는 EndpointSlice에는 controller가 이 Pod 상태를 반영합니다
 `publishNotReadyAddresses=false`인 Service에서는 준비된 endpoint를 고르는 일반 트래픽의 대상에서 제외하는 데 이 값이 쓰입니다
 외부 의존성이 불안정하다는 이유와 앱 자체를 재시작해야 한다는 이유를 같은 검사로 합치지 않는 편이 좋습니다
 
@@ -189,6 +140,58 @@ sidecar의 readiness probe는 Pod의 준비 판정에도 참여합니다
 `SidecarContainers`와 `PodLifecycleSleepAction`은 각각 v1.33·v1.34에 안정화된 기능입니다
 현재 확인한 v1.37.1에는 이 두 feature gate 키가 남아 있지 않습니다
 과거의 gate 이름을 현재도 켜야 하는 설정처럼 안내하지는 않습니다
+
+## 실행 상태의 변화는 반복 동기화에 반영합니다
+
+![Pod 구성·런타임·probe의 변화를 받아 kubelet이 동기화하고 런타임에 작업을 요청한 뒤 관찰 상태를 보고하는 반복 흐름|tall](/diagrams/k8s-theory-kubelet-pod-lifecycle-1.svg)
+
+[`syncLoopIteration`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet.go)은 여러 채널 중 준비된 이벤트 하나를 선택해 해당 처리를 수행합니다
+여러 채널이 동시에 준비돼도 코드에 적힌 순서대로 처리한다는 보장은 없습니다
+
+| 입력 | 처리하는 변화 | 주기·조건 |
+|---|---|---|
+| config | Pod 구성 추가·수정·삭제 | 구성 소스의 변화 |
+| PLEG | 런타임에서 관찰한 컨테이너 상태 변화 | 기본 Generic PLEG의 전체 조회 간격은 1초 |
+| sync | 동기화할 시점이 된 Pod | 1초마다 대상을 확인 |
+| liveness | 생존 검사 결과 | 실패 결과만 동기화에 연결 |
+| readiness | 요청 준비 검사 결과 | 성공·실패 모두 준비 상태에 반영 |
+| startup | 시작 검사 결과 | 성공·실패 모두 시작 상태에 반영 |
+| container manager | 장치 관련 변화가 영향을 주는 Pod | 해당 업데이트가 올 때 |
+| housekeeping | 남은 Pod·볼륨 등의 정리 | 2초 티커. 구성 소스가 준비된 뒤 수행 |
+
+현재 확인한 구현에는 container manager 업데이트까지 여덟 입력 분기가 있습니다
+구성 변화, 런타임 관찰, probe 결과, 주기 처리가 서로 다른 경로로 동기화를 요청합니다
+
+### 1초 티커와 1분 동기화 설정은 다른 값입니다
+
+sync 티커가 1초마다 울린다고 모든 Pod를 매초 동기화하지는 않습니다
+`getPodsToSync`는 작업 큐에서 시점이 된 Pod와 `ShouldSync`로 선택한 Pod를 찾습니다
+
+[`SyncFrequency`의 설정 기본값](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/apis/config/v1beta1/defaults.go)은 1분입니다
+이 값은 Pod worker의 `resyncInterval`로 전달됩니다
+정상적으로 동기화를 마쳤고 상태 전이가 없으면 이 간격에 jitter, 즉 무작위 지연을 더해 다시 예약합니다
+
+상태 전이, 처리 대기 중인 업데이트, 오류, 다른 이벤트는 별도 경로를 따릅니다
+따라서 모든 Pod의 동기화가 정확히 1분마다 이뤄진다는 시간 보장도 아닙니다
+`syncLoop` 주석의 기본 10초라는 설명 대신 실제 설정 기본값과 [`completeWork`의 재예약](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/pod_workers.go)을 함께 봐야 합니다
+
+### Generic PLEG는 런타임을 조회해 변화를 찾습니다
+
+**PLEG(Pod Lifecycle Event Generator)**는 런타임에서 관찰한 상태 변화로 Pod 수명주기 이벤트를 만드는 컴포넌트입니다
+기본 Generic PLEG는 런타임에 Pod 목록을 요청하고 이전 결과와 비교합니다
+변화에 따라 `ContainerStarted`, `ContainerDied`, `ContainerRemoved`, `ContainerChanged` 이벤트를 만듭니다
+
+현재는 전체 조회 외에 특정 Pod의 재조회를 요청하는 경로도 있습니다
+`PLEGOnDemandRelist`는 v1.37에서 GA이며 기본 on으로 잠겨 있습니다
+이 경로가 추가됐어도 Generic PLEG의 주기 조회와 캐시 갱신 역할은 유지됩니다
+
+[`GenericPLEG.Healthy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/pleg/generic.go)는 저장된 마지막 전체 relist 시각으로부터 지난 시간을 기본 임계값 3분과 비교합니다
+한 번의 조회 수행시간만을 재는 검사는 아닙니다
+런타임 조회 실패로 이 시각이 갱신되지 않거나 조회가 오래 걸리면 unhealthy가 될 수 있습니다
+
+이 결과는 kubelet의 런타임 상태 검사에 들어가며, 노드 `Ready` 판정에도 영향을 줍니다
+런타임이 이벤트를 먼저 전달하는 `EventedPLEG`는 현재도 Alpha·기본 off입니다
+이를 켰을 때의 300초 relist 간격을 기본 Generic PLEG의 1초 간격과 섞으면 안 됩니다
 
 ## preStop도 컨테이너의 종료 유예 시간을 사용합니다
 

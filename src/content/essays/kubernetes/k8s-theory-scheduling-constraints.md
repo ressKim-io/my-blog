@@ -117,22 +117,6 @@ Score는 toleration하지 못하는 `PreferNoSchedule` taint 개수를 세고, �
 [`taint eviction controller`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/tainteviction/taint_eviction.go)는 모든 taint를 toleration하는지와 `tolerationSeconds`를 사용해 삭제 작업을 결정합니다
 시간을 지정하지 않은 무기한 toleration과, 제한된 유예 시간을 구분해야 합니다
 
-### 기본 300초는 모든 Pod의 공통 유예 시간이 아닙니다
-
-노드 상태에 따라 `not-ready`·`unreachable`·`memory-pressure`·`disk-pressure`·`pid-pressure`·`network-unavailable`·`unschedulable` 등의 taint가 붙을 수 있습니다
-이 중 not-ready와 unreachable에는 Pod의 기본 toleration을 추가하는 별도 admission 처리가 있습니다
-
-[`DefaultTolerationSeconds`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/defaulttolerationseconds/admission.go)가 활성화되어 있고 해당 toleration이 없으면 기본 300초를 추가합니다
-키나 effect가 비어 있어 여러 taint를 포함하는 기존 toleration도 검사하며, 이미 지정된 toleration을 덮어쓰지 않습니다
-기본값은 API 서버의 `--default-not-ready-toleration-seconds`와 `--default-unreachable-toleration-seconds`로 바꿀 수 있습니다
-
-DaemonSet 컨트롤러는 이 두 NoExecute taint에 대해 `tolerationSeconds`가 없는 toleration을 추가합니다
-따라서 DaemonSet Pod까지 일괄적으로 5분 뒤 축출된다고 설명할 수는 없습니다
-그 처리는 [`AddOrUpdateDaemonPodTolerations`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/daemon/util/daemonset_util.go)에서 확인할 수 있습니다
-
-이처럼 최종 Pod의 배치 조건에는 사용자가 작성한 값뿐 아니라 admission과 컨트롤러가 추가한 값도 들어갑니다
-[admission의 변경 단계](/essays/k8s-theory-admission-order/)가 스케줄링보다 앞에 있는 이유와도 연결됩니다
-
 ## pod affinity는 기존 Pod의 위치를 기준으로 합니다
 
 pod affinity는 selector로 고른 기존 Pod와 같은 영역에 배치하려는 조건입니다
@@ -186,7 +170,11 @@ v1.37의 `InterPodAffinityHostnameFastPath`는 Alpha·기본 off입니다
 ## topology spread는 domain별 Pod 개수 차이를 계산합니다
 
 `topologySpreadConstraints`는 selector에 맞는 Pod가 domain별로 몇 개씩 있는지 비교합니다
-`DoNotSchedule`의 Filter 판정식은 다음과 같습니다
+예를 들어 적격 domain 하나에 매칭 Pod가 5개 있고 새 Pod도 같은 selector에 맞는다고 가정합니다
+그 domain에 배치한 뒤의 개수는 6개가 되며, 이 값을 비교 기준인 최소 개수와 빼서 허용 차이를 넘는지 판단합니다
+최소 개수는 적격 domain의 구성과 `minDomains` 조건에 따라 달라집니다
+
+`DoNotSchedule`의 Filter는 이 배치 전후 관계를 다음 식으로 계산합니다
 
 ```text
 skew = matchNum + selfMatchNum - minMatchNum
@@ -283,6 +271,24 @@ NodeAffinity·TaintToleration Filter의 거절까지 끄지는 않습니다
 | 기존 affinity·anti-affinity 관계가 달라짐 | 바뀐 관계에 맞춰 기존 Pod를 재배치하지 않음 |
 | 노드 증설로 spread 분포가 달라짐 | 새 Pod의 배치에 계산하며 기존 Pod를 자동 이동하지 않음 |
 | toleration하지 못하는 NoExecute taint 추가 | 별도의 taint eviction controller가 삭제를 처리 |
+
+### 기본 300초는 모든 Pod의 공통 유예 시간이 아닙니다
+
+노드 상태에 따라 `not-ready`·`unreachable`·`memory-pressure`·`disk-pressure`·`pid-pressure`·`network-unavailable`·`unschedulable` 등의 taint가 붙을 수 있습니다
+이 중 not-ready와 unreachable에는 Pod의 기본 toleration을 추가하는 별도 admission 처리가 있습니다
+
+[`DefaultTolerationSeconds`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/defaulttolerationseconds/admission.go)가 활성화되어 있고 해당 toleration이 없으면 기본 300초를 추가합니다
+키나 effect가 비어 있어 여러 taint를 포함하는 기존 toleration도 검사하며, 이미 지정된 toleration을 덮어쓰지 않습니다
+기본값은 API 서버의 `--default-not-ready-toleration-seconds`와 `--default-unreachable-toleration-seconds`로 바꿀 수 있습니다
+
+DaemonSet 컨트롤러는 이 두 NoExecute taint에 대해 `tolerationSeconds`가 없는 toleration을 추가합니다
+따라서 DaemonSet Pod까지 일괄적으로 5분 뒤 축출된다고 설명할 수는 없습니다
+그 처리는 [`AddOrUpdateDaemonPodTolerations`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/daemon/util/daemonset_util.go)에서 확인할 수 있습니다
+
+이처럼 최종 Pod의 배치 조건에는 사용자가 작성한 값뿐 아니라 admission과 컨트롤러가 추가한 값도 들어갑니다
+[admission의 변경 단계](/essays/k8s-theory-admission-order/)가 스케줄링보다 앞에 있는 이유와도 연결됩니다
+
+### 배치 제약의 제공 필드와 기능 단계
 
 [PodAffinity API 타입](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/api/core/v1/types.go)에는 `RequiredDuringSchedulingRequiredDuringExecution`이라는 이름이 주석으로 남아 있지만 실제 제공하는 필드는 아닙니다
 배치 후 강제 유지가 필요하다는 이유로 이 이름의 설정을 만들어 넣을 수는 없습니다

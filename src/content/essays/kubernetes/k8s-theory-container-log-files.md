@@ -22,6 +22,32 @@ kubelet은 파일 회전과 조회를 맡지만, 로그 요청마다 남아 있�
 
 ![kubelet의 경로 지정, 런타임의 파일 기록, kubelet의 읽기와 API 서버 중계를 구분한 흐름|tall](/diagrams/k8s-theory-container-log-files-1.svg)
 
+## kubectl logs는 선택한 인스턴스의 현재 파일을 읽습니다
+
+[`GetContainerLogs`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container.go)는 선택된 컨테이너 ID로 런타임 상태를 가져옵니다
+그 상태의 `LogPath` 하나를 `ReadLogs`에 전달하며 회전본 목록을 모아 읽지 않습니다
+[공식 로깅 문서](https://kubernetes.io/docs/concepts/cluster-administration/logging/#log-rotation)도 최신 파일의 내용만 조회할 수 있다고 설명합니다
+
+노드에 `.gz` 회전본이 남아 있다는 사실만으로 `kubectl logs`가 그 내용을 반환하지는 않습니다
+`containerLogMaxFiles`를 늘리면 디스크에 남기는 파일 수는 늘지만 이 조회가 읽는 파일 수는 늘지 않습니다
+`--since=1h`도 선택한 파일 안에서 시각을 거를 뿐 회전 이전 구간을 복구하지 않습니다
+
+최신 파일 하나로 제한한 실제 설계 이유는 확인한 근거에서 확정하지 못했습니다
+압축을 풀고 더 많은 파일을 읽으면 비용이 늘 수 있다는 추론을 구현의 확정된 설계 이유로 제시하지는 않습니다
+
+## API 서버는 파일을 저장하지 않고 해당 노드에 중계합니다
+
+로그 요청은 `pods/log` 서브리소스로 들어옵니다
+[`LogLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)은 Pod의 `spec.nodeName`으로 노드를 찾아 `/containerLogs/<namespace>/<Pod>/<컨테이너>` URL을 만듭니다
+`follow`, `previous`, `sinceSeconds`, `tailLines` 등도 쿼리로 전달합니다
+
+[`LogREST.Get`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/rest/log.go)은 그 응답을 스트림으로 중계합니다
+[kubelet 접속 경로](/essays/k8s-theory-kubelet-access)의 API 서버와 노드 연결이 여기에도 필요합니다
+
+노드가 아직 배정되지 않아 `spec.nodeName`이 비어 있으면 로그를 요청할 kubelet URL도 만들지 않습니다
+노드가 정해졌더라도 kubelet과 연결할 수 없으면 해당 노드의 파일을 이 경로로 읽을 수 없습니다
+로그 본문 전체가 Pod처럼 etcd에 저장돼 대신 반환되는 구조는 아닙니다
+
 ## 경로는 CRI의 두 필드로 전달합니다
 
 [CRI와 OCI의 경계](/essays/k8s-theory-cri-oci-boundary)에서 본 kubelet과 런타임의 계약에는 로그 위치도 들어 있습니다
@@ -42,31 +68,6 @@ Linux의 기본 루트는 `podLogsDir: /var/log/pods`입니다
 
 `podLogsDir`를 바꾸려면 비어 있지 않은 절대 경로여야 하며 정규화된 ASCII 경로여야 합니다
 이는 [`ValidateKubeletConfiguration`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/apis/config/validation/validation.go)의 검증 조건입니다
-
-### 파일 이름은 restart count를 복구할 때도 사용합니다
-
-컨테이너 상태를 찾으면 kubelet은 그 상태의 restart count에 1을 더합니다
-상태가 없으면 `calcRestartCountByLogDir`로 로그 디렉터리를 읽어 파일 이름에 남은 숫자를 확인합니다
-
-이 함수는 `0.log` 같은 현재 파일뿐 아니라 `0.log.<시각>.gz` 같은 회전본 이름도 살핍니다
-찾은 가장 큰 숫자에 1을 더하므로, 로그 파일 이름은 지난 실행의 기록이면서 다음 실행 번호를 정하는 입력입니다
-
-일부 런타임이 재부팅 등으로 상태를 잃더라도 기존 로그를 다시 `0.log`에 쓰지 않도록 보완하는 경로입니다
-재부팅 자체가 언제나 상태 손실을 뜻하지는 않습니다
-상태와 로그 디렉터리를 모두 잃었다면 이 복구 자료도 사용할 수 없습니다
-
-### /var/log/containers는 별도 원본 저장소가 아닙니다
-
-kubelet은 시작한 컨테이너의 실제 로그 경로를 가리키는 호환용 심볼릭 링크도 만듭니다
-[`legacyLogSymlink`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/legacy.go)가 만드는 이름은 다음 형태입니다
-
-```text
-/var/log/containers/<Pod 이름>_<namespace>_<컨테이너 이름>-<컨테이너 ID>.log
-```
-
-이 경로는 예전 수집기와의 호환을 위한 것이며 로그 내용을 한 벌 더 복사하지 않습니다
-대상이 없다고 확인되면 시작 경로에서 링크를 만들지 않고, 파일명은 확장자를 포함해 255바이트 한도에 맞춥니다
-컨테이너 로그를 삭제하는 경로에서는 이 링크도 정리합니다
 
 ## 경로 계약과 읽을 수 있는 형식은 구분해야 합니다
 
@@ -166,19 +167,6 @@ CRI 계약은 오류를 반환한 런타임이 새 로그 파일을 만들면 �
 현재는 kubelet의 회전 구현과 `ReopenContainerLog` RPC를 함께 봐야 합니다
 과거 설계의 경로·회전 예시를 현재 구현과 그대로 대응시키면 안 됩니다
 
-## kubectl logs는 선택한 인스턴스의 현재 파일을 읽습니다
-
-[`GetContainerLogs`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container.go)는 선택된 컨테이너 ID로 런타임 상태를 가져옵니다
-그 상태의 `LogPath` 하나를 `ReadLogs`에 전달하며 회전본 목록을 모아 읽지 않습니다
-[공식 로깅 문서](https://kubernetes.io/docs/concepts/cluster-administration/logging/#log-rotation)도 최신 파일의 내용만 조회할 수 있다고 설명합니다
-
-노드에 `.gz` 회전본이 남아 있다는 사실만으로 `kubectl logs`가 그 내용을 반환하지는 않습니다
-`containerLogMaxFiles`를 늘리면 디스크에 남기는 파일 수는 늘지만 이 조회가 읽는 파일 수는 늘지 않습니다
-`--since=1h`도 선택한 파일 안에서 시각을 거를 뿐 회전 이전 구간을 복구하지 않습니다
-
-최신 파일 하나로 제한한 실제 설계 이유는 확인한 근거에서 확정하지 못했습니다
-압축을 풀고 더 많은 파일을 읽으면 비용이 늘 수 있다는 추론을 구현의 확정된 설계 이유로 제시하지는 않습니다
-
 ### follow는 같은 이름으로 다시 생긴 파일을 따라갑니다
 
 현재 [`ReadLogs`와 `waitLogs`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-client/pkg/logs/logs.go)는 `--follow`일 때 파일의 끝까지 읽은 뒤 디렉터리 변경을 감시합니다
@@ -209,20 +197,32 @@ GC의 삭제 경로는 `removeContainerLog`를 거쳐 `LogPath`와 접두사가 
 이전 인스턴스가 실행 중에 이미 회전했다면 `--previous`로도 마지막 파일만 읽습니다
 그 뒤 GC가 인스턴스나 파일을 지웠다면 조회에 필요한 상태 또는 파일이 없어질 수 있습니다
 
-## API 서버는 파일을 저장하지 않고 해당 노드에 중계합니다
+## 파일 이름은 restart count를 복구할 때도 사용합니다
 
-로그 요청은 `pods/log` 서브리소스로 들어옵니다
-[`LogLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)은 Pod의 `spec.nodeName`으로 노드를 찾아 `/containerLogs/<namespace>/<Pod>/<컨테이너>` URL을 만듭니다
-`follow`, `previous`, `sinceSeconds`, `tailLines` 등도 쿼리로 전달합니다
+컨테이너 상태를 찾으면 kubelet은 그 상태의 restart count에 1을 더합니다
+상태가 없으면 `calcRestartCountByLogDir`로 로그 디렉터리를 읽어 파일 이름에 남은 숫자를 확인합니다
 
-[`LogREST.Get`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/rest/log.go)은 그 응답을 스트림으로 중계합니다
-[kubelet 접속 경로](/essays/k8s-theory-kubelet-access)의 API 서버와 노드 연결이 여기에도 필요합니다
+이 함수는 `0.log` 같은 현재 파일뿐 아니라 `0.log.<시각>.gz` 같은 회전본 이름도 살핍니다
+찾은 가장 큰 숫자에 1을 더하므로, 로그 파일 이름은 지난 실행의 기록이면서 다음 실행 번호를 정하는 입력입니다
 
-노드가 아직 배정되지 않아 `spec.nodeName`이 비어 있으면 로그를 요청할 kubelet URL도 만들지 않습니다
-노드가 정해졌더라도 kubelet과 연결할 수 없으면 해당 노드의 파일을 이 경로로 읽을 수 없습니다
-로그 본문 전체가 Pod처럼 etcd에 저장돼 대신 반환되는 구조는 아닙니다
+일부 런타임이 재부팅 등으로 상태를 잃더라도 기존 로그를 다시 `0.log`에 쓰지 않도록 보완하는 경로입니다
+재부팅 자체가 언제나 상태 손실을 뜻하지는 않습니다
+상태와 로그 디렉터리를 모두 잃었다면 이 복구 자료도 사용할 수 없습니다
 
-### 종료 메시지에 복사한 로그 끝부분은 예외입니다
+### /var/log/containers는 별도 원본 저장소가 아닙니다
+
+kubelet은 시작한 컨테이너의 실제 로그 경로를 가리키는 호환용 심볼릭 링크도 만듭니다
+[`legacyLogSymlink`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/legacy.go)가 만드는 이름은 다음 형태입니다
+
+```text
+/var/log/containers/<Pod 이름>_<namespace>_<컨테이너 이름>-<컨테이너 ID>.log
+```
+
+이 경로는 예전 수집기와의 호환을 위한 것이며 로그 내용을 한 벌 더 복사하지 않습니다
+대상이 없다고 확인되면 시작 경로에서 링크를 만들지 않고, 파일명은 확장자를 포함해 255바이트 한도에 맞춥니다
+컨테이너 로그를 삭제하는 경로에서는 이 링크도 정리합니다
+
+## 종료 메시지에 복사한 로그 끝부분은 예외입니다
 
 `terminationMessagePolicy: FallbackToLogsOnError`이면 kubelet이 로그의 끝부분을 종료 메시지로 사용할 수 있습니다
 [`convertToKubeContainerStatus`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_container.go)의 조건은 다음과 같습니다

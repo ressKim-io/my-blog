@@ -21,20 +21,6 @@ Job의 성공을 판정하는 일과 정해진 회차에 Job을 만드는 일은
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 클러스터에서 재현한 실측 기록은 포함하지 않습니다
 
-## Job은 Pod 결과를 집계한 뒤 최종 조건을 기록합니다
-
-Pod에는 `Pending`, `Running`, `Succeeded`, `Failed` 같은 phase가 있지만 Job에는 같은 형태의 phase가 없습니다
-Job 컨트롤러는 성공·실패·활성 Pod 수와 `status.conditions`로 작업 상태를 표현합니다
-
-![Job 컨트롤러가 Pod 결과와 정책을 평가해 중간 성공·실패 조건을 정하고 종료·집계 정리 뒤 최종 조건을 기록하는 흐름|tall](/diagrams/k8s-theory-job-cronjob-completion-1.svg)
-
-여기서 **성공 기준 충족**과 **최종 완료**를 구분해야 합니다
-`SuccessCriteriaMet`는 성공 기준이 충족됐다는 중간 조건이고, `Complete`는 Job의 최종 성공 조건입니다
-실패도 `FailureTarget`으로 종료 이유를 먼저 기록한 뒤 `Failed`를 기록하는 단계를 거칩니다
-
-[`enactJobFinished`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/job_controller.go)는 아직 집계하지 않은 종료 Pod나 종료 중인 Pod가 남으면 최종 조건 기록을 미룹니다
-따라서 중간 조건을 확인한 시점에 모든 Pod가 사라졌거나 컨테이너가 이미 멈췄다고 판단하면 안 됩니다
-
 ## completions는 총 성공 목표, parallelism은 동시 활성 목표입니다
 
 `completions`는 필요한 총 성공 수이고, `parallelism`은 컨트롤러가 목표로 삼는 동시 활성 Pod 수입니다
@@ -58,15 +44,19 @@ Job 컨트롤러는 성공·실패·활성 Pod 수와 `status.conditions`로 작
 컨트롤러는 새 Pod 보충을 멈추고 이미 활성인 Pod들이 끝나기를 기다립니다
 성공 하나 이상과 활성 Pod 0이라는 조건을 함께 보는 이유입니다
 
-### Indexed는 같은 번호의 성공을 중복해서 세지 않습니다
+## Job은 Pod 결과를 집계한 뒤 최종 조건을 기록합니다
 
-`completionMode`의 기본값은 `NonIndexed`이며, 성공한 Pod 수를 셉니다
-`Indexed`에서는 `0`부터 `completions-1`까지 번호를 배정하고, 각 번호가 성공했는지 따로 기록합니다
-같은 번호의 Pod가 여러 번 생성되더라도 그 번호의 성공은 하나로 집계합니다
+Pod에는 `Pending`, `Running`, `Succeeded`, `Failed` 같은 phase가 있지만 Job에는 같은 형태의 phase가 없습니다
+Job 컨트롤러는 성공·실패·활성 Pod 수와 `status.conditions`로 작업 상태를 표현합니다
 
-번호는 `batch.kubernetes.io/job-completion-index` annotation과 label에 기록됩니다
-[`addCompletionIndexEnvVariable`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/indexed_job_utils.go)은 `JOB_COMPLETION_INDEX`가 이미 명시돼 있지 않으면 label을 참조하는 환경 변수를 추가합니다
-이 번호로 작업 구간을 나눌 수 있지만, 번호의 중복 집계를 막는 것과 애플리케이션이 실제로 한 번만 실행되는 것은 다릅니다
+![Job 컨트롤러가 Pod 결과와 정책을 평가해 중간 성공·실패 조건을 정하고 종료·집계 정리 뒤 최종 조건을 기록하는 흐름|tall](/diagrams/k8s-theory-job-cronjob-completion-1.svg)
+
+여기서 **성공 기준 충족**과 **최종 완료**를 구분해야 합니다
+`SuccessCriteriaMet`는 성공 기준이 충족됐다는 중간 조건이고, `Complete`는 Job의 최종 성공 조건입니다
+실패도 `FailureTarget`으로 종료 이유를 먼저 기록한 뒤 `Failed`를 기록하는 단계를 거칩니다
+
+[`enactJobFinished`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/job_controller.go)는 아직 집계하지 않은 종료 Pod나 종료 중인 Pod가 남으면 최종 조건 기록을 미룹니다
+따라서 중간 조건을 확인한 시점에 모든 Pod가 사라졌거나 컨테이너가 이미 멈췄다고 판단하면 안 됩니다
 
 ## Job의 Pod 재시작 정책에는 Never와 OnFailure만 허용합니다
 
@@ -87,6 +77,16 @@ Job은 성공한 컨테이너 실행을 별도로 세는 대신, [kubelet이 판
 
 현재 기본 on인 `ContainerRestartRules` 기능에서는 일반 컨테이너의 `restartPolicy`와 `restartPolicyRules`가 Pod 정책을 재정의할 수 있습니다
 Pod 정책과 컨테이너별 규칙을 함께 확인해야 실제 재시작 여부를 판단할 수 있습니다
+
+## Indexed는 같은 번호의 성공을 중복해서 세지 않습니다
+
+`completionMode`의 기본값은 `NonIndexed`이며, 성공한 Pod 수를 셉니다
+`Indexed`에서는 `0`부터 `completions-1`까지 번호를 배정하고, 각 번호가 성공했는지 따로 기록합니다
+같은 번호의 Pod가 여러 번 생성되더라도 그 번호의 성공은 하나로 집계합니다
+
+번호는 `batch.kubernetes.io/job-completion-index` annotation과 label에 기록됩니다
+[`addCompletionIndexEnvVariable`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/indexed_job_utils.go)은 `JOB_COMPLETION_INDEX`가 이미 명시돼 있지 않으면 label을 참조하는 환경 변수를 추가합니다
+이 번호로 작업 구간을 나눌 수 있지만, 번호의 중복 집계를 막는 것과 애플리케이션이 실제로 한 번만 실행되는 것은 다릅니다
 
 ## backoffLimit은 실패 Pod와 컨테이너 재시작을 구분해서 셉니다
 
@@ -125,7 +125,30 @@ Pod 정책과 컨테이너별 규칙을 함께 확인해야 실제 재시작 여
 이 값은 **Job 컨트롤러의 Pod 보충 지연**입니다
 컨테이너를 같은 Pod 안에서 다시 실행하는 kubelet의 backoff와 같은 타이머가 아니며, Pod 생성 시각이 정확히 이 수열 간격으로 관찰된다는 보장도 아닙니다
 
+## successPolicy는 성공한 index의 조합을 봅니다
+
+`successPolicy`는 Indexed Job에서만 사용할 수 있습니다
+기본 `completions`를 전부 채우기 전이라도 지정한 index와 성공 개수가 규칙에 맞으면 성공 기준을 충족할 수 있습니다
+
+| 규칙 필드 | 충족 조건 |
+|---|---|
+| `succeededIndexes`만 지정 | 지정한 index가 모두 성공 |
+| `succeededCount`만 지정 | 성공한 index 수가 지정 값 이상 |
+| 둘 다 지정 | 지정한 목록 안에서 성공한 index 수가 지정 값 이상 |
+
+[`matchSuccessPolicy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/success_policy.go)는 규칙을 쓴 순서대로 검사하고 하나가 맞으면 뒤의 규칙은 검사하지 않습니다
+규칙을 충족하면 `SuccessCriteriaMet`의 reason은 `SuccessPolicy`가 됩니다
+기본 성공 목표로 충족한 경우의 reason은 `CompletionsReached`입니다
+
+새 실패 기준과 성공 기준이 같은 sync에서 함께 충족되면 실패 검사가 먼저 적용됩니다
+그러나 이미 `SuccessCriteriaMet`가 저장돼 있다면 다음 sync에서는 그 조건에 따라 처리하고 새로운 실패 검사를 건너뜁니다
+항상 실패가 성공을 뒤집는다고 일반화하면 이 저장된 조건의 처리를 놓칩니다
+
 ## 새로운 실패와 성공을 동시에 평가하면 실패 기준을 먼저 봅니다
+
+`podFailurePolicy`의 모든 매치가 Job을 즉시 실패시키는 것은 아닙니다
+`Ignore`는 해당 실패를 한도 계산에서 제외하고, `Count`는 집계하며, `FailIndex`는 해당 index를 실패로 처리합니다
+Job 전체를 실패시키는 규칙이 `FailJob`입니다
 
 [`syncJob`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/job_controller.go)은 먼저 이미 기록된 `SuccessCriteriaMet`와 `FailureTarget`을 확인합니다
 어느 조건으로 종료할지 아직 정하지 않은 경우에는 다음 순서로 새로운 기준을 평가합니다
@@ -137,9 +160,6 @@ Pod 정책과 컨테이너별 규칙을 함께 확인해야 실제 재시작 여
 5. Indexed Job의 `successPolicy`를 평가하고, 아직 종료 조건을 정하지 않았다면 기본 성공 목표도 평가합니다
 
 앞선 검사에서 종료 이유를 정하면 뒤의 검사로 덮어쓰지 않습니다
-`podFailurePolicy`의 모든 매치가 Job을 즉시 실패시키는 것은 아닙니다
-`Ignore`는 해당 실패를 한도 계산에서 제외하고, `Count`는 집계하며, `FailIndex`는 해당 index를 실패로 처리합니다
-Job 전체를 실패시키는 규칙이 `FailJob`입니다
 
 | 실패 reason | 판단 내용 |
 |---|---|
@@ -165,25 +185,6 @@ Job의 `spec.activeDeadlineSeconds`는 `status.startTime`부터 잰 활성 시�
 suspend 상태에서는 이 시간 한도를 검사하지 않습니다
 재개할 때는 `startTime`을 현재 시각으로 다시 설정하므로, 중단 전까지 쓴 시간을 누적한 채 초시계를 이어 가는 방식이 아닙니다
 또한 Job 수준의 이 필드와 Pod 템플릿 내부의 같은 이름 필드를 구분해야 합니다
-
-## successPolicy는 성공한 index의 조합을 봅니다
-
-`successPolicy`는 Indexed Job에서만 사용할 수 있습니다
-기본 `completions`를 전부 채우기 전이라도 지정한 index와 성공 개수가 규칙에 맞으면 성공 기준을 충족할 수 있습니다
-
-| 규칙 필드 | 충족 조건 |
-|---|---|
-| `succeededIndexes`만 지정 | 지정한 index가 모두 성공 |
-| `succeededCount`만 지정 | 성공한 index 수가 지정 값 이상 |
-| 둘 다 지정 | 지정한 목록 안에서 성공한 index 수가 지정 값 이상 |
-
-[`matchSuccessPolicy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/job/success_policy.go)는 규칙을 쓴 순서대로 검사하고 하나가 맞으면 뒤의 규칙은 검사하지 않습니다
-규칙을 충족하면 `SuccessCriteriaMet`의 reason은 `SuccessPolicy`가 됩니다
-기본 성공 목표로 충족한 경우의 reason은 `CompletionsReached`입니다
-
-새 실패 기준과 성공 기준이 같은 sync에서 함께 충족되면 앞선 실패 검사가 먼저 적용됩니다
-그러나 이미 `SuccessCriteriaMet`가 저장돼 있다면 다음 sync에서는 그 조건에 따라 처리하고 새로운 실패 검사를 건너뜁니다
-항상 실패가 성공을 뒤집는다고 일반화하면 이 저장된 조건의 처리를 놓칩니다
 
 ## 대체 Pod를 만드는 시점은 종료 완료 시점과 다를 수 있습니다
 

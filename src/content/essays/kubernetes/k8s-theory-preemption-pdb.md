@@ -34,6 +34,25 @@ preemption으로 후보를 찾은 시도도 새 Pod의 관점에서는 `PodSched
 이 글은 기본값의 **Pod 단위 DefaultPreemption**을 기준으로 설명합니다
 기본 off인 GenericWorkload·PodGroup 관련 집합 경로를 활성화하면 희생자 단위와 영향을 받는 노드의 범위도 달라질 수 있습니다
 
+## PDB는 preemption의 집행을 막지 않습니다
+
+**Eviction API**는 `policy/v1`의 `Eviction`을 Pod의 `eviction` 서브리소스에 CREATE하는 요청입니다
+일반 Pod DELETE와 요청 경로가 다릅니다
+
+```text
+POST /api/v1/namespaces/<namespace>/pods/<name>/eviction
+```
+
+PDB는 희생자 선정 중 되돌리는 순서와 최종 노드 선택에 반영됩니다
+그러나 일반 preemption 삭제는 `Pods().Delete`를 사용하므로 Eviction API의 예산 검사를 거치지 않습니다
+바인딩 전 대기·준비 중인 Pod를 스케줄러 메모리에서 중단하는 Permit·PreBind 취소도 `pods/eviction` 요청이 아닙니다
+
+[공식 문서의 best effort](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/scheduling-eviction/pod-priority-preemption.md#poddisruptionbudget-is-supported-but-not-guaranteed)는 이 범위를 뜻합니다
+PDB 위반을 줄이려고 시도하지만 필요하면 위반하는 희생자도 제거할 수 있습니다
+
+preemption에도 이 예산 검사를 강제하면 사용자의 `maxUnavailable: 0`이 시스템용 고우선순위 Pod가 사용할 자리까지 막을 수 있습니다
+가용성 예산은 자원을 선점할 권한을 정하는 우선순위와 별도입니다
+
 ## PriorityClass는 생성할 때 Pod의 정수 우선순위가 됩니다
 
 사용자는 `priorityClassName`에 PriorityClass 이름을 지정합니다
@@ -71,17 +90,6 @@ Filter의 `Unschedulable`은 다른 Pod를 제거하면 조건이 바뀔 여지�
 
 기본 Pod 경로는 배치하려는 노드에 있는 **더 낮은 우선순위의 Pod**를 제거 대상으로 삼습니다
 같은 우선순위 Pod를 밀어내거나, 다른 노드의 Pod를 지워 현재 노드의 배치 문제를 해결하는 일반적인 cross-node preemption은 이 기본 경로의 범위가 아닙니다
-
-### 후보 목표 수는 전체 검사 횟수와 다릅니다
-
-[`DefaultPreemption` 설정의 기본값](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/apis/config/v1/defaults.go)은 `minCandidateNodesPercentage: 10`, `minCandidateNodesAbsolute: 100`입니다
-잠재 후보 노드 수를 `N`이라고 하면 목표 수는 `min(N, max(N × 10 / 100, 100))`으로 계산하며 정수 나눗셈을 사용합니다
-
-탐색 시작점은 무작위로 고릅니다
-하지만 목표 수만큼 노드를 검사하고 무조건 끝내는 것은 아닙니다
-
-[`DryRunPreemption`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/preemption/preemption.go)은 배치 가능한 후보를 찾으며, PDB 위반이 없는 후보를 하나 이상 확보하고 전체 후보 수가 목표에 도달했을 때 탐색을 중단할 수 있습니다
-쓸 만한 후보가 부족하면 더 검사해야 합니다
 
 ## 희생자를 고르는 동안에는 실제 Pod를 삭제하지 않습니다
 
@@ -129,6 +137,17 @@ PDB를 위반하는 Pod까지 모두 남기면 새 Pod가 들어갈 수 없는 �
 다섯 번째 기준은 같은 최고 우선순위라면 더 오래 실행한 Pod를 가급적 남기는 순서입니다
 마지막 후보 순서는 노드 이름의 정렬 순서로 보장되는 것은 아닙니다
 
+### 후보 목표 수는 전체 검사 횟수와 다릅니다
+
+[`DefaultPreemption` 설정의 기본값](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/apis/config/v1/defaults.go)은 `minCandidateNodesPercentage: 10`, `minCandidateNodesAbsolute: 100`입니다
+잠재 후보 노드 수를 `N`이라고 하면 목표 수는 `min(N, max(N × 10 / 100, 100))`으로 계산하며 정수 나눗셈을 사용합니다
+
+탐색 시작점은 무작위로 고릅니다
+하지만 목표 수만큼 노드를 검사하고 무조건 끝내는 것은 아닙니다
+
+[`DryRunPreemption`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/scheduler/framework/preemption/preemption.go)은 배치 가능한 후보를 찾으며, PDB 위반이 없는 후보를 하나 이상 확보하고 전체 후보 수가 목표에 도달했을 때 탐색을 중단할 수 있습니다
+쓸 만한 후보가 부족하면 더 검사해야 합니다
+
 ## 우선순위가 높아도 다른 Pod를 밀어내지 않을 수 있습니다
 
 `preemptionPolicy: Never`인 Pod는 높은 우선순위를 가져도 다른 Pod를 밀어내지 않습니다
@@ -137,7 +156,7 @@ PDB를 위반하는 Pod까지 모두 남기면 새 Pod가 들어갈 수 없는 �
 기본 정책은 `PreemptLowerPriority`입니다
 Never는 다른 Pod를 밀어낼 권한을 끄는 것이며, 그 Pod 자신이 더 높은 우선순위 Pod에게 밀려나지 않는다는 의미는 아닙니다
 
-이전에 preemption을 요청한 Pod는 nominated node에서 희생자가 종료 중이면 추가 preemption을 보통 중단합니다
+이전에 preemption을 요청한 Pod는 배치 예정 노드인 nominated node에서 희생자가 종료 중이면 추가 preemption을 보통 중단합니다
 이때 검사하는 것은 단순히 삭제 중인 모든 Pod가 아니라, preemption을 요청한 Pod가 밀어낼 수 있고 preemption 때문에 종료 중인 Pod입니다
 
 다만 그 nominated node의 상태가 `UnschedulableAndUnresolvable`이면 다시 preemption을 시도할 수 있습니다
@@ -227,12 +246,7 @@ DELETE가 승인되어도 희생자의 프로세스가 즉시 종료되는 것�
 
 ## 예산을 검사해 삭제를 거부하는 곳은 Eviction API입니다
 
-**Eviction API**는 `policy/v1`의 `Eviction`을 Pod의 `eviction` 서브리소스에 CREATE하는 요청입니다
-일반 Pod DELETE와 요청 경로가 다릅니다
-
-```text
-POST /api/v1/namespaces/<namespace>/pods/<name>/eviction
-```
+앞서 구분한 두 요청 경로 중 Eviction API는 계산된 PDB 예산을 실제로 검사합니다
 
 다음 그림은 PDB 예산을 사용하는 eviction 경로와 일반 preemption 삭제 경로를 비교합니다
 미준비·종료 Pod처럼 예산 검사를 생략하거나 차감 없이 허용하는 조건은 아래에서 구분합니다
@@ -269,19 +283,7 @@ controller가 Pod 삭제를 확인하기 전까지 그 Pod를 가용 수에서 �
 그 기한이 지났는데 삭제되지 않은 항목은 controller가 재검토해 맵에서 제외하고 예산을 다시 계산합니다
 모든 항목이 정확히 2분 뒤 같은 순간에 정리된다는 시간 보장은 아닙니다
 
-## PDB는 preemption의 집행을 막지 않습니다
-
-PDB는 희생자 선정 중 되돌리는 순서와 최종 노드 선택에 반영됩니다
-그러나 일반 preemption 삭제는 `Pods().Delete`를 사용하므로 Eviction API의 예산 검사를 거치지 않습니다
-메모리 내 Permit·PreBind 취소도 `pods/eviction` 요청이 아닙니다
-
-[공식 문서의 best effort](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/scheduling-eviction/pod-priority-preemption.md#poddisruptionbudget-is-supported-but-not-guaranteed)는 이 범위를 뜻합니다
-PDB 위반을 줄이려고 시도하지만 필요하면 위반하는 희생자도 제거할 수 있습니다
-
-preemption에도 이 예산 검사를 강제하면 사용자의 `maxUnavailable: 0`이 시스템용 고우선순위 Pod가 사용할 자리까지 막을 수 있습니다
-가용성 예산은 자원을 선점할 권한을 정하는 우선순위와 별도입니다
-
-### drain의 기본 Eviction 경로와 예외도 구분합니다
+## drain의 기본 Eviction 경로와 예외도 구분합니다
 
 `kubectl drain`은 먼저 노드를 cordon해 새 배치를 막고, 기본적으로 Eviction API를 사용해 Pod를 제거합니다
 429를 받으면 대기 후 재시도하므로 예산이 계속 부족하면 멈춘 것처럼 보일 수 있습니다

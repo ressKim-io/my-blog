@@ -79,7 +79,27 @@ eviction manager는 내부 Summary provider에서 받은 자원 통계를 임계
 `containerfs`는 쓰기 가능한 컨테이너 계층을 구분하는 식별자이며, 구성에 따라 다른 식별자와 같은 파일시스템을 가리킬 수도 있습니다
 지원과 분리 여부는 런타임·기능 설정에 달려 있으므로 세 이름을 항상 별도 디스크로 읽으면 안 됩니다
 
-### memory.available은 전체 사용량을 뺀 값과 다릅니다
+## 한 주기의 node-pressure 축출은 최대 한 Pod입니다
+
+eviction manager는 먼저 노드 수준에서 회수할 수 있는 자원을 살펴봅니다
+디스크 부족 때 미사용 이미지나 종료된 컨테이너를 정리해 압박을 해소하면 실행 중인 Pod를 축출할 필요가 없습니다
+
+그 뒤 node-pressure 임계값을 처리하는 루프는 한 주기에 최대 한 Pod를 축출합니다
+선택된 Pod의 정리를 최대 30초 동안 기다리며 1초마다 완료 여부를 확인한 뒤 다시 통계를 봅니다
+이 정리 완료 대기는 컨테이너 종료에 허용하는 유예와도 별도입니다
+
+종료 효과를 보기 전에 같은 부족 신호로 여러 Pod를 제거하면 필요 이상으로 축출할 수 있습니다
+한 번씩 다시 측정하면 그 위험을 줄이지만, 메모리 소모가 급격할 때 회수가 소모 속도를 따라잡지 못할 수 있습니다
+커널 OOM과 kubelet 축출이 언제나 고정된 순서로 일어난다고 기대할 수는 없습니다
+
+한 주기에 한 Pod라는 범위는 **node-pressure 임계값 축출 루프**에 해당합니다
+그보다 앞서 실행하는 local storage limit 축출은 여러 Pod를 반환할 수 있으므로, eviction manager의 모든 축출을 이 규칙으로 묶지 않습니다
+
+[`evictPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/eviction_manager.go)는 `IsCriticalPod`가 참이면 축출을 거부합니다
+확인한 버전의 [`IsCriticalPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/types/pod_update.go)는 시스템 critical 우선순위뿐 아니라 static Pod와 mirror Pod도 포함합니다
+이 보호는 해당 kubelet 축출 경로의 규칙이며, 커널 OOM까지 막아 주는 보호는 아닙니다
+
+## memory.available은 전체 사용량을 뺀 값과 다릅니다
 
 [`SignalMemoryAvailable`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/api/types.go)의 기본 정의는 `capacity - workingSet`입니다
 working set은 현재 사용 중인 메모리 가운데 회수 가능하다고 보는 일부를 제외한 값입니다
@@ -91,34 +111,6 @@ Linux에서는 비활성 파일 페이지인 `inactive_file`을 제외하므로,
 v1.37의 `HugepageAwareEviction`은 Beta이며 기본으로 켜져 있습니다
 hugepage를 예약한 노드에서는 [`adjustForHugePages`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/server/stats/summary.go)가 노드의 `AvailableBytes`에서 전체 hugepage capacity를 추가로 빼고 0 아래로 내려가지 않게 합니다
 따라서 이 조건에서는 단순한 `capacity - workingSet`에 그 보정까지 적용한 값이 eviction manager에 전달됩니다
-
-### Linux 기본 hard 임계값도 부분 설정에 주의해야 합니다
-
-[`DefaultEvictionHard`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/defaults_linux.go)는 다음 다섯 값을 정의합니다
-
-| 신호 | Linux 기본 hard 임계값 |
-|---|---:|
-| `memory.available` | `<100Mi` |
-| `nodefs.available` | `<10%` |
-| `nodefs.inodesFree` | `<5%` |
-| `imagefs.available` | `<15%` |
-| `imagefs.inodesFree` | `<5%` |
-
-`evictionHard`를 지정하지 않으면 이 기본 맵을 사용합니다
-일부 값만 지정했다면 빠진 값까지 자동으로 이어받지는 않습니다
-[`MergeDefaultEvictionSettings`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/server.go)를 `true`로 설정해야 누락된 기본값을 병합하며, 이 설정의 기본값은 `false`입니다
-
-[QoS와 cgroup](/essays/k8s-theory-qos-cgroups)에서 구분한 두 자원 계산에도 이 임계값이 연결됩니다
-스케줄러에게 알리는 `node.status.allocatable`에는 시스템 예약·Kubernetes 예약·hard eviction 예약을 반영하지만, 전체 Pod cgroup 한도 계산에서는 앞의 두 예약만 뺍니다
-Pod들이 요청을 넘겨 사용하면 배치 계산에서 제외했던 hard eviction 예약분까지 사용할 수 있고, kubelet은 남은 여유를 자원 신호로 확인합니다
-
-cgroup v2에서는 `cgroup.event_control`을 사용하는 메모리 임계값 알림을 지원하지 않습니다
-[`NewCgroupNotifier`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/threshold_notifier_linux.go)는 비활성 알림기를 반환하므로 `--kernel-memcg-notification`을 켜도 이 알림 경로는 사용할 수 없습니다
-eviction manager의 주기적인 통계 확인은 계속됩니다
-
-`KubeletPSI`는 메모리 회수 등에 막혀 기다린 시간을 나타내는 PSI 지표를 노출하는 기능이며, v1.36부터 GA로 기본 활성화됩니다
-이 지표가 있다는 사실과 eviction manager가 그 값을 축출 임계값으로 사용한다는 주장은 다릅니다
-확인한 eviction 신호 목록과 판단 경로에는 PSI 임계값이 포함돼 있지 않습니다
 
 ## hard와 soft에서는 두 종류의 시간을 나눠 봅니다
 
@@ -156,6 +148,8 @@ Pod의 원래 긴 종료 유예를 그대로 기다리지 않는다는 문서의
 
 ## 메모리 축출 순위는 QoS 이름으로 정하지 않습니다
 
+노드 수준의 회수로 압박을 해소하지 못해 Pod를 골라야 한다면 다음 순위를 적용합니다
+
 [`rankMemoryPressure`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/helpers.go)는 세 비교 함수를 순서대로 적용합니다
 통계를 얻은 Pod끼리는 앞선 비교에서 순위가 갈리면 뒤의 비교를 하지 않습니다
 
@@ -183,25 +177,33 @@ Guaranteed 역시 모든 종료나 축출로부터 보호되는 등급은 아닙
 QoS만으로는 같은 Burstable 두 Pod 중 누가 요청 이내이고 누가 초과했는지 알 수 없습니다
 초과 여부가 같을 때 우선순위로 중요도를 비교하고, 그것도 같을 때 더 큰 사용량 차이를 비교합니다
 
-## 한 주기의 node-pressure 축출은 최대 한 Pod입니다
+## Linux 기본 hard 임계값도 부분 설정에 주의해야 합니다
 
-eviction manager는 먼저 노드 수준에서 회수할 수 있는 자원을 살펴봅니다
-디스크 부족 때 미사용 이미지나 종료된 컨테이너를 정리해 압박을 해소하면 실행 중인 Pod를 축출할 필요가 없습니다
+[`DefaultEvictionHard`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/defaults_linux.go)는 다음 다섯 값을 정의합니다
 
-그 뒤 node-pressure 임계값을 처리하는 루프는 한 주기에 최대 한 Pod를 축출합니다
-선택된 Pod의 정리를 최대 30초 동안 기다리며 1초마다 완료 여부를 확인한 뒤 다시 통계를 봅니다
-이 대기는 앞서 설명한 컨테이너 종료 유예와도 별도입니다
+| 신호 | Linux 기본 hard 임계값 |
+|---|---:|
+| `memory.available` | `<100Mi` |
+| `nodefs.available` | `<10%` |
+| `nodefs.inodesFree` | `<5%` |
+| `imagefs.available` | `<15%` |
+| `imagefs.inodesFree` | `<5%` |
 
-종료 효과를 보기 전에 같은 부족 신호로 여러 Pod를 제거하면 필요 이상으로 축출할 수 있습니다
-한 번씩 다시 측정하면 그 위험을 줄이지만, 메모리 소모가 급격할 때 회수가 소모 속도를 따라잡지 못할 수 있습니다
-커널 OOM과 kubelet 축출이 언제나 고정된 순서로 일어난다고 기대할 수는 없습니다
+`evictionHard`를 지정하지 않으면 이 기본 맵을 사용합니다
+일부 값만 지정했다면 빠진 값까지 자동으로 이어받지는 않습니다
+[`MergeDefaultEvictionSettings`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/server.go)를 `true`로 설정해야 누락된 기본값을 병합하며, 이 설정의 기본값은 `false`입니다
 
-한 주기에 한 Pod라는 범위는 **node-pressure 임계값 축출 루프**에 해당합니다
-그보다 앞서 실행하는 local storage limit 축출은 여러 Pod를 반환할 수 있으므로, eviction manager의 모든 축출을 이 규칙으로 묶지 않습니다
+[QoS와 cgroup](/essays/k8s-theory-qos-cgroups)에서 구분한 두 자원 계산에도 이 임계값이 연결됩니다
+스케줄러에게 알리는 `node.status.allocatable`에는 시스템 예약·Kubernetes 예약·hard eviction 예약을 반영하지만, 전체 Pod cgroup 한도 계산에서는 앞의 두 예약만 뺍니다
+Pod들이 요청을 넘겨 사용하면 배치 계산에서 제외했던 hard eviction 예약분까지 사용할 수 있고, kubelet은 남은 여유를 자원 신호로 확인합니다
 
-[`evictPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/eviction_manager.go)는 `IsCriticalPod`가 참이면 축출을 거부합니다
-확인한 버전의 [`IsCriticalPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/types/pod_update.go)는 시스템 critical 우선순위뿐 아니라 static Pod와 mirror Pod도 포함합니다
-이 보호는 해당 kubelet 축출 경로의 규칙이며, 커널 OOM까지 막아 주는 보호는 아닙니다
+cgroup v2에서는 `cgroup.event_control`을 사용하는 메모리 임계값 알림을 지원하지 않습니다
+[`NewCgroupNotifier`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/eviction/threshold_notifier_linux.go)는 비활성 알림기를 반환하므로 `--kernel-memcg-notification`을 켜도 이 알림 경로는 사용할 수 없습니다
+eviction manager의 주기적인 통계 확인은 계속됩니다
+
+`KubeletPSI`는 메모리 회수 등에 막혀 기다린 시간을 나타내는 PSI 지표를 노출하는 기능이며, v1.36부터 GA로 기본 활성화됩니다
+이 지표가 있다는 사실과 eviction manager가 그 값을 축출 임계값으로 사용한다는 주장은 다릅니다
+확인한 eviction 신호 목록과 판단 경로에는 PSI 임계값이 포함돼 있지 않습니다
 
 ## 압박 조건의 해제와 새 Pod 수용은 별도 판단입니다
 

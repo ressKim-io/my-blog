@@ -32,6 +32,19 @@ kubelet은 Pod 설정과 이미지 정보를 읽어 CRI 보안 설정을 만들�
 seccomp 프로필 파일이 노드에 있는지, 선택한 런타임이 user namespace를 지원하는지 같은 조건은 필드 값과 조합만 검사해서 확정할 수 없습니다
 [CRI와 OCI의 경계](/essays/k8s-theory-cri-oci-boundary)에서 본 것처럼, kubelet이 전달할 설정을 조립하는 일과 런타임이 실행 환경을 만드는 일도 나뉘어 있습니다
 
+## capability·seccomp·AppArmor·SELinux는 제한하는 대상이 다릅니다
+
+capability는 Linux 특권을 동작별 권한으로 나눈 것입니다
+`add`·`drop`은 그 목록에서 권한을 더하거나 뺍니다
+어떤 syscall을 허용할지 정하는 seccomp과는 다른 기전입니다
+
+seccomp는 프로세스가 커널 기능을 요청하는 시스템 호출을 필터링합니다
+AppArmor는 프로그램의 파일·네트워크 등 자원 접근을 프로필로 제한하고, SELinux는 프로세스와 자원의 보안 라벨에 적용한 정책으로 접근을 판단합니다
+같은 접근 실패여도 어떤 기전이 거부했는지 구분해야 합니다
+
+이 역할과 지원 조건은 [Linux kernel security constraints 공식 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/security/linux-kernel-security-constraints.md)에 설명되어 있습니다
+AppArmor·SELinux는 노드의 커널과 정책 지원을 전제로 하며, YAML에 이름을 적는 것만으로 정책이 배포되지는 않습니다
+
 ## securityContext의 위치는 적용 범위와 연결됩니다
 
 Pod 수준은 `spec.securityContext`, 컨테이너 수준은 `spec.containers[].securityContext`에 둡니다
@@ -67,19 +80,6 @@ seccomp과 AppArmor는 이 다섯 필드에 포함되지 않습니다
 AppArmor의 annotation 경로는 static Pod처럼 annotation이 필드로 동기화되지 않은 입력을 처리하기 위해 남아 있습니다
 실제 우선순위는 [`apparmor.GetProfile`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/security/apparmor/helpers.go)에 있습니다
 
-## capability·seccomp·AppArmor·SELinux는 제한하는 대상이 다릅니다
-
-capability는 Linux 특권을 동작별 권한으로 나눈 것입니다
-`add`·`drop`은 그 목록에서 권한을 더하거나 뺍니다
-어떤 syscall을 허용할지 정하는 seccomp과는 다른 기전입니다
-
-seccomp는 프로세스가 커널 기능을 요청하는 시스템 호출을 필터링합니다
-AppArmor는 프로그램의 파일·네트워크 등 자원 접근을 프로필로 제한하고, SELinux는 프로세스와 자원의 보안 라벨에 적용한 정책으로 접근을 판단합니다
-같은 접근 실패여도 어떤 기전이 거부했는지 구분해야 합니다
-
-이 역할과 지원 조건은 [Linux kernel security constraints 공식 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/security/linux-kernel-security-constraints.md)에 설명되어 있습니다
-AppArmor·SELinux는 노드의 커널과 정책 지원을 전제로 하며, YAML에 이름을 적는 것만으로 정책이 배포되지는 않습니다
-
 ### 생략할 때 kubelet이 보내는 값
 
 다음 표는 다른 수준에서도 해당 값을 지정하지 않은 일반 경로입니다
@@ -104,14 +104,16 @@ baseline이 명시적인 Unconfined를 금지해도 프로필 생략을 허용�
 생략하면 이 상승 금지 플래그를 요청하지 않습니다
 그렇다고 모든 권한 상승이 실제로 가능하다는 뜻은 아니며 다른 권한·커널 조건도 적용됩니다
 
+capability 목록은 kubelet이 CRI의 추가·제거 목록으로 전달합니다
+[CRI Capability 규약](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-api/pkg/apis/runtime/v1/api.proto)은 drop을 모든 집합에서 제거하고, 일반 add를 ambient를 제외한 집합에 추가하도록 정합니다
+kubelet의 이 변환은 별도 ambient 추가 목록을 채우지 않습니다
+
+### procMount의 기본 경로 수에는 노드 조건이 들어갑니다
+
 기본 procMount는 고정된 masked 경로 12개에 노드에서 존재하는 CPU별 `thermal_throttle` 경로가 더해질 수 있습니다
 읽기 전용 경로는 5개입니다
 따라서 현행 masked 경로 수를 모든 노드에서 정확히 12개라고 단정해서는 안 됩니다
 계산은 [`ConvertToRuntimeMaskedPaths`·`ConvertToRuntimeReadonlyPaths`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/securitycontext/util.go)에 있습니다
-
-capability 목록은 kubelet이 CRI의 추가·제거 목록으로 전달합니다
-[CRI Capability 규약](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-api/pkg/apis/runtime/v1/api.proto)은 drop을 모든 집합에서 제거하고, 일반 add를 ambient를 제외한 집합에 추가하도록 정합니다
-kubelet의 이 변환은 별도 ambient 추가 목록을 채우지 않습니다
 
 ## privileged는 여러 제약을 함께 바꾸는 요청입니다
 
