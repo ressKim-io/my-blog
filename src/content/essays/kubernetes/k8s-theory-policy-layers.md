@@ -49,28 +49,9 @@ VAP·MAP은 별도의 정책 서버와 네트워크 왕복을 추가하지 않�
 그래도 표현식의 비용과 평가 한도, 잘못된 설정에 따른 거절은 남습니다
 외부 구현의 캐시와 조회 방식도 다르므로 도구 이름만으로 처리 속도를 비교할 수는 없습니다
 
-### 현재 API와 기본값을 구분합니다
-
-VAP는 v1.30부터 GA이며 `admissionregistration.k8s.io/v1`을 사용합니다
-MAP도 v1.36부터 GA·기본 활성이고, 현재 기준 API는 `v1`입니다
-
-Kubernetes v1.37.1의 MAP 게이트 항목에는 `LockToDefault`가 없습니다
-기본 admission 플러그인 목록과 API 등록 소스에서 활성 경로를 확인했지만, 실제 서버의 게이트·플러그인·API 활성화 override는 별도로 확인해야 합니다
-
-| 설정 | 확인한 기본값 또는 필수 조건 |
-|---|---|
-| VAP·MAP의 `failurePolicy` | 생략하면 `Fail` |
-| v1 mutating·validating webhook의 `failurePolicy` | 생략하면 `Fail` |
-| 정책 `MatchResources`·webhook의 `matchPolicy` | 생략하면 `Equivalent` |
-| webhook의 `timeoutSeconds` | 생략하면 10초 |
-| mutating webhook의 `reinvocationPolicy` | 생략하면 `Never` |
-| MAP의 `reinvocationPolicy` | 필수 선언이며 `Never` 또는 `IfNeeded` |
-
-MAP의 필수 필드와 mutating webhook의 생략 시 기본값을 같은 규칙으로 읽으면 안 됩니다
-API의 존재와 플러그인 활성화, 매칭되는 정책·바인딩의 존재도 각각 다른 조건입니다
-
 ## CEL이 볼 수 있는 정보에는 정해진 범위가 있습니다
 
+CEL(Common Expression Language)은 제공된 값으로 조건이나 변경 내용을 표현하는 언어입니다
 VAP·MAP은 CEL 표현식에 제공된 입력으로 판단합니다
 `object`는 요청 오브젝트이고 `oldObject`는 변경 전 오브젝트입니다
 DELETE에는 `object`가, CREATE에는 `oldObject`가 없습니다
@@ -102,6 +83,7 @@ Kyverno는 ConfigMap·Kubernetes API·외부 서비스 등을 조회하는 입�
 `Equivalent`는 동등한 리소스의 다른 API 버전까지 매칭할 수 있으므로 버전 이름 하나만 보고 제외되었다고 판단하면 안 됩니다
 
 webhook·VAP·MAP의 `matchConditions`는 하나라도 false이면 그 대상을 건너뜁니다
+`failurePolicy`는 평가·호출 오류를 처리하는 정책입니다
 false 없이 평가 오류가 남으면 `failurePolicy`에 따른 오류 처리로 넘어갑니다
 VAP는 이때 `Fail` 오류도 바인딩의 `validationActions`를 적용하므로 항상 직접 거절하는 것은 아닙니다
 조건에 맞지 않는 것과 조건 평가에 실패한 것은 다른 결과입니다
@@ -151,22 +133,6 @@ PSA의 `audit`·`warn`은 workload template에도 적용하지만 `enforce`는 �
 Gatekeeper의 Constraint는 `enforcementAction`으로 `deny`·`dryrun`·`warn`을 선택하며 기본은 `deny`입니다
 여기의 `dryrun`은 정책을 강제하지 않는 모드입니다
 Kubernetes 요청의 dry-run 옵션과 같은 설정이 아닙니다
-
-## 정책을 지우는 요청도 적용 범위를 확인해야 합니다
-
-API로 구성된 CEL 정책은 VAP·VAPBinding·MAP·MAPBinding 네 종류의 정책·바인딩을 자기 평가에서 제외합니다
-API로 구성된 webhook은 여기에 MutatingWebhookConfiguration·ValidatingWebhookConfiguration을 더해 여섯 Kind를 제외합니다
-
-CEL 정책이 webhook 설정까지 일괄 제외하는 것은 아닙니다
-Kubernetes v1.37의 manifest 기반 정적 정책·webhook은 해당 설정 자원을 평가할 수도 있습니다
-`ManifestBasedAdmissionControlConfig`는 이 버전에서 beta·기본 활성입니다
-가상 auth/authz review 자원을 제외하는 보호 경로는 별도입니다
-
-이 제외 규칙은 API 기반 admission의 순환 의존을 줄이는 장치입니다
-RBAC·다른 admission·저장소 실패까지 우회해 삭제할 수 있다는 보장은 아닙니다
-
-정책 엔진의 규칙을 담는 CRD는 이 내장 정책 Kind와 다릅니다
-엔진 webhook의 `rules`·selector·예외 설정에 따라 자기 규칙의 수정·삭제까지 막을 수 있으므로 실제 등록 범위를 확인해야 합니다
 
 ## admission 변경은 자기 이름의 field manager를 만들지 않습니다
 
@@ -278,6 +244,42 @@ clone 원본 삭제는 같은 문서의 본문과 표가 서로 다릅니다
 또 `generate.foreach`의 대상 명세 변경이 기존 대상에 모두 동기화되는 것은 아닙니다
 `ownerReferences`로 수명을 넘기려면 owner의 scope와 GC 조건도 맞아야 합니다
 GitOps의 추적 범위, generate의 동기화, GC의 수명을 맞춰 어느 선언이 존재 여부를 관리할지 정해야 합니다
+
+## 현재 API와 기본값을 구분합니다
+
+VAP는 v1.30부터 GA이며 `admissionregistration.k8s.io/v1`을 사용합니다
+MAP도 v1.36부터 GA·기본 활성이고, 현재 기준 API는 `v1`입니다
+
+Kubernetes v1.37.1의 MAP 게이트 항목에는 `LockToDefault`가 없습니다
+기본 admission 플러그인 목록과 API 등록 소스에서 활성 경로를 확인했지만, 실제 서버의 게이트·플러그인·API 활성화 override는 별도로 확인해야 합니다
+
+| 설정 | 확인한 기본값 또는 필수 조건 |
+|---|---|
+| VAP·MAP의 `failurePolicy` | 생략하면 `Fail` |
+| v1 mutating·validating webhook의 `failurePolicy` | 생략하면 `Fail` |
+| 정책 `MatchResources`·webhook의 `matchPolicy` | 생략하면 `Equivalent` |
+| webhook의 `timeoutSeconds` | 생략하면 10초 |
+| mutating webhook의 `reinvocationPolicy` | 생략하면 `Never` |
+| MAP의 `reinvocationPolicy` | 필수 선언이며 `Never` 또는 `IfNeeded` |
+
+MAP의 필수 필드와 mutating webhook의 생략 시 기본값을 같은 규칙으로 읽으면 안 됩니다
+API의 존재와 플러그인 활성화, 매칭되는 정책·바인딩의 존재도 각각 다른 조건입니다
+
+## 정책을 지우는 요청도 적용 범위를 확인해야 합니다
+
+API로 구성된 CEL 정책은 VAP·VAPBinding·MAP·MAPBinding 네 종류의 정책·바인딩을 자기 평가에서 제외합니다
+API로 구성된 webhook은 여기에 MutatingWebhookConfiguration·ValidatingWebhookConfiguration을 더해 여섯 Kind를 제외합니다
+
+CEL 정책이 webhook 설정까지 일괄 제외하는 것은 아닙니다
+Kubernetes v1.37의 manifest 기반 정적 정책·webhook은 해당 설정 자원을 평가할 수도 있습니다
+`ManifestBasedAdmissionControlConfig`는 이 버전에서 beta·기본 활성입니다
+가상 auth/authz review 자원을 제외하는 보호 경로는 별도입니다
+
+이 제외 규칙은 API 기반 admission의 순환 의존을 줄이는 장치입니다
+RBAC·다른 admission·저장소 실패까지 우회해 삭제할 수 있다는 보장은 아닙니다
+
+정책 엔진의 규칙을 담는 CRD는 이 내장 정책 Kind와 다릅니다
+엔진 webhook의 `rules`·selector·예외 설정에 따라 자기 규칙의 수정·삭제까지 막을 수 있으므로 실제 등록 범위를 확인해야 합니다
 
 ## 필요한 기능과 실패 범위로 선택합니다
 

@@ -18,6 +18,29 @@ Aggregated API server는 API 경로의 처리를 별도 서버에 맡기며, 그
 아래 설명은 Kubernetes v1.37.1 소스를 기준으로 합니다
 metrics-server는 현재 릴리스 v0.9.0을 따로 확인했으며, 이 릴리스가 의존하는 Kubernetes 라이브러리는 v0.36.2입니다
 
+## CRD 대신 별도 서버가 필요한 경계
+
+CRD는 Kubernetes API 서버의 저장 경로를 사용합니다
+스키마나 conversion webhook을 바꿔도 자원 저장 방식을 메모리 캐시나 다른 데이터베이스로 교체하는 기능은 아닙니다
+
+공식 비교 문서는 다른 저장소 사용, Protobuf와 strategic merge patch 지원을 별도 API 서버의 영역으로 구분합니다
+`logs`·`exec` 같은 추가 subresource와 다른 이름 규칙도 포함됩니다
+실제로 무엇을 지원하는지는 확장 서버 구현마다 확인해야 합니다
+
+선언적 상태를 저장하고 컨트롤러가 맞춰 가는 API라면 CRD가 제공하는 기능을 활용할 수 있습니다
+동기 작업 응답이나 별도 저장·읽기 방식이 필요하다면 확장 서버의 구현과 운영 부담까지 비교해야 합니다
+
+## Metrics-server는 측정값을 메모리에 둡니다
+
+`metrics.k8s.io`는 metrics-server가 제공하는 aggregated API의 예입니다
+클러스터에 metrics-server 또는 대체 adapter를 배포해야 사용할 수 있으며, Kubernetes API 서버가 측정값을 기본 제공하는 것은 아닙니다
+
+v0.9.0의 서버는 백그라운드 수집 루프에서 kubelet 측정값을 모아 `storage.Store`로 저장합니다
+Node와 Pod 저장소는 프로세스 메모리의 `last`·`prev` 맵을 사용합니다
+
+API 조회는 저장된 표본으로 사용량을 계산합니다
+요청이 들어올 때마다 새 kubelet 수집을 수행하는 구조가 아닙니다
+
 ## APIService는 그룹과 버전의 처리 경로를 등록합니다
 
 `apiregistration.k8s.io/v1`의 `APIService`는 하나의 그룹·버전을 누가 처리할지 등록하는 클러스터 범위 객체입니다
@@ -30,18 +53,9 @@ metrics-server는 현재 릴리스 v0.9.0을 따로 확인했으며, 이 릴리�
 | `service.port` | 연결할 Service 포트이며 생략 시 443 |
 | `caBundle` | 확장 서버의 서버 인증서를 검증할 CA이며, 생략 시 시스템 신뢰 루트 사용 |
 | `insecureSkipTLSVerify` | 확장 서버의 TLS 인증서 검증 생략 여부 |
-| `groupPriorityMinimum` | Discovery에서 그룹을 정렬할 우선순위 |
-| `versionPriority` | 같은 그룹 안에서 버전을 정렬할 우선순위 |
 
 `service`가 없는 등록까지 모두 외부 프록시로 읽으면 안 됩니다
 핸들러는 이 경우 다음 로컬 처리기로 요청을 넘깁니다. 코어 API의 `/api` 경로에는 별도 처리가 있습니다
-
-우선순위 값은 클수록 앞섭니다
-그룹은 해당 그룹 등록들이 가진 가장 높은 `groupPriorityMinimum`에 따라 배치되며, 값이 같으면 APIService 이름을 비교합니다
-
-그룹 안에서는 `versionPriority`를 먼저 비교합니다
-동률이면 Kubernetes 형식의 버전 문자열을 비교해 GA, beta, alpha 등의 순서를 정합니다
-정렬 결과는 discovery 선호 버전에 영향을 주지만 모든 클라이언트의 자원 이름 해석을 보장하지는 않습니다
 
 등록만으로 서버가 생기거나 API 구현이 완성되는 것은 아닙니다
 별도 서버의 배포, HTTPS 연결, 인증·인가와 discovery 응답을 함께 갖춰야 합니다
@@ -144,11 +158,28 @@ v1.37.1에서는 이 검사와 실제 프록시가 같은 `BuildTransportConfig`
 
 ## 등록 목록과 실제 자원 목록은 다릅니다
 
+Discovery는 어떤 자원이 있는지를 알려주는 경로입니다
 기존 형식의 `GET /apis` 목록은 APIService 등록을 바탕으로 그룹을 구성합니다
 이 목록을 만드는 코드는 `Available`이 거짓이라는 이유만으로 등록을 빼지 않습니다
 
 그래서 그룹 이름은 보이는데 해당 그룹·버전의 요청은 503을 반환하는 상태가 가능합니다
 등록이 남아 있다는 사실과 그 API를 현재 읽을 수 있다는 사실은 다릅니다
+
+### 등록한 그룹과 버전의 순서는 우선순위로 정합니다
+
+| 필드 | 정하는 내용 |
+|---|---|
+| `groupPriorityMinimum` | Discovery에서 그룹을 정렬할 우선순위 |
+| `versionPriority` | 같은 그룹 안에서 버전을 정렬할 우선순위 |
+
+우선순위 값은 클수록 앞섭니다
+그룹은 해당 그룹 등록들이 가진 가장 높은 `groupPriorityMinimum`에 따라 배치되며, 값이 같으면 APIService 이름을 비교합니다
+
+그룹 안에서는 `versionPriority`를 먼저 비교합니다
+동률이면 Kubernetes 형식의 버전 문자열을 비교해 GA, beta, alpha 등의 순서를 정합니다
+정렬 결과는 discovery 선호 버전에 영향을 주지만 모든 클라이언트의 자원 이름 해석을 보장하지는 않습니다
+
+### 자원 목록의 갱신 상태는 별도로 표시합니다
 
 현행 aggregated discovery는 그룹·버전·자원 정보를 모아 응답하는 별도 경로입니다
 서비스별 캐시와 ETag를 사용하고, 갱신 결과를 `Current` 또는 `Stale`로 표시합니다
@@ -164,7 +195,7 @@ client-go는 `Stale` 버전을 실패한 그룹·버전으로 분리합니다
 
 ### OpenAPI는 다시 별도의 집계 경로입니다
 
-Discovery는 어떤 자원이 있는지를 알려주고, OpenAPI는 API의 스키마 등을 제공합니다
+OpenAPI는 API의 스키마 등을 제공합니다
 Aggregator는 OpenAPI v2 문서를 내려받아 캐시·병합하고, v3에서는 루트 문서의 경로 정보를 모아 그룹·버전 문서 요청을 연결합니다
 
 v2 다운로드와 v3 루트 다운로드의 제한은 각각 1분입니다
@@ -202,14 +233,7 @@ Namespace condition을 통해 목록 조회 실패와 실제 내용·finalizer �
 
 이 상태들은 함께 나타날 수도 있습니다
 
-## CRD 대신 별도 서버가 필요한 경계
-
-CRD는 Kubernetes API 서버의 저장 경로를 사용합니다
-스키마나 conversion webhook을 바꿔도 자원 저장 방식을 메모리 캐시나 다른 데이터베이스로 교체하는 기능은 아닙니다
-
-공식 비교 문서는 다른 저장소 사용, Protobuf와 strategic merge patch 지원을 별도 API 서버의 영역으로 구분합니다
-`logs`·`exec` 같은 추가 subresource와 다른 이름 규칙도 포함됩니다
-실제로 무엇을 지원하는지는 확장 서버 구현마다 확인해야 합니다
+## 추가 subresource도 기존 요청 동사로 분류합니다
 
 추가 subresource를 만든다고 새로운 요청 verb까지 생기는 것은 아닙니다
 kube-apiserver의 일반 자원 요청은 아래 verb로 분류합니다
@@ -221,19 +245,7 @@ kube-apiserver의 일반 자원 요청은 아래 verb로 분류합니다
 `pods/exec`의 POST가 `create`, GET이 `get`으로 분류되는 방식입니다
 이 설명이 `bind`·`escalate` 같은 추가 인가 검사의 verb까지 제한하지는 않습니다
 
-선언적 상태를 저장하고 컨트롤러가 맞춰 가는 API라면 CRD가 제공하는 기능을 활용할 수 있습니다
-동기 작업 응답이나 별도 저장·읽기 방식이 필요하다면 확장 서버의 구현과 운영 부담까지 비교해야 합니다
-
-## Metrics-server는 측정값을 메모리에 둡니다
-
-`metrics.k8s.io`는 metrics-server가 제공하는 aggregated API의 예입니다
-클러스터에 metrics-server 또는 대체 adapter를 배포해야 사용할 수 있으며, Kubernetes API 서버가 측정값을 기본 제공하는 것은 아닙니다
-
-v0.9.0의 서버는 백그라운드 수집 루프에서 kubelet 측정값을 모아 `storage.Store`로 저장합니다
-Node와 Pod 저장소는 프로세스 메모리의 `last`·`prev` 맵을 사용합니다
-
-API 조회는 저장된 표본으로 사용량을 계산합니다
-요청이 들어올 때마다 새 kubelet 수집을 수행하는 구조가 아닙니다
+## Metrics-server의 표본 계산과 수집 주기를 구분합니다
 
 CPU 사용량은 누적 CPU 값의 차이를 표본 시간 차이로 나눠 계산합니다
 메모리는 최근 표본의 working set 값을 사용합니다. 유효한 표본이 없거나 컨테이너 시작·재시작 등의 조건을 만족하지 못하면 결과에서 빠질 수 있습니다

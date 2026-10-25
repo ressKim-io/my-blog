@@ -41,7 +41,7 @@ CR을 받아 검증하고 저장하는 주체는 API 서버입니다
 
 ![CR 생성 요청이 디코딩·가지치기·기본값, mutating admission, 스키마·CEL 검증, validating admission을 거쳐 저장되는 경로|tall](/diagrams/k8s-theory-crd-schema-pruning-1.svg)
 
-필드 구조와 CEL 규칙은 CRD에 있지만 `fieldValidation`은 요청 옵션입니다
+필드 구조와 같은 오브젝트 안의 값 관계를 검사하는 CEL 규칙은 CRD에 있지만 `fieldValidation`은 요청 옵션입니다
 RBAC는 누가 어느 리소스 경로에 접근할지 정하며 admission 정책은 추가 변경·검증을 수행합니다
 스키마의 유효성, 요청자의 권한, 외부 정책의 허용 여부를 같은 판정으로 묶으면 안 됩니다
 
@@ -50,50 +50,6 @@ RBAC는 누가 어느 리소스 경로에 접근할지 정하며 admission 정�
 **structural schema**는 서버가 필드의 구조와 임의 JSON 허용 범위를 알 수 있도록 제한한 스키마입니다
 새 `apiextensions.k8s.io/v1` CRD의 `spec.versions[].schema.openAPIV3Schema`에 선언합니다
 단순히 OpenAPI 문법을 아무 형태로나 넣을 수 있는 칸은 아닙니다
-
-주요 규칙은 다음과 같습니다
-
-- 루트에 type을 명시할 때는 `object`를 사용합니다
-- type은 일반적으로 필요하지만 `x-kubernetes-preserve-unknown-fields: true`인 노드는 루트에서도 생략할 수 있습니다
-- IntOrString·embedded-resource 등 추가 선언에는 별도 제약이 있습니다
-- `allOf`·`anyOf`·`oneOf`·`not` 안에서 참조한 필드·원소의 구조는 그 밖에도 선언합니다
-- 이 결합자 안에는 type·default·description·additionalProperties·nullable을 두지 않습니다. IntOrString의 허용 패턴은 예외입니다
-- metadata에 직접 제약을 선언한다면 name·generateName으로 제한됩니다
-
-`$ref`·definitions·patternProperties·readOnly 등의 키와 `uniqueItems: true`, `additionalProperties: false`도 허용하지 않습니다
-미선언 필드의 저장을 제한하는 주된 방식은 거절만이 아니라 다음 절의 pruning입니다
-
-### 확장 필드는 허용 범위·관리 단위·검증을 나눕니다
-
-현재 JSONSchemaProps에 있는 일곱 확장은 역할이 다릅니다
-
-| 확장 | 역할 |
-|---|---|
-| `x-kubernetes-preserve-unknown-fields` | 해당 노드의 미선언 데이터를 보존 |
-| `x-kubernetes-int-or-string` | 정수 또는 문자열 허용 |
-| `x-kubernetes-embedded-resource` | 내장 오브젝트의 apiVersion·kind·metadata를 암묵적으로 검증 |
-| `x-kubernetes-list-type` | 배열의 atomic·set·map 단위 지정 |
-| `x-kubernetes-list-map-keys` | map 리스트의 원소 식별 키 지정 |
-| `x-kubernetes-map-type` | 오브젝트의 granular·atomic 단위 지정 |
-| `x-kubernetes-validations` | CEL 검증 규칙 선언 |
-
-embedded-resource는 오브젝트를 담는 데이터 구조입니다
-이 선언만으로 별도의 자식 리소스를 생성하거나 reconcile하는 기능이 생기지는 않습니다
-근거는 [JSONSchemaProps의 필드·주석](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1/types_jsonschema.go)과 [구조 스키마 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/schema/validation.go)입니다
-
-### 리스트·맵의 단위는 SSA의 소유권에도 쓰입니다
-
-배열은 기본적으로 atomic이며 리스트 전체를 한 단위로 취급합니다
-set은 중복 없는 값으로 원소를 식별하고, map 리스트는 `x-kubernetes-list-map-keys`의 키 필드로 원소를 식별합니다
-map 키는 원소 안의 스칼라 필드이며 required 또는 default로 값이 존재하도록 해야 합니다
-
-오브젝트의 기본 granular는 내부 필드를 나눠 다루고 atomic은 오브젝트 전체를 한 단위로 다룹니다
-이 선언은 [Server-Side Apply의 필드 관리](/essays/k8s-theory-server-side-apply)에도 사용됩니다
-누가 어느 단위를 소유하는지 정하는 구조이지 RBAC 권한 자체는 아닙니다
-
-set·map 리스트에는 중복 값·중복 키 검사도 붙습니다
-기존 스키마의 관리 단위를 바꾸면 이미 기록된 managedFields의 해석과 충돌 범위도 바뀔 수 있습니다
-필드 타입이 같아도 리스트·맵의 관리 단위(topology)를 바꾸는 것은 단순한 설명 수정이 아닙니다
 
 ## pruning과 unknown-field 요청 거절은 다른 동작입니다
 
@@ -137,7 +93,7 @@ CRD 전체의 옛 `spec.preserveUnknownFields`와 이 노드별 확장은 구분
 ### 저장 경로의 가지치기 횟수는 고정되지 않습니다
 
 현재 구현은 요청 디코딩뿐 아니라 저장소에서 읽는 디코딩과 변환 결과에도 스키마 처리를 붙입니다
-그러나 저장 인코더는 오브젝트의 GVK가 목표와 같으면 변환 없이 바로 인코딩하는 분기가 있습니다
+그러나 저장 인코더는 오브젝트의 GVK(API group·version·kind)가 목표와 같으면 변환 없이 바로 인코딩하는 분기가 있습니다
 mutating webhook 뒤에 항상 두 번째 가지치기가 실행된다고 말할 수는 없습니다
 
 조회 결과에서 필드가 사라진 것과 저장 바이트에 처음부터 없었던 것도 다른 판정입니다
@@ -175,7 +131,53 @@ self는 규칙을 단 스키마 노드의 현재 값입니다
 규칙이 다른 CR이나 외부 시스템의 현재 상태를 조회하는 것은 아닙니다
 직전 값은 조건에 따라 oldSelf로 참조하며 이 범위를 넘는 검증은 다른 정책·admission 구현이 필요합니다
 
-### oldSelf와 오류 reason에도 조건이 있습니다
+## 구조 선언에는 별도의 제약이 있습니다
+
+주요 규칙은 다음과 같습니다
+
+- 루트에 type을 명시할 때는 `object`를 사용합니다
+- type은 일반적으로 필요하지만 `x-kubernetes-preserve-unknown-fields: true`인 노드는 루트에서도 생략할 수 있습니다
+- IntOrString·embedded-resource 등 추가 선언에는 별도 제약이 있습니다
+- `allOf`·`anyOf`·`oneOf`·`not` 안에서 참조한 필드·원소의 구조는 그 밖에도 선언합니다
+- 이 결합자 안에는 type·default·description·additionalProperties·nullable을 두지 않습니다. IntOrString의 허용 패턴은 예외입니다
+- metadata에 직접 제약을 선언한다면 name·generateName으로 제한됩니다
+
+`$ref`·definitions·patternProperties·readOnly 등의 키와 `uniqueItems: true`, `additionalProperties: false`도 허용하지 않습니다
+미선언 필드의 저장을 제한하는 주된 방식은 거절만이 아니라 앞에서 본 pruning입니다
+
+### 확장 필드는 허용 범위·관리 단위·검증을 나눕니다
+
+현재 JSONSchemaProps에 있는 일곱 확장은 역할이 다릅니다
+
+| 확장 | 역할 |
+|---|---|
+| `x-kubernetes-preserve-unknown-fields` | 해당 노드의 미선언 데이터를 보존 |
+| `x-kubernetes-int-or-string` | 정수 또는 문자열 허용 |
+| `x-kubernetes-embedded-resource` | 내장 오브젝트의 apiVersion·kind·metadata를 암묵적으로 검증 |
+| `x-kubernetes-list-type` | 배열의 atomic·set·map 단위 지정 |
+| `x-kubernetes-list-map-keys` | map 리스트의 원소 식별 키 지정 |
+| `x-kubernetes-map-type` | 오브젝트의 granular·atomic 단위 지정 |
+| `x-kubernetes-validations` | CEL 검증 규칙 선언 |
+
+embedded-resource는 오브젝트를 담는 데이터 구조입니다
+이 선언만으로 별도의 자식 리소스를 생성하거나 reconcile하는 기능이 생기지는 않습니다
+근거는 [JSONSchemaProps의 필드·주석](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1/types_jsonschema.go)과 [구조 스키마 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/schema/validation.go)입니다
+
+### 리스트·맵의 단위는 SSA의 소유권에도 쓰입니다
+
+배열은 기본적으로 atomic이며 리스트 전체를 한 단위로 취급합니다
+set은 중복 없는 값으로 원소를 식별하고, map 리스트는 `x-kubernetes-list-map-keys`의 키 필드로 원소를 식별합니다
+map 키는 원소 안의 스칼라 필드이며 required 또는 default로 값이 존재하도록 해야 합니다
+
+오브젝트의 기본 granular는 내부 필드를 나눠 다루고 atomic은 오브젝트 전체를 한 단위로 다룹니다
+이 선언은 [Server-Side Apply의 필드 관리](/essays/k8s-theory-server-side-apply)에도 사용됩니다
+누가 어느 단위를 소유하는지 정하는 구조이지 RBAC 권한 자체는 아닙니다
+
+set·map 리스트에는 중복 값·중복 키 검사도 붙습니다
+기존 스키마의 관리 단위를 바꾸면 이미 기록된 managedFields의 해석과 충돌 범위도 바뀔 수 있습니다
+필드 타입이 같아도 리스트·맵의 관리 단위(topology)를 바꾸는 것은 단순한 설명 수정이 아닙니다
+
+## oldSelf와 오류 reason에도 조건이 있습니다
 
 oldSelf를 쓰는 **transition rule**은 기본적으로 옛 값과 새 값을 짝지을 수 있을 때 평가합니다
 `optionalOldSelf: true`이면 생성이나 새 필드 추가에서도 평가하고, oldSelf를 값이 없을 수 있는 CEL Optional로 제공합니다

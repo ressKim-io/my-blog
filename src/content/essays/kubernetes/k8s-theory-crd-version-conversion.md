@@ -50,22 +50,8 @@ storage가 없거나 둘 이상이면 CRD 검증이 `must have exactly one versi
 served가 false인 버전의 요청은 CRD 핸들러가 다음 핸들러에 넘기며, 일반적으로 없는 API 경로의 404가 됩니다
 served를 끄는 것과 저장된 옛 버전의 지원을 `spec.versions`에서 제거하는 것은 다른 변경입니다
 
-### 선호 버전과 저장 버전도 같을 필요가 없습니다
 
-버전을 생략한 클라이언트가 사용하는 discovery의 선호 순서는 단순 사전순이 아닙니다
-Kubernetes 형식의 이름은 GA·beta·alpha 순으로 우선하고 그 안에서 버전 숫자를 비교하므로, v1이 v2beta1보다 앞섭니다
-
-Kubernetes 형식이 아닌 이름은 그 뒤에 놓으며, 이 이름들끼리는 사전순으로 정합니다
-따라서 foo1이 foo10보다 앞서고, CRD의 선언 순서나 storage 표시가 선호 순서를 대신하지 않습니다
-
-deprecated 경고를 서버가 만들 때도 현재 버전보다 우선순위가 높고, served이며 deprecated가 아닌 후보가 있으면 그중 가장 높은 버전을 추천합니다
-후보가 없으면 추천 문구를 붙이지 않습니다
-
-`deprecationWarning`을 직접 지정하려면 deprecated가 true여야 합니다
-비어 있지 않은 출력 가능한 UTF-8이어야 하며, 현재 검증의 길이 상한은 256바이트입니다
-오류 문구가 characters라고 해도 한글 256자를 뜻하지는 않습니다
-
-근거는 [CRD 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go), [버전 비교](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/version/helpers.go), [서빙·경고 처리](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/customresource_handler.go)에 있습니다
+클라이언트에 우선 안내할 버전과 내부 저장 목표도 별도로 정합니다
 
 ## None은 필드 변환을 대신하지 않습니다
 
@@ -78,13 +64,56 @@ schema coercing converter를 거치는 경로에서는 변환된 오브젝트의
 목표 스키마에 없는 필드는 보존 예외가 없다면 제거될 수 있습니다
 
 이 때문에 None으로 서로 다른 스키마를 연결하면 다른 검증을 통과한 요청에서도 응답이나 이후 저장본의 값이 빠질 수 있습니다
-변환을 거치는지·같은 GVK 인코딩으로 변환을 우회하는지에 따라 경로가 다르므로 가지치기가 항상 같은 횟수로 실행된다고 설명하지도 않습니다
+변환을 거치는지·같은 GVK(API group·version·kind)의 인코딩으로 변환을 우회하는지에 따라 경로가 다르므로 가지치기가 항상 같은 횟수로 실행된다고 설명하지도 않습니다
 
 Webhook 전략에서는 별도의 서비스가 필드의 의미와 구조를 변환합니다
 `spec.conversion.webhook` 설정이 필요하고 `spec.preserveUnknownFields`가 false여야 합니다
 구조 스키마·보존 예외·defaulting의 세부는 [CRD 구조와 가지치기](/essays/k8s-theory-crd-schema-pruning)에서 이어집니다
 
 실제 None 변환은 [nop_converter.go](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/conversion/nop_converter.go), 목표 버전 스키마 선택은 [schemaCoercingConverter·unstructuredSchemaCoercer](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/customresource_handler.go)에 있습니다
+
+## storedVersions는 남아 있는 CR의 개수를 기록하지 않습니다
+
+`status.storedVersions`는 저장 버전으로 지정돼 사용됐을 수 있는 버전을 기록합니다
+CR을 저장할 때마다 개수를 세어 갱신하는 필드가 아닙니다
+현재 코드는 CRD 생성·업데이트에서 storage인 버전이 아직 목록에 없으면 추가합니다
+
+따라서 CR이 하나도 없어도 저장 목표를 바꾸면 목록에 새 버전이 들어갈 수 있습니다
+반대로 옛 형식의 CR을 모두 다시 썼다고 CRD의 이 목록을 자동으로 줄여 주지도 않습니다
+
+![storage를 v1alpha1에서 v1으로 바꾼 뒤 CR B만 재쓰면 CR A의 옛 저장본과 혼재하고 전수 재쓰기 확인 뒤에야 storedVersions 장부를 정리하는 두 객체 예시|tall](/diagrams/k8s-theory-crd-version-conversion-2.svg)
+
+API 서버가 검증하는 것은 목록이 비어 있지 않고, 현재 storage 버전을 포함하며, 각 버전이 spec.versions에도 존재하는지입니다
+실제 etcd에 어느 형식의 CR이 몇 개 남았는지 조사하지 않습니다
+
+storedVersions에 있는 버전을 spec.versions에서 빼면 업데이트를 거절합니다
+그러나 실제 데이터가 남았는데도 status를 성급하게 줄이면 그 검증을 통과한 뒤 옛 저장본의 읽기가 깨질 수 있습니다
+`/status`의 장부 수정과 실제 CR 재쓰기를 같은 작업으로 취급하면 안 됩니다
+
+추가 시점은 [CRD strategy](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/registry/customresourcedefinition/strategy.go), 목록의 일관성 검증은 [ValidateCustomResourceDefinitionStoredVersions](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go)에 있습니다
+
+## 옛 버전 제거에는 실제 재쓰기 확인이 필요합니다
+
+| 이행 단계 | API 서버가 강제하는 것·별도 확인할 것 |
+|---|---|
+| 새 버전을 served: true, storage: false로 추가 | 새 요청 형식·변환을 준비하고 클라이언트 이행 확인 |
+| storage: true를 새 버전으로 이동 | storage는 정확히 하나여야 함, 기존 데이터는 그대로일 수 있음 |
+| 기존 CR을 현재 저장 목표로 다시 쓰기 | 설정 변경만으로 실행되지 않음, 실제 이행 완료를 별도로 확인 |
+| status.storedVersions에서 옛 버전 제거 | 목록·현재 storage·spec.versions의 일관성을 검증하며 잔존 데이터는 세지 않음 |
+| 옛 버전을 spec.versions에서 제거 | storedVersions에 남아 있으면 거절 |
+
+served를 끄는 시점 자체를 서버가 이 다섯 단계에 묶어 강제하지는 않습니다
+클라이언트 이행과 실제 저장본 이행은 별도로 확인해야 합니다
+서빙을 껐더라도 옛 저장본을 해석하는 데 필요한 버전 선언과 변환 지원까지 곧바로 없애면 안 됩니다
+
+### 재쓰기는 값을 바꾸는 것과 다릅니다
+
+수락된 업데이트가 저장 코덱을 거치면 현재 저장 목표로 인코딩됩니다
+spec 값을 바꾸지 않아도 저장 형식을 바꾸는 요청이 될 수 있습니다
+
+다만 직렬화한 바이트가 기존 저장본과 같고 저장 변환 층도 stale하지 않으면 실제 etcd 쓰기를 생략할 수 있습니다
+옛 저장 버전의 바이트가 새 버전 인코딩과 달라지는 경우는 이 동일성 조건에 해당하지 않습니다
+따라서 성공한 API 응답 수만으로 모든 요청이 실제 etcd 쓰기를 발생시켰다고 계산할 수도 없습니다
 
 ## ConversionReview 버전과 CR 버전은 별개입니다
 
@@ -165,50 +194,7 @@ CRD의 Terminating을 볼 때 conversion 오류와 남은 CR 자체의 finalizer
 
 이 경로는 [일반 Store.Delete](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go), [CRD 정리 finalizer](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/controller/finalizer/crd_finalizer.go), [저장 버전 저장소 선택](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/customresource_handler.go)에 있습니다
 
-## storedVersions는 남아 있는 CR의 개수를 기록하지 않습니다
-
-`status.storedVersions`는 저장 버전으로 지정돼 사용됐을 수 있는 버전을 기록합니다
-CR을 저장할 때마다 개수를 세어 갱신하는 필드가 아닙니다
-현재 코드는 CRD 생성·업데이트에서 storage인 버전이 아직 목록에 없으면 추가합니다
-
-따라서 CR이 하나도 없어도 저장 목표를 바꾸면 목록에 새 버전이 들어갈 수 있습니다
-반대로 옛 형식의 CR을 모두 다시 썼다고 CRD의 이 목록을 자동으로 줄여 주지도 않습니다
-
-![storage를 v1alpha1에서 v1으로 바꾼 뒤 CR B만 재쓰면 CR A의 옛 저장본과 혼재하고 전수 재쓰기 확인 뒤에야 storedVersions 장부를 정리하는 두 객체 예시|tall](/diagrams/k8s-theory-crd-version-conversion-2.svg)
-
-API 서버가 검증하는 것은 목록이 비어 있지 않고, 현재 storage 버전을 포함하며, 각 버전이 spec.versions에도 존재하는지입니다
-실제 etcd에 어느 형식의 CR이 몇 개 남았는지 조사하지 않습니다
-
-storedVersions에 있는 버전을 spec.versions에서 빼면 업데이트를 거절합니다
-그러나 실제 데이터가 남았는데도 status를 성급하게 줄이면 그 검증을 통과한 뒤 옛 저장본의 읽기가 깨질 수 있습니다
-`/status`의 장부 수정과 실제 CR 재쓰기를 같은 작업으로 취급하면 안 됩니다
-
-추가 시점은 [CRD strategy](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/registry/customresourcedefinition/strategy.go), 목록의 일관성 검증은 [ValidateCustomResourceDefinitionStoredVersions](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go)에 있습니다
-
-## 옛 버전 제거에는 실제 재쓰기 확인이 필요합니다
-
-| 이행 단계 | API 서버가 강제하는 것·별도 확인할 것 |
-|---|---|
-| 새 버전을 served: true, storage: false로 추가 | 새 요청 형식·변환을 준비하고 클라이언트 이행 확인 |
-| storage: true를 새 버전으로 이동 | storage는 정확히 하나여야 함, 기존 데이터는 그대로일 수 있음 |
-| 기존 CR을 현재 저장 목표로 다시 쓰기 | 설정 변경만으로 실행되지 않음, 실제 이행 완료를 별도로 확인 |
-| status.storedVersions에서 옛 버전 제거 | 목록·현재 storage·spec.versions의 일관성을 검증하며 잔존 데이터는 세지 않음 |
-| 옛 버전을 spec.versions에서 제거 | storedVersions에 남아 있으면 거절 |
-
-served를 끄는 시점 자체를 서버가 이 다섯 단계에 묶어 강제하지는 않습니다
-클라이언트 이행과 실제 저장본 이행은 별도로 확인해야 합니다
-서빙을 껐더라도 옛 저장본을 해석하는 데 필요한 버전 선언과 변환 지원까지 곧바로 없애면 안 됩니다
-
-### 재쓰기는 값을 바꾸는 것과 다릅니다
-
-수락된 업데이트가 저장 코덱을 거치면 현재 저장 목표로 인코딩됩니다
-spec 값을 바꾸지 않아도 저장 형식을 바꾸는 요청이 될 수 있습니다
-
-다만 직렬화한 바이트가 기존 저장본과 같고 저장 변환 층도 stale하지 않으면 실제 etcd 쓰기를 생략할 수 있습니다
-옛 저장 버전의 바이트가 새 버전 인코딩과 달라지는 경우는 이 동일성 조건에 해당하지 않습니다
-따라서 성공한 API 응답 수만으로 모든 요청이 실제 etcd 쓰기를 발생시켰다고 계산할 수도 없습니다
-
-### 현행 마이그레이터는 Merge patch를 사용합니다
+## 현행 마이그레이터는 Merge patch를 사용합니다
 
 v1.37의 `StorageVersionMigrator` 게이트는 GA·기본 true이며 현재 정의에 LockToDefault는 없습니다
 `storagemigration.k8s.io/v1`의 StorageVersionMigration이 등록되고 v1이 선호되며 v1beta1도 등록돼 있습니다
@@ -244,6 +230,23 @@ CRD의 deprecated·served는 작성자가 선언합니다
 내장 API의 deprecation 일정만 보고 CR의 저장 데이터 이행도 자동으로 수행된다고 볼 수는 없습니다
 저장된 형식·클라이언트·왕복 변환의 정보 손실을 각각 확인해야 합니다
 필드 추가 역시 required·default·검증 규칙에 따라 기존 자료에 영향을 줄 수 있습니다
+
+## 선호 버전과 저장 버전도 같을 필요가 없습니다
+
+버전을 생략한 클라이언트가 사용하는 discovery의 선호 순서는 단순 사전순이 아닙니다
+Kubernetes 형식의 이름은 GA·beta·alpha 순으로 우선하고 그 안에서 버전 숫자를 비교하므로, v1이 v2beta1보다 앞섭니다
+
+Kubernetes 형식이 아닌 이름은 그 뒤에 놓으며, 이 이름들끼리는 사전순으로 정합니다
+따라서 foo1이 foo10보다 앞서고, CRD의 선언 순서나 storage 표시가 선호 순서를 대신하지 않습니다
+
+deprecated 경고를 서버가 만들 때도 현재 버전보다 우선순위가 높고, served이며 deprecated가 아닌 후보가 있으면 그중 가장 높은 버전을 추천합니다
+후보가 없으면 추천 문구를 붙이지 않습니다
+
+`deprecationWarning`을 직접 지정하려면 deprecated가 true여야 합니다
+비어 있지 않은 출력 가능한 UTF-8이어야 하며, 현재 검증의 길이 상한은 256바이트입니다
+오류 문구가 characters라고 해도 한글 256자를 뜻하지는 않습니다
+
+근거는 [CRD 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go), [버전 비교](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/version/helpers.go), [서빙·경고 처리](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/customresource_handler.go)에 있습니다
 
 ## 실패한 위치를 나눠 봅니다
 

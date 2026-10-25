@@ -58,56 +58,6 @@ predicate는 큐에 넣을 이벤트를 거르는 함수이며, 캐시에 저장
 ‘이름만 들어간다’는 설명은 표준 Request 기준입니다
 `TypedReconciler`는 별도의 비교 가능한 요청 타입도 허용하므로 모든 사용자 정의 큐의 값이 namespace/name으로 제한되는 것은 아닙니다. [Request와 Reconciler의 정의](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/reconcile/reconcile.go)
 
-## 같은 키의 동시 실행을 막는 범위는 한 Controller의 큐입니다
-
-현재 기본 큐는 controller-runtime의 우선순위 큐입니다
-같은 키가 대기 중 다시 들어오면 요청을 합치고 더 이른 준비 시각과 높은 우선순위를 유지합니다
-
-워커에 넘긴 키는 잠급니다
-처리 중 같은 키가 다시 들어와 대기 항목이 생겨도 현재 호출의 `Done`이 잠금을 풀기 전에는 다른 워커에 넘기지 않습니다
-
-`UsePriorityQueue: false`이면 client-go 큐를 사용합니다
-이 큐는 같은 보장을 `dirty`와 `processing` 집합으로 만듭니다
-
-- **`dirty`**: 다시 처리할 필요가 있는 키입니다. 이미 dirty인 키의 반복 추가는 합칩니다
-- **`processing`**: 현재 워커가 처리 중인 키입니다. 처리 중 다시 추가되면 dirty로 표시하되 즉시 대기열에 넣지 않습니다
-- **`Done`**: processing에서 지우고, 여전히 dirty이면 그때 대기열에 다시 넣습니다
-
-![기본 우선순위 큐의 키 잠금과 비우선순위 client-go 큐의 dirty·processing이 처리 중 재추가된 같은 키를 직렬화하는 비교|tall](/diagrams/k8s-theory-controller-runtime-reconcile-2.svg)
-
-따라서 이벤트 개수와 Reconcile 호출 횟수는 일치하지 않습니다
-현재 호출 중 반복해서 들어온 같은 키도 대기 요청 하나로 합쳐질 수 있습니다
-
-`MaxConcurrentReconciles`의 기본값은 1입니다
-값을 올리면 서로 다른 키를 병렬로 조정할 수 있지만 같은 큐에서 같은 키를 동시에 처리하지 않는 보장은 유지됩니다
-
-다른 Controller의 큐나 다른 프로세스까지 막는 전역 잠금은 아닙니다
-이 보장을 API 읽기의 최신성이나 외부 시스템 변경의 배타성으로 확대하면 안 됩니다. [기본 큐의 병합·잠금](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/controller/priorityqueue/priorityqueue.go), [client-go의 Add·Get·Done](https://github.com/kubernetes/client-go/blob/28076445520055420e3be4255b4cd27fd19df1f9/util/workqueue/queue.go)
-
-## Owns는 자식 이벤트를 부모의 요청으로 바꿉니다
-
-`Owns()`는 자식 오브젝트의 이벤트에서 `ownerReferences`를 읽고 부모의 키를 큐에 넣습니다
-자식 이벤트를 받았다고 그 자식 자체를 Reconcile하는 기능은 아닙니다
-
-기본 동작에는 다음 조건이 붙습니다
-
-- `controller: true`인 소유 참조 하나를 봅니다. 전체 소유 참조를 보려면 `builder.MatchEveryOwner`를 선택합니다
-- 소유자 타입은 group과 kind로 비교합니다. UID는 표준 요청에 넣지 않습니다
-- namespace는 소유 참조가 아닌 이벤트 오브젝트에서 가져옵니다
-- RESTMapper가 부모를 cluster-scoped로 판단하면 namespace를 비웁니다
-
-타입 비교에 버전을 사용하지 않아도 RESTMapper 조회에는 소유 참조의 버전이 들어갑니다
-해당 버전을 매핑하지 못하면 요청을 만들지 못합니다
-
-Update 핸들러는 옛 오브젝트와 새 오브젝트의 소유자를 모두 확인합니다
-소유권이 바뀐 이벤트라면 이전 부모와 새 부모의 키가 함께 들어갈 수 있습니다
-
-`Watches()`는 감시할 타입과 핸들러를 직접 연결하는 일반적인 형태입니다
-임의의 관계로 키를 만들려면 `EnqueueRequestsFromMapFunc`를 사용할 수 있고, Owns는 소유 참조를 사용하는 경우를 묶어 제공합니다
-
-`controller: true`는 주 관리자를 나타내는 API 관계입니다
-다른 주체의 쓰기를 막는 잠금은 아니며, 모든 일반 소유자까지 깨워야 하는지는 조정기의 역할에 따라 정해야 합니다. [Owns의 연결](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/builder/controller.go), [부모 요청 생성](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/handler/enqueue_owner.go)
-
 ## 기본 client는 캐시에서 읽고 API 서버에 씁니다
 
 Manager가 제공하는 기본 cache-backed client의 구조체 `Get`·`List`는 캐시를 읽습니다
@@ -122,25 +72,23 @@ Manager가 제공하는 기본 cache-backed client의 구조체 `Get`·`List`는
 읽기가 항상 캐시로 가는 것은 아닙니다
 `CacheOptions.DisableFor`로 제외한 타입과 기본 설정의 unstructured 오브젝트는 직접 조회합니다. 캐시를 설정하지 않은 client도 직접 조회합니다
 
-### 같은 client의 쓰기 반영을 기다리는 옵션도 있습니다
 
-v0.25.2에는 `CacheOptions.EnableReadYourWritesConsistency`가 있으며 기본값은 false입니다
-이를 켜면 같은 client가 추적한 쓰기를 캐시가 관찰한 뒤 읽기를 진행하도록 기다리는 기능을 사용합니다
+### NotFound의 의미는 어떤 오브젝트를 읽었는지에 달려 있습니다
 
-범위는 GVK와 typed·unstructured·PartialObjectMetadata 같은 표현 방식으로 나뉩니다
-Get은 해당 키의 쓰기를, List는 해당 GVK·표현의 앞선 쓰기들을 기다리는 구조이며 다른 표현으로 한 쓰기까지 하나로 묶지 않습니다
+Controller가 모든 NotFound 에러를 자동으로 무시하는 것은 아닙니다
+사용자 Reconciler가 그대로 반환하면 일반 에러 재시도 경로에 들어갑니다
 
-`DisableReadYourWritesConsistency` 요청 옵션으로 개별 읽기·쓰기를 이 기능에서 제외할 수도 있습니다
+조정 대상이 이미 없어 더 할 일이 없다고 판단했다면 `client.IgnoreNotFound(err)`로 정상 종료할 수 있습니다
+ObjectReconciler를 연결하는 `AsReconciler` 어댑터도 대상 조회에서 이 처리를 사용합니다
 
-이 기능은 실험적이며 공식 옵션 주석은 한 리소스에 여러 namespace를 설정한 경우 제대로 동작하지 않는 제한을 명시합니다
-따라서 이를 전역 최신성이나 다른 client의 모든 변경까지 보장하는 기능으로 읽으면 안 됩니다
-
-기본 캐시 지연 설명과 이 선택 기능의 적용 조건을 나눠 판단해야 합니다. [client의 캐시 분기·옵션](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/client/client.go), [쓰기 관찰 대기 구현](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/client/consistency.go)
+반면 원하는 자식이 없어서 생성해야 하는 상황이라면 NotFound를 관찰하고 생성 분기로 진행해야 합니다
+‘없음’을 모두 성공으로 지우는 것과 필요한 변경을 판단하는 일은 다릅니다
 
 ## 반환값이 다음 조정을 예약합니다
 
 Reconciler는 `Result`와 `error`를 반환합니다
 Controller가 그 조합을 보고 재시도 여부를 결정합니다
+이때 rate limiter는 실패한 조정의 재시도 간격을 조절합니다
 
 | 반환 | 확인한 Controller의 처리 |
 |---|---|
@@ -158,31 +106,6 @@ Controller가 그 조합을 보고 재시도 여부를 결정합니다
 
 `Forget`은 rate limiter의 실패 기록을 지우는 동작입니다
 이미 큐에 대기 중인 요청이나 다른 이벤트까지 취소하지는 않습니다. TerminalError 분기에는 이 Forget 호출도 없습니다
-
-### 백오프와 전체 처리 속도는 다릅니다
-
-기본 우선순위 큐의 에러 재시도는 키별 지수 백오프를 사용합니다
-시작은 5ms이며 상한은 1000초, 약 16분 40초입니다
-
-우선순위 큐를 끄고 기본 client-go 리미터를 쓰면 키별 지수 백오프와 전체 10 QPS·burst 100 버킷 중 더 긴 지연을 적용합니다
-이 버킷은 재시도 속도에 대한 제한이며 일반 이벤트의 Add나 모든 API 요청에 적용되는 전역 처리량 제한은 아닙니다
-
-`RequeueAfter`와 백오프는 다음 요청을 예약하는 기능입니다
-그 시각까지 다른 이벤트의 조정을 막는 장벽은 아니므로 새 이벤트가 더 일찍 키를 준비시킬 수 있습니다
-
-기본 핸들러의 우선순위 처리에서는 초기 List의 이벤트와 옛·새 `resourceVersion`이 같은 업데이트를 낮은 우선순위 `-100`으로 다룹니다
-이벤트를 버리는 predicate와도 다른 동작입니다. [기본값과 리미터 선택](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/controller/controller.go), [반환값 switch](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/internal/controller/controller.go)
-
-### NotFound의 의미는 어떤 오브젝트를 읽었는지에 달려 있습니다
-
-Controller가 모든 NotFound 에러를 자동으로 무시하는 것은 아닙니다
-사용자 Reconciler가 그대로 반환하면 일반 에러 재시도 경로에 들어갑니다
-
-조정 대상이 이미 없어 더 할 일이 없다고 판단했다면 `client.IgnoreNotFound(err)`로 정상 종료할 수 있습니다
-ObjectReconciler를 연결하는 `AsReconciler` 어댑터도 대상 조회에서 이 처리를 사용합니다
-
-반면 원하는 자식이 없어서 생성해야 하는 상황이라면 NotFound를 관찰하고 생성 분기로 진행해야 합니다
-‘없음’을 모두 성공으로 지우는 것과 필요한 변경을 판단하는 일은 다릅니다
 
 ## status 쓰기도 다시 조정할 이벤트가 됩니다
 
@@ -253,6 +176,85 @@ Reconciler가 필요한 메타데이터·status 변경을 저장하고 실패 �
 
 CR의 메타데이터 변경은 generation 변화와 별개일 수 있습니다
 generation predicate를 사용할 때에는 삭제 상태 전환도 필요한 감시·재조정 경로로 전달되는지 함께 검토해야 합니다. [finalizer 헬퍼의 실제 책임](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/finalizer/finalizer.go)
+
+## Owns는 자식 이벤트를 부모의 요청으로 바꿉니다
+
+`Owns()`는 자식 오브젝트의 이벤트에서 `ownerReferences`를 읽고 부모의 키를 큐에 넣습니다
+자식 이벤트를 받았다고 그 자식 자체를 Reconcile하는 기능은 아닙니다
+
+기본 동작에는 다음 조건이 붙습니다
+
+- `controller: true`인 소유 참조 하나를 봅니다. 전체 소유 참조를 보려면 `builder.MatchEveryOwner`를 선택합니다
+- 소유자 타입은 group과 kind로 비교합니다. UID는 표준 요청에 넣지 않습니다
+- namespace는 소유 참조가 아닌 이벤트 오브젝트에서 가져옵니다
+- RESTMapper가 부모를 cluster-scoped로 판단하면 namespace를 비웁니다
+
+타입 비교에 버전을 사용하지 않아도 RESTMapper 조회에는 소유 참조의 버전이 들어갑니다
+해당 버전을 매핑하지 못하면 요청을 만들지 못합니다
+
+Update 핸들러는 옛 오브젝트와 새 오브젝트의 소유자를 모두 확인합니다
+소유권이 바뀐 이벤트라면 이전 부모와 새 부모의 키가 함께 들어갈 수 있습니다
+
+`Watches()`는 감시할 타입과 핸들러를 직접 연결하는 일반적인 형태입니다
+임의의 관계로 키를 만들려면 `EnqueueRequestsFromMapFunc`를 사용할 수 있고, Owns는 소유 참조를 사용하는 경우를 묶어 제공합니다
+
+`controller: true`는 주 관리자를 나타내는 API 관계입니다
+다른 주체의 쓰기를 막는 잠금은 아니며, 모든 일반 소유자까지 깨워야 하는지는 조정기의 역할에 따라 정해야 합니다. [Owns의 연결](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/builder/controller.go), [부모 요청 생성](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/handler/enqueue_owner.go)
+
+## 같은 키의 동시 실행을 막는 범위는 한 Controller의 큐입니다
+
+현재 기본 큐는 controller-runtime의 우선순위 큐입니다
+같은 키가 대기 중 다시 들어오면 요청을 합치고 더 이른 준비 시각과 높은 우선순위를 유지합니다
+
+워커에 넘긴 키는 잠급니다
+처리 중 같은 키가 다시 들어와 대기 항목이 생겨도 현재 호출의 `Done`이 잠금을 풀기 전에는 다른 워커에 넘기지 않습니다
+
+`UsePriorityQueue: false`이면 client-go 큐를 사용합니다
+이 큐는 같은 보장을 `dirty`와 `processing` 집합으로 만듭니다
+
+- **`dirty`**: 다시 처리할 필요가 있는 키입니다. 이미 dirty인 키의 반복 추가는 합칩니다
+- **`processing`**: 현재 워커가 처리 중인 키입니다. 처리 중 다시 추가되면 dirty로 표시하되 즉시 대기열에 넣지 않습니다
+- **`Done`**: processing에서 지우고, 여전히 dirty이면 그때 대기열에 다시 넣습니다
+
+![기본 우선순위 큐의 키 잠금과 비우선순위 client-go 큐의 dirty·processing이 처리 중 재추가된 같은 키를 직렬화하는 비교|tall](/diagrams/k8s-theory-controller-runtime-reconcile-2.svg)
+
+따라서 이벤트 개수와 Reconcile 호출 횟수는 일치하지 않습니다
+현재 호출 중 반복해서 들어온 같은 키도 대기 요청 하나로 합쳐질 수 있습니다
+
+`MaxConcurrentReconciles`의 기본값은 1입니다
+값을 올리면 서로 다른 키를 병렬로 조정할 수 있지만 같은 큐에서 같은 키를 동시에 처리하지 않는 보장은 유지됩니다
+
+다른 Controller의 큐나 다른 프로세스까지 막는 전역 잠금은 아닙니다
+이 보장을 API 읽기의 최신성이나 외부 시스템 변경의 배타성으로 확대하면 안 됩니다. [기본 큐의 병합·잠금](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/controller/priorityqueue/priorityqueue.go), [client-go의 Add·Get·Done](https://github.com/kubernetes/client-go/blob/28076445520055420e3be4255b4cd27fd19df1f9/util/workqueue/queue.go)
+
+### 백오프와 전체 처리 속도는 다릅니다
+
+기본 우선순위 큐의 에러 재시도는 키별 지수 백오프를 사용합니다
+시작은 5ms이며 상한은 1000초, 약 16분 40초입니다
+
+우선순위 큐를 끄고 기본 client-go 리미터를 쓰면 키별 지수 백오프와 전체 10 QPS·burst 100 버킷 중 더 긴 지연을 적용합니다
+이 버킷은 재시도 속도에 대한 제한이며 일반 이벤트의 Add나 모든 API 요청에 적용되는 전역 처리량 제한은 아닙니다
+
+`RequeueAfter`와 백오프는 다음 요청을 예약하는 기능입니다
+그 시각까지 다른 이벤트의 조정을 막는 장벽은 아니므로 새 이벤트가 더 일찍 키를 준비시킬 수 있습니다
+
+기본 핸들러의 우선순위 처리에서는 초기 List의 이벤트와 옛·새 `resourceVersion`이 같은 업데이트를 낮은 우선순위 `-100`으로 다룹니다
+이벤트를 버리는 predicate와도 다른 동작입니다. [기본값과 리미터 선택](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/controller/controller.go), [반환값 switch](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/internal/controller/controller.go)
+
+## 같은 client의 쓰기 반영을 기다리는 옵션도 있습니다
+
+v0.25.2에는 `CacheOptions.EnableReadYourWritesConsistency`가 있으며 기본값은 false입니다
+이를 켜면 같은 client가 추적한 쓰기를 캐시가 관찰한 뒤 읽기를 진행하도록 기다리는 기능을 사용합니다
+
+범위는 GVK와 typed·unstructured·PartialObjectMetadata 같은 표현 방식으로 나뉩니다
+Get은 해당 키의 쓰기를, List는 해당 GVK·표현의 앞선 쓰기들을 기다리는 구조이며 다른 표현으로 한 쓰기까지 하나로 묶지 않습니다
+
+`DisableReadYourWritesConsistency` 요청 옵션으로 개별 읽기·쓰기를 이 기능에서 제외할 수도 있습니다
+
+이 기능은 실험적이며 공식 옵션 주석은 한 리소스에 여러 namespace를 설정한 경우 제대로 동작하지 않는 제한을 명시합니다
+따라서 이를 전역 최신성이나 다른 client의 모든 변경까지 보장하는 기능으로 읽으면 안 됩니다
+
+기본 캐시 지연 설명과 이 선택 기능의 적용 조건을 나눠 판단해야 합니다. [client의 캐시 분기·옵션](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/client/client.go), [쓰기 관찰 대기 구현](https://github.com/kubernetes-sigs/controller-runtime/blob/5d8467b3065818a3b382d8f6941147a801fd1969/pkg/client/consistency.go)
 
 ## leader election은 같은 키의 전역 잠금이 아닙니다
 
