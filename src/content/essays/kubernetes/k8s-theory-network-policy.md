@@ -29,14 +29,6 @@ API 서버에 저장된 정책과 패킷에 적용된 제한도 구분해야 합
 [공식 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/services-networking/network-policies.md)는 집행하는 controller 없이 리소스를 만들면 효과가 없다고 설명합니다
 따라서 생성 성공만으로 설치된 플러그인의 지원 여부를 판정할 수 없습니다
 
-코어의 [`storage.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/networking/networkpolicy/storage/storage.go)는 저장소를 만들고 검증 strategy를 연결합니다
-[`strategy.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/networking/networkpolicy/strategy.go)는 생성·갱신 검증과 CIDR 표기 경고 등을 처리합니다
-이 경로가 패킷의 허용·차단 완료를 보고하는 것은 아닙니다
-
-현재 [`NetworkPolicy` 타입](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/api/networking/v1/types.go)에는 적용 완료를 나타내는 `status` 필드가 없습니다
-`kubectl get networkpolicy`로 존재를 확인해도 집행 완료 시각까지 알 수는 없습니다
-외부 구현이 제공하는 Event·로그·관측 도구는 별도로 확인해야 하며, 코어 경고가 항상 없다고 단정해서도 안 됩니다
-
 ## 격리는 Pod별·방향별로 판단합니다
 
 **격리(isolation)**는 해당 방향에서 연결을 제한하고 허용 규칙으로 범위를 정하는 상태입니다
@@ -68,6 +60,67 @@ Pod 사이 새 연결에는 **출발지 egress와 목적지 ingress가 모두 �
 허용 규칙 없이 특정 방향을 격리하는 정책을 보통 **default-deny**라고 부릅니다
 이 API에 직접적인 Deny 동작을 추가하는 것은 아닙니다
 다른 적용 정책의 허용과 정해진 예외까지 취소하지 않으므로, 이미 넓게 허용한 방향을 좁은 정책 하나로 다시 줄일 수는 없습니다
+
+## selector는 적용 대상과 허용 상대를 구분해서 읽습니다
+
+최상위 `spec.podSelector`는 제한받을 Pod를 고릅니다
+규칙 안의 **peer**는 허용할 출발지 또는 목적지를 고릅니다
+같은 `podSelector`라는 이름이어도 놓인 위치가 다릅니다
+
+peer의 `podSelector`만 쓰면 정책 자신의 namespace 안에서 Pod를 고릅니다
+`namespaceSelector`만 쓰면 그 namespace들의 모든 Pod를 고릅니다
+
+둘을 **같은 peer 항목에** 넣으면 선택한 namespace 안에서 Pod 라벨까지 맞아야 합니다
+아래는 `Ingress` 방향을 명시한 정책에서 규칙의 `from` 부분만 떼어 낸 개념 예시입니다
+정책의 최상위 selector가 고른 Pod로 들어오는 연결에서, 이 상대 조건과 같은 규칙의 포트 조건을 함께 만족해야 합니다
+
+```yaml
+from:
+  - namespaceSelector:
+      matchLabels:
+        team: blue
+    podSelector:
+      matchLabels:
+        app: client
+```
+
+반대로 두 peer로 나누면 `team=blue` namespace의 모든 Pod **또는** 정책 namespace의 `app=client` Pod를 허용합니다
+
+```yaml
+from:
+  - namespaceSelector:
+      matchLabels:
+        team: blue
+  - podSelector:
+      matchLabels:
+        app: client
+```
+
+![같은 peer 안의 namespace·Pod selector는 교집합이고 별도 peer로 나누면 선택 namespace 전체와 정책 namespace의 선택 Pod를 합치는 비교|tall](/diagrams/k8s-theory-network-policy-2.svg)
+
+그림은 정책 namespace가 `team=blue`에 속하지 않는 가정입니다
+두 YAML 모두 문법상 유효하므로 API 서버가 어느 쪽을 의도했는지 추론하지는 않습니다
+
+peer의 빈 `podSelector: {}`는 해당 namespace 범위의 모든 Pod를 고릅니다
+빈 `namespaceSelector: {}`는 모든 namespace를 고르므로 둘을 함께 쓰면 모든 namespace의 모든 Pod가 대상입니다
+peer 전체가 빈 `{}`인 경우와는 다릅니다
+
+## 포트 조건과 구현 지원을 함께 확인합니다
+
+표준 규칙의 포트 조건은 TCP·UDP·SCTP를 표현합니다
+`NetworkPolicyPort.protocol`을 생략하면 [`SetDefaults_NetworkPolicyPort`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/networking/v1/defaults.go)가 **TCP**를 넣습니다
+
+`port`는 숫자나 Pod의 포트 이름으로 지정할 수 있습니다
+포트 항목에서 `port`를 생략하면 그 항목의 프로토콜에 대해 포트 번호를 제한하지 않습니다
+반면 `ports` 목록 전체를 생략하면 규칙 자체에 포트 조건이 없습니다
+
+`port`부터 `endPort`까지의 범위에는 양 끝 포트가 모두 포함됩니다
+숫자 `port`가 있어야 하며 이름 포트와 함께 쓸 수 없고 `endPort >= port`여야 합니다
+[`ValidateNetworkPolicyPort`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/networking/validation/validation.go)가 이 조합과 유효한 포트 형식을 검사합니다
+
+API가 필드를 받아들이는 것과 플러그인이 이를 구현하는 것은 다릅니다
+SCTP는 해당 프로토콜 정책을 지원하는 플러그인이 필요하며 `endPort` 지원도 확인해야 합니다
+공식 문서는 `endPort`를 지원하지 않는 구현에서는 단일 `port`만 적용될 수 있다고 설명합니다
 
 ## policyTypes를 생략하면 ingress가 기본으로 들어갑니다
 
@@ -115,50 +168,7 @@ egress의 `to`에도 같은 목록 의미가 적용됩니다
 `from`·`to` 목록의 여러 peer는 OR이고 `ports` 목록의 여러 항목도 OR입니다
 빈 목록이 무엇을 뜻하는지는 해당 필드가 규칙 목록인지, 규칙 안의 조건 목록인지에 따라 달라집니다
 
-## selector는 적용 대상과 허용 상대를 구분해서 읽습니다
-
-최상위 `spec.podSelector`는 제한받을 Pod를 고릅니다
-규칙 안의 **peer**는 허용할 출발지 또는 목적지를 고릅니다
-같은 `podSelector`라는 이름이어도 놓인 위치가 다릅니다
-
-peer의 `podSelector`만 쓰면 정책 자신의 namespace 안에서 Pod를 고릅니다
-`namespaceSelector`만 쓰면 그 namespace들의 모든 Pod를 고릅니다
-
-둘을 **같은 peer 항목에** 넣으면 선택한 namespace 안에서 Pod 라벨까지 맞아야 합니다
-아래는 규칙의 `from` 부분만 떼어 낸 개념 예시입니다
-
-```yaml
-from:
-  - namespaceSelector:
-      matchLabels:
-        team: blue
-    podSelector:
-      matchLabels:
-        app: client
-```
-
-반대로 두 peer로 나누면 `team=blue` namespace의 모든 Pod **또는** 정책 namespace의 `app=client` Pod를 허용합니다
-
-```yaml
-from:
-  - namespaceSelector:
-      matchLabels:
-        team: blue
-  - podSelector:
-      matchLabels:
-        app: client
-```
-
-![같은 peer 안의 namespace·Pod selector는 교집합이고 별도 peer로 나누면 선택 namespace 전체와 정책 namespace의 선택 Pod를 합치는 비교|tall](/diagrams/k8s-theory-network-policy-2.svg)
-
-그림은 정책 namespace가 `team=blue`에 속하지 않는 가정입니다
-두 YAML 모두 문법상 유효하므로 API 서버가 어느 쪽을 의도했는지 추론하지는 않습니다
-
-peer의 빈 `podSelector: {}`는 해당 namespace 범위의 모든 Pod를 고릅니다
-빈 `namespaceSelector: {}`는 모든 namespace를 고르므로 둘을 함께 쓰면 모든 namespace의 모든 Pod가 대상입니다
-peer 전체가 빈 `{}`인 경우와는 다릅니다
-
-### ipBlock의 except는 그 규칙에서 뺄 주소 범위입니다
+## ipBlock의 except는 그 규칙에서 뺄 주소 범위입니다
 
 `ipBlock`은 CIDR 주소 범위와 제외할 `except`를 지정합니다
 같은 peer에 `ipBlock`과 selector를 함께 넣을 수 없으며, 각 `except`는 `cidr`의 진부분집합이어야 합니다
@@ -169,23 +179,6 @@ peer 전체가 빈 `{}`인 경우와는 다릅니다
 
 Pod를 라벨로 지정할 수 있는 상황에서 `ipBlock`을 Pod 신원처럼 취급해서도 안 됩니다
 Pod IP는 교체될 수 있고, 실제 정책이 관찰하는 주소에는 NAT 적용 순서도 영향을 줍니다
-
-## 포트 조건과 구현 지원을 함께 확인합니다
-
-표준 규칙의 포트 조건은 TCP·UDP·SCTP를 표현합니다
-`NetworkPolicyPort.protocol`을 생략하면 [`SetDefaults_NetworkPolicyPort`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/networking/v1/defaults.go)가 **TCP**를 넣습니다
-
-`port`는 숫자나 Pod의 포트 이름으로 지정할 수 있습니다
-포트 항목에서 `port`를 생략하면 그 항목의 프로토콜에 대해 포트 번호를 제한하지 않습니다
-반면 `ports` 목록 전체를 생략하면 규칙 자체에 포트 조건이 없습니다
-
-`port`부터 `endPort`까지의 범위에는 양 끝 포트가 모두 포함됩니다
-숫자 `port`가 있어야 하며 이름 포트와 함께 쓸 수 없고 `endPort >= port`여야 합니다
-[`ValidateNetworkPolicyPort`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/networking/validation/validation.go)가 이 조합과 유효한 포트 형식을 검사합니다
-
-API가 필드를 받아들이는 것과 플러그인이 이를 구현하는 것은 다릅니다
-SCTP는 해당 프로토콜 정책을 지원하는 플러그인이 필요하며 `endPort` 지원도 확인해야 합니다
-공식 문서는 `endPort`를 지원하지 않는 구현에서는 단일 `port`만 적용될 수 있다고 설명합니다
 
 ## 노드 통신 예외와 구현별 동작을 구분합니다
 
@@ -221,6 +214,16 @@ ICMP나 ARP를 포함해 모두 차단된다고 가정할 수 없으므로 `ping
 DNS 역시 egress 통신입니다
 DNS가 필요한 Pod라면 실제 resolver 목적지·프로토콜·포트에 대한 허용을 확인해야 합니다
 Service 주소의 변환과 노드 로컬 DNS 경로가 있을 수 있으므로 이름 조회 실패를 애플리케이션 목적지의 차단과 구분합니다
+
+## 저장 상태만으로 집행 완료를 알 수는 없습니다
+
+코어의 [`storage.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/networking/networkpolicy/storage/storage.go)는 저장소를 만들고 검증 strategy를 연결합니다
+[`strategy.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/networking/networkpolicy/strategy.go)는 생성·갱신 검증과 CIDR 표기 경고 등을 처리합니다
+이 경로가 패킷의 허용·차단 완료를 보고하는 것은 아닙니다
+
+현재 [`NetworkPolicy` 타입](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/api/networking/v1/types.go)에는 적용 완료를 나타내는 `status` 필드가 없습니다
+`kubectl get networkpolicy`로 존재를 확인해도 집행 완료 시각까지 알 수는 없습니다
+외부 구현이 제공하는 Event·로그·관측 도구는 별도로 확인해야 하며, 코어 경고가 항상 없다고 단정해서도 안 됩니다
 
 ## 패킷 판정 위치와 확장 API는 구현이 정합니다
 

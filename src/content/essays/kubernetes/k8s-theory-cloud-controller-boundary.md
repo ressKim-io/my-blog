@@ -23,6 +23,21 @@ CCM은 클러스터 안의 Pod로도 실행할 수 있습니다
 > 소스 ref는 `f78e722310e50bcaca9276be22276d9e91d91308`, website 저장본은 `7fde177e22dc98390a6d55d215dd0301b5f6d0bb`입니다
 > 실제 cloud provider·클러스터 설치·클라우드 API 호출·로드 밸런서 동작을 실측한 기록은 포함하지 않습니다
 
+## CCM에는 서로 다른 네 컨트롤러 경로가 있습니다
+
+확인한 [`cloud-provider/app/core.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/app/core.go)는 네 컨트롤러의 시작 경로를 둡니다
+실제 활성화는 설정과 provider의 인터페이스 지원에 달려 있습니다
+
+| 컨트롤러 | 클라우드에서 읽거나 조정하는 것 | Kubernetes에 반영하는 것 |
+|---|---|---|
+| cloud node | 인스턴스 메타데이터 | 초기화 필드·라벨·주소, uninitialized taint 제거 |
+| cloud node lifecycle | 인스턴스 존재·종료 상태 | Node 삭제 또는 shutdown taint |
+| route | 노드의 Pod CIDR로 가는 클라우드 경로 | `NetworkUnavailable` 조건 |
+| service | 외부 로드 밸런서와 백엔드 노드 | Service의 LB 상태·정리 finalizer |
+
+[공식 CCM 개요](https://kubernetes.io/docs/concepts/architecture/cloud-controller/)는 node·route·service를 중심으로 설명하면서, node와 node lifecycle을 분리하는 구현도 있다고 명시합니다
+문서의 기능 분류와 현재 코드의 시작 함수 개수를 그대로 같은 단위로 세면 안 됩니다
+
 ## external 모드의 새 Node는 초기화 미완료를 표시합니다
 
 `--cloud-provider=external`로 실행한 kubelet이 **새 Node를 등록하는 경로**에는 초기화 taint가 붙습니다
@@ -84,26 +99,7 @@ taint를 제거하기 전에 kubelet이 지정한 Node IP를 클라우드 주소
 이 순서와 예외는 [`syncNode`·`getNodeModifiersFromCloudProvider`·`getInstanceMetadata`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/controllers/node/node_controller.go#L416-L650)를 기준으로 확인했습니다
 오류 반환 때 workqueue가 재시도하며, taint 자체가 모든 재시도를 만들어 내는 것은 아닙니다
 
-## CCM에는 서로 다른 네 컨트롤러 경로가 있습니다
-
-확인한 [`cloud-provider/app/core.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/app/core.go)는 네 컨트롤러의 시작 경로를 둡니다
-실제 활성화는 설정과 provider의 인터페이스 지원에 달려 있습니다
-
-| 컨트롤러 | 클라우드에서 읽거나 조정하는 것 | Kubernetes에 반영하는 것 |
-|---|---|---|
-| cloud node | 인스턴스 메타데이터 | 초기화 필드·라벨·주소, uninitialized taint 제거 |
-| cloud node lifecycle | 인스턴스 존재·종료 상태 | Node 삭제 또는 shutdown taint |
-| route | 노드의 Pod CIDR로 가는 클라우드 경로 | `NetworkUnavailable` 조건 |
-| service | 외부 로드 밸런서와 백엔드 노드 | Service의 LB 상태·정리 finalizer |
-
-[공식 CCM 개요](https://kubernetes.io/docs/concepts/architecture/cloud-controller/)는 node·route·service를 중심으로 설명하면서, node와 node lifecycle을 분리하는 구현도 있다고 명시합니다
-문서의 기능 분류와 현재 코드의 시작 함수 개수를 그대로 같은 단위로 세면 안 됩니다
-
-관련 기본값도 서로 다른 작업의 주기입니다
-cloud node lifecycle의 `--node-monitor-period`는 5초, 경로 조정의 `--route-reconciliation-period`는 10초이며 service controller의 노드 informer 재동기 주기는 100초입니다
-이 값은 API 호출·처리가 그 시간 안에 성공한다는 상한이나 클라우드 자원 생성 시간을 뜻하지 않습니다
-
-### 노드의 연락 상태와 인스턴스의 존재는 다른 질문입니다
+## 노드의 연락 상태와 인스턴스의 존재는 다른 질문입니다
 
 kube-controller-manager의 node lifecycle controller는 Node 상태 하트비트·Lease 갱신을 보고 연락 상태를 판단합니다
 CCM의 cloud node lifecycle controller는 그 상태를 입력으로 사용하며, 같은 미관찰 시간을 다시 계산하지 않습니다
@@ -117,6 +113,36 @@ CCM의 cloud node lifecycle controller는 그 상태를 입력으로 사용하�
 
 따라서 NotReady Node가 남아 있다는 사실만으로 cloud node lifecycle controller의 장애를 확정할 수 없습니다
 인스턴스가 실제로 존재하거나, 질의가 실패했거나, 컨트롤러가 활성화되지 않은 경우를 나눠야 합니다
+
+## Pod CIDR 할당과 클라우드 경로 생성은 별도 작업입니다
+
+kube-controller-manager의 nodeipam은 노드별 주소 범위를 `Node.spec.podCIDRs`에 기록할 수 있습니다
+CCM의 route controller는 이 범위를 읽어 클라우드 경로를 만드는 별도 소비자입니다
+
+![KCM nodeipam의 Pod CIDR 기록과 CCM route controller의 클라우드 경로 조정, NetworkUnavailable 조건과 KCM taint 변환의 분업|tall](/diagrams/k8s-theory-cloud-controller-boundary-2.svg)
+
+`--configure-cloud-routes`가 꺼져 있거나 provider가 `Routes` 인터페이스를 지원하지 않으면 이 route controller를 실행하지 않습니다
+활성화할 때도 유효한 클러스터 CIDR 설정 등 생성 조건이 맞아야 합니다
+Node에 Pod CIDR이 있다는 사실만으로 클라우드 경로 조정까지 활성화됐다고 판단할 수는 없습니다
+
+이 경로에서 route controller는 자기가 관리하는 경로 작업 결과를 `NetworkUnavailable` 조건에 기록합니다
+경로가 준비되면 `False`, 준비되지 않으면 `True`로 반영합니다
+kube-controller-manager의 node lifecycle controller는 `True`를 `node.kubernetes.io/network-unavailable:NoSchedule` taint로 옮깁니다
+
+이 taint는 클라우드 초기화의 uninitialized taint나 인스턴스 종료의 shutdown taint와 원인이 다릅니다
+Ready가 True여도 별도로 남을 수 있으므로 Node 상태와 taint의 키를 함께 읽어야 합니다
+
+또한 모든 CNI가 Kubernetes의 Pod CIDR이나 CCM 경로를 사용하는 것은 아닙니다
+네트워크 구현이 자체 주소 풀과 별도 라우팅을 사용할 수도 있습니다
+범위를 기록하는 주체와 실제 주소·경로를 소비하는 주체는 [overlay·native routing 글](/essays/k8s-theory-overlay-native-routing)에서 구분한 관계입니다
+
+소스 기준은 CCM의 [`startRouteController`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/app/core.go#L104-L151)와 [`updateNetworkingCondition`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/controllers/route/route_controller.go#L528-L576)입니다
+
+## 컨트롤러의 주기는 작업 완료 시간과 다릅니다
+
+관련 기본값도 서로 다른 작업의 주기입니다
+cloud node lifecycle의 `--node-monitor-period`는 5초, 경로 조정의 `--route-reconciliation-period`는 10초이며 service controller의 노드 informer 재동기 주기는 100초입니다
+이 값은 API 호출·처리가 그 시간 안에 성공한다는 상한이나 클라우드 자원 생성 시간을 뜻하지 않습니다
 
 ## LoadBalancer Service는 세 시점의 값을 함께 가집니다
 
@@ -138,21 +164,6 @@ Pod IP로 직접 전달하는 LB처럼 nodePort가 필요 없는 구성이 가�
 
 이 경계는 [`SetDefaults_Service`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/defaults.go)와 [`shouldAllocateNodePorts`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/service/storage/alloc.go), [Service 공식 문서](https://kubernetes.io/docs/concepts/services-networking/service/#disabling-load-balancer-nodeport-allocation)를 기준으로 확인했습니다
 
-### EXTERNAL-IP의 pending은 API 상태 값이 아닙니다
-
-`kubectl get svc`에 보이는 `<pending>`은 printer가 만든 표시입니다
-LoadBalancer Service에서 LB 상태와 `spec.externalIPs`에 표시할 주소가 없으면 이 문자열을 출력합니다
-API에 별도의 `pending` 상태 값을 저장하는 것은 아닙니다
-
-이 표시만으로는 생성 중인지, 클라우드 오류로 재시도 중인지, 처리자가 없는지 알 수 없습니다
-`loadBalancerClass`로 위임했는데 그 클래스를 지원하는 컨트롤러가 없는 경우도 주소가 비어 있을 수 있습니다
-
-기본 service controller는 시작 시 `EnsuringLoadBalancer`, LB 확보 성공 시 `EnsuredLoadBalancer`, 동기화 실패 시 `SyncLoadBalancerFailed` 이벤트를 남깁니다
-성공 이벤트가 있어도 뒤따르는 status 쓰기까지 모두 성공했는지는 별도로 봐야 합니다
-이벤트 부재도 보존 기간·기록 실패의 영향을 받으므로 처리자 부재의 증명은 아닙니다
-
-표시의 실제 조건은 [`getServiceExternalIP`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/printers/internalversion/printers.go#L1412-L1441), 처리 경로는 service controller의 이벤트·로그·Service status를 함께 확인합니다
-
 ## loadBalancerClass는 신규 LB 처리 주체를 가릅니다
 
 기본 CCM service controller의 [`wantsLoadBalancer`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/controllers/service/controller.go#L862-L866)는 두 조건을 봅니다
@@ -161,23 +172,6 @@ Service 타입이 `LoadBalancer`이고 `spec.loadBalancerClass`가 `nil`이어�
 class 값이 있으면 이를 지원하는 다른 컨트롤러가 신규 LB 처리를 맡습니다
 IngressClass나 StorageClass와 달리 이 문자열이 가리키는 별도 class 오브젝트는 없습니다
 API가 값을 수락했다고 그 처리자가 설치돼 있다는 뜻은 아닙니다
-
-이 판정과 기존 자원의 정리는 다릅니다
-informer는 `wantsLoadBalancer` 외에도 `needsCleanup`·`needsUpdate` 조건으로 Service를 큐에 넣습니다
-기존 cleanup finalizer가 남은 Service는 class가 있다는 이유만으로 모든 처리가 배제되지는 않습니다
-
-class 변경 제한도 이전·새 타입을 함께 봐야 합니다
-
-| 요청 | class 검증·정리 경계 |
-|---|---|
-| LoadBalancer Service 생성 | class 지정 가능, 형식 검증 적용 |
-| 기존·새 타입 모두 LoadBalancer | nil에서 값 추가·값 제거를 포함해 class가 달라지면 거절 |
-| 다른 타입에서 LoadBalancer로 전환 | class 지정 가능, 형식과 다른 Service 검증은 계속 적용 |
-| LoadBalancer에서 다른 타입으로 전환하며 기존 class 유지 | 서버가 불필요해진 기존 class를 제거 |
-| 새 타입이 LoadBalancer가 아닌데 class를 남기는 요청 | 검증에서 거절 |
-
-이는 [`validateLoadBalancerClassField`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go#L9647-L9689)와 Service strategy의 `dropTypeDependentFields`를 함께 적용한 경계입니다
-타입 전환이 API에서 허용된다는 사실이 외부 LB의 전환 순서나 무중단을 보장하지는 않습니다
 
 ## LB 생성 전에 Service에 정리 finalizer를 붙입니다
 
@@ -201,6 +195,40 @@ CCM만 이 필드를 수정할 수 있다는 권한 보장은 아닙니다
 Node 초기화의 taint는 Pod의 **새 배치**를 제한합니다
 Service finalizer는 오브젝트의 **삭제 완료**를 제한합니다
 외부 작업이 남아 있다는 공통점만으로 두 장치가 막는 동작을 같게 보면 안 됩니다
+
+## class 변경 검증과 기존 자원 정리는 함께 봅니다
+
+신규 LB 처리자 판정과 기존 자원의 정리는 다릅니다
+informer는 `wantsLoadBalancer` 외에도 `needsCleanup`·`needsUpdate` 조건으로 Service를 큐에 넣습니다
+기존 cleanup finalizer가 남은 Service는 class가 있다는 이유만으로 모든 처리가 배제되지는 않습니다
+
+class 변경 제한도 이전·새 타입을 함께 봐야 합니다
+
+| 요청 | class 검증·정리 경계 |
+|---|---|
+| LoadBalancer Service 생성 | class 지정 가능, 형식 검증 적용 |
+| 기존·새 타입 모두 LoadBalancer | nil에서 값 추가·값 제거를 포함해 class가 달라지면 거절 |
+| 다른 타입에서 LoadBalancer로 전환 | class 지정 가능, 형식과 다른 Service 검증은 계속 적용 |
+| LoadBalancer에서 다른 타입으로 전환하며 기존 class 유지 | 서버가 불필요해진 기존 class를 제거 |
+| 새 타입이 LoadBalancer가 아닌데 class를 남기는 요청 | 검증에서 거절 |
+
+이는 [`validateLoadBalancerClassField`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go#L9647-L9689)와 Service strategy의 `dropTypeDependentFields`를 함께 적용한 경계입니다
+타입 전환이 API에서 허용된다는 사실이 외부 LB의 전환 순서나 무중단을 보장하지는 않습니다
+
+## EXTERNAL-IP의 pending은 API 상태 값이 아닙니다
+
+`kubectl get svc`에 보이는 `<pending>`은 printer가 만든 표시입니다
+LoadBalancer Service에서 LB 상태와 `spec.externalIPs`에 표시할 주소가 없으면 이 문자열을 출력합니다
+API에 별도의 `pending` 상태 값을 저장하는 것은 아닙니다
+
+이 표시만으로는 생성 중인지, 클라우드 오류로 재시도 중인지, 처리자가 없는지 알 수 없습니다
+`loadBalancerClass`로 위임했는데 그 클래스를 지원하는 컨트롤러가 없는 경우도 주소가 비어 있을 수 있습니다
+
+기본 service controller는 시작 시 `EnsuringLoadBalancer`, LB 확보 성공 시 `EnsuredLoadBalancer`, 동기화 실패 시 `SyncLoadBalancerFailed` 이벤트를 남깁니다
+성공 이벤트가 있어도 뒤따르는 status 쓰기까지 모두 성공했는지는 별도로 봐야 합니다
+이벤트 부재도 보존 기간·기록 실패의 영향을 받으므로 처리자 부재의 증명은 아닙니다
+
+표시의 실제 조건은 [`getServiceExternalIP`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/printers/internalversion/printers.go#L1412-L1441), 처리 경로는 service controller의 이벤트·로그·Service status를 함께 확인합니다
 
 ## NotReady 노드도 LB 후보 목록에 남을 수 있습니다
 
@@ -233,30 +261,6 @@ Node 추가·삭제와 주기적 재동기, 다른 Service 변경에 따른 처�
 노드를 백엔드로 사용하는 `externalTrafficPolicy: Local` 구성에서는 노드 제외가 그 노드의 Pod에 대한 외부 도달성에도 영향을 줄 수 있습니다
 
 후보·이벤트 판정은 [`shouldSyncUpdatedNode`와 `stableNodeSetPredicates`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/controllers/service/controller.go#L693-L713), provider별 차이는 해당 LB 구현과 함께 확인해야 합니다
-
-## Pod CIDR 할당과 클라우드 경로 생성은 별도 작업입니다
-
-kube-controller-manager의 nodeipam은 노드별 주소 범위를 `Node.spec.podCIDRs`에 기록할 수 있습니다
-CCM의 route controller는 이 범위를 읽어 클라우드 경로를 만드는 별도 소비자입니다
-
-![KCM nodeipam의 Pod CIDR 기록과 CCM route controller의 클라우드 경로 조정, NetworkUnavailable 조건과 KCM taint 변환의 분업|tall](/diagrams/k8s-theory-cloud-controller-boundary-2.svg)
-
-`--configure-cloud-routes`가 꺼져 있거나 provider가 `Routes` 인터페이스를 지원하지 않으면 이 route controller를 실행하지 않습니다
-활성화할 때도 유효한 클러스터 CIDR 설정 등 생성 조건이 맞아야 합니다
-Node에 Pod CIDR이 있다는 사실만으로 클라우드 경로 조정까지 활성화됐다고 판단할 수는 없습니다
-
-이 경로에서 route controller는 자기가 관리하는 경로 작업 결과를 `NetworkUnavailable` 조건에 기록합니다
-경로가 준비되면 `False`, 준비되지 않으면 `True`로 반영합니다
-kube-controller-manager의 node lifecycle controller는 `True`를 `node.kubernetes.io/network-unavailable:NoSchedule` taint로 옮깁니다
-
-이 taint는 클라우드 초기화의 uninitialized taint나 인스턴스 종료의 shutdown taint와 원인이 다릅니다
-Ready가 True여도 별도로 남을 수 있으므로 Node 상태와 taint의 키를 함께 읽어야 합니다
-
-또한 모든 CNI가 Kubernetes의 Pod CIDR이나 CCM 경로를 사용하는 것은 아닙니다
-네트워크 구현이 자체 주소 풀과 별도 라우팅을 사용할 수도 있습니다
-범위를 기록하는 주체와 실제 주소·경로를 소비하는 주체는 [overlay·native routing 글](/essays/k8s-theory-overlay-native-routing)에서 구분한 관계입니다
-
-소스 기준은 CCM의 [`startRouteController`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/app/core.go#L104-L151)와 [`updateNetworkingCondition`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cloud-provider/controllers/route/route_controller.go#L528-L576)입니다
 
 ## 코어에서 분리됐지만 cloud provider 계약은 Go 인터페이스입니다
 

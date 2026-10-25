@@ -56,21 +56,6 @@ namespace의 생성과 그 안에 통신 설정을 넣는 것은 별도 작업�
 containerd v2.4.2의 [`RunPodSandbox`](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/internal/cri/server/sandbox_run.go)는 일반 Linux 경로에서 namespace를 만든 뒤 `setupPodNetwork`를 호출합니다
 CNI 호출 뒤에 sandbox 시작 절차가 이어지므로, 이 시점을 애플리케이션 컨테이너가 시작하는 시점과 혼동하면 안 됩니다
 
-### 규격 버전과 라이브러리 릴리스는 다릅니다
-
-확인한 containerd의 [`go.mod`](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/go.mod)는 다음 버전을 사용합니다
-
-| 구성요소 | 확인 버전 | 이 글에서 맡는 역할 |
-|---|---|---|
-| containerd | `v2.4.2` | CRI 구현·CNI 호출·sandbox 수명 관리 |
-| containerd/go-cni | `v1.1.14` | 설정 로드와 네트워크별 Setup·Remove·Status 연결 |
-| containernetworking/cni | `v1.3.1` | libcni의 실행·결과 보관·체인 처리 |
-| containernetworking/plugins | `v1.9.1` | bridge·IPAM 등 구체적인 플러그인 구현 예 |
-
-CNI 라이브러리 v1.3.1 안의 `SPEC.md`와 `version.Current()`가 가리키는 규격은 **1.1.0**입니다
-설정의 `cniVersion`은 이 실행 규격을 뜻하며 라이브러리 릴리스 번호를 넣는 칸이 아닙니다
-런타임의 Go 의존 버전만으로는 노드에 설치된 개별 플러그인 실행 파일의 버전을 알 수 없습니다
-
 ## CNI는 환경 변수와 JSON으로 실행 파일을 호출합니다
 
 런타임은 플러그인을 별도 프로세스로 실행하고 종료 결과를 받습니다
@@ -92,6 +77,9 @@ CNI 라이브러리 v1.3.1 안의 `SPEC.md`와 `version.Current()`가 가리키�
 `(CNI_CONTAINERID, CNI_IFNAME)` 쌍으로 식별하며, 같은 대상이라도 인터페이스 이름이 다르면 별도 attachment가 될 수 있습니다
 containerd의 이 경로는 sandbox ID와 namespace 경로를 go-cni에 전달합니다
 
+ADD는 이 attachment에 네트워크를 구성하는 요청입니다
+플러그인은 인터페이스와 주소 등을 설정하고 성공 결과를 stdout의 JSON으로 런타임에 반환합니다
+
 플러그인 실행 프로세스 자체는 런타임의 네트워크 환경에서 시작합니다
 `CNI_NETNS`가 있다고 해서 프로세스를 처음부터 대상 namespace 안에서 실행하라는 뜻은 아닙니다
 플러그인이 대상 환경을 설정하는 데 그 경로를 사용합니다
@@ -100,19 +88,23 @@ containerd의 이 경로는 sandbox ID와 namespace 경로를 go-cni에 전달�
 stdout이 비어 있으면 stderr 등을 사용해 진단 문구를 만듭니다
 따라서 stdout에 임의의 디버그 문구를 섞으면 결과나 오류 JSON 파싱을 방해할 수 있습니다
 
-### 각 명령이 묻는 대상도 다릅니다
+## 주소 할당은 상위 플러그인이 IPAM에 위임합니다
 
-| 명령 | 대상·의미 | 적용 조건 |
-|---|---|---|
-| `ADD` | attachment를 구성하거나 기존 인터페이스 설정을 수정 | 성공 결과 JSON 반환 |
-| `DEL` | attachment 구성과 예약을 해제 | namespace가 없어도 가능한 정리 수행, 반복 삭제 허용 |
-| `CHECK` | 이미 붙인 attachment가 기대 상태인지 확인 | spec 0.4.0부터, `disableCheck`면 호출하지 않음 |
-| `VERSION` | 플러그인이 지원하는 규격 버전 조회 | `supportedVersions` 등을 JSON으로 반환 |
-| `STATUS` | 새 ADD 요청을 처리할 준비 상태 조회 | spec 1.1.0부터, 특정 attachment 검사가 아님 |
-| `GC` | 유효한 attachment 목록 밖의 남은 자원 정리 | spec 1.1.0부터, DEL을 대체할 수 없음 |
+**IPAM(IP Address Management)**은 인터페이스에 사용할 주소와 경로 등을 할당하는 역할입니다
+상위 CNI 플러그인은 `ipam.type`이 지정한 실행 파일에 이 작업을 위임할 수 있습니다
+호출 책임은 런타임이 아니라 상위 플러그인에 있습니다
 
-명령이 규격에 존재한다는 사실과 런타임이 그 명령을 자동 호출한다는 사실을 구분해야 합니다
-플러그인의 지원 버전과 콜백 구현, 사용하는 설정 버전도 함께 확인해야 합니다
+위임받은 플러그인은 `ipam` 블록만 받는 것이 아니라 상위 플러그인이 받은 설정 전체와 환경 변수를 받습니다
+IPAM 결과는 `interfaces` 배열과 `ips` 안의 인터페이스 인덱스가 빠진 축약 결과입니다
+상위 플러그인이 그 주소·경로를 실제 인터페이스 설정에 사용한 뒤 런타임에 답합니다
+
+plugins v1.9.1의 [`bridge`](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/plugins/main/bridge/bridge.go)는 주소 구성이 필요한 경로에서 `ipam.ExecAdd`를 호출합니다
+[`README`](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/README.md)의 `host-local`은 할당 IP의 로컬 DB를, `dhcp`는 호스트 데몬을 사용합니다
+같은 실행 파일 호출 규약을 따라도 주소를 고르고 보관하는 방식은 달라질 수 있습니다
+
+Kubernetes의 NodeIPAM과도 구분해야 합니다
+[`rangeAllocator`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/nodeipam/ipam/range_allocator.go)는 Node의 `spec.podCIDRs`에 대역을 배정합니다
+노드 대역 배정과 개별 attachment의 주소 할당은 다른 작업이며 그 대역을 사용하는지는 네트워크 구현에 달립니다
 
 ## 체인은 결과를 이어 받고 삭제할 때 역순으로 실행합니다
 
@@ -139,24 +131,6 @@ CHECK도 같은 마지막 결과를 받지만 실행 순서는 목록 순서입�
 그 결과를 못 읽으면 비어 있는 값으로 삭제를 시도합니다
 플러그인도 `prevResult`나 인터페이스가 이미 사라진 경우를 고려해야 합니다
 
-### IPAM은 런타임 체인의 다음 항목과 다릅니다
-
-**IPAM(IP Address Management)**은 인터페이스에 사용할 주소와 경로 등을 할당하는 역할입니다
-상위 CNI 플러그인은 `ipam.type`이 지정한 실행 파일에 이 작업을 위임할 수 있습니다
-호출 책임은 런타임이 아니라 상위 플러그인에 있습니다
-
-위임받은 플러그인은 `ipam` 블록만 받는 것이 아니라 상위 플러그인이 받은 설정 전체와 환경 변수를 받습니다
-IPAM 결과는 `interfaces` 배열과 `ips` 안의 인터페이스 인덱스가 빠진 축약 결과입니다
-상위 플러그인이 그 주소·경로를 실제 인터페이스 설정에 사용한 뒤 런타임에 답합니다
-
-plugins v1.9.1의 [`bridge`](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/plugins/main/bridge/bridge.go)는 주소 구성이 필요한 경로에서 `ipam.ExecAdd`를 호출합니다
-[`README`](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/README.md)의 `host-local`은 할당 IP의 로컬 DB를, `dhcp`는 호스트 데몬을 사용합니다
-같은 실행 파일 호출 규약을 따라도 주소를 고르고 보관하는 방식은 달라질 수 있습니다
-
-Kubernetes의 NodeIPAM과도 구분해야 합니다
-[`rangeAllocator`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/nodeipam/ipam/range_allocator.go)는 Node의 `spec.podCIDRs`에 대역을 배정합니다
-노드 대역 배정과 개별 attachment의 주소 할당은 다른 작업이며 그 대역을 사용하는지는 네트워크 구현에 달립니다
-
 ## ADD 실패 뒤에도 삭제 책임은 남습니다
 
 네트워크 구성 중 오류가 나면 체인의 다음 ADD를 멈추고 호출자에게 오류를 반환합니다
@@ -180,6 +154,35 @@ GC는 런타임이 전달한 유효한 attachment 집합을 기준으로 남은 
 [`libcni.GCNetworkList`](https://github.com/containernetworking/cni/blob/3f51e8803ebbdba0ebeed735b42137e4c7302403/libcni/api.go)는 제공되지만, 그것만으로 특정 런타임이 주기적으로 GC를 실행한다고 판단할 수는 없습니다
 확인한 go-cni의 공개 CNI 인터페이스에는 별도 GC 메서드가 없고, plugins의 bridge 등록부도 GC 콜백을 구현하지 않은 상태입니다
 규격의 GC 설명을 모든 설치 조합의 자동 회수 보장으로 읽으면 안 됩니다
+
+## 규격 버전과 라이브러리 릴리스는 다릅니다
+
+확인한 containerd의 [`go.mod`](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/go.mod)는 다음 버전을 사용합니다
+
+| 구성요소 | 확인 버전 | 이 글에서 맡는 역할 |
+|---|---|---|
+| containerd | `v2.4.2` | CRI 구현·CNI 호출·sandbox 수명 관리 |
+| containerd/go-cni | `v1.1.14` | 설정 로드와 네트워크별 Setup·Remove·Status 연결 |
+| containernetworking/cni | `v1.3.1` | libcni의 실행·결과 보관·체인 처리 |
+| containernetworking/plugins | `v1.9.1` | bridge·IPAM 등 구체적인 플러그인 구현 예 |
+
+CNI 라이브러리 v1.3.1 안의 `SPEC.md`와 `version.Current()`가 가리키는 규격은 **1.1.0**입니다
+설정의 `cniVersion`은 이 실행 규격을 뜻하며 라이브러리 릴리스 번호를 넣는 칸이 아닙니다
+런타임의 Go 의존 버전만으로는 노드에 설치된 개별 플러그인 실행 파일의 버전을 알 수 없습니다
+
+### 각 명령이 묻는 대상도 다릅니다
+
+| 명령 | 대상·의미 | 적용 조건 |
+|---|---|---|
+| `ADD` | attachment를 구성하거나 기존 인터페이스 설정을 수정 | 성공 결과 JSON 반환 |
+| `DEL` | attachment 구성과 예약을 해제 | namespace가 없어도 가능한 정리 수행, 반복 삭제 허용 |
+| `CHECK` | 이미 붙인 attachment가 기대 상태인지 확인 | spec 0.4.0부터, `disableCheck`면 호출하지 않음 |
+| `VERSION` | 플러그인이 지원하는 규격 버전 조회 | `supportedVersions` 등을 JSON으로 반환 |
+| `STATUS` | 새 ADD 요청을 처리할 준비 상태 조회 | spec 1.1.0부터, 특정 attachment 검사가 아님 |
+| `GC` | 유효한 attachment 목록 밖의 남은 자원 정리 | spec 1.1.0부터, DEL을 대체할 수 없음 |
+
+명령이 규격에 존재한다는 사실과 런타임이 그 명령을 자동 호출한다는 사실을 구분해야 합니다
+플러그인의 지원 버전과 콜백 구현, 사용하는 설정 버전도 함께 확인해야 합니다
 
 ## containerd는 설정 탐색과 준비 상태를 따로 판단합니다
 

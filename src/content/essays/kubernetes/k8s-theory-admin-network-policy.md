@@ -27,8 +27,19 @@ NetworkPolicy의 허용 규칙보다 먼저 적용할 관리자 거부 규칙은
 이 리소스는 `policy.networking.k8s.io/v1alpha2` 그룹·버전의 클러스터 범위 CRD입니다
 `tier`는 정책을 평가하는 계층이며, 이 리소스의 `spec.tier`에는 `Admin`과 `Baseline`을 지정할 수 있습니다
 
+이 프로젝트의 API 그룹은 `policy.networking.k8s.io`입니다
+이름에 `k8s.io`가 들어가도 Kubernetes 코어 내장 API는 아니며 CRD와 이를 집행하는 구현이 필요합니다
+
 가운데 NetworkPolicy 계층은 기존 `networking.k8s.io/v1 NetworkPolicy`가 채웁니다
 따라서 ClusterNetworkPolicy의 tier 값에 `NetworkPolicy`를 넣는 구조는 아닙니다
+
+subject는 정책을 적용할 Pod를 고릅니다
+`namespaces`는 네임스페이스 라벨로 그 안의 Pod를, `pods`는 네임스페이스 선택자와 Pod 선택자를 함께 만족하는 Pod를 고릅니다
+subject에는 둘 중 정확히 하나를 지정합니다
+
+peer는 그 Pod와 통신할 상대입니다
+ingress의 `from`에는 출발지가, egress의 `to`에는 목적지가 들어갑니다
+한 peer에도 선택 형식 하나만 지정하며, 여러 peer 중 하나가 매치하면 해당 규칙의 상대 조건을 만족합니다
 
 ![ingress 또는 egress 한 방향에서 Admin과 NetworkPolicy와 Baseline을 차례로 평가하며 Accept와 Deny는 최종 판정하고 Pass는 현재 tier의 남은 규칙을 건너뛰는 흐름|xtall](/diagrams/k8s-theory-admin-network-policy-1.svg)
 
@@ -48,33 +59,6 @@ NetworkPolicy가 해당 방향을 격리했다면, 허용 규칙의 합집합으
 어느 계층에서도 그 방향을 확정하지 않으면 정책 모델의 기본 허용으로 이어집니다
 
 계층의 평가 순서와 판정이 끝나는 조건은 [ClusterNetworkPolicySpec](https://github.com/kubernetes-sigs/network-policy-api/blob/a17adecd0316b8ff1c3f83939ec0441d68cd6cce/apis/v1alpha2/clusternetworkpolicy_types.go), 방향별 격리는 [코어 NetworkPolicy 문서](https://kubernetes.io/docs/concepts/services-networking/network-policies/)에 근거합니다
-
-## ANP와 BANP의 역할이 한 Kind의 tier가 됐습니다
-
-이 프로젝트의 API 그룹은 `policy.networking.k8s.io`입니다
-이름에 `k8s.io`가 들어가도 Kubernetes 코어 내장 API는 아니며 CRD와 이를 집행하는 구현이 필요합니다
-
-| API 모델 | 리소스와 버전 | 관리자 정책의 표현 |
-|---|---|---|
-| v0.1.7 | `AdminNetworkPolicy`, `v1alpha1` | NetworkPolicy보다 앞에서 평가, `Allow`·`Deny`·`Pass` |
-| v0.1.7 | `BaselineAdminNetworkPolicy`, `v1alpha1` | NetworkPolicy 뒤의 기본 정책, `Allow`·`Deny` |
-| v0.2.0 | `ClusterNetworkPolicy`, `v1alpha2` | `tier: Admin` 또는 `Baseline`, `Accept`·`Deny`·`Pass` |
-
-이하 ANP는 구형 AdminNetworkPolicy, BANP는 구형 BaselineAdminNetworkPolicy를 뜻합니다
-현재 ClusterNetworkPolicy는 두 Kind의 역할을 tier 필드로 합쳤고, 허용 액션의 이름도 `Allow`에서 `Accept`로 바꿨습니다
-허용 액션의 이름을 바꾼 이유는 확인한 발표 글과 설계 문서에서 찾지 못했습니다
-
-공식 프로젝트는 ClusterNetworkPolicy를 현재 개발하는 API로, ANP/BANP를 이전 API로 분류합니다
-다만 구형 API가 사라졌거나 유지보수가 모두 끝났다는 뜻은 아닙니다
-[시작 안내](https://network-policy-api.sigs.k8s.io/getting-started/)는 구형 최신 릴리스 v0.1.7을 별도로 안내하고 `release-0.1` 유지 및 잠재적인 버그 수정을 설명합니다
-
-v0.2.0 설치용 standard·experimental CRD에는 ClusterNetworkPolicy가 있고 ANP/BANP CRD는 없습니다
-저장소에 구형 Go 타입이 남아 있는 것과 그 릴리스가 설치용 CRD를 제공하는 것은 구분해야 합니다
-API 버전은 여전히 `v1alpha2`이며, `standard` 채널을 사용한다고 안정 API인 `v1`이 되는 것은 아닙니다
-
-이 글의 ClusterNetworkPolicy는 Cilium의 `CiliumNetworkPolicy`와도 다릅니다
-두 이름 모두 CNP로 줄이기도 하지만, Cilium 확장 리소스의 API 그룹은 `cilium.io`입니다
-Kind와 API 그룹을 함께 확인해야 서로 다른 정책을 같은 오브젝트로 읽지 않습니다
 
 ## Pass는 허용이 아니라 현재 계층의 평가를 끝냅니다
 
@@ -105,7 +89,7 @@ ClusterNetworkPolicy는 subject로 Pod를 선택했다는 사실만으로 암묵
 Admin과 Baseline은 tier 순서가 먼저이므로 두 계층의 priority 숫자를 서로 비교해 순서를 뒤집지 않습니다
 
 한 오브젝트 안의 규칙은 priority를 공유하므로 목록에 적힌 순서로 평가합니다
-구형 ANP는 방향별 최대 100개 규칙을, 현재 ClusterNetworkPolicy는 ingress·egress 각각 최대 25개 규칙을 허용합니다
+구형 ANP(AdminNetworkPolicy)는 방향별 최대 100개 규칙을, 현재 ClusterNetworkPolicy는 ingress·egress 각각 최대 25개 규칙을 허용합니다
 현재 API의 한 규칙에서 peer 목록과 protocols 목록도 각각 최대 25개입니다
 
 같은 tier에서 같은 priority의 두 정책이 같은 연결에 매치할 수 있다면, API는 어느 정책이 먼저 적용될지 고정하지 않습니다
@@ -118,15 +102,7 @@ Admin과 Baseline은 tier 순서가 먼저이므로 두 계층의 priority 숫�
 따라서 겹치는 정책에서 판정 순서의 모호함을 허용할 수 없다면 priority가 중복되지 않도록 설계해야 합니다
 이 조건은 구형 [AdminNetworkPolicySpec](https://github.com/kubernetes-sigs/network-policy-api/blob/0638d394d89ddb61dded975b502391a122fc762c/apis/v1alpha1/adminnetworkpolicy_types.go)과 현재 ClusterNetworkPolicySpec에 모두 명시돼 있습니다
 
-## subject와 peer는 고르는 대상이 다릅니다
-
-subject는 정책을 적용할 Pod를 고릅니다
-`namespaces`는 네임스페이스 라벨로 그 안의 Pod를, `pods`는 네임스페이스 선택자와 Pod 선택자를 함께 만족하는 Pod를 고릅니다
-subject에는 둘 중 정확히 하나를 지정합니다
-
-peer는 그 Pod와 통신할 상대입니다
-ingress의 `from`에는 출발지가, egress의 `to`에는 목적지가 들어갑니다
-한 peer에도 선택 형식 하나만 지정하며, 여러 peer 중 하나가 매치하면 해당 규칙의 상대 조건을 만족합니다
+## 선택자와 포트는 방향·채널 조건을 함께 봅니다
 
 | peer 형식 | 방향 | v0.2.0 배포 채널 | 의미 |
 |---|---|---|---|
@@ -180,6 +156,30 @@ peer에서 아는 필드가 하나도 보이지 않는다면 호환되지 않는
 
 허용 조건을 모르는데 트래픽을 열거나, 위임 조건을 모르는데 다음 계층으로 넘기지 않도록 액션별 처리가 다릅니다
 이것은 저장 전에 API 서버가 알 수 없는 필드를 거절·제거하는 것과 다른 단계입니다
+
+## ANP와 BANP의 역할이 한 Kind의 tier가 됐습니다
+
+| API 모델 | 리소스와 버전 | 관리자 정책의 표현 |
+|---|---|---|
+| v0.1.7 | `AdminNetworkPolicy`, `v1alpha1` | NetworkPolicy보다 앞에서 평가, `Allow`·`Deny`·`Pass` |
+| v0.1.7 | `BaselineAdminNetworkPolicy`, `v1alpha1` | NetworkPolicy 뒤의 기본 정책, `Allow`·`Deny` |
+| v0.2.0 | `ClusterNetworkPolicy`, `v1alpha2` | `tier: Admin` 또는 `Baseline`, `Accept`·`Deny`·`Pass` |
+
+이하 ANP는 구형 AdminNetworkPolicy, BANP는 구형 BaselineAdminNetworkPolicy를 뜻합니다
+현재 ClusterNetworkPolicy는 두 Kind의 역할을 tier 필드로 합쳤고, 허용 액션의 이름도 `Allow`에서 `Accept`로 바꿨습니다
+허용 액션의 이름을 바꾼 이유는 확인한 발표 글과 설계 문서에서 찾지 못했습니다
+
+공식 프로젝트는 ClusterNetworkPolicy를 현재 개발하는 API로, ANP/BANP를 이전 API로 분류합니다
+다만 구형 API가 사라졌거나 유지보수가 모두 끝났다는 뜻은 아닙니다
+[시작 안내](https://network-policy-api.sigs.k8s.io/getting-started/)는 구형 최신 릴리스 v0.1.7을 별도로 안내하고 `release-0.1` 유지 및 잠재적인 버그 수정을 설명합니다
+
+v0.2.0 설치용 standard·experimental CRD에는 ClusterNetworkPolicy가 있고 ANP/BANP CRD는 없습니다
+저장소에 구형 Go 타입이 남아 있는 것과 그 릴리스가 설치용 CRD를 제공하는 것은 구분해야 합니다
+API 버전은 여전히 `v1alpha2`이며, `standard` 채널을 사용한다고 안정 API인 `v1`이 되는 것은 아닙니다
+
+이 글의 ClusterNetworkPolicy는 Cilium의 `CiliumNetworkPolicy`와도 다릅니다
+두 이름 모두 CNP로 줄이기도 하지만, Cilium 확장 리소스의 API 그룹은 `cilium.io`입니다
+Kind와 API 그룹을 함께 확인해야 서로 다른 정책을 같은 오브젝트로 읽지 않습니다
 
 ## 계층을 합치면서 구형 BANP의 제약도 바뀌었습니다
 

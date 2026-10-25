@@ -35,22 +35,6 @@ IPv4·IPv6를 함께 사용하는 dual-stack에서는 같은 Service의 후보�
 iptables의 [`syncProxyRules`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/proxy/iptables/proxier.go)는 클러스터 Pod가 Service의 외부 주소로 보내는 트래픽과 호스트에서 시작한 트래픽을 별도 처리합니다
 아래 Local의 외부 경로 설명은 이런 예외와 일반적인 외부 유입을 구분해서 읽어야 합니다
 
-### 두 Local이 출발지 주소에 주는 효과는 다릅니다
-
-`externalTrafficPolicy: Cluster`의 일반 외부 유입 경로는 다른 노드의 백엔드로도 보낼 수 있습니다
-iptables는 이 경로에 masquerade를 걸어 응답이 연결 변환 상태가 있는 유입 노드로 돌아오도록 합니다
-**SNAT**는 이처럼 출발지 주소를 바꾸는 처리입니다
-
-외부 정책의 `Local`은 유입 노드의 백엔드만 사용해 이 전달 과정의 출발지 변환을 피합니다
-단, 호스트에서 시작한 특수 경로까지 출발지를 무조건 보존하는 것은 아니며 앞단 로드밸런서가 이미 바꾼 원래 주소를 복원하는 기능도 아닙니다
-
-일반적인 Pod의 ClusterIP 호출은 외부 유입과 같은 masquerade를 항상 요구하지 않습니다
-그래서 `internalTrafficPolicy: Local`의 주된 목적은 출발지 복원보다 노드를 넘는 경로를 피하는 데 있습니다
-iptables의 `masqueradeAll` 설정이나 클러스터 밖 출발지가 ClusterIP로 들어오는 처리 등은 별도로 남으므로 내부 통신은 절대 SNAT되지 않는다고 일반화하면 안 됩니다
-
-로컬 전달은 경로·지연·네트워크 비용을 줄이는 데 도움이 될 수 있습니다
-그러나 노드마다 백엔드 수와 요청량이 다르면 부하가 쏠릴 수 있으며, 실제 효과는 배치와 네트워크 구성으로 확인해야 합니다
-
 ## Local은 원격 후보로 돌아가지 않는 제약입니다
 
 `Local`은 같은 노드에서 사용할 후보를 고릅니다
@@ -75,13 +59,6 @@ iptables는 규칙 주석도 `has no endpoints`와 `has no local endpoints`로 �
 REJECT에서는 즉시 오류를 받을 수 있고 DROP에서는 응답 없이 기다릴 수 있습니다
 하지만 구체적인 오류 문구·timeout·재시도는 프로토콜과 클라이언트에 달려 있습니다
 다른 Service 프록시까지 같은 오류 형태를 보장하는 설명은 아닙니다
-
-로컬 후보 부재를 나타내는 `kubeproxy_sync_proxy_rules_no_local_endpoints_total`도 확인할 근거입니다
-이름에 `_total`이 있지만 현재 [`metrics.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/proxy/metrics/metrics.go)는 **GaugeVec**으로 선언합니다
-
-두 proxier는 Service 포트·프로토콜 항목을 순회하며 로컬 후보 부재를 집계한 뒤 `Set`합니다
-라벨은 `traffic_policy`와 `ip_family`이며 internal·external을 나눕니다
-누적 차단 패킷 수나 실패 연결 수로 읽으면 안 됩니다
 
 ## Ready와 종료 중 후보의 fallback을 구분합니다
 
@@ -165,7 +142,35 @@ internalTrafficPolicy가 Local이면 ClusterIP는 로컬 집합을 사용하지�
 선호를 적용한 뒤에는 같은 노드·zone의 후보 수와 그곳에서 발생하는 요청량을 함께 봐야 합니다
 전체 후보를 대상으로 분배해도 실제 요청 수·응답 시간·부하의 균등까지 보장되지는 않습니다
 
+## 두 Local이 출발지 주소에 주는 효과는 다릅니다
+
+`externalTrafficPolicy: Cluster`의 일반 외부 유입 경로는 다른 노드의 백엔드로도 보낼 수 있습니다
+iptables는 이 경로에 masquerade를 걸어 응답이 연결 변환 상태가 있는 유입 노드로 돌아오도록 합니다
+**SNAT**는 이처럼 출발지 주소를 바꾸는 처리입니다
+
+외부 정책의 `Local`은 유입 노드의 백엔드만 사용해 이 전달 과정의 출발지 변환을 피합니다
+단, 호스트에서 시작한 특수 경로까지 출발지를 무조건 보존하는 것은 아니며 앞단 로드밸런서가 이미 바꾼 원래 주소를 복원하는 기능도 아닙니다
+
+일반적인 Pod의 ClusterIP 호출은 외부 유입과 같은 masquerade를 항상 요구하지 않습니다
+그래서 `internalTrafficPolicy: Local`의 주된 목적은 출발지 복원보다 노드를 넘는 경로를 피하는 데 있습니다
+iptables의 `masqueradeAll` 설정이나 클러스터 밖 출발지가 ClusterIP로 들어오는 처리 등은 별도로 남으므로 내부 통신은 절대 SNAT되지 않는다고 일반화하면 안 됩니다
+
+로컬 전달은 경로·지연·네트워크 비용을 줄이는 데 도움이 될 수 있습니다
+그러나 노드마다 백엔드 수와 요청량이 다르면 부하가 쏠릴 수 있으며, 실제 효과는 배치와 네트워크 구성으로 확인해야 합니다
+
+## 로컬 후보 부재 지표는 패킷 수가 아닙니다
+
+로컬 후보 부재를 나타내는 `kubeproxy_sync_proxy_rules_no_local_endpoints_total`도 확인할 근거입니다
+이름에 `_total`이 있지만 현재 [`metrics.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/proxy/metrics/metrics.go)는 **GaugeVec**으로 선언합니다
+
+두 proxier는 Service 포트·프로토콜 항목을 순회하며 로컬 후보 부재를 집계한 뒤 `Set`합니다
+라벨은 `traffic_policy`와 `ip_family`이며 internal·external을 나눕니다
+누적 차단 패킷 수나 실패 연결 수로 읽으면 안 됩니다
+
 ## dual-stack은 주소 할당과 주소군별 후보를 나눕니다
+
+앞의 후보 판단은 IPv4와 IPv6에 각각 적용됩니다
+같은 Service의 Local 정책이라도 주소군별 목록에서 이 노드가 사용할 후보가 남는지 확인해야 합니다
 
 **dual-stack**은 IPv4와 IPv6를 함께 사용하는 구성입니다
 Service에 값을 적는 것만으로 노드의 두 주소군 경로나 CNI 지원이 생기지는 않습니다

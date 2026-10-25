@@ -89,6 +89,9 @@ IPv4의 앞자리 0이나 IPv6의 다른 축약 표기를 별개의 이름으로
 
 ## 동적 할당은 캐시로 후보를 고르고 쓰기로 확정합니다
 
+ServiceCIDR는 Service 주소를 공급할 대역을 나타냅니다
+할당기는 Ready·삭제 상태와 informer 동기화를 확인해 사용할 수 있는 대역에서 후보를 찾습니다
+
 동적 할당은 범위 안의 무작위 지점에서 시작해 주소를 순회합니다
 informer 캐시에서 이미 보이는 IPAddress는 건너뛰고, 없는 후보에 Create를 시도합니다
 
@@ -99,7 +102,41 @@ informer 캐시에서 이미 보이는 IPAddress는 건너뛰고, 없는 후보�
 따라서 캐시는 어디를 시도할지 정하는 데 쓰이며, 최종 확보 여부는 API 쓰기가 판정합니다
 시작 지점의 무작위 선택은 여러 할당기가 같은 후보부터 찾는 경합을 줄이려는 것이며 충돌이 없다는 보장은 아닙니다
 
-### 동적 할당이 먼저 쓰는 구간은 따로 있습니다
+## repair는 주소 기록을 고치며 Service의 주소를 바꾸지 않습니다
+
+Service 쓰기가 실패하면 앞에서 만든 IPAddress의 해제를 시도합니다
+정상적인 Service 삭제 뒤에도 저장소의 afterDelete 경로가 주소를 반환합니다
+그러나 현재 IPAddress 해제 구현은 삭제 오류를 로그에 남기고 nil을 반환하는 호환 동작이 있으므로 해제 호출의 종료만으로 실제 삭제까지 증명할 수 없습니다
+
+RepairIPAddress는 Service의 clusterIPs와 IPAddress의 parentRef를 양방향으로 대조합니다
+
+| 방향 | 현재 복구 범위 |
+|---|---|
+| Service → IPAddress | 주소 기록이 없으면 생성, 잘못된 참조·라벨은 조건을 대조해 삭제·재생성 |
+| IPAddress → Service | 할당기 관리 라벨의 주소 기록이 실제 Service와 연결되는지 확인하고 누수·잘못된 참조 정리 |
+
+역방향 누수 정리는 `managed-by: ipallocator.k8s.io`인 오브젝트만 대상으로 합니다
+Service가 실제로 쓰는 주소의 기록을 확인하는 순방향 보정과 이 라벨 제한을 구분해야 합니다
+다른 관리자의 모든 주소를 무조건 삭제하거나, 어느 경로에서도 절대 건드리지 않는다고 일반화할 수는 없습니다
+
+### 유예 시간은 잘못된 참조의 조건마다 다릅니다
+
+Service가 없을 때는 IPAddress의 생성 시각으로부터 60초를 넘기기 전까지 누수로 지우지 않습니다
+주소 기록이 Service보다 먼저 생기는 정상 구간을 보호하기 위해서입니다
+ExternalName Service를 주소가 필요한 타입으로 바꾸는 중의 일부 불일치에도 60초 보호가 있습니다
+
+또 IPAddress가 기존 Service보다 나중에 생겼고 생성 뒤 5초 미만이면, 다시 검사하도록 예약합니다
+트랜잭션 되돌리기와 repair가 경합해 불필요한 `IPAddressWrongReference` 경고를 내는 것을 막기 위해서입니다
+따라서 모든 잘못된 참조를 발견한 뒤 60초에 삭제하는 규칙이 아닙니다
+컨트롤러의 큐 처리와 재시도도 있으므로 이 값은 관측한 전체 복구 시간과 구분합니다
+
+한 주소를 두 Service가 쓰거나 주소가 어느 ServiceCIDR에도 속하지 않는 상황은 Service에 새 주소를 자동 할당하는 방식으로 고치지 않습니다
+`ClusterIPAlreadyAllocated` 또는 `ClusterIPOutOfRange` Event와 재생성 안내를 남깁니다
+repair가 만드는 변경은 IPAddress 쪽이며, 정상적인 기존 ClusterIP를 임의로 교체하는 컨트롤러가 아닙니다
+
+복구 조건과 유예는 [RepairIPAddress.syncService·syncIPAddress](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/service/ipallocator/controller/repairip.go)에 있습니다
+
+## 동적 할당이 먼저 쓰는 구간은 따로 있습니다
 
 대역 전체 주소 개수인 cidrSize가 16 이하면 구간 offset은 0입니다
 그보다 크면 offset은 `min(max(16, cidrSize / 16), 256)`입니다
@@ -217,40 +254,6 @@ IPv4는 prefix 길이 최소 12, IPv6는 최소 108에 해당하지만 현재 �
 > 이 숫자들을 현재 할당 범위나 최대 Service 개수의 근거로 합치지 않습니다
 
 이행의 동기는 [KEP-1880](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-network/1880-multiple-service-cidrs/README.md), 현재 상한 분기는 [validateClusterIPFlags](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-apiserver/app/options/validation.go)에 근거합니다
-
-## repair는 주소 기록을 고치며 Service의 주소를 바꾸지 않습니다
-
-Service 쓰기가 실패하면 앞에서 만든 IPAddress의 해제를 시도합니다
-정상적인 Service 삭제 뒤에도 저장소의 afterDelete 경로가 주소를 반환합니다
-그러나 현재 IPAddress 해제 구현은 삭제 오류를 로그에 남기고 nil을 반환하는 호환 동작이 있으므로 해제 호출의 종료만으로 실제 삭제까지 증명할 수 없습니다
-
-RepairIPAddress는 Service의 clusterIPs와 IPAddress의 parentRef를 양방향으로 대조합니다
-
-| 방향 | 현재 복구 범위 |
-|---|---|
-| Service → IPAddress | 주소 기록이 없으면 생성, 잘못된 참조·라벨은 조건을 대조해 삭제·재생성 |
-| IPAddress → Service | 할당기 관리 라벨의 주소 기록이 실제 Service와 연결되는지 확인하고 누수·잘못된 참조 정리 |
-
-역방향 누수 정리는 `managed-by: ipallocator.k8s.io`인 오브젝트만 대상으로 합니다
-Service가 실제로 쓰는 주소의 기록을 확인하는 순방향 보정과 이 라벨 제한을 구분해야 합니다
-다른 관리자의 모든 주소를 무조건 삭제하거나, 어느 경로에서도 절대 건드리지 않는다고 일반화할 수는 없습니다
-
-### 유예 시간은 잘못된 참조의 조건마다 다릅니다
-
-Service가 없을 때는 IPAddress의 생성 시각으로부터 60초를 넘기기 전까지 누수로 지우지 않습니다
-주소 기록이 Service보다 먼저 생기는 정상 구간을 보호하기 위해서입니다
-ExternalName Service를 주소가 필요한 타입으로 바꾸는 중의 일부 불일치에도 60초 보호가 있습니다
-
-또 IPAddress가 기존 Service보다 나중에 생겼고 생성 뒤 5초 미만이면, 다시 검사하도록 예약합니다
-트랜잭션 되돌리기와 repair가 경합해 불필요한 `IPAddressWrongReference` 경고를 내는 것을 막기 위해서입니다
-따라서 모든 잘못된 참조를 발견한 뒤 60초에 삭제하는 규칙이 아닙니다
-컨트롤러의 큐 처리와 재시도도 있으므로 이 값은 관측한 전체 복구 시간과 구분합니다
-
-한 주소를 두 Service가 쓰거나 주소가 어느 ServiceCIDR에도 속하지 않는 상황은 Service에 새 주소를 자동 할당하는 방식으로 고치지 않습니다
-`ClusterIPAlreadyAllocated` 또는 `ClusterIPOutOfRange` Event와 재생성 안내를 남깁니다
-repair가 만드는 변경은 IPAddress 쪽이며, 정상적인 기존 ClusterIP를 임의로 교체하는 컨트롤러가 아닙니다
-
-복구 조건과 유예는 [RepairIPAddress.syncService·syncIPAddress](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/service/ipallocator/controller/repairip.go)에 있습니다
 
 ## 생성 충돌과 저장 뒤의 불일치는 다른 문제입니다
 

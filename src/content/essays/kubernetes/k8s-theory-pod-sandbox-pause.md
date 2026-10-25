@@ -94,65 +94,6 @@ PID namespace 공유는 별도 선택입니다
 
 모드 선택은 [`NamespacesForPod`와 관련 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/util/util.go), PID 공유의 동작은 [공식 프로세스 namespace 공유 문서](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)에서 확인할 수 있습니다
 
-## veth를 쓴다면 노드 쪽 끝의 처리도 봐야 합니다
-
-veth pair는 두 인터페이스가 한 쌍으로 만들어져 한쪽에서 보낸 패킷을 다른 쪽으로 전달하는 가상 장치입니다
-veth 기반 CNI 구성에서는 한쪽을 Pod network namespace 안에, 다른 쪽을 노드 쪽에 둡니다
-Pod 안의 이름은 흔히 `eth0`이며 CNI의 `CNI_IFNAME`으로 전달합니다
-
-이 장치를 만드는 주체는 해당 플러그인입니다
-예를 들어 [CNI bridge 플러그인](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/plugins/main/bridge/bridge.go)은 veth를 만든 뒤 노드 쪽 끝을 bridge에 연결합니다
-`ipvlan`·`macvlan`·`host-device`처럼 veth와 다른 인터페이스 방식을 제공하는 플러그인도 있으므로 모든 Pod가 같은 쌍을 갖는 것은 아닙니다
-
-이 플러그인 소스는 v1.9.1로 고정했으며 [containerd의 go.mod](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/go.mod)가 참조하는 plugins 버전과도 대조했습니다
-go.mod에 적힌 라이브러리 의존성이 노드에 설치된 CNI 실행 파일의 버전을 증명하는 것은 아닙니다
-
-![두 veth 기반 구성에서 Pod쪽과 노드쪽 인터페이스 쌍은 유지되고 bridge 전달 또는 Cilium의 노드쪽 TC hook 처리로 갈리는 비교|tall](/diagrams/k8s-theory-pod-sandbox-pause-2.svg)
-
-bridge는 노드 안에서 이더넷 프레임을 전달하는 가상 스위치입니다
-bridge는 일반적으로 수신 프레임의 출발지 MAC 주소를 학습하고, 목적지 MAC 주소를 기준으로 전달할 포트를 고릅니다
-학습할 주소와 전달 판단에 사용하는 주소가 다릅니다
-
-다른 예로 [Cilium 1.20.3의 veth 기반 설명](https://docs.cilium.io/en/stable/network/ebpf/intro/)은 노드 쪽 veth의 TC ingress hook에 붙은 eBPF 프로그램을 다룹니다
-TC는 네트워크 인터페이스의 트래픽 제어 지점이며, 프로그램은 Pod에서 나오는 패킷에 정책을 적용하고 전달을 처리할 수 있습니다
-
-이 비교의 두 예시에서는 veth가 양쪽 모두 남습니다
-차이는 노드 쪽 끝을 bridge에 연결하는지, 그 지점의 프로그램과 라우팅으로 전달하는지입니다
-이를 모든 eBPF 네트워크 구현이나 모든 Cilium 장치 모드의 고정 구조로 넓히면 안 됩니다
-
-예를 들어 Cilium의 [socket load balancer](https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#socket-loadbalancer-bypass-in-pod-namespace)는 TCP `connect` 시점에 Service의 대상을 바꿀 수 있으며, 이는 veth 패킷 처리와 다른 위치입니다
-eBPF가 무엇을 대신하는지 판단할 때는 기술 이름만 보지 않고 프로그램이 붙는 지점과 처리 시점을 함께 확인해야 합니다
-
-bridge의 전달·학습은 [Linux Ethernet Bridging 문서](https://docs.kernel.org/networking/bridge.html)에 근거합니다
-
-## kubelet은 런타임이 보고한 IP를 읽습니다
-
-kubelet은 sandbox의 IP를 직접 할당하지 않습니다
-새 sandbox를 만든 뒤 `PodSandboxStatus`를 조회하고 런타임이 보고한 primary·additional IP를 파싱합니다
-앱 컨테이너 시작 경로가 Pod IP에 의존하므로 상태 조회와 주소 확인을 먼저 수행합니다
-이를 사용해 Downward API의 `status.podIP`·`status.podIPs` 같은 환경 변수 참조와 컨테이너의 hosts 파일을 구성합니다
-
-Network 정보가 없으면 주소 목록을 보고할 수 없다는 로그를 남깁니다
-primary 또는 additional IP가 파싱되지 않으면 해당 값만 빼고 계속하는 것이 아니라 이 함수의 전체 반환을 `nil`로 처리합니다
-따라서 파싱 실패와 정보 부재, 비어 있는 IP 문자열을 구분해야 합니다
-
-현재 SyncPod에는 sandbox 생성 뒤 `OnPodSandboxReady`로 상태 갱신을 알리는 단계가 있으며 이미지 pull보다 먼저 호출합니다
-필요한 sandbox·네트워크 준비를 먼저 알리고 이후 컨테이너 생성으로 이어가는 흐름입니다
-
-관련 구현은 [`determinePodSandboxIPs`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_sandbox.go)와 [`SyncPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_manager.go)에 있습니다
-
-### hostNetwork는 노드의 network namespace를 사용합니다
-
-`hostNetwork: true`이면 kubelet은 CRI에 network 모드 `NODE`를 전달합니다
-이 모드에서 Pod status의 IP는 [노드 IP를 상속하는 경로](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)로 채웁니다
-CRI의 sandbox network status도 host network 공유 Pod에서는 무시한다고 정의합니다
-
-확인한 containerd 경로는 hostNetwork Pod에 별도 network namespace를 만들거나 앞 절의 CNI setup을 수행하지 않습니다
-이는 이 구현을 확인한 결과이며 namespace 모드 `NODE`라는 API 값만으로 모든 런타임의 내부 호출까지 규정하는 것은 아닙니다
-
-kubelet은 [런타임의 network 준비 오류로 Pod를 막는 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet.go)에서도 hostNetwork를 제외합니다
-이 차단 예외와 실제 런타임이 CNI를 호출하는지는 서로 다른 판단입니다
-
 ## 앱 재시작과 sandbox 재생성을 구분합니다
 
 앱 컨테이너 하나가 종료돼 다시 시작하는 것만으로 sandbox도 항상 재생성되는 것은 아닙니다
@@ -183,18 +124,77 @@ bind mount 등 참조가 남아 있어도 sandbox 상태 판정에 따라 kubele
 이 경로에서 기존 환경을 바꿀 때의 Event 문구는 `Pod sandbox changed, it will be killed and re-created.`입니다
 다만 Event만으로 다섯 조건 중 어느 것이 원인인지 알 수는 없으므로 sandbox 상태·모드·보고 IP를 함께 확인합니다
 
+## kubelet은 런타임이 보고한 IP를 읽습니다
+
+kubelet은 sandbox의 IP를 직접 할당하지 않습니다
+새 sandbox를 만든 뒤 `PodSandboxStatus`를 조회하고 런타임이 보고한 primary·additional IP를 파싱합니다
+앱 컨테이너 시작 경로가 Pod IP에 의존하므로 상태 조회와 주소 확인을 먼저 수행합니다
+이를 사용해 Downward API의 `status.podIP`·`status.podIPs` 같은 환경 변수 참조와 컨테이너의 hosts 파일을 구성합니다
+
+Network 정보가 없으면 주소 목록을 보고할 수 없다는 로그를 남깁니다
+primary 또는 additional IP가 파싱되지 않으면 해당 값만 빼고 계속하는 것이 아니라 이 함수의 전체 반환을 `nil`로 처리합니다
+따라서 파싱 실패와 정보 부재, 비어 있는 IP 문자열을 구분해야 합니다
+
+현재 SyncPod에는 sandbox 생성 뒤 `OnPodSandboxReady`로 상태 갱신을 알리는 단계가 있으며 이미지 pull보다 먼저 호출합니다
+필요한 sandbox·네트워크 준비를 먼저 알리고 이후 컨테이너 생성으로 이어가는 흐름입니다
+
+관련 구현은 [`determinePodSandboxIPs`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_sandbox.go)와 [`SyncPod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kuberuntime/kuberuntime_manager.go)에 있습니다
+
+### hostNetwork는 노드의 network namespace를 사용합니다
+
+`hostNetwork: true`이면 kubelet은 CRI에 network 모드 `NODE`를 전달합니다
+이 모드에서 Pod status의 IP는 [노드 IP를 상속하는 경로](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet_pods.go)로 채웁니다
+CRI의 sandbox network status도 host network 공유 Pod에서는 무시한다고 정의합니다
+
+확인한 containerd 경로는 hostNetwork Pod에 별도 network namespace를 만들거나 앞 절의 CNI setup을 수행하지 않습니다
+이는 이 구현을 확인한 결과이며 namespace 모드 `NODE`라는 API 값만으로 모든 런타임의 내부 호출까지 규정하는 것은 아닙니다
+
+kubelet은 [런타임의 network 준비 오류로 Pod를 막는 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/kubelet.go)에서도 hostNetwork를 제외합니다
+이 차단 예외와 실제 런타임이 CNI를 호출하는지는 서로 다른 판단입니다
+
 ## sandbox 준비 조건과 앱 Ready는 다릅니다
 
 `PodReadyToStartContainers`는 sandbox와 네트워크를 준비해 컨테이너를 시작할 수 있는 상태를 나타냅니다
 v1.28 alpha·v1.29 beta를 거쳐 현재 v1.37에서는 GA·기본 on이며 gate가 잠겨 있습니다
 
 [`GeneratePodReadyToStartContainersCondition`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/status/generate.go)은 `PodSandboxChanged`가 새 sandbox를 요구하지 않으면 True를 반환합니다
-이 계산식은 Network 정보 부재를 앞 절의 빈 IP 조건으로 잡지 않으므로, 그 자체가 유효한 IP의 존재를 별도로 검증하는 식은 아닙니다
+이 계산식은 Network 정보 부재를 앞서 본 sandbox 재생성의 빈 IP 조건으로 잡지 않으므로, 그 자체가 유효한 IP의 존재를 별도로 검증하는 식은 아닙니다
 
 또한 컨테이너를 시작할 준비가 됐다는 조건이지 앱의 readiness probe 통과를 뜻하지 않습니다
 실제 앱 준비 상태는 `ContainersReady`·`Ready` 등 다른 조건으로 확인해야 합니다
 
 공식 정의는 [Pod network readiness](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-network-readiness), 현재 기능 상태는 [gate 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/features/kube_features.go)에 있습니다
+
+## veth를 쓴다면 노드 쪽 끝의 처리도 봐야 합니다
+
+veth pair는 두 인터페이스가 한 쌍으로 만들어져 한쪽에서 보낸 패킷을 다른 쪽으로 전달하는 가상 장치입니다
+veth 기반 CNI 구성에서는 한쪽을 Pod network namespace 안에, 다른 쪽을 노드 쪽에 둡니다
+Pod 안의 이름은 흔히 `eth0`이며 CNI의 `CNI_IFNAME`으로 전달합니다
+
+이 장치를 만드는 주체는 해당 플러그인입니다
+예를 들어 [CNI bridge 플러그인](https://github.com/containernetworking/plugins/blob/adc3e6b5b581638afbd194cf2e9319ecbb0151a1/plugins/main/bridge/bridge.go)은 veth를 만든 뒤 노드 쪽 끝을 bridge에 연결합니다
+`ipvlan`·`macvlan`·`host-device`처럼 veth와 다른 인터페이스 방식을 제공하는 플러그인도 있으므로 모든 Pod가 같은 쌍을 갖는 것은 아닙니다
+
+이 플러그인 소스는 v1.9.1로 고정했으며 [containerd의 go.mod](https://github.com/containerd/containerd/blob/b7a25261e029d68978bbf290df0a62fc819b3c51/go.mod)가 참조하는 plugins 버전과도 대조했습니다
+go.mod에 적힌 라이브러리 의존성이 노드에 설치된 CNI 실행 파일의 버전을 증명하는 것은 아닙니다
+
+![두 veth 기반 구성에서 Pod쪽과 노드쪽 인터페이스 쌍은 유지되고 bridge 전달 또는 Cilium의 노드쪽 TC hook 처리로 갈리는 비교|tall](/diagrams/k8s-theory-pod-sandbox-pause-2.svg)
+
+bridge는 노드 안에서 이더넷 프레임을 전달하는 가상 스위치입니다
+bridge는 일반적으로 수신 프레임의 출발지 MAC 주소를 학습하고, 목적지 MAC 주소를 기준으로 전달할 포트를 고릅니다
+학습할 주소와 전달 판단에 사용하는 주소가 다릅니다
+
+다른 예로 [Cilium 1.20.3의 veth 기반 설명](https://docs.cilium.io/en/stable/network/ebpf/intro/)은 노드 쪽 veth의 TC ingress hook에 붙은 eBPF 프로그램을 다룹니다
+TC는 네트워크 인터페이스의 트래픽 제어 지점이며, 프로그램은 Pod에서 나오는 패킷에 정책을 적용하고 전달을 처리할 수 있습니다
+
+이 비교의 두 예시에서는 veth가 양쪽 모두 남습니다
+차이는 노드 쪽 끝을 bridge에 연결하는지, 그 지점의 프로그램과 라우팅으로 전달하는지입니다
+이를 모든 eBPF 네트워크 구현이나 모든 Cilium 장치 모드의 고정 구조로 넓히면 안 됩니다
+
+예를 들어 Cilium의 [socket load balancer](https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#socket-loadbalancer-bypass-in-pod-namespace)는 TCP `connect` 시점에 Service의 대상을 바꿀 수 있으며, 이는 veth 패킷 처리와 다른 위치입니다
+eBPF가 무엇을 대신하는지 판단할 때는 기술 이름만 보지 않고 프로그램이 붙는 지점과 처리 시점을 함께 확인해야 합니다
+
+bridge의 전달·학습은 [Linux Ethernet Bridging 문서](https://docs.kernel.org/networking/bridge.html)에 근거합니다
 
 ## 실패 지점은 네트워크의 수명과 함께 봅니다
 

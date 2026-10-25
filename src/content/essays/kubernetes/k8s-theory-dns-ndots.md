@@ -44,39 +44,6 @@ Service의 전체 이름은 `my-svc.my-ns.svc.cluster.local`처럼 Service·name
 
 설정을 만드는 실제 구현은 [`GetPodDNS`·`generateSearchesForDNSClusterFirst`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/network/dns/dns.go)에 있습니다
 
-### dnsPolicy와 hostNetwork를 함께 확인합니다
-
-| dnsPolicy | kubelet이 선택하는 기본 설정 |
-|---|---|
-| `ClusterFirst` | 클러스터 DNS, 단 hostNetwork면 노드 설정 경로로 전환 |
-| `ClusterFirstWithHostNet` | hostNetwork에서도 클러스터 DNS 사용 |
-| `Default` | kubelet이 읽는 노드 resolver 설정 사용 |
-| `None` | 빈 설정에서 시작해 Pod의 dnsConfig로 구성 |
-
-노드 설정의 원본 경로는 kubelet 설정에 따라 달라질 수 있으므로 무조건 노드의 `/etc/resolv.conf`라고 단정하지 않습니다
-Pod의 `dnsConfig`는 선택한 기본 설정에 합쳐지며 같은 이름의 option은 Pod 값으로 덮어쓸 수 있습니다
-
-`hostNetwork: true`에서 dnsPolicy를 생략하면 기본값은 ClusterFirst지만, 실제 분기는 Default 방식으로 바뀝니다
-이 전환 자체는 Event나 경고를 남기지 않습니다
-노드 DNS가 클러스터 이름을 처리하지 못하는 구성이라면 이 Pod도 Service 이름을 찾지 못할 수 있습니다
-
-이는 hostNetwork에서 클러스터 DNS Service 주소에 접근할 수 없다는 뜻은 아닙니다
-네트워크 접근 가능성과 kubelet이 고른 DNS 설정은 다른 조건입니다
-공식 문서는 Linux hostNetwork Pod에 `ClusterFirstWithHostNet`을 명시하도록 안내하며 Windows는 이를 지원하지 않습니다
-
-클러스터 DNS 주소 자체가 kubelet에 없다면 별도 `MissingClusterDNS` 경고와 노드 설정 fallback이 있습니다
-hostNetwork 정책 전환과 이 설정 누락을 같은 실패로 묶으면 안 됩니다
-
-### 합쳐진 설정의 상한과 API 검증은 다릅니다
-
-kubelet은 최종 search를 32개·공백 포함 2048자, nameserver를 3개로 제한합니다
-합쳐진 설정이 상한을 넘으면 일부를 잘라내고 `DNSConfigForming` Event를 남깁니다
-255자를 넘는 개별 search 항목도 제외합니다
-
-반면 Pod의 dnsConfig 자체에 상한을 넘는 목록을 직접 보내면 API validation에서 거절될 수 있습니다
-API가 허용한 Pod 값과 노드 search를 합친 결과가 넘치는 경우의 잘림과 구분해야 합니다
-근거는 [DNS 설정 구성 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/network/dns/dns.go)와 [Pod DNSConfig 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go)에 있습니다
-
 ## ndots는 이름의 성공 여부보다 조회 순서를 정합니다
 
 glibc의 ndots 기본값은 1이고 앞 절의 ClusterFirst 기본 옵션은 5입니다
@@ -116,31 +83,20 @@ search 도중 주소 응답을 얻으면 뒤 후보를 모두 묻지 않을 수 
 그러나 A·AAAA 두 주소 유형까지 하나로 합쳐지는 것은 아닙니다
 레코드와 오류의 의미는 [RFC 1035의 A](https://www.rfc-editor.org/rfc/rfc1035.html#section-3.4.1), [RFC 3596의 AAAA](https://www.rfc-editor.org/rfc/rfc3596.html#section-2.1), [RFC 2308의 NXDOMAIN·NODATA](https://www.rfc-editor.org/rfc/rfc2308.html#section-2.1)에 근거합니다
 
-## CoreDNS는 이름 종류와 설정에 따라 답합니다
+## 외부 이름과 fallthrough는 구분합니다
 
-| 조회하는 이름 | 응답의 의미와 조건 |
-|---|---|
-| 일반 Service의 `<service>.<namespace>.svc.<domain>` | Service의 ClusterIP |
-| headless Service 이름 | 연결 대상 endpoint의 주소 목록, 주소 선택은 클라이언트 몫 |
-| ExternalName Service 이름 | 다른 이름을 가리키는 CNAME |
-| `172-17-0-3.default.pod.cluster.local` 같은 주소형 Pod 이름 | CoreDNS pods 모드에 따라 응답 여부 결정 |
-| `<hostname>.<subdomain>.<namespace>.svc.<domain>` | 해당 Pod가 연결된 headless Service와 endpoint 조건 필요 |
+클러스터 영역 밖의 이름은 Corefile 구성에 따라 forward 같은 플러그인이 상위 DNS로 전달합니다
+반면 kubernetes 플러그인이 담당하는 영역의 이름이 없으면 기본적으로 NXDOMAIN을 응답합니다
 
-주소형 Pod 이름은 이미 IP를 알아야 만들 수 있는 이름입니다
-CoreDNS kubernetes 플러그인의 기본 pods 모드는 `disabled`이며, `insecure` 또는 `verified` 설정으로 동작을 바꿉니다
-verified는 같은 namespace에 해당 IP의 Pod가 존재하는지 확인하기 위해 Pod 정보도 관찰합니다
+`fallthrough`는 설정한 영역에서 이름을 찾지 못한 질의를 다음 플러그인으로 넘기는 옵션입니다
+이는 외부 이름을 전달하는 것과 다르며, 클러스터 이름이 없다고 항상 상위 DNS로 넘기는 것은 아닙니다
+관련 조건은 [kubernetes 플러그인 문서](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/README.md)에 있습니다
 
-hostname·subdomain으로 만든 이름이 풀리려면 같은 namespace에 subdomain과 같은 이름의 headless Service가 있고 그 Pod가 endpoint에 포함되어야 합니다
-기본적으로 Pod가 Ready여야 하며 Service의 `publishNotReadyAddresses: true`로 이 조건이 달라집니다
-Pod 안에서 FQDN이 보인다는 사실만으로 DNS 레코드의 존재까지 보장하지는 않습니다
-
-이름 규칙과 조건은 [Service·Pod DNS 공식 문서](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)에서 확인할 수 있습니다
-
-### API 관찰과 DNS 응답 캐시는 다른 상태입니다
+## API 관찰과 DNS 응답 캐시는 다른 상태입니다
 
 CoreDNS의 kubernetes 플러그인은 Service와 EndpointSlice 등의 API를 list/watch해 로컬 상태를 유지합니다
 클러스터 DNS 질의마다 API 서버에서 오브젝트를 새로 가져오는 구조는 아닙니다
-endpoint 주소는 EndpointSlice에서 얻으며 주소형 Pod 조회의 Pod watch 여부는 pods 모드에 따라 달라집니다
+endpoint 주소는 EndpointSlice에서 얻으며 주소형 Pod 조회의 Pod watch 여부는 이런 이름의 응답을 제어하는 pods 모드에 따라 달라집니다
 
 기동 시 API 동기화를 기다리는 기본 시간은 5초이며 `startup_timeout`으로 조정할 수 있습니다
 시간 안에 동기화하지 못하면 서버를 시작하고, 아직 동기화되지 않아 판정할 수 없는 이름에는 SERVFAIL을 반환할 수 있습니다
@@ -154,15 +110,6 @@ API의 새 상태를 봤더라도 앞서 보관한 부정 응답이 TTL 동안 �
 CoreDNS 캐시가 응답하면 상위 DNS로 보내거나 후단에서 처리할 요청은 줄어들지만, Pod가 DNS 서버로 보낸 질의 자체가 없어지지는 않습니다
 
 구현 근거는 [CoreDNS controller](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/controller.go), [기동 동기화](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/kubernetes.go), [응답 처리](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/handler.go), [cache 문서](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/cache/README.md)에 있습니다
-
-### 외부 이름과 fallthrough는 구분합니다
-
-클러스터 영역 밖의 이름은 Corefile 구성에 따라 forward 같은 플러그인이 상위 DNS로 전달합니다
-반면 kubernetes 플러그인이 담당하는 영역의 이름이 없으면 기본적으로 NXDOMAIN을 응답합니다
-
-`fallthrough`는 설정한 영역에서 이름을 찾지 못한 질의를 다음 플러그인으로 넘기는 옵션입니다
-이는 외부 이름을 전달하는 것과 다르며, 클러스터 이름이 없다고 항상 상위 DNS로 넘기는 것은 아닙니다
-관련 조건은 [kubernetes 플러그인 문서](https://github.com/coredns/coredns/blob/a6fde3fe339c6ec848447e11cc9796be8c97b4e0/plugin/kubernetes/README.md)에 있습니다
 
 ## 5초와 재시도 횟수는 resolver의 조건입니다
 
@@ -213,6 +160,59 @@ Linux conntrack은 FIN 등으로 상태를 바꾸고 상태별 timeout을 적용
 
 구성 목적은 [NodeLocal DNSCache 공식 문서](https://kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/), TCP 추적 수명의 조건은 [Linux v6.12 conntrack 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/networking/nf_conntrack-sysctl.rst)와 [TCP 상태 처리](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/net/netfilter/nf_conntrack_proto_tcp.c)에 근거합니다
 실제 노드의 커널 버전·sysctl이나 지연 시간은 확인하지 않았습니다
+
+## dnsPolicy와 hostNetwork를 함께 확인합니다
+
+| dnsPolicy | kubelet이 선택하는 기본 설정 |
+|---|---|
+| `ClusterFirst` | 클러스터 DNS, 단 hostNetwork면 노드 설정 경로로 전환 |
+| `ClusterFirstWithHostNet` | hostNetwork에서도 클러스터 DNS 사용 |
+| `Default` | kubelet이 읽는 노드 resolver 설정 사용 |
+| `None` | 빈 설정에서 시작해 Pod의 dnsConfig로 구성 |
+
+노드 설정의 원본 경로는 kubelet 설정에 따라 달라질 수 있으므로 무조건 노드의 `/etc/resolv.conf`라고 단정하지 않습니다
+Pod의 `dnsConfig`는 선택한 기본 설정에 합쳐지며 같은 이름의 option은 Pod 값으로 덮어쓸 수 있습니다
+
+`hostNetwork: true`에서 dnsPolicy를 생략하면 기본값은 ClusterFirst지만, 실제 분기는 Default 방식으로 바뀝니다
+이 전환 자체는 Event나 경고를 남기지 않습니다
+노드 DNS가 클러스터 이름을 처리하지 못하는 구성이라면 이 Pod도 Service 이름을 찾지 못할 수 있습니다
+
+이는 hostNetwork에서 클러스터 DNS Service 주소에 접근할 수 없다는 뜻은 아닙니다
+네트워크 접근 가능성과 kubelet이 고른 DNS 설정은 다른 조건입니다
+공식 문서는 Linux hostNetwork Pod에 `ClusterFirstWithHostNet`을 명시하도록 안내하며 Windows는 이를 지원하지 않습니다
+
+클러스터 DNS 주소 자체가 kubelet에 없다면 별도 `MissingClusterDNS` 경고와 노드 설정 fallback이 있습니다
+hostNetwork 정책 전환과 이 설정 누락을 같은 실패로 묶으면 안 됩니다
+
+### 합쳐진 설정의 상한과 API 검증은 다릅니다
+
+kubelet은 최종 search를 32개·공백 포함 2048자, nameserver를 3개로 제한합니다
+합쳐진 설정이 상한을 넘으면 일부를 잘라내고 `DNSConfigForming` Event를 남깁니다
+255자를 넘는 개별 search 항목도 제외합니다
+
+반면 Pod의 dnsConfig 자체에 상한을 넘는 목록을 직접 보내면 API validation에서 거절될 수 있습니다
+API가 허용한 Pod 값과 노드 search를 합친 결과가 넘치는 경우의 잘림과 구분해야 합니다
+근거는 [DNS 설정 구성 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/network/dns/dns.go)와 [Pod DNSConfig 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/validation/validation.go)에 있습니다
+
+## CoreDNS는 이름 종류와 설정에 따라 답합니다
+
+| 조회하는 이름 | 응답의 의미와 조건 |
+|---|---|
+| 일반 Service의 `<service>.<namespace>.svc.<domain>` | Service의 ClusterIP |
+| headless Service 이름 | 연결 대상 endpoint의 주소 목록, 주소 선택은 클라이언트 몫 |
+| ExternalName Service 이름 | 다른 이름을 가리키는 CNAME |
+| `172-17-0-3.default.pod.cluster.local` 같은 주소형 Pod 이름 | CoreDNS pods 모드에 따라 응답 여부 결정 |
+| `<hostname>.<subdomain>.<namespace>.svc.<domain>` | 해당 Pod가 연결된 headless Service와 endpoint 조건 필요 |
+
+주소형 Pod 이름은 이미 IP를 알아야 만들 수 있는 이름입니다
+CoreDNS kubernetes 플러그인의 기본 pods 모드는 `disabled`이며, `insecure` 또는 `verified` 설정으로 동작을 바꿉니다
+verified는 같은 namespace에 해당 IP의 Pod가 존재하는지 확인하기 위해 Pod 정보도 관찰합니다
+
+hostname·subdomain으로 만든 이름이 풀리려면 같은 namespace에 subdomain과 같은 이름의 headless Service가 있고 그 Pod가 endpoint에 포함되어야 합니다
+기본적으로 Pod가 Ready여야 하며 Service의 `publishNotReadyAddresses: true`로 이 조건이 달라집니다
+Pod 안에서 FQDN이 보인다는 사실만으로 DNS 레코드의 존재까지 보장하지는 않습니다
+
+이름 규칙과 조건은 [Service·Pod DNS 공식 문서](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)에서 확인할 수 있습니다
 
 ## 지연과 실패를 관측한 위치부터 나눕니다
 

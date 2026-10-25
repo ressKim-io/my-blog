@@ -40,21 +40,6 @@ TLS Secret을 참조하면 클라이언트와 진입점 사이의 TLS 종료에 
 `spec.ingressClassName`은 클러스터 범위의 `IngressClass` 이름을 가리킵니다
 그 IngressClass의 `spec.controller`가 처리할 컨트롤러를 식별합니다
 
-과거에는 `kubernetes.io/ingress.class` 어노테이션이 널리 쓰였습니다
-이 키는 정식 API 필드로 정의되지 않았고 현재 deprecated지만, API 주석은 호환성을 위해 컨트롤러가 여전히 이를 존중해야 한다고 설명합니다
-새로 작성할 때는 `ingressClassName`을 우선합니다
-
-기본 클래스는 IngressClass의 `ingressclass.kubernetes.io/is-default-class: "true"` 어노테이션으로 지정합니다
-v1.37.1의 `DefaultIngressClass` admission 플러그인은 생성 시 `ingressClassName`과 기존 class 어노테이션이 모두 없으면 기본 클래스를 채웁니다
-기본 클래스가 없으면 필드를 그대로 두며, 이후 class 없는 Ingress를 처리할지는 컨트롤러 설정에 달려 있습니다
-
-다중 기본 클래스의 동작은 문서와 고정 소스가 다릅니다
-공식 문서는 class 없는 Ingress 생성을 거절한다고 설명하지만, v1.37.1 구현의 `getDefaultClass`는 생성 시각이 가장 최근인 클래스를 고릅니다
-생성 시각이 같으면 이름의 오름차순으로 선택합니다
-
-이 설명은 [v1.37.1 admission 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/network/defaultingressclass/admission.go#L83-L155)을 읽은 결과입니다
-운영 설정에서는 기본 클래스를 하나로 관리하고 `ingressClassName`을 명시해 선택의 모호함을 줄일 수 있습니다
-
 ## 어노테이션으로 확장한 기능과 편집 권한
 
 헤더 기반 분기, 가중치 분배, 타임아웃, 경로 재작성처럼 공통 Ingress 필드로 표현하지 못하는 기능은 구현별 어노테이션으로 전달해 왔습니다
@@ -101,18 +86,6 @@ Gateway의 listener는 요청을 받을 포트, 프로토콜, 호스트명, TLS 
 이 역할 분리는 [공식 역할 모델](https://gateway-api.sigs.k8s.io/docs/concepts/roles-and-personas/)과 [보안 모델](https://gateway-api.sigs.k8s.io/docs/concepts/security/)의 설계입니다
 앱 팀에 HTTPRoute 편집 권한을 주고 Gateway 편집 권한은 주지 않는 RBAC 구성이 가능해집니다
 Route 추가 때마다 운영자가 Gateway 안에 개별 Route 목록을 등록하는 구조도 피할 수 있습니다
-
-### TLS 설정은 연결 구간별로 구분합니다
-
-HTTPS listener의 `tls.certificateRefs`는 클라이언트와 Gateway 사이에서 TLS를 종료할 인증서를 참조합니다
-TLS passthrough는 Gateway가 암호화된 세션을 종료하지 않고 전달하는 별도 모드이며, HTTPS listener와 HTTPRoute의 TLS 종료 모델과 구분합니다
-
-Gateway API는 클라이언트에서 Gateway로 오는 구간과 Gateway에서 백엔드로 가는 구간을 독립적으로 설정합니다
-전자의 인증서를 적었다고 후자도 암호화되지는 않습니다
-후자의 TLS 정책은 `BackendTLSPolicy` 같은 별도 설정과 구현 지원을 확인해야 합니다
-
-구체적인 listener 프로토콜·TLS 모드·Route 조합은 [공식 TLS 가이드](https://gateway-api.sigs.k8s.io/guides/user-guides/tls/)에 정리돼 있습니다
-Gateway listener 모델은 Ingress의 `spec.tls`가 가진 443 단일 포트 표현과도 다릅니다
 
 ## parentRefs는 부착 요청, allowedRoutes는 수락 범위입니다
 
@@ -167,6 +140,35 @@ Grant는 생성 시 한 번 검사하고 끝나는 허가도 아닙니다
 [ReferenceGrant 명세](https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/)에는 다른 수단이 동등한 효과로 교차 참조를 제한하는 경우의 엄격한 예외도 있습니다
 구현이 이 예외를 쓰려면 ReferenceGrant를 따르지 않는 사실과 대체 보호 수단을 명확히 문서화해야 합니다
 이 조건을 일반적인 Gateway 구현에서 Grant를 생략해도 된다는 뜻으로 확대할 수는 없습니다
+
+## TLS 설정은 연결 구간별로 구분합니다
+
+HTTPS listener의 `tls.certificateRefs`는 클라이언트와 Gateway 사이에서 TLS를 종료할 인증서를 참조합니다
+TLS passthrough는 Gateway가 암호화된 세션을 종료하지 않고 전달하는 별도 모드이며, HTTPS listener와 HTTPRoute의 TLS 종료 모델과 구분합니다
+
+Gateway API는 클라이언트에서 Gateway로 오는 구간과 Gateway에서 백엔드로 가는 구간을 독립적으로 설정합니다
+전자의 인증서를 적었다고 후자도 암호화되지는 않습니다
+후자의 TLS 정책은 `BackendTLSPolicy` 같은 별도 설정과 구현 지원을 확인해야 합니다
+
+구체적인 listener 프로토콜·TLS 모드·Route 조합은 [공식 TLS 가이드](https://gateway-api.sigs.k8s.io/guides/user-guides/tls/)에 정리돼 있습니다
+Gateway listener 모델은 Ingress의 `spec.tls`가 가진 443 단일 포트 표현과도 다릅니다
+
+## Ingress 기본 클래스와 기존 어노테이션을 확인합니다
+
+과거에는 `kubernetes.io/ingress.class` 어노테이션이 널리 쓰였습니다
+이 키는 정식 API 필드로 정의되지 않았고 현재 deprecated지만, API 주석은 호환성을 위해 컨트롤러가 여전히 이를 존중해야 한다고 설명합니다
+새로 작성할 때는 `ingressClassName`을 우선합니다
+
+기본 클래스는 IngressClass의 `ingressclass.kubernetes.io/is-default-class: "true"` 어노테이션으로 지정합니다
+v1.37.1의 `DefaultIngressClass` admission 플러그인은 생성 시 `ingressClassName`과 기존 class 어노테이션이 모두 없으면 기본 클래스를 채웁니다
+기본 클래스가 없으면 필드를 그대로 두며, 이후 class 없는 Ingress를 처리할지는 컨트롤러 설정에 달려 있습니다
+
+다중 기본 클래스의 동작은 문서와 고정 소스가 다릅니다
+공식 문서는 class 없는 Ingress 생성을 거절한다고 설명하지만, v1.37.1 구현의 `getDefaultClass`는 생성 시각이 가장 최근인 클래스를 고릅니다
+생성 시각이 같으면 이름의 오름차순으로 선택합니다
+
+이 설명은 [v1.37.1 admission 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/network/defaultingressclass/admission.go#L83-L155)을 읽은 결과입니다
+운영 설정에서는 기본 클래스를 하나로 관리하고 `ingressClassName`을 명시해 선택의 모호함을 줄일 수 있습니다
 
 ## CRD 버전과 컨트롤러 지원을 따로 확인합니다
 
