@@ -37,7 +37,41 @@ events 기록기는 반복 관측의 증가분을 메모리에 모아 전송 횟
 사용자가 Event를 직접 API에 POST했다고 해서 client-go의 같은 집계·필터를 거치는 것은 아닙니다
 두 구현의 입구는 [`record.recorderImpl.generateEvent`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/record/event.go)와 [`events.recorderImpl.eventf`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/events/event_recorder.go)에 있습니다
 
+## 큐 입구의 대기와 처리기 채널의 드롭은 다른 문제다
+
+두 기록기는 입구 큐와 처리기별 채널을 구분합니다
+처리기별 채널은 서버 전송이나 로그 출력처럼 등록된 소비자에게 관측을 전달하는 큐입니다
+
+| 지점 | core 기록기 | events 기록기 |
+|---|---|---|
+| 입구 큐 크기 | 1,000 | 25 |
+| 입구가 가득 참 | 호출자의 `ActionOrDrop`이 관측을 버리고 로그 기록 | 별도 고루틴의 `Action`이 공간을 기다림 |
+| 처리기별 채널 크기 | 1,000 | 1,000 |
+| 처리기별 채널이 가득 참 | 해당 처리기에 전달하지 않음 | 해당 처리기에 전달하지 않음 |
+
+core 기록기의 입구 드롭에는 다음 로그 문구가 남습니다
+
+```text
+Unable to record event: too many queued events, dropped event
+```
+
+호출자의 고루틴에서 큐 공간을 기다리면 이벤트 처리 지연이 컨트롤러의 조정 작업까지 막을 수 있습니다
+그래서 core 구현의 주석은 과부하 시 이벤트를 버리는 선택을 설명합니다
+
+events 구현은 별도 고루틴에서 큐에 넣으므로 `Eventf` 호출자는 그 큐 공간을 기다리지 않습니다
+입구가 작아도 대기하는 고루틴이 쌓일 수 있으며, 작은 큐가 프로세스 전체의 대기 작업량까지 제한하는 것은 아닙니다
+
+두 구현 모두 처리기 채널에는 `DropIfChannelFull` 정책을 사용합니다
+한 처리기의 채널이 가득 차면 그 처리기는 관측을 받지 못할 수 있습니다
+다른 처리기의 채널에 여유가 있다면 그쪽으로는 전달될 수 있습니다
+이 드롭 분기 자체에는 로그나 전용 카운터가 없습니다
+근거는 [`NewBroadcaster`·`NewLongQueueBroadcaster`·`ActionOrDrop`·`distribute`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/watch/mux.go)입니다
+
 ## 같은 관측으로 묶는 키부터 다르다
+
+같은 Pod에서 같은 이유의 실패를 두 번 기록하되 설명 속 숫자만 바뀌었다고 가정하겠습니다
+나머지 키 필드가 모두 같아도 core 기록기의 반복 키는 달라지고, events 기록기는 같은 시리즈로 묶을 수 있습니다
+설명 문자열을 반복 관측의 기준에 넣는지가 다르기 때문입니다
 
 두 기록기는 아래 필드들이 같은지를 기준으로 반복 관측을 묶습니다
 
@@ -164,74 +198,6 @@ events 기록기는 같은 키의 첫 관측을 단발 Event로 전송하려고 
 메시지를 키에서 빼고 같은 키의 반복을 시리즈로 묶어 매번 요청하지 않기 때문입니다
 다만 관측마다 키가 달라지면 같은 시리즈로 묶을 수 없어 이 방식으로 전송 횟수를 줄이지는 못합니다
 
-## 큐 입구의 대기와 처리기 채널의 드롭은 다른 문제다
-
-두 기록기는 입구 큐와 처리기별 채널을 구분합니다
-처리기별 채널은 서버 전송이나 로그 출력처럼 등록된 소비자에게 관측을 전달하는 큐입니다
-
-| 지점 | core 기록기 | events 기록기 |
-|---|---|---|
-| 입구 큐 크기 | 1,000 | 25 |
-| 입구가 가득 참 | 호출자의 `ActionOrDrop`이 관측을 버리고 로그 기록 | 별도 고루틴의 `Action`이 공간을 기다림 |
-| 처리기별 채널 크기 | 1,000 | 1,000 |
-| 처리기별 채널이 가득 참 | 해당 처리기에 전달하지 않음 | 해당 처리기에 전달하지 않음 |
-
-core 기록기의 입구 드롭에는 다음 로그 문구가 남습니다
-
-```text
-Unable to record event: too many queued events, dropped event
-```
-
-호출자의 고루틴에서 큐 공간을 기다리면 이벤트 처리 지연이 컨트롤러의 조정 작업까지 막을 수 있습니다
-그래서 core 구현의 주석은 과부하 시 이벤트를 버리는 선택을 설명합니다
-
-events 구현은 별도 고루틴에서 큐에 넣으므로 `Eventf` 호출자는 그 큐 공간을 기다리지 않습니다
-입구가 작아도 대기하는 고루틴이 쌓일 수 있으며, 작은 큐가 프로세스 전체의 대기 작업량까지 제한하는 것은 아닙니다
-
-두 구현 모두 처리기 채널에는 `DropIfChannelFull` 정책을 사용합니다
-한 처리기의 채널이 가득 차면 그 처리기는 관측을 받지 못할 수 있습니다
-다른 처리기의 채널에 여유가 있다면 그쪽으로는 전달될 수 있습니다
-이 드롭 분기 자체에는 로그나 전용 카운터가 없습니다
-근거는 [`NewBroadcaster`·`NewLongQueueBroadcaster`·`ActionOrDrop`·`distribute`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/watch/mux.go)입니다
-
-## kubectl describe의 숫자는 두 기준 중 하나다
-
-core Event 타입은 `count`와 `series`를 모두 갖습니다
-events Event 타입에는 `series`와 호환용 `deprecatedCount`가 있습니다
-서버는 같은 저장소의 Event를 두 API 표현으로 변환할 수 있습니다
-
-| 항목 | core 기록기의 `count` | events 기록기의 `series.count` |
-|---|---|---|
-| 세는 단위 | 일반 이벤트 키 또는 집계 결과의 키 | 메시지를 제외한 시리즈 키 |
-| 처음 값 | 단발 Event의 `count`는 1 | 둘째 관측에서 2로 시작 |
-| 단발일 때 | `count: 1` | `series` 없음 |
-| 서버 반영 | 필터 통과 뒤 쓰기 성공 필요 | 첫째·둘째 관측, 주기 갱신·종료 쓰기 성공 필요 |
-
-`kubectl describe`는 `series`가 있으면 그 카운트를 먼저 사용합니다
-없고 `count`가 1보다 크면 `count`를 사용해 `(x12 over 5m)` 같은 반복 표시를 만듭니다
-같은 화면의 두 Event가 서로 다른 기준으로 센 숫자를 보여줄 수 있습니다
-
-어느 숫자도 클러스터의 전체 사건 수는 아닙니다
-기록기에 전달되기 전이나 큐에서 빠진 관측은 세지 못하고, 카운트가 로컬에만 남아 있을 수도 있습니다
-화면 처리의 근거는 [`DescribeEvents`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/describe/describe.go), 필드 대응은 [Event API 변환](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/events/v1/conversion.go)입니다
-
-### 컴포넌트 이름만으로 모든 Event의 기록기를 확정할 수는 없다
-
-현행 소스에서 확인한 대표 경로는 다음과 같습니다
-
-| 기록 경로 | 사용하는 곳 |
-|---|---|
-| events 기록기 | [kube-proxy](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-proxy/app/server.go), API 서버의 [Service IP](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/service/ipallocator/controller/repair.go)·[포트 할당 복구 컨트롤러](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/service/portallocator/controller/repair.go) |
-| events 기록기를 우선하는 adapter | kube-scheduler의 일반 이벤트 기록 |
-| core 기록기 | kubelet 기본 기록기, [kube-controller-manager의 공통 이벤트 경로](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-controller-manager/app/controllermanager.go)와 Deployment 컨트롤러 |
-
-kube-scheduler의 adapter는 events API 디스커버리가 성공하면 새 기록기를 사용하고, 그렇지 않으면 legacy 기록기로 돌아갑니다
-같은 scheduler 안에서도 leader election용 기록기는 명시적으로 legacy 경로를 사용합니다
-따라서 컴포넌트 하나가 오직 한 방식으로만 기록한다고 일반화하면 안 됩니다
-
-스케줄 실패와 이미지 pull 실패가 같은 Pod 화면에 함께 나오더라도, 각각의 키와 전송 시점이 다를 수 있습니다
-대표 근거는 [scheduler 설정](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-scheduler/app/options/options.go), [adapter 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/events/event_broadcaster.go), [kubelet 기록기](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/server.go), [Deployment 기록기](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/deployment_controller.go)입니다
-
 ## 전송을 기다리는 제한과 서버에서 거절하는 제한도 있다
 
 kubelet은 이벤트 전송용 클라이언트를 별도로 만들고 여기에 `eventRecordQPS`와 `eventBurst`를 설정합니다
@@ -280,6 +246,44 @@ core 기록기도 필터를 통과한 관측의 저장 쓰기가 성공하면 le
 
 반대로 관측이 한 번 있었다는 이유만으로 Event가 영구히 남지는 않습니다
 수명을 이어갈 저장 갱신이 없으면 연결된 lease가 만료될 때 Event가 사라집니다
+
+## kubectl describe의 숫자는 두 기준 중 하나다
+
+core Event 타입은 `count`와 `series`를 모두 갖습니다
+events Event 타입에는 `series`와 호환용 `deprecatedCount`가 있습니다
+서버는 같은 저장소의 Event를 두 API 표현으로 변환할 수 있습니다
+
+| 항목 | core 기록기의 `count` | events 기록기의 `series.count` |
+|---|---|---|
+| 세는 단위 | 일반 이벤트 키 또는 집계 결과의 키 | 메시지를 제외한 시리즈 키 |
+| 처음 값 | 단발 Event의 `count`는 1 | 둘째 관측에서 2로 시작 |
+| 단발일 때 | `count: 1` | `series` 없음 |
+| 서버 반영 | 필터 통과 뒤 쓰기 성공 필요 | 첫째·둘째 관측, 주기 갱신·종료 쓰기 성공 필요 |
+
+`kubectl describe`는 `series`가 있으면 그 카운트를 먼저 사용합니다
+없고 `count`가 1보다 크면 `count`를 사용해 `(x12 over 5m)` 같은 반복 표시를 만듭니다
+같은 화면의 두 Event가 서로 다른 기준으로 센 숫자를 보여줄 수 있습니다
+
+어느 숫자도 클러스터의 전체 사건 수는 아닙니다
+기록기에 전달되기 전이나 큐에서 빠진 관측은 세지 못하고, 카운트가 로컬에만 남아 있을 수도 있습니다
+화면 처리의 근거는 [`DescribeEvents`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/describe/describe.go), 필드 대응은 [Event API 변환](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/events/v1/conversion.go)입니다
+
+### 컴포넌트 이름만으로 모든 Event의 기록기를 확정할 수는 없다
+
+현행 소스에서 확인한 대표 경로는 다음과 같습니다
+
+| 기록 경로 | 사용하는 곳 |
+|---|---|
+| events 기록기 | [kube-proxy](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-proxy/app/server.go), API 서버의 [Service IP](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/service/ipallocator/controller/repair.go)·[포트 할당 복구 컨트롤러](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/service/portallocator/controller/repair.go) |
+| events 기록기를 우선하는 adapter | kube-scheduler의 일반 이벤트 기록 |
+| core 기록기 | kubelet 기본 기록기, [kube-controller-manager의 공통 이벤트 경로](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-controller-manager/app/controllermanager.go)와 Deployment 컨트롤러 |
+
+kube-scheduler의 adapter는 events API 디스커버리가 성공하면 새 기록기를 사용하고, 그렇지 않으면 legacy 기록기로 돌아갑니다
+같은 scheduler 안에서도 leader election용 기록기는 명시적으로 legacy 경로를 사용합니다
+따라서 컴포넌트 하나가 오직 한 방식으로만 기록한다고 일반화하면 안 됩니다
+
+스케줄 실패와 이미지 pull 실패가 같은 Pod 화면에 함께 나오더라도, 각각의 키와 전송 시점이 다를 수 있습니다
+대표 근거는 [scheduler 설정](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kube-scheduler/app/options/options.go), [adapter 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/events/event_broadcaster.go), [kubelet 기록기](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/server.go), [Deployment 기록기](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/deployment/deployment_controller.go)입니다
 
 ## Event가 없다는 사실만으로 사건의 부재를 판단하지 않는다
 

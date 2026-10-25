@@ -20,6 +20,18 @@ date: "2026-08-22"
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 클러스터에서 재현한 실측 기록은 포함하지 않습니다
 
+## API로 읽을 권한과 저장 암호화의 역할은 다릅니다
+
+저장 변환은 쓰기에서는 etcd에 넣기 전에 적용하고, 읽기에서는 etcd 값을 오브젝트로 복원하기 전에 되돌립니다
+API 응답은 복원한 오브젝트에서 만들므로 암호화를 켜도 읽을 권한이 있는 사용자가 얻는 API 표현은 그대로입니다
+Secret을 YAML로 읽으면 `data`의 값은 여전히 base64로 표현되며, 저장 암호문이 그대로 응답하는 것은 아닙니다
+
+[API 요청 경로](/essays/k8s-theory-api-request-path)에서 인증·인가는 저장소 접근보다 앞에 있습니다
+CREATE는 그 뒤 admission·validation도 거치지만 GET은 오브젝트를 생성하는 그 단계를 거치지 않습니다
+저장 암호화가 RBAC의 읽기 권한을 추가로 제한해 주는 것은 아닙니다
+
+저장 암호화는 etcd 데이터 파일이나 백업처럼 API 권한 검사를 거치지 않고 데이터에 접근하는 경우를 다룹니다
+
 ## 직렬화 다음에 저장 변환이 적용됩니다
 
 [앞 글에서 살펴본 직렬화와 버전 변환](/essays/k8s-theory-serialization-version-conversion)은 어느 API 버전의 표현을 어떤 바이트 형식으로 적을지 정합니다
@@ -40,6 +52,24 @@ API 서버가 etcd에서 값을 읽고 쓰는 지점의 설명이며, 캐시에�
 
 암호화하지 않은 바이트를 이 글에서는 평문이라고 부릅니다
 이는 사람이 바로 읽을 수 있는 JSON만 뜻하지 않으며, protobuf 등으로 직렬화했지만 암호화하지 않은 값도 포함합니다
+
+## 키 회전은 새 키를 고르는 일과 기존 값을 다시 쓰는 일입니다
+
+새 키를 키 목록의 맨 앞에 두면 이후 쓰기는 새 키를 사용합니다
+옛 키를 읽기 후보로 남겨 두면 기존 값도 계속 복원할 수 있습니다
+이 공존 구간에는 새 키로 쓴 값과 옛 키로 쓴 값이 함께 있습니다
+
+기존 값까지 옮기려면 갱신이 필요합니다
+
+API 서버가 여러 대라면 각 서버에 키를 배포하는 순서도 중요합니다
+[공식 키 회전 절차](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/tasks/administer-cluster/encrypt-data.md#rotating-a-decryption-key)는 새 키를 먼저 두 번째 키로 모든 API 서버에 배포해 읽을 수 있게 한 뒤, 첫 키로 올리도록 설명합니다
+어떤 서버가 새 키로 쓰기 시작했는데 다른 서버가 그 키를 모르면 서로 같은 데이터를 읽지 못할 수 있기 때문입니다
+
+옛 키를 읽기 후보에서 제거하는 것은 기존 값의 재기록 뒤에 해야 합니다
+재기록을 건너뛰고 제거하면 옛 키로 저장한 값은 그 키가 목록에 없는 동안 읽히지 않습니다
+
+키 자료와 설정을 복구해 읽기 후보에 넣을 수 있는 경우와 키 자료 자체를 잃은 경우도 구분해야 합니다
+특히 과거 백업에는 당시 키로 쓴 값이 남아 있을 수 있으므로, 현재 데이터의 재기록 여부만으로 예전 키의 보관 필요까지 판단하면 안 됩니다
 
 ## 접두사가 변환 방식과 읽을 키를 알려 줍니다
 
@@ -127,7 +157,8 @@ k8s:enc:aescbc:v1:key1:<암호화한 바이트>
 stale이 true이면 내용이 같아도 이 조건을 통과하지 않습니다
 현재 첫 변환기로 바이트를 만든 뒤 etcd에 쓰기를 시도합니다
 
-이것이 오브젝트를 읽어 같은 내용으로 갱신해도 새 키로 다시 암호화할 수 있는 이유입니다
+이것이 키 목록의 첫 항목만 바꾸는 일과 기존 값을 옮기는 일이 나뉘는 이유입니다
+오브젝트를 읽어 같은 내용으로 갱신해도 새 키로 다시 암호화할 수 있습니다
 GET·LIST·watch는 복원 과정에서 받은 stale 값을 이용해 저장 값을 다시 쓰지 않습니다
 읽기만 반복해도 암호화 방식이나 키가 바뀌지는 않습니다
 
@@ -135,24 +166,26 @@ GET·LIST·watch는 복원 과정에서 받은 stale 값을 이용해 저장 값
 `GuaranteedUpdate`는 etcd에 쓸 때 기존 revision을 조건으로 사용하며, 다른 쓰기가 먼저 반영되어 충돌하면 현재 값을 다시 읽고 반복합니다
 stale이 true라고 이 동시성 검사를 건너뛰지는 않습니다
 
-## 키 회전은 새 키를 고르는 일과 기존 값을 다시 쓰는 일입니다
+## 자동 재적재는 새 변환기를 확인한 뒤 교체합니다
 
-새 키를 키 목록의 맨 앞에 두면 이후 쓰기는 새 키를 사용합니다
-옛 키를 읽기 후보로 남겨 두면 기존 값도 계속 복원할 수 있습니다
-이 공존 구간에는 새 키로 쓴 값과 옛 키로 쓴 값이 함께 있습니다
+`--encryption-provider-config`는 설정 파일 경로를 지정합니다
+`--encryption-provider-config-automatic-reload`는 그 파일의 변경을 자동으로 다시 읽게 합니다
 
-기존 값까지 옮기려면 갱신이 필요합니다
-그 값의 내용이 같아도 stale 때문에 쓰기 생략이 해제되므로 현재 쓰기 키로 다시 기록할 수 있습니다
+[`EtcdOptions.Validate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/etcd.go)는 파일 경로 없이 자동 재적재만 켠 설정을 거부합니다
+재적재를 켜지 않으면 실행 중인 프로세스는 파일을 고쳤다는 이유만으로 새 구성을 사용하지 않습니다
 
-API 서버가 여러 대라면 각 서버에 키를 배포하는 순서도 중요합니다
-[공식 키 회전 절차](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/tasks/administer-cluster/encrypt-data.md#rotating-a-decryption-key)는 새 키를 먼저 두 번째 키로 모든 API 서버에 배포해 읽을 수 있게 한 뒤, 첫 키로 올리도록 설명합니다
-어떤 서버가 새 키로 쓰기 시작했는데 다른 서버가 그 키를 모르면 서로 같은 데이터를 읽지 못할 수 있기 때문입니다
+![기본 1분 주기로 설정 파일을 확인하고 새 변환기 구성과 상태 검사에 성공해야 교체하며 실패하면 기존 구성을 유지하는 흐름](/diagrams/k8s-theory-storage-transformations-3.svg)
 
-옛 키를 읽기 후보에서 제거하는 것은 기존 값의 재기록 뒤에 해야 합니다
-재기록을 건너뛰고 제거하면 옛 키로 저장한 값은 그 키가 목록에 없는 동안 읽히지 않습니다
+[`DynamicEncryptionConfigContent`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/encryptionconfig/controller/controller.go)는 기본 1분 주기로 작업을 넣어 파일 내용 해시를 확인합니다
+해시가 같으면 교체하지 않고, 다르면 새 변환기 집합을 만든 뒤 상태 검사를 수행합니다
 
-키 자료와 설정을 복구해 읽기 후보에 넣을 수 있는 경우와 키 자료 자체를 잃은 경우도 구분해야 합니다
-특히 과거 백업에는 당시 키로 쓴 값이 남아 있을 수 있으므로, 현재 데이터의 재기록 여부만으로 예전 키의 보관 필요까지 판단하면 안 됩니다
+구성과 검사에 성공해야 `dynamicTransformers.Set`을 호출합니다
+실패하면 새 구성은 적용하지 않고 기존 변환기를 유지합니다
+오류를 기록하고 작업을 다시 큐에 넣습니다
+재시도 간격은 rate limit으로 조절합니다
+다음 시도가 반드시 1분 뒤에만 이루어진다는 뜻은 아닙니다
+
+재적재 오류나 상태 검사 실패가 있다면 서버는 계속 이전 방식으로 쓸 수 있습니다
 
 ## KMS v2는 설정 순서를 바꾸지 않아도 stale을 만들 수 있습니다
 
@@ -213,27 +246,6 @@ KMS v2도 내부 AES-GCM 계열 변환기에 같은 문맥을 전달합니다
 이 표가 구분하는 것은 provider별 **저장 위치와 암호문의 결합 여부**입니다
 암호화를 켰다는 사실만으로 모든 provider에 같은 위치 검증을 기대하면 안 됩니다
 
-## 자동 재적재는 새 변환기를 확인한 뒤 교체합니다
-
-`--encryption-provider-config`는 설정 파일 경로를 지정합니다
-`--encryption-provider-config-automatic-reload`는 그 파일의 변경을 자동으로 다시 읽게 합니다
-
-[`EtcdOptions.Validate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/etcd.go)는 파일 경로 없이 자동 재적재만 켠 설정을 거부합니다
-재적재를 켜지 않으면 실행 중인 프로세스는 파일을 고쳤다는 이유만으로 새 구성을 사용하지 않습니다
-
-![기본 1분 주기로 설정 파일을 확인하고 새 변환기 구성과 상태 검사에 성공해야 교체하며 실패하면 기존 구성을 유지하는 흐름](/diagrams/k8s-theory-storage-transformations-3.svg)
-
-[`DynamicEncryptionConfigContent`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/encryptionconfig/controller/controller.go)는 기본 1분 주기로 작업을 넣어 파일 내용 해시를 확인합니다
-해시가 같으면 교체하지 않고, 다르면 새 변환기 집합을 만든 뒤 상태 검사를 수행합니다
-
-구성과 검사에 성공해야 `dynamicTransformers.Set`을 호출합니다
-실패하면 새 구성은 적용하지 않고 기존 변환기를 유지합니다
-오류를 기록하고 작업을 다시 큐에 넣습니다
-재시도 간격은 rate limit으로 조절합니다
-다음 시도가 반드시 1분 뒤에만 이루어진다는 뜻은 아닙니다
-
-재적재 오류나 상태 검사 실패가 있다면 서버는 계속 이전 방식으로 쓸 수 있습니다
-
 ## LIST의 손상 오류 처리는 게이트에 따라 달라집니다
 
 etcd에서 읽은 항목 하나를 복원하지 못했을 때, 그 항목을 빼고 나머지만 정상 목록으로 반환하는 것은 아닙니다
@@ -274,15 +286,4 @@ LIST 마지막에는 모은 오류를 확인해 요청을 실패로 반환하므
 범용 `NewPrefixTransformers`의 기본 오류는 `the provided value does not match any of the supported transformers`입니다
 암호화 설정의 바깥 목록과 안쪽 키 목록은 각각 별도의 오류를 전달하므로, 이 기본 문구 하나가 모든 접두사 실패에서 나온다고 가정하면 안 됩니다
 
-## API로 읽을 권한과 저장 암호화의 역할은 다릅니다
-
-저장 변환은 쓰기에서는 etcd에 넣기 전에 적용하고, 읽기에서는 etcd 값을 오브젝트로 복원하기 전에 되돌립니다
-API 응답은 복원한 오브젝트에서 만들므로 암호화를 켜도 읽을 권한이 있는 사용자가 얻는 API 표현은 그대로입니다
-Secret을 YAML로 읽으면 `data`의 값은 여전히 base64로 표현되며, 저장 암호문이 그대로 응답하는 것은 아닙니다
-
-[API 요청 경로](/essays/k8s-theory-api-request-path)에서 인증·인가는 저장소 접근보다 앞에 있습니다
-CREATE는 그 뒤 admission·validation도 거치지만 GET은 오브젝트를 생성하는 그 단계를 거치지 않습니다
-저장 암호화가 RBAC의 읽기 권한을 추가로 제한해 주는 것은 아닙니다
-
-저장 암호화는 etcd 데이터 파일이나 백업처럼 API 권한 검사를 거치지 않고 데이터에 접근하는 경우를 다룹니다
 암호화 설정을 점검할 때는 실제 암호화 여부뿐 아니라 provider의 인증 조건, 읽기 후보에 남긴 키, 기존 값의 재기록 상태까지 함께 봐야 합니다

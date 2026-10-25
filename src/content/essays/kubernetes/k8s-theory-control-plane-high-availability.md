@@ -57,21 +57,44 @@ etcd는 Raft라는 합의 알고리즘으로 로그를 복제하고 쓰기를 �
 [etcd FAQ](https://etcd.io/docs/v3.6/faq/#what-is-maximum-cluster-size)는 7개 이하를 권장합니다
 더 큰 구성을 금지하는 하드 한도가 아니라, 복제 대상이 늘 때 쓰기 성능에 드는 비용을 고려한 권장입니다
 
-### learner는 quorum을 바꾸기 전에 데이터를 따라잡게 합니다
+## API 서버는 각자 요청을 받고 저장소를 공유합니다
 
-투표 멤버로 바로 추가하면 데이터가 아직 없는 새 멤버도 quorum 계산에 들어갑니다
-3개에 하나를 더하면 quorum이 3으로 올라가고, 그 상태에서 2 대 2로 단절되면 어느 쪽도 결정을 내릴 수 없습니다
-새 멤버의 로그를 채우는 복제 작업도 리더의 네트워크와 처리 자원을 사용합니다
+저장소에 과반이 남았다면, 다음 조건은 요청이 살아 있는 API 서버에 도착하는지입니다
+API 서버끼리는 사용자 요청을 처리할 리더 하나를 선출하지 않습니다
+각 인스턴스가 요청을 검사하고 공유 etcd를 사용합니다
+같은 오브젝트를 동시에 조건부 갱신하려 하면 저장 단계에서 `resourceVersion` 충돌이 발생할 수 있습니다
 
-learner는 투표하지 않고 로그를 따라잡는 멤버입니다
-따라잡은 뒤 투표 멤버로 승격하기 전까지 quorum에 포함되지 않고 리더 역할도 맡지 않습니다
+## 컨트롤러는 Lease를 다투지만 모든 동시 행동을 차단하지는 못합니다
 
-[etcd v3.6 learner 설계 문서](https://etcd.io/docs/v3.6/learning/design-learner/)의 부록은 serializable 읽기와 member status API를 예외로 허용합니다
-따라서 learner가 모든 종류의 요청을 거절한다고 볼 수는 없습니다
-Kubernetes 저장 경로가 사용하는 linearizable 읽기와 쓰기를 처리하는 멤버로 보아서는 안 됩니다
+컨트롤러는 요청을 기다리는 대신 관찰한 상태를 근거로 쓰기를 만들어 냅니다
+목표 Pod 수가 3인데 두 컨트롤러가 각각 현재 2개를 보고 하나씩 만들면 4개가 될 수 있습니다
+workqueue는 한 프로세스 안에서 같은 작업 키의 중복 처리를 제어합니다
+[expectations](/essays/k8s-theory-reconcile/)는 컨트롤러가 요청한 생성·삭제가 캐시에 반영되기를 기다리게 합니다
+이 두 장치만으로 여러 프로세스의 동시 행동까지 막을 수는 없습니다
 
-멤버 추가가 언제나 그대로 승인되는 것도 아닙니다
-[etcd의 재구성 검사](https://etcd.io/docs/v3.6/faq/#why-wont-etcd-accept-my-membership-changes)는 quorum 상실을 일으킬 수 있는 변경을 기본적으로 거절합니다
+기본 리더 선출은 여러 후보가 하나의 `Lease`를 갱신하며 조정 작업을 맡을 인스턴스를 고릅니다
+[`leaderelection`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/leaderelection/leaderelection.go)은 다른 노드가 쓴 `renewTime`을 자신의 현재 시각과 직접 빼지 않습니다
+관찰한 기록이 바뀌었을 때 자기 로컬 시각을 남기고, 그 시각과 Lease의 지속 시간을 사용합니다
+
+그래서 시계의 절대값 차이에는 견딜 수 있지만 시계가 흐르는 속도의 차이에는 한계가 있습니다
+패키지 주석은 `LeaseDuration`과 `RenewDeadline`의 비율이 이 내성에 영향을 준다고 설명합니다
+
+| 설정 | 공용 권장 기본값 | 역할 |
+|---|---|---|
+| `--leader-elect-lease-duration` | 15초 | 다른 후보가 기존 리더의 기록이 만료됐다고 판단하는 기간 |
+| `--leader-elect-renew-deadline` | 10초 | 리더가 갱신을 재시도하다 리더 역할을 포기하는 기간 |
+| `--leader-elect-retry-period` | 2초 | 획득·갱신 재시도의 기준 간격 |
+
+값은 [`RecommendedDefaultLeaderElectionConfiguration`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/config/v1alpha1/defaults.go)에서 확인할 수 있습니다
+실제 재시도에는 지연과 jitter가 있으므로 세 값으로 정확한 장애 전환 완료 시점을 보장할 수는 없습니다
+
+15초와 10초의 차이도 두 리더가 동시에 행동하지 않는다는 보장은 아닙니다
+client-go 패키지는 fencing을 보장하지 않는다고 명시합니다
+fencing은 이전 리더가 뒤늦게 작업하더라도 저장소나 작업 대상이 그 쓰기를 거절하게 하는 장치입니다
+
+같은 오브젝트의 같은 옛 버전을 조건부 갱신하면 `resourceVersion` 충돌로 한쪽을 거절할 수 있습니다
+서로 다른 오브젝트를 만들거나 외부 시스템을 변경하는 작업은 하나의 버전 충돌 검사로 묶이지 않습니다
+컨트롤러는 자신의 동작 범위에 맞는 멱등성과 재조정을 함께 갖춰야 합니다
 
 ## quorum을 잃었을 때 읽기는 요청 조건에 따라 달라집니다
 
@@ -131,11 +154,7 @@ API 서버 저장 계층의 [`store.watchContext`](https://github.com/kubernetes
 위 표의 마지막 행은 이미 etcd로 위임된 요청까지 다시 캐시로 돌린다는 뜻이 아닙니다
 etcd로 위임됐다는 사실도 quorum 없이 성공한다는 뜻은 아닙니다
 
-## API 서버는 저장소를 공유하고 캐시와 APF 용량은 따로 둡니다
-
-API 서버끼리는 사용자 요청을 처리할 리더 하나를 선출하지 않습니다
-각 인스턴스가 요청을 검사하고 공유 etcd를 사용합니다
-같은 오브젝트를 동시에 조건부 갱신하려 하면 저장 단계에서 `resourceVersion` 충돌이 발생할 수 있습니다
+## 캐시와 APF 용량은 인스턴스마다 따로 둡니다
 
 인스턴스를 늘리면 다음 상태도 함께 늘어납니다
 
@@ -161,6 +180,22 @@ APF 기본 오브젝트를 관리하는 인스턴스의 버전이 서로 다르�
 [APF 공식 문서](https://kubernetes.io/docs/concepts/cluster-administration/flow-control/#maintenance-of-the-mandatory-and-suggested-configuration-objects)는 이때 설정이 반복해서 바뀔 수 있음을 설명합니다
 mandatory 구성은 서버가 유지하며, suggested 구성의 `spec` 자동 갱신은 `apf.kubernetes.io/autoupdate-spec`과 generation 조건으로 정합니다
 `false` 어노테이션이 모든 기본 오브젝트의 서버 관리를 끈다고 확대하면 안 됩니다
+
+## learner는 quorum을 바꾸기 전에 데이터를 따라잡게 합니다
+
+투표 멤버로 바로 추가하면 데이터가 아직 없는 새 멤버도 quorum 계산에 들어갑니다
+3개에 하나를 더하면 quorum이 3으로 올라가고, 그 상태에서 2 대 2로 단절되면 어느 쪽도 결정을 내릴 수 없습니다
+새 멤버의 로그를 채우는 복제 작업도 리더의 네트워크와 처리 자원을 사용합니다
+
+learner는 투표하지 않고 로그를 따라잡는 멤버입니다
+따라잡은 뒤 투표 멤버로 승격하기 전까지 quorum에 포함되지 않고 리더 역할도 맡지 않습니다
+
+[etcd v3.6 learner 설계 문서](https://etcd.io/docs/v3.6/learning/design-learner/)의 부록은 serializable 읽기와 member status API를 예외로 허용합니다
+따라서 learner가 모든 종류의 요청을 거절한다고 볼 수는 없습니다
+Kubernetes 저장 경로가 사용하는 linearizable 읽기와 쓰기를 처리하는 멤버로 보아서는 안 됩니다
+
+멤버 추가가 언제나 그대로 승인되는 것도 아닙니다
+[etcd의 재구성 검사](https://etcd.io/docs/v3.6/faq/#why-wont-etcd-accept-my-membership-changes)는 quorum 상실을 일으킬 수 있는 변경을 기본적으로 거절합니다
 
 ## API 서버 명단을 기록하는 두 장치는 서로 다릅니다
 
@@ -196,38 +231,6 @@ v1.37.1에서는 [`UnknownVersionInteroperabilityProxy`](https://github.com/kube
 
 일부 기능에서 API 서버끼리 서로를 찾고 요청을 전달하더라도, 저장할 내용을 API 서버들이 직접 합의하는 것은 아닙니다
 `StorageVersionAPI`는 같은 고정 소스에서 여전히 Alpha·기본 off이며, 별도의 `CoordinatedLeaderElection`은 Beta·기본 off입니다
-
-## 컨트롤러는 Lease를 다투지만 모든 동시 행동을 차단하지는 못합니다
-
-컨트롤러는 요청을 기다리는 대신 관찰한 상태를 근거로 쓰기를 만들어 냅니다
-목표 Pod 수가 3인데 두 컨트롤러가 각각 현재 2개를 보고 하나씩 만들면 4개가 될 수 있습니다
-workqueue는 한 프로세스 안에서 같은 작업 키의 중복 처리를 제어합니다
-[expectations](/essays/k8s-theory-reconcile/)는 컨트롤러가 요청한 생성·삭제가 캐시에 반영되기를 기다리게 합니다
-이 두 장치만으로 여러 프로세스의 동시 행동까지 막을 수는 없습니다
-
-기본 리더 선출은 여러 후보가 하나의 `Lease`를 갱신하며 조정 작업을 맡을 인스턴스를 고릅니다
-[`leaderelection`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/leaderelection/leaderelection.go)은 다른 노드가 쓴 `renewTime`을 자신의 현재 시각과 직접 빼지 않습니다
-관찰한 기록이 바뀌었을 때 자기 로컬 시각을 남기고, 그 시각과 Lease의 지속 시간을 사용합니다
-
-그래서 시계의 절대값 차이에는 견딜 수 있지만 시계가 흐르는 속도의 차이에는 한계가 있습니다
-패키지 주석은 `LeaseDuration`과 `RenewDeadline`의 비율이 이 내성에 영향을 준다고 설명합니다
-
-| 설정 | 공용 권장 기본값 | 역할 |
-|---|---|---|
-| `--leader-elect-lease-duration` | 15초 | 다른 후보가 기존 리더의 기록이 만료됐다고 판단하는 기간 |
-| `--leader-elect-renew-deadline` | 10초 | 리더가 갱신을 재시도하다 리더 역할을 포기하는 기간 |
-| `--leader-elect-retry-period` | 2초 | 획득·갱신 재시도의 기준 간격 |
-
-값은 [`RecommendedDefaultLeaderElectionConfiguration`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/config/v1alpha1/defaults.go)에서 확인할 수 있습니다
-실제 재시도에는 지연과 jitter가 있으므로 세 값으로 정확한 장애 전환 완료 시점을 보장할 수는 없습니다
-
-15초와 10초의 차이도 두 리더가 동시에 행동하지 않는다는 보장은 아닙니다
-client-go 패키지는 fencing을 보장하지 않는다고 명시합니다
-fencing은 이전 리더가 뒤늦게 작업하더라도 저장소나 작업 대상이 그 쓰기를 거절하게 하는 장치입니다
-
-같은 오브젝트의 같은 옛 버전을 조건부 갱신하면 `resourceVersion` 충돌로 한쪽을 거절할 수 있습니다
-서로 다른 오브젝트를 만들거나 외부 시스템을 변경하는 작업은 하나의 버전 충돌 검사로 묶이지 않습니다
-컨트롤러는 자신의 동작 범위에 맞는 멱등성과 재조정을 함께 갖춰야 합니다
 
 ## 같은 Lease Kind라도 단독 갱신과 경쟁은 다릅니다
 

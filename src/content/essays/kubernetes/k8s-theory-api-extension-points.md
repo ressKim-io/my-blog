@@ -63,34 +63,6 @@ CRD를 등록하는 일과 그 상태에 반응하는 controller를 구현하는
 이 경로는 [`APIAggregator.AddAPIService`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kube-aggregator/pkg/apiserver/apiserver.go)에 있습니다
 `spec.service`가 없는 등록은 로컬 서버로 위임하며, 여기서는 별도 Service를 가리키는 확장 서버를 설명합니다
 
-등록에 성공했다고 백엔드까지 응답하는 것은 아닙니다
-availability controller는 Service를 조회하고, ClusterIP Service라면 포트와 EndpointSlice의 사용 가능한 주소를 확인합니다
-그 뒤 그룹·버전의 discovery 경로에 GET을 보냅니다
-
-| 검사 결과 | `Available.status` | `reason` |
-|---|---|---|
-| Service가 없음 | `False` | `ServiceNotFound` |
-| Service 조회 오류 | `Unknown` | `ServiceAccessError` |
-| ClusterIP Service에 지정 포트가 없음 | `False` | `ServicePortError` |
-| EndpointSlice 조회 오류 | `Unknown` | `EndpointsAccessError` |
-| EndpointSlice가 없거나 사용 가능한 주소·포트가 없음 | `False` | `EndpointsNotFound` 또는 `MissingEndpoints` |
-| discovery GET 시도가 모두 실패 | `False` | `FailedDiscoveryCheck` |
-| 검사를 통과 | `True` | `Passed` |
-
-v1.37.1 구현의 GET용 HTTP timeout은 5초이고, GET 결과를 기다리는 별도 제한은 6초입니다
-GET 요청을 다섯 번 병렬로 보내며, 하나라도 성공하면 검사를 통과합니다
-이 timeout 값이 등록 후 5초 안에 `Available` 상태가 바뀐다는 보장은 아닙니다
-
-TLS 설정도 버전별 구현을 확인해야 합니다
-이 버전의 상태 검사와 사용자 요청 프록시는 모두 `BuildTransportConfig`를 호출합니다
-`APIService.spec.insecureSkipTLSVerify`와 `caBundle`을 사용하므로, 상태 검사라는 이유만으로 항상 서버 인증서 검증을 생략하지 않습니다
-
-근거는 [상태 검사와 transport 구성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kube-aggregator/pkg/controllers/status/remote/remote_available_controller.go), [사용자 요청의 프록시 구성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kube-aggregator/pkg/apiserver/handler_proxy.go)입니다
-`Available=True`는 이 검사를 통과했다는 뜻이며 개별 리소스의 모든 동작이 성공한다는 판정은 아닙니다
-
-확장 서버의 장애는 discovery를 사용하는 다른 작업에도 영향을 줄 수 있습니다
-[Namespace 삭제](/essays/k8s-theory-deletion-lifecycle)처럼 삭제할 리소스 목록이 필요한 작업에서는 discovery 실패 때문에 정리가 끝나지 않을 수 있습니다
-
 ## Discovery는 이름을 찾고 OpenAPI는 구조를 설명합니다
 
 Discovery API는 서버가 제공하는 그룹·버전·리소스와 scope, 지원 동작을 알려줍니다
@@ -156,6 +128,57 @@ kubectl의 다른 요청이 오래된 discovery 캐시를 사용하는 동안 `a
 
 선택 알고리즘은 [client-go의 discovery 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/discovery/discovery_client.go), 캐시와 출력 열은 [kubectl 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/apiresources/apiresources.go)에서 확인할 수 있습니다
 
+## feature gate와 API 서빙 설정은 따로 확인해야 합니다
+
+discovery에서 타입을 찾은 뒤에도 그 객체를 처리할 기능이 실행되는지는 따로 봐야 합니다
+feature gate는 특정 기능의 코드 경로를 켜고 끄는 설정입니다
+API 그룹·버전의 서빙 설정은 해당 경로로 요청을 받을지를 정합니다
+게이트가 켜졌다는 이유만으로 필요한 API 버전도 열렸다고 판단할 수는 없습니다
+
+![MutatingAdmissionPolicy에서 API 저장소 등록과 플러그인 활성 여부를 각각 결정하는 설정](/diagrams/k8s-theory-api-extension-points-2.svg)
+
+이 구분은 요청 내용을 정책에 따라 변경하는 MutatingAdmissionPolicy(MAP)에서 확인할 수 있습니다
+API 저장소를 등록하는 코드는 `ResourceEnabled`를 확인하고, 정책을 실행하는 플러그인은 `MutatingAdmissionPolicy` 게이트를 읽습니다
+저장소 등록 조건에 이 게이트 검사는 없습니다
+
+v1.37.1의 MAP 게이트는 v1.36부터 GA·기본 `true`인 사양을 사용하며 `LockToDefault`는 지정되지 않았습니다
+안정 API인 `admissionregistration.k8s.io/v1`도 기본 서빙 목록에 들어 있습니다
+따라서 과거 v1.35의 beta·기본 off 설명을 현재 기본값처럼 적용하면 안 됩니다
+
+이 버전에서도 플러그인을 끄고 API 서빙은 유지하면 정책 객체는 저장할 수 있지만 그 플러그인의 mutation은 실행되지 않습니다
+반대로 특정 그룹·버전의 서빙을 끄면 그 경로로 정책을 생성할 수 없습니다
+플러그인이 활성 상태여도 실제 mutation에는 Policy·Binding과 요청의 매칭이 필요합니다
+Policy에 변경 규칙을 두고 Binding으로 적용 범위를 연결하는 관계는 [Admission webhook과 CEL 정책](/essays/k8s-theory-admission-webhook-failure)에서 설명합니다
+
+근거는 [MAP 저장소 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/admissionregistration/rest/storage_apiserver.go), [플러그인의 gate 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/plugin.go), [버전별 gate 사양](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/features/kube_features.go)입니다
+이 사례를 모든 기능에 동일한 두 설정이 있다는 뜻으로 확대하지는 않습니다
+
+### Beta라는 이름만으로 기본값을 알 수는 없습니다
+
+[Feature Gates 문서](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)는 beta 기능이 대개 기본 활성이고 beta API 그룹은 기본 비활성이라고 설명합니다
+다만 개별 gate의 실제 기본값은 `FeatureSpec.Default`, 안정도는 `PreRelease`, 변경 가능 여부는 `LockToDefault`로 따로 정합니다
+
+GA 게이트라도 해당 버전의 사양이 잠겨 있는지 확인해야 합니다
+잠긴 기본값과 반대 값을 지정하면 설정 오류이고, GA·Deprecated 게이트를 명시하면 향후 제거에 관한 경고가 나올 수 있습니다
+게이트 이름 자체가 제거됐다면 그 이름을 계속 설정하는 것도 오류입니다
+버전별 사양의 선택에는 emulation version과 필요한 경우 minimum compatibility version도 관여합니다
+
+이 동작은 [`FeatureSpec`과 설정 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/featuregate/feature_gate.go)에 있습니다
+모든 기능이 GA까지 가는 것도 아니며, 기본 off의 Deprecated 사양으로 남는 기능도 있습니다
+
+API 서빙 쪽에서는 [`DefaultGenericAPIResourceConfigSource`와 `DefaultAPIResourceConfigSource`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controlplane/instance.go)가 기본 목록을 구성합니다
+기본 활성 목록에는 안정 버전을 넣고 alpha·beta는 별도 비활성 목록에 둡니다
+추가로 열 그룹·버전은 [`--runtime-config`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/api_enablement.go)에서 지정합니다
+
+기본 설정 목록에 API 버전 이름이 남아 있어도 그 버전을 실제로 다시 제공할 수 있는 것은 아닙니다
+예를 들어 기본 설정의 비활성 목록에는 flowcontrol의 예전 beta 버전이 남아 있지만, v1.37.1의 [flowcontrol 저장소 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/flowcontrol/rest/storage_flowcontrol.go)은 `v1`만 설치합니다
+설정 목록과 현재 서버가 구현한 경로를 함께 봐야 합니다
+
+새 beta API를 기본 비활성으로 바꾼 배경은 [KEP-3136](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-architecture/3136-beta-apis-off-by-default/README.md)에 나옵니다
+제안서는 당시 PRR 설문에서 90%가 넘는 클러스터 관리자가 프로덕션의 beta API를 켜 둔다고 답한 점과, 안정 버전으로 옮길 때의 부담을 이유로 듭니다
+이 수치는 현재 전체 클러스터의 사용률을 뜻하지 않습니다
+제안 자체도 기존 beta API와 그 후속 beta 버전은 예외로 두었으므로, 역사 전체를 “모든 beta API는 항상 off”로 요약하면 맞지 않습니다
+
 ## API 버전이 올라가면 호환성 약속도 달라집니다
 
 `v1alpha1`, `v1beta1`, `v1`은 각각 alpha·beta·GA 안정도에 속하는 API 버전 이름입니다
@@ -186,54 +209,35 @@ deprecated API 호출에는 v1.19부터 세 가지 신호가 제공됩니다
 이는 [폐기 메시지 생성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/deprecation/deprecation.go)과 [요청 계측](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/metrics/metrics.go)에서 확인할 수 있습니다
 API의 서빙을 멈추는 것과 이미 저장한 객체를 지우거나 다른 저장 버전으로 옮기는 것도 구분해야 합니다
 
-## feature gate와 API 서빙 설정은 따로 확인해야 합니다
+## APIService 등록 뒤 백엔드의 응답을 확인합니다
 
-feature gate는 특정 기능의 코드 경로를 켜고 끄는 설정입니다
-API 그룹·버전의 서빙 설정은 해당 경로로 요청을 받을지를 정합니다
-게이트가 켜졌다는 이유만으로 필요한 API 버전도 열렸다고 판단할 수는 없습니다
+등록에 성공했다고 백엔드까지 응답하는 것은 아닙니다
+availability controller는 Service를 조회하고, ClusterIP Service라면 포트와 EndpointSlice의 사용 가능한 주소를 확인합니다
+그 뒤 그룹·버전의 discovery 경로에 GET을 보냅니다
 
-![MutatingAdmissionPolicy에서 API 저장소 등록과 플러그인 활성 여부를 각각 결정하는 설정](/diagrams/k8s-theory-api-extension-points-2.svg)
+| 검사 결과 | `Available.status` | `reason` |
+|---|---|---|
+| Service가 없음 | `False` | `ServiceNotFound` |
+| Service 조회 오류 | `Unknown` | `ServiceAccessError` |
+| ClusterIP Service에 지정 포트가 없음 | `False` | `ServicePortError` |
+| EndpointSlice 조회 오류 | `Unknown` | `EndpointsAccessError` |
+| EndpointSlice가 없거나 사용 가능한 주소·포트가 없음 | `False` | `EndpointsNotFound` 또는 `MissingEndpoints` |
+| discovery GET 시도가 모두 실패 | `False` | `FailedDiscoveryCheck` |
+| 검사를 통과 | `True` | `Passed` |
 
-이 구분은 MutatingAdmissionPolicy에서 확인할 수 있습니다
-API 저장소를 등록하는 코드는 `ResourceEnabled`를 확인하고, 정책을 실행하는 플러그인은 `MutatingAdmissionPolicy` 게이트를 읽습니다
-저장소 등록 조건에 이 게이트 검사는 없습니다
+v1.37.1 구현의 GET용 HTTP timeout은 5초이고, GET 결과를 기다리는 별도 제한은 6초입니다
+GET 요청을 다섯 번 병렬로 보내며, 하나라도 성공하면 검사를 통과합니다
+이 timeout 값이 등록 후 5초 안에 `Available` 상태가 바뀐다는 보장은 아닙니다
 
-v1.37.1의 MAP 게이트는 v1.36부터 GA·기본 `true`인 사양을 사용하며 `LockToDefault`는 지정되지 않았습니다
-안정 API인 `admissionregistration.k8s.io/v1`도 기본 서빙 목록에 들어 있습니다
-따라서 과거 v1.35의 beta·기본 off 설명을 현재 기본값처럼 적용하면 안 됩니다
+TLS 설정도 버전별 구현을 확인해야 합니다
+이 버전의 상태 검사와 사용자 요청 프록시는 모두 `BuildTransportConfig`를 호출합니다
+`APIService.spec.insecureSkipTLSVerify`와 `caBundle`을 사용하므로, 상태 검사라는 이유만으로 항상 서버 인증서 검증을 생략하지 않습니다
 
-이 버전에서도 플러그인을 끄고 API 서빙은 유지하면 정책 객체는 저장할 수 있지만 그 플러그인의 mutation은 실행되지 않습니다
-반대로 특정 그룹·버전의 서빙을 끄면 그 경로로 정책을 생성할 수 없습니다
-플러그인이 활성 상태여도 실제 mutation에는 Policy·Binding과 요청의 매칭이 필요하며, 이는 [Admission 순서](/essays/k8s-theory-admission-order)에서 구분했습니다
+근거는 [상태 검사와 transport 구성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kube-aggregator/pkg/controllers/status/remote/remote_available_controller.go), [사용자 요청의 프록시 구성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kube-aggregator/pkg/apiserver/handler_proxy.go)입니다
+`Available=True`는 이 검사를 통과했다는 뜻이며 개별 리소스의 모든 동작이 성공한다는 판정은 아닙니다
 
-근거는 [MAP 저장소 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/admissionregistration/rest/storage_apiserver.go), [플러그인의 gate 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/plugin.go), [버전별 gate 사양](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/features/kube_features.go)입니다
-이 사례를 모든 기능에 동일한 두 설정이 있다는 뜻으로 확대하지는 않습니다
-
-### Beta라는 이름만으로 기본값을 알 수는 없습니다
-
-[Feature Gates 문서](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)는 beta 기능이 대개 기본 활성이고 beta API 그룹은 기본 비활성이라고 설명합니다
-다만 개별 gate의 실제 기본값은 `FeatureSpec.Default`, 안정도는 `PreRelease`, 변경 가능 여부는 `LockToDefault`로 따로 정합니다
-
-GA 게이트라도 해당 버전의 사양이 잠겨 있는지 확인해야 합니다
-잠긴 기본값과 반대 값을 지정하면 설정 오류이고, GA·Deprecated 게이트를 명시하면 향후 제거에 관한 경고가 나올 수 있습니다
-게이트 이름 자체가 제거됐다면 그 이름을 계속 설정하는 것도 오류입니다
-버전별 사양의 선택에는 emulation version과 필요한 경우 minimum compatibility version도 관여합니다
-
-이 동작은 [`FeatureSpec`과 설정 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/featuregate/feature_gate.go)에 있습니다
-모든 기능이 GA까지 가는 것도 아니며, 기본 off의 Deprecated 사양으로 남는 기능도 있습니다
-
-API 서빙 쪽에서는 [`DefaultGenericAPIResourceConfigSource`와 `DefaultAPIResourceConfigSource`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controlplane/instance.go)가 기본 목록을 구성합니다
-기본 활성 목록에는 안정 버전을 넣고 alpha·beta는 별도 비활성 목록에 둡니다
-추가로 열 그룹·버전은 [`--runtime-config`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/api_enablement.go)에서 지정합니다
-
-기본 설정 목록에 API 버전 이름이 남아 있어도 그 버전을 실제로 다시 제공할 수 있는 것은 아닙니다
-예를 들어 기본 설정의 비활성 목록에는 flowcontrol의 예전 beta 버전이 남아 있지만, v1.37.1의 [flowcontrol 저장소 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/flowcontrol/rest/storage_flowcontrol.go)은 `v1`만 설치합니다
-설정 목록과 현재 서버가 구현한 경로를 함께 봐야 합니다
-
-새 beta API를 기본 비활성으로 바꾼 배경은 [KEP-3136](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-architecture/3136-beta-apis-off-by-default/README.md)에 나옵니다
-제안서는 당시 PRR 설문에서 90%가 넘는 클러스터 관리자가 프로덕션의 beta API를 켜 둔다고 답한 점과, 안정 버전으로 옮길 때의 부담을 이유로 듭니다
-이 수치는 현재 전체 클러스터의 사용률을 뜻하지 않습니다
-제안 자체도 기존 beta API와 그 후속 beta 버전은 예외로 두었으므로, 역사 전체를 “모든 beta API는 항상 off”로 요약하면 맞지 않습니다
+확장 서버의 장애는 discovery를 사용하는 다른 작업에도 영향을 줄 수 있습니다
+[Namespace 삭제](/essays/k8s-theory-deletion-lifecycle)처럼 삭제할 리소스 목록이 필요한 작업에서는 discovery 실패 때문에 정리가 끝나지 않을 수 있습니다
 
 ## 실패 신호가 가리키는 설정부터 확인합니다
 

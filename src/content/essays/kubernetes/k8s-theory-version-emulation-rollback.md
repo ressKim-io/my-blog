@@ -38,48 +38,13 @@ v1.37.1 바이너리도 emulated를 1.36으로 두고, min compat을 1.35로 두
 단, 이 설정이 실제 클러스터에 있는 모든 컴포넌트의 버전을 자동으로 조사해 일치시켜 주는 것은 아닙니다
 이 글에서 다루는 검증은 각 프로세스에 설정한 버전 값의 범위 검증입니다
 
-## 하한과 기본값은 함께 계산합니다
-
-[공식 compatibility 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/cluster-administration/compatibility-version.md)는 버전 호환성과 emulation 옵션이 v1.32부터 도입되었다고 설명합니다
-소스의 최소 버전 상수 `1.31`은 설정 하한을 계산할 때 쓰는 값이며, 기능이 도입된 릴리스와 구분해야 합니다
-
-[`kubeEffectiveVersionFloors`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/compatibility/version.go)는 binary보다 마이너 버전 세 단계 낮은 값과 `1.31` 중 더 높은 값을 하한으로 고릅니다
-v1.37 계열에서는 이 값이 `1.34`입니다
-
-| 값 | 설정 방법 | 기본값 | v1.37.1 바이너리의 허용 범위 |
-|---|---|---|---|
-| binary | 빌드로 결정 | 배포한 실행 파일의 버전 | 고정 |
-| emulated | `--emulated-version` | binary의 major·minor | `1.34 .. 1.37` |
-| min compat | `--min-compatibility-version` | `emulated - 1`, 하한보다 낮으면 하한으로 보정 | `1.34 .. emulated` |
-
-[`SetEmulationVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/compatibility/version.go)은 emulated를 설정하면서 기본 min compat도 다시 계산합니다
-emulated가 1.37이면 기본 min compat은 1.36이고, emulated가 하한인 1.34이면 기본 min compat도 1.34입니다
-1.33으로 더 내려가지는 않습니다
-
-플래그 값은 `major.minor` 형식입니다
-컴포넌트 이름을 생략하면 `kube`로 해석하므로 `--emulated-version=1.36`과 `--emulated-version=kube=1.36`은 같은 대상을 지정합니다
-
-두 플래그는 kube-apiserver, kube-controller-manager, kube-scheduler의 옵션에 연결되어 있습니다
-kubelet은 이 emulation 플래그를 제공하지 않습니다
-컨트롤 플레인의 설정을 바꿨다고 kubelet 바이너리가 이전 버전 동작을 흉내 내는 것은 아닙니다
-
-[`effectiveVersion.Validate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/compatibility/version.go)는 emulated가 하한과 binary 사이인지, min compat이 하한과 emulated 사이인지 검사합니다
-도움말에 min compat의 범위가 binary까지 표시되어 있어도, 실제로 낮춰 둔 emulated보다 큰 min compat을 지정하면 검증에서 거부합니다
+설정값을 낮추는 것만으로 이미 저장한 객체가 이전 서버가 읽을 형태로 바뀌지는 않습니다
+현재 동작을 고르는 설정과 저장 데이터의 호환성을 함께 봐야 하는 이유입니다
 
 ## emulated가 게이트의 단계와 기본값을 고릅니다
 
 **Feature gate**는 기능의 활성 여부를 제어하는 스위치입니다
 기능마다 하나의 기본값만 두는 것이 아니라, 버전별 `FeatureSpec` 목록에 단계와 기본값을 기록합니다
-
-[`featureSpecAtEmulationAndMinCompatVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/featuregate/feature_gate.go)은 목록의 뒤에서부터 다음 조건을 검사합니다
-
-1. 항목의 `Version`이 emulated보다 높으면 건너뜁니다
-2. 항목에 `MinCompatibilityVersion`이 있고 설정한 min compat이 그보다 낮으면 건너뜁니다
-3. 두 조건을 통과한 첫 항목을 선택합니다
-
-뒤에서 시작하므로 조건에 맞는 가장 최근 스펙을 바로 선택할 수 있습니다
-모든 항목을 건너뛰면 `Default: false`, `PreRelease: PreAlpha`를 반환합니다
-PreAlpha는 선택한 버전에 아직 없는 기능을 나타내며, 이를 `--feature-gates`로 지정하려고 하면 오류가 납니다
 
 실제 예로 [`ComponentStatusz`의 버전 목록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/zpages/features/kube_features.go)에는 두 항목이 있습니다
 `/statusz`는 컴포넌트의 시작 시각과 버전 등 상태 정보를 제공하는 경로입니다
@@ -92,6 +57,16 @@ PreAlpha는 선택한 버전에 아직 없는 기능을 나타내며, 이를 `--
 같은 v1.37.1 바이너리에서도 emulated에 따라 선택이 달라집니다
 문서에서 기본 on이라고 읽었어도 낮은 emulated로 실행한다면 이전 항목이 선택될 수 있습니다
 기본값을 읽을 때는 binary뿐 아니라 emulated와 명시적인 gate 설정을 함께 확인해야 합니다
+
+[`featureSpecAtEmulationAndMinCompatVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/featuregate/feature_gate.go)은 목록의 뒤에서부터 다음 조건을 검사합니다
+
+1. 항목의 `Version`이 emulated보다 높으면 건너뜁니다
+2. 항목에 `MinCompatibilityVersion`이 있고 설정한 min compat이 그보다 낮으면 건너뜁니다
+3. 두 조건을 통과한 첫 항목을 선택합니다
+
+뒤에서 시작하므로 조건에 맞는 가장 최근 스펙을 바로 선택할 수 있습니다
+모든 항목을 건너뛰면 `Default: false`, `PreRelease: PreAlpha`를 반환합니다
+PreAlpha는 선택한 버전에 아직 없는 기능을 나타내며, 이를 `--feature-gates`로 지정하려고 하면 오류가 납니다
 
 ### min compat 때문에 Beta의 기본 활성화가 미뤄질 수도 있습니다
 
@@ -131,41 +106,13 @@ min compat 조건이 있는 항목을 건너뛰었다고 해서 기능을 명시
 etcd에 이미 기록된 오브젝트를 지운다는 뜻은 아닙니다
 제공할 API 경로를 고르는 일과 저장할 API 버전을 고르는 일을 구분해야 합니다
 
-### 이후 버전을 함께 여는 경로는 두 가지입니다
-
-| 플래그 | 적용 방식 |
-|---|---|
-| `--emulation-forward-compatible` | 켜져 있는 beta 이상의 API를 바탕으로 같은 리소스의 우선순위가 더 높은 후속 버전을 자동 활성화 |
-| `--runtime-config-emulation-forward-compatible` | `--runtime-config`에서 명시적으로 활성화한 이후 API의 서빙을 허용 |
-
-첫 경로는 같은 리소스의 낮은 우선순위 버전이 이미 켜져 있어야 합니다
-예를 들어 v1beta1이 활성화되어 있을 때 후속 v1을 함께 제공할 수 있지만, 켜진 버전이 없는 그룹을 새로 여는 방식은 아닙니다
-Alpha API는 이 자동 활성화의 출발점에서 제외됩니다
-
-두 번째 경로 없이 emulated 이후 API를 runtime-config로 명시하면 기동 오류가 날 수 있습니다
-구현은 이후에 도입된 개별 리소스의 명시적 활성화와, 버전 안의 리소스가 모두 제외되는 경우를 검사합니다
-두 플래그 모두 emulated가 binary보다 낮은 경우에만 켤 수 있습니다
-
-명시적으로 Alpha API를 켠 상태에서 이전 버전을 emulation하면 [`APIEnablementOptions.ApplyTo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/api_enablement.go)가 경고를 남깁니다
-경고의 `unsupported, proceed at your own risk`는 호환성이 보장되지 않는다는 뜻입니다
-자동 활성화의 범위와 명시적 활성화 후 경고를 같은 결과로 취급하면 안 됩니다
-
-### OpenAPI의 버전 정보도 emulated를 받습니다
-
-OpenAPI는 API의 경로와 데이터 구조를 설명하는 문서입니다
-[`Config.Complete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/config.go)는 OpenAPI v2·v3를 완성하는 함수에 emulated를 전달합니다
-두 함수는 별도 지정이 없는 `info.version`을 이 값으로 채웁니다
-
-제공하지 않을 리소스를 REST storage 등록에서 제외하는 처리도 OpenAPI 모델 설치 전에 수행됩니다
-다만 `info.version`을 채우는 코드만으로 모든 필드 스키마가 과거 릴리스와 완전히 같아진다고 결론 내릴 수는 없습니다
-문서에 표시되는 버전과 API·필드별 동작의 호환 조건은 나눠 확인해야 합니다
-
 ## 저장 버전은 min compat을 먼저 보지만 예외가 있습니다
 
 저장한 데이터는 현재 API 서버가 종료된 뒤에도 남습니다
 그 데이터를 함께 실행하는 서버나 롤백한 서버가 다시 읽어야 하므로, 현재 서빙 동작만으로 저장 버전을 고르면 충분하지 않습니다
 
-앞 글의 `StorageVersion`이 어떤 API 버전으로 기록할지를 나타냈다면, 여기서는 그 버전을 선택할 기준을 살펴봅니다
+`StorageVersion`은 객체를 어떤 API 버전으로 기록할지를 나타냅니다
+이 버전도 현재 서빙 동작과 별도로 선택합니다
 v1.37.1의 [`emulatedStorageVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/storage/resource_encoding_config.go)은 우선순위가 높은 버전부터 **두 차례** 탐색합니다
 
 ![min compat 이하의 비 Alpha 저장 버전을 먼저 찾고, 없으면 emulated 이하의 버전에서 Alpha까지 포함해 다시 찾는 두 단계 선택](/diagrams/k8s-theory-version-emulation-rollback-2.svg)
@@ -229,6 +176,63 @@ min compat을 다시 낮춰도 이미 저장된 바이트와 CEL 표현식이 �
 
 이처럼 호환 범위를 남기기 위해 새 기능 사용을 미루는 것을 [초기 문서의 min compat 설명](https://github.com/kubernetes/website/commit/f0ca297ac692c70f20a0519a3e2d345707e4639d)에서는 *feature availability delay*라고 불렀습니다
 저장 버전 선택, 새 CEL 표현식에 허용하는 기능, 호환 조건이 붙은 gate의 기본값에서 새 기능 사용이 미뤄질 수 있습니다
+
+## 하한과 기본값은 함께 계산합니다
+
+[공식 compatibility 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/cluster-administration/compatibility-version.md)는 버전 호환성과 emulation 옵션이 v1.32부터 도입되었다고 설명합니다
+소스의 최소 버전 상수 `1.31`은 설정 하한을 계산할 때 쓰는 값이며, 기능이 도입된 릴리스와 구분해야 합니다
+
+[`kubeEffectiveVersionFloors`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/compatibility/version.go)는 binary보다 마이너 버전 세 단계 낮은 값과 `1.31` 중 더 높은 값을 하한으로 고릅니다
+v1.37 계열에서는 이 값이 `1.34`입니다
+
+| 값 | 설정 방법 | 기본값 | v1.37.1 바이너리의 허용 범위 |
+|---|---|---|---|
+| binary | 빌드로 결정 | 배포한 실행 파일의 버전 | 고정 |
+| emulated | `--emulated-version` | binary의 major·minor | `1.34 .. 1.37` |
+| min compat | `--min-compatibility-version` | `emulated - 1`, 하한보다 낮으면 하한으로 보정 | `1.34 .. emulated` |
+
+[`SetEmulationVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/compatibility/version.go)은 emulated를 설정하면서 기본 min compat도 다시 계산합니다
+emulated가 1.37이면 기본 min compat은 1.36이고, emulated가 하한인 1.34이면 기본 min compat도 1.34입니다
+1.33으로 더 내려가지는 않습니다
+
+플래그 값은 `major.minor` 형식입니다
+컴포넌트 이름을 생략하면 `kube`로 해석하므로 `--emulated-version=1.36`과 `--emulated-version=kube=1.36`은 같은 대상을 지정합니다
+
+두 플래그는 kube-apiserver, kube-controller-manager, kube-scheduler의 옵션에 연결되어 있습니다
+kubelet은 이 emulation 플래그를 제공하지 않습니다
+컨트롤 플레인의 설정을 바꿨다고 kubelet 바이너리가 이전 버전 동작을 흉내 내는 것은 아닙니다
+
+[`effectiveVersion.Validate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/compatibility/version.go)는 emulated가 하한과 binary 사이인지, min compat이 하한과 emulated 사이인지 검사합니다
+도움말에 min compat의 범위가 binary까지 표시되어 있어도, 실제로 낮춰 둔 emulated보다 큰 min compat을 지정하면 검증에서 거부합니다
+
+## 이후 버전을 함께 여는 경로는 두 가지입니다
+
+| 플래그 | 적용 방식 |
+|---|---|
+| `--emulation-forward-compatible` | 켜져 있는 beta 이상의 API를 바탕으로 같은 리소스의 우선순위가 더 높은 후속 버전을 자동 활성화 |
+| `--runtime-config-emulation-forward-compatible` | `--runtime-config`에서 명시적으로 활성화한 이후 API의 서빙을 허용 |
+
+첫 경로는 같은 리소스의 낮은 우선순위 버전이 이미 켜져 있어야 합니다
+예를 들어 v1beta1이 활성화되어 있을 때 후속 v1을 함께 제공할 수 있지만, 켜진 버전이 없는 그룹을 새로 여는 방식은 아닙니다
+Alpha API는 이 자동 활성화의 출발점에서 제외됩니다
+
+두 번째 경로 없이 emulated 이후 API를 runtime-config로 명시하면 기동 오류가 날 수 있습니다
+구현은 이후에 도입된 개별 리소스의 명시적 활성화와, 버전 안의 리소스가 모두 제외되는 경우를 검사합니다
+두 플래그 모두 emulated가 binary보다 낮은 경우에만 켤 수 있습니다
+
+명시적으로 Alpha API를 켠 상태에서 이전 버전을 emulation하면 [`APIEnablementOptions.ApplyTo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/api_enablement.go)가 경고를 남깁니다
+경고의 `unsupported, proceed at your own risk`는 호환성이 보장되지 않는다는 뜻입니다
+자동 활성화의 범위와 명시적 활성화 후 경고를 같은 결과로 취급하면 안 됩니다
+
+### OpenAPI의 버전 정보도 emulated를 받습니다
+
+OpenAPI는 API의 경로와 데이터 구조를 설명하는 문서입니다
+[`Config.Complete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/config.go)는 OpenAPI v2·v3를 완성하는 함수에 emulated를 전달합니다
+두 함수는 별도 지정이 없는 `info.version`을 이 값으로 채웁니다
+
+제공하지 않을 리소스를 REST storage 등록에서 제외하는 처리도 OpenAPI 모델 설치 전에 수행됩니다
+다만 `info.version`을 채우는 코드만으로 모든 필드 스키마가 과거 릴리스와 완전히 같아진다고 결론 내릴 수는 없습니다
+문서에 표시되는 버전과 API·필드별 동작의 호환 조건은 나눠 확인해야 합니다
 
 ## 구현과 문서, 실제 응답을 구분해야 합니다
 

@@ -43,6 +43,50 @@ kubelet은 API 서버에서 발급받은 토큰을 projected volume을 통해 �
 인증기의 응답에는 검증한 audience도 들어갈 수 있습니다
 audience는 토큰을 받을 서비스의 식별자이며, `user.Info`와는 별도로 전달됩니다
 
+## Pod bound token은 서명만 맞으면 유효한가
+
+API 서버는 JWT의 서명·issuer·audience·시간 조건과, 토큰이 묶인 객체의 상태를 함께 확인합니다
+issuer는 토큰 발급자입니다
+
+여기서 다루는 것은 Pod projected volume에 들어가는 Pod bound token입니다
+TokenRequest에는 Secret이나 Node에 직접 묶는 경로도 있으므로 모든 단기 ServiceAccount token을 Pod bound token이라고 부를 수는 없습니다
+
+다음은 claim 관계를 설명하는 예시이며 실제 토큰이나 실행 출력이 아닙니다
+issuer와 audience의 실제 값은 클러스터 설정에 달려 있습니다
+
+```yaml
+iss: "https://kubernetes.default.svc.cluster.local"
+sub: "system:serviceaccount:prod:web"
+aud: ["https://kubernetes.default.svc.cluster.local"]
+exp: "<만료 Unix 시각>"
+iat: "<발급 Unix 시각>"
+jti: "<토큰별 식별자>"
+kubernetes.io:
+  namespace: prod
+  serviceaccount: {name: web, uid: "<SA UID>"}
+  pod: {name: web-0, uid: "<Pod UID>"}
+  node: {name: node3, uid: "<Node UID>"}
+```
+
+Pod가 아직 Node에 배치되지 않았다면 `node` claim은 없을 수 있습니다
+객체 이름만으로 토큰의 대상을 고정할 수도 없습니다
+`web-0`을 지우고 같은 이름으로 다시 만들면 UID가 달라지므로, 옛 Pod UID에 묶인 토큰이 새 Pod의 토큰이 되지는 않습니다
+
+Pod bound token 인증에서는 ServiceAccount와 Pod의 존재·UID를 확인합니다
+객체가 없거나 UID가 다르면 실패합니다
+
+### audience가 맞으면 권한도 생길까
+
+audience는 수신 대상에 대한 조건이며 API 동작 권한이 아닙니다
+수신자는 발급자를 신뢰하는지와 audience가 자신에게 맞는지를 각각 확인해야 합니다
+서비스 A용 토큰을 B가 서명만 보고 받아들이면 A에 제시한 자격증명이 B에서도 재사용됩니다
+
+audience가 여러 개라면 수신자와 맞는 값이 그중 하나여야 합니다
+이 검사를 통과해도 Pod 목록을 읽는 등의 동작은 별도 인가가 필요합니다
+
+bound token도 여전히 bearer token입니다
+Pod UID와의 결합은 객체 수명을 검증하는 조건이지, 요청이 해당 Pod의 네트워크에서 왔다거나 요청자가 개인 키를 소유한다는 증명이 아닙니다
+
 ## 만들어진 신원은 어떻게 인가에 전달되나
 
 ServiceAccount `prod/web`의 토큰이 인증되면 다음과 같은 정보가 전달됩니다
@@ -58,8 +102,30 @@ ServiceAccount `prod/web`의 토큰이 인증되면 다음과 같은 정보가 �
 인가는 여기에 verb·resource·namespace 같은 요청 속성을 붙여 판단합니다
 팀별로 권한을 나누려면 인증된 그룹 등 인가가 받는 정보에 그 구분이 있어야 합니다
 
+## 삭제 중인 객체와 Node 바인딩은 따로 확인합니다
+
+Pod bound token이 참조하는 객체가 남아 있어도 `metadata.deletionTimestamp`가 현재 시각에서 기본 허용 오차 60초를 뺀 시각보다 앞서면 실패합니다
+
+이 60초는 validator가 삭제 중인 객체의 토큰을 거부할지 판단할 때 사용하는 허용 오차입니다
+모든 삭제에 반드시 60초를 기다린다는 뜻도, 삭제 후 60초 안에 모든 검증자에게 폐기가 반영된다는 보장도 아닙니다
+객체가 이미 없어졌다면 조회 실패로 거부될 수 있습니다
+
+Pod bound token의 `node` claim은 별도로 Node를 조회해 검증하지 않습니다
+Pod에 묶이지 않고 Node에 직접 묶인 토큰은 Node의 존재·UID·삭제 상태를 검사합니다
+Node 정보가 claim에 있다는 사실과 Node가 bound object라는 사실은 다릅니다
+
+| 기능 | 구분하는 동작 | GA 이력 |
+|---|---|---|
+| `ServiceAccountTokenPodNodeInfo` | Pod bound token에 Node 이름·UID를 싣기 | v1.32 |
+| `ServiceAccountTokenNodeBinding` | Node에 직접 토큰 묶기 | v1.33 |
+| `ServiceAccountTokenNodeBindingValidation` | Node bound token 인증 시 Node 검증 | v1.32 |
+
+확인한 v1.37.1 소스에서도 세 gate는 기본값 true에 잠긴 `LockToDefault` 상태입니다
+토큰에 Node 정보를 넣는 기능과, Node에 토큰을 묶고 그 상태를 검증하는 기능을 구분해야 합니다
+
 ## 파일이 갱신되면 요청의 토큰도 바뀔까
 
+Pod가 계속 실행되면 발급받은 토큰을 새로 받아야 합니다
 파일을 갱신하는 일과 애플리케이션이 그 파일을 다시 읽는 일은 별개입니다
 처음 읽은 문자열을 계속 보내면 kubelet이 새 토큰을 써도 실제 요청에는 옛 토큰이 실립니다
 
@@ -111,81 +177,6 @@ transport는 HTTP 요청을 전달하면서 인증 헤더 등을 처리합니다
 따라서 파일 갱신 여부만으로 요청의 자격증명이 교체됐다고 결론 내릴 수 없습니다
 애플리케이션이 어떤 transport와 재로딩 방식을 사용하는지도 확인해야 합니다
 
-## Secret 기반 legacy token은 어디서 갈라지나
-
-Secret 기반 장기 토큰은 보통 `exp`가 없고 audience별 제한을 표현하지 못합니다
-Secret을 읽을 권한이 있으면 토큰도 읽을 수 있으며, ServiceAccount·Secret과 연결되지만 Pod UID에는 묶이지 않습니다
-projected token은 TokenRequest로 발급하며, 별도 토큰 오브젝트를 저장하지 않습니다
-
-v1.24부터 ServiceAccount마다 Secret 기반 토큰을 자동 생성하지 않으며, 수동 장기 토큰 Secret은 계속 지원됩니다
-자동 생성된 미사용 legacy token은 v1.29부터 별도 정리 대상입니다
-legacy token을 아무 객체에도 묶이지 않은 영구 토큰이라고 일반화할 수는 없습니다
-이 조건은 [ServiceAccount 관리 공식 문서 저장본](https://github.com/kubernetes/website/blob/1ad9080d7d3ddd79e955b7dd653711c8f2caedb8/content/en/docs/reference/access-authn-authz/service-accounts-admin.md)과 [`legacyValidator.Validate`](https://github.com/kubernetes/kubernetes/blob/8aaeb4e53d1a489570afe94ef5258554de68897a/pkg/serviceaccount/legacy.go)에서 확인할 수 있습니다
-
-## Pod bound token은 서명만 맞으면 유효한가
-
-API 서버는 JWT의 서명·issuer·audience·시간 조건과, 토큰이 묶인 객체의 상태를 함께 확인합니다
-issuer는 토큰 발급자입니다
-
-여기서 다루는 것은 Pod projected volume에 들어가는 Pod bound token입니다
-TokenRequest에는 Secret이나 Node에 직접 묶는 경로도 있으므로 모든 단기 ServiceAccount token을 Pod bound token이라고 부를 수는 없습니다
-
-다음은 claim 관계를 설명하는 예시이며 실제 토큰이나 실행 출력이 아닙니다
-issuer와 audience의 실제 값은 클러스터 설정에 달려 있습니다
-
-```yaml
-iss: "https://kubernetes.default.svc.cluster.local"
-sub: "system:serviceaccount:prod:web"
-aud: ["https://kubernetes.default.svc.cluster.local"]
-exp: "<만료 Unix 시각>"
-iat: "<발급 Unix 시각>"
-jti: "<토큰별 식별자>"
-kubernetes.io:
-  namespace: prod
-  serviceaccount: {name: web, uid: "<SA UID>"}
-  pod: {name: web-0, uid: "<Pod UID>"}
-  node: {name: node3, uid: "<Node UID>"}
-```
-
-Pod가 아직 Node에 배치되지 않았다면 `node` claim은 없을 수 있습니다
-객체 이름만으로 토큰의 대상을 고정할 수도 없습니다
-`web-0`을 지우고 같은 이름으로 다시 만들면 UID가 달라지므로, 옛 Pod UID에 묶인 토큰이 새 Pod의 토큰이 되지는 않습니다
-
-### 객체 상태와 60초의 의미
-
-Pod bound token 인증에서는 ServiceAccount와 Pod의 존재·UID를 확인합니다
-객체가 없거나 UID가 다르면 실패합니다
-객체가 남아 있어도 `metadata.deletionTimestamp`가 현재 시각에서 기본 허용 오차 60초를 뺀 시각보다 앞서면 실패합니다
-
-이 60초는 validator가 삭제 중인 객체의 토큰을 거부할지 판단할 때 사용하는 허용 오차입니다
-모든 삭제에 반드시 60초를 기다린다는 뜻도, 삭제 후 60초 안에 모든 검증자에게 폐기가 반영된다는 보장도 아닙니다
-객체가 이미 없어졌다면 조회 실패로 거부될 수 있습니다
-
-Pod bound token의 `node` claim은 별도로 Node를 조회해 검증하지 않습니다
-Pod에 묶이지 않고 Node에 직접 묶인 토큰은 Node의 존재·UID·삭제 상태를 검사합니다
-Node 정보가 claim에 있다는 사실과 Node가 bound object라는 사실은 다릅니다
-
-| 기능 | 구분하는 동작 | GA 이력 |
-|---|---|---|
-| `ServiceAccountTokenPodNodeInfo` | Pod bound token에 Node 이름·UID를 싣기 | v1.32 |
-| `ServiceAccountTokenNodeBinding` | Node에 직접 토큰 묶기 | v1.33 |
-| `ServiceAccountTokenNodeBindingValidation` | Node bound token 인증 시 Node 검증 | v1.32 |
-
-확인한 v1.37.1 소스에서도 세 gate는 기본값 true에 잠긴 `LockToDefault` 상태입니다
-토큰에 Node 정보를 넣는 기능과, Node에 토큰을 묶고 그 상태를 검증하는 기능을 구분해야 합니다
-
-### audience가 맞으면 권한도 생길까
-
-audience는 수신 대상에 대한 조건이며 API 동작 권한이 아닙니다
-수신자는 발급자를 신뢰하는지와 audience가 자신에게 맞는지를 각각 확인해야 합니다
-서비스 A용 토큰을 B가 서명만 보고 받아들이면 A에 제시한 자격증명이 B에서도 재사용됩니다
-
-audience가 여러 개라면 수신자와 맞는 값이 그중 하나여야 합니다
-이 검사를 통과해도 Pod 목록을 읽는 등의 동작은 별도 인가가 필요합니다
-
-bound token도 여전히 bearer token입니다
-Pod UID와의 결합은 객체 수명을 검증하는 조건이지, 요청이 해당 Pod의 네트워크에서 왔다거나 요청자가 개인 키를 소유한다는 증명이 아닙니다
-
 ## 외부 서비스가 토큰을 받으면 무엇이 달라지나
 
 외부 서비스는 API 서버에 TokenReview를 요청하거나, JWT를 직접 검증할 수 있습니다
@@ -206,8 +197,20 @@ API 서버가 객체 상태를 확인한다는 말도 매 요청마다 etcd 최�
 API의 변경을 따라가며 로컬 사본을 관리하는 informer와 토큰 인증 캐시, 외부 서비스의 결과 캐시 때문에 폐기 반영이 늦어질 수 있습니다
 앞의 60초 조건을 전역적인 폐기 완료 시간으로 해석할 수 없는 이유입니다
 
+## Secret 기반 legacy token은 어디서 갈라지나
+
+Secret 기반 장기 토큰은 보통 `exp`가 없고 audience별 제한을 표현하지 못합니다
+Secret을 읽을 권한이 있으면 토큰도 읽을 수 있으며, ServiceAccount·Secret과 연결되지만 Pod UID에는 묶이지 않습니다
+projected token은 TokenRequest로 발급하며, 별도 토큰 오브젝트를 저장하지 않습니다
+
+v1.24부터 ServiceAccount마다 Secret 기반 토큰을 자동 생성하지 않으며, 수동 장기 토큰 Secret은 계속 지원됩니다
+자동 생성된 미사용 legacy token은 v1.29부터 별도 정리 대상입니다
+legacy token을 아무 객체에도 묶이지 않은 영구 토큰이라고 일반화할 수는 없습니다
+이 조건은 [ServiceAccount 관리 공식 문서 저장본](https://github.com/kubernetes/website/blob/1ad9080d7d3ddd79e955b7dd653711c8f2caedb8/content/en/docs/reference/access-authn-authz/service-accounts-admin.md)과 [`legacyValidator.Validate`](https://github.com/kubernetes/kubernetes/blob/8aaeb4e53d1a489570afe94ef5258554de68897a/pkg/serviceaccount/legacy.go)에서 확인할 수 있습니다
+
 ## 사람의 이름과 그룹은 어디서 오나
 
+Pod의 토큰에서 만든 이름·그룹이 인가의 입력이었듯, 사람의 자격증명도 같은 사용자 정보로 바뀝니다
 사람 사용자도 요청마다 자격증명을 검사해 신원으로 바꿉니다
 인증서의 `CN`은 username, `O`는 groups로 이어질 수 있습니다
 OIDC/JWT는 설정된 claim 매핑으로 이름과 그룹을 만듭니다

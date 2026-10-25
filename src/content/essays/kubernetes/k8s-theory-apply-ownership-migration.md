@@ -15,6 +15,7 @@ Deployment의 `spec.replicas`를 HPA에 맡기려면 사람이 관리하는 매�
 사람만 소유하던 필드를 먼저 빼면, Apply가 그 필드를 제거하고 Deployment 기본값 1을 채울 수 있습니다
 충돌 에러 없이도 원하는 복제본 수가 줄어드는 경우입니다
 
+SSA는 관리할 필드 집합을 서버에 선언하는 방식이며, 그 관리 주체를 구분하는 이름이 매니저입니다
 [앞 글](/essays/k8s-theory-server-side-apply)에서는 필드 소유권과 충돌 계산을 살펴봤습니다
 이번에는 소유권을 다른 매니저에게 넘기는 동안 값이 어떻게 달라질 수 있는지 확인하겠습니다
 
@@ -63,7 +64,7 @@ HPA가 소유권을 얻기 전에 사람이 필드를 빼고 Apply하면, 다른
 ![HPA가 replicas를 쓰기 전에 사람이 관리에서 빼는 경우와 HPA가 이미 소유한 경우의 차이](/diagrams/k8s-theory-apply-ownership-migration-1.svg)
 
 반대로 HPA가 이미 값을 바꿔 소유권을 얻었다면, 사람이 관리에서 빠져도 HPA의 값은 남습니다
-판단할 것은 HPA 오브젝트의 존재만이 아니라 그 시점의 값과 `managedFields`입니다
+판단할 것은 HPA 오브젝트의 존재만이 아니라 그 시점의 값과 필드별 소유권 기록인 `managedFields`입니다
 
 ### 기존 값을 유지하며 넘기는 두 방법
 
@@ -139,29 +140,6 @@ reconcile은 현재 상태를 원하는 상태에 맞추는 컨트롤러의 반�
 client-go에는 타입별 `ApplyConfiguration`, 클라이언트의 `Apply`·`ApplyStatus`, 특정 매니저 소유분을 뽑는 `Extract*` 함수가 생성돼 있습니다
 Deployment 예시는 [Apply 설정·Extract 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/applyconfigurations/apps/v1/deployment.go)과 [클라이언트 인터페이스](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/kubernetes/typed/apps/v1/deployment.go)에서 확인할 수 있습니다
 
-## 같은 내용을 Apply해도 항상 저장을 생략하지는 않습니다
-
-같은 매니페스트를 다시 보냈다는 사실과 서버의 최종 상태가 같다는 사실은 다릅니다
-값이 같아도 새 매니저가 공동 소유자가 됐다면 `managedFields`가 달라집니다
-Admission이나 기본값 적용 결과가 바뀌는 경우도 있습니다
-
-반대로 값과 소유권이 그대로인데 `managedFields.time`만 갱신됐다면, 그 시각 때문에 불필요한 저장이 생길 수 있습니다
-기본 처리 경로는 시각을 제외한 나머지가 같을 때 이전 시각을 복구합니다
-
-![반복 Apply에서 값과 소유권을 확인하고 시각을 복구한 뒤 동일한 저장 데이터를 생략하는 흐름](/diagrams/k8s-theory-apply-ownership-migration-2.svg)
-
-이 과정을 세 단계로 나눠 볼 수 있습니다
-
-1. structured merge는 현재 값과 병합 결과가 같으면 새 typed object 대신 nil을 반환할 수 있습니다
-2. `IgnoreManagedFieldsTimestampsTransformer`는 소유권 집합과 나머지 필드가 같고 시각만 달라졌다면 기존 시각을 복구합니다
-3. etcd의 `GuaranteedUpdate`는 직렬화한 데이터가 같고 기존 상태를 그대로 재사용할 수 있으면 쓰기를 생략합니다
-
-마지막 단계는 필요하면 etcd의 현재 상태를 다시 확인합니다
-저장 형식을 갱신해야 하는 상태라면 바이트가 같다는 이유만으로 생략하지 않습니다
-또한 v1.37.1에는 `KUBE_APISERVER_AVOID_NOOP_SSA_TIMESTAMP_UPDATES=false`로 시각 복구를 끄는 구현 분기가 있으므로, 이 최적화를 모든 서버 설정의 보장으로 볼 수는 없습니다
-
-근거는 [병합 결과 동등성 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/sigs.k8s.io/structured-merge-diff/v6/merge/update.go), [시각 복구 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/handlers/fieldmanager/equality.go), [저장소의 동일 데이터 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/store.go)입니다
-
 ## CSA에서 SSA로 바꾸는 처리는 한 곳에만 있지 않습니다
 
 client-side apply, 줄여서 CSA와 SSA는 기본 매니저 이름이 다릅니다
@@ -207,7 +185,33 @@ SSA를 한 번 실행했다는 이유만으로 CSA 복귀에 필요한 기록이
 
 근거는 [`lastAppliedUpdater.Apply`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/util/managedfields/internal/lastappliedupdater.go)와 kubectl의 `saveLastApplyAnnotationIfNecessary`입니다
 
+## 같은 내용을 Apply해도 항상 저장을 생략하지는 않습니다
+
+같은 매니페스트를 다시 보냈다는 사실과 서버의 최종 상태가 같다는 사실은 다릅니다
+값이 같아도 새 매니저가 공동 소유자가 됐다면 `managedFields`가 달라집니다
+Admission이나 기본값 적용 결과가 바뀌는 경우도 있습니다
+
+반대로 값과 소유권이 그대로인데 `managedFields.time`만 갱신됐다면, 그 시각 때문에 불필요한 저장이 생길 수 있습니다
+기본 처리 경로는 시각을 제외한 나머지가 같을 때 이전 시각을 복구합니다
+
+![반복 Apply에서 값과 소유권을 확인하고 시각을 복구한 뒤 동일한 저장 데이터를 생략하는 흐름](/diagrams/k8s-theory-apply-ownership-migration-2.svg)
+
+이 과정을 세 단계로 나눠 볼 수 있습니다
+
+1. structured merge는 현재 값과 병합 결과가 같으면 새 typed object 대신 nil을 반환할 수 있습니다
+2. `IgnoreManagedFieldsTimestampsTransformer`는 소유권 집합과 나머지 필드가 같고 시각만 달라졌다면 기존 시각을 복구합니다
+3. etcd의 `GuaranteedUpdate`는 직렬화한 데이터가 같고 기존 상태를 그대로 재사용할 수 있으면 쓰기를 생략합니다
+
+마지막 단계는 필요하면 etcd의 현재 상태를 다시 확인합니다
+저장 형식을 갱신해야 하는 상태라면 바이트가 같다는 이유만으로 생략하지 않습니다
+또한 v1.37.1에는 `KUBE_APISERVER_AVOID_NOOP_SSA_TIMESTAMP_UPDATES=false`로 시각 복구를 끄는 구현 분기가 있으므로, 이 최적화를 모든 서버 설정의 보장으로 볼 수는 없습니다
+
+근거는 [병합 결과 동등성 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/sigs.k8s.io/structured-merge-diff/v6/merge/update.go), [시각 복구 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/handlers/fieldmanager/equality.go), [저장소의 동일 데이터 검사](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/store.go)입니다
+
 ## managedFields 초기화는 문서와 구현을 구분해야 합니다
+
+기존 소유권을 다른 매니저로 넘기는 일과 소유권 기록 자체를 지우는 일은 다릅니다
+다음은 정상 인계 절차가 아니라 기록 초기화 요청을 해석할 때 확인할 조건입니다
 
 오브젝트 본체에 대한 Apply 이외의 쓰기 요청에서는 `managedFields`를 직접 초기화할 수 있습니다
 `[{}]`처럼 빈 항목 하나를 담은 목록은 명시적인 초기화 값입니다

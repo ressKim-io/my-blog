@@ -35,6 +35,7 @@ API 서버는 HTTP 요청에서 다음 속성을 얻습니다
 | namespace | `prod` |
 | name | 빈 값. 특정 이름이 없는 목록 요청 |
 
+Role은 허용할 동작을 담고, Binding은 그 규칙을 적용할 신원과 범위를 연결합니다
 설정된 authorizer 체인이 이 신원과 속성을 받습니다
 이 ServiceAccount에 Binding으로 `prod`의 `list pods` 권한이 주어졌다면 RBAC이 `Allow`를 낼 수 있습니다
 앞선 authorizer가 결론을 내리지 않았다면 이 허용으로 인가를 통과합니다
@@ -42,6 +43,29 @@ API 서버는 HTTP 요청에서 다음 속성을 얻습니다
 RBAC이 비교한 것은 요청의 속성입니다
 어떤 Pod가 결과에 포함될지는 뒤의 목록 처리 경로가 정합니다
 RBAC이 목록에 담길 Pod의 내용을 하나씩 검사하는 것은 아닙니다
+
+## Role과 Binding이 권한 범위를 나누는 방식
+
+Role과 ClusterRole은 허용할 동작을 적습니다
+Binding은 그 규칙을 적용할 신원과 범위를 정합니다
+ClusterRole을 정의하기만 해서는 아무 신원에도 권한을 주지 않습니다
+
+| 규칙 객체 | namespace X의 RoleBinding으로 연결 | ClusterRoleBinding으로 연결 |
+|---|---|---|
+| namespace X의 Role | X에서 유효 | 연결 불가 |
+| ClusterRole | X 안의 namespaced resource에 적용 | 규칙에 따라 모든 namespace·cluster-scoped resource·non-resource URL에 적용 |
+
+공통 ClusterRole을 `team-a`와 `team-b`의 RoleBinding에서 각각 참조하면 규칙을 복제하지 않고 대상 범위를 나눌 수 있습니다
+같은 규칙을 ClusterRoleBinding으로 부여하면 namespace 하나에 묶이지 않는 권한이 됩니다
+
+RoleBinding의 namespace는 **권한을 행사할 대상의 범위**입니다
+권한을 받을 대상인 subject가 ServiceAccount라면, 그 ServiceAccount의 namespace와 같을 필요는 없습니다
+`team-a`의 ServiceAccount를 `prod`의 RoleBinding에 적으면 그 신원에 `prod` 안의 권한을 줄 수 있습니다
+
+여러 namespace의 RoleBinding을 받았다고 `/api/v1/pods` 같은 전체 namespace 목록 요청까지 자동 허용되지는 않습니다
+이 요청의 namespace 속성은 비어 있습니다
+RBAC은 namespace별로 읽을 수 있는 Pod를 합쳐 부분 목록을 만들어 주지 않습니다
+cluster-scoped resource와 전체 namespace 목록은 서로 다른 대상이지만, namespace RoleBinding만으로 요청 범위를 허용할 수 없다는 점은 같습니다
 
 ## RBAC 규칙은 무엇을 비교하나
 
@@ -79,29 +103,6 @@ PATCH는 `patch`로 인가되므로 `update` 권한만으로 자동 통과하지
 뒤에 `/log`가 붙으면 `subresource=log`가 추가됩니다
 그래서 `get pods` 권한만으로 `get pods/log`를 허용하지 않습니다
 `deployments/scale`도 별도 하위 resource 권한입니다
-
-## Role과 Binding이 권한 범위를 나누는 방식
-
-Role과 ClusterRole은 허용할 동작을 적습니다
-Binding은 그 규칙을 적용할 신원과 범위를 정합니다
-ClusterRole을 정의하기만 해서는 아무 신원에도 권한을 주지 않습니다
-
-| 규칙 객체 | namespace X의 RoleBinding으로 연결 | ClusterRoleBinding으로 연결 |
-|---|---|---|
-| namespace X의 Role | X에서 유효 | 연결 불가 |
-| ClusterRole | X 안의 namespaced resource에 적용 | 규칙에 따라 모든 namespace·cluster-scoped resource·non-resource URL에 적용 |
-
-공통 ClusterRole을 `team-a`와 `team-b`의 RoleBinding에서 각각 참조하면 규칙을 복제하지 않고 대상 범위를 나눌 수 있습니다
-같은 규칙을 ClusterRoleBinding으로 부여하면 namespace 하나에 묶이지 않는 권한이 됩니다
-
-RoleBinding의 namespace는 **권한을 행사할 대상의 범위**입니다
-권한을 받을 대상인 subject가 ServiceAccount라면, 그 ServiceAccount의 namespace와 같을 필요는 없습니다
-`team-a`의 ServiceAccount를 `prod`의 RoleBinding에 적으면 그 신원에 `prod` 안의 권한을 줄 수 있습니다
-
-여러 namespace의 RoleBinding을 받았다고 `/api/v1/pods` 같은 전체 namespace 목록 요청까지 자동 허용되지는 않습니다
-이 요청의 namespace 속성은 비어 있습니다
-RBAC은 namespace별로 읽을 수 있는 Pod를 합쳐 부분 목록을 만들어 주지 않습니다
-cluster-scoped resource와 전체 namespace 목록은 서로 다른 대상이지만, namespace RoleBinding만으로 요청 범위를 허용할 수 없다는 점은 같습니다
 
 ## RBAC의 허용 누적과 체인의 첫 결론은 다르다
 
@@ -177,11 +178,13 @@ authorizer가 반환 객체를 하나씩 숨기는 구조가 아닙니다
 `team=a` label을 소유권의 근거로 사용한다면 누가 그 label을 쓸 수 있는지 별도 쓰기 정책도 필요합니다
 정해진 이름 하나의 허용과 “내가 소유한 Pod 전체”의 동적 허용은 같은 기능이 아닙니다
 
-## 규칙을 만들고 위임하는 일도 검사한다
+## 역할의 규칙을 자동으로 모으는 경우
 
 `aggregationRule`이 있는 ClusterRole의 `rules`는 aggregation controller가 계산합니다
 selector에 맞는 다른 ClusterRole의 규칙을 모아 채우므로, `aggregationRule`이 있는 ClusterRole의 `rules`를 직접 수정해도 controller가 덮어쓸 수 있습니다
 예를 들어 CRD operator가 자기 resource의 읽기 규칙에 집계 label을 붙이면 기본 `view` 역할에 포함되도록 구성할 수 있습니다
+
+## 규칙을 만들고 위임하는 일도 검사한다
 
 Role을 생성할 수 있다는 이유로 임의의 권한을 그 Role에 쓸 수 있다면 스스로 권한을 키울 수 있습니다
 이를 막기 위해 Role·ClusterRole을 생성하거나 수정할 때는 그 안의 권한을 이미 갖고 있거나 해당 범위의 `escalate` 권한이 있어야 합니다

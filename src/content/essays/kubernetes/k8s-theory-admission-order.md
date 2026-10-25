@@ -40,38 +40,6 @@ PATCH는 변경안을 적용한 결과를 대상으로 UPDATE 또는 CREATE admi
 
 처리 순서는 [`createHandler`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/handlers/create.go), [`BeforeCreate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/create.go), [`Store.create`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go)에서 확인할 수 있습니다
 
-## 플러그인 목록 하나를 두 단계에서 사용합니다
-
-kube-apiserver에는 실행 순서가 정해진 admission 플러그인 목록이 있습니다
-mutating 단계에서는 현재 operation을 처리할 수 있고 `MutationInterface`를 구현한 플러그인의 `Admit`를 호출합니다
-validating 단계에서는 같은 목록에서 `ValidationInterface`를 구현한 플러그인의 `Validate`를 호출합니다
-
-각 단계는 참여한 플러그인이 오류를 반환하면 멈춥니다
-두 인터페이스를 모두 구현한 플러그인은 양쪽에 참여하지만, 목록에 있다는 이유로 무조건 두 번 호출되는 것은 아닙니다
-
-`--enable-admission-plugins`는 어떤 플러그인을 켤지 정합니다
-쉼표로 나열한 순서로 실행 순서를 다시 정하는 옵션은 아닙니다
-
-| 플러그인 | 소스에서 확인한 참여 방식 | 주로 판단하거나 바꾸는 내용 |
-|---|---|---|
-| `NamespaceLifecycle` | `Admit` | namespace 존재·상태와 일부 삭제 제한 |
-| `LimitRanger` | `Admit` + `Validate` | 자원 기본값과 최소·최대·비율 제약 |
-| `ServiceAccount` | `Admit` + `Validate` | Pod의 ServiceAccount와 토큰 volume 명세 |
-| `NodeRestriction` | `Admit` | node 신원이 바꿀 수 있는 대상·내용 |
-| `Priority` | `Admit` + `Validate` | Pod priority 계산과 PriorityClass 제약 |
-| `DefaultStorageClass` | `Admit` | PVC의 기본 StorageClass |
-| `PodSecurity` | `Validate` | Pod Security Standards 충족 여부 |
-| `ResourceQuota` | `Validate` | quota 검사와 사용량 갱신 |
-
-이 표는 전체 플러그인이나 기본 활성 목록을 나열한 것이 아닙니다
-실제 참여 여부는 서버 설정과 처리하는 operation에도 달려 있습니다
-
-특히 `NamespaceLifecycle`과 `NodeRestriction`은 내용을 검사해 거부하는 기능이지만, 소스에서는 mutating 단계의 `Admit`로 참여합니다
-공식 문서의 기능 분류인 `Type: Validating`과 실행 인터페이스를 구분해야 합니다
-**mutating과 validating을 나누는 기준은 요청 오브젝트를 바꿀 수 있는지이며, 양쪽 모두 거부할 수 있습니다**
-
-[`chain.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/chain.go)는 인터페이스별 호출을, [`AllOrderedPlugins`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubeapiserver/options/plugins.go)는 실행 순서를 정의합니다
-
 ## 기본값을 채운 뒤에도 검사가 남습니다
 
 ### ServiceAccount는 토큰 파일이 아니라 명세를 넣습니다
@@ -108,22 +76,37 @@ API 타입의 기본값 처리도 값을 채울 수 있습니다
 `Priority`도 PriorityClass를 바탕으로 Pod의 정수 priority와 관련 정책을 정합니다
 존재하지 않는 class를 참조하거나 허용되지 않은 priority를 지정하면 mutating 경로에서 거부될 수 있습니다
 
-### PVC는 미지정과 빈 문자열의 뜻이 다릅니다
+## 플러그인 목록 하나를 두 단계에서 사용합니다
 
-`DefaultStorageClass`는 PVC의 `storageClassName`이 미지정됐을 때 기본 class를 선택할 수 있습니다
-명시적인 빈 문자열 `""`은 class를 지정하지 않겠다는 뜻이므로 그대로 둡니다
+kube-apiserver에는 실행 순서가 정해진 admission 플러그인 목록이 있습니다
+mutating 단계에서는 현재 operation을 처리할 수 있고 `MutationInterface`를 구현한 플러그인의 `Admit`를 호출합니다
+validating 단계에서는 같은 목록에서 `ValidationInterface`를 구현한 플러그인의 `Validate`를 호출합니다
 
-| PVC의 입력과 현재 상태 | admission의 처리 |
-|---|---|
-| `storageClassName` 미지정, 기본 class 존재 | 기본 class를 채울 수 있음 |
-| `storageClassName` 미지정, 기본 class 없음 | 미지정 상태로 통과 가능 |
-| `storageClassName: ""` | 빈 문자열 유지 |
+각 단계는 참여한 플러그인이 오류를 반환하면 멈춥니다
+두 인터페이스를 모두 구현한 플러그인은 양쪽에 참여하지만, 목록에 있다는 이유로 무조건 두 번 호출되는 것은 아닙니다
 
-나중에 기본 class가 생기면 controller가 미지정 PVC에 값을 채우는 별도 경로도 있습니다
-결과에 기본값이 보인다는 사실만으로 admission과 controller 중 누가 바꿨는지 알 수는 없습니다
+`--enable-admission-plugins`는 어떤 플러그인을 켤지 정합니다
+쉼표로 나열한 순서로 실행 순서를 다시 정하는 옵션은 아닙니다
 
-구현은 [ServiceAccount](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/serviceaccount/admission.go), [LimitRanger](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/limitranger/admission.go), [Priority](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/priority/admission.go), [DefaultStorageClass](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/storage/storageclass/setdefault/admission.go)에서 확인했습니다
-기본 class의 사후 지정은 [PV controller](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/pv_controller.go)가 담당합니다
+| 플러그인 | 소스에서 확인한 참여 방식 | 주로 판단하거나 바꾸는 내용 |
+|---|---|---|
+| `NamespaceLifecycle` | `Admit` | namespace 존재·상태와 일부 삭제 제한 |
+| `LimitRanger` | `Admit` + `Validate` | 자원 기본값과 최소·최대·비율 제약 |
+| `ServiceAccount` | `Admit` + `Validate` | Pod의 ServiceAccount와 토큰 volume 명세 |
+| `NodeRestriction` | `Admit` | node 신원이 바꿀 수 있는 대상·내용 |
+| `Priority` | `Admit` + `Validate` | Pod priority 계산과 PriorityClass 제약 |
+| `DefaultStorageClass` | `Admit` | PVC의 기본 StorageClass |
+| `PodSecurity` | `Validate` | Pod Security Standards 충족 여부 |
+| `ResourceQuota` | `Validate` | quota 검사와 사용량 갱신 |
+
+이 표는 전체 플러그인이나 기본 활성 목록을 나열한 것이 아닙니다
+실제 참여 여부는 서버 설정과 처리하는 operation에도 달려 있습니다
+
+특히 `NamespaceLifecycle`과 `NodeRestriction`은 내용을 검사해 거부하는 기능이지만, 소스에서는 mutating 단계의 `Admit`로 참여합니다
+공식 문서의 기능 분류인 `Type: Validating`과 실행 인터페이스를 구분해야 합니다
+**mutating과 validating을 나누는 기준은 요청 오브젝트를 바꿀 수 있는지이며, 양쪽 모두 거부할 수 있습니다**
+
+[`chain.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/chain.go)는 인터페이스별 호출을, [`AllOrderedPlugins`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubeapiserver/options/plugins.go)는 실행 순서를 정의합니다
 
 ## 값을 바꾸지 않아도 mutating 단계에서 거부할 수 있습니다
 
@@ -142,6 +125,7 @@ Node authorizer가 쓰기 API를 허용했더라도 요청 본문의 모든 변�
 
 ## 뒤에서 바꾼 내용을 앞의 플러그인이 다시 보는 경우
 
+webhook은 API 서버가 외부 서비스에 admission 판단을 맡기는 방식입니다
 플러그인 목록에서 `PodSecurity`는 `MutatingAdmissionWebhook`보다 앞에 있습니다
 그렇다고 PodSecurity가 webhook의 변경 전 오브젝트만 검사하는 것은 아닙니다
 Pod CREATE에서는 mutating 단계가 먼저 끝나고 validating 단계에서 PodSecurity를 실행합니다
@@ -190,21 +174,6 @@ server dry-run은 quota 적합성을 검사하되 사용량을 갱신하지 않�
 **validating이 요청 오브젝트를 바꾸지 않는다는 말은 다른 객체의 상태도 전혀 갱신하지 않는다는 뜻이 아닙니다**
 이 차이는 [quota evaluator](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/resourcequota/controller.go)와 [ResourceQuota controller](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/resourcequota/resource_quota_controller.go)에서 드러납니다
 
-## Admission이 넣은 필드의 소유자는 자동으로 생기지 않습니다
-
-`managedFields`는 어떤 작성자가 어떤 필드를 관리하는지 기록합니다
-일반 CREATE에서는 이 기록을 계산하는 field manager 처리가 mutating admission보다 앞에 있습니다
-따라서 admission이 필드를 추가해도 플러그인 이름의 관리자가 자동으로 생기지는 않습니다
-
-다만 admission이 바꾼 필드에 이미 소유 기록이 있다면, 값을 바꿨다고 그 기록까지 자동으로 없어지지는 않습니다
-
-사용자가 보내지 않은 필드를 모두 사용자의 apply 의도로 처리하면, 다음 apply에서 그 필드를 생략했을 때 삭제·충돌의 의미가 달라질 수 있습니다
-필드 값과 소유 기록을 구분해야 하는 이유입니다
-
-서버는 admission이 `managedFields` 자체를 잘못 바꾸면 이전 값을 복구하고 경고합니다
-이 보호도 새 필드의 소유자를 대신 만드는 기능은 아닙니다
-[`managedFieldsValidatingAdmissionController`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/handlers/fieldmanager/admission.go)에서 이 처리를 확인했습니다
-
 ## Deployment는 생성됐는데 Pod는 거부될 수 있습니다
 
 PodSecurity Admission, 줄여서 PSA는 Pod Security Standards를 적용하는 내장 플러그인입니다
@@ -231,6 +200,38 @@ namespace의 정책을 강화해도 기존 Pod 전체에 admission을 다시 실
 namespace label 변경 때 기존 Pod의 위반을 살펴 경고할 수 있지만, 해당 Pod를 자동 삭제하는 기능은 아닙니다
 
 [PSA 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/pod-security-admission/admission/admission.go)의 `ValidatePodController`와 `EvaluatePod`에서 workload의 `enforce=false` 경로를 확인할 수 있습니다
+
+## PVC는 미지정과 빈 문자열의 뜻이 다릅니다
+
+`DefaultStorageClass`는 PVC의 `storageClassName`이 미지정됐을 때 기본 class를 선택할 수 있습니다
+명시적인 빈 문자열 `""`은 class를 지정하지 않겠다는 뜻이므로 그대로 둡니다
+
+| PVC의 입력과 현재 상태 | admission의 처리 |
+|---|---|
+| `storageClassName` 미지정, 기본 class 존재 | 기본 class를 채울 수 있음 |
+| `storageClassName` 미지정, 기본 class 없음 | 미지정 상태로 통과 가능 |
+| `storageClassName: ""` | 빈 문자열 유지 |
+
+나중에 기본 class가 생기면 controller가 미지정 PVC에 값을 채우는 별도 경로도 있습니다
+결과에 기본값이 보인다는 사실만으로 admission과 controller 중 누가 바꿨는지 알 수는 없습니다
+
+구현은 [ServiceAccount](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/serviceaccount/admission.go), [LimitRanger](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/limitranger/admission.go), [Priority](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/priority/admission.go), [DefaultStorageClass](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/storage/storageclass/setdefault/admission.go)에서 확인했습니다
+기본 class의 사후 지정은 [PV controller](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/volume/persistentvolume/pv_controller.go)가 담당합니다
+
+## Admission이 넣은 필드의 소유자는 자동으로 생기지 않습니다
+
+`managedFields`는 어떤 작성자가 어떤 필드를 관리하는지 기록합니다
+일반 CREATE에서는 이 기록을 계산하는 field manager 처리가 mutating admission보다 앞에 있습니다
+따라서 admission이 필드를 추가해도 플러그인 이름의 관리자가 자동으로 생기지는 않습니다
+
+다만 admission이 바꾼 필드에 이미 소유 기록이 있다면, 값을 바꿨다고 그 기록까지 자동으로 없어지지는 않습니다
+
+사용자가 보내지 않은 필드를 모두 사용자의 apply 의도로 처리하면, 다음 apply에서 그 필드를 생략했을 때 삭제·충돌의 의미가 달라질 수 있습니다
+필드 값과 소유 기록을 구분해야 하는 이유입니다
+
+서버는 admission이 `managedFields` 자체를 잘못 바꾸면 이전 값을 복구하고 경고합니다
+이 보호도 새 필드의 소유자를 대신 만드는 기능은 아닙니다
+[`managedFieldsValidatingAdmissionController`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/handlers/fieldmanager/admission.go)에서 이 처리를 확인했습니다
 
 ## 응답 코드와 메시지를 함께 봅니다
 

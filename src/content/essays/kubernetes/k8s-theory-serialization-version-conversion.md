@@ -46,6 +46,47 @@ API 서버가 요청을 디코딩한다고 하면 JSON을 Go 구조체로 읽는
 storing <resource> in <storage version>, reading as <memory version> from <config>
 ```
 
+## 기본값은 요청받은 버전에서 먼저 채웁니다
+
+일반적인 버전 코덱의 순서는 **디코딩, 기본값 적용, 대상 버전 변환**입니다
+[`codec.Decode`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/runtime/serializer/versioning/versioning.go)는 디코딩한 객체에 defaulter를 적용한 다음 `Convert` 또는 `ConvertToVersion`을 호출합니다
+
+버전마다 필드와 기본값의 의미가 다를 수 있기 때문입니다
+다른 타입으로 변환한 뒤에는 원래 버전에만 있던 필드나 표현을 그대로 다루기 어려울 수 있습니다
+기본값을 채우는 일반 함수가 `pkg/apis/core/v1/defaults.go`처럼 버전 패키지에 놓이는 이유입니다
+
+다만 기본값 적용이 언제나 입력의 누락과 명시적인 빈 값을 구별한다는 뜻은 아닙니다
+[`SetDefaults_Pod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/defaults.go)는 `enableServiceLinks`의 포인터가 `nil`인지 확인하지만, `SetDefaults_PodSpec`의 `dnsPolicy`는 문자열이 비었는지 확인합니다
+누락된 값과 명시적인 빈 값을 구분할 수 있는지는 필드 타입과 디코딩·기본값 로직에 달려 있습니다
+
+일부 기본값을 변환 과정에서 채우는 예외도 있습니다
+[`autoscaling/v1`의 HPA 변환](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/autoscaling/v1/conversion.go)은 변환 뒤 Metrics가 비어 있으면 기본 CPU 사용률 메트릭을 구성합니다
+일반 코덱의 순서와 개별 변환 함수의 호환성 처리를 나눠 읽어야 합니다
+
+## 가운데 타입 하나가 버전 사이의 연결 수를 줄입니다
+
+외부에 제공하거나 영구 저장하는 표현은 호환성을 유지해야 합니다
+내부 타입의 구조를 외부에 그대로 제공하지 않으면, 내부 구현을 바꾸더라도 변환을 통해 외부 버전과 저장 데이터의 호환성을 유지할 수 있습니다
+
+외부 버전이 4개이고 모든 방향의 변환을 직접 만든다고 가정하면 `4 × 3 = 12`개의 방향이 필요합니다
+각 버전을 가운데 타입 하나와 연결하면 버전마다 들어오는 방향과 나가는 방향만 필요하므로 `2 × 4 = 8`개입니다
+일반화하면 `n × (n - 1)`과 `2n`의 차이입니다
+
+이처럼 공통 타입을 중심으로 버전들을 연결하는 구조를 hub-and-spoke라고 합니다
+
+![외부 버전 네 개가 공통 내부 타입과 양방향으로 연결되어 변환 방향 여덟 개를 만드는 구조](/diagrams/k8s-theory-serialization-version-conversion-2.svg)
+
+v1.37.1 소스의 `flowcontrol.apiserver.k8s.io`에는 `v1`, `v1beta1`, `v1beta2`, `v1beta3` 패키지가 남아 있습니다
+[`FlowSchema` 변환 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/flowcontrol/v1/zz_generated.conversion.go)는 외부 `v1` 타입과 내부 `flowcontrol` 타입을 연결합니다
+`resource.k8s.io`에도 `v1`, `v1alpha3`, `v1beta1`, `v1beta2` 패키지가 있습니다
+
+이것은 코드에 남은 패키지 수이며, 모두 현재 API로 제공한다는 뜻은 아닙니다
+예를 들어 `flowcontrol.apiserver.k8s.io/v1beta3`은 [v1.32부터 제공되지 않습니다](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/using-api/deprecation-guide.md#v1-32)
+
+내부 타입을 두면 그 타입을 대상으로 작성한 검증도 공유할 수 있습니다
+다만 현재 Kubernetes의 모든 검증이 내부 타입에서만 이루어진다는 뜻은 아닙니다
+버전이 있는 타입에 검증 코드를 생성하는 방식도 있으며, 이 변화는 내부 타입을 줄이려는 설계의 근거 중 하나입니다
+
 ## __internal은 클라이언트에게 제공하는 API 버전이 아닙니다
 
 `__internal`은 서버 안에서 사용하는 타입을 등록할 때 쓰는 버전 이름입니다
@@ -67,65 +108,6 @@ GVK는 API 그룹·버전·Kind를 묶은 식별자입니다
 그렇다고 GVK를 지운 객체가 Go에서 어떤 방법으로도 직렬화될 수 없다는 뜻은 아닙니다
 지원하는 API 경로가 내부 버전을 제공하지 않고, 정상 응답·저장 경로가 외부 버전으로 바꿔 내보낸다는 뜻입니다
 `__internal`을 숨겨진 API endpoint로 취급하면 안 됩니다
-
-외부에 제공하거나 영구 저장하는 표현은 호환성을 유지해야 합니다
-내부 타입의 구조를 외부에 그대로 제공하지 않으면, 내부 구현을 바꾸더라도 변환을 통해 외부 버전과 저장 데이터의 호환성을 유지할 수 있습니다
-
-## 가운데 타입 하나가 버전 사이의 연결 수를 줄입니다
-
-외부 버전이 4개이고 모든 방향의 변환을 직접 만든다고 가정하면 `4 × 3 = 12`개의 방향이 필요합니다
-각 버전을 가운데 타입 하나와 연결하면 버전마다 들어오는 방향과 나가는 방향만 필요하므로 `2 × 4 = 8`개입니다
-일반화하면 `n × (n - 1)`과 `2n`의 차이입니다
-
-이처럼 공통 타입을 중심으로 버전들을 연결하는 구조를 hub-and-spoke라고 합니다
-
-![외부 버전 네 개가 공통 내부 타입과 양방향으로 연결되어 변환 방향 여덟 개를 만드는 구조](/diagrams/k8s-theory-serialization-version-conversion-2.svg)
-
-v1.37.1 소스의 `flowcontrol.apiserver.k8s.io`에는 `v1`, `v1beta1`, `v1beta2`, `v1beta3` 패키지가 남아 있습니다
-[`FlowSchema` 변환 함수](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/flowcontrol/v1/zz_generated.conversion.go)는 외부 `v1` 타입과 내부 `flowcontrol` 타입을 연결합니다
-`resource.k8s.io`에도 `v1`, `v1alpha3`, `v1beta1`, `v1beta2` 패키지가 있습니다
-
-이것은 코드에 남은 패키지 수이며, 모두 현재 API로 제공한다는 뜻은 아닙니다
-예를 들어 `flowcontrol.apiserver.k8s.io/v1beta3`은 [v1.32부터 제공되지 않습니다](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/using-api/deprecation-guide.md#v1-32)
-
-내부 타입을 두면 그 타입을 대상으로 작성한 검증도 공유할 수 있습니다
-다만 현재 Kubernetes의 모든 검증이 내부 타입에서만 이루어진다는 뜻은 아닙니다
-버전이 있는 타입에 검증 코드를 생성하는 방식도 있으며, 이 변화는 내부 타입을 줄이려는 설계의 근거 중 하나입니다
-
-### 내부 타입을 줄이는 작업과 hub를 없애는 일은 다릅니다
-
-[KEP-6164](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-api-machinery/6164-internal-type-elimination/README.md)는 별도의 내부 타입을 유지하는 비용을 줄이려는 제안입니다
-요청·저장·watch 경로에서 반복하는 변환과 메모리 할당, 그룹마다 추가 타입·생성 코드를 유지하는 부담을 다룹니다
-
-확인한 KEP는 작업을 두 단계로 나눕니다
-
-1. 내부 타입과 안정된 외부 타입의 메모리 배치를 같게 만들어 변환 비용을 줄입니다
-2. 내부 타입을 외부 타입의 Go alias로 바꾸고 `__internal` 등록을 없애, 버전이 있는 타입을 hub로 사용합니다
-
-KEP의 v1.37 목표는 첫 단계입니다
-[메타데이터](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-api-machinery/6164-internal-type-elimination/kep.yaml)는 `status: implementable`, `stage: stable`, 목표 버전 v1.37로 기록하지만, 이것만으로 모든 API의 내부 타입 제거가 끝났다고 판단할 수는 없습니다
-이 작업에는 런타임 feature gate가 없으며 리소스별 변경이 합쳐질 때 적용됩니다
-
-실제로 확인한 v1.37.1의 [`flowcontrol/types.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/flowcontrol/types.go)에는 내부 `FlowSchema` 구조체가 남아 있습니다
-생성된 변환 코드에는 메모리 구조가 같은 일부 타입을 `unsafe.Pointer`로 변환하는 경로도 있습니다
-내부 타입이 존재한다는 사실과 변환마다 모든 필드를 새로 할당한다는 주장은 구분해야 합니다
-
-## 기본값은 요청받은 버전에서 먼저 채웁니다
-
-일반적인 버전 코덱의 순서는 **디코딩, 기본값 적용, 대상 버전 변환**입니다
-[`codec.Decode`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/runtime/serializer/versioning/versioning.go)는 디코딩한 객체에 defaulter를 적용한 다음 `Convert` 또는 `ConvertToVersion`을 호출합니다
-
-버전마다 필드와 기본값의 의미가 다를 수 있기 때문입니다
-다른 타입으로 변환한 뒤에는 원래 버전에만 있던 필드나 표현을 그대로 다루기 어려울 수 있습니다
-기본값을 채우는 일반 함수가 `pkg/apis/core/v1/defaults.go`처럼 버전 패키지에 놓이는 이유입니다
-
-다만 기본값 적용이 언제나 입력의 누락과 명시적인 빈 값을 구별한다는 뜻은 아닙니다
-[`SetDefaults_Pod`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/core/v1/defaults.go)는 `enableServiceLinks`의 포인터가 `nil`인지 확인하지만, `SetDefaults_PodSpec`의 `dnsPolicy`는 문자열이 비었는지 확인합니다
-누락된 값과 명시적인 빈 값을 구분할 수 있는지는 필드 타입과 디코딩·기본값 로직에 달려 있습니다
-
-일부 기본값을 변환 과정에서 채우는 예외도 있습니다
-[`autoscaling/v1`의 HPA 변환](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/autoscaling/v1/conversion.go)은 변환 뒤 Metrics가 비어 있으면 기본 CPU 사용률 메트릭을 구성합니다
-일반 코덱의 순서와 개별 변환 함수의 호환성 처리를 나눠 읽어야 합니다
 
 ## Accept는 바이트 형식과 응답 타입을 함께 요청합니다
 
@@ -208,6 +190,22 @@ v1.37.1의 [Pod 열 정의](https://github.com/kubernetes/kubernetes/blob/f78e72
 CRD에서는 `additionalPrinterColumns`로 같은 정보를 정의합니다
 kubectl이 사용자 정의 타입의 구조를 미리 알지 못해도 서버가 만든 열과 셀을 그릴 수 있습니다
 
+## 응답 형식과 저장 형식은 독립적입니다
+
+일반 API 서버 옵션의 저장 형식 기본값은 JSON이지만, [kube-apiserver 옵션](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controlplane/apiserver/options/options.go)은 이를 `application/vnd.kubernetes.protobuf`로 바꿉니다
+[`--storage-media-type`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/etcd.go)은 이 저장 형식 설정이며 요청의 Accept와 별개입니다
+
+CR 본체의 저장 코덱은 별도로 구성합니다
+[`NewCRDRESTOptionsGetter`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/cmd/server/options/options.go)는 기본적으로 JSON을 쓰고, CBORServingAndStorage를 켜면 CBOR 인코더로 바꿉니다
+읽는 쪽은 gate가 꺼져 있어도 이미 저장된 CBOR와 JSON을 모두 인식하도록 구성합니다
+
+따라서 기본 설정에서는 내장 자원의 protobuf와 CR 본체의 JSON이 같은 etcd 안에 있을 수 있습니다
+이것을 모든 설정에서 내장 자원은 반드시 protobuf, CR은 반드시 JSON이라는 규칙으로 넓히면 안 됩니다
+
+저장된 크기와 응답 바이트 크기도 다를 수 있습니다
+[저장소 통계의 `EstimatedAverageObjectSizeBytes`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/interfaces.go)는 저장된 직렬화 값의 크기를 바탕으로 한 평균 추정치입니다
+응답 형식을 JSON으로 골랐다는 이유로 이 통계도 JSON 응답 크기로 바뀌는 것은 아닙니다
+
 ## CRD에는 별도의 내부 Go 타입이 없습니다
 
 내장 API의 내부 타입과 달리 CRD 객체에는 서버가 미리 알고 있는 별도의 `__internal` Go 구조체가 없습니다
@@ -219,7 +217,6 @@ Webhook 전략을 쓰면 `ConversionReview`의 `desiredAPIVersion`이 원하는 
 
 웹훅 구현이 서빙 버전 하나를 hub로 삼아 나머지 버전을 연결할 수는 있습니다
 **별도 내부 타입이 없다는 것과 hub를 쓸 수 없다는 것은 다릅니다**
-KEP-6164가 내장 타입의 향후 구조를 설명할 때 CRD를 참고하는 이유도 이 구분에 있습니다
 
 ## Event는 두 API 그룹이 같은 저장소를 사용합니다
 
@@ -234,6 +231,25 @@ KEP-6164가 내장 타입의 향후 구조를 설명할 때 CRD를 참고하는 
 [`events` 등록 코드](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/events/rest/storage_events.go)는 core Event의 저장소 구현을 사용하고, [저장소 구성](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubeapiserver/default_storage_factory_builder.go)은 두 그룹의 events를 같은 저장 공간을 사용하는 리소스로 등록합니다
 새 그룹의 [Event 타입](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/api/events/v1/types.go)에는 옛 필드도 `deprecatedFirstTimestamp`, `deprecatedCount` 같은 이름으로 남아 있습니다
 새 API 표현을 도입했다고 기존 데이터의 호환성 책임이 사라지는 것은 아닙니다
+
+## 내부 타입을 줄이는 작업과 hub를 없애는 일은 다릅니다
+
+[KEP-6164](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-api-machinery/6164-internal-type-elimination/README.md)는 별도의 내부 타입을 유지하는 비용을 줄이려는 제안입니다
+KEP-6164가 CRD를 참고하는 이유는 별도 내부 타입 없이도 버전이 있는 타입을 hub로 사용할 수 있기 때문입니다
+요청·저장·watch 경로에서 반복하는 변환과 메모리 할당, 그룹마다 추가 타입·생성 코드를 유지하는 부담을 다룹니다
+
+확인한 KEP는 작업을 두 단계로 나눕니다
+
+1. 내부 타입과 안정된 외부 타입의 메모리 배치를 같게 만들어 변환 비용을 줄입니다
+2. 내부 타입을 외부 타입의 Go alias로 바꾸고 `__internal` 등록을 없애, 버전이 있는 타입을 hub로 사용합니다
+
+KEP의 v1.37 목표는 첫 단계입니다
+[메타데이터](https://github.com/kubernetes/enhancements/blob/0c8d11e9a13e12d2ef75d2d78af5ac00d8189046/keps/sig-api-machinery/6164-internal-type-elimination/kep.yaml)는 `status: implementable`, `stage: stable`, 목표 버전 v1.37로 기록하지만, 이것만으로 모든 API의 내부 타입 제거가 끝났다고 판단할 수는 없습니다
+이 작업에는 런타임 feature gate가 없으며 리소스별 변경이 합쳐질 때 적용됩니다
+
+실제로 확인한 v1.37.1의 [`flowcontrol/types.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/flowcontrol/types.go)에는 내부 `FlowSchema` 구조체가 남아 있습니다
+생성된 변환 코드에는 메모리 구조가 같은 일부 타입을 `unsafe.Pointer`로 변환하는 경로도 있습니다
+내부 타입이 존재한다는 사실과 변환마다 모든 필드를 새로 할당한다는 주장은 구분해야 합니다
 
 ## continue에는 시점뿐 아니라 읽기 위치도 있습니다
 
@@ -282,22 +298,6 @@ selector가 있으면 저장소가 센 객체 수와 실제 응답 대상 수가
 새 토큰으로 진행하면 첫 조각을 받은 뒤 생성·수정·삭제된 객체의 변화가 결과에 섞일 수 있습니다
 일관된 로컬 사본을 만들 목적이라면 처음부터 다시 읽어야 합니다
 놓친 변경을 복구하려는 watch 재연결과, 목록의 남은 위치를 훑는 페이징을 같은 동작으로 취급하면 안 됩니다
-
-## 응답 형식과 저장 형식은 독립적입니다
-
-일반 API 서버 옵션의 저장 형식 기본값은 JSON이지만, [kube-apiserver 옵션](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controlplane/apiserver/options/options.go)은 이를 `application/vnd.kubernetes.protobuf`로 바꿉니다
-[`--storage-media-type`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/etcd.go)은 이 저장 형식 설정이며 요청의 Accept와 별개입니다
-
-CR 본체의 저장 코덱은 별도로 구성합니다
-[`NewCRDRESTOptionsGetter`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/cmd/server/options/options.go)는 기본적으로 JSON을 쓰고, CBORServingAndStorage를 켜면 CBOR 인코더로 바꿉니다
-읽는 쪽은 gate가 꺼져 있어도 이미 저장된 CBOR와 JSON을 모두 인식하도록 구성합니다
-
-따라서 기본 설정에서는 내장 자원의 protobuf와 CR 본체의 JSON이 같은 etcd 안에 있을 수 있습니다
-이것을 모든 설정에서 내장 자원은 반드시 protobuf, CR은 반드시 JSON이라는 규칙으로 넓히면 안 됩니다
-
-저장된 크기와 응답 바이트 크기도 다를 수 있습니다
-[저장소 통계의 `EstimatedAverageObjectSizeBytes`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/interfaces.go)는 저장된 직렬화 값의 크기를 바탕으로 한 평균 추정치입니다
-응답 형식을 JSON으로 골랐다는 이유로 이 통계도 JSON 응답 크기로 바뀌는 것은 아닙니다
 
 ## 오류를 볼 때 버전과 형식을 나눠 확인합니다
 

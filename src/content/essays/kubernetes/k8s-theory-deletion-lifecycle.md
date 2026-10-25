@@ -41,37 +41,6 @@ Pod의 유예 종료는 다른 이유로 기다립니다
 
 이 분기는 [`Store.Delete`·`updateForGracefulDeletionAndFinalizers`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go)와 [`BeforeDelete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/delete.go)에 나뉘어 있습니다
 
-## 부모 삭제와 자식 처리는 전파 정책으로 연결합니다
-
-Garbage collector(GC)는 객체의 `ownerReferences`를 따라 소유 관계를 확인하고, 삭제 대상이 된 종속 객체를 정리하는 컨트롤러입니다
-여기서는 소유자를 부모, 종속 객체를 자식이라고 부르겠습니다
-부모 DELETE의 `propagationPolicy`가 부모와 자식 처리의 순서를 정합니다
-
-| 정책 | 부모 객체 | 자식 처리 | 부모에 붙는 전파용 finalizer |
-|---|---|---|---|
-| `Background` | 다른 보류 조건이 없으면 먼저 사라짐 | GC가 뒤따라 정리 | 없음 |
-| `Foreground` | 삭제 중인 상태로 남음 | 부모 삭제를 막는 자식의 처리가 끝나면 부모 삭제를 진행할 수 있음 | `foregroundDeletion` |
-| `Orphan` | GC가 소유 참조를 제거하는 동안 남음 | 해당 부모의 owner reference만 제거하고 자식은 남김 | `orphan` |
-
-Background에서 자식이 무조건 모두 삭제되는 것은 아닙니다
-다른 유효한 소유자가 남아 있는 자식은 GC가 보존할 수 있습니다
-Foreground도 모든 자식을 빠짐없이 기다린다는 보장은 아닙니다
-**GC의 cache에 있고, 해당 부모 참조의 `blockOwnerDeletion`이 true인 자식**이 부모 삭제를 막습니다
-
-GC가 해당 리소스를 정상적으로 LIST·WATCH하지 못하거나 부모 삭제와 자식 생성이 겹치면 cache에 자식이 없을 수 있습니다
-Background에서는 부모가 먼저 사라질 수 있으므로 `blockOwnerDeletion`으로 부모 삭제를 붙잡을 수도 없습니다
-
-`kubectl delete`의 `--cascade` 기본값은 `background`입니다
-일반 저장 경로는 삭제 요청의 명시적 옵션을 먼저 보고, 없으면 기존 전파용 finalizer와 리소스별 기본 정책을 확인합니다
-해당 리소스가 GC를 지원하지 않거나 저장소에서 GC를 비활성화했다면 전파용 finalizer를 붙이지 않습니다
-
-Foreground에서는 blocking 자식 하나가 자기 finalizer에 걸려도 부모가 계속 남을 수 있습니다
-부모 이름도 점유되므로 같은 이름으로 다시 만들려 하면 `AlreadyExists`가 날 수 있습니다
-Background에서는 부모가 먼저 사라져 이름을 다시 쓸 수 있지만, 그 뒤에도 자식이 남아 있을 수 있습니다
-
-전파 정책의 계약은 [Garbage Collection 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/architecture/garbage-collection.md)에 있습니다
-구현은 [`shouldOrphanDependents`·`shouldDeleteDependentsInForeground`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go), GC의 [`classifyReferences`·`processDeletingDependentsItem`·`orphanDependents`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/garbagecollector.go), kubectl 기본값은 [`delete_flags.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/delete/delete_flags.go)에서 확인했습니다
-
 ## finalizer는 정리 코드를 실행하는 명령이 아닙니다
 
 `metadata.finalizers`는 삭제 전에 처리할 작업의 이름 목록입니다
@@ -96,6 +65,7 @@ no new finalizers can be added if the object is being deleted
 ### 사용자 finalizer의 이름과 예약 이름은 구분합니다
 
 사용자 finalizer는 `example.com/cleanup`처럼 도메인 접두사가 있는 이름을 사용합니다
+소유 관계를 따라 종속 객체를 정리하는 컨트롤러를 garbage collector(GC)라고 합니다
 접두사가 없는 `foregroundDeletion`과 `orphan`은 GC가 다루는 예약 이름이며, 두 값을 동시에 넣는 것은 검증에서 막습니다
 
 이름 검증을 볼 때 공통 `ValidateFinalizerName` 하나만 보고 접두사가 필요 없다고 결론 내리면 안 됩니다
@@ -181,8 +151,85 @@ Pod fully terminated and removed from etcd
 `deletionTimestamp`는 삭제가 시작됐다는 상태와 예정 시각을 읽는 필드이지, 저장소에서 실제로 사라진 시각의 기록이 아닙니다
 관련 분기는 [`BeforeDelete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/delete.go)와 [`markAsDeleting`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go)에 있습니다
 
+## 부모 삭제와 자식 처리는 전파 정책으로 연결합니다
+
+GC는 객체의 `ownerReferences`를 따라 소유 관계를 확인합니다
+여기서는 소유자를 부모, 종속 객체를 자식이라고 부르겠습니다
+부모 DELETE의 `propagationPolicy`가 부모와 자식 처리의 순서를 정합니다
+
+| 정책 | 부모 객체 | 자식 처리 | 부모에 붙는 전파용 finalizer |
+|---|---|---|---|
+| `Background` | 다른 보류 조건이 없으면 먼저 사라짐 | GC가 뒤따라 정리 | 없음 |
+| `Foreground` | 삭제 중인 상태로 남음 | 부모 삭제를 막는 자식의 처리가 끝나면 부모 삭제를 진행할 수 있음 | `foregroundDeletion` |
+| `Orphan` | GC가 소유 참조를 제거하는 동안 남음 | 해당 부모의 owner reference만 제거하고 자식은 남김 | `orphan` |
+
+Background에서 자식이 무조건 모두 삭제되는 것은 아닙니다
+다른 유효한 소유자가 남아 있는 자식은 GC가 보존할 수 있습니다
+Foreground도 모든 자식을 빠짐없이 기다린다는 보장은 아닙니다
+**GC의 cache에 있고, 해당 부모 참조의 `blockOwnerDeletion`이 true인 자식**이 부모 삭제를 막습니다
+
+GC가 해당 리소스를 정상적으로 LIST·WATCH하지 못하거나 부모 삭제와 자식 생성이 겹치면 cache에 자식이 없을 수 있습니다
+Background에서는 부모가 먼저 사라질 수 있으므로 `blockOwnerDeletion`으로 부모 삭제를 붙잡을 수도 없습니다
+
+`kubectl delete`의 `--cascade` 기본값은 `background`입니다
+일반 저장 경로는 삭제 요청의 명시적 옵션을 먼저 보고, 없으면 기존 전파용 finalizer와 리소스별 기본 정책을 확인합니다
+해당 리소스가 GC를 지원하지 않거나 저장소에서 GC를 비활성화했다면 전파용 finalizer를 붙이지 않습니다
+
+Foreground에서는 blocking 자식 하나가 자기 finalizer에 걸려도 부모가 계속 남을 수 있습니다
+부모 이름도 점유되므로 같은 이름으로 다시 만들려 하면 `AlreadyExists`가 날 수 있습니다
+Background에서는 부모가 먼저 사라져 이름을 다시 쓸 수 있지만, 그 뒤에도 자식이 남아 있을 수 있습니다
+
+전파 정책의 계약은 [Garbage Collection 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/architecture/garbage-collection.md)에 있습니다
+구현은 [`shouldOrphanDependents`·`shouldDeleteDependentsInForeground`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go), GC의 [`classifyReferences`·`processDeletingDependentsItem`·`orphanDependents`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/garbagecollector.go), kubectl 기본값은 [`delete_flags.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/delete/delete_flags.go)에서 확인했습니다
+
+## 삭제 시작도 generation을 바꿀 수 있습니다
+
+삭제가 시작됐다는 표시가 갱신되면, 컨트롤러가 관찰할 객체의 번호도 달라질 수 있습니다
+`metadata.generation`은 API 서버가 관리하는 번호입니다
+일반 Update에서는 사용자가 넣은 값을 먼저 이전 generation으로 되돌리고, 리소스별 strategy가 증가 여부를 결정합니다
+그래서 단순히 spec을 수정한 횟수라고 읽으면 맞지 않는 경우가 있습니다
+
+| 리소스 | 일반 Update에서 generation이 증가하는 조건 |
+|---|---|
+| StatefulSet | `spec` 변경 |
+| Deployment | `spec` 또는 `metadata.annotations` 변경 |
+| CRD로 정의한 custom resource | `metadata` 밖의 변경. status subresource가 있으면 일반 Update의 status 변경을 먼저 제거 |
+
+Deployment는 annotation을 ReplicaSet에 복사하므로 annotation 변경도 generation에 반영합니다
+Custom resource는 status subresource를 켜지 않았다면 `status`도 metadata 밖의 변경입니다
+따라서 status를 쓸 때도 generation이 증가할 수 있습니다
+여기서 말하는 custom resource는 정의 자체인 CRD 객체와 구분합니다
+
+삭제 시작을 저장할 때도 변화가 있습니다
+기존 generation이 양수라면 유예 삭제를 처음 기록하는 update에서 1 증가할 수 있습니다
+finalizer 때문에 객체를 남기면서 처음 삭제 표시를 기록할 때도 마찬가지입니다
+즉시 저장소에서 지우는 경로라면 새 번호를 읽을 객체 자체가 남지 않습니다
+
+사용자 값 초기화는 [`BeforeUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/update.go), 증가 조건은 [StatefulSet](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/statefulset/strategy.go)·[Deployment](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/deployment/strategy.go)·[custom resource](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/registry/customresource/strategy.go)의 `PrepareForUpdate`에 있습니다
+삭제 시작의 증가는 앞서 본 `BeforeDelete`와 `markAsDeleting`에서 따로 처리합니다
+
+## observedGeneration이 같아도 작업은 끝나지 않았을 수 있습니다
+
+컨트롤러가 현재 객체를 어디까지 관찰했다고 보고하는지는 `observedGeneration`으로 확인할 수 있습니다
+이 필드는 API 서버가 대신 채우는 것이 아니라 상태를 쓰는 컨트롤러가 기록합니다
+
+| 위치 | 나타내는 관찰 번호 |
+|---|---|
+| `status.observedGeneration` | 객체 상태에 대해 보고한 generation |
+| `status.conditions[x].observedGeneration` | 해당 condition에 대해 보고한 generation |
+
+모든 리소스가 두 필드를 모두 제공하지 않으며, 함께 제공해도 같은 시점에 갱신한다는 보장은 없습니다
+예를 들어 현재 generation이 7인데 한 condition의 observedGeneration이 6이라면, 그 condition은 현재 generation을 반영한 판정이 아닙니다
+
+둘 다 7이라고 해서 외부 자원의 준비나 rollout까지 완료됐다는 뜻은 아닙니다
+컨트롤러가 새 요구를 확인하고도 아직 작업 중이거나 실패 상태를 보고할 수 있으므로 condition의 상태와 이유도 함께 봐야 합니다
+`kubectl rollout status` 역시 관찰 번호만 비교하고 끝내지 않고, 워크로드별 replica 상태와 진행 조건을 더 확인합니다
+
+condition의 번호 의미는 [`metav1.Condition.ObservedGeneration`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/apis/meta/v1/types.go), rollout 판정은 [`rollout_status.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/polymorphichelpers/rollout_status.go)에 있습니다
+
 ## Namespace 안의 객체를 정리한 뒤 finalizer를 제거합니다
 
+Namespace에서는 정리 완료를 확인하려면 관찰 번호보다 실제 남은 객체와 finalizer를 살펴야 합니다
 Namespace는 일반적인 `metadata.finalizers`와 별도로 `spec.finalizers`도 사용합니다
 API 서버는 Namespace를 만들 때 `spec.finalizers`에 `kubernetes`가 없으면 추가합니다
 다른 이름도 함께 들어 있을 수 있습니다
@@ -259,47 +306,3 @@ unable to create new content in namespace <ns> because it is being terminated
 `spec.finalizers`를 `/finalize`로 강제로 비우면 namespace controller가 내부 객체의 정리 여부를 확인하는 과정을 건너뛰게 됩니다
 다른 삭제 보류 조건이 없다면 Namespace가 사라질 수 있고, 남은 객체는 정상적인 조회·정리 경로에서 벗어날 수 있습니다
 따라서 이 필드를 비우는 일을 내부 리소스를 모두 정리하는 작업과 같게 취급하면 안 됩니다
-
-## 삭제 시작도 generation을 바꿀 수 있습니다
-
-`metadata.generation`은 API 서버가 관리하는 번호입니다
-일반 Update에서는 사용자가 넣은 값을 먼저 이전 generation으로 되돌리고, 리소스별 strategy가 증가 여부를 결정합니다
-그래서 단순히 spec을 수정한 횟수라고 읽으면 맞지 않는 경우가 있습니다
-
-| 리소스 | 일반 Update에서 generation이 증가하는 조건 |
-|---|---|
-| StatefulSet | `spec` 변경 |
-| Deployment | `spec` 또는 `metadata.annotations` 변경 |
-| CRD로 정의한 custom resource | `metadata` 밖의 변경. status subresource가 있으면 일반 Update의 status 변경을 먼저 제거 |
-
-Deployment는 annotation을 ReplicaSet에 복사하므로 annotation 변경도 generation에 반영합니다
-Custom resource는 status subresource를 켜지 않았다면 `status`도 metadata 밖의 변경입니다
-따라서 status를 쓸 때도 generation이 증가할 수 있습니다
-여기서 말하는 custom resource는 정의 자체인 CRD 객체와 구분합니다
-
-삭제 시작을 저장할 때도 변화가 있습니다
-기존 generation이 양수라면 유예 삭제를 처음 기록하는 update에서 1 증가할 수 있습니다
-finalizer 때문에 객체를 남기면서 처음 삭제 표시를 기록할 때도 마찬가지입니다
-즉시 저장소에서 지우는 경로라면 새 번호를 읽을 객체 자체가 남지 않습니다
-
-사용자 값 초기화는 [`BeforeUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/update.go), 증가 조건은 [StatefulSet](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/statefulset/strategy.go)·[Deployment](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/deployment/strategy.go)·[custom resource](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/registry/customresource/strategy.go)의 `PrepareForUpdate`에 있습니다
-삭제 시작의 증가는 앞서 본 `BeforeDelete`와 `markAsDeleting`에서 따로 처리합니다
-
-## observedGeneration이 같아도 작업은 끝나지 않았을 수 있습니다
-
-컨트롤러가 현재 객체를 어디까지 관찰했다고 보고하는지는 `observedGeneration`으로 확인할 수 있습니다
-이 필드는 API 서버가 대신 채우는 것이 아니라 상태를 쓰는 컨트롤러가 기록합니다
-
-| 위치 | 나타내는 관찰 번호 |
-|---|---|
-| `status.observedGeneration` | 객체 상태에 대해 보고한 generation |
-| `status.conditions[x].observedGeneration` | 해당 condition에 대해 보고한 generation |
-
-모든 리소스가 두 필드를 모두 제공하지 않으며, 함께 제공해도 같은 시점에 갱신한다는 보장은 없습니다
-예를 들어 현재 generation이 7인데 한 condition의 observedGeneration이 6이라면, 그 condition은 현재 generation을 반영한 판정이 아닙니다
-
-둘 다 7이라고 해서 외부 자원의 준비나 rollout까지 완료됐다는 뜻은 아닙니다
-컨트롤러가 새 요구를 확인하고도 아직 작업 중이거나 실패 상태를 보고할 수 있으므로 condition의 상태와 이유도 함께 봐야 합니다
-`kubectl rollout status` 역시 관찰 번호만 비교하고 끝내지 않고, 워크로드별 replica 상태와 진행 조건을 더 확인합니다
-
-condition의 번호 의미는 [`metav1.Condition.ObservedGeneration`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/apis/meta/v1/types.go), rollout 판정은 [`rollout_status.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/polymorphichelpers/rollout_status.go)에 있습니다

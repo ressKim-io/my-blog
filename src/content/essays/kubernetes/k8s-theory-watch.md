@@ -53,6 +53,64 @@ LIST 처리와 watch 연결 사이에 일어난 변경도 서버에 이력이 �
 
 이렇게 복구하는 것은 누락된 과거 이벤트 전체가 아니라 현재 객체 상태입니다
 
+## Reflector는 오류가 난 요청에 따라 다시 읽는 방법을 고릅니다
+
+Reflector는 서버에서 받은 목록과 변경을 클라이언트의 로컬 사본에 반영하는 client-go 구성요소입니다
+v1.37.1에서는 `WatchListClient`가 beta·기본 활성입니다
+클라이언트가 지원하면 streaming list로 초기 상태를 받을 수 있고, 일반 LIST 뒤에 watch를 여는 경로도 남아 있습니다
+
+| 경로와 조건 | 다음 초기 상태 요청 |
+|---|---|
+| 일반 LIST 경로의 최초 동기화 | `resourceVersion="0"` |
+| 일반 watch에서 410 발생 후 일반 LIST로 복구 | 마지막 관찰 번호를 유지해 LIST 시도 |
+| 그 LIST에서 번호 만료 또는 너무 큰 번호 오류 | 번호를 사용할 수 없다고 기록하고 `resourceVersion=""`로 LIST 재시도 |
+| streaming list 초기화 중 번호 만료 또는 너무 큰 번호 오류 | 번호를 사용할 수 없다고 기록하고 빈 번호의 streaming list로 재시도 |
+
+일반 watch에서 410을 받았다는 이유만으로 마지막 번호를 즉시 지우지는 않습니다
+그 번호 이상으로 신선한 목록은 여전히 받을 수 있기 때문입니다
+일반 LIST 경로에서는 해당 번호를 사용한 LIST도 실패할 때 빈 번호로 폴백합니다
+
+streaming list는 `sendInitialEvents=true`, `resourceVersionMatch=NotOlderThan`을 사용합니다
+현재 객체들을 합성 `ADDED`로 받고, `allowWatchBookmarks=true`이면 초기 상태의 끝에 완료 BOOKMARK를 받습니다
+이 BOOKMARK에는 `k8s.io/initial-events-end: "true"` annotation이 붙습니다
+이후에는 같은 스트림으로 변경을 이어 받습니다
+
+서버의 `WatchList`도 v1.37.1 기준 beta·기본 활성입니다
+v1.32에서 기본 활성화됐다가 v1.33에서 기본 비활성으로 바뀌었고, v1.34부터 다시 기본 활성화된 이력이 있습니다
+client-go 쪽 gate와 서버 쪽 gate는 구분해야 합니다
+
+빈 번호로 전체 상태를 다시 읽더라도 반드시 etcd에서 객체 목록 전체를 가져오는 것은 아닙니다
+캐시가 저장소의 현재 revision까지 따라잡았다면 그 캐시에서 일관된 목록을 구성해 응답할 수도 있습니다
+하지만 전송·직렬화·로컬 사본 교체는 다시 필요하므로, 여러 클라이언트가 함께 초기화하면 그 비용이 겹칠 수 있습니다
+
+복구 분기는 [`Reflector.ListAndWatchWithContext`·`list`·`watchList`·`relistResourceVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/cache/reflector.go), 클라이언트 gate는 [`known_features.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/features/known_features.go)에서 확인했습니다
+
+## BOOKMARK는 변경이 없어도 재개 번호를 앞으로 옮깁니다
+
+`app=web`만 보는 watch에서 해당 라벨의 객체가 한동안 바뀌지 않았다고 가정하겠습니다
+같은 리소스의 다른 객체들은 계속 바뀌므로 서버가 보관하는 최근 이벤트 이력에서는 오래된 항목이 밀려나는데, 이 클라이언트가 마지막으로 받은 번호는 오래된 값에 머물 수 있습니다
+
+BOOKMARK는 이때 spec·status 없이 `metadata.resourceVersion`으로 진행 지점을 알립니다
+아래는 번호만 보여 주기 위한 예시입니다
+
+```json
+{"type":"BOOKMARK","object":{"metadata":{"resourceVersion":"900"}}}
+```
+
+실제 전송에는 kind·apiVersion도 포함될 수 있고, streaming list 완료 BOOKMARK에는 앞서 설명한 annotation도 붙습니다
+일반 BOOKMARK는 초기 snapshot을 새로 주거나 객체 상태를 바꾸는 이벤트가 아닙니다
+
+watch cache가 켜진 경로에서는 API 서버가 리소스별 객체 사본과 최근 이벤트 이력을 유지합니다
+이때 이벤트 이력을 채우는 것은 **같은 리소스 캐시 안의 변경**입니다
+다른 리소스의 etcd 쓰기로 전체 revision이 증가하더라도 그 사실만으로 이 리소스의 이벤트 링버퍼가 차는 것은 아닙니다
+
+BOOKMARK를 요청하려면 `allowWatchBookmarks=true`를 지정합니다
+다만 [공식 API 계약](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/using-api/api-concepts.md#watch-bookmarks)은 BOOKMARK 수신 자체나 일정한 전송 간격을 보장하지 않습니다
+기본 주기가 60초라는 구현값을 클라이언트의 보장으로 사용하면 안 됩니다
+
+BOOKMARK는 이력이 남아 있을 때 이어 받을 가능성을 높여 주지만, 전체 상태를 다시 받아야 하는 상황까지 없애지는 않습니다
+마지막 BOOKMARK 번호에서도 410을 처리할 수 있어야 합니다
+
 ## watch의 빈 번호와 양수 번호는 의미가 다릅니다
 
 공식 API 문서는 `sendInitialEvents`를 지정하지 않은 watch의 시작점을 다음처럼 구분합니다
@@ -191,60 +249,3 @@ etcd가 오래된 revision을 정리해도 API 서버가 이미 받은 이벤트
 따라서 compaction 한 번에 모든 클라이언트가 동시에 410을 받는 것도 아닙니다
 
 오류의 생성 위치는 [`GetIntervalLocked`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/cacher/watch_cache_history.go)와 [`interpretWatchError`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/errors.go)입니다
-
-## Reflector는 오류가 난 요청에 따라 다시 읽는 방법을 고릅니다
-
-Reflector는 서버에서 받은 목록과 변경을 클라이언트의 로컬 사본에 반영하는 client-go 구성요소입니다
-v1.37.1에서는 `WatchListClient`가 beta·기본 활성입니다
-클라이언트가 지원하면 streaming list로 초기 상태를 받을 수 있고, 일반 LIST 뒤에 watch를 여는 경로도 남아 있습니다
-
-| 경로와 조건 | 다음 초기 상태 요청 |
-|---|---|
-| 일반 LIST 경로의 최초 동기화 | `resourceVersion="0"` |
-| 일반 watch에서 410 발생 후 일반 LIST로 복구 | 마지막 관찰 번호를 유지해 LIST 시도 |
-| 그 LIST에서 번호 만료 또는 너무 큰 번호 오류 | 번호를 사용할 수 없다고 기록하고 `resourceVersion=""`로 LIST 재시도 |
-| streaming list 초기화 중 번호 만료 또는 너무 큰 번호 오류 | 번호를 사용할 수 없다고 기록하고 빈 번호의 streaming list로 재시도 |
-
-일반 watch에서 410을 받았다는 이유만으로 마지막 번호를 즉시 지우지는 않습니다
-그 번호 이상으로 신선한 목록은 여전히 받을 수 있기 때문입니다
-일반 LIST 경로에서는 해당 번호를 사용한 LIST도 실패할 때 빈 번호로 폴백합니다
-
-streaming list는 `sendInitialEvents=true`, `resourceVersionMatch=NotOlderThan`을 사용합니다
-현재 객체들을 합성 `ADDED`로 받고, `allowWatchBookmarks=true`이면 초기 상태의 끝에 완료 BOOKMARK를 받습니다
-이 BOOKMARK에는 `k8s.io/initial-events-end: "true"` annotation이 붙습니다
-이후에는 같은 스트림으로 변경을 이어 받습니다
-
-서버의 `WatchList`도 v1.37.1 기준 beta·기본 활성입니다
-v1.32에서 기본 활성화됐다가 v1.33에서 기본 비활성으로 바뀌었고, v1.34부터 다시 기본 활성화된 이력이 있습니다
-client-go 쪽 gate와 서버 쪽 gate는 구분해야 합니다
-
-빈 번호로 전체 상태를 다시 읽더라도 반드시 etcd에서 객체 목록 전체를 가져오는 것은 아닙니다
-앞서 설명한 일관된 캐시 읽기가 응답할 수도 있습니다
-하지만 전송·직렬화·로컬 사본 교체는 다시 필요하므로, 여러 클라이언트가 함께 초기화하면 그 비용이 겹칠 수 있습니다
-
-복구 분기는 [`Reflector.ListAndWatchWithContext`·`list`·`watchList`·`relistResourceVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/tools/cache/reflector.go), 클라이언트 gate는 [`known_features.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/features/known_features.go)에서 확인했습니다
-
-## BOOKMARK는 변경이 없어도 재개 번호를 앞으로 옮깁니다
-
-`app=web`만 보는 watch에서 해당 라벨의 객체가 한동안 바뀌지 않았다고 가정하겠습니다
-같은 리소스의 다른 객체들은 계속 바뀌므로 서버의 이벤트 이력은 밀려나는데, 이 클라이언트가 마지막으로 받은 번호는 오래된 값에 머물 수 있습니다
-
-BOOKMARK는 이때 spec·status 없이 `metadata.resourceVersion`으로 진행 지점을 알립니다
-아래는 번호만 보여 주기 위한 예시입니다
-
-```json
-{"type":"BOOKMARK","object":{"metadata":{"resourceVersion":"900"}}}
-```
-
-실제 전송에는 kind·apiVersion도 포함될 수 있고, streaming list 완료 BOOKMARK에는 앞서 설명한 annotation도 붙습니다
-일반 BOOKMARK는 초기 snapshot을 새로 주거나 객체 상태를 바꾸는 이벤트가 아닙니다
-
-이때 이벤트 이력을 채우는 것은 **같은 리소스 캐시 안의 변경**입니다
-다른 리소스의 etcd 쓰기로 전체 revision이 증가하더라도 그 사실만으로 이 리소스의 이벤트 링버퍼가 차는 것은 아닙니다
-
-BOOKMARK를 요청하려면 `allowWatchBookmarks=true`를 지정합니다
-다만 [공식 API 계약](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/using-api/api-concepts.md#watch-bookmarks)은 BOOKMARK 수신 자체나 일정한 전송 간격을 보장하지 않습니다
-기본 주기가 60초라는 구현값을 클라이언트의 보장으로 사용하면 안 됩니다
-
-BOOKMARK는 이력이 남아 있을 때 이어 받을 가능성을 높여 주지만, 전체 상태를 다시 받아야 하는 상황까지 없애지는 않습니다
-마지막 BOOKMARK 번호에서도 410을 처리할 수 있어야 합니다

@@ -35,6 +35,10 @@ impersonation으로 다른 신원을 사용하는 요청이라면 APF가 보는 
 그림은 APF의 일반적인 분류·배정 경로를 나타냅니다
 watch가 아닌 long-running 요청으로 판정된 요청은 이 필터의 추적을 건너뜁니다
 
+분류된 수준에서 필요한 자리를 배정하면 요청을 실행합니다
+한도를 적용하는 `Limited` 수준에서는 자리가 부족할 때 `limitResponse` 설정에 따라 거절하거나 큐에서 기다리며, 대기에도 길이·시간 조건이 있습니다
+제한을 면제하는 `Exempt` 수준은 이 동시성 제한으로 기다리거나 거절되지 않습니다
+
 ## FlowSchema는 분류하고 PriorityLevelConfiguration은 한도를 정합니다
 
 두 리소스는 모두 `flowcontrol.apiserver.k8s.io/v1`의 클러스터 범위 오브젝트입니다
@@ -99,10 +103,6 @@ FlowSchema 이름과 flow distinguisher라는 구분자 값의 쌍으로 식별�
 | 필드 생략 | 빈 문자열, 해당 FlowSchema의 요청을 한 흐름으로 취급 |
 
 모든 ServiceAccount가 `service-accounts` 규칙에 맞더라도 `ByUser`로 나누면 서로 다른 흐름이 됩니다
-서버는 FlowSchema 이름과 구분자 사이에 0 바이트 구분자를 넣어 SHA-256으로 해시하고, 앞 8바이트를 큐 후보 선택에 사용합니다
-
-다만 `Exempt`이거나 큐가 2개 미만이면 이 구분자와 해시를 계산하지 않습니다
-분류·참조 검사·해시는 [`apf_controller.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go)에 구현되어 있습니다
 
 ## 요청이 사용할 자리 수는 실행 전에 추정합니다
 
@@ -122,106 +122,6 @@ FlowSchema 이름과 flow distinguisher라는 구분자 값의 쌍으로 식별�
 큐 구현은 실행·후속 구간에 `max(InitialSeats, FinalSeats)`를 예약합니다
 그래서 `InitialSeats: 1`, `FinalSeats: 10`이라고 해서 실행 중에는 꼭 1자리만 쓰는 것은 아닙니다
 
-## LIST는 예상 바이트와 저장 경로로 계산합니다
-
-v1.37.1에서는 `SizeBasedListCostEstimate`가 beta·기본 활성입니다
-이때 추정기는 한 번에 메모리에 올라갈 바이트를 100,000으로 나누어 올림합니다
-
-```text
-예상 바이트 = 예상 적재 객체 수 × 평균 객체 크기
-자리 수 = ceil(예상 바이트 / 100,000)
-```
-
-기본 상수와 계산은 [`config.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/config.go), [`list_work_estimator.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/list_work_estimator.go)에 있습니다
-평균 크기는 이번 응답의 직렬화 결과를 미리 측정한 값이 아니라 저장 계층의 통계입니다
-
-추정기는 먼저 LIST가 캐시와 저장소 중 어느 경로를 사용할지 판단합니다
-캐시 경로로 추정하면 예상 바이트에 1,000,000바이트 상한을 적용하므로 이 계산의 결과는 최대 10자리입니다
-저장소 경로에는 이 상한이 없고 LIST 추정기의 전역 상한은 100자리입니다
-
-| 요청 조건 | 추정 경로의 주요 분기 |
-|---|---|
-| `resourceVersion="0"` | 캐시 경로로 추정 |
-| 빈 resourceVersion | 저장소의 watch progress 지원 여부에 따라 캐시 또는 저장소로 추정 |
-| `resourceVersionMatch=NotOlderThan` | 캐시 경로로 추정 |
-| Exact 또는 continue | 추정기가 사용하는 `CacheWithoutSnapshots`에서는 저장소 경로로 추정 |
-
-캐시 지원 판정은 [`ShouldDelegateListMeta`와 `ConsistentReadSupported`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/cacher/delegator/interface.go)를 따릅니다
-이 버전에서는 과거 `ConsistentListFromCache` gate를 검사하지 않고 watch progress 지원을 확인합니다
-
-추정 경로와 실제 읽기 경로가 같다는 보장은 없습니다
-추정에 쓰는 helper 함수는 캐시 snapshot을 고려하지 않습니다
-실제 읽기 경로는 캐시가 준비됐는지, 필요한 revision까지 따라잡았는지 등의 조건에도 영향을 받습니다
-따라서 [410 이후 전체 상태를 다시 읽는 과정](/essays/k8s-theory-watch)이 항상 100자리 LIST가 되는 것도 아닙니다
-
-객체 수를 계산할 때도 조건이 있습니다
-이름 하나를 지정한 요청은 객체 1개로 보고, 일반 요청은 전체 수와 `limit` 중 작은 수를 사용합니다
-저장소 경로에 selector가 있으면 그 수와 전체 객체 수의 절반 중 큰 쪽을 예상 적재량으로 봅니다
-selector로 반환될 객체만 세면 검사 과정의 비용을 놓칠 수 있기 때문입니다
-
-통계가 오래됐으면 큰 객체 수·크기를 대입한 뒤 경로별 상한을 적용합니다
-반면 통계 자체가 없으면 aggregated API처럼 다른 서버에 위임될 가능성도 있어 최소 1자리를 반환합니다
-둘을 모두 “최대 비용”으로 묶으면 이 분기를 놓칩니다
-
-### 100자리는 모든 수준에서 사용할 수 있는 값이 아닙니다
-
-큐를 쓰는 수준에는 별도의 요청당 상한도 있습니다
-`NominalCL`은 그 수준의 기본 동시성 몫이며 뒤에서 계산합니다
-
-```text
-수준별 요청 상한 = max(1, min(ceil(NominalCL × 0.15), floor(NominalCL / handSize)))
-최종 LIST 상한 = min(수준별 요청 상한, 전역 LIST 상한)
-```
-
-이는 [`finishQueueSetReconfigsLocked`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go)의 계산입니다
-따라서 캐시 추정의 10자리나 전역 상한 100자리만으로 실제 요청 폭을 단정하면 안 됩니다
-
-크기 기반 gate를 끄면 객체 수 기반 추정으로 바뀌고 전역 LIST 상한은 10자리입니다
-이전 방식은 처리할 것으로 예상한 객체 100개마다 1자리로 계산하되, 캐시·selector·limit에 따라 예상 처리 개수를 다르게 잡습니다
-확인한 [공식 문서 저장본](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/cluster-administration/flow-control.md)은 LIST 비용을 객체 수에 비례한다고 설명하므로, 기본 활성인 크기 기반 구현과 구분해서 읽어야 합니다
-
-## 쓰기는 watch 이벤트의 후속 비용까지 계산합니다
-
-오브젝트를 바꾸면 관심 있는 watcher에 변경 이벤트를 전달해야 합니다
-추정기는 이 필터링·직렬화·전송 부담을 이벤트를 만든 쓰기 요청의 후속 작업량으로 계산합니다
-watcher 수를 실제 직렬화 횟수나 전송 성공 횟수와 동일하게 보는 것은 아닙니다
-
-관심 watcher가 10개 미만이면 후속 비용을 추가하지 않습니다
-10개 이상이면 우선 `ceil(watcher 수 / 10)`자리와 5ms를 곱해 작업량을 구합니다
-그 뒤 자리 상한을 적용하되 **작업량은 줄이지 않고 시간을 늘립니다**
-
-![관심 watcher 1000개와 자리 상한 10을 가정했을 때 후속 작업량을 보존하며 폭을 줄이고 시간을 늘리는 계산](/diagrams/k8s-theory-api-priority-fairness-2.svg)
-
-그림은 관심 watcher가 1000개이고 요청당 상한이 10자리인 계산 예시입니다
-먼저 100자리 × 5ms로 500 seat-ms를 추정하고, 상한을 적용한 뒤에는 10자리 × 50ms로 같은 작업량을 나타냅니다
-`AdditionalLatency`가 항상 5ms인 것은 아닙니다
-
-쓰기 추정기의 전역 자리 상한은 10이며 수준별 상한이 더 작으면 그 값을 사용합니다
-이벤트를 만들지 않는 ServiceAccount의 `token` 하위 리소스는 후속 비용을 제외합니다
-자세한 분기는 [`mutatingWorkEstimator.estimate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/mutating_work_estimator.go)에 있습니다
-
-후속 시간은 응답을 그만큼 늦추는 sleep이 아닙니다
-응답 처리 뒤에도 자리를 예약해 두었다가 비동기로 반환하여 이후 요청의 배정에 반영합니다
-큐에서 실행을 배정할 때 `FinalSeats`가 현재 수준의 한도보다 크면 폭을 다시 줄이고 시간을 조정하는 경로도 있습니다
-
-## watch는 연결 전체가 아니라 초기화 구간을 셉니다
-
-watch 연결을 몇 시간 유지한다고 몇 시간 동안 APF 자리를 점유하지는 않습니다
-APF는 저장 계층이 초기화를 마쳤다는 신호를 보낼 때 실행 구간을 끝냅니다
-초기 객체 이벤트를 받는 watch라면 그 초기 전송까지 포함합니다
-
-`WatchList`가 활성화된 기본 구성에서 추정기는 다음 조건을 구분합니다
-
-- `sendInitialEvents=true`이거나 resourceVersion이 비어 있거나 `"0"`이면 LIST 추정기로 초기 비용을 계산합니다
-- 그 외의 watch는 최소 1자리로 계산합니다
-
-이는 추정기가 검사하는 조건이며 모든 watch가 같은 초기 이벤트를 받는다는 뜻은 아닙니다
-legacy watch와 streaming 초기 전송의 의미 차이는 [watch 글](/essays/k8s-theory-watch)에서 구분했습니다
-
-초기화가 끝난 연결은 APF 자리를 놓지만 이후 변경 이벤트 전달 비용까지 사라진 것은 아닙니다
-그 비용은 앞서 본 쓰기 요청의 후속 추정에 반영합니다
-초기화 대기와 자리 반환 경계는 [`priority-and-fairness.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/filters/priority-and-fairness.go)에 있습니다
-
 ## 우선순위 수준은 서버 전체 자리의 비율을 받습니다
 
 APF가 활성화되어 있으면 서버 전체 동시성 한도 `ServerCL`은 다음 두 플래그의 합입니다
@@ -235,6 +135,8 @@ NominalCL(i) = ceil(ServerCL × NCS(i) / sum_ncs)
 기본 서버 값은 400과 200이므로 `ServerCL`은 600입니다
 APF를 사용하는 동안 이 두 값을 읽기 400·쓰기 200의 별도 풀로 해석하지 않습니다
 [플래그 정의](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/server_run_options.go)와 [`FeatureOptions.ApplyTo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/feature.go)가 이 관계를 보여 줍니다
+
+아래 표의 `handSize`는 흐름마다 선택하는 후보 큐 수입니다
 
 | 기본 수준 | NCS | 빌려줄 비율 | 한도 초과 처리 | 큐 수 / handSize |
 |---|---:|---:|---|---|
@@ -305,6 +207,11 @@ BorrowingCL = round(NominalCL × borrowingLimitPercent / 100)
 필드를 생략한 일반 기본값은 `queues: 64`, `handSize: 8`, `queueLengthLimit: 50`입니다
 앞의 기본 수준 표는 이 값을 명시적으로 덮어쓴 구성이므로 두 종류의 기본값을 구분해야 합니다
 
+서버는 FlowSchema 이름과 구분자 사이에 0 바이트 구분자를 넣어 SHA-256으로 해시하고, 앞 8바이트를 큐 후보 선택에 사용합니다
+
+다만 `Exempt`이거나 큐가 2개 미만이면 이 구분자와 해시를 계산하지 않습니다
+분류·참조 검사·해시는 [`apf_controller.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go)에 구현되어 있습니다
+
 서버는 해시로 고른 후보들 중 **대기 작업량의 합이 가장 작은 큐**에 요청을 넣습니다
 요청 개수가 가장 적은 큐를 고르는 것과는 다릅니다
 작업량의 단위는 자리 수와 시간을 곱한 seat-second입니다
@@ -325,6 +232,106 @@ BorrowingCL = round(NominalCL × borrowingLimitPercent / 100)
 shuffle sharding은 서로 다른 흐름의 큐 후보가 전부 겹칠 가능성을 줄이지만, 흐름 사이의 격리를 보장하지는 않습니다
 큐 128개에서 6개 후보를 고르는 조합은 `C(128, 6) = 5,423,611,200`개입니다
 후보 조합이 균등하게 선택된다는 가정에서 두 흐름의 후보가 전부 같을 확률은 약 54억 분의 1이지만, 일부 큐가 겹칠 가능성까지 이 값으로 계산하면 안 됩니다
+
+## LIST는 예상 바이트와 저장 경로로 계산합니다
+
+v1.37.1에서는 `SizeBasedListCostEstimate`가 beta·기본 활성입니다
+이때 추정기는 한 번에 메모리에 올라갈 바이트를 100,000으로 나누어 올림합니다
+
+```text
+예상 바이트 = 예상 적재 객체 수 × 평균 객체 크기
+자리 수 = ceil(예상 바이트 / 100,000)
+```
+
+기본 상수와 계산은 [`config.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/config.go), [`list_work_estimator.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/list_work_estimator.go)에 있습니다
+평균 크기는 이번 응답의 직렬화 결과를 미리 측정한 값이 아니라 저장 계층의 통계입니다
+
+추정기는 먼저 LIST가 캐시와 저장소 중 어느 경로를 사용할지 판단합니다
+캐시 경로로 추정하면 예상 바이트에 1,000,000바이트 상한을 적용하므로 이 계산의 결과는 최대 10자리입니다
+저장소 경로에는 이 상한이 없고 LIST 추정기의 전역 상한은 100자리입니다
+
+| 요청 조건 | 추정 경로의 주요 분기 |
+|---|---|
+| `resourceVersion="0"` | 캐시 경로로 추정 |
+| 빈 resourceVersion | 저장소의 watch progress 지원 여부에 따라 캐시 또는 저장소로 추정 |
+| `resourceVersionMatch=NotOlderThan` | 캐시 경로로 추정 |
+| Exact 또는 continue | 추정기가 사용하는 `CacheWithoutSnapshots`에서는 저장소 경로로 추정 |
+
+캐시 지원 판정은 [`ShouldDelegateListMeta`와 `ConsistentReadSupported`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/cacher/delegator/interface.go)를 따릅니다
+이 버전에서는 과거 `ConsistentListFromCache` gate를 검사하지 않고 watch progress 지원을 확인합니다
+
+추정 경로와 실제 읽기 경로가 같다는 보장은 없습니다
+추정에 쓰는 helper 함수는 캐시 snapshot을 고려하지 않습니다
+실제 읽기 경로는 캐시가 준비됐는지, 필요한 revision까지 따라잡았는지 등의 조건에도 영향을 받습니다
+따라서 [410 이후 전체 상태를 다시 읽는 과정](/essays/k8s-theory-watch)이 항상 100자리 LIST가 되는 것도 아닙니다
+
+객체 수를 계산할 때도 조건이 있습니다
+이름 하나를 지정한 요청은 객체 1개로 보고, 일반 요청은 전체 수와 `limit` 중 작은 수를 사용합니다
+저장소 경로에 selector가 있으면 그 수와 전체 객체 수의 절반 중 큰 쪽을 예상 적재량으로 봅니다
+selector로 반환될 객체만 세면 검사 과정의 비용을 놓칠 수 있기 때문입니다
+
+통계가 오래됐으면 큰 객체 수·크기를 대입한 뒤 경로별 상한을 적용합니다
+반면 통계 자체가 없으면 aggregated API처럼 다른 서버에 위임될 가능성도 있어 최소 1자리를 반환합니다
+둘을 모두 “최대 비용”으로 묶으면 이 분기를 놓칩니다
+
+### 100자리는 모든 수준에서 사용할 수 있는 값이 아닙니다
+
+큐를 쓰는 수준에는 별도의 요청당 상한도 있습니다
+앞에서 계산한 `NominalCL`은 그 수준의 기본 동시성 몫입니다
+
+```text
+수준별 요청 상한 = max(1, min(ceil(NominalCL × 0.15), floor(NominalCL / handSize)))
+최종 LIST 상한 = min(수준별 요청 상한, 전역 LIST 상한)
+```
+
+이는 [`finishQueueSetReconfigsLocked`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go)의 계산입니다
+따라서 캐시 추정의 10자리나 전역 상한 100자리만으로 실제 요청 폭을 단정하면 안 됩니다
+
+크기 기반 gate를 끄면 객체 수 기반 추정으로 바뀌고 전역 LIST 상한은 10자리입니다
+이전 방식은 처리할 것으로 예상한 객체 100개마다 1자리로 계산하되, 캐시·selector·limit에 따라 예상 처리 개수를 다르게 잡습니다
+확인한 [공식 문서 저장본](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/cluster-administration/flow-control.md)은 LIST 비용을 객체 수에 비례한다고 설명하므로, 기본 활성인 크기 기반 구현과 구분해서 읽어야 합니다
+
+## 쓰기는 watch 이벤트의 후속 비용까지 계산합니다
+
+오브젝트를 바꾸면 관심 있는 watcher에 변경 이벤트를 전달해야 합니다
+추정기는 이 필터링·직렬화·전송 부담을 이벤트를 만든 쓰기 요청의 후속 작업량으로 계산합니다
+watcher 수를 실제 직렬화 횟수나 전송 성공 횟수와 동일하게 보는 것은 아닙니다
+
+관심 watcher가 10개 미만이면 후속 비용을 추가하지 않습니다
+10개 이상이면 우선 `ceil(watcher 수 / 10)`자리와 5ms를 곱해 작업량을 구합니다
+그 뒤 자리 상한을 적용하되 **작업량은 줄이지 않고 시간을 늘립니다**
+
+![관심 watcher 1000개와 자리 상한 10을 가정했을 때 후속 작업량을 보존하며 폭을 줄이고 시간을 늘리는 계산](/diagrams/k8s-theory-api-priority-fairness-2.svg)
+
+그림은 관심 watcher가 1000개이고 요청당 상한이 10자리인 계산 예시입니다
+먼저 100자리 × 5ms로 500 seat-ms를 추정하고, 상한을 적용한 뒤에는 10자리 × 50ms로 같은 작업량을 나타냅니다
+`AdditionalLatency`가 항상 5ms인 것은 아닙니다
+
+쓰기 추정기의 전역 자리 상한은 10이며 수준별 상한이 더 작으면 그 값을 사용합니다
+이벤트를 만들지 않는 ServiceAccount의 `token` 하위 리소스는 후속 비용을 제외합니다
+자세한 분기는 [`mutatingWorkEstimator.estimate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/util/flowcontrol/request/mutating_work_estimator.go)에 있습니다
+
+후속 시간은 응답을 그만큼 늦추는 sleep이 아닙니다
+응답 처리 뒤에도 자리를 예약해 두었다가 비동기로 반환하여 이후 요청의 배정에 반영합니다
+큐에서 실행을 배정할 때 `FinalSeats`가 현재 수준의 한도보다 크면 폭을 다시 줄이고 시간을 조정하는 경로도 있습니다
+
+## watch는 연결 전체가 아니라 초기화 구간을 셉니다
+
+watch 연결을 몇 시간 유지한다고 몇 시간 동안 APF 자리를 점유하지는 않습니다
+APF는 저장 계층이 초기화를 마쳤다는 신호를 보낼 때 실행 구간을 끝냅니다
+초기 객체 이벤트를 받는 watch라면 그 초기 전송까지 포함합니다
+
+`WatchList`가 활성화된 기본 구성에서 추정기는 다음 조건을 구분합니다
+
+- `sendInitialEvents=true`이거나 resourceVersion이 비어 있거나 `"0"`이면 LIST 추정기로 초기 비용을 계산합니다
+- 그 외의 watch는 최소 1자리로 계산합니다
+
+이는 추정기가 검사하는 조건이며 모든 watch가 같은 초기 이벤트를 받는다는 뜻은 아닙니다
+legacy watch와 streaming 초기 전송의 의미 차이는 [watch 글](/essays/k8s-theory-watch)에서 구분했습니다
+
+초기화가 끝난 연결은 APF 자리를 놓지만 이후 변경 이벤트 전달 비용까지 사라진 것은 아닙니다
+그 비용은 앞서 본 쓰기 요청의 후속 추정에 반영합니다
+초기화 대기와 자리 반환 경계는 [`priority-and-fairness.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/filters/priority-and-fairness.go)에 있습니다
 
 ## 자리가 없으면 기다리거나 429로 거절합니다
 

@@ -40,48 +40,6 @@ B가 A의 변경을 보존하려면 현재 상태를 다시 읽고 자기 변경
 번호가 같다는 것은 그 버전 검사만 통과했다는 뜻입니다
 다른 검증과 저장도 성공해야 갱신이 끝납니다
 
-## etcd revision은 같은 키 공간이 공유합니다
-
-etcd의 revision은 키마다 독립적으로 매기는 번호가 아닙니다
-하나의 etcd 키 공간을 바꾸는 원자적 연산마다 증가하며, 한 트랜잭션에서 여러 키를 바꾸면 같은 revision을 받습니다
-
-| revision | 변경된 키의 예 |
-|---|---|
-| 101 | Pod a |
-| 102 | Pod b |
-| 103 | Pod a |
-| 104 | ConfigMap x |
-
-이 가정에서 Pod a는 101 다음에 103을 받습니다
-중간에 다른 키가 바뀌었기 때문에 같은 오브젝트의 번호도 연속하지 않을 수 있습니다
-이 설명은 **같은 etcd 키 공간**을 기준으로 합니다
-리소스별 저장소를 달리 설정한 경우까지 클러스터 전체에 번호 하나가 있다고 확대하지는 않습니다
-
-etcd에는 키가 수정된 횟수를 세는 `version`도 있습니다
-새 키의 version은 1에서 시작하고, 키를 삭제하면 0이 됩니다
-같은 키를 다시 만들어도 이전 version을 이어 쓰지 않습니다
-Kubernetes의 resourceVersion이 사용하는 것은 이 키별 version이 아니라 revision입니다
-
-이 구분은 [etcd v3.7 데이터 모델](https://etcd.io/docs/v3.7/learning/data_model/)과 [revision의 API 보장](https://etcd.io/docs/v3.7/learning/api_guarantees/#revision)에 설명돼 있습니다
-확인한 Kubernetes [go.mod](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/go.mod)의 etcd 의존성은 v3.7.0입니다
-이 버전 확인은 실제 클러스터에 설치된 etcd 버전을 뜻하지 않습니다
-
-## 객체의 번호와 LIST의 번호는 다릅니다
-
-| 필드 위치 | 의미 |
-|---|---|
-| `ObjectMeta.resourceVersion` | 그 객체가 마지막으로 변경된 버전 |
-| `ListMeta.resourceVersion` | 목록이 구성된 버전 |
-
-별도의 예로, LIST 응답 전체의 번호가 `104`이고 안의 Pod a는 `101`, Pod b는 `103`일 수 있습니다
-104 시점의 목록에 들어 있다고 모든 객체가 그 시점에 변경된 것은 아닙니다
-
-etcd 저장 경로는 객체를 읽을 때 키의 `ModRevision`을 디코더에 넘깁니다
-목록에는 snapshot revision을 넣고, 각 항목에는 각 키의 ModRevision을 넣습니다
-객체와 목록의 번호가 다른 이유입니다
-
-API 서버의 [`store.Get`·목록 디코딩](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/store.go)과 [`APIObjectVersioner`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/api_object_versioner.go)에서 이 연결을 확인했습니다
-
 ## 번호를 생략하면 리소스마다 결과가 다릅니다
 
 모든 Update가 resourceVersion 생략을 같은 방식으로 처리하지는 않습니다
@@ -108,6 +66,32 @@ GET·LIST query의 `resourceVersion=0`은 얼마나 최신 상태를 읽을지 �
 분기는 [`Store.Update`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/generic/registry/store.go)에 있습니다
 [`deploymentStrategy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/apps/deployment/strategy.go)와 [`customResourceStrategy`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiextensions-apiserver/pkg/registry/customresource/strategy.go)의 `AllowUnconditionalUpdate` 반환값도 대조했습니다
 
+## etcd revision은 같은 키 공간이 공유합니다
+
+etcd의 revision은 키마다 독립적으로 매기는 번호가 아닙니다
+하나의 etcd 키 공간을 바꾸는 원자적 연산마다 증가하며, 한 트랜잭션에서 여러 키를 바꾸면 같은 revision을 받습니다
+
+| revision | 변경된 키의 예 |
+|---|---|
+| 101 | Pod a |
+| 102 | Pod b |
+| 103 | Pod a |
+| 104 | ConfigMap x |
+
+이 가정에서 Pod a는 101 다음에 103을 받습니다
+중간에 다른 키가 바뀌었기 때문에 같은 오브젝트의 번호도 연속하지 않을 수 있습니다
+이 설명은 **같은 etcd 키 공간**을 기준으로 합니다
+리소스별 저장소를 달리 설정한 경우까지 클러스터 전체에 번호 하나가 있다고 확대하지는 않습니다
+
+etcd에는 키가 수정된 횟수를 세는 `version`도 있습니다
+새 키의 version은 1에서 시작하고, 키를 삭제하면 0이 됩니다
+같은 키를 다시 만들어도 이전 version을 이어 쓰지 않습니다
+Kubernetes의 resourceVersion이 사용하는 것은 이 키별 version이 아니라 revision입니다
+
+이 구분은 [etcd v3.7 데이터 모델](https://etcd.io/docs/v3.7/learning/data_model/)과 [revision의 API 보장](https://etcd.io/docs/v3.7/learning/api_guarantees/#revision)에 설명돼 있습니다
+확인한 Kubernetes [go.mod](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/go.mod)의 etcd 의존성은 v3.7.0입니다
+이 버전 확인은 실제 클러스터에 설치된 etcd 버전을 뜻하지 않습니다
+
 ## resourceVersion 검사 뒤에도 etcd의 CAS가 필요한 이유
 
 API 서버가 요청 번호와 현재 번호를 비교한 직후에도 다른 API 서버가 저장할 수 있습니다
@@ -129,6 +113,26 @@ Kubernetes의 etcd 저장 경로는 읽은 키의 `ModRevision`을 쓰기 조건
 저장할 바이트가 기존 값과 같고 저장 형식을 갱신할 필요도 없다면 실제 쓰기를 생략할 수 있습니다
 따라서 성공한 Update마다 반드시 새 번호가 생기는 것도 아닙니다
 이 조건과 재시도 루프는 [`GuaranteedUpdate`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/store.go)에 있습니다
+
+## etcd lease와 Kubernetes Lease는 다릅니다
+
+번호를 비교해 갱신하는 것과, 만료 시각에 키를 없애는 것은 다른 동작입니다
+etcd lease는 키에 만료 시간을 연결합니다
+만료되면 연결된 키가 사라집니다
+`--event-ttl`의 기본값 `1h0m0s`가 적용되는 Event가 그 사용 사례입니다
+이 만료 경로에서는 controller가 객체 삭제 요청을 보내는 대신 etcd lease가 키의 수명을 정합니다
+
+반면 `coordination.k8s.io/v1`의 `Lease`는 leader election 등에 사용하는 API 오브젝트입니다
+controller가 이 객체를 직접 갱신하며, etcd lease와 같은 것은 아닙니다
+같은 resourceVersion을 읽은 두 후보가 서로 다른 값을 일반 Update로 저장하려 하면 앞서 본 충돌 검사를 거칩니다
+
+Event마다 새 etcd lease를 만들면 lease 관리 부담도 늘어납니다
+그래서 만료 시점이 비슷한 키는 lease를 재사용합니다
+lease를 재사용할 수 있는 만료 시점의 차이는 기본적으로 TTL의 5%와 60초 중 작은 값입니다
+기본 재사용 카운트 한도는 1000입니다
+이 카운트는 성공한 객체 수만 세는 것이 아니라 실패한 시도도 포함합니다
+
+정확한 기본값과 재사용 조건은 [`leaseManager.GetLease`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/lease_manager.go), Event의 TTL 전달은 [Event 저장 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/event/storage/storage.go)에서 확인했습니다
 
 ## 번호의 크기를 비교할 수 있는 범위
 
@@ -155,6 +159,25 @@ v1.35 이전에는 같은 값인지만 확인하고 내부 형식이나 숫자 �
 같은 저장소에서 번호가 만들어진다는 구현 설명보다 **API가 보장한 비교 범위**를 따라야 합니다
 공식 [API Concepts](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/using-api/api-concepts.md#resource-versions)와 [`CompareResourceVersion`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/util/resourceversion/resourceversion.go)에서 이 조건을 확인했습니다
 이 순서 비교 성질은 v1.35부터 Kubernetes 적합성 시험의 요구사항에도 포함됩니다
+
+## 객체의 번호와 LIST의 번호는 다릅니다
+
+지금까지는 갱신할 객체의 번호를 비교했습니다
+목록을 받고 변경을 이어 읽을 때는 개별 객체의 번호와 목록 전체의 번호를 구분해야 합니다
+
+| 필드 위치 | 의미 |
+|---|---|
+| `ObjectMeta.resourceVersion` | 그 객체가 마지막으로 변경된 버전 |
+| `ListMeta.resourceVersion` | 목록이 구성된 버전 |
+
+별도의 예로, LIST 응답 전체의 번호가 `104`이고 안의 Pod a는 `101`, Pod b는 `103`일 수 있습니다
+104 시점의 목록에 들어 있다고 모든 객체가 그 시점에 변경된 것은 아닙니다
+
+etcd 저장 경로는 객체를 읽을 때 키의 `ModRevision`을 디코더에 넘깁니다
+목록에는 snapshot revision을 넣고, 각 항목에는 각 키의 ModRevision을 넣습니다
+객체와 목록의 번호가 다른 이유입니다
+
+API 서버의 [`store.Get`·목록 디코딩](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/store.go)과 [`APIObjectVersioner`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/api_object_versioner.go)에서 이 연결을 확인했습니다
 
 ## 오래된 번호를 언제까지 사용할 수 있을까
 
@@ -192,25 +215,6 @@ watch에서 미래 번호를 요청한 경우에는 timeout까지 기다릴 수�
 
 compaction 기본값은 [저장소 설정](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/storagebackend/config.go)과 [kube-apiserver 옵션](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)을 대조했습니다
 410·504의 계약은 위 API Concepts의 응답 조건을 따릅니다
-
-## etcd lease와 Kubernetes Lease는 다릅니다
-
-etcd lease는 키에 만료 시간을 연결합니다
-만료되면 연결된 키가 사라집니다
-`--event-ttl`의 기본값 `1h0m0s`가 적용되는 Event가 그 사용 사례입니다
-이 만료 경로에서는 controller가 객체 삭제 요청을 보내는 대신 etcd lease가 키의 수명을 정합니다
-
-반면 `coordination.k8s.io/v1`의 `Lease`는 leader election 등에 사용하는 API 오브젝트입니다
-controller가 이 객체를 직접 갱신하며, etcd lease와 같은 것은 아닙니다
-같은 resourceVersion을 읽은 두 후보가 서로 다른 값을 일반 Update로 저장하려 하면 앞서 본 충돌 검사를 거칩니다
-
-Event마다 새 etcd lease를 만들면 lease 관리 부담도 늘어납니다
-그래서 만료 시점이 비슷한 키는 lease를 재사용합니다
-lease를 재사용할 수 있는 만료 시점의 차이는 기본적으로 TTL의 5%와 60초 중 작은 값입니다
-기본 재사용 카운트 한도는 1000입니다
-이 카운트는 성공한 객체 수만 세는 것이 아니라 실패한 시도도 포함합니다
-
-정확한 기본값과 재사용 조건은 [`leaseManager.GetLease`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/storage/etcd3/lease_manager.go), Event의 TTL 전달은 [Event 저장 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/event/storage/storage.go)에서 확인했습니다
 
 resourceVersion은 이번 글에서는 오래된 갱신을 막는 비교값이었습니다
 watch에서는 이미 본 변경 뒤부터 이어 받기 위한 커서로도 쓰입니다

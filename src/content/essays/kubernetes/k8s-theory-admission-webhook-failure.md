@@ -25,25 +25,6 @@ CEL은 제공된 입력을 바탕으로 조건이나 변경을 표현하는 언�
 > 공식 문서 저장본: `kubernetes/website@7fde177e22dc98390a6d55d215dd0301b5f6d0bb`
 > 클러스터 실측은 포함하지 않으며, 수치가 들어간 상황 예시는 설명을 위한 가정입니다
 
-## Ignore는 정상적인 거부를 무시하지 않습니다
-
-webhook의 `failurePolicy`는 호출 오류 등으로 판단을 얻지 못했을 때의 처리를 정합니다
-기본값은 `Fail`입니다
-
-| webhook의 결과 | `Fail` | `Ignore` |
-|---|---|---|
-| 정상 응답 `allowed: true` | 다음 검사로 진행 | 다음 검사로 진행 |
-| 정상 응답 `allowed: false` | 거부 | 거부 |
-| 연결·TLS·timeout·응답 검증 등의 호출 오류 | 거부 | 그 호출 실패를 무시하고 다음 검사로 진행 |
-
-`Ignore`로 다음 검사에 넘겨도 저장 성공은 보장되지 않습니다
-필수 라벨을 넣는 mutating webhook이 응답하지 못했다고 가정하겠습니다
-뒤의 validator가 그 라벨을 요구하면 라벨이 추가되지 않은 객체는 거기서 거부됩니다
-사용자가 처음부터 라벨을 넣었다면 같은 최종 검증을 통과할 수도 있습니다
-
-다만 라벨을 넣는 webhook과 최종 validator가 같은 서버에 의존한다면, 그 서버가 장애 상태일 때 검증 단계에서도 다시 응답을 기다립니다
-변경과 검증의 역할을 나누는 것만으로 가용성이 개선되지는 않습니다
-
 ## AdmissionReview는 원래 HTTP 요청과 다릅니다
 
 API 서버는 심사 정보를 `AdmissionReview`의 `request` 필드에 담고, 이 `AdmissionReview` 객체를 webhook에 POST합니다
@@ -86,6 +67,60 @@ HTTPS로 연결하는 주체는 API 서버이고, 본문의 `userInfo`는 원래
 본문에 사용자 이름이 있다는 사실만으로 신뢰할 수 있는 API 서버의 호출임을 보장하지는 않습니다
 
 근거는 [AdmissionReview v1 타입](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/api/admission/v1/types.go), [응답 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/request/admissionreview.go), [등록 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/admissionregistration/validation/validation.go)입니다
+
+## 매칭 범위가 장애의 직접 영향 범위입니다
+
+webhook의 `failurePolicy`는 호출 오류 등으로 판단을 얻지 못했을 때의 처리를 정합니다
+기본값은 `Fail`입니다
+`Fail`은 판단 오류로 요청을 거부하고, `Ignore`는 해당 오류를 넘겨 뒤의 검사를 진행하게 합니다
+
+API 서버는 원격 호출 전에 `rules`, selector, `matchConditions`로 대상 요청을 고릅니다
+정책 적용 대상에서 제외하면 그 webhook의 응답도 기다리지 않습니다
+
+| 필드 | 적용 범위를 정하는 방식 | 주의할 조건 |
+|---|---|---|
+| `rules` | operation·group·version·resource·scope | `pods`와 `pods/status`는 별개. `*`는 최상위 리소스, `*/*`는 하위 리소스까지 포함 |
+| `matchPolicy` | 정확한 일치 또는 동등한 리소스의 버전 변환 | 기본 `Equivalent`. 빠진 operation·하위 리소스까지 추가하지 않음 |
+| `namespaceSelector` | 대상 Namespace의 라벨 | Namespace 자체는 그 객체의 라벨로 판정. 그 외 클러스터 범위 객체는 이 selector로 제외할 수 없음 |
+| `objectSelector` | 새 객체 또는 기존 객체의 라벨 | 하나라도 매칭되면 대상 |
+| `matchConditions` | CEL로 표현한 추가 조건 | `false`와 평가 오류를 구분 |
+
+`objectSelector`는 사용자가 라벨로 참여를 선택하는 정책에 적합합니다
+모두에게 강제할 정책을 그 라벨 하나에만 의존시키면, 처음부터 라벨 없이 생성해 검사를 피할 수 있습니다
+
+이미 붙은 라벨을 지우는 UPDATE는 기존 객체도 매칭하므로 그 UPDATE 요청 자체가 검사 대상이 됩니다
+하지만 라벨이 사라진 뒤의 요청까지 자동으로 검사하지는 않습니다
+Namespace 라벨도 마찬가지로 누가 만들고 바꿀 수 있는지 확인해야 합니다
+
+`Equivalent`는 API 서버가 동등한 것으로 인식하는 리소스에 적용합니다
+더 이상 제공하지 않는 API 버전만 규칙에 남겨 놓고 다른 버전까지 계속 검사할 것이라고 가정해서는 안 됩니다
+
+| `matchConditions` 결과 | 처리 |
+|---|---|
+| 하나라도 실제로 `false`가 나옴 | webhook 제외. 다른 조건의 개별 오류보다 제외가 우선 |
+| 모두 `true` | webhook 호출 |
+| `false` 없이 평가 오류 | `Fail`이면 거부, `Ignore`이면 webhook 제외 |
+
+CEL의 계산량 한도를 넘어 평가 자체가 중단됐다면, 아직 계산하지 않은 조건이 false일 것이라고 가정할 수 없습니다
+서버에 연락하기 전 대상 선택 과정에서도 요청이 실패할 수 있습니다
+
+매칭 근거는 [`ShouldCallHook`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/generic/webhook.go), [resource 규칙](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/predicates/rules/rules.go), [객체 selector](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/predicates/object/matcher.go), [Namespace selector](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/predicates/namespace/matcher.go), [조건 평가](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/matchconditions/matcher.go)입니다
+
+## Ignore는 정상적인 거부를 무시하지 않습니다
+
+| webhook의 결과 | `Fail` | `Ignore` |
+|---|---|---|
+| 정상 응답 `allowed: true` | 다음 검사로 진행 | 다음 검사로 진행 |
+| 정상 응답 `allowed: false` | 거부 | 거부 |
+| 연결·TLS·timeout·응답 검증 등의 호출 오류 | 거부 | 그 호출 실패를 무시하고 다음 검사로 진행 |
+
+`Ignore`로 다음 검사에 넘겨도 저장 성공은 보장되지 않습니다
+필수 라벨을 넣는 mutating webhook이 응답하지 못했다고 가정하겠습니다
+뒤의 validator가 그 라벨을 요구하면 라벨이 추가되지 않은 객체는 거기서 거부됩니다
+사용자가 처음부터 라벨을 넣었다면 같은 최종 검증을 통과할 수도 있습니다
+
+다만 라벨을 넣는 webhook과 최종 validator가 같은 서버에 의존한다면, 그 서버가 장애 상태일 때 검증 단계에서도 다시 응답을 기다립니다
+변경과 검증의 역할을 나누는 것만으로 가용성이 개선되지는 않습니다
 
 ## 직렬 호출과 병렬 호출의 대기 시간
 
@@ -144,39 +179,50 @@ API 서버는 이를 로그·metric·admission audit annotation으로 남길 수
 
 [`reinvoker`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/reinvocation.go)는 추가 mutating 단계를 실행하고, 앞서 연결한 mutating dispatcher가 호출 대상을 고릅니다
 
-## 매칭 범위가 장애의 직접 영향 범위입니다
+## 최신 목록을 읽는 것만으로 전체 개수를 제한할 수는 없습니다
 
-API 서버는 원격 호출 전에 `rules`, selector, `matchConditions`로 대상 요청을 고릅니다
-정책 적용 대상에서 제외하면 그 webhook의 응답도 기다리지 않습니다
+객체를 열 개까지만 허용하는 webhook이 현재 아홉 개를 조회했다고 가정하겠습니다
+동시에 들어온 두 요청이 모두 아홉 개를 보고 하나씩 허용하면, 둘 다 저장된 뒤에는 열한 개가 됩니다
+조회 당시의 목록이 최신이어도 가능한 상황입니다
 
-| 필드 | 적용 범위를 정하는 방식 | 주의할 조건 |
-|---|---|---|
-| `rules` | operation·group·version·resource·scope | `pods`와 `pods/status`는 별개. `*`는 최상위 리소스, `*/*`는 하위 리소스까지 포함 |
-| `matchPolicy` | 정확한 일치 또는 동등한 리소스의 버전 변환 | 기본 `Equivalent`. 빠진 operation·하위 리소스까지 추가하지 않음 |
-| `namespaceSelector` | 대상 Namespace의 라벨 | Namespace 자체는 그 객체의 라벨로 판정. 그 외 클러스터 범위 객체는 이 selector로 제외할 수 없음 |
-| `objectSelector` | 새 객체 또는 기존 객체의 라벨 | 하나라도 매칭되면 대상 |
-| `matchConditions` | CEL로 표현한 추가 조건 | `false`와 평가 오류를 구분 |
+검사와 저장 사이에 다른 요청이 끼어들 수 있으므로, 캐시를 없애는 것만으로 해결되지는 않습니다
+총량·유일성을 엄격히 보장하려면 경쟁 요청을 조정하거나 관련 상태를 원자적으로 확정해야 합니다
 
-`objectSelector`는 사용자가 라벨로 참여를 선택하는 정책에 적합합니다
-모두에게 강제할 정책을 그 라벨 하나에만 의존시키면, 처음부터 라벨 없이 생성해 검사를 피할 수 있습니다
+## 외부 부작용은 저장 실패와 함께 되돌아가지 않습니다
 
-이미 붙은 라벨을 지우는 UPDATE는 기존 객체도 매칭하므로 그 UPDATE 요청 자체가 검사 대상이 됩니다
-하지만 라벨이 사라진 뒤의 요청까지 자동으로 검사하지는 않습니다
-Namespace 라벨도 마찬가지로 누가 만들고 바꿀 수 있는지 확인해야 합니다
+webhook이 허용 응답과 함께 외부 시스템에 예약을 만들 수 있습니다
+그 뒤 다른 validator가 거부하거나 저장이 실패하면 Kubernetes 객체 없이 외부 예약만 남을 수 있습니다
+webhook의 외부 작업과 etcd 저장은 하나의 트랜잭션이 아니기 때문입니다
 
-`Equivalent`는 API 서버가 동등한 것으로 인식하는 리소스에 적용합니다
-더 이상 제공하지 않는 API 버전만 규칙에 남겨 놓고 다른 버전까지 계속 검사할 것이라고 가정해서는 안 됩니다
+외부 상태를 바꾸는 webhook에는 실제 저장 결과와 나중에 대조해 차이를 맞추는 처리가 필요합니다
+이처럼 실제 상태를 계속 맞추는 과정을 reconciliation이라고 합니다
 
-| `matchConditions` 결과 | 처리 |
-|---|---|
-| 하나라도 실제로 `false`가 나옴 | webhook 제외. 다른 조건의 개별 오류보다 제외가 우선 |
-| 모두 `true` | webhook 호출 |
-| `false` 없이 평가 오류 | `Fail`이면 거부, `Ignore`이면 webhook 제외 |
+v1 설정의 `sideEffects: None`은 외부 변경을 하지 않는다는 선언입니다
+`NoneOnDryRun`은 일반 요청의 부작용은 가능하지만 dry-run에서는 억제한다는 선언입니다
+응답 patch로 현재 심사 중인 객체를 바꾸는 것은 여기서 말하는 외부 부작용과 다릅니다
 
-CEL의 계산량 한도를 넘어 평가 자체가 중단됐다면, 아직 계산하지 않은 조건이 false일 것이라고 가정할 수 없습니다
-서버에 연락하기 전 대상 선택 과정에서도 요청이 실패할 수 있습니다
+dry-run도 admission을 거칩니다
+webhook이 `dryRun: true`를 받고 외부 시스템을 바꾸면 선언을 어긴 것이며, API 서버가 그 쓰기를 강제로 막아주는 것은 아닙니다
 
-매칭 근거는 [`ShouldCallHook`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/generic/webhook.go), [resource 규칙](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/predicates/rules/rules.go), [객체 selector](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/predicates/object/matcher.go), [Namespace selector](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/predicates/namespace/matcher.go), [조건 평가](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/webhook/matchconditions/matcher.go)입니다
+## 자신의 복구 요청까지 검사하면 순환이 생깁니다
+
+webhook W가 모든 namespace의 Pod CREATE를 검사하고 `failurePolicy: Fail`을 쓴다고 가정하겠습니다
+W 자신도 Pod로 실행되는데 정상 endpoint가 모두 사라졌고, 복구에 새 Pod 생성이 필요하면 문제가 생깁니다
+
+![응답 불가능한 webhook이 자기 복구 Pod의 생성까지 검사하면서 복구를 막는 순환 의존성](/diagrams/k8s-theory-admission-webhook-failure-2.svg)
+
+W를 복구할 Pod를 만들려면 W의 판단을 받아야 하지만 W가 응답하지 못합니다
+controller가 재시도해도 같은 의존 관계가 남아 있으면 거부됩니다
+
+다른 정상 endpoint가 있거나 기존 Pod의 컨테이너 재시작만으로 회복할 수 있다면 상황이 다릅니다
+노드 하나의 장애가 언제나 이 순환을 만드는 것은 아닙니다
+일반 GET·LIST·WATCH가 admission webhook의 장애 때문에 직접 차단되거나 기존 Pod가 즉시 종료되는 것도 아닙니다
+다만 이후 복구·갱신 요청이 막히면 controller와 시스템 컴포넌트가 다음 작업을 진행하지 못할 수 있습니다
+
+`namespaceSelector`로 복구 Pod를 제외하면 그 Pod가 W의 응답을 기다리지 않게 할 수 있습니다
+동시에 그 영역에는 해당 정책이 적용되지 않습니다
+W의 Namespace만이 아니라 DNS·인증서·네트워크 등 의존 컴포넌트의 복구 요청도 살펴야 합니다
+클러스터 범위 요청은 namespaceSelector만으로 제외할 수 없습니다
 
 ## VAP는 규칙과 적용 방식을 나눕니다
 
@@ -228,7 +274,8 @@ CEL이 직접 HTTP 요청을 보내거나 다른 Deployment 전체를 조회하�
 파라미터는 주로 informer의 사본에서 읽습니다
 v1.37.1의 `CollectParams`에는 **이름으로 조회한 파라미터가 캐시에 없을 때 직접 API 조회로 보완하는 경로**도 있습니다
 selector 조회까지 항상 최신 API 조회로 바뀌는 것은 아닙니다
-어느 경로든 파라미터를 읽는 작업과 심사 대상 객체를 저장하는 작업이 하나의 트랜잭션으로 묶이지는 않습니다
+어느 경로든 파라미터·Namespace를 읽는 작업과 심사 대상 객체를 저장하는 작업이 하나의 트랜잭션으로 묶이지는 않습니다
+따라서 API 서버 내부에서 평가하는 VAP도 동시 요청의 총량·유일성을 그 평가만으로 보장하지는 않습니다
 
 ### 파라미터를 찾지 못한 경우를 구분합니다
 
@@ -314,58 +361,12 @@ CEL을 내부에서 실행해도 계산 비용은 듭니다
 
 근거는 [feature gate 이력](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/features/kube_features.go), [MAP 플러그인](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/plugin.go), [변경 dispatcher](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/dispatcher.go), [소유권을 추적하지 않는 병합 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/admission/plugin/policy/mutating/patch/smd.go)입니다
 
-## 최신 목록을 읽는 것만으로 전체 개수를 제한할 수는 없습니다
-
-객체를 열 개까지만 허용하는 webhook이 현재 아홉 개를 조회했다고 가정하겠습니다
-동시에 들어온 두 요청이 모두 아홉 개를 보고 하나씩 허용하면, 둘 다 저장된 뒤에는 열한 개가 됩니다
-조회 당시의 목록이 최신이어도 가능한 상황입니다
-
-검사와 저장 사이에 다른 요청이 끼어들 수 있으므로, 캐시를 없애는 것만으로 해결되지는 않습니다
-총량·유일성을 엄격히 보장하려면 경쟁 요청을 조정하거나 관련 상태를 원자적으로 확정해야 합니다
-VAP도 파라미터·Namespace와 대상 객체를 한 트랜잭션으로 묶지 않으므로 내부 실행이라는 사실만으로 이 문제를 해결하지는 않습니다
-
 [기본 플러그인 순서](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubeapiserver/options/plugins.go)에서는 MAP가 mutating webhook보다 앞에 있습니다
 validating에서는 VAP, validating webhook, ResourceQuota 순서로 진행합니다
 앞 VAP가 거부하면 뒤 원격 호출을 줄일 수 있지만, 그것을 유일한 설계 이유로 단정하지는 않습니다
 ResourceQuota의 사용량 조정·사후 보정은 [앞선 글](/essays/k8s-theory-admission-order)에서 다룬 별도 구현입니다
 
-## 외부 부작용은 저장 실패와 함께 되돌아가지 않습니다
-
-webhook이 허용 응답과 함께 외부 시스템에 예약을 만들 수 있습니다
-그 뒤 다른 validator가 거부하거나 저장이 실패하면 Kubernetes 객체 없이 외부 예약만 남을 수 있습니다
-webhook의 외부 작업과 etcd 저장은 하나의 트랜잭션이 아니기 때문입니다
-
-외부 상태를 바꾸는 webhook에는 실제 저장 결과와 나중에 대조해 차이를 맞추는 처리가 필요합니다
-이처럼 실제 상태를 계속 맞추는 과정을 reconciliation이라고 합니다
-
-v1 설정의 `sideEffects: None`은 외부 변경을 하지 않는다는 선언입니다
-`NoneOnDryRun`은 일반 요청의 부작용은 가능하지만 dry-run에서는 억제한다는 선언입니다
-응답 patch로 현재 심사 중인 객체를 바꾸는 것은 여기서 말하는 외부 부작용과 다릅니다
-
-dry-run도 admission을 거칩니다
-webhook이 `dryRun: true`를 받고 외부 시스템을 바꾸면 선언을 어긴 것이며, API 서버가 그 쓰기를 강제로 막아주는 것은 아닙니다
-
-## 자신의 복구 요청까지 검사하면 순환이 생깁니다
-
-webhook W가 모든 namespace의 Pod CREATE를 검사하고 `failurePolicy: Fail`을 쓴다고 가정하겠습니다
-W 자신도 Pod로 실행되는데 정상 endpoint가 모두 사라졌고, 복구에 새 Pod 생성이 필요하면 문제가 생깁니다
-
-![응답 불가능한 webhook이 자기 복구 Pod의 생성까지 검사하면서 복구를 막는 순환 의존성](/diagrams/k8s-theory-admission-webhook-failure-2.svg)
-
-W를 복구할 Pod를 만들려면 W의 판단을 받아야 하지만 W가 응답하지 못합니다
-controller가 재시도해도 같은 의존 관계가 남아 있으면 거부됩니다
-
-다른 정상 endpoint가 있거나 기존 Pod의 컨테이너 재시작만으로 회복할 수 있다면 상황이 다릅니다
-노드 하나의 장애가 언제나 이 순환을 만드는 것은 아닙니다
-일반 GET·LIST·WATCH가 admission webhook의 장애 때문에 직접 차단되거나 기존 Pod가 즉시 종료되는 것도 아닙니다
-다만 이후 복구·갱신 요청이 막히면 controller와 시스템 컴포넌트가 다음 작업을 진행하지 못할 수 있습니다
-
-`namespaceSelector`로 복구 Pod를 제외하면 그 Pod가 W의 응답을 기다리지 않게 할 수 있습니다
-동시에 그 영역에는 해당 정책이 적용되지 않습니다
-W의 Namespace만이 아니라 DNS·인증서·네트워크 등 의존 컴포넌트의 복구 요청도 살펴야 합니다
-클러스터 범위 요청은 namespaceSelector만으로 제외할 수 없습니다
-
-### Admission 설정의 면제에도 범위가 있습니다
+## Admission 설정의 면제에도 범위가 있습니다
 
 v1.37.1에서 **API로 등록한** webhook과 CEL 정책에는 다음 설정 제외가 있습니다
 

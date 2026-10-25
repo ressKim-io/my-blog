@@ -45,20 +45,6 @@ reconcile은 그 상태와 원하는 상태를 비교해 필요한 조정을 수
 구현은 [`Typed.Add`·`Get`·`Done`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/queue.go)에 있습니다
 처리가 끝나면 `Done()`을 호출해야 하며, 재시도 이력을 지우는 `Forget()`은 다른 역할입니다
 
-## 지금, 나중에, 실패 후에 다시 넣는 경로가 다릅니다
-
-| 경로 | 메서드 | 의미 |
-|---|---|---|
-| 기본 큐 | `Add` | 지금 처리가 필요하다고 표시 |
-| 지연 큐 | `AddAfter(key, duration)` | 지정한 시간 뒤 기본 큐에 추가 |
-| 재시도 제한 큐 | `AddRateLimited` | rate limiter가 계산한 지연 뒤 추가 |
-
-실패만 재처리 이유가 되는 것은 아닙니다
-ReplicaSet은 `minReadySeconds`를 충족해 가용해졌는지 다시 확인하려고 `AddAfter`를 사용합니다
-Pod가 Ready가 된 시점과 충분히 오래 Ready였다는 판단 시점이 다르기 때문입니다
-
-[`syncReplicaSet`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go)은 가용성 재확인 시점을 계산하고, [`AddRateLimited`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/rate_limiting_queue.go)는 limiter의 지연값을 `AddAfter`에 넘깁니다
-
 ## expectations는 요청에 따른 자식 이벤트를 기다립니다
 
 같은 키의 동시 처리를 막아도 캐시 지연으로 인한 중복 조정은 남습니다
@@ -75,7 +61,7 @@ Pod 생성 알림이 핸들러에 도착하면 `CreationObserved`가 이 기대 
 기대가 아직 남아 있다면 `manageReplicas`를 건너뜁니다
 
 이때 전체 reconcile이 곧바로 끝나는 것은 아닙니다
-앞의 캐시 일관성 검사·조회·소유권 판정이 성공하면 status 계산과 갱신 경로는 계속 진행합니다
+reconcile 시작 시 자신의 쓰기 버전까지 캐시가 따라왔는지 확인하는 검사와 조회·소유권 판정이 성공하면 status 계산과 갱신 경로는 계속 진행합니다
 status도 캐시가 아는 상태를 반영하므로, 아직 안 보이는 Pod를 이미 관찰한 것처럼 세지는 않습니다
 
 expectations는 프로세스 메모리에 있는 임시 기록입니다
@@ -161,6 +147,20 @@ selector가 맞는 고아 Pod는 [ReplicaSet이 입양할 수 있습니다](http
 [`ClaimObject`·`AdoptPod`·`CanAdopt`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/controller_ref_manager.go)와 [`claimPods`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go)가 이 순서를 구현합니다
 직접 읽기가 부모 조회와 자식 patch를 하나의 원자적 트랜잭션으로 만드는 것은 아닙니다
 
+## 지금, 나중에, 실패 후에 다시 넣는 경로가 다릅니다
+
+| 경로 | 메서드 | 의미 |
+|---|---|---|
+| 기본 큐 | `Add` | 지금 처리가 필요하다고 표시 |
+| 지연 큐 | `AddAfter(key, duration)` | 지정한 시간 뒤 기본 큐에 추가 |
+| 재시도 제한 큐 | `AddRateLimited` | rate limiter가 계산한 지연 뒤 추가 |
+
+실패만 재처리 이유가 되는 것은 아닙니다
+ReplicaSet은 `minReadySeconds`를 충족해 가용해졌는지 다시 확인하려고 `AddAfter`를 사용합니다
+Pod가 Ready가 된 시점과 충분히 오래 Ready였다는 판단 시점이 다르기 때문입니다
+
+[`syncReplicaSet`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/replicaset/replica_set.go)은 가용성 재확인 시점을 계산하고, [`AddRateLimited`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/rate_limiting_queue.go)는 limiter의 지연값을 `AddAfter`에 넘깁니다
+
 ## 실패 재시도의 기본 지연은 두 제한 중 긴 쪽입니다
 
 ReplicaSet이 사용하는 `DefaultTypedControllerRateLimiter`는 키별 실패 이력과 큐 전체의 재시도 예약을 함께 제한합니다
@@ -195,8 +195,37 @@ Event는 특정 시점에 일어난 일을 별도 오브젝트로 남기며, 영
 생성 요청 성공은 Pod가 Ready가 됐다는 뜻이 아니며, 삭제 요청 성공도 유예 종료와 finalizer 처리가 모두 끝났다는 뜻은 아닙니다
 status의 개수와 Event의 message를 함께 봐야 원하는 수에 도달하지 못한 원인을 구분할 수 있습니다
 
+## 워크큐 메트릭은 대기와 처리를 나눠 읽습니다
+
+v1.37.1의 Prometheus workqueue 제공자는 다음 7개 메트릭을 큐 이름 라벨 `name`과 함께 등록합니다
+현재 소스의 안정성 등급은 모두 **BETA**입니다
+
+| 메트릭 | 의미 |
+|---|---|
+| `workqueue_depth` | 처리할 것으로 표시된 키 수 |
+| `workqueue_adds_total` | 중복 dirty 항목을 제외하고 새로 처리 대상으로 기록한 횟수 |
+| `workqueue_queue_duration_seconds` | 기본 큐의 Add 기록부터 다음 Get까지의 시간 |
+| `workqueue_work_duration_seconds` | Get부터 Done까지의 처리 시간 |
+| `workqueue_retries_total` | 지연 큐의 AddAfter 호출에서 기록하는 횟수 |
+| `workqueue_unfinished_work_seconds` | 처리 중인 작업들의 현재 경과 시간 합 |
+| `workqueue_longest_running_processor_seconds` | 처리 중인 작업 중 가장 긴 경과 시간 |
+
+`queue_duration`에는 `AddAfter` 타이머나 rate limiter를 기다리느라 아직 기본 큐에 들어오지 않은 시간이 포함되지 않습니다
+반면 처리 중인 키에 다시 `Add()`했다면 현재 처리의 남은 시간도 다음 `Get()`까지의 대기에 포함될 수 있습니다
+`depth` 역시 이때 dirty로 표시한 재처리 키를 포함하므로, 내부 FIFO 길이와 항상 같지는 않습니다
+
+`retries_total`은 실패 횟수와 같지 않습니다
+가용성 재확인처럼 정상적인 `AddAfter()`도 포함되며, 지연이 0 이하인 호출도 기록합니다
+기본 큐가 중복 키를 합쳐도 지연 예약을 호출한 횟수가 줄어드는 것은 아닙니다
+
+큐 깊이만 보지 말고 처리 시간과 진행 중인 작업의 경과 시간도 함께 봐야 합니다
+새 키가 늘지 않더라도 `longest_running_processor_seconds`가 계속 커지면 워커가 긴 작업을 붙잡고 있을 수 있습니다
+
+등록 이름·등급은 [Prometheus 메트릭 정의](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/metrics/prometheus/workqueue/metrics.go), 측정 경계는 [`metrics.add`·`get`·`done`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/metrics.go)과 [`AddAfter`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/delaying_queue.go)에 있습니다
+
 ## Lease 경쟁에서 이겨도 이전 리더의 작업을 차단하지는 못합니다
 
+지금까지의 워크큐와 관찰 기록은 각 프로세스 안에서 동작합니다
 여러 프로세스 중 리더를 고를 때는 Lease를 사용할 수 있습니다
 후보는 Lease의 리더 기록이 바뀌는 것을 관찰하고, 자신의 로컬 시계로 관찰 후 경과 시간을 계산합니다
 다른 프로세스가 쓴 `renewTime`을 자기 시계와 그대로 비교하는 방식은 아닙니다
@@ -231,34 +260,6 @@ endpoints lock is removed, migrate to leases
 과거 Endpoints·ConfigMap에 리더 기록을 넣으면 다른 용도로 그 오브젝트를 감시하는 구성요소에도 갱신이 전달됐습니다
 [Lease 이전 이슈](https://github.com/kubernetes/kubernetes/issues/80289)는 이 불필요한 부하를 이전 이유로 설명합니다
 Lease를 감시하는 주체가 전혀 없다는 뜻은 아닙니다
-
-## 워크큐 메트릭은 대기와 처리를 나눠 읽습니다
-
-v1.37.1의 Prometheus workqueue 제공자는 다음 7개 메트릭을 큐 이름 라벨 `name`과 함께 등록합니다
-현재 소스의 안정성 등급은 모두 **BETA**입니다
-
-| 메트릭 | 의미 |
-|---|---|
-| `workqueue_depth` | 처리할 것으로 표시된 키 수 |
-| `workqueue_adds_total` | 중복 dirty 항목을 제외하고 새로 처리 대상으로 기록한 횟수 |
-| `workqueue_queue_duration_seconds` | 기본 큐의 Add 기록부터 다음 Get까지의 시간 |
-| `workqueue_work_duration_seconds` | Get부터 Done까지의 처리 시간 |
-| `workqueue_retries_total` | 지연 큐의 AddAfter 호출에서 기록하는 횟수 |
-| `workqueue_unfinished_work_seconds` | 처리 중인 작업들의 현재 경과 시간 합 |
-| `workqueue_longest_running_processor_seconds` | 처리 중인 작업 중 가장 긴 경과 시간 |
-
-`queue_duration`에는 `AddAfter` 타이머나 rate limiter를 기다리느라 아직 기본 큐에 들어오지 않은 시간이 포함되지 않습니다
-반면 처리 중인 키에 다시 `Add()`했다면 현재 처리의 남은 시간도 다음 `Get()`까지의 대기에 포함될 수 있습니다
-`depth` 역시 이때 dirty로 표시한 재처리 키를 포함하므로, 내부 FIFO 길이와 항상 같지는 않습니다
-
-`retries_total`은 실패 횟수와 같지 않습니다
-가용성 재확인처럼 정상적인 `AddAfter()`도 포함되며, 지연이 0 이하인 호출도 기록합니다
-기본 큐가 중복 키를 합쳐도 지연 예약을 호출한 횟수가 줄어드는 것은 아닙니다
-
-큐 깊이만 보지 말고 처리 시간과 진행 중인 작업의 경과 시간도 함께 봐야 합니다
-새 키가 늘지 않더라도 `longest_running_processor_seconds`가 계속 커지면 워커가 긴 작업을 붙잡고 있을 수 있습니다
-
-등록 이름·등급은 [Prometheus 메트릭 정의](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/metrics/prometheus/workqueue/metrics.go), 측정 경계는 [`metrics.add`·`get`·`done`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/metrics.go)과 [`AddAfter`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/client-go/util/workqueue/delaying_queue.go)에 있습니다
 
 ## 같은 증상이어도 보호하는 범위가 다릅니다
 

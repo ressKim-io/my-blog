@@ -39,24 +39,6 @@ GC가 이름 `web`으로 찾은 ReplicaSet의 UID가 `bbb`라면, 참조하던 �
 
 이 구분은 [Object Names and IDs](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/overview/working-with-objects/names.md)와 [`ObjectMeta.UID`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/apis/meta/v1/types.go)에 설명돼 있습니다
 
-### DELETE에도 개체를 확인하는 조건을 넣을 수 있습니다
-
-삭제 요청의 `DeleteOptions.Preconditions.uid`에 UID를 지정하면, 서버는 현재 객체의 UID와 비교합니다
-kubelet도 Pod 종료를 마친 뒤 API 객체를 최종 삭제할 때 이 조건을 넣습니다
-그 사이 같은 이름과 namespace로 새 Pod가 생겼더라도, UID가 다르면 새 Pod를 지우지 않고 `409 Conflict`를 반환합니다
-
-다음은 실측 로그가 아니라 소스에 정의된 UID 불일치 오류의 문구입니다
-
-```text
-the UID in the precondition (...) does not match the UID in record (...).
-The object might have been deleted and then recreated
-```
-
-`DeleteOptions.Preconditions.resourceVersion`도 지정할 수 있습니다
-UID로는 같은 이름을 가진 다른 객체인지 구분하고, [resourceVersion](/essays/k8s-theory-resource-version)으로는 같은 객체가 조회 이후 바뀌었는지 확인합니다
-
-근거는 [`BeforeDelete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/delete.go)와 [kubelet의 `NewUIDPreconditions` 사용](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/status/status_manager.go)입니다
-
 ## 소유 관계는 자식의 ownerReferences에 적습니다
 
 부모가 자식 목록을 저장하는 대신, 자식이 자기 `metadata.ownerReferences`에 소유자를 기록합니다
@@ -87,6 +69,10 @@ label selector와 소유자 참조도 구분해야 합니다
 selector는 label 조건에 맞는 대상을 고르며, `ownerReferences`는 특정 개체와의 소유 관계를 가리킵니다
 ReplicaSet 같은 컨트롤러가 둘을 함께 사용하더라도, selector에 맞는 모든 객체가 자동으로 소유 관계를 갖는 것은 아닙니다
 
+label과 annotation은 둘 다 객체에 붙이는 문자열 키·값입니다
+label은 selector로 객체 집합을 고르는 데 쓸 수 있지만, annotation은 API의 label selector 대상이 아닙니다
+어느 쪽도 이름·UID처럼 객체의 유일성을 보장하거나, `ownerReferences`처럼 소유 관계를 만들지는 않습니다
+
 ## 소유자와 자식의 namespace에는 제약이 있습니다
 
 namespace 범위의 자식은 같은 namespace의 소유자 또는 클러스터 범위 소유자를 가리킬 수 있습니다
@@ -116,32 +102,6 @@ Event가 없다는 이유만으로 소유 관계가 유효하다고 판단할 �
 `ownerReferences`에 namespace 필드가 없다는 사실만으로 저장할 때 어떤 소유 관계 검사까지 가능한지 판단할 수는 없습니다
 객체 구조의 검증과 admission 정책, GC의 현재 소유자 조회는 서로 다른 단계입니다
 저장할 때 참조가 유효했더라도 소유자는 나중에 삭제되거나 같은 이름으로 재생성될 수 있습니다
-
-## 참조를 바꿀 권한과 부모 삭제를 막을 권한은 다릅니다
-
-`OwnerReferencesPermissionEnforcement`는 소유자 참조 변경에 추가 권한을 검사하는 validating admission 플러그인입니다
-확인한 v1.37.1의 기본 활성 플러그인 목록에는 포함되지 않습니다
-실제 서버에서 활성화했다면 다음 검사가 적용됩니다
-
-| 변경 | 검사하는 권한 |
-|---|---|
-| 기존 객체의 `ownerReferences` 변경 | 자식 객체 자체의 `delete`. CREATE에서는 이 검사를 건너뜀 |
-| 새 blocking 참조 추가 또는 `blockOwnerDeletion`을 false·nil에서 true로 변경 | 부모 리소스의 `finalizers` 하위 리소스에 대한 `update` |
-| 기존 true 값을 유지 | 새 blocking 참조 검사의 대상은 아님. 참조 목록 자체를 바꾸면 앞의 자식 delete 검사는 별도로 적용 |
-
-두 번째 검사는 부모의 finalizer를 실제로 수정하지 않습니다
-부모 삭제를 지연시킬 수 있는 참조를 자식에 넣을 권한이 있는지 판단하는 것입니다
-모든 리소스의 finalizers에 대한 포괄적인 update 권한이 있으면 개별 리소스 매핑 전에 허용하는 경로도 있습니다
-권한 판정이 Allow가 아니면 `403 Forbidden`으로 거부합니다
-
-확인한 [개념 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/overview/working-with-objects/owners-dependents.md)에는 부모의 delete 권한이라는 설명이 남아 있습니다
-여기서는 [admission 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/access-authn-authz/admission-controllers.md#ownerreferencespermissionenforcement)와 실제 [`AttributesRecord` 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/gc/gc_admission.go)의 `update`·`finalizers`를 따릅니다
-기본 활성 여부는 [`DefaultOffAdmissionPlugins`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubeapiserver/options/plugins.go)에서 확인했습니다
-
-종류에 관한 검증도 있습니다
-[`ValidateOwnerReferences`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/api/validation/objectmeta.go)는 `controller: true` 참조가 둘 이상이면 거부하며, core 그룹의 `v1/Event`를 소유자로 지정하는 것도 금지합니다
-이는 `Event`라는 이름의 모든 kind를 막는 규칙은 아닙니다
-GC가 어떤 리소스를 감시할지는 별도의 기준으로 정합니다
 
 ## 소유자가 여럿이면 각 참조를 분류합니다
 
@@ -199,6 +159,50 @@ UID만 같고 나머지 참조 정보가 다르면 같은 조회 결과로 취�
 
 그래프의 상태와 처리 경로는 [`node` 정의](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/graph.go), [`addDependentToOwners`·`processGraphChanges`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/graph_builder.go), [`isDangling`·`attemptToOrphanWorker`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/garbagecollector/garbagecollector.go)를 기준으로 합니다
 
+## DELETE에도 개체를 확인하는 조건을 넣을 수 있습니다
+
+삭제 요청의 `DeleteOptions.Preconditions.uid`에 UID를 지정하면, 서버는 현재 객체의 UID와 비교합니다
+kubelet도 Pod 종료를 마친 뒤 API 객체를 최종 삭제할 때 이 조건을 넣습니다
+그 사이 같은 이름과 namespace로 새 Pod가 생겼더라도, UID가 다르면 새 Pod를 지우지 않고 `409 Conflict`를 반환합니다
+
+다음은 실측 로그가 아니라 소스에 정의된 UID 불일치 오류의 문구입니다
+
+```text
+the UID in the precondition (...) does not match the UID in record (...).
+The object might have been deleted and then recreated
+```
+
+`DeleteOptions.Preconditions.resourceVersion`도 지정할 수 있습니다
+UID로는 같은 이름을 가진 다른 객체인지 구분하고, [resourceVersion](/essays/k8s-theory-resource-version)으로는 같은 객체가 조회 이후 바뀌었는지 확인합니다
+
+근거는 [`BeforeDelete`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/registry/rest/delete.go)와 [kubelet의 `NewUIDPreconditions` 사용](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/status/status_manager.go)입니다
+
+## 참조를 바꿀 권한과 부모 삭제를 막을 권한은 다릅니다
+
+`OwnerReferencesPermissionEnforcement`는 소유자 참조 변경에 추가 권한을 검사하는 validating admission 플러그인입니다
+확인한 v1.37.1의 기본 활성 플러그인 목록에는 포함되지 않습니다
+실제 서버에서 활성화했다면 다음 검사가 적용됩니다
+
+| 변경 | 검사하는 권한 |
+|---|---|
+| 기존 객체의 `ownerReferences` 변경 | 자식 객체 자체의 `delete`. CREATE에서는 이 검사를 건너뜀 |
+| 새 blocking 참조 추가 또는 `blockOwnerDeletion`을 false·nil에서 true로 변경 | 부모 리소스의 `finalizers` 하위 리소스에 대한 `update` |
+| 기존 true 값을 유지 | 새 blocking 참조 검사의 대상은 아님. 참조 목록 자체를 바꾸면 앞의 자식 delete 검사는 별도로 적용 |
+
+두 번째 검사는 부모의 finalizer를 실제로 수정하지 않습니다
+부모 삭제를 지연시킬 수 있는 참조를 자식에 넣을 권한이 있는지 판단하는 것입니다
+모든 리소스의 finalizers에 대한 포괄적인 update 권한이 있으면 개별 리소스 매핑 전에 허용하는 경로도 있습니다
+권한 판정이 Allow가 아니면 `403 Forbidden`으로 거부합니다
+
+확인한 [개념 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/concepts/overview/working-with-objects/owners-dependents.md)에는 부모의 delete 권한이라는 설명이 남아 있습니다
+여기서는 [admission 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/access-authn-authz/admission-controllers.md#ownerreferencespermissionenforcement)와 실제 [`AttributesRecord` 구현](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/gc/gc_admission.go)의 `update`·`finalizers`를 따릅니다
+기본 활성 여부는 [`DefaultOffAdmissionPlugins`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubeapiserver/options/plugins.go)에서 확인했습니다
+
+종류에 관한 검증도 있습니다
+[`ValidateOwnerReferences`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apimachinery/pkg/api/validation/objectmeta.go)는 `controller: true` 참조가 둘 이상이면 거부하며, core 그룹의 `v1/Event`를 소유자로 지정하는 것도 금지합니다
+이는 `Event`라는 이름의 모든 kind를 막는 규칙은 아닙니다
+GC가 어떤 리소스를 감시할지는 별도의 기준으로 정합니다
+
 ## discovery 실패가 모든 리소스의 감시를 멈추지는 않습니다
 
 discovery는 API 서버가 제공하는 리소스 종류와 지원 동작을 확인하는 과정입니다
@@ -221,9 +225,7 @@ GraphBuilder는 대상 리소스 타입마다 monitor를 두고 list/watch합니
 
 ## label과 annotation은 식별·소유 참조를 대신하지 않습니다
 
-label과 annotation은 둘 다 객체에 붙이는 문자열 키·값입니다
-label은 selector로 객체 집합을 고르는 데 쓸 수 있지만, annotation은 API의 label selector 대상이 아닙니다
-어느 쪽도 이름·UID처럼 객체의 유일성을 보장하거나, `ownerReferences`처럼 소유 관계를 만들지는 않습니다
+두 메타데이터의 역할뿐 아니라 저장할 수 있는 형식과 크기도 구분해야 합니다
 
 | 항목 | label | annotation |
 |---|---|---|

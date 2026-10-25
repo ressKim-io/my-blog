@@ -42,44 +42,6 @@ collector는 이렇게 내보낸 span을 받는 수집 서비스입니다
 메트릭의 이름은 `apiserver_request_filter_duration_seconds`이며 라벨은 `filter`입니다
 지연 분포를 집계하는 기록이므로 이 히스토그램에서 요청 하나를 이름이나 audit ID로 찾아낼 수는 없습니다
 
-## 필터 메트릭과 filter span은 끝나는 지점이 다릅니다
-
-[`filterlatency.TrackStarted`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/filterlatency/filterlatency.go)는 span을 열고 필터 측정 시작 시각을 저장합니다
-뒤의 `TrackCompleted`는 다음 처리 단계에 들어갈 때 그 시각과의 차이를 메트릭에 기록하고, 조건에 맞으면 `fl_` 로그 필드를 붙입니다
-
-반면 span은 `defer span.End()`로 닫습니다
-안쪽 필터와 핸들러가 반환한 뒤에 끝나므로, 이름이 `authorization`인 span의 전체 길이를 인가 함수만의 실행 시간으로 읽으면 안 됩니다
-
-![필터 메트릭은 다음 TrackCompleted 진입까지, OpenTelemetry filter span은 하위 핸들러 반환까지 이어지는 시간 경계](/diagrams/k8s-theory-distributed-tracing-2.svg)
-
-메트릭 기록도 해당 완료 지점에 도달해야 합니다
-필터가 요청을 거절하고 안쪽 핸들러를 호출하지 않았다면 그 필터 뒤의 `TrackCompleted`는 실행되지 않습니다
-인증 실패처럼 별도의 완료 지점을 둔 경로도 있으므로, 추적 설정과 무관하다는 설명을 모든 요청·모든 필터에 반드시 표본이 남는다는 뜻으로 확대할 수는 없습니다
-
-이 배치는 [`DefaultBuildHandlerChain`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/config.go)에 있습니다
-같은 코드 주변에서 나온 메트릭과 span이어도 측정 구간을 먼저 비교해야 지연을 해석할 수 있습니다
-
-### Trace 로그는 OpenTelemetry span과 별도입니다
-
-핸들러와 저장 계층의 공통 [`tracing.Start`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/tracing/tracing.go)는 두 추적 경로를 함께 시작합니다
-하나는 OpenTelemetry이고, 다른 하나는 `k8s.io/utils/trace`의 내부 추적입니다
-
-| 경로 | 끝날 때 하는 일 |
-|---|---|
-| OpenTelemetry | span을 끝내고, 표본으로 선택됐으면 배치 처리 경로에 넘김 |
-| 내부 `utiltrace` | `LogIfLong`에 넘긴 시간 기준과 로그 설정에 따라 느린 구간을 출력 |
-
-확인한 Create·Get·List·Update·Patch·Delete와 저장 작업은 대체로 500ms를 로그 기준으로 사용합니다
-`SerializeObject`는 5초를 사용합니다
-이 값은 API 요청을 중단하는 timeout이 아니라 내부 추적을 로그로 남길지 정하는 기준입니다
-
-내부 추적은 루트에서 klog verbosity 2 이상이어야 로그 출력을 시작하며, 설정한 시간 기준 이상인 구간을 골라 기록합니다
-중첩된 구간은 각자 즉시 출력하는 대신 상위 추적이 처리할 때 함께 평가됩니다
-
-따라서 `Trace[...] ... (total time: ...)` 로그는 OpenTelemetry 설정 없이도 나올 수 있습니다
-괄호 안의 번호도 OpenTelemetry trace ID를 그대로 출력한 것이 아니라 내부 추적 로그가 만든 식별자입니다
-실제 출력 조건은 [`Trace.Log`·`LogIfLong`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/k8s.io/utils/trace/trace.go)에 있습니다
-
 ## 문맥을 전달하는 것과 span을 내보내는 것은 다릅니다
 
 `traceparent`는 W3C 추적 문맥 헤더입니다
@@ -143,6 +105,23 @@ kubelet의 `KubeletTracing` 등록은 남아 있으며 v1.34부터 GA·기본 �
 
 실제 연결은 API 서버의 [`TracingOptions.ApplyTo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/options/tracing.go)와 kubelet의 [`newTracerProvider`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/server.go)에서 확인할 수 있습니다
 
+## 들어온 traceparent를 부모로 쓸지는 신원으로 정합니다
+
+표본 추출은 기록할 span을 선택하는 일입니다
+부모의 선택을 이어받을지 새 루트로 선택할지 정하려면, 먼저 받은 문맥을 부모로 쓸 수 있는지 판단해야 합니다
+실제 추적기를 사용하는 API 서버는 요청자의 그룹을 보고 외부 추적 문맥을 신뢰할지 결정합니다
+`system:masters` 또는 `system:monitoring`에 속하면 받은 문맥을 부모로 사용할 수 있습니다
+그 밖의 요청자는 새 루트를 시작하고, 유효한 원격 문맥은 link로 연결합니다
+
+![특권 그룹의 유효한 원격 문맥은 부모가 되고 일반 요청의 문맥은 새 루트에 링크로 연결되는 표본 결정](/diagrams/k8s-theory-distributed-tracing-3.svg)
+
+부모로 삼으면 같은 trace에 속하면서 표본 결정도 이어받습니다
+link는 다른 span과 관련이 있다는 표시이며, 여기서 사용하는 루트 표본기는 link의 sampled 표시를 따라 선택하지 않습니다
+
+외부 요청자의 sampled 표시를 모두 부모로 신뢰하면 서버의 루트 표본 비율을 우회할 수 있습니다
+특권 그룹만 예외로 두는 이유이며, 그룹을 확인해야 하므로 추적 필터는 인증 뒤에 있습니다
+이 판정은 [`notSystemPrivilegedGroup`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/filters/traces.go)에 있습니다
+
 ## 표본 수를 생략하거나 0으로 두어도 부모의 표본 결정을 따릅니다
 
 `samplingRatePerMillion`은 백만 개당 얼마를 선택할지 정하며 0 이상 1,000,000 이하를 허용합니다
@@ -162,21 +141,6 @@ kubelet의 `KubeletTracing` 등록은 남아 있으며 v1.34부터 GA·기본 �
 그러므로 설정을 통째로 주지 않은 상태와, 실제 추적기를 만들되 표본 수만 생략한 상태는 다릅니다
 전자는 아무 span도 내보내지 않지만, 후자는 sampled 부모를 받았을 때 자식 span을 내보낼 수 있습니다
 
-## 들어온 traceparent를 부모로 쓸지는 신원으로 정합니다
-
-실제 추적기를 사용하는 API 서버는 요청자의 그룹을 보고 외부 추적 문맥을 신뢰할지 결정합니다
-`system:masters` 또는 `system:monitoring`에 속하면 받은 문맥을 부모로 사용할 수 있습니다
-그 밖의 요청자는 새 루트를 시작하고, 유효한 원격 문맥은 link로 연결합니다
-
-![특권 그룹의 유효한 원격 문맥은 부모가 되고 일반 요청의 문맥은 새 루트에 링크로 연결되는 표본 결정](/diagrams/k8s-theory-distributed-tracing-3.svg)
-
-부모로 삼으면 같은 trace에 속하면서 표본 결정도 이어받습니다
-link는 다른 span과 관련이 있다는 표시이며, 여기서 사용하는 루트 표본기는 link의 sampled 표시를 따라 선택하지 않습니다
-
-외부 요청자의 sampled 표시를 모두 부모로 신뢰하면 서버의 루트 표본 비율을 우회할 수 있습니다
-특권 그룹만 예외로 두는 이유이며, 그룹을 확인해야 하므로 추적 필터는 인증 뒤에 있습니다
-이 판정은 [`notSystemPrivilegedGroup`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/filters/traces.go)에 있습니다
-
 ### 헤더가 없다고 항상 부모도 없는 것은 아닙니다
 
 인증 구간의 span은 최상위 HTTP 추적 필터보다 바깥에서 먼저 열립니다
@@ -186,50 +150,6 @@ link는 다른 span과 관련이 있다는 표시이며, 여기서 사용하는 
 따라서 특권 그룹 요청에 헤더가 없다는 이유만으로 항상 span이 없다고 결론 낼 수 없습니다
 인증 span도 설정한 추적기로 시작하므로 그 부모 유무와 루트 표본 비율에 따라 선택 결과가 달라집니다
 이는 필터 배치와 표본기 구현을 함께 읽은 결과이며, 별도의 클러스터 재현 결과는 아닙니다
-
-## span 이름은 처리 계층을 보여 줍니다
-
-v1.37.1에서 확인한 대표 계측 지점은 다음과 같습니다
-모든 요청이 모든 지점을 거친다거나 전체 span 이름을 열거한 목록은 아닙니다
-
-| 계층 | 대표 span 이름과 조건 |
-|---|---|
-| HTTP 요청 | `GET /api/v1/namespaces/{:namespace}/pods/{:name}`처럼 요청 정보로 이름 구성 |
-| 필터 | `authentication`·`audit`·`authorization`, APF 경로의 `priorityandfairness`, 설정에 따른 `impersonation` 또는 `constrainedimpersonation` |
-| 핸들러 | `Create`·`Get`·`List`·`WatchList`·`Update`·`Patch`·`Delete`·`SerializeObject` |
-| admission webhook | `Call mutating webhook`·`Call validating webhook` |
-| 캐시·저장 | `cacher.Get`·`cacher.GetList`·`Get etcd3`·`Create etcd3`·`GuaranteedUpdate etcd3`·`List(recursive=...) etcd3` |
-| KMS 저장 변환 | `TransformFromStorage with envelopeTransformer`·`TransformToStorage with envelopeTransformer` |
-
-API 서버가 요청의 인증·인가를 처리하고 본문을 다룬 뒤 저장하는 흐름이 계측 경계로도 드러납니다
-캐시에서 응답하면 etcd 저장 호출을 거치지 않을 수 있고, 읽기 요청이 admission webhook을 호출하는 것도 아닙니다
-
-`Create etcd3`는 API 서버의 저장 구현에서 시작하는 구간입니다
-etcd 서버 내부의 Raft 합의나 디스크 기록 단계가 이 이름 하나로 각각 계측된다는 뜻은 아닙니다
-[저장 변환 층](/essays/k8s-theory-storage-transformations)의 KMS 구간도 실제 그 변환기를 통과할 때만 나타납니다
-
-HTTP span 이름은 namespace와 오브젝트 이름을 `{:namespace}`·`{:name}`으로 바꿔 이름 종류가 지나치게 늘어나는 것을 막습니다
-이를 카디널리티를 제한한다고 표현합니다
-이 처리는 span의 이름에 대한 것으로, `http.target` 같은 속성에는 실제 요청 URL이 들어갈 수 있습니다
-
-## kubelet은 HTTP·CRI뿐 아니라 내부 작업도 계측합니다
-
-kubelet의 HTTP 서버에는 추적 필터가 설치되고, CRI 클라이언트에는 gRPC 계측기가 붙습니다
-CRI(Container Runtime Interface)는 kubelet이 컨테이너 런타임에 요청하는 API입니다
-런타임도 추적을 지원하고 문맥을 이어받으면 kubelet 호출과 런타임 span을 연결할 수 있습니다
-
-현재 CRI 클라이언트의 [`RemoteRuntimeServiceBuilder`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-client/pkg/remote_runtime.go)는 추적기를 지정하지 않으면 noop을 사용하되 문맥 전파 계측기는 설치합니다
-명시적으로 `WithTracerProvider(nil)`을 주는 것은 다릅니다
-이 경우에는 계측기 자체를 설치하지 않아 문맥 전파도 꺼집니다
-kubelet의 일반 초기화 경로는 구성한 추적기를 이 builder에 전달합니다
-
-내부에서는 `syncPod`·`syncTerminatingPod`·`syncTerminatedPod`와 이미지·컨테이너 GC에 span이 있습니다
-GC는 사용하지 않는 이미지와 컨테이너 등을 정리하는 작업입니다
-이 코드는 공통 `tracing.Start` 대신 `tracer.Start`를 직접 호출하므로 공통 함수만 검색하면 계측을 놓칠 수 있습니다
-
-내부 작업이 언제나 앞선 API 요청의 자식으로 이어지는 것은 아닙니다
-예를 들어 종료 동기화는 작업 문맥을 새로 구성하는 지점이 있으므로, 계측이 있다는 사실과 하나의 분산 trace로 연결된다는 사실은 나눠 봐야 합니다
-CNI·CSI 인터페이스 전체의 추적 구현 여부는 여기서 확인한 범위에 포함하지 않습니다
 
 ## collector 내보내기는 별도 배치 루프에서 처리합니다
 
@@ -278,6 +198,88 @@ OTel v1.44.0은 exporter 환경변수로 TLS 자격 증명을 구성할 수 있�
 예를 들어 SDK는 `OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE`로 CA 파일을 읽어 TLS 자격 증명을 구성하는 경로를 갖습니다
 이 우선순위는 [`envconfig.go`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc/internal/otlpconfig/envconfig.go)와 [`NewGRPCConfig`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc/internal/otlpconfig/options.go)에서 확인했습니다
 이 글에서 해당 환경 설정으로 실제 TLS 통신을 재현한 것은 아닙니다
+
+## span 이름은 처리 계층을 보여 줍니다
+
+v1.37.1에서 확인한 대표 계측 지점은 다음과 같습니다
+모든 요청이 모든 지점을 거친다거나 전체 span 이름을 열거한 목록은 아닙니다
+
+| 계층 | 대표 span 이름과 조건 |
+|---|---|
+| HTTP 요청 | `GET /api/v1/namespaces/{:namespace}/pods/{:name}`처럼 요청 정보로 이름 구성 |
+| 필터 | `authentication`·`audit`·`authorization`, APF 경로의 `priorityandfairness`, 설정에 따른 `impersonation` 또는 `constrainedimpersonation` |
+| 핸들러 | `Create`·`Get`·`List`·`WatchList`·`Update`·`Patch`·`Delete`·`SerializeObject` |
+| admission webhook | `Call mutating webhook`·`Call validating webhook` |
+| 캐시·저장 | `cacher.Get`·`cacher.GetList`·`Get etcd3`·`Create etcd3`·`GuaranteedUpdate etcd3`·`List(recursive=...) etcd3` |
+| KMS 저장 변환 | `TransformFromStorage with envelopeTransformer`·`TransformToStorage with envelopeTransformer` |
+
+API 서버가 요청의 인증·인가를 처리하고 본문을 다룬 뒤 저장하는 흐름이 계측 경계로도 드러납니다
+캐시에서 응답하면 etcd 저장 호출을 거치지 않을 수 있고, 읽기 요청이 admission webhook을 호출하는 것도 아닙니다
+
+`Create etcd3`는 API 서버의 저장 구현에서 시작하는 구간입니다
+etcd 서버 내부의 Raft 합의나 디스크 기록 단계가 이 이름 하나로 각각 계측된다는 뜻은 아닙니다
+[저장 변환 층](/essays/k8s-theory-storage-transformations)의 KMS 구간도 실제 그 변환기를 통과할 때만 나타납니다
+
+HTTP span 이름은 namespace와 오브젝트 이름을 `{:namespace}`·`{:name}`으로 바꿔 이름 종류가 지나치게 늘어나는 것을 막습니다
+이를 카디널리티를 제한한다고 표현합니다
+이 처리는 span의 이름에 대한 것으로, `http.target` 같은 속성에는 실제 요청 URL이 들어갈 수 있습니다
+
+## kubelet은 HTTP·CRI뿐 아니라 내부 작업도 계측합니다
+
+kubelet의 HTTP 서버에는 추적 필터가 설치되고, CRI 클라이언트에는 gRPC 계측기가 붙습니다
+CRI(Container Runtime Interface)는 kubelet이 컨테이너 런타임에 요청하는 API입니다
+런타임도 추적을 지원하고 문맥을 이어받으면 kubelet 호출과 런타임 span을 연결할 수 있습니다
+
+현재 CRI 클라이언트의 [`RemoteRuntimeServiceBuilder`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/cri-client/pkg/remote_runtime.go)는 추적기를 지정하지 않으면 noop을 사용하되 문맥 전파 계측기는 설치합니다
+명시적으로 `WithTracerProvider(nil)`을 주는 것은 다릅니다
+이 경우에는 계측기 자체를 설치하지 않아 문맥 전파도 꺼집니다
+kubelet의 일반 초기화 경로는 구성한 추적기를 이 builder에 전달합니다
+
+내부에서는 `syncPod`·`syncTerminatingPod`·`syncTerminatedPod`와 이미지·컨테이너 GC에 span이 있습니다
+GC는 사용하지 않는 이미지와 컨테이너 등을 정리하는 작업입니다
+이 코드는 공통 `tracing.Start` 대신 `tracer.Start`를 직접 호출하므로 공통 함수만 검색하면 계측을 놓칠 수 있습니다
+
+내부 작업이 언제나 앞선 API 요청의 자식으로 이어지는 것은 아닙니다
+예를 들어 종료 동기화는 작업 문맥을 새로 구성하는 지점이 있으므로, 계측이 있다는 사실과 하나의 분산 trace로 연결된다는 사실은 나눠 봐야 합니다
+CNI·CSI 인터페이스 전체의 추적 구현 여부는 여기서 확인한 범위에 포함하지 않습니다
+
+## 필터 메트릭과 filter span은 끝나는 지점이 다릅니다
+
+[`filterlatency.TrackStarted`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/endpoints/filterlatency/filterlatency.go)는 span을 열고 필터 측정 시작 시각을 저장합니다
+뒤의 `TrackCompleted`는 다음 처리 단계에 들어갈 때 그 시각과의 차이를 메트릭에 기록하고, 조건에 맞으면 `fl_` 로그 필드를 붙입니다
+
+반면 span은 `defer span.End()`로 닫습니다
+안쪽 필터와 핸들러가 반환한 뒤에 끝나므로, 이름이 `authorization`인 span의 전체 길이를 인가 함수만의 실행 시간으로 읽으면 안 됩니다
+
+![필터 메트릭은 다음 TrackCompleted 진입까지, OpenTelemetry filter span은 하위 핸들러 반환까지 이어지는 시간 경계](/diagrams/k8s-theory-distributed-tracing-2.svg)
+
+메트릭 기록도 해당 완료 지점에 도달해야 합니다
+필터가 요청을 거절하고 안쪽 핸들러를 호출하지 않았다면 그 필터 뒤의 `TrackCompleted`는 실행되지 않습니다
+인증 실패처럼 별도의 완료 지점을 둔 경로도 있으므로, 추적 설정과 무관하다는 설명을 모든 요청·모든 필터에 반드시 표본이 남는다는 뜻으로 확대할 수는 없습니다
+
+이 배치는 [`DefaultBuildHandlerChain`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/apiserver/pkg/server/config.go)에 있습니다
+같은 코드 주변에서 나온 메트릭과 span이어도 측정 구간을 먼저 비교해야 지연을 해석할 수 있습니다
+
+### Trace 로그는 OpenTelemetry span과 별도입니다
+
+핸들러와 저장 계층의 공통 [`tracing.Start`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/component-base/tracing/tracing.go)는 두 추적 경로를 함께 시작합니다
+하나는 OpenTelemetry이고, 다른 하나는 `k8s.io/utils/trace`의 내부 추적입니다
+
+| 경로 | 끝날 때 하는 일 |
+|---|---|
+| OpenTelemetry | span을 끝내고, 표본으로 선택됐으면 배치 처리 경로에 넘김 |
+| 내부 `utiltrace` | `LogIfLong`에 넘긴 시간 기준과 로그 설정에 따라 느린 구간을 출력 |
+
+확인한 Create·Get·List·Update·Patch·Delete와 저장 작업은 대체로 500ms를 로그 기준으로 사용합니다
+`SerializeObject`는 5초를 사용합니다
+이 값은 API 요청을 중단하는 timeout이 아니라 내부 추적을 로그로 남길지 정하는 기준입니다
+
+내부 추적은 루트에서 klog verbosity 2 이상이어야 로그 출력을 시작하며, 설정한 시간 기준 이상인 구간을 골라 기록합니다
+중첩된 구간은 각자 즉시 출력하는 대신 상위 추적이 처리할 때 함께 평가됩니다
+
+따라서 `Trace[...] ... (total time: ...)` 로그는 OpenTelemetry 설정 없이도 나올 수 있습니다
+괄호 안의 번호도 OpenTelemetry trace ID를 그대로 출력한 것이 아니라 내부 추적 로그가 만든 식별자입니다
+실제 출력 조건은 [`Trace.Log`·`LogIfLong`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/vendor/k8s.io/utils/trace/trace.go)에 있습니다
 
 ## 기록이 없을 때는 빠진 조건부터 구분합니다
 

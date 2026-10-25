@@ -62,19 +62,6 @@ API 서버는 타입별로 주소 목록을 훑어 처음 일치하는 값을 �
 노드가 늘고 줄 때마다 API 서버의 주소 목록을 고치는 대신, Node 오브젝트가 접속 정보를 전달하는 구조입니다
 kubelet이 보고한 포트와 주소를 실제로 읽는 곳은 [`GetConnectionInfo`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/kubelet/client/kubelet_client.go)이며, 타입 우선순위는 [`GetPreferredNodeAddress`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/util/node/node.go)에서 적용합니다
 
-### 주소를 보고한 노드와 주소의 소유자는 같다고 보장되지 않습니다
-
-NodeRestriction은 노드가 자기 Node만 수정하도록 제한하고, `configSource`·taint·`ownerReferences`·일부 label 변경도 제한하는 admission 플러그인입니다
-하지만 확인한 [`admitNode`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/noderestriction/admission.go)는 `status.addresses`가 실제로 그 노드의 주소인지 확인하지 않습니다
-
-주소 검사도 요청 경로별로 구분해야 합니다
-`nodes/proxy`의 [`ResourceLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/node/strategy.go)은 이름을 IP로 해석하고, 결과 중 하나라도 global unicast가 아니면 `address not allowed`로 거절합니다
-global unicast는 일반적인 유니캐스트 주소 분류이며, 사설 IP가 모두 금지된다는 뜻은 아닙니다
-
-이 검사는 루프백·link-local 등을 제외하지만, 일반 유니캐스트 주소가 해당 노드의 것인지 다른 호스트의 것인지까지 확인하지는 않습니다
-또한 `kubectl logs`의 [`LogLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)은 이 함수를 거치지 않고 접속 URL을 만듭니다
-따라서 `nodes/proxy`의 주소 검사를 모든 kubelet 접속에 공통으로 적용되는 방어선으로 설명할 수는 없습니다
-
 ## TLS에서는 양쪽이 서로 다른 인증서를 사용합니다
 
 API 서버가 kubelet에 자신을 증명할 때는 `--kubelet-client-certificate`와 `--kubelet-client-key`로 지정한 클라이언트 인증서와 키를 사용합니다
@@ -129,46 +116,6 @@ kubelet의 x509 인증은 앞의 `clientCAFile`로 직접 수행합니다
 TokenReview는 토큰을 보내 인증 결과와 신원을 받는 API입니다
 두 API 모두 API 서버의 기존 인증·인가 정책을 재사용하므로 kubelet이 RBAC 정책 오브젝트 전체를 복제할 필요가 없습니다
 실제 구성은 [`BuildAuthn`과 `BuildAuthz`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/auth.go)에서 확인할 수 있습니다
-
-### 왕복을 줄이는 캐시는 권한 변경 반영을 늦출 수 있습니다
-
-| 캐시 | 설정 필드 | 기본 보관 시간 |
-|---|---|---|
-| 토큰 인증 결과 | `authentication.webhook.cacheTTL` | 2분 |
-| 허용 인가 결과 | `authorization.webhook.cacheAuthorizedTTL` | 5분 |
-| 거절 인가 결과 | `authorization.webhook.cacheUnauthorizedTTL` | 30초 |
-
-허용 결과가 남아 있으면 권한을 회수한 뒤에도 같은 인가 속성의 요청이 통과할 수 있습니다
-반대로 거절 결과가 남아 있으면 권한을 새로 부여해도 즉시 통과하지 않을 수 있습니다
-기본값 기준 허용 결과는 거절 결과보다 열 배 오래 보관됩니다
-
-이 시간은 권한 변경을 클러스터 전체에 반영하는 보장 시간이 아닙니다
-각 kubelet의 결과 캐시와 API 서버 쪽 정책 반영도 구분해야 합니다
-API 서버에 인가를 요청하다 오류가 나면 인가 필터는 500을 반환합니다
-다만 캐시로 답할 수 있는 요청은 API 서버에 다시 묻지 않고 처리할 수 있습니다
-
-## 설정 파일과 기존 명령행의 기본값이 다릅니다
-
-같은 kubelet 바이너리라도 설정 파일 API의 기본값과 기존 명령행 기본값은 네 필드에서 다릅니다
-아래는 값을 명시하지 않은 경우의 비교입니다
-
-| 필드 | `--config`로 읽는 설정 API 기본값 | 설정 파일 없이 플래그만 사용하는 기본값 |
-|---|---|---|
-| `authentication.anonymous.enabled` | `false` | `true` |
-| `authentication.webhook.enabled` | `true` | `false` |
-| `authorization.mode` | `Webhook` | `AlwaysAllow` |
-| `readOnlyPort` | `0`, 서버를 띄우지 않음 | `10255` |
-
-설정 파일 API는 익명 차단과 인가 위임을 기본으로 삼았습니다
-반면 기존 명령행과의 호환성을 위해 초기 설정에는 [`applyLegacyDefaults`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/options/options.go)가 이전 기본값을 적용합니다
-파일을 읽으면 API 기본값이 적용된 설정으로 바꾸고, 명시한 명령행 플래그를 다시 파싱해 우선 적용합니다
-
-따라서 `--config`를 사용한다는 사실만으로 표 왼쪽 값이 실제 적용됐다고 단정할 수도 없습니다
-파일의 명시적 값, 함께 준 플래그, 추가 설정 조각까지 확인해야 합니다
-
-플래그만 사용하고 이 값들을 바꾸지 않았다면 익명 인증과 `AlwaysAllow`가 함께 동작합니다
-네트워크로 접근할 수 있는 클라이언트의 익명 요청이 등록된 kubelet API에서 허용될 수 있고, 별도의 읽기 전용 포트도 열립니다
-공식 문서에 적힌 익명 허용·`AlwaysAllow` 기본값과 설정 파일 API의 기본값을 섞으면 실제 접근 조건을 잘못 판단할 수 있습니다
 
 ## HTTP 경로를 nodes 하위 리소스 권한으로 바꿉니다
 
@@ -279,14 +226,54 @@ API 서버의 kubelet 클라이언트 신원으로 바뀌는 경유 요청과 �
 `nodes/proxy`만으로 `/stats/summary`에 접근할 수는 없습니다
 반대로 `nodes/metrics`를 줬다고 컨테이너 실행 경로까지 허용되는 것도 아닙니다
 
+## 왕복을 줄이는 캐시는 권한 변경 반영을 늦출 수 있습니다
+
+| 캐시 | 설정 필드 | 기본 보관 시간 |
+|---|---|---|
+| 토큰 인증 결과 | `authentication.webhook.cacheTTL` | 2분 |
+| 허용 인가 결과 | `authorization.webhook.cacheAuthorizedTTL` | 5분 |
+| 거절 인가 결과 | `authorization.webhook.cacheUnauthorizedTTL` | 30초 |
+
+허용 결과가 남아 있으면 권한을 회수한 뒤에도 같은 인가 속성의 요청이 통과할 수 있습니다
+반대로 거절 결과가 남아 있으면 권한을 새로 부여해도 즉시 통과하지 않을 수 있습니다
+기본값 기준 허용 결과는 거절 결과보다 열 배 오래 보관됩니다
+
+이 시간은 권한 변경을 클러스터 전체에 반영하는 보장 시간이 아닙니다
+각 kubelet의 결과 캐시와 API 서버 쪽 정책 반영도 구분해야 합니다
+API 서버에 인가를 요청하다 오류가 나면 인가 필터는 500을 반환합니다
+다만 캐시로 답할 수 있는 요청은 API 서버에 다시 묻지 않고 처리할 수 있습니다
+
+## 설정 파일과 기존 명령행의 기본값이 다릅니다
+
+같은 kubelet 바이너리라도 설정 파일 API의 기본값과 기존 명령행 기본값은 네 필드에서 다릅니다
+아래는 값을 명시하지 않은 경우의 비교입니다
+
+| 필드 | `--config`로 읽는 설정 API 기본값 | 설정 파일 없이 플래그만 사용하는 기본값 |
+|---|---|---|
+| `authentication.anonymous.enabled` | `false` | `true` |
+| `authentication.webhook.enabled` | `true` | `false` |
+| `authorization.mode` | `Webhook` | `AlwaysAllow` |
+| `readOnlyPort` | `0`, 서버를 띄우지 않음 | `10255` |
+
+설정 파일 API는 익명 차단과 인가 위임을 기본으로 삼았습니다
+반면 기존 명령행과의 호환성을 위해 초기 설정에는 [`applyLegacyDefaults`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/cmd/kubelet/app/options/options.go)가 이전 기본값을 적용합니다
+파일을 읽으면 API 기본값이 적용된 설정으로 바꾸고, 명시한 명령행 플래그를 다시 파싱해 우선 적용합니다
+
+따라서 `--config`를 사용한다는 사실만으로 표 왼쪽 값이 실제 적용됐다고 단정할 수도 없습니다
+파일의 명시적 값, 함께 준 플래그, 추가 설정 조각까지 확인해야 합니다
+
+플래그만 사용하고 이 값들을 바꾸지 않았다면 익명 인증과 `AlwaysAllow`가 함께 동작합니다
+네트워크로 접근할 수 있는 클라이언트의 익명 요청이 등록된 kubelet API에서 허용될 수 있고, 별도의 읽기 전용 포트도 열립니다
+공식 문서에 적힌 익명 허용·`AlwaysAllow` 기본값과 설정 파일 API의 기본값을 섞으면 실제 접근 조건을 잘못 판단할 수 있습니다
+
 ### 읽기 전용 포트에는 인증·인가 필터가 없습니다
 
-위 메트릭 핸들러는 이름이 `InstallAuthNotRequiredHandlers`인 함수에 등록됩니다
+앞서 비교한 `/metrics/resource`·`/metrics/cadvisor`·`/stats/summary` 핸들러는 이름이 `InstallAuthNotRequiredHandlers`인 함수에 등록됩니다
 하지만 TLS 서버에서는 그 앞에 인증·인가 필터가 있으므로 함수 이름만 보고 인증이 필요 없다고 해석하면 안 됩니다
 
 `readOnlyPort`가 0보다 크면 별도의 읽기 전용 서버가 동작합니다
 이 서버는 `NewServer`에 인증 객체를 전달하지 않고, 인증 객체가 없으면 필터도 설치하지 않습니다
-또한 TLS 없이 HTTP로 동작하며 위 세 경로와 `/pods`·`/healthz` 등을 제공합니다
+또한 TLS 없이 HTTP로 동작하며 이 세 경로와 `/pods`·`/healthz` 등을 제공합니다
 
 따라서 읽기 전용 포트의 공개 여부는 HTTPS 포트의 RBAC 설정과 별도로 확인해야 합니다
 `readOnlyPort: 0`은 이 별도 서버를 띄우지 않는 설정입니다
@@ -320,6 +307,19 @@ API 서버에는 kubelet용과 별개의 프록시 transport가 있습니다
 
 [`CreateProxyTransport`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controlplane/apiserver/config.go)는 IP 기반 목적지에서 이름 검증을 기대할 수 없다는 이유로 이 설정을 만듭니다
 공식 문서의 일반 프록시 통신 설명과 kubelet 기본 포트에 적용되는 별도 transport를 함께 읽어야 합니다
+
+## 주소를 보고한 노드와 주소의 소유자는 같다고 보장되지 않습니다
+
+NodeRestriction은 노드가 자기 Node만 수정하도록 제한하고, `configSource`·taint·`ownerReferences`·일부 label 변경도 제한하는 admission 플러그인입니다
+하지만 확인한 [`admitNode`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/plugin/pkg/admission/noderestriction/admission.go)는 `status.addresses`가 실제로 그 노드의 주소인지 확인하지 않습니다
+
+주소 검사도 요청 경로별로 구분해야 합니다
+`nodes/proxy`의 [`ResourceLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/node/strategy.go)은 이름을 IP로 해석하고, 결과 중 하나라도 global unicast가 아니면 `address not allowed`로 거절합니다
+global unicast는 일반적인 유니캐스트 주소 분류이며, 사설 IP가 모두 금지된다는 뜻은 아닙니다
+
+이 검사는 루프백·link-local 등을 제외하지만, 일반 유니캐스트 주소가 해당 노드의 것인지 다른 호스트의 것인지까지 확인하지는 않습니다
+또한 `kubectl logs`의 [`LogLocation`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/core/pod/strategy.go)은 이 함수를 거치지 않고 접속 URL을 만듭니다
+따라서 `nodes/proxy`의 주소 검사를 모든 kubelet 접속에 공통으로 적용되는 방어선으로 설명할 수는 없습니다
 
 ## 실패 응답에서는 주체·경로·연결을 나눠 봅니다
 

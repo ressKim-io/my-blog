@@ -36,6 +36,11 @@ CA(Certificate Authority)는 인증서에 서명해 신뢰를 제공하는 인�
 발급된 인증서를 신뢰할지는 인증서를 받는 서버의 CA 신뢰 설정에도 달려 있습니다
 발급 요청이 승인됐다는 사실만으로 모든 서버에 접속할 수 있게 되는 것은 아닙니다
 
+## 첫 인증서 전에는 bootstrap token으로 인증한다
+
+인증서를 발급받는 API도 인증이 필요합니다
+bootstrap token은 kubelet이 첫 클라이언트 인증서를 받기 전 API에 접근하는 초기 자격증명입니다
+
 ## CSR은 요청 내용과 요청자 신원을 함께 저장한다
 
 CSR(CertificateSigningRequest)은 인증서 발급 요청을 저장하는 클러스터 범위의 API 오브젝트입니다
@@ -65,21 +70,6 @@ API 서버는 생성 시 요청 context의 신원으로 `username`·`uid`·`grou
 | `kubernetes.io/kube-apiserver-client` | API 서버에 접속하는 클라이언트 | 없음 |
 | `kubernetes.io/kube-apiserver-client-kubelet` | kubelet이 API 서버에 접속하는 클라이언트 | 조건을 만족하면 가능 |
 | `kubernetes.io/kubelet-serving` | kubelet의 TLS 서버 | 없음 |
-
-`kubernetes.io/legacy-unknown`이라는 네 번째 이름과 서명 컨트롤러 구현도 남아 있습니다
-하지만 v1 CSR의 검증은 다음 오류로 이 이름을 거부합니다
-
-```text
-the legacy signerName is not allowed via this API version
-```
-
-이를 허용하던 `v1beta1` CSR 엔드포인트는 현재 서빙하지 않습니다
-서명 구현이 남아 있다는 사실과, 그 이름의 CSR을 현재 API로 생성할 수 있다는 사실을 구분해야 합니다
-근거는 [CSR 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/certificates/validation/validation.go), [서명 컨트롤러](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/certificates/signer/signer.go), [API 저장소 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/certificates/rest/storage_certificates.go)입니다
-
-내장 목록 밖의 `signerName`도 지정할 수 있습니다
-다만 그 이름을 처리하는 컨트롤러가 없으면 인증서가 발급되지 않습니다
-별도 signer는 CA 신뢰 배포, 허용 subject, X.509 확장, 키 용도, 유효 기간, CA 인증서 요청 허용 여부를 정해야 합니다
 
 ## CSR 생성, 자동 승인, 서명은 서로 다른 권한이다
 
@@ -164,10 +154,7 @@ API 디스커버리에 없는 이름이어도, authorizer가 받는 권한 질�
 위 속성을 담은 SubjectAccessReview나 SelfSubjectAccessReview로 구분해 물어야 합니다
 이 주의점은 [`CanIOptions.resourceFor`·`RunAccessCheck`](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/staging/src/k8s.io/kubectl/pkg/cmd/auth/cani.go)에 근거합니다
 
-## 첫 인증서 전에는 bootstrap token으로 인증한다
-
-인증서를 발급받는 API도 인증이 필요합니다
-bootstrap token은 kubelet이 첫 클라이언트 인증서를 받기 전 API에 접근하는 초기 자격증명입니다
+## bootstrap token의 형식과 유효 조건
 
 토큰은 `kube-system` namespace의 `bootstrap-token-<token-id>` Secret에 저장합니다
 Secret 타입은 `bootstrap.kubernetes.io/token`이며, 클라이언트는 `<token-id>.<token-secret>`을 bearer token으로 보냅니다
@@ -204,6 +191,23 @@ Kubernetes는 X.509 클라이언트 인증서의 개별 폐기를 지원하지 �
 이 제한은 [공식 인증 문서](https://github.com/kubernetes/website/blob/7fde177e22dc98390a6d55d215dd0301b5f6d0bb/content/en/docs/reference/access-authn-authz/authentication.md)에도 명시돼 있습니다
 인증서 만료 전의 대응에서는 서버의 CA 신뢰 제거와 RBAC 등 인가 변경을 구분해야 합니다
 권한을 회수하는 일은 인증서 자체를 무효화하는 일과 다릅니다
+
+## signer 이름의 구현과 사용 가능 여부는 다릅니다
+
+`kubernetes.io/legacy-unknown`이라는 네 번째 이름과 서명 컨트롤러 구현도 남아 있습니다
+하지만 v1 CSR의 검증은 다음 오류로 이 이름을 거부합니다
+
+```text
+the legacy signerName is not allowed via this API version
+```
+
+이를 허용하던 `v1beta1` CSR 엔드포인트는 현재 서빙하지 않습니다
+서명 구현이 남아 있다는 사실과, 그 이름의 CSR을 현재 API로 생성할 수 있다는 사실을 구분해야 합니다
+근거는 [CSR 검증](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/apis/certificates/validation/validation.go), [서명 컨트롤러](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/controller/certificates/signer/signer.go), [API 저장소 등록](https://github.com/kubernetes/kubernetes/blob/f78e722310e50bcaca9276be22276d9e91d91308/pkg/registry/certificates/rest/storage_certificates.go)입니다
+
+내장 목록 밖의 `signerName`도 지정할 수 있습니다
+다만 그 이름을 처리하는 컨트롤러가 없으면 인증서가 발급되지 않습니다
+별도 signer는 CA 신뢰 배포, 허용 subject, X.509 확장, 키 용도, 유효 기간, CA 인증서 요청 허용 여부를 정해야 합니다
 
 ## 갱신 시점과 발급 수명은 서로 다른 설정이다
 
