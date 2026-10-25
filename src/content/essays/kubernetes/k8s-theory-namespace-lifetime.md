@@ -34,30 +34,13 @@ Mount namespace는 보이는 mount 구성을, PID namespace는 프로세스 ID�
 Kubernetes의 `Namespace`는 다시 다른 대상입니다
 API 객체와 정책을 구획하는 Kubernetes Namespace를 만들었다는 사실만으로 커널의 모든 자원·보안 경계가 분리되지는 않습니다
 
-## Task는 여러 namespace를 참조합니다
-
-커널의 `task_struct`는 스케줄링하는 작업을 표현합니다
-이 객체의 `nsproxy`는 mount·UTS·IPC·network·cgroup·time namespace 등으로 향하는 참조를 묶습니다
-
-namespace 정보를 모두 `nsproxy`에서 찾으려 하면 두 예외를 놓칩니다
-현재 task의 **활성 PID namespace**는 `task_active_pid_ns()`로 접근합니다
-`nsproxy.pid_ns_for_children`은 앞으로 생성할 자식의 대상을 가리킵니다
-
-User namespace도 자격 증명인 credentials의 `user_ns`를 통해 연결됩니다
-이는 사용자·그룹 ID와 capability 권한이 어느 범위에 적용되는지를 나누는 namespace입니다
-
-여러 task는 같은 `nsproxy`를 공유할 수 있고 namespace별 객체도 다른 `nsproxy` 사이에서 공유할 수 있습니다
-따라서 `nsproxy`의 참조 수를 그 namespace 안의 프로세스 수와 같은 값으로 읽을 수는 없습니다
-
-Task가 종료하면서 `exit_nsproxy_namespaces()`를 호출하면 자신의 `nsproxy` 참조를 내려놓습니다
-마지막 `nsproxy` 참조가 사라져 `free_nsproxy()`가 실행돼도, 이 함수는 종류별 `put_*`을 호출해 해당 참조를 반환하는 단계입니다
-
-그 namespace로 향하는 다른 참조까지 모두 사라졌다는 뜻은 아닙니다
-
 ## 열린 FD와 namespace mount도 수명을 유지합니다
 
 **참조**는 커널 객체를 가리키며 그 수명을 유지하는 관계입니다
 Network namespace 안의 마지막 프로세스가 종료돼도 열린 namespace FD나 namespace 자체를 가리키는 mount가 남아 있으면 객체를 유지할 수 있습니다
+
+그림의 `nsproxy`는 프로세스가 가진 여러 namespace 참조를 묶는 커널 구조입니다
+열린 FD와 mount는 그 프로세스 쪽 참조와 별개로 객체를 유지할 수 있습니다
 
 ![Task의 nsproxy 참조 외에 열린 FD와 namespace bind mount가 network namespace를 유지하는 관계|tall](/diagrams/k8s-theory-namespace-lifetime-1.svg)
 
@@ -73,47 +56,6 @@ Network namespace 안의 마지막 프로세스가 종료돼도 열린 namespace
 
 모든 bind mount가 namespace를 유지하는 것은 아닙니다
 앱 디렉터리를 다른 경로에 붙인 mount와 namespace 자체를 가리키는 mount는 대상이 다릅니다
-
-### 다른 namespace와 파일시스템도 참조를 가질 수 있습니다
-
-| 참조 관계의 예 | 유지될 수 있는 대상 |
-|---|---|
-| 열린 namespace FD·해당 파일의 bind mount | 그 namespace 객체 |
-| 자식 PID·user namespace | 계층의 부모 namespace |
-| Non-user namespace의 소유 관계 | 소유한 user namespace |
-| `pid_for_children`·`time_for_children` | 이후 자식에게 사용할 PID·time namespace |
-| 해당 PID namespace를 참조하는 procfs mount | PID namespace |
-| 해당 IPC namespace를 참조하는 mqueue mount | IPC namespace |
-
-Procfs는 프로세스 정보를, mqueue 파일시스템은 POSIX 메시지 큐를 노출합니다
-이 mount들이 가진 참조도 프로세스 개수만 세면 빠집니다. 표는 수명에 관여하는 모든 참조를 빠짐없이 열거한 목록은 아닙니다
-
-참조를 찾았다고 바로 누수로 판단할 수도 없습니다
-관찰 도구나 runtime이 의도한 수명 동안 유지하는 중일 수 있으므로 참조의 주체와 목적, 해제할 조건을 함께 확인해야 합니다
-
-객체가 있다는 사실과 그 안에 자원이 있다는 사실, 정상 프로세스가 그 자원을 계속 사용할 수 있다는 사실도 다릅니다
-
-## FD를 갖는 것과 namespace에 참여할 권한은 다릅니다
-
-Linux의 namespace API는 생성과 기존 대상 참여를 구분합니다
-다음은 인터페이스의 역할을 설명한 것으로 실제 실행 절차가 아닙니다
-
-| 인터페이스 | 기본 역할과 구분할 조건 |
-|---|---|
-| `clone()`의 `CLONE_NEW*` | 자식을 생성하면서 지정한 종류의 namespace를 새로 생성 |
-| `unshare()`의 `CLONE_NEW*` | 호출자가 공유하던 실행 문맥을 분리하고 새 namespace를 준비 |
-| `setns()` | FD 등이 가리키는 기존 namespace에 종류별 규칙으로 참여 |
-
-Namespace FD가 있다고 `setns()`의 권한 검사를 건너뛰지는 않습니다
-확인한 network namespace 참여 경로는 두 user namespace의 `CAP_SYS_ADMIN`을 확인합니다
-호출자의 user namespace와 대상 network namespace를 소유한 user namespace입니다
-
-종류에 따라 추가 조건도 다릅니다
-예를 들어 user namespace 참여에는 대상 범위의 권한 외에도 멀티스레드·파일시스템 문맥 공유 제약이 있습니다
-같은 user namespace에 다시 들어가 권한을 되찾는 것도 허용하지 않습니다
-
-PID namespace에는 아래에서 볼 자식 대상 선택의 의미와 계층 제약이 있습니다
-그래서 “FD를 열었으니 현재 프로세스가 그 안으로 이동했다”라고 해석해서는 안 됩니다
 
 ## Network namespace의 마지막 참조 뒤에도 정리 단계가 있습니다
 
@@ -168,6 +110,67 @@ CNI 규격 1.1.0의 `DEL`은 일부 자원이나 상태가 없어도 가능한 �
 
 또 CNI에서 container는 네트워크 격리 영역을 가리킵니다
 일반적인 Kubernetes 구성에서는 sandbox가 그 단위이므로 `CNI_CONTAINERID`를 앱 실행 컨테이너의 ID와 같다고 가정하면 안 됩니다
+
+## Task는 여러 namespace를 참조합니다
+
+커널의 `task_struct`는 스케줄링하는 작업을 표현합니다
+이 객체의 `nsproxy`는 mount·UTS·IPC·network·cgroup·time namespace 등으로 향하는 참조를 묶습니다
+
+namespace 정보를 모두 `nsproxy`에서 찾으려 하면 두 예외를 놓칩니다
+현재 task의 **활성 PID namespace**는 `task_active_pid_ns()`로 접근합니다
+`nsproxy.pid_ns_for_children`은 앞으로 생성할 자식의 대상을 가리킵니다
+
+User namespace도 자격 증명인 credentials의 `user_ns`를 통해 연결됩니다
+이는 사용자·그룹 ID와 capability 권한이 어느 범위에 적용되는지를 나누는 namespace입니다
+
+여러 task는 같은 `nsproxy`를 공유할 수 있고 namespace별 객체도 다른 `nsproxy` 사이에서 공유할 수 있습니다
+따라서 `nsproxy`의 참조 수를 그 namespace 안의 프로세스 수와 같은 값으로 읽을 수는 없습니다
+
+Task가 종료하면서 `exit_nsproxy_namespaces()`를 호출하면 자신의 `nsproxy` 참조를 내려놓습니다
+마지막 `nsproxy` 참조가 사라져 `free_nsproxy()`가 실행돼도, 이 함수는 종류별 `put_*`을 호출해 해당 참조를 반환하는 단계입니다
+
+그 namespace로 향하는 다른 참조까지 모두 사라졌다는 뜻은 아닙니다
+
+### 다른 namespace와 파일시스템도 참조를 가질 수 있습니다
+
+| 참조 관계의 예 | 유지될 수 있는 대상 |
+|---|---|
+| 열린 namespace FD·해당 파일의 bind mount | 그 namespace 객체 |
+| 자식 PID·user namespace | 계층의 부모 namespace |
+| Non-user namespace의 소유 관계 | 소유한 user namespace |
+| `pid_for_children`·`time_for_children` | 이후 자식에게 사용할 PID·time namespace |
+| 해당 PID namespace를 참조하는 procfs mount | PID namespace |
+| 해당 IPC namespace를 참조하는 mqueue mount | IPC namespace |
+
+Procfs는 프로세스 정보를, mqueue 파일시스템은 POSIX 메시지 큐를 노출합니다
+이 mount들이 가진 참조도 프로세스 개수만 세면 빠집니다. 표는 수명에 관여하는 모든 참조를 빠짐없이 열거한 목록은 아닙니다
+
+참조를 찾았다고 바로 누수로 판단할 수도 없습니다
+관찰 도구나 runtime이 의도한 수명 동안 유지하는 중일 수 있으므로 참조의 주체와 목적, 해제할 조건을 함께 확인해야 합니다
+
+객체가 있다는 사실과 그 안에 자원이 있다는 사실, 정상 프로세스가 그 자원을 계속 사용할 수 있다는 사실도 다릅니다
+
+## FD를 갖는 것과 namespace에 참여할 권한은 다릅니다
+
+Linux의 namespace API는 생성과 기존 대상 참여를 구분합니다
+다음은 인터페이스의 역할을 설명한 것으로 실제 실행 절차가 아닙니다
+
+| 인터페이스 | 기본 역할과 구분할 조건 |
+|---|---|
+| `clone()`의 `CLONE_NEW*` | 자식을 생성하면서 지정한 종류의 namespace를 새로 생성 |
+| `unshare()`의 `CLONE_NEW*` | 호출자가 공유하던 실행 문맥을 분리하고 새 namespace를 준비 |
+| `setns()` | FD 등이 가리키는 기존 namespace에 종류별 규칙으로 참여 |
+
+Namespace FD가 있다고 `setns()`의 권한 검사를 건너뛰지는 않습니다
+확인한 network namespace 참여 경로는 두 user namespace의 `CAP_SYS_ADMIN`을 확인합니다
+호출자의 user namespace와 대상 network namespace를 소유한 user namespace입니다
+
+종류에 따라 추가 조건도 다릅니다
+예를 들어 user namespace 참여에는 대상 범위의 권한 외에도 멀티스레드·파일시스템 문맥 공유 제약이 있습니다
+같은 user namespace에 다시 들어가 권한을 되찾는 것도 허용하지 않습니다
+
+PID namespace에는 아래에서 볼 자식 대상 선택의 의미와 계층 제약이 있습니다
+그래서 “FD를 열었으니 현재 프로세스가 그 안으로 이동했다”라고 해석해서는 안 됩니다
 
 ## PID namespace는 init 종료 뒤 실행을 다시 시작할 수 없습니다
 

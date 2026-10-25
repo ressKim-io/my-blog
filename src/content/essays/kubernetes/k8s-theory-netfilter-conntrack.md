@@ -41,28 +41,6 @@ iptables의 `nat`·`filter` 테이블은 서로 다른 규칙 묶음이며 같�
 사용자 정의 체인인 `KUBE-SERVICES`가 새로운 커널 hook을 만드는 것은 아닙니다
 기본 체인에 설치한 점프 규칙으로 그 체인의 규칙을 실행합니다
 
-nftables도 같은 Netfilter 기반을 사용하지만 기본 체인을 자동으로 모두 만들지는 않습니다
-base chain을 만들 때 hook과 priority 등을 지정하며, table 이름을 `nat`로 지었다는 사실만으로 NAT 처리 위치가 정해지지는 않습니다
-
-같은 hook에 여러 함수가 등록되면 숫자가 작은 priority부터 실행합니다
-Linux v6.18.58의 대표적인 IPv4 우선순위는 다음과 같습니다
-
-| 처리 | Priority | 관계 |
-|---|---:|---|
-| 조각 재조립 | `-400` | conntrack보다 앞선 처리 |
-| 전통적인 raw | `-300` | 추적 여부를 정하는 규칙 등을 conntrack보다 먼저 처리 |
-| conntrack | `-200` | 패킷을 연결 기록과 대응 |
-| mangle | `-150` | DNAT보다 앞선 패킷 처리 |
-| 목적지 NAT | `-100` | `PREROUTING`·`OUTPUT`의 DNAT 처리 |
-| filter | `0` | 해당 hook에 등록한 필터 처리 |
-| 출발지 NAT | `100` | `POSTROUTING`·`INPUT`의 SNAT 처리 |
-
-이 표는 모든 행이 모든 hook에서 실행된다는 뜻이 아닙니다
-실제 등록 위치와 우선순위를 함께 봐야 합니다. 예를 들어 conntrack의 초기 조회는 `PREROUTING`·`OUTPUT`에서 DNAT보다 먼저 실행됩니다
-
-또한 한 함수의 `ACCEPT`가 이후 모든 hook까지 면제하는 것은 아닙니다
-커널의 `nf_hook_slow`는 `NF_ACCEPT`를 받으면 다음 등록 함수를 계속 실행합니다
-
 ## 목적지가 바뀌면 라우팅 판단도 달라집니다
 
 **DNAT(Destination NAT)**는 목적지 주소·포트를 바꾸는 처리입니다
@@ -70,15 +48,6 @@ Linux v6.18.58의 대표적인 IPv4 우선순위는 다음과 같습니다
 
 iptables ClusterIP 경로에서는 Service 주소를 보통 인터페이스에 바인딩하지 않고 규칙의 매치 대상으로 사용합니다
 DNAT이 없을 때 반드시 “라우트가 없다”고 단정할 수는 없으며, 실제 전달·실패 형태는 노드의 라우팅에 달려 있습니다
-
-로컬에서 만든 패킷은 `PREROUTING`을 지나지 않으므로 `OUTPUT`에서도 DNAT이 가능합니다
-v6.18.58의 `nf_nat_ipv4_local_fn`은 목적지 주소의 변환을 확인하면 `ip_route_me_harder`로 경로를 다시 계산합니다
-
-출발지 주소·포트를 바꾸는 **SNAT(Source NAT)**도 구분해야 합니다
-kube-proxy의 masquerade는 표시된 트래픽을 `POSTROUTING`에서 처리하지만, 일반 Netfilter의 모든 SNAT이 이 위치에만 한정되는 것은 아닙니다
-
-확인한 커널은 `PREROUTING`·`OUTPUT`에 목적지 변환을, `POSTROUTING`·`INPUT`에 출발지 변환을 등록합니다
-Masquerade는 송신 인터페이스 주소를 사용하는 SNAT 방식이며 모든 ClusterIP 요청에 무조건 적용되는 것은 아닙니다
 
 ## ClusterIP의 DNAT은 endpoint 체인의 규칙에서 일어납니다
 
@@ -93,11 +62,10 @@ Service를 찾는 단계, 백엔드를 선택하는 단계, 패킷의 목적지�
 진입점이 둘이므로 노드 프로세스와 `hostNetwork` Pod의 로컬 송신도 Service를 사용할 수 있습니다
 반면 일반 Pod에서 나와 노드 네트워크 경로로 들어온 패킷은 노드의 수신 경로를 따릅니다
 
+출발지 주소·포트를 바꾸는 **SNAT(Source NAT)**도 구분해야 합니다
+
 `nat/POSTROUTING`은 `KUBE-POSTROUTING`으로 연결됩니다
 앞에서 masquerade 대상으로 표시한 트래픽의 출발지를 바꾸며, DNAT을 했다는 사실만으로 모든 요청이 SNAT 대상이 되는 것은 아닙니다
-
-`filter` 쪽 일부 진입 규칙은 `-m conntrack --ctstate NEW`로 연결 상태를 읽습니다
-그렇다고 모든 filter 점프에 같은 조건이 있는 것은 아닙니다. `KUBE-FORWARD`와 health-check용 `KUBE-NODEPORTS` 점프에는 이 조건이 없습니다
 
 이 체인 이름과 점프 구성을 IPVS·nftables 모드나 kube-proxy 대체 구현까지 그대로 적용해서는 안 됩니다
 iptables 모드라는 선택과 그 명령이 사용하는 백엔드 역시 실제 노드에서 확인할 사항입니다
@@ -126,25 +94,6 @@ TCP·UDP에서는 출발지와 목적지 주소·포트, 프로토콜이 연결 
 두 키를 단순히 주소를 맞바꾼 사본으로 생각하면 이 차이를 놓칩니다
 NAT 설정의 `nf_nat_setup_info`는 실제 변환을 반영해 reply 튜플을 수정합니다
 
-### 연결 상태는 TCP 소켓 상태와 같은 분류가 아닙니다
-
-conntrack의 `NEW`는 반드시 “테이블에 없는 패킷”을 뜻하지 않습니다
-아직 응답을 보지 못한 기존 기록의 original 방향 패킷도 `NEW`일 수 있습니다
-
-반대 방향을 조회하면 `ESTABLISHED_REPLY`로 분류하고, 응답을 본 original 방향은 `ESTABLISHED`로 분류합니다
-기존 연결과 관련된 `RELATED`도 별도 상태입니다. UDP에도 이 연결 추적 분류를 적용할 수 있습니다
-
-따라서 “`--ctstate NEW`니까 반드시 NAT 백엔드를 새로 선택한다”고 연결해서는 안 됩니다
-NAT 바인딩의 초기화 여부와 패킷의 연결 상태 분류를 함께 봐야 합니다
-
-### Namespace는 조회를 구분하지만 자원을 전부 분리하지는 않습니다
-
-커널 조회는 튜플뿐 아니라 namespace와 zone의 일치도 검사합니다
-호스트 네트워크의 규칙·연결 상태와 Pod의 네트워크 문맥을 구분해야 하는 이유입니다
-
-다만 확인한 커널의 conntrack 해시 저장소는 공유되며, 연결 객체에 namespace 정보가 함께 있습니다
-각 Pod가 독립적인 해시 메모리와 노드 자원 한도를 자동으로 얻는다고 해석할 수는 없습니다
-
 ## 후속 패킷은 유지 중인 NAT 바인딩을 재사용합니다
 
 새 흐름의 첫 패킷은 NAT 규칙을 조회해 바인딩을 만들며 그 패킷도 변환합니다
@@ -161,6 +110,62 @@ iptables의 Service 순차 검색 비용도 새 NAT 바인딩을 선택하는 �
 
 엔트리가 만료·삭제되거나 추적을 제외한 패킷에는 같은 바인딩이 유지된다는 전제를 적용할 수 없습니다
 응답을 역변환할 때 쓰는 NAT 상태는 이후 패킷에 같은 변환을 적용하는 데도 쓰입니다
+
+## 로컬 송신은 OUTPUT의 DNAT 뒤 경로를 다시 계산합니다
+
+로컬에서 만든 패킷은 `PREROUTING`을 지나지 않으므로 `OUTPUT`에서도 DNAT이 가능합니다
+v6.18.58의 `nf_nat_ipv4_local_fn`은 목적지 주소의 변환을 확인하면 `ip_route_me_harder`로 경로를 다시 계산합니다
+
+kube-proxy의 masquerade는 표시된 트래픽을 `POSTROUTING`에서 처리하지만, 일반 Netfilter의 모든 SNAT이 이 위치에만 한정되는 것은 아닙니다
+
+확인한 커널은 `PREROUTING`·`OUTPUT`에 목적지 변환을, `POSTROUTING`·`INPUT`에 출발지 변환을 등록합니다
+Masquerade는 송신 인터페이스 주소를 사용하는 SNAT 방식이며 모든 ClusterIP 요청에 무조건 적용되는 것은 아닙니다
+
+## Hook의 등록 위치와 우선순위를 함께 봅니다
+
+nftables도 같은 Netfilter 기반을 사용하지만 기본 체인을 자동으로 모두 만들지는 않습니다
+base chain을 만들 때 hook과 priority 등을 지정하며, table 이름을 `nat`로 지었다는 사실만으로 NAT 처리 위치가 정해지지는 않습니다
+
+같은 hook에 여러 함수가 등록되면 숫자가 작은 priority부터 실행합니다
+Linux v6.18.58의 대표적인 IPv4 우선순위는 다음과 같습니다
+
+| 처리 | Priority | 관계 |
+|---|---:|---|
+| 조각 재조립 | `-400` | conntrack보다 앞선 처리 |
+| 전통적인 raw | `-300` | 추적 여부를 정하는 규칙 등을 conntrack보다 먼저 처리 |
+| conntrack | `-200` | 패킷을 연결 기록과 대응 |
+| mangle | `-150` | DNAT보다 앞선 패킷 처리 |
+| 목적지 NAT | `-100` | `PREROUTING`·`OUTPUT`의 DNAT 처리 |
+| filter | `0` | 해당 hook에 등록한 필터 처리 |
+| 출발지 NAT | `100` | `POSTROUTING`·`INPUT`의 SNAT 처리 |
+
+이 표는 모든 행이 모든 hook에서 실행된다는 뜻이 아닙니다
+실제 등록 위치와 우선순위를 함께 봐야 합니다. 예를 들어 conntrack의 초기 조회는 `PREROUTING`·`OUTPUT`에서 DNAT보다 먼저 실행됩니다
+
+또한 한 함수의 `ACCEPT`가 이후 모든 hook까지 면제하는 것은 아닙니다
+커널의 `nf_hook_slow`는 `NF_ACCEPT`를 받으면 다음 등록 함수를 계속 실행합니다
+
+## 연결 상태는 TCP 소켓 상태와 같은 분류가 아닙니다
+
+conntrack의 `NEW`는 반드시 “테이블에 없는 패킷”을 뜻하지 않습니다
+아직 응답을 보지 못한 기존 기록의 original 방향 패킷도 `NEW`일 수 있습니다
+
+반대 방향을 조회하면 `ESTABLISHED_REPLY`로 분류하고, 응답을 본 original 방향은 `ESTABLISHED`로 분류합니다
+기존 연결과 관련된 `RELATED`도 별도 상태입니다. UDP에도 이 연결 추적 분류를 적용할 수 있습니다
+
+따라서 “`--ctstate NEW`니까 반드시 NAT 백엔드를 새로 선택한다”고 연결해서는 안 됩니다
+NAT 바인딩의 초기화 여부와 패킷의 연결 상태 분류를 함께 봐야 합니다
+
+`filter` 쪽 일부 진입 규칙은 `-m conntrack --ctstate NEW`로 연결 상태를 읽습니다
+그렇다고 모든 filter 점프에 같은 조건이 있는 것은 아닙니다. `KUBE-FORWARD`와 health-check용 `KUBE-NODEPORTS` 점프에는 이 조건이 없습니다
+
+### Namespace는 조회를 구분하지만 자원을 전부 분리하지는 않습니다
+
+커널 조회는 튜플뿐 아니라 namespace와 zone의 일치도 검사합니다
+호스트 네트워크의 규칙·연결 상태와 Pod의 네트워크 문맥을 구분해야 하는 이유입니다
+
+다만 확인한 커널의 conntrack 해시 저장소는 공유되며, 연결 객체에 namespace 정보가 함께 있습니다
+각 Pod가 독립적인 해시 메모리와 노드 자원 한도를 자동으로 얻는다고 해석할 수는 없습니다
 
 ## 연결 기록에는 용량과 만료 조건이 있습니다
 

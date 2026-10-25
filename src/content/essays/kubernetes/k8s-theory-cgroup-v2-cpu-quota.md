@@ -39,46 +39,10 @@ CPU 사용률을 평균 내는 구간과 CPU 시간을 제한하는 주기가 �
 평균 2.1%와 첫 기간의 실행 제한은 모순되지 않습니다
 여러 CPU에서 병렬로 실행하면 합산 예산을 더 짧은 시간에 소진할 수도 있습니다
 
-## kubelet의 계산과 컨테이너 파일 기록을 구분합니다
-
-[QoS와 cgroup](/essays/k8s-theory-qos-cgroups)에서 kubelet의 자원 변환을 살펴봤습니다
-CPU request는 배분 가중치로, CPU limit은 quota와 period로 바꿉니다
-
-컨테이너 경로에서 kubelet은 CRI의 `LinuxContainerResources`에 `cpu_quota`·`cpu_period`·`cpu_shares` 등을 담아 전달합니다
-CRI는 kubelet과 컨테이너 런타임 사이의 인터페이스입니다
-컨테이너의 cgroup 파일에 어떤 값을 기록하는지는 런타임과 그 하위 구현·cgroup 드라이버에 따라 달라집니다
-
-Pod cgroup은 kubelet의 cgroup 관리 경로에서 설정합니다
-이 경로와 CRI 런타임의 컨테이너 변환이 같은 라이브러리 버전·계산식을 사용한다고 가정하면 안 됩니다
-초기 생성뿐 아니라 자원 갱신에서도 파일 값이 바뀔 수 있습니다
-
-| cgroup v2 파일 | 커널이 적용하는 대상 |
-|---|---|
-| `cpu.max` | 기간당 합산 CPU 시간 상한 |
-| `cpu.weight` | 경합 시 상대적인 CPU 배분 몫 |
-| `memory.max` | 메모리 사용량 상한과 회수·OOM 경계 |
-| `cpu.stat` | CPU 사용 시간과 대역폭 제한 통계 |
-
-커널은 이 파일을 Kubernetes의 request·limit이라는 이름으로 해석하지 않습니다
-전달된 제어 값을 해당 계층과 작업의 스케줄링 정책에 적용합니다
-
-### CFS라는 이름과 현재 fair-class 스케줄러는 구분합니다
-
-공식 문서와 지표에는 **CFS Bandwidth Control**이라는 이름이 남아 있습니다
-이는 그룹의 CPU 시간 대역폭을 제한하는 기능의 이름입니다
-현재 fair-class의 다음 작업 선택까지 예전 CFS 알고리즘 그대로라는 뜻은 아닙니다
-
-확인한 Linux 문서는 EEVDF로의 전환을 설명합니다
-이 글은 작업 선택 알고리즘 대신 fair-class의 대역폭 제한을 다룹니다
-
-`cpu.max`·`cpu.max.burst`와 대역폭 통계는 fair-class 작업을 대상으로 합니다
-`cpu.weight`는 fair-class와, 해당 callback을 제공하는 BPF scheduler에서 구현한 범위에 적용됩니다
-이를 `SCHED_FIFO`·`SCHED_RR`·`SCHED_DEADLINE` 등 모든 작업의 같은 제한으로 확대할 수는 없습니다
-
-커널의 `CONFIG_CFS_BANDWIDTH`는 `CONFIG_FAIR_GROUP_SCHED`에 의존합니다
-cgroup 계층의 CPU controller 활성화·위임과 실제 커널 설정도 파일의 사용 가능 범위에 영향을 줍니다
-
 ## cpu.max는 기간과 CPU 시간을 함께 지정합니다
+
+fair-class는 실행 가능한 일반 작업 사이에 CPU 시간을 공정하게 배분하는 스케줄링 클래스입니다
+이 절의 CPU 시간 제한은 fair-class 작업을 대상으로 합니다
 
 `cpu.max`는 `$MAX $PERIOD` 두 값을 마이크로초 단위로 적습니다
 기본값은 `max 100000`이며 `max`는 이 그룹 자체의 quota 상한이 없다는 뜻입니다
@@ -92,62 +56,6 @@ cgroup 계층의 CPU controller 활성화·위임과 실제 커널 설정도 파
 100ms마다 합산 CPU 시간 50ms를 허용하는 값입니다
 매 순간 CPU의 절반 속도로만 실행한다거나 특정 CPU의 절반을 전용으로 확보한다는 뜻은 아닙니다
 여러 CPU에서 동시에 실행하면 같은 예산을 더 짧은 벽시계 시간 안에 사용할 수 있습니다
-
-kubelet의 `MilliCPUToQuota`는 다음 정수 계산을 사용합니다
-
-```text
-quota = (milliCPU × period) / 1000
-양수 CPU limit의 최소 quota = 1000µs
-기본 period = 100000µs
-```
-
-기본 period의 `limits.cpu: 500m`은 위의 `50000 100000`에 대응합니다
-아주 작은 양수 limit에는 최소 1ms 보정이 있으므로 단순 비례식만 적용하면 안 됩니다
-입력 0은 하한 보정 전에 0을 반환합니다
-
-### limit 생략과 파일 미작성은 다릅니다
-
-기본 kubelet 설정은 `cpuCFSQuota: true`, `cpuCFSQuotaPeriod: 100ms`입니다
-quota 적용 경로가 켜져 있으면 limit이 없더라도 period를 CRI에 전달할 수 있습니다
-
-확인한 cgroups v0.0.7 라이브러리는 quota 또는 period가 0이 아니면 `cpu.max`를 씁니다
-quota가 양수가 아니면 `max`를 쓰고 period가 0이면 100000을 사용합니다
-따라서 상한이 없다는 것과 파일을 쓰지 않았다는 것을 같은 상태로 볼 수 없습니다
-
-`cpuCFSQuota: false`이면 이 kubelet 컨테이너 계산 경로에서 quota·period 설정을 생략합니다
-그것만으로 런타임의 다른 설정이나 기존·부모 cgroup의 한도까지 제거된다고 판단할 수는 없습니다
-
-v1.37.1의 `CustomCPUCFSQuotaPeriod`는 v1.36부터 GA·기본 활성입니다
-현재 게이트 항목에는 `LockToDefault`가 없으며, 설정한 period가 실제 입력에 반영되는지도 봐야 합니다
-
-또 기본 활성인 `PodLevelResources` 경로에서 컨테이너 CPU limit이 없으면 Pod-level limit을 계산에 사용할 수 있습니다
-exclusive CPU가 할당된 컨테이너에는 quota를 해제하는 예외가 있습니다
-관련 `DisableCPUQuotaWithExclusiveCPUs` 게이트는 v1.37에서 Deprecated·기본 true·잠김 상태입니다
-
-이 조건들은 커널 quota 원리가 아니라 kubelet이 어떤 값을 전달할지 정하는 조건입니다
-컨테이너 spec의 limit 한 칸만 보고 실제 파일을 추정하면 빠뜨릴 수 있습니다
-
-## weight는 경합할 때 나누는 몫입니다
-
-일반적인 `cpu.idle=0` 그룹의 `cpu.weight` 범위는 1~10000이고 기본값은 100입니다
-CPU를 사용하려는 자식 그룹 사이에서 상대적인 비율로 배분합니다
-경합이 사라지면 다른 제한이 없는 범위에서 CPU를 더 사용할 수 있습니다
-
-`cpu.max`는 다른 CPU가 한가해도 적용되는 시간 상한입니다
-weight를 높이는 것과 quota를 높이는 것은 서로 다른 제어입니다
-idle 그룹인 `cpu.idle=1`에서는 weight가 0으로 보이는 예외도 있습니다
-
-Kubernetes의 request에서 계산한 shares는 v1 단위이며 범위는 2~262144입니다
-v2의 weight로 바꾸는 함수도 경로에 따라 구분해야 합니다
-
-| 확인한 경로 | shares에서 weight로의 변환 |
-|---|---|
-| kubelet의 Pod cgroup `getCPUWeight` | `1 + ((shares - 2) × 9999) / 262142` |
-| 벤더된 cgroups v0.0.7의 변환 함수 | `ceil(10 ^ ((l² + 125l)/612 - 7/34))`, `l = log2(shares)` |
-
-두 식은 양 끝값을 맞추지만 중간 값이 같지는 않습니다
-코드 계산상 shares 1024는 앞의 식에서 39, 뒤의 식에서 100입니다
-뒤 함수의 존재만으로 실제 설치된 CRI 런타임도 이 식을 호출한다고 단정할 수는 없습니다
 
 ## 전체 예산은 공유하고 실행 시간은 CPU별로 차감합니다
 
@@ -186,9 +94,6 @@ CPU마다 남은 몇 ms가 항상 갇혀서 낮은 사용률의 throttling을 �
 기본값은 0이며, 쓰지 않은 CPU 시간을 누적해 사용할 수 있는 상한을 0~`$MAX` 범위로 지정합니다
 현재 보충 구현은 전역 runtime에 quota를 더하고 quota+burst로 상한을 둡니다
 
-일반적인 Pod CPU limit 계산이 burst 값까지 자동으로 만들지는 않습니다
-다만 cgroups 라이브러리에는 `CpuBurst` 기록 경로가 있고 CRI에는 범용 `unified` map이 있으므로, 전달 수단 자체가 없다고 설명해서도 안 됩니다
-
 ### CPU limit을 높여도 다른 제한은 남습니다
 
 같은 period에서 CPU limit을 올리면 그룹 전체의 quota가 늘어납니다
@@ -200,6 +105,110 @@ CPU별 slice 크기가 자동으로 커지는 것이 아니라 그 기간에 공
 
 한 번의 보충 대기는 요청 전체 지연의 상한도 아닙니다
 작업이 여러 기간에 걸리면 더 기다릴 수 있고, 그 영향이 긴 구간의 평균에는 전혀 없고 p99에만 나타난다고 단정할 수도 없습니다
+
+## weight는 경합할 때 나누는 몫입니다
+
+일반적인 `cpu.idle=0` 그룹의 `cpu.weight` 범위는 1~10000이고 기본값은 100입니다
+CPU를 사용하려는 자식 그룹 사이에서 상대적인 비율로 배분합니다
+경합이 사라지면 다른 제한이 없는 범위에서 CPU를 더 사용할 수 있습니다
+
+`cpu.max`는 다른 CPU가 한가해도 적용되는 시간 상한입니다
+weight를 높이는 것과 quota를 높이는 것은 서로 다른 제어입니다
+idle 그룹인 `cpu.idle=1`에서는 weight가 0으로 보이는 예외도 있습니다
+
+## kubelet의 계산과 컨테이너 파일 기록을 구분합니다
+
+[QoS와 cgroup](/essays/k8s-theory-qos-cgroups)에서 kubelet의 자원 변환을 살펴봤습니다
+CPU request는 배분 가중치로, CPU limit은 quota와 period로 바꿉니다
+
+컨테이너 경로에서 kubelet은 CRI의 `LinuxContainerResources`에 `cpu_quota`·`cpu_period`·`cpu_shares` 등을 담아 전달합니다
+CRI는 kubelet과 컨테이너 런타임 사이의 인터페이스입니다
+컨테이너의 cgroup 파일에 어떤 값을 기록하는지는 런타임과 그 하위 구현·cgroup 드라이버에 따라 달라집니다
+
+Pod cgroup은 kubelet의 cgroup 관리 경로에서 설정합니다
+이 경로와 CRI 런타임의 컨테이너 변환이 같은 라이브러리 버전·계산식을 사용한다고 가정하면 안 됩니다
+초기 생성뿐 아니라 자원 갱신에서도 파일 값이 바뀔 수 있습니다
+
+| cgroup v2 파일 | 커널이 적용하는 대상 |
+|---|---|
+| `cpu.max` | 기간당 합산 CPU 시간 상한 |
+| `cpu.weight` | 경합 시 상대적인 CPU 배분 몫 |
+| `memory.max` | 메모리 사용량 상한과 회수·OOM 경계 |
+| `cpu.stat` | CPU 사용 시간과 대역폭 제한 통계 |
+
+커널은 이 파일을 Kubernetes의 request·limit이라는 이름으로 해석하지 않습니다
+전달된 제어 값을 해당 계층과 작업의 스케줄링 정책에 적용합니다
+
+### CPU limit을 quota로 바꾸는 계산
+
+kubelet의 `MilliCPUToQuota`는 다음 정수 계산을 사용합니다
+
+```text
+quota = (milliCPU × period) / 1000
+양수 CPU limit의 최소 quota = 1000µs
+기본 period = 100000µs
+```
+
+기본 period의 `limits.cpu: 500m`은 위의 `50000 100000`에 대응합니다
+아주 작은 양수 limit에는 최소 1ms 보정이 있으므로 단순 비례식만 적용하면 안 됩니다
+입력 0은 하한 보정 전에 0을 반환합니다
+
+### limit 생략과 파일 미작성은 다릅니다
+
+기본 kubelet 설정은 `cpuCFSQuota: true`, `cpuCFSQuotaPeriod: 100ms`입니다
+quota 적용 경로가 켜져 있으면 limit이 없더라도 period를 CRI에 전달할 수 있습니다
+
+확인한 cgroups v0.0.7 라이브러리는 quota 또는 period가 0이 아니면 `cpu.max`를 씁니다
+quota가 양수가 아니면 `max`를 쓰고 period가 0이면 100000을 사용합니다
+따라서 상한이 없다는 것과 파일을 쓰지 않았다는 것을 같은 상태로 볼 수 없습니다
+
+`cpuCFSQuota: false`이면 이 kubelet 컨테이너 계산 경로에서 quota·period 설정을 생략합니다
+그것만으로 런타임의 다른 설정이나 기존·부모 cgroup의 한도까지 제거된다고 판단할 수는 없습니다
+
+v1.37.1의 `CustomCPUCFSQuotaPeriod`는 v1.36부터 GA·기본 활성입니다
+현재 게이트 항목에는 `LockToDefault`가 없으며, 설정한 period가 실제 입력에 반영되는지도 봐야 합니다
+
+또 기본 활성인 `PodLevelResources` 경로에서 컨테이너 CPU limit이 없으면 Pod-level limit을 계산에 사용할 수 있습니다
+exclusive CPU가 할당된 컨테이너에는 quota를 해제하는 예외가 있습니다
+관련 `DisableCPUQuotaWithExclusiveCPUs` 게이트는 v1.37에서 Deprecated·기본 true·잠김 상태입니다
+
+이 조건들은 커널 quota 원리가 아니라 kubelet이 어떤 값을 전달할지 정하는 조건입니다
+컨테이너 spec의 limit 한 칸만 보고 실제 파일을 추정하면 빠뜨릴 수 있습니다
+
+### burst 값을 전달하는 수단과 자동 설정은 다릅니다
+
+일반적인 Pod CPU limit 계산이 burst 값까지 자동으로 만들지는 않습니다
+다만 cgroups 라이브러리에는 `CpuBurst` 기록 경로가 있고 CRI에는 범용 `unified` map이 있으므로, 전달 수단 자체가 없다고 설명해서도 안 됩니다
+
+### request의 shares를 weight로 바꾸는 경로
+
+Kubernetes의 request에서 계산한 shares는 v1 단위이며 범위는 2~262144입니다
+v2의 weight로 바꾸는 함수도 경로에 따라 구분해야 합니다
+
+| 확인한 경로 | shares에서 weight로의 변환 |
+|---|---|
+| kubelet의 Pod cgroup `getCPUWeight` | `1 + ((shares - 2) × 9999) / 262142` |
+| 벤더된 cgroups v0.0.7의 변환 함수 | `ceil(10 ^ ((l² + 125l)/612 - 7/34))`, `l = log2(shares)` |
+
+두 식은 양 끝값을 맞추지만 중간 값이 같지는 않습니다
+코드 계산상 shares 1024는 앞의 식에서 39, 뒤의 식에서 100입니다
+뒤 함수의 존재만으로 실제 설치된 CRI 런타임도 이 식을 호출한다고 단정할 수는 없습니다
+
+### CFS라는 이름과 현재 fair-class 스케줄러는 구분합니다
+
+공식 문서와 지표에는 **CFS Bandwidth Control**이라는 이름이 남아 있습니다
+이는 그룹의 CPU 시간 대역폭을 제한하는 기능의 이름입니다
+현재 fair-class의 다음 작업 선택까지 예전 CFS 알고리즘 그대로라는 뜻은 아닙니다
+
+확인한 Linux 문서는 EEVDF로의 전환을 설명합니다
+이 글은 작업 선택 알고리즘 대신 fair-class의 대역폭 제한을 다룹니다
+
+`cpu.max`·`cpu.max.burst`와 대역폭 통계는 fair-class 작업을 대상으로 합니다
+`cpu.weight`는 fair-class와, 해당 callback을 제공하는 BPF scheduler에서 구현한 범위에 적용됩니다
+이를 `SCHED_FIFO`·`SCHED_RR`·`SCHED_DEADLINE` 등 모든 작업의 같은 제한으로 확대할 수는 없습니다
+
+커널의 `CONFIG_CFS_BANDWIDTH`는 `CONFIG_FAIR_GROUP_SCHED`에 의존합니다
+cgroup 계층의 CPU controller 활성화·위임과 실제 커널 설정도 파일의 사용 가능 범위에 영향을 줍니다
 
 ## cpu.stat에서 사용량과 대역폭 통계를 나눠 읽습니다
 
@@ -256,6 +265,8 @@ CPU 사용량 metric 수집이 켜져 있고 spec의 quota가 0이 아닌 조건
 CPU 시간은 다음 기간에 새 예산을 받을 수 있지만 이미 점유한 메모리는 시간이 지났다고 자동 반환되지 않습니다
 그렇다고 메모리에는 실행을 늦추는 제어가 없다는 뜻도 아닙니다
 
+### 메모리의 제한과 보호는 별도 조건을 갖습니다
+
 `memory.high`를 넘으면 작업을 throttle하고 direct reclaim, 즉 할당 경로의 직접 회수를 유도합니다
 high 초과 자체가 OOM killer를 호출하지는 않으며 한도가 넘어갈 수도 있습니다
 `memory.min`은 강한 보호, `memory.low`는 최선 노력 보호이고 실효 보호 범위는 조상 설정에도 제한됩니다
@@ -271,6 +282,8 @@ high도 별도 factor와 자원·Pod-level 조건을 따릅니다
 `memory.oom.group=1`은 해당 cgroup과 자손을 OOM 처리의 한 작업 단위로 다룹니다
 `oom_score_adj=-1000`인 작업은 예외입니다
 컨테이너 cgroup에 설정했다고 같은 Pod의 형제 컨테이너까지 함께 종료하는 것은 아닙니다
+
+## CPU 제한의 범위와 관측 구간을 맞춥니다
 
 CPU 제한의 원인을 좁힐 때는 quota·period와 같은 구간의 카운터 증가량을 먼저 맞춥니다
 그다음 실제 상위 cgroup의 제한과 CPU 경합을 확인해야 컨테이너의 CPU limit을 올렸을 때 어떤 제한이 풀리는지 판단할 수 있습니다

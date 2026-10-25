@@ -20,6 +20,24 @@ working set은 사용량을 가공한 관측값입니다
 > 공식 문서 저장본은 `7fde177e22dc98390a6d55d215dd0301b5f6d0bb`입니다
 > 실제 노드에서 메모리를 고갈시키거나 파일·지연·OOM을 관측한 실측 기록은 포함하지 않습니다
 
+## working set과 available은 회계 모델입니다
+
+`inactive_file`은 파일 기반 메모리 중 커널의 회수용 inactive file 목록(LRU)에 속한 양입니다
+
+확인한 cAdvisor/lib v0.60.5의 cgroup v2 계산은 다음과 같습니다
+`inactive_file` 항목이 있을 때 사용량에서 빼며 결과가 음수가 되지 않게 합니다
+
+```text
+working set = max(usage - inactive_file, 0)
+```
+
+여기서 제외된 캐시도 회수와 재접근에 비용이 듭니다
+working set이 limit 아래라는 사실만으로 할당이 즉시 성공하거나 OOM이 없을 것이라고 보장할 수는 없습니다
+
+kubelet이 사용하는 Linux `memory.available`도 working set 기반 신호와 연결됩니다
+확인한 통계 경로는 한도가 알려졌을 때 limit에서 working set을 뺀 available을 만들고 이를 Summary로 전달합니다
+일반 시스템 도구의 available 추정과 같은 식이라고 가정하면 안 됩니다
+
 ## 캐시를 회수할 수 있어도 비용은 남습니다
 
 **page cache**는 파일 데이터를 메모리에 보관해 다음 읽기의 저장소 접근을 줄이는 공간입니다
@@ -62,38 +80,6 @@ OOM 기록이 없다는 사실만으로 다른 종료나 대기도 배제할 수
 kubelet은 별도의 관측 주기와 정책으로 Pod 축출을 판단합니다
 `kswapd`·direct reclaim·kubelet 축출·OOM이 반드시 이 순서로 진행되는 것은 아닙니다
 
-## LRU는 다음 접근을 아는 대신 추정합니다
-
-커널은 접근 정보를 이용해 어떤 페이지를 덜 필요로 할지 추정합니다
-LRU 계열은 최근 사용 여부를 이 판단에 사용하며, **Multi-Gen LRU(MGLRU)**는 접근 시기가 비슷한 페이지를 generation으로 묶습니다
-
-MGLRU는 접근 정보를 갱신하는 aging과 후보 페이지의 회수를 담당하는 eviction을 나눕니다
-회수한 페이지에 다시 접근한 **refault** 정보도 판단에 반영합니다
-최근 덜 접근한 것으로 분류됐다고 사용자 요청에 영향 없이 버릴 수 있다는 뜻은 아닙니다
-
-현재 소스에는 기존 회수 경로와 MGLRU 조건 분기가 함께 있습니다
-`CONFIG_LRU_GEN`·`CONFIG_LRU_GEN_ENABLED`는 빌드 지원과 기본 활성 여부를 정합니다
-현재 활성 여부는 `/sys/kernel/mm/lru_gen/enabled`도 확인해야 합니다
-커널 버전만으로 배포판의 설정까지 확정할 수는 없습니다
-
-`inactive_file`도 허용할 수 있는 요청 지연을 표시한 값이 아닙니다
-파일 상태·동시 접근·writeback·새 할당의 제약에 따라 실제 회수 비용이 달라집니다
-
-### 조사한 양과 회수한 양, 다시 읽은 양을 나눕니다
-
-| `memory.stat` 필드 | 설명하는 대상 |
-|---|---|
-| `pgscan` | 회수 후보로 조사한 page 수 |
-| `pgsteal` | 회수한 page 수 |
-| `workingset_refault_file` | 회수했던 file page에 다시 접근한 횟수 |
-
-scan이 많은데 회수가 적다면 조사에 비해 공간을 충분히 얻지 못했다는 가설을 세울 수 있습니다
-회수 뒤 refault가 늘었다면 공간을 확보하는 대신 치른 재읽기 비용을 확인할 근거가 됩니다
-어느 경우도 그 카운터 하나가 특정 요청의 지연을 직접 측정하지는 않습니다
-
-누적값이므로 같은 실행 인스턴스와 관측 구간의 증가량을 비교해야 합니다
-cgroup 재생성·관측 누락·부하 변화가 섞이면 서로 다른 이력을 비교하게 됩니다
-
 ## 메모리를 사용하는 주체와 charge된 cgroup은 다를 수 있습니다
 
 공유 페이지를 여러 cgroup의 프로세스가 읽어도 비용을 소비자 수대로 균등 분할하지는 않습니다
@@ -130,73 +116,27 @@ high에서 느려진 작업은 아직 종료되지 않았어도 메모리 정책
 min을 과도하게 예약하면 보호되지 않은 회수 가능 메모리가 줄어 OOM 위험이 생길 수 있습니다
 배치용 request 회계에 여유가 있다는 사실과 실제 회수 보호에 여유가 있다는 사실은 별도로 확인해야 합니다
 
-### MemoryQoS는 gate 외에 정책과 자원 조건을 봅니다
+## PSI는 사용량 대신 진행하지 못한 시간을 봅니다
 
-Kubernetes v1.37.1의 `MemoryQoS`는 beta·기본 활성이고 Linux cgroup v2를 전제로 합니다
-하지만 기본 `memoryReservationPolicy`는 `None`, `memoryThrottlingFactor`는 nil입니다
-gate만으로 유효한 min·low 보호와 high 제한이 생기지는 않습니다
+**Pressure Stall Information(PSI)**은 자원 부족으로 작업이 진행하지 못한 시간을 나타냅니다
+`some`은 일부 작업이 막힌 시간이고 `full`은 해당 범위의 모든 non-idle 작업이 동시에 막힌 시간입니다
+노드 전체와 cgroup은 대상 작업 집합이 다르며 system-level CPU full은 정의되지 않아 0으로 제공되는 예외가 있습니다
 
-`memoryReservationPolicy: TieredReservation`을 선택하고 0이 아닌 memory request 등의 조건이 맞으면 보호를 계산합니다
-Guaranteed에는 min, Burstable에는 low를 사용하는 경로입니다
-기본 정책에서도 min·low를 0으로 초기화할 수 있으므로 `None`을 파일 미작성과 동일시하면 안 됩니다
+`avg10`·`avg60`·`avg300`은 각각의 시간 창에 대한 정지 비율이며 단위는 %입니다
+`total`은 누적 마이크로초입니다
+**가정 예시**로 같은 객체의 total이 10초 동안 200000 증가했다면 0.2초를 10초로 나눈 정지 비율은 2%입니다
 
-high에는 별도 factor가 필요합니다
-단순한 컨테이너에서 request를 R, limit을 L, factor를 f로 놓으면 정렬 전 후보는 다음과 같습니다
+이는 요청의 2%가 느렸다거나 p99가 200ms였다는 뜻이 아닙니다
+다른 자원·범위의 PSI를 더하면 겹친 정지 시간을 중복 계산할 수도 있습니다
 
-```text
-memory.high 후보 = R + f × (L - R)
-```
+`KubeletPSI`는 v1.36부터 GA·기본 활성·잠김 상태입니다
+확인한 cAdvisor 변환은 some·full의 total과 평균을 Summary로 옮깁니다
+다른 CRI 통계 경로나 collector도 같은 필드를 보존하는지는 배포 버전별 확인이 필요합니다
 
-**가정 예시**로 R=512Mi·L=1Gi·f=0.9라면 후보는 972.8Mi입니다
-실제 계산은 page 크기 단위로 내림하고, 결과가 0이 아니며 request보다 큰 경우에 설정합니다
-limit이 없으면 node allocatable을 사용하는 경로도 있습니다
-
-request=limit인 경우와 Pod-level·DRA 자원 분기는 이 단순 예와 구분해야 합니다
-Pod-level memory limit이 있고 컨테이너 limit을 생략한 경우에는 컨테이너 high를 생략하고 Pod cgroup의 high로 제어하는 분기가 있습니다
-
-Pod cgroup 설정은 kubelet의 cgroup 관리 경로를 따르고 컨테이너 설정은 CRI로 런타임에 전달합니다
-계산한 값, 전달한 값, 노드에서 실제 효력이 있는 값은 서로 다른 확인 지점입니다
-보호는 charge된 page cache에도 영향을 줄 수 있으므로 다른 작업의 회수 여유와 함께 판단해야 합니다
-
-## working set과 available은 회계 모델입니다
-
-확인한 cAdvisor/lib v0.60.5의 cgroup v2 계산은 다음과 같습니다
-`inactive_file` 항목이 있을 때 사용량에서 빼며 결과가 음수가 되지 않게 합니다
-
-```text
-working set = max(usage - inactive_file, 0)
-```
-
-여기서 제외된 캐시도 회수와 재접근에 비용이 듭니다
-working set이 limit 아래라는 사실만으로 할당이 즉시 성공하거나 OOM이 없을 것이라고 보장할 수는 없습니다
-
-kubelet이 사용하는 Linux `memory.available`도 working set 기반 신호와 연결됩니다
-확인한 통계 경로는 한도가 알려졌을 때 limit에서 working set을 뺀 available을 만들고 이를 Summary로 전달합니다
-일반 시스템 도구의 available 추정과 같은 식이라고 가정하면 안 됩니다
-
-### hugetlb 예약 pool과 THP를 구분합니다
-
-**hugetlb**는 큰 페이지를 별도 pool로 확보해 명시적으로 사용하는 기제입니다
-그 pool 안의 미사용 공간도 일반 할당이나 page cache가 곧바로 쓸 수 있는 여유는 아닙니다
-pool 총량과, pool 안에서 향후 할당을 약속한 수인 `HugePages_Rsvd`도 다른 값입니다
-
-**Transparent Huge Pages(THP)**는 커널이 큰 페이지 매핑의 생성·분할을 관리하는 다른 경로입니다
-hugetlb와 같은 별도 예약 pool을 요구하지 않으므로 THP 사용량을 같은 예약량으로 읽으면 안 됩니다
-
-v1.37.1의 `HugepageAwareEviction`은 beta·기본 활성입니다
-`adjustForHugePages`는 Node capacity의 모든 hugepage 크기별 용량을 합해 node `AvailableBytes`에서 빼고 0 아래를 막습니다
-working set 자체나 모든 컨테이너 지표의 공통식을 바꾸는 처리가 아닙니다
-
-**계산 예시**로 보정 전 available이 6Gi이고 이 예약 용량이 4Gi라면 보정 결과는 2Gi입니다
-애플리케이션이 사용하는 THP 용량을 빼는 계산으로 바꿔 읽어서는 안 됩니다
-
-Linux의 `memory_hugetlb_accounting` mount 옵션은 실제 사용한 hugetlb를 memcg에 charge하는 별도 선택입니다
-미사용 pool 전체를 charge하지는 않습니다
-예약 용량을 빼는 Summary 구현과 이 회계 옵션이 실제 노드의 통계 경로에서 어떻게 조합되는지도 확인해야 합니다
-
-swap으로 빠진 페이지도 물리 메모리의 resident working set과 같은 바구니에 있지 않습니다
-다시 접근할 때 swap-in이 필요하면 상주량이 줄었어도 지연은 늘 수 있습니다
-`memory.swap.max`도 `memory.max`와 별도 제약이므로 working set 하락만으로 여유와 성능의 개선을 함께 결론 낼 수는 없습니다
+PSI를 수집한다는 사실이 eviction 임계값으로 사용한다는 뜻도 아닙니다
+확인한 kubelet eviction 신호 목록에는 PSI 임계값이 없습니다
+요청 지연과 PSI가 같은 시각에 늘었다면 요청 자체의 관측 자료도 함께 봐야 합니다
+각 기록이 어느 실행 인스턴스에서 나왔는지 연결해야 원인 후보를 좁힐 수 있습니다
 
 ## OOM의 범위와 희생 프로세스를 나눠 봅니다
 
@@ -247,27 +187,91 @@ soft의 발동 전 대기와 Pod 선택 후 종료 유예도 구분해야 합니
 세부 시간·상태·정책은 [Eviction과 OOM](/essays/k8s-theory-eviction-oom)에서 비교합니다
 원인을 판단할 때는 컨테이너 종료 정보·커널 기록·cgroup 사건·kubelet 축출 기록을 같은 시각과 실행 인스턴스에 연결해야 합니다
 
-## PSI는 사용량 대신 진행하지 못한 시간을 봅니다
+## LRU는 다음 접근을 아는 대신 추정합니다
 
-**Pressure Stall Information(PSI)**은 자원 부족으로 작업이 진행하지 못한 시간을 나타냅니다
-`some`은 일부 작업이 막힌 시간이고 `full`은 해당 범위의 모든 non-idle 작업이 동시에 막힌 시간입니다
-노드 전체와 cgroup은 대상 작업 집합이 다르며 system-level CPU full은 정의되지 않아 0으로 제공되는 예외가 있습니다
+커널은 접근 정보를 이용해 어떤 페이지를 덜 필요로 할지 추정합니다
+LRU 계열은 최근 사용 여부를 이 판단에 사용하며, **Multi-Gen LRU(MGLRU)**는 접근 시기가 비슷한 페이지를 generation으로 묶습니다
 
-`avg10`·`avg60`·`avg300`은 각각의 시간 창에 대한 정지 비율이며 단위는 %입니다
-`total`은 누적 마이크로초입니다
-**가정 예시**로 같은 객체의 total이 10초 동안 200000 증가했다면 0.2초를 10초로 나눈 정지 비율은 2%입니다
+MGLRU는 접근 정보를 갱신하는 aging과 후보 페이지의 회수를 담당하는 eviction을 나눕니다
+회수한 페이지에 다시 접근한 **refault** 정보도 판단에 반영합니다
+최근 덜 접근한 것으로 분류됐다고 사용자 요청에 영향 없이 버릴 수 있다는 뜻은 아닙니다
 
-이는 요청의 2%가 느렸다거나 p99가 200ms였다는 뜻이 아닙니다
-다른 자원·범위의 PSI를 더하면 겹친 정지 시간을 중복 계산할 수도 있습니다
+현재 소스에는 기존 회수 경로와 MGLRU 조건 분기가 함께 있습니다
+`CONFIG_LRU_GEN`·`CONFIG_LRU_GEN_ENABLED`는 빌드 지원과 기본 활성 여부를 정합니다
+현재 활성 여부는 `/sys/kernel/mm/lru_gen/enabled`도 확인해야 합니다
+커널 버전만으로 배포판의 설정까지 확정할 수는 없습니다
 
-`KubeletPSI`는 v1.36부터 GA·기본 활성·잠김 상태입니다
-확인한 cAdvisor 변환은 some·full의 total과 평균을 Summary로 옮깁니다
-다른 CRI 통계 경로나 collector도 같은 필드를 보존하는지는 배포 버전별 확인이 필요합니다
+`inactive_file`도 허용할 수 있는 요청 지연을 표시한 값이 아닙니다
+파일 상태·동시 접근·writeback·새 할당의 제약에 따라 실제 회수 비용이 달라집니다
 
-PSI를 수집한다는 사실이 eviction 임계값으로 사용한다는 뜻도 아닙니다
-확인한 kubelet eviction 신호 목록에는 PSI 임계값이 없습니다
-요청 지연과 PSI가 같은 시각에 늘었다면 요청 자체의 관측 자료도 함께 봐야 합니다
-각 기록이 어느 실행 인스턴스에서 나왔는지 연결해야 원인 후보를 좁힐 수 있습니다
+### 조사한 양과 회수한 양, 다시 읽은 양을 나눕니다
+
+| `memory.stat` 필드 | 설명하는 대상 |
+|---|---|
+| `pgscan` | 회수 후보로 조사한 page 수 |
+| `pgsteal` | 회수한 page 수 |
+| `workingset_refault_file` | 회수했던 file page에 다시 접근한 횟수 |
+
+scan이 많은데 회수가 적다면 조사에 비해 공간을 충분히 얻지 못했다는 가설을 세울 수 있습니다
+회수 뒤 refault가 늘었다면 공간을 확보하는 대신 치른 재읽기 비용을 확인할 근거가 됩니다
+어느 경우도 그 카운터 하나가 특정 요청의 지연을 직접 측정하지는 않습니다
+
+누적값이므로 같은 실행 인스턴스와 관측 구간의 증가량을 비교해야 합니다
+cgroup 재생성·관측 누락·부하 변화가 섞이면 서로 다른 이력을 비교하게 됩니다
+
+## MemoryQoS는 gate 외에 정책과 자원 조건을 봅니다
+
+Kubernetes v1.37.1의 `MemoryQoS`는 beta·기본 활성이고 Linux cgroup v2를 전제로 합니다
+하지만 기본 `memoryReservationPolicy`는 `None`, `memoryThrottlingFactor`는 nil입니다
+gate만으로 유효한 min·low 보호와 high 제한이 생기지는 않습니다
+
+`memoryReservationPolicy: TieredReservation`을 선택하고 0이 아닌 memory request 등의 조건이 맞으면 보호를 계산합니다
+Guaranteed에는 min, Burstable에는 low를 사용하는 경로입니다
+기본 정책에서도 min·low를 0으로 초기화할 수 있으므로 `None`을 파일 미작성과 동일시하면 안 됩니다
+
+high에는 별도 factor가 필요합니다
+단순한 컨테이너에서 request를 R, limit을 L, factor를 f로 놓으면 정렬 전 후보는 다음과 같습니다
+
+```text
+memory.high 후보 = R + f × (L - R)
+```
+
+**가정 예시**로 R=512Mi·L=1Gi·f=0.9라면 후보는 972.8Mi입니다
+실제 계산은 page 크기 단위로 내림하고, 결과가 0이 아니며 request보다 큰 경우에 설정합니다
+limit이 없으면 node allocatable을 사용하는 경로도 있습니다
+
+request=limit인 경우와 Pod-level·DRA 자원 분기는 이 단순 예와 구분해야 합니다
+Pod-level memory limit이 있고 컨테이너 limit을 생략한 경우에는 컨테이너 high를 생략하고 Pod cgroup의 high로 제어하는 분기가 있습니다
+
+Pod cgroup 설정은 kubelet의 cgroup 관리 경로를 따르고 컨테이너 설정은 CRI로 런타임에 전달합니다
+계산한 값, 전달한 값, 노드에서 실제 효력이 있는 값은 서로 다른 확인 지점입니다
+보호는 charge된 page cache에도 영향을 줄 수 있으므로 다른 작업의 회수 여유와 함께 판단해야 합니다
+
+## hugetlb 예약 pool과 THP를 구분합니다
+
+**hugetlb**는 큰 페이지를 별도 pool로 확보해 명시적으로 사용하는 기제입니다
+그 pool 안의 미사용 공간도 일반 할당이나 page cache가 곧바로 쓸 수 있는 여유는 아닙니다
+pool 총량과, pool 안에서 향후 할당을 약속한 수인 `HugePages_Rsvd`도 다른 값입니다
+
+**Transparent Huge Pages(THP)**는 커널이 큰 페이지 매핑의 생성·분할을 관리하는 다른 경로입니다
+hugetlb와 같은 별도 예약 pool을 요구하지 않으므로 THP 사용량을 같은 예약량으로 읽으면 안 됩니다
+
+v1.37.1의 `HugepageAwareEviction`은 beta·기본 활성입니다
+`adjustForHugePages`는 Node capacity의 모든 hugepage 크기별 용량을 합해 node `AvailableBytes`에서 빼고 0 아래를 막습니다
+working set 자체나 모든 컨테이너 지표의 공통식을 바꾸는 처리가 아닙니다
+
+**계산 예시**로 보정 전 available이 6Gi이고 이 예약 용량이 4Gi라면 보정 결과는 2Gi입니다
+애플리케이션이 사용하는 THP 용량을 빼는 계산으로 바꿔 읽어서는 안 됩니다
+
+Linux의 `memory_hugetlb_accounting` mount 옵션은 실제 사용한 hugetlb를 memcg에 charge하는 별도 선택입니다
+미사용 pool 전체를 charge하지는 않습니다
+예약 용량을 빼는 Summary 구현과 이 회계 옵션이 실제 노드의 통계 경로에서 어떻게 조합되는지도 확인해야 합니다
+
+swap으로 빠진 페이지도 물리 메모리의 resident working set과 같은 바구니에 있지 않습니다
+다시 접근할 때 swap-in이 필요하면 상주량이 줄었어도 지연은 늘 수 있습니다
+`memory.swap.max`도 `memory.max`와 별도 제약이므로 working set 하락만으로 여유와 성능의 개선을 함께 결론 낼 수는 없습니다
+
+## 사용량·대기·종료를 같은 범위에서 연결합니다
 
 회수 성공과 목표 지연 안의 응답 성공은 다른 결과입니다
 메모리 정책을 조정할 때는 charge의 범위·보호량·회수와 재접근 비용을 서비스의 지연 목표와 함께 평가해야 합니다
