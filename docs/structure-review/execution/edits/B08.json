@@ -1,0 +1,16 @@
+{
+  "batch": "B08",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-server-side-apply",
+      "edit_status": "completed",
+      "sha256": "1dc4055ec7ef8471af46bbe0366888fe508d8d070c2444b272bf243af6449c8e"
+    },
+    {
+      "slug": "k8s-theory-apply-ownership-migration",
+      "edit_status": "completed",
+      "sha256": "b4bc5e30fe121608ee3d58c0bc9b4afb08dbfb9bf8e7f6b968ddfd91234c6f05"
+    }
+  ]
+}

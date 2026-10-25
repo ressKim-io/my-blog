@@ -1,0 +1,18 @@
+{
+  "batch": "B24",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-dns-ndots",
+      "review_status": "completed",
+      "sha256": "a0f6bdde2dd5901366437cce163d1e215b770f47d18b502ac1b3996a9597bb82",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-traffic-locality-dual-stack",
+      "review_status": "completed",
+      "sha256": "ffdc41a7f59ce430485888ec0b3c3d1bf752723df20b8dd7dea47a3d3d3110e5",
+      "open_findings": 0
+    }
+  ]
+}

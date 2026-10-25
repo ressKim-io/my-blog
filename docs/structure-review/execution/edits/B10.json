@@ -1,0 +1,16 @@
+{
+  "batch": "B10",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-serialization-version-conversion",
+      "edit_status": "completed",
+      "sha256": "385f052bbe1e8649f428c99967488c757f3c2f3b0524fc9b736726df60903c4e"
+    },
+    {
+      "slug": "k8s-theory-version-emulation-rollback",
+      "edit_status": "completed",
+      "sha256": "30c7f6c378667a369463a177f4a45aa5ceb4283a8628a80917630a371fcbb0f3"
+    }
+  ]
+}

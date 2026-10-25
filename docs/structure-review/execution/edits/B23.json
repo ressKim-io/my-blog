@@ -1,0 +1,16 @@
+{
+  "batch": "B23",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-service-kube-proxy",
+      "edit_status": "completed",
+      "sha256": "70cdc733ed4929036dbf5a2bdaa3dad8cc127af1fc3e0c5a0d2a252aebe4b82f"
+    },
+    {
+      "slug": "k8s-theory-service-cidr-ip-address",
+      "edit_status": "completed",
+      "sha256": "ef6acf41aad8eba74af87a4f8b8c1d2d63f460dfa83ba010ef7412be878e939e"
+    }
+  ]
+}

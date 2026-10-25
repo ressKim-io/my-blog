@@ -1,0 +1,18 @@
+{
+  "batch": "B23",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-service-kube-proxy",
+      "review_status": "completed",
+      "sha256": "70cdc733ed4929036dbf5a2bdaa3dad8cc127af1fc3e0c5a0d2a252aebe4b82f",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-service-cidr-ip-address",
+      "review_status": "completed",
+      "sha256": "ef6acf41aad8eba74af87a4f8b8c1d2d63f460dfa83ba010ef7412be878e939e",
+      "open_findings": 0
+    }
+  ]
+}

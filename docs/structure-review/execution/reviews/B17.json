@@ -1,0 +1,18 @@
+{
+  "batch": "B17",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-eviction-oom",
+      "review_status": "completed",
+      "sha256": "d516bde714014bd4b15748d93b794d97b197ab34fa9f4d7ae2616caf95b84eea",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-node-heartbeat-taint-eviction",
+      "review_status": "completed",
+      "sha256": "8d8fc209da4b90b55d76268551676c1165bcb75aeb180de74c4fe14af38a3223",
+      "open_findings": 0
+    }
+  ]
+}

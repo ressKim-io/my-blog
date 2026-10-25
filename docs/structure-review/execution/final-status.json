@@ -1,0 +1,439 @@
+{
+  "result": "PASS",
+  "edited": 71,
+  "independently_reviewed": 71,
+  "matching_review_hashes": 71,
+  "open_findings": 0,
+  "reviewer_counts": {
+    "review_pilot": 46,
+    "review_a": 25
+  },
+  "exported_html": [
+    {
+      "slug": "k8s-theory-api-request-path",
+      "path": "out/essays/k8s-theory-api-request-path/index.html",
+      "h1": "Kubernetes API 서버의 생성 요청 처리 과정",
+      "bytes": 435593
+    },
+    {
+      "slug": "k8s-theory-authentication",
+      "path": "out/essays/k8s-theory-authentication/index.html",
+      "h1": "Kubernetes 인증: 신원은 어디서 만들어지는가",
+      "bytes": 439998
+    },
+    {
+      "slug": "k8s-theory-authorization",
+      "path": "out/essays/k8s-theory-authorization/index.html",
+      "h1": "Kubernetes 인가: 요청을 허용하는 기준과 RBAC의 범위",
+      "bytes": 443742
+    },
+    {
+      "slug": "k8s-theory-admission-order",
+      "path": "out/essays/k8s-theory-admission-order/index.html",
+      "h1": "Admission 실행 순서 — 누가 값을 바꾸고, 누가 거부하는가",
+      "bytes": 437584
+    },
+    {
+      "slug": "k8s-theory-admission-webhook-failure",
+      "path": "out/essays/k8s-theory-admission-webhook-failure/index.html",
+      "h1": "Admission webhook과 CEL 정책 — 판단 실패는 어떻게 처리할까",
+      "bytes": 487425
+    },
+    {
+      "slug": "k8s-theory-resource-version",
+      "path": "out/essays/k8s-theory-resource-version/index.html",
+      "h1": "resourceVersion — 오래된 상태로 덮어쓰는 일을 막는 번호",
+      "bytes": 415134
+    },
+    {
+      "slug": "k8s-theory-watch",
+      "path": "out/essays/k8s-theory-watch/index.html",
+      "h1": "watch와 410 Gone — 놓친 변경은 커서만 옮겨 복구할 수 없습니다",
+      "bytes": 431185
+    },
+    {
+      "slug": "k8s-theory-object-identity-ownership",
+      "path": "out/essays/k8s-theory-object-identity-ownership/index.html",
+      "h1": "이름·UID·ownerReferences — 같은 이름이어도 같은 소유자는 아닙니다",
+      "bytes": 442124
+    },
+    {
+      "slug": "k8s-theory-deletion-lifecycle",
+      "path": "out/essays/k8s-theory-deletion-lifecycle/index.html",
+      "h1": "DELETE 이후 객체가 남는 이유 — finalizer와 유예 종료",
+      "bytes": 448626
+    },
+    {
+      "slug": "k8s-theory-server-side-apply",
+      "path": "out/essays/k8s-theory-server-side-apply/index.html",
+      "h1": "Server-Side Apply — 필드별 소유권으로 변경 충돌을 판단합니다",
+      "bytes": 428054
+    },
+    {
+      "slug": "k8s-theory-apply-ownership-migration",
+      "path": "out/essays/k8s-theory-apply-ownership-migration/index.html",
+      "h1": "SSA 소유권 이전 — 필드를 뺐는데 값이 바뀌는 이유",
+      "bytes": 433381
+    },
+    {
+      "slug": "k8s-theory-informer",
+      "path": "out/essays/k8s-theory-informer/index.html",
+      "h1": "informer — 로컬 사본은 언제부터 믿을 수 있을까요?",
+      "bytes": 432966
+    },
+    {
+      "slug": "k8s-theory-reconcile",
+      "path": "out/essays/k8s-theory-reconcile/index.html",
+      "h1": "reconcile — 캐시가 방금 보낸 쓰기를 아직 모를 때",
+      "bytes": 441343
+    },
+    {
+      "slug": "k8s-theory-api-extension-points",
+      "path": "out/essays/k8s-theory-api-extension-points/index.html",
+      "h1": "API 확장 지점 — 타입 등록과 기능 활성은 다른 일입니다",
+      "bytes": 436915
+    },
+    {
+      "slug": "k8s-theory-api-priority-fairness",
+      "path": "out/essays/k8s-theory-api-priority-fairness/index.html",
+      "h1": "APF 내부 — 요청 수 대신 처리 자리를 나누는 방식",
+      "bytes": 477406
+    },
+    {
+      "slug": "k8s-theory-serialization-version-conversion",
+      "path": "out/essays/k8s-theory-serialization-version-conversion/index.html",
+      "h1": "직렬화와 버전 변환 — 요청·메모리·저장의 모양이 다른 이유",
+      "bytes": 461597
+    },
+    {
+      "slug": "k8s-theory-certificate-signing-delegation",
+      "path": "out/essays/k8s-theory-certificate-signing-delegation/index.html",
+      "h1": "인증서 발급과 사칭: 조회할 수 없는 리소스 이름으로 권한을 묻는 이유",
+      "bytes": 484820
+    },
+    {
+      "slug": "k8s-theory-kubelet-access",
+      "path": "out/essays/k8s-theory-kubelet-access/index.html",
+      "h1": "kubelet 접속과 인가 — 같은 logs 요청에서 주체가 바뀝니다",
+      "bytes": 485144
+    },
+    {
+      "slug": "k8s-theory-version-emulation-rollback",
+      "path": "out/essays/k8s-theory-version-emulation-rollback/index.html",
+      "h1": "세 가지 버전과 롤백 — 바이너리 교체와 기능 활성화를 나누는 이유",
+      "bytes": 446967
+    },
+    {
+      "slug": "k8s-theory-control-plane-high-availability",
+      "path": "out/essays/k8s-theory-control-plane-high-availability/index.html",
+      "h1": "컨트롤 플레인 이중화 — etcd·API 서버·컨트롤러의 다른 역할",
+      "bytes": 456655
+    },
+    {
+      "slug": "k8s-theory-storage-transformations",
+      "path": "out/essays/k8s-theory-storage-transformations/index.html",
+      "h1": "Kubernetes 저장 암호화 — 새 키를 설정해도 기존 데이터가 그대로인 이유",
+      "bytes": 448636
+    },
+    {
+      "slug": "k8s-theory-event-compression",
+      "path": "out/essays/k8s-theory-event-compression/index.html",
+      "h1": "Kubernetes Event는 어디서 묶이고 버려지는가",
+      "bytes": 456747
+    },
+    {
+      "slug": "k8s-theory-distributed-tracing",
+      "path": "out/essays/k8s-theory-distributed-tracing/index.html",
+      "h1": "분산 추적의 계측 지점 — 문맥 전파와 기록을 나눠 봅니다",
+      "bytes": 465118
+    },
+    {
+      "slug": "k8s-theory-crd-schema-pruning",
+      "path": "out/essays/k8s-theory-crd-schema-pruning/index.html",
+      "h1": "CRD 구조 — 스키마가 검사하고 남기는 필드",
+      "bytes": 431677
+    },
+    {
+      "slug": "k8s-theory-crd-version-conversion",
+      "path": "out/essays/k8s-theory-crd-version-conversion/index.html",
+      "h1": "CRD 버저닝 — 저장 목표와 기존 저장본을 나눕니다",
+      "bytes": 419157
+    },
+    {
+      "slug": "k8s-theory-controller-runtime-reconcile",
+      "path": "out/essays/k8s-theory-controller-runtime-reconcile/index.html",
+      "h1": "controller-runtime과 reconcile — 큐에는 이름이 들어갑니다",
+      "bytes": 423052
+    },
+    {
+      "slug": "k8s-theory-policy-layers",
+      "path": "out/essays/k8s-theory-policy-layers/index.html",
+      "h1": "정책 계층 — 요청을 막는 판정과 나중에 고치는 변경",
+      "bytes": 428105
+    },
+    {
+      "slug": "k8s-theory-aggregated-api-server",
+      "path": "out/essays/k8s-theory-aggregated-api-server/index.html",
+      "h1": "Aggregated API server — 경로 위임과 장애의 범위",
+      "bytes": 413191
+    },
+    {
+      "slug": "k8s-theory-extension-failure-boundaries",
+      "path": "out/essays/k8s-theory-extension-failure-boundaries/index.html",
+      "h1": "Kubernetes 확장 기능 — 장애가 나면 어디까지 영향을 받을까",
+      "bytes": 428126
+    },
+    {
+      "slug": "k8s-theory-cgroup-v2-cpu-quota",
+      "path": "out/essays/k8s-theory-cgroup-v2-cpu-quota/index.html",
+      "h1": "cgroup v2 CPU quota — 평균 사용률이 낮아도 실행이 멈추는 이유",
+      "bytes": 419354
+    },
+    {
+      "slug": "k8s-theory-netfilter-conntrack",
+      "path": "out/essays/k8s-theory-netfilter-conntrack/index.html",
+      "h1": "Netfilter와 conntrack — Service의 주소 변환을 기억하는 곳",
+      "bytes": 418832
+    },
+    {
+      "slug": "k8s-theory-mount-bind-mount",
+      "path": "out/essays/k8s-theory-mount-bind-mount/index.html",
+      "h1": "mount와 bind mount — 같은 볼륨을 다른 경로에 제공하는 방법",
+      "bytes": 394199
+    },
+    {
+      "slug": "k8s-theory-page-cache-reclaim-oom",
+      "path": "out/essays/k8s-theory-page-cache-reclaim-oom/index.html",
+      "h1": "페이지 캐시·회수·OOM — working set이 limit 아래여도 느려지고 종료되는 이유",
+      "bytes": 417202
+    },
+    {
+      "slug": "k8s-theory-namespace-lifetime",
+      "path": "out/essays/k8s-theory-namespace-lifetime/index.html",
+      "h1": "Namespace 수명 — 프로세스가 없어도 남는 참조",
+      "bytes": 412669
+    },
+    {
+      "slug": "k8s-theory-cni-contract",
+      "path": "out/essays/k8s-theory-cni-contract/index.html",
+      "h1": "CNI 호출 규약 — 런타임은 Pod 네트워크를 어떻게 준비할까",
+      "bytes": 425698
+    },
+    {
+      "slug": "k8s-theory-pod-sandbox-pause",
+      "path": "out/essays/k8s-theory-pod-sandbox-pause/index.html",
+      "h1": "Pod sandbox와 pause — 네트워크를 앱 재시작과 분리하는 과정",
+      "bytes": 410797
+    },
+    {
+      "slug": "k8s-theory-overlay-native-routing",
+      "path": "out/essays/k8s-theory-overlay-native-routing/index.html",
+      "h1": "Overlay와 native routing — 노드 간 경로와 주소 공급을 구분하기",
+      "bytes": 421070
+    },
+    {
+      "slug": "k8s-theory-service-kube-proxy",
+      "path": "out/essays/k8s-theory-service-kube-proxy/index.html",
+      "h1": "Service와 kube-proxy — 고정 주소 뒤의 목록·규칙·연결 상태",
+      "bytes": 435569
+    },
+    {
+      "slug": "k8s-theory-dns-ndots",
+      "path": "out/essays/k8s-theory-dns-ndots/index.html",
+      "h1": "DNS와 ndots — 이름 하나가 여러 질의로 이어지는 조건",
+      "bytes": 418090
+    },
+    {
+      "slug": "k8s-theory-ingress-gateway-api",
+      "path": "out/essays/k8s-theory-ingress-gateway-api/index.html",
+      "h1": "Ingress와 Gateway API — 역할에 따라 라우팅 설정 나누기",
+      "bytes": 408754
+    },
+    {
+      "slug": "k8s-theory-network-policy",
+      "path": "out/essays/k8s-theory-network-policy/index.html",
+      "h1": "NetworkPolicy — Pod와 방향을 고르고 허용 규칙을 합칩니다",
+      "bytes": 420836
+    },
+    {
+      "slug": "k8s-theory-admin-network-policy",
+      "path": "out/essays/k8s-theory-admin-network-policy/index.html",
+      "h1": "관리자 네트워크 정책 — 허용·거부와 다음 계층으로의 위임",
+      "bytes": 421573
+    },
+    {
+      "slug": "k8s-theory-cloud-controller-boundary",
+      "path": "out/essays/k8s-theory-cloud-controller-boundary/index.html",
+      "h1": "CCM과 클라우드 경계 — 노드 초기화와 외부 자원 정리",
+      "bytes": 438945
+    },
+    {
+      "slug": "k8s-theory-traffic-locality-dual-stack",
+      "path": "out/essays/k8s-theory-traffic-locality-dual-stack/index.html",
+      "h1": "트래픽 지역성과 dual-stack — 후보 제한과 선호, 주소군별 경로",
+      "bytes": 433924
+    },
+    {
+      "slug": "k8s-theory-service-cidr-ip-address",
+      "path": "out/essays/k8s-theory-service-cidr-ip-address/index.html",
+      "h1": "ServiceCIDR와 IPAddress — 주소를 확보한 뒤 Service를 저장합니다",
+      "bytes": 422889
+    },
+    {
+      "slug": "k8s-theory-scheduling-binding-cycles",
+      "path": "out/essays/k8s-theory-scheduling-binding-cycles/index.html",
+      "h1": "스케줄링과 바인딩 사이클 — 노드 선택과 기록을 나누는 이유",
+      "bytes": 453104
+    },
+    {
+      "slug": "k8s-theory-scheduling-constraints",
+      "path": "out/essays/k8s-theory-scheduling-constraints/index.html",
+      "h1": "Pod 배치 제약 — 노드를 제외하는 조건과 점수를 높이는 조건",
+      "bytes": 452299
+    },
+    {
+      "slug": "k8s-theory-preemption-pdb",
+      "path": "out/essays/k8s-theory-preemption-pdb/index.html",
+      "h1": "Preemption과 PDB — 희생자 선정과 삭제 허용은 다른 판단입니다",
+      "bytes": 459809
+    },
+    {
+      "slug": "k8s-theory-kubelet-pod-lifecycle",
+      "path": "out/essays/k8s-theory-kubelet-pod-lifecycle/index.html",
+      "h1": "kubelet과 Pod 수명주기 — 실행 중과 준비 완료는 다릅니다",
+      "bytes": 448184
+    },
+    {
+      "slug": "k8s-theory-qos-cgroups",
+      "path": "out/essays/k8s-theory-qos-cgroups/index.html",
+      "h1": "QoS와 cgroup — request가 배치 계산에, limit이 실행 상한에 쓰이는 과정",
+      "bytes": 452355
+    },
+    {
+      "slug": "k8s-theory-eviction-oom",
+      "path": "out/essays/k8s-theory-eviction-oom/index.html",
+      "h1": "Eviction과 OOM — 컨테이너 종료와 Pod 삭제를 구분합니다",
+      "bytes": 445247
+    },
+    {
+      "slug": "k8s-theory-node-observability-sources",
+      "path": "out/essays/k8s-theory-node-observability-sources/index.html",
+      "h1": "Kubernetes 자원 지표 — 같은 Pod의 숫자가 다른 이유",
+      "bytes": 425984
+    },
+    {
+      "slug": "k8s-theory-workload-rollout-revisions",
+      "path": "out/essays/k8s-theory-workload-rollout-revisions/index.html",
+      "h1": "Deployment와 DaemonSet — 롤아웃의 가용성과 되돌리기 이력",
+      "bytes": 449621
+    },
+    {
+      "slug": "k8s-theory-job-cronjob-completion",
+      "path": "out/essays/k8s-theory-job-cronjob-completion/index.html",
+      "h1": "Job과 CronJob — 성공 집계와 실행 시각은 다른 판단입니다",
+      "bytes": 453798
+    },
+    {
+      "slug": "k8s-theory-node-heartbeat-taint-eviction",
+      "path": "out/essays/k8s-theory-node-heartbeat-taint-eviction/index.html",
+      "h1": "노드 하트비트와 taint 축출 — 관찰 실패와 실제 종료는 다릅니다",
+      "bytes": 458975
+    },
+    {
+      "slug": "k8s-theory-configmap-secret-delivery",
+      "path": "out/essays/k8s-theory-configmap-secret-delivery/index.html",
+      "h1": "ConfigMap과 Secret 전달 — 환경 변수와 볼륨 파일의 갱신 경계",
+      "bytes": 449189
+    },
+    {
+      "slug": "k8s-theory-cri-oci-boundary",
+      "path": "out/essays/k8s-theory-cri-oci-boundary/index.html",
+      "h1": "CRI와 OCI — 실행 요청과 bundle 설정의 경계를 구분합니다",
+      "bytes": 447331
+    },
+    {
+      "slug": "k8s-theory-device-resource-allocation",
+      "path": "out/essays/k8s-theory-device-resource-allocation/index.html",
+      "h1": "장치 자원 할당 — 수량에 따른 노드 선택과 DRA의 장치 선택",
+      "bytes": 455269
+    },
+    {
+      "slug": "k8s-theory-runtime-isolation",
+      "path": "out/essays/k8s-theory-runtime-isolation/index.html",
+      "h1": "런타임 격리 — 생략한 보안 설정은 필드마다 다르게 적용됩니다",
+      "bytes": 452870
+    },
+    {
+      "slug": "k8s-theory-resource-accounting-scoring",
+      "path": "out/essays/k8s-theory-resource-accounting-scoring/index.html",
+      "h1": "자원 계산과 점수 전략 — Pod 요청을 세고 노드를 고르는 기준",
+      "bytes": 441923
+    },
+    {
+      "slug": "k8s-theory-node-swap",
+      "path": "out/essays/k8s-theory-node-swap/index.html",
+      "h1": "노드 swap — 기동 허용과 컨테이너 한도, 배치 계산을 구분하기",
+      "bytes": 446659
+    },
+    {
+      "slug": "k8s-theory-container-log-files",
+      "path": "out/essays/k8s-theory-container-log-files/index.html",
+      "h1": "컨테이너 로그 파일: 경로를 정한 쪽은 그 파일을 쓰지 않습니다",
+      "bytes": 441764
+    },
+    {
+      "slug": "k8s-theory-hpa-scale-subresource",
+      "path": "out/essays/k8s-theory-hpa-scale-subresource/index.html",
+      "h1": "HPA와 scale subresource — replica 계산과 필드 소유권의 경계",
+      "bytes": 447446
+    },
+    {
+      "slug": "k8s-theory-ephemeral-containers",
+      "path": "out/essays/k8s-theory-ephemeral-containers/index.html",
+      "h1": "임시 컨테이너 — 추가 전용 API와 실행·상태 집계의 경계",
+      "bytes": 449724
+    },
+    {
+      "slug": "k8s-theory-pvc-storageclass-binding",
+      "path": "out/essays/k8s-theory-pvc-storageclass-binding/index.html",
+      "h1": "PVC 바인딩과 StorageClass — PV의 claimRef를 먼저 쓰는 이유",
+      "bytes": 425004
+    },
+    {
+      "slug": "k8s-theory-csi-architecture",
+      "path": "out/essays/k8s-theory-csi-architecture/index.html",
+      "h1": "CSI 구조 — sidecar의 Controller 호출과 kubelet의 Node 호출",
+      "bytes": 416646
+    },
+    {
+      "slug": "k8s-theory-volume-attach-stage-publish",
+      "path": "out/essays/k8s-theory-volume-attach-stage-publish/index.html",
+      "h1": "attach·stage·publish — 볼륨 연결부터 Pod가 사용할 경로까지",
+      "bytes": 416803
+    },
+    {
+      "slug": "k8s-theory-statefulset-volume-lifecycle",
+      "path": "out/essays/k8s-theory-statefulset-volume-lifecycle/index.html",
+      "h1": "StatefulSet과 볼륨 수명 — PVC를 지우기 전에 주인을 정합니다",
+      "bytes": 405174
+    },
+    {
+      "slug": "k8s-theory-volume-expansion-snapshots-ephemeral",
+      "path": "out/essays/k8s-theory-volume-expansion-snapshots-ephemeral/index.html",
+      "h1": "확장·스냅샷·임시 볼륨 — 요청 뒤의 주체와 수명",
+      "bytes": 422681
+    },
+    {
+      "slug": "k8s-theory-volume-attachment-limits",
+      "path": "out/essays/k8s-theory-volume-attachment-limits/index.html",
+      "h1": "볼륨 개수 상한 — 드라이버가 말한 숫자를 누가 고치나",
+      "bytes": 408144
+    },
+    {
+      "slug": "k8s-theory-storage-capacity-scheduling",
+      "path": "out/essays/k8s-theory-storage-capacity-scheduling/index.html",
+      "h1": "용량 기반 스케줄링 — 아직 없는 볼륨의 크기를 무엇과 비교하나",
+      "bytes": 406127
+    }
+  ]
+}

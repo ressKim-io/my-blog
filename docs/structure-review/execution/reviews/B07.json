@@ -1,0 +1,18 @@
+{
+  "batch": "B07",
+  "reviewer": "review_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-object-identity-ownership",
+      "review_status": "completed",
+      "sha256": "cef969a08003b485c875e358bc600bce8631ce582077dba4c95dee3b5174aab5",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-deletion-lifecycle",
+      "review_status": "completed",
+      "sha256": "ef88f1b0cfe8ca3b8e733847d0c57d11d6620974c25ef217388b098f1e0749f9",
+      "open_findings": 0
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "batch": "B10",
+  "reviewer": "review_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-serialization-version-conversion",
+      "review_status": "completed",
+      "sha256": "385f052bbe1e8649f428c99967488c757f3c2f3b0524fc9b736726df60903c4e",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-version-emulation-rollback",
+      "review_status": "completed",
+      "sha256": "30c7f6c378667a369463a177f4a45aa5ceb4283a8628a80917630a371fcbb0f3",
+      "open_findings": 0
+    }
+  ]
+}

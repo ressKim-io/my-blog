@@ -1,0 +1,18 @@
+{
+  "batch": "B29",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-volume-attachment-limits",
+      "review_status": "completed",
+      "sha256": "82dd57f90de875d5b584cb2591dc1f5639b2ea23a9de942399523f6abed904d2",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-storage-capacity-scheduling",
+      "review_status": "completed",
+      "sha256": "22973a86fd260ea38b538e107c84c119d14379e0fd706700c5f459f1b4c2f572",
+      "open_findings": 0
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "batch": "B22",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-cni-contract",
+      "edit_status": "completed",
+      "sha256": "a68b6f69ddb3b3a0facf16bbe734ea5729a49ec94f60019d8655b874c005b967"
+    },
+    {
+      "slug": "k8s-theory-pod-sandbox-pause",
+      "edit_status": "completed",
+      "sha256": "444a700b48326360fbbe69c87e0b02f015d185548d13282596c29422f91bfce9"
+    },
+    {
+      "slug": "k8s-theory-overlay-native-routing",
+      "edit_status": "completed",
+      "sha256": "99f58b1d83233f09e5ea1f14856cfeea36ae7aa027a63c334dd5abced9c1fd4b"
+    }
+  ]
+}

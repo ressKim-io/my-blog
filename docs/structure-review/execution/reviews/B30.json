@@ -1,0 +1,18 @@
+{
+  "batch": "B30",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-crd-schema-pruning",
+      "review_status": "completed",
+      "sha256": "275aba5d31d6636694b5c133083c0b1219ae3ab41c77f9a8619bdeaea3d11721",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-crd-version-conversion",
+      "review_status": "completed",
+      "sha256": "7afc466d4fdd1355536fc0daab5dab83ddfe6169c81d9b57c41c4debbc2b542f",
+      "open_findings": 0
+    }
+  ]
+}

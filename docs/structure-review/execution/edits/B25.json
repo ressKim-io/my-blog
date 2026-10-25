@@ -1,0 +1,16 @@
+{
+  "batch": "B25",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-ingress-gateway-api",
+      "edit_status": "completed",
+      "sha256": "f679ff9e911efb0a48385555cb5906ef28090af55fbe5322ee0120e440ed3f3e"
+    },
+    {
+      "slug": "k8s-theory-cloud-controller-boundary",
+      "edit_status": "completed",
+      "sha256": "2f911ec8bab21b748b3b6a3d67c32fd12ab186460c07a195be3851fc87e98b81"
+    }
+  ]
+}

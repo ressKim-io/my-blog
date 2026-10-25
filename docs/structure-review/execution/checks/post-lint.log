@@ -1,0 +1,225 @@
+src/content/essays/kubernetes/k8s-theory-api-request-path.md
+    —  △ [문장길이] 100자 초과 줄 14곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-authentication.md
+    —  △ [문장길이] 100자 초과 줄 15곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-authorization.md
+    —  △ [문장길이] 100자 초과 줄 17곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-admission-order.md
+    —  △ [문장길이] 100자 초과 줄 15곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-admission-webhook-failure.md
+    —  △ [문장길이] 100자 초과 줄 17곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-resource-version.md
+    —  △ [문장길이] 100자 초과 줄 10곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-watch.md
+    —  △ [문장길이] 100자 초과 줄 8곳 — 분리 검토
+  L 29 △ [SVG] /diagrams/k8s-theory-watch-1.svg — <text> 17개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-object-identity-ownership.md
+    —  △ [문장길이] 100자 초과 줄 13곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-deletion-lifecycle.md
+    —  △ [문장길이] 100자 초과 줄 17곳 — 분리 검토
+  L 36 △ [SVG] /diagrams/k8s-theory-deletion-lifecycle-1.svg — <text> 29개 > 목표 16
+  L251 △ [SVG] /diagrams/k8s-theory-deletion-lifecycle-2.svg — <text> 23개 > 목표 16
+  요약: error 0 · warn 3
+src/content/essays/kubernetes/k8s-theory-server-side-apply.md
+    —  △ [문장길이] 100자 초과 줄 12곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-apply-ownership-migration.md
+    —  △ [문장길이] 100자 초과 줄 13곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-informer.md
+    —  △ [문장길이] 100자 초과 줄 14곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-reconcile.md
+    —  △ [문장길이] 100자 초과 줄 15곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-api-extension-points.md
+    —  △ [문장길이] 100자 초과 줄 21곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-api-priority-fairness.md
+    —  △ [문장길이] 100자 초과 줄 20곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-serialization-version-conversion.md
+    —  △ [문장길이] 100자 초과 줄 33곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-certificate-signing-delegation.md
+    —  △ [문장길이] 100자 초과 줄 22곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-kubelet-access.md
+    —  △ [문장길이] 100자 초과 줄 27곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-version-emulation-rollback.md
+    —  △ [문장길이] 100자 초과 줄 23곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-control-plane-high-availability.md
+    —  △ [문장길이] 100자 초과 줄 31곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-storage-transformations.md
+    —  △ [문장길이] 100자 초과 줄 22곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-event-compression.md
+    —  △ [문장길이] 100자 초과 줄 16곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-distributed-tracing.md
+    —  △ [문장길이] 100자 초과 줄 19곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-crd-schema-pruning.md
+    —  △ [문장길이] 100자 초과 줄 14곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-crd-version-conversion.md
+    —  △ [문장길이] 100자 초과 줄 13곳 — 분리 검토
+  L 27 △ [SVG] /diagrams/k8s-theory-crd-version-conversion-1.svg — <text> 19개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-controller-runtime-reconcile.md
+    —  △ [문장길이] 100자 초과 줄 12곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-policy-layers.md
+    —  △ [문장길이] 100자 초과 줄 7곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-aggregated-api-server.md
+    —  △ [문장길이] 100자 초과 줄 6곳 — 분리 검토
+  L 65 △ [SVG] /diagrams/k8s-theory-aggregated-api-server-1.svg — <text> 18개 > 목표 16
+  L212 △ [SVG] /diagrams/k8s-theory-aggregated-api-server-2.svg — <text> 20개 > 목표 16
+  요약: error 0 · warn 3
+src/content/essays/kubernetes/k8s-theory-extension-failure-boundaries.md
+    —  △ [문장길이] 100자 초과 줄 10곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-cgroup-v2-cpu-quota.md
+    —  △ [문장길이] 100자 초과 줄 5곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-netfilter-conntrack.md
+    —  △ [문장길이] 100자 초과 줄 9곳 — 분리 검토
+  L 25 △ [SVG] /diagrams/k8s-theory-netfilter-conntrack-1.svg — <text> 28개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-mount-bind-mount.md
+    —  △ [문장길이] 100자 초과 줄 6곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-page-cache-reclaim-oom.md
+    —  △ [문장길이] 100자 초과 줄 6곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-namespace-lifetime.md
+    —  △ [문장길이] 100자 초과 줄 8곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-cni-contract.md
+    —  △ [문장길이] 100자 초과 줄 27곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-pod-sandbox-pause.md
+    —  △ [문장길이] 100자 초과 줄 19곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-overlay-native-routing.md
+    —  △ [문장길이] 100자 초과 줄 26곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-service-kube-proxy.md
+    —  △ [문장길이] 100자 초과 줄 30곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-dns-ndots.md
+    —  △ [문장길이] 100자 초과 줄 19곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-ingress-gateway-api.md
+    —  △ [문장길이] 100자 초과 줄 12곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-network-policy.md
+    —  △ [문장길이] 100자 초과 줄 17곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-admin-network-policy.md
+    —  △ [문장길이] 100자 초과 줄 19곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-cloud-controller-boundary.md
+    —  △ [문장길이] 100자 초과 줄 25곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-traffic-locality-dual-stack.md
+    —  △ [문장길이] 100자 초과 줄 25곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-service-cidr-ip-address.md
+    —  △ [문장길이] 100자 초과 줄 16곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-scheduling-binding-cycles.md
+    —  △ [문장길이] 100자 초과 줄 22곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-scheduling-constraints.md
+    —  △ [문장길이] 100자 초과 줄 23곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-preemption-pdb.md
+    —  △ [문장길이] 100자 초과 줄 18곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-kubelet-pod-lifecycle.md
+    —  △ [문장길이] 100자 초과 줄 20곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-qos-cgroups.md
+    —  △ [문장길이] 100자 초과 줄 23곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-eviction-oom.md
+    —  △ [문장길이] 100자 초과 줄 23곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-node-observability-sources.md
+    —  △ [문장길이] 100자 초과 줄 20곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-workload-rollout-revisions.md
+    —  △ [문장길이] 100자 초과 줄 24곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-job-cronjob-completion.md
+    —  △ [문장길이] 100자 초과 줄 27곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-node-heartbeat-taint-eviction.md
+    —  △ [문장길이] 100자 초과 줄 22곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-configmap-secret-delivery.md
+    —  △ [문장길이] 100자 초과 줄 27곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-cri-oci-boundary.md
+    —  △ [문장길이] 100자 초과 줄 30곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-device-resource-allocation.md
+    —  △ [문장길이] 100자 초과 줄 19곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-runtime-isolation.md
+    —  △ [문장길이] 100자 초과 줄 27곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-resource-accounting-scoring.md
+    —  △ [문장길이] 100자 초과 줄 20곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-node-swap.md
+    —  △ [문장길이] 100자 초과 줄 27곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-container-log-files.md
+    —  △ [문장길이] 100자 초과 줄 29곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-hpa-scale-subresource.md
+    —  △ [문장길이] 100자 초과 줄 20곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-ephemeral-containers.md
+    —  △ [문장길이] 100자 초과 줄 25곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-pvc-storageclass-binding.md
+    —  △ [문장길이] 100자 초과 줄 17곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-csi-architecture.md
+    —  △ [문장길이] 100자 초과 줄 23곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-volume-attach-stage-publish.md
+    —  △ [문장길이] 100자 초과 줄 16곳 — 분리 검토
+  L 26 △ [SVG] /diagrams/k8s-theory-volume-attach-stage-publish-1.svg — <text> 20개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-statefulset-volume-lifecycle.md
+    —  △ [문장길이] 100자 초과 줄 11곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-volume-expansion-snapshots-ephemeral.md
+    —  △ [문장길이] 100자 초과 줄 17곳 — 분리 검토
+  요약: error 0 · warn 1
+src/content/essays/kubernetes/k8s-theory-volume-attachment-limits.md
+    —  △ [문장길이] 100자 초과 줄 15곳 — 분리 검토
+  L 27 △ [SVG] /diagrams/k8s-theory-volume-attachment-limits-1.svg — <text> 18개 > 목표 16
+  L132 △ [SVG] /diagrams/k8s-theory-volume-attachment-limits-2.svg — <text> 20개 > 목표 16
+  요약: error 0 · warn 3
+src/content/essays/kubernetes/k8s-theory-storage-capacity-scheduling.md
+    —  △ [문장길이] 100자 초과 줄 12곳 — 분리 검토
+  요약: error 0 · warn 1
+
+전체: error 0 · warn 81 (파일 71개)

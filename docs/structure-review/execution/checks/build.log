@@ -1,0 +1,56 @@
+▲ Next.js 16.1.1 (Turbopack)
+
+  Creating an optimized production build ...
+(node:78196) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✓ Compiled successfully in 1389.5ms
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/670) ...
+  Generating static pages using 7 workers (167/670) 
+  Generating static pages using 7 workers (334/670) 
+  Generating static pages using 7 workers (502/670) 
+✓ Generating static pages using 7 workers (670/670) in 4.2s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ○ /blog
+├ ● /blog/[slug]
+│ ├ /blog/k8s-theory-page-cache-reclaim-oom
+│ ├ /blog/k8s-theory-namespace-lifetime
+│ ├ /blog/k8s-theory-mount-bind-mount
+│ └ [+216 more paths]
+├ ○ /essays
+├ ● /essays/[slug]
+│ ├ /essays/k8s-theory-page-cache-reclaim-oom
+│ ├ /essays/k8s-theory-namespace-lifetime
+│ ├ /essays/k8s-theory-mount-bind-mount
+│ └ [+216 more paths]
+├ ○ /icon.svg
+├ ● /logs/[slug]
+│ ├ /logs/goti-devlog-tier-policy
+│ ├ /logs/goti-agentic-control-plane-evolution
+│ ├ /logs/goti-portfolio-korean-copy-principles
+│ └ [+203 more paths]
+├ ○ /projects
+├ ● /projects/[slug]
+│ ├ /projects/go-ti
+│ └ /projects/ai-improvement
+├ ○ /series
+└ ● /series/[id]
+  ├ /series/redis
+  ├ /series/observability
+  ├ /series/database
+  └ [+12 more paths]
+
+
+○  (Static)  prerendered as static content
+●  (SSG)     prerendered as static HTML (uses generateStaticParams)
+
+✓ sitemap.xml (148 posts, logs 206편 격리 제외)
+✓ robots.txt
+✓ feed.xml (essays only, 20 items)
+✓ llms.txt (essays only: 148편, logs 206편 격리 제외)

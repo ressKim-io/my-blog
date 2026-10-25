@@ -1,0 +1,365 @@
+{
+  "posts": [
+    {
+      "slug": "k8s-theory-api-request-path",
+      "sha256": "f9718877d5c4d76538352476850310f1ac1f451de18d0f4eaee65bb6478a9870",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-authentication",
+      "sha256": "10eb587ef067b314dd85190b3e0de183ceb94dacb73dadd5f0fbd08cc00d7358",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-authorization",
+      "sha256": "560d2311110d41bd303f47ab2e21a328513364bbe365b7361640409582a81a93",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-admission-order",
+      "sha256": "af731b219d303ab88e313a85eee4d74178866a3ee53821fbd29f5a3233a8ca69",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-admission-webhook-failure",
+      "sha256": "e77d72349bcee669f1dcff3b1047e40471e19dcab984db239c3d5dad9fd53bdd",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-resource-version",
+      "sha256": "f0928a67cb787d84433f764dd852993421c2b577123390d440bc3e1fc46d5265",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-watch",
+      "sha256": "653d9d20ae2bc282df9370764174977edb7d3d8535a3243209d7b5552fd53fc1",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-object-identity-ownership",
+      "sha256": "cef969a08003b485c875e358bc600bce8631ce582077dba4c95dee3b5174aab5",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-deletion-lifecycle",
+      "sha256": "ef88f1b0cfe8ca3b8e733847d0c57d11d6620974c25ef217388b098f1e0749f9",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-server-side-apply",
+      "sha256": "1dc4055ec7ef8471af46bbe0366888fe508d8d070c2444b272bf243af6449c8e",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-apply-ownership-migration",
+      "sha256": "b4bc5e30fe121608ee3d58c0bc9b4afb08dbfb9bf8e7f6b968ddfd91234c6f05",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-informer",
+      "sha256": "19ddb24d649bac313d886eef2bf1eda302468e49c5b4666db0a0f9e148d34d26",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-reconcile",
+      "sha256": "2bb4132307c23bffb09901f63b87f4ef699ef573980d2eef749a44a6cf8f516f",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-api-extension-points",
+      "sha256": "5e85e4e320e17528b9f0403319d26f3a5375fcc478f940da89fa4c3f558c4afa",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-api-priority-fairness",
+      "sha256": "46973305487b8be4b45e68c35cd15740af9f8e2a9abb30220bf1d78e96509c8c",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-serialization-version-conversion",
+      "sha256": "385f052bbe1e8649f428c99967488c757f3c2f3b0524fc9b736726df60903c4e",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-certificate-signing-delegation",
+      "sha256": "ffefc7bc950afa066a2496a6321e6988354de052cbbf6d339ea6d50e94ba74c8",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-kubelet-access",
+      "sha256": "5b0e81c1c29f43bba2cd9f8259ab3cbb999bbb0611b6642f63c7d7d64447d9ff",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-version-emulation-rollback",
+      "sha256": "30c7f6c378667a369463a177f4a45aa5ceb4283a8628a80917630a371fcbb0f3",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-control-plane-high-availability",
+      "sha256": "fe745a24f82d287b19bc85c4971e1540779770155746a50f4445b14a5061aac5",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-storage-transformations",
+      "sha256": "7cbaf75bc2075690e8450300d342a564810bb64369e15c02859964a353846584",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-event-compression",
+      "sha256": "2f6eaf207dd14a2a099c01dbe61e151d59cd482fc7d14e3bc8e16298999995dc",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-distributed-tracing",
+      "sha256": "6fb480c855ac2b6a1368c988b90ee98cc74a9d19cc49835953900151c227d51b",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-crd-schema-pruning",
+      "sha256": "275aba5d31d6636694b5c133083c0b1219ae3ab41c77f9a8619bdeaea3d11721",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-crd-version-conversion",
+      "sha256": "7afc466d4fdd1355536fc0daab5dab83ddfe6169c81d9b57c41c4debbc2b542f",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-controller-runtime-reconcile",
+      "sha256": "0b086f523dc9288fbeb5f25d3d65ef6a0733ba45245373f9f9c79f940029e32c",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-policy-layers",
+      "sha256": "ed585dea5c29e358536d7c1981f45af5b4f0d6991687729276eccb301b0c4025",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-aggregated-api-server",
+      "sha256": "f4c1f3e390c3302d07497e8288d5049fcedf37fc1050a0e87054b86269cbb99f",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-extension-failure-boundaries",
+      "sha256": "7f5dfb961d6c16ed6117d9014a2b445711f60bebf97a91d7b696953f88dd51a7",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-cgroup-v2-cpu-quota",
+      "sha256": "38145d2f4518f9191e694d3b6571308b40e0c7b6aefbe5d96612acaa79b0fdef",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-netfilter-conntrack",
+      "sha256": "5504acbe7913b8277deac62f9e0ec9bf7111804ddda747ea91f1704843909a13",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-mount-bind-mount",
+      "sha256": "1566694161b284dac0e9ea81d8d4c02573d979422e7d78da1fb5da096d41f35d",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-page-cache-reclaim-oom",
+      "sha256": "7ca533863376ff671b8212a8404f749da2689c6bd6d2d7d8f30dcf5321e929eb",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-namespace-lifetime",
+      "sha256": "e48783b93e197e42199333428183956fcc3c57be562595ee36b2311122977d49",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-cni-contract",
+      "sha256": "a68b6f69ddb3b3a0facf16bbe734ea5729a49ec94f60019d8655b874c005b967",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-pod-sandbox-pause",
+      "sha256": "444a700b48326360fbbe69c87e0b02f015d185548d13282596c29422f91bfce9",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-overlay-native-routing",
+      "sha256": "99f58b1d83233f09e5ea1f14856cfeea36ae7aa027a63c334dd5abced9c1fd4b",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-service-kube-proxy",
+      "sha256": "70cdc733ed4929036dbf5a2bdaa3dad8cc127af1fc3e0c5a0d2a252aebe4b82f",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-dns-ndots",
+      "sha256": "a0f6bdde2dd5901366437cce163d1e215b770f47d18b502ac1b3996a9597bb82",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-ingress-gateway-api",
+      "sha256": "f679ff9e911efb0a48385555cb5906ef28090af55fbe5322ee0120e440ed3f3e",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-network-policy",
+      "sha256": "2b85cddb33f2311a9aa23fab5cd951da8ee2071a5b348c233b499f574617eb56",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-admin-network-policy",
+      "sha256": "af2436dbb641838f5dc38b71430cf65b70ff5f88909b8aeb3c567604028ab550",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-cloud-controller-boundary",
+      "sha256": "2f911ec8bab21b748b3b6a3d67c32fd12ab186460c07a195be3851fc87e98b81",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-traffic-locality-dual-stack",
+      "sha256": "ffdc41a7f59ce430485888ec0b3c3d1bf752723df20b8dd7dea47a3d3d3110e5",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-service-cidr-ip-address",
+      "sha256": "ef6acf41aad8eba74af87a4f8b8c1d2d63f460dfa83ba010ef7412be878e939e",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-scheduling-binding-cycles",
+      "sha256": "8f10255e6b5e22ec0c1f1405185a4f5835ad7156795402f091576e8174afb46c",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-scheduling-constraints",
+      "sha256": "f859651b876aedc7d6a698accd86cc58c495aea628f35ad3b832ed8c5e601e93",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-preemption-pdb",
+      "sha256": "8dea0e933af1acf148fbe48d2148c4687ea58a56e914692ef007723f2d9b4cdf",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-kubelet-pod-lifecycle",
+      "sha256": "63677c955737466d3073a543c82578f10b86fc5d39ea25af942d8e8ad82826c4",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-qos-cgroups",
+      "sha256": "f2327304dde1c823696a4a80cd185d29fb5695637e998518376e67372d41e135",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-eviction-oom",
+      "sha256": "d516bde714014bd4b15748d93b794d97b197ab34fa9f4d7ae2616caf95b84eea",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-node-observability-sources",
+      "sha256": "d89f598343622ed50edf2786569c098a8c016ae3f6cc02df595a71ddd7843e7d",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-workload-rollout-revisions",
+      "sha256": "bf33a42732bcc3a4c8b30a2c133bf265d1a14ba3bef965f8a02e3b51321092da",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-job-cronjob-completion",
+      "sha256": "75f0c27e08d5e06dfba03a207fc00b5c69a56879913cf4599b710e428de63244",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-node-heartbeat-taint-eviction",
+      "sha256": "8d8fc209da4b90b55d76268551676c1165bcb75aeb180de74c4fe14af38a3223",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-configmap-secret-delivery",
+      "sha256": "117a5b384461a0232acfb1664a86c96c4550ab09904250eb26536088b9ba02bf",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-cri-oci-boundary",
+      "sha256": "e573eb65f2f3d406bb16bb22d1f4d023a4640f497c581f4d10e958d8f713cab8",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-device-resource-allocation",
+      "sha256": "21787167339e3138654b891c6306d95a5362880b4695cd2c85b2953e5a002ca9",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-runtime-isolation",
+      "sha256": "d51a19bd497a1264511e03aa0a03e0f9e8a60ea942013f1f25501c5164647ae1",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-resource-accounting-scoring",
+      "sha256": "ebf4c7008038d4e0f53a46c0a106b24057ff6b57876e764b1222178e3085a183",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-node-swap",
+      "sha256": "5d92076d9f00b5ffc72e640d6c9eda9d35a20c87487be9d97b5924d2ce3bd779",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-container-log-files",
+      "sha256": "5d32128753be0445979eec16ed37d787f984399ca9751b7a078b2c7d89baf645",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-hpa-scale-subresource",
+      "sha256": "35d8a128e7745d74bc8e1f69edee56c8c36e06bf9b6e26c185451e153d675582",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-ephemeral-containers",
+      "sha256": "f504fed8d500be46c6c6061443a92ff18bf6b7b716ab4bf9b7fe8382cb4e3056",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-pvc-storageclass-binding",
+      "sha256": "4eca143bd74ae9ed7b2e65f65324bdce62e6f0837c47051c70de35b565baa260",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-csi-architecture",
+      "sha256": "78952e0592919eb17ccbe2d2353e8c4a93c6b3116ad0628f18040ff9d2ec2441",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-volume-attach-stage-publish",
+      "sha256": "bbecbf1e43519bc909f250d3e0767c27d7c32a3b4c401f63b56600836586d3ab",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-statefulset-volume-lifecycle",
+      "sha256": "fce76275ba1f54bf94e98ebb55ffe47e2fa892e789770e4dde4cff3e87daff50",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-volume-expansion-snapshots-ephemeral",
+      "sha256": "fee32567ac86b53b726550ea01c4e6bf91f9186412f9d9a0bb78c951180562aa",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-volume-attachment-limits",
+      "sha256": "82dd57f90de875d5b584cb2591dc1f5639b2ea23a9de942399523f6abed904d2",
+      "edited": true
+    },
+    {
+      "slug": "k8s-theory-storage-capacity-scheduling",
+      "sha256": "22973a86fd260ea38b538e107c84c119d14379e0fd706700c5f459f1b4c2f572",
+      "edited": true
+    }
+  ],
+  "errors": [],
+  "preservationDifferences": [],
+  "localLinks": 250,
+  "documentLinks": 512,
+  "mdx": 71,
+  "protectedFiles": 1646
+}

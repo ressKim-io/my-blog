@@ -1,0 +1,24 @@
+{
+  "batch": "B19",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-workload-rollout-revisions",
+      "review_status": "completed",
+      "sha256": "bf33a42732bcc3a4c8b30a2c133bf265d1a14ba3bef965f8a02e3b51321092da",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-job-cronjob-completion",
+      "review_status": "completed",
+      "sha256": "75f0c27e08d5e06dfba03a207fc00b5c69a56879913cf4599b710e428de63244",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-hpa-scale-subresource",
+      "review_status": "completed",
+      "sha256": "35d8a128e7745d74bc8e1f69edee56c8c36e06bf9b6e26c185451e153d675582",
+      "open_findings": 0
+    }
+  ]
+}

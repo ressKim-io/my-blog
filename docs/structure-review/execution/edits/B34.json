@@ -1,0 +1,16 @@
+{
+  "batch": "B34",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-cgroup-v2-cpu-quota",
+      "edit_status": "completed",
+      "sha256": "38145d2f4518f9191e694d3b6571308b40e0c7b6aefbe5d96612acaa79b0fdef"
+    },
+    {
+      "slug": "k8s-theory-page-cache-reclaim-oom",
+      "edit_status": "completed",
+      "sha256": "7ca533863376ff671b8212a8404f749da2689c6bd6d2d7d8f30dcf5321e929eb"
+    }
+  ]
+}

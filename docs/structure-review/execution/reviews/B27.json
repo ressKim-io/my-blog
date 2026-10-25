@@ -1,0 +1,18 @@
+{
+  "batch": "B27",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-csi-architecture",
+      "review_status": "completed",
+      "sha256": "78952e0592919eb17ccbe2d2353e8c4a93c6b3116ad0628f18040ff9d2ec2441",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-volume-attach-stage-publish",
+      "review_status": "completed",
+      "sha256": "bbecbf1e43519bc909f250d3e0767c27d7c32a3b4c401f63b56600836586d3ab",
+      "open_findings": 0
+    }
+  ]
+}

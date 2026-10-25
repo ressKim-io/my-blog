@@ -1,0 +1,10 @@
+{
+  "batch": "B03",
+  "reviewer": "review_pilot",
+  "posts": [{
+    "slug": "k8s-theory-informer",
+    "review_status": "completed",
+    "sha256": "19ddb24d649bac313d886eef2bf1eda302468e49c5b4666db0a0f9e148d34d26",
+    "open_findings": 0
+  }]
+}

@@ -1,0 +1,16 @@
+{
+  "batch": "B13",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-event-compression",
+      "edit_status": "completed",
+      "sha256": "2f6eaf207dd14a2a099c01dbe61e151d59cd482fc7d14e3bc8e16298999995dc"
+    },
+    {
+      "slug": "k8s-theory-distributed-tracing",
+      "edit_status": "completed",
+      "sha256": "6fb480c855ac2b6a1368c988b90ee98cc74a9d19cc49835953900151c227d51b"
+    }
+  ]
+}

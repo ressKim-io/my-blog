@@ -1,0 +1,21 @@
+{
+  "batch": "B04",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-authentication",
+      "edit_status": "completed",
+      "sha256": "10eb587ef067b314dd85190b3e0de183ceb94dacb73dadd5f0fbd08cc00d7358"
+    },
+    {
+      "slug": "k8s-theory-authorization",
+      "edit_status": "completed",
+      "sha256": "560d2311110d41bd303f47ab2e21a328513364bbe365b7361640409582a81a93"
+    },
+    {
+      "slug": "k8s-theory-admission-order",
+      "edit_status": "completed",
+      "sha256": "af731b219d303ab88e313a85eee4d74178866a3ee53821fbd29f5a3233a8ca69"
+    }
+  ]
+}

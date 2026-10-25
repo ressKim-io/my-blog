@@ -1,0 +1,12 @@
+{
+  "batch": "B36",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-mount-bind-mount",
+      "review_status": "completed",
+      "sha256": "1566694161b284dac0e9ea81d8d4c02573d979422e7d78da1fb5da096d41f35d",
+      "open_findings": 0
+    }
+  ]
+}

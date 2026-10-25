@@ -1,0 +1,16 @@
+{
+  "batch": "B11",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-certificate-signing-delegation",
+      "edit_status": "completed",
+      "sha256": "ffefc7bc950afa066a2496a6321e6988354de052cbbf6d339ea6d50e94ba74c8"
+    },
+    {
+      "slug": "k8s-theory-kubelet-access",
+      "edit_status": "completed",
+      "sha256": "5b0e81c1c29f43bba2cd9f8259ab3cbb999bbb0611b6642f63c7d7d64447d9ff"
+    }
+  ]
+}

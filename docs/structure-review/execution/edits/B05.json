@@ -1,0 +1,21 @@
+{
+  "batch": "B05",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-admission-webhook-failure",
+      "edit_status": "completed",
+      "sha256": "e77d72349bcee669f1dcff3b1047e40471e19dcab984db239c3d5dad9fd53bdd"
+    },
+    {
+      "slug": "k8s-theory-api-extension-points",
+      "edit_status": "completed",
+      "sha256": "5e85e4e320e17528b9f0403319d26f3a5375fcc478f940da89fa4c3f558c4afa"
+    },
+    {
+      "slug": "k8s-theory-api-priority-fairness",
+      "edit_status": "completed",
+      "sha256": "46973305487b8be4b45e68c35cd15740af9f8e2a9abb30220bf1d78e96509c8c"
+    }
+  ]
+}

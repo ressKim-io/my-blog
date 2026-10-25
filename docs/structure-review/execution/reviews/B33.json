@@ -1,0 +1,18 @@
+{
+  "batch": "B33",
+  "reviewer": "review_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-policy-layers",
+      "review_status": "completed",
+      "sha256": "ed585dea5c29e358536d7c1981f45af5b4f0d6991687729276eccb301b0c4025",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-extension-failure-boundaries",
+      "review_status": "completed",
+      "sha256": "7f5dfb961d6c16ed6117d9014a2b445711f60bebf97a91d7b696953f88dd51a7",
+      "open_findings": 0
+    }
+  ]
+}

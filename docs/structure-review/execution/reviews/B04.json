@@ -1,0 +1,24 @@
+{
+  "batch": "B04",
+  "reviewer": "review_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-authentication",
+      "review_status": "completed",
+      "sha256": "10eb587ef067b314dd85190b3e0de183ceb94dacb73dadd5f0fbd08cc00d7358",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-authorization",
+      "review_status": "completed",
+      "sha256": "560d2311110d41bd303f47ab2e21a328513364bbe365b7361640409582a81a93",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-admission-order",
+      "review_status": "completed",
+      "sha256": "af731b219d303ab88e313a85eee4d74178866a3ee53821fbd29f5a3233a8ca69",
+      "open_findings": 0
+    }
+  ]
+}

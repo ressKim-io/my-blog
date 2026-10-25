@@ -1,0 +1,10 @@
+
+> blog-nextjs@0.1.0 lint
+> eslint
+
+
+/Users/jun/my-file/my-blog/src/app/layout.tsx
+  80:9  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+✖ 1 problem (0 errors, 1 warning)
+

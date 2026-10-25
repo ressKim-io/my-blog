@@ -1,0 +1,24 @@
+{
+  "batch": "B22",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-cni-contract",
+      "review_status": "completed",
+      "sha256": "a68b6f69ddb3b3a0facf16bbe734ea5729a49ec94f60019d8655b874c005b967",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-pod-sandbox-pause",
+      "review_status": "completed",
+      "sha256": "444a700b48326360fbbe69c87e0b02f015d185548d13282596c29422f91bfce9",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-overlay-native-routing",
+      "review_status": "completed",
+      "sha256": "99f58b1d83233f09e5ea1f14856cfeea36ae7aa027a63c334dd5abced9c1fd4b",
+      "open_findings": 0
+    }
+  ]
+}

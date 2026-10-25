@@ -1,0 +1,11 @@
+{
+  "batch": "B02",
+  "editor": "editor_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-pvc-storageclass-binding",
+      "edit_status": "completed",
+      "sha256": "4eca143bd74ae9ed7b2e65f65324bdce62e6f0837c47051c70de35b565baa260"
+    }
+  ]
+}

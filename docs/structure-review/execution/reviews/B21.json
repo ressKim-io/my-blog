@@ -1,0 +1,12 @@
+{
+  "batch": "B21",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-device-resource-allocation",
+      "review_status": "completed",
+      "sha256": "21787167339e3138654b891c6306d95a5362880b4695cd2c85b2953e5a002ca9",
+      "open_findings": 0
+    }
+  ]
+}

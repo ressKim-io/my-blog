@@ -1,0 +1,11 @@
+{
+  "batch": "B01",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-api-request-path",
+      "edit_status": "completed",
+      "sha256": "f9718877d5c4d76538352476850310f1ac1f451de18d0f4eaee65bb6478a9870"
+    }
+  ]
+}

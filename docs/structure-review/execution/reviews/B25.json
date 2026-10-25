@@ -1,0 +1,18 @@
+{
+  "batch": "B25",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-ingress-gateway-api",
+      "review_status": "completed",
+      "sha256": "f679ff9e911efb0a48385555cb5906ef28090af55fbe5322ee0120e440ed3f3e",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-cloud-controller-boundary",
+      "review_status": "completed",
+      "sha256": "2f911ec8bab21b748b3b6a3d67c32fd12ab186460c07a195be3851fc87e98b81",
+      "open_findings": 0
+    }
+  ]
+}

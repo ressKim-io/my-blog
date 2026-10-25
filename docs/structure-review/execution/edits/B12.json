@@ -1,0 +1,16 @@
+{
+  "batch": "B12",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-control-plane-high-availability",
+      "edit_status": "completed",
+      "sha256": "fe745a24f82d287b19bc85c4971e1540779770155746a50f4445b14a5061aac5"
+    },
+    {
+      "slug": "k8s-theory-storage-transformations",
+      "edit_status": "completed",
+      "sha256": "7cbaf75bc2075690e8450300d342a564810bb64369e15c02859964a353846584"
+    }
+  ]
+}

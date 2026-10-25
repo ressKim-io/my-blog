@@ -1,0 +1,11 @@
+{
+  "batch": "B03",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-informer",
+      "edit_status": "completed",
+      "sha256": "19ddb24d649bac313d886eef2bf1eda302468e49c5b4666db0a0f9e148d34d26"
+    }
+  ]
+}

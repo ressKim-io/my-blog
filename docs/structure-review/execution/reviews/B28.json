@@ -1,0 +1,18 @@
+{
+  "batch": "B28",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-statefulset-volume-lifecycle",
+      "review_status": "completed",
+      "sha256": "fce76275ba1f54bf94e98ebb55ffe47e2fa892e789770e4dde4cff3e87daff50",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-volume-expansion-snapshots-ephemeral",
+      "review_status": "completed",
+      "sha256": "fee32567ac86b53b726550ea01c4e6bf91f9186412f9d9a0bb78c951180562aa",
+      "open_findings": 0
+    }
+  ]
+}

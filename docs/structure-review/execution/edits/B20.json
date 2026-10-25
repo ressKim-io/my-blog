@@ -1,0 +1,11 @@
+{
+  "batch": "B20",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-configmap-secret-delivery",
+      "edit_status": "completed",
+      "sha256": "117a5b384461a0232acfb1664a86c96c4550ab09904250eb26536088b9ba02bf"
+    }
+  ]
+}

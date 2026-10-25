@@ -1,0 +1,16 @@
+{
+  "batch": "B26",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-network-policy",
+      "edit_status": "completed",
+      "sha256": "2b85cddb33f2311a9aa23fab5cd951da8ee2071a5b348c233b499f574617eb56"
+    },
+    {
+      "slug": "k8s-theory-admin-network-policy",
+      "edit_status": "completed",
+      "sha256": "af2436dbb641838f5dc38b71430cf65b70ff5f88909b8aeb3c567604028ab550"
+    }
+  ]
+}

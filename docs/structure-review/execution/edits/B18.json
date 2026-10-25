@@ -1,0 +1,21 @@
+{
+  "batch": "B18",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-node-observability-sources",
+      "edit_status": "completed",
+      "sha256": "d89f598343622ed50edf2786569c098a8c016ae3f6cc02df595a71ddd7843e7d"
+    },
+    {
+      "slug": "k8s-theory-container-log-files",
+      "edit_status": "completed",
+      "sha256": "5d32128753be0445979eec16ed37d787f984399ca9751b7a078b2c7d89baf645"
+    },
+    {
+      "slug": "k8s-theory-ephemeral-containers",
+      "edit_status": "completed",
+      "sha256": "f504fed8d500be46c6c6061443a92ff18bf6b7b716ab4bf9b7fe8382cb4e3056"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "batch": "B14",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-scheduling-binding-cycles",
+      "edit_status": "completed",
+      "sha256": "8f10255e6b5e22ec0c1f1405185a4f5835ad7156795402f091576e8174afb46c"
+    },
+    {
+      "slug": "k8s-theory-scheduling-constraints",
+      "edit_status": "completed",
+      "sha256": "f859651b876aedc7d6a698accd86cc58c495aea628f35ad3b832ed8c5e601e93"
+    },
+    {
+      "slug": "k8s-theory-preemption-pdb",
+      "edit_status": "completed",
+      "sha256": "8dea0e933af1acf148fbe48d2148c4687ea58a56e914692ef007723f2d9b4cdf"
+    }
+  ]
+}

@@ -1,0 +1,401 @@
+{
+  "scope": "Kubernetes 이론 71편",
+  "post_editing_started": true,
+  "batches": [
+    {
+      "id": "B01",
+      "purpose": "첫 기준: 한 CREATE 요청의 기본 경로",
+      "slugs": [
+        "k8s-theory-api-request-path"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B02",
+      "purpose": "첫 기준: PVC 요청과 바인딩의 기본 사례",
+      "slugs": [
+        "k8s-theory-pvc-storageclass-binding"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B03",
+      "purpose": "첫 기준: 필요에서 로컬 캐시·알림으로 연결",
+      "slugs": [
+        "k8s-theory-informer"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B04",
+      "purpose": "인증·인가·admission의 서로 다른 판단",
+      "slugs": [
+        "k8s-theory-authentication",
+        "k8s-theory-authorization",
+        "k8s-theory-admission-order"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B05",
+      "purpose": "요청 중 확장 호출과 과부하 제어",
+      "slugs": [
+        "k8s-theory-admission-webhook-failure",
+        "k8s-theory-api-extension-points",
+        "k8s-theory-api-priority-fairness"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B06",
+      "purpose": "변경 버전과 연속 관찰·복구",
+      "slugs": [
+        "k8s-theory-resource-version",
+        "k8s-theory-watch"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B07",
+      "purpose": "오브젝트 신원·소유와 삭제 수명",
+      "slugs": [
+        "k8s-theory-object-identity-ownership",
+        "k8s-theory-deletion-lifecycle"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B08",
+      "purpose": "필드 소유권과 apply 전환",
+      "slugs": [
+        "k8s-theory-server-side-apply",
+        "k8s-theory-apply-ownership-migration"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B09",
+      "purpose": "상태를 다시 판단하는 조정 원리",
+      "slugs": [
+        "k8s-theory-reconcile"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B10",
+      "purpose": "API 표현·저장과 버전 이행",
+      "slugs": [
+        "k8s-theory-serialization-version-conversion",
+        "k8s-theory-version-emulation-rollback"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B11",
+      "purpose": "인증서와 kubelet 접근의 신뢰 경계",
+      "slugs": [
+        "k8s-theory-certificate-signing-delegation",
+        "k8s-theory-kubelet-access"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B12",
+      "purpose": "제어 평면 가용성과 저장 변환",
+      "slugs": [
+        "k8s-theory-control-plane-high-availability",
+        "k8s-theory-storage-transformations"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B13",
+      "purpose": "이벤트·추적으로 확인할 수 있는 범위",
+      "slugs": [
+        "k8s-theory-event-compression",
+        "k8s-theory-distributed-tracing"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B14",
+      "purpose": "배치 후보·제약·선점",
+      "slugs": [
+        "k8s-theory-scheduling-binding-cycles",
+        "k8s-theory-scheduling-constraints",
+        "k8s-theory-preemption-pdb"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B15",
+      "purpose": "노드의 실행 준비와 runtime 경계",
+      "slugs": [
+        "k8s-theory-kubelet-pod-lifecycle",
+        "k8s-theory-cri-oci-boundary",
+        "k8s-theory-runtime-isolation"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B16",
+      "purpose": "자원 선언·회계·실행 제어",
+      "slugs": [
+        "k8s-theory-qos-cgroups",
+        "k8s-theory-resource-accounting-scoring",
+        "k8s-theory-node-swap"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B17",
+      "purpose": "자원 압박과 연락 두절의 별도 종료 판단",
+      "slugs": [
+        "k8s-theory-eviction-oom",
+        "k8s-theory-node-heartbeat-taint-eviction"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B18",
+      "purpose": "관측 소스·로그·실행 중 진단",
+      "slugs": [
+        "k8s-theory-node-observability-sources",
+        "k8s-theory-container-log-files",
+        "k8s-theory-ephemeral-containers"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B19",
+      "purpose": "워크로드 교체·완료·자동 크기 조정",
+      "slugs": [
+        "k8s-theory-workload-rollout-revisions",
+        "k8s-theory-job-cronjob-completion",
+        "k8s-theory-hpa-scale-subresource"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B20",
+      "purpose": "설정 전달과 앱이 관찰하는 시점",
+      "slugs": [
+        "k8s-theory-configmap-secret-delivery"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B21",
+      "purpose": "장치 요청·할당·실행 준비",
+      "slugs": [
+        "k8s-theory-device-resource-allocation"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B22",
+      "purpose": "attachment·sandbox 수명·노드 간 전달",
+      "slugs": [
+        "k8s-theory-cni-contract",
+        "k8s-theory-pod-sandbox-pause",
+        "k8s-theory-overlay-native-routing"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B23",
+      "purpose": "Service 주소 확보와 백엔드 전달",
+      "slugs": [
+        "k8s-theory-service-kube-proxy",
+        "k8s-theory-service-cidr-ip-address"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B24",
+      "purpose": "이름 조회·주소군과 사용할 후보",
+      "slugs": [
+        "k8s-theory-dns-ndots",
+        "k8s-theory-traffic-locality-dual-stack"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B25",
+      "purpose": "외부 진입 설정과 클라우드 작업 주체",
+      "slugs": [
+        "k8s-theory-ingress-gateway-api",
+        "k8s-theory-cloud-controller-boundary"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B26",
+      "purpose": "표준 정책과 관리자 판정·위임",
+      "slugs": [
+        "k8s-theory-network-policy",
+        "k8s-theory-admin-network-policy"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B27",
+      "purpose": "CSI 호출자와 준비·정리 단계",
+      "slugs": [
+        "k8s-theory-csi-architecture",
+        "k8s-theory-volume-attach-stage-publish"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B28",
+      "purpose": "복제본·PVC 수명과 변경·복원",
+      "slugs": [
+        "k8s-theory-statefulset-volume-lifecycle",
+        "k8s-theory-volume-expansion-snapshots-ephemeral"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B29",
+      "purpose": "볼륨 개수와 공급 바이트의 배치 판단",
+      "slugs": [
+        "k8s-theory-volume-attachment-limits",
+        "k8s-theory-storage-capacity-scheduling"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B30",
+      "purpose": "CR 필드 처리와 저장본 버전 이행",
+      "slugs": [
+        "k8s-theory-crd-schema-pruning",
+        "k8s-theory-crd-version-conversion"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B31",
+      "purpose": "라이브러리 위에서 한 번의 조정 완결",
+      "slugs": [
+        "k8s-theory-controller-runtime-reconcile"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B32",
+      "purpose": "별도 API 서버의 필요와 요청·목록 경계",
+      "slugs": [
+        "k8s-theory-aggregated-api-server"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B33",
+      "purpose": "정책 실행 시점과 플랫폼 확장 선택",
+      "slugs": [
+        "k8s-theory-policy-layers",
+        "k8s-theory-extension-failure-boundaries"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B34",
+      "purpose": "CPU 예산·메모리 압박과 관측값",
+      "slugs": [
+        "k8s-theory-cgroup-v2-cpu-quota",
+        "k8s-theory-page-cache-reclaim-oom"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B35",
+      "purpose": "패킷 연결 상태와 namespace 정리 수명",
+      "slugs": [
+        "k8s-theory-netfilter-conntrack",
+        "k8s-theory-namespace-lifetime"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    },
+    {
+      "id": "B36",
+      "purpose": "공유 데이터·경로 연결·mount 전파",
+      "slugs": [
+        "k8s-theory-mount-bind-mount"
+      ],
+      "status": "completed",
+      "edit_status": "completed",
+      "independent_review_status": "completed"
+    }
+  ]
+}

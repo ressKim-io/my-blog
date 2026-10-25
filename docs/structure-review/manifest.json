@@ -1,0 +1,718 @@
+{
+  "date": "2026-10-25",
+  "base_commit": "d747a3b1767850670e50cc4cb58d357be019d282",
+  "scope": "src/content/essays/kubernetes/k8s-theory-*.md",
+  "expected_count": 71,
+  "items": [
+    {
+      "slug": "k8s-theory-api-request-path",
+      "source": "src/content/essays/kubernetes/k8s-theory-api-request-path.md",
+      "title": "Kubernetes API 서버의 생성 요청 처리 과정",
+      "series": "k8s-theory-api",
+      "order": 1,
+      "sha256": "53d0bae2453133f14203593f8b42d23f543f0c0a06d086587cd54fba9f6f7240",
+      "lines": 264,
+      "review": "posts/k8s-theory-api-request-path.md"
+    },
+    {
+      "slug": "k8s-theory-authentication",
+      "source": "src/content/essays/kubernetes/k8s-theory-authentication.md",
+      "title": "Kubernetes 인증: 신원은 어디서 만들어지는가",
+      "series": "k8s-theory-api",
+      "order": 2,
+      "sha256": "271441cb68e34deffe767519f774df664fc6e264a059f842a90c9775f7a96224",
+      "lines": 285,
+      "review": "posts/k8s-theory-authentication.md"
+    },
+    {
+      "slug": "k8s-theory-authorization",
+      "source": "src/content/essays/kubernetes/k8s-theory-authorization.md",
+      "title": "Kubernetes 인가: 요청을 허용하는 기준과 RBAC의 범위",
+      "series": "k8s-theory-api",
+      "order": 3,
+      "sha256": "0a1e497cb2908205504a4ef5aadd1ee58fb72bfa2267104ff236f922a4a073aa",
+      "lines": 266,
+      "review": "posts/k8s-theory-authorization.md"
+    },
+    {
+      "slug": "k8s-theory-admission-order",
+      "source": "src/content/essays/kubernetes/k8s-theory-admission-order.md",
+      "title": "Admission 실행 순서 — 누가 값을 바꾸고, 누가 거부하는가",
+      "series": "k8s-theory-api",
+      "order": 4,
+      "sha256": "37f3ff7f26594716f2c38a7db5814a8b508bca42110aca2646cc4d373013fbda",
+      "lines": 260,
+      "review": "posts/k8s-theory-admission-order.md"
+    },
+    {
+      "slug": "k8s-theory-admission-webhook-failure",
+      "source": "src/content/essays/kubernetes/k8s-theory-admission-webhook-failure.md",
+      "title": "Admission webhook과 CEL 정책 — 판단 실패는 어떻게 처리할까",
+      "series": "k8s-theory-api",
+      "order": 5,
+      "sha256": "f3c77823e51f21df0a8eff5664853d3883a9905d810472cac404c17ede14b55f",
+      "lines": 428,
+      "review": "posts/k8s-theory-admission-webhook-failure.md"
+    },
+    {
+      "slug": "k8s-theory-resource-version",
+      "source": "src/content/essays/kubernetes/k8s-theory-resource-version.md",
+      "title": "resourceVersion — 오래된 상태로 덮어쓰는 일을 막는 번호",
+      "series": "k8s-theory-api",
+      "order": 6,
+      "sha256": "daed742f466e417414119943e7c2963cd1a7bde53bd823aef8603a75ed3b3045",
+      "lines": 217,
+      "review": "posts/k8s-theory-resource-version.md"
+    },
+    {
+      "slug": "k8s-theory-watch",
+      "source": "src/content/essays/kubernetes/k8s-theory-watch.md",
+      "title": "watch와 410 Gone — 놓친 변경은 커서만 옮겨 복구할 수 없습니다",
+      "series": "k8s-theory-api",
+      "order": 7,
+      "sha256": "d12a759b9297c9430fd940506fbc5036d3fd1e6e0b35df8f6946e0482df1aab3",
+      "lines": 250,
+      "review": "posts/k8s-theory-watch.md"
+    },
+    {
+      "slug": "k8s-theory-object-identity-ownership",
+      "source": "src/content/essays/kubernetes/k8s-theory-object-identity-ownership.md",
+      "title": "이름·UID·ownerReferences — 같은 이름이어도 같은 소유자는 아닙니다",
+      "series": "k8s-theory-api",
+      "order": 8,
+      "sha256": "f45924437218c4eb792e64f4e7cb5de7cba17d159edc3933200271695c78b415",
+      "lines": 262,
+      "review": "posts/k8s-theory-object-identity-ownership.md"
+    },
+    {
+      "slug": "k8s-theory-deletion-lifecycle",
+      "source": "src/content/essays/kubernetes/k8s-theory-deletion-lifecycle.md",
+      "title": "DELETE 이후 객체가 남는 이유 — finalizer와 유예 종료",
+      "series": "k8s-theory-api",
+      "order": 9,
+      "sha256": "21af6f5fb818c1375c5ec527c30908f2ab97c82e9f93af22578535894603adc3",
+      "lines": 305,
+      "review": "posts/k8s-theory-deletion-lifecycle.md"
+    },
+    {
+      "slug": "k8s-theory-server-side-apply",
+      "source": "src/content/essays/kubernetes/k8s-theory-server-side-apply.md",
+      "title": "Server-Side Apply — 필드별 소유권으로 변경 충돌을 판단합니다",
+      "series": "k8s-theory-api",
+      "order": 10,
+      "sha256": "cc24fc2a30d07ebec92fb2c51d5d5bd73ecc21e758f0327d1ea47fe116d4f242",
+      "lines": 249,
+      "review": "posts/k8s-theory-server-side-apply.md"
+    },
+    {
+      "slug": "k8s-theory-apply-ownership-migration",
+      "source": "src/content/essays/kubernetes/k8s-theory-apply-ownership-migration.md",
+      "title": "SSA 소유권 이전 — 필드를 뺐는데 값이 바뀌는 이유",
+      "series": "k8s-theory-api",
+      "order": 11,
+      "sha256": "51c1a1f95a3d8ad1a1797eaf67c140e1af44799b755126099a6cbb896bec8133",
+      "lines": 246,
+      "review": "posts/k8s-theory-apply-ownership-migration.md"
+    },
+    {
+      "slug": "k8s-theory-informer",
+      "source": "src/content/essays/kubernetes/k8s-theory-informer.md",
+      "title": "informer — 로컬 사본은 언제부터 믿을 수 있을까요?",
+      "series": "k8s-theory-api",
+      "order": 12,
+      "sha256": "d107340dbde6b51f9289b58e34f34127fbf8cd7a71379b9fee3fb8ac1cce003f",
+      "lines": 245,
+      "review": "posts/k8s-theory-informer.md"
+    },
+    {
+      "slug": "k8s-theory-reconcile",
+      "source": "src/content/essays/kubernetes/k8s-theory-reconcile.md",
+      "title": "reconcile — 캐시가 방금 보낸 쓰기를 아직 모를 때",
+      "series": "k8s-theory-api",
+      "order": 13,
+      "sha256": "af68d8508385921d88b0058f3964875672e3894bb3e1e11087fbceec77dadc9d",
+      "lines": 276,
+      "review": "posts/k8s-theory-reconcile.md"
+    },
+    {
+      "slug": "k8s-theory-api-extension-points",
+      "source": "src/content/essays/kubernetes/k8s-theory-api-extension-points.md",
+      "title": "API 확장 지점 — 타입 등록과 기능 활성은 다른 일입니다",
+      "series": "k8s-theory-api",
+      "order": 14,
+      "sha256": "85807a7cc54c911b599e6e8166b11073189814124a4636dc6c34e88ca647a528",
+      "lines": 250,
+      "review": "posts/k8s-theory-api-extension-points.md"
+    },
+    {
+      "slug": "k8s-theory-api-priority-fairness",
+      "source": "src/content/essays/kubernetes/k8s-theory-api-priority-fairness.md",
+      "title": "APF 내부 — 요청 수 대신 처리 자리를 나누는 방식",
+      "series": "k8s-theory-api",
+      "order": 15,
+      "sha256": "ca3068efea0ab344635b32f267f9907c8126b25a2d568e293e4de168de66a139",
+      "lines": 407,
+      "review": "posts/k8s-theory-api-priority-fairness.md"
+    },
+    {
+      "slug": "k8s-theory-serialization-version-conversion",
+      "source": "src/content/essays/kubernetes/k8s-theory-serialization-version-conversion.md",
+      "title": "직렬화와 버전 변환 — 요청·메모리·저장의 모양이 다른 이유",
+      "series": "k8s-theory-api",
+      "order": 16,
+      "sha256": "c26fdad97c6f9cb946e7fd8e0c5ce7f692c726c67bed5a53c5ea06581ae9bbdf",
+      "lines": 315,
+      "review": "posts/k8s-theory-serialization-version-conversion.md"
+    },
+    {
+      "slug": "k8s-theory-certificate-signing-delegation",
+      "source": "src/content/essays/kubernetes/k8s-theory-certificate-signing-delegation.md",
+      "title": "인증서 발급과 사칭: 조회할 수 없는 리소스 이름으로 권한을 묻는 이유",
+      "series": "k8s-theory-api",
+      "order": 17,
+      "sha256": "cb4707604c997efab62d252610490d7cae9a00b90cda7e77f2b5afb7cb9d992d",
+      "lines": 381,
+      "review": "posts/k8s-theory-certificate-signing-delegation.md"
+    },
+    {
+      "slug": "k8s-theory-kubelet-access",
+      "source": "src/content/essays/kubernetes/k8s-theory-kubelet-access.md",
+      "title": "kubelet 접속과 인가 — 같은 logs 요청에서 주체가 바뀝니다",
+      "series": "k8s-theory-api",
+      "order": 18,
+      "sha256": "0314ac0f570f376653dcf53700cd1c1cda9386b876cceff1b238540bfe948804",
+      "lines": 369,
+      "review": "posts/k8s-theory-kubelet-access.md"
+    },
+    {
+      "slug": "k8s-theory-version-emulation-rollback",
+      "source": "src/content/essays/kubernetes/k8s-theory-version-emulation-rollback.md",
+      "title": "세 가지 버전과 롤백 — 바이너리 교체와 기능 활성화를 나누는 이유",
+      "series": "k8s-theory-api",
+      "order": 19,
+      "sha256": "8d4c9376c75d64d9359dee871ec16fd2784f1b18fbb2409425bf355f9732012b",
+      "lines": 273,
+      "review": "posts/k8s-theory-version-emulation-rollback.md"
+    },
+    {
+      "slug": "k8s-theory-control-plane-high-availability",
+      "source": "src/content/essays/kubernetes/k8s-theory-control-plane-high-availability.md",
+      "title": "컨트롤 플레인 이중화 — etcd·API 서버·컨트롤러의 다른 역할",
+      "series": "k8s-theory-api",
+      "order": 20,
+      "sha256": "8cfb8627b2cccd220e19b9420e7cab1835b538d7660d84443f957e3d21ade0ce",
+      "lines": 286,
+      "review": "posts/k8s-theory-control-plane-high-availability.md"
+    },
+    {
+      "slug": "k8s-theory-storage-transformations",
+      "source": "src/content/essays/kubernetes/k8s-theory-storage-transformations.md",
+      "title": "Kubernetes 저장 암호화 — 새 키를 설정해도 기존 데이터가 그대로인 이유",
+      "series": "k8s-theory-api",
+      "order": 21,
+      "sha256": "b34cfc265ff79ba09302d764714219059e6ad73002116a5096ef025a839cf622",
+      "lines": 288,
+      "review": "posts/k8s-theory-storage-transformations.md"
+    },
+    {
+      "slug": "k8s-theory-event-compression",
+      "source": "src/content/essays/kubernetes/k8s-theory-event-compression.md",
+      "title": "Kubernetes Event는 어디서 묶이고 버려지는가",
+      "series": "k8s-theory-api",
+      "order": 22,
+      "sha256": "900da9293b6b253f6d3cd2853f91a2ac16df78cabd0e07881b91cf25f344b1a0",
+      "lines": 299,
+      "review": "posts/k8s-theory-event-compression.md"
+    },
+    {
+      "slug": "k8s-theory-distributed-tracing",
+      "source": "src/content/essays/kubernetes/k8s-theory-distributed-tracing.md",
+      "title": "분산 추적의 계측 지점 — 문맥 전파와 기록을 나눠 봅니다",
+      "series": "k8s-theory-api",
+      "order": 23,
+      "sha256": "d4162803fdeda6ec297288000252873b84a395f666a6e7ec187d883d5ec3491c",
+      "lines": 324,
+      "review": "posts/k8s-theory-distributed-tracing.md"
+    },
+    {
+      "slug": "k8s-theory-crd-schema-pruning",
+      "source": "src/content/essays/kubernetes/k8s-theory-crd-schema-pruning.md",
+      "title": "CRD 구조 — 스키마가 검사하고 남기는 필드",
+      "series": "k8s-theory-extension",
+      "order": 1,
+      "sha256": "36073e4666f0fa8261c379282b8d22f7166cb2989b844f048a3878cb10b2d936",
+      "lines": 310,
+      "review": "posts/k8s-theory-crd-schema-pruning.md"
+    },
+    {
+      "slug": "k8s-theory-crd-version-conversion",
+      "source": "src/content/essays/kubernetes/k8s-theory-crd-version-conversion.md",
+      "title": "CRD 버저닝 — 저장 목표와 기존 저장본을 나눕니다",
+      "series": "k8s-theory-extension",
+      "order": 2,
+      "sha256": "0ecd622c41141cee34fc95d26325a8ca3a6113fac96becb273d931d2e36d7b59",
+      "lines": 265,
+      "review": "posts/k8s-theory-crd-version-conversion.md"
+    },
+    {
+      "slug": "k8s-theory-controller-runtime-reconcile",
+      "source": "src/content/essays/kubernetes/k8s-theory-controller-runtime-reconcile.md",
+      "title": "controller-runtime과 reconcile — 큐에는 이름이 들어갑니다",
+      "series": "k8s-theory-extension",
+      "order": 3,
+      "sha256": "84d04d2d84f289b75d02d3644edb868e1006ae99ed2649ba4d6797350eaf6a11",
+      "lines": 301,
+      "review": "posts/k8s-theory-controller-runtime-reconcile.md"
+    },
+    {
+      "slug": "k8s-theory-policy-layers",
+      "source": "src/content/essays/kubernetes/k8s-theory-policy-layers.md",
+      "title": "정책 계층 — 요청을 막는 판정과 나중에 고치는 변경",
+      "series": "k8s-theory-extension",
+      "order": 4,
+      "sha256": "d1ee7c387c5eb4332da3bf298cde4d552b57bf99ebab1a257d3a1c7c4be8671c",
+      "lines": 303,
+      "review": "posts/k8s-theory-policy-layers.md"
+    },
+    {
+      "slug": "k8s-theory-aggregated-api-server",
+      "source": "src/content/essays/kubernetes/k8s-theory-aggregated-api-server.md",
+      "title": "Aggregated API server — 경로 위임과 장애의 범위",
+      "series": "k8s-theory-extension",
+      "order": 5,
+      "sha256": "0e9fa5035af95968159a74a952864eefcebef733b9303e31c010511cfe2f5ef8",
+      "lines": 263,
+      "review": "posts/k8s-theory-aggregated-api-server.md"
+    },
+    {
+      "slug": "k8s-theory-extension-failure-boundaries",
+      "source": "src/content/essays/kubernetes/k8s-theory-extension-failure-boundaries.md",
+      "title": "Kubernetes 확장 기능 — 장애가 나면 어디까지 영향을 받을까",
+      "series": "k8s-theory-extension",
+      "order": 6,
+      "sha256": "142268c27c83ca25a4e8a9435b8c8bffd48b583081a77ba49d6d9fc551933bb6",
+      "lines": 271,
+      "review": "posts/k8s-theory-extension-failure-boundaries.md"
+    },
+    {
+      "slug": "k8s-theory-cgroup-v2-cpu-quota",
+      "source": "src/content/essays/kubernetes/k8s-theory-cgroup-v2-cpu-quota.md",
+      "title": "cgroup v2 CPU quota — 평균 사용률이 낮아도 실행이 멈추는 이유",
+      "series": "k8s-theory-kernel",
+      "order": 1,
+      "sha256": "79189c285464bd32d7938960cb9e358b02f77a2db14ff91db05c6a08bd4bcaf0",
+      "lines": 284,
+      "review": "posts/k8s-theory-cgroup-v2-cpu-quota.md"
+    },
+    {
+      "slug": "k8s-theory-netfilter-conntrack",
+      "source": "src/content/essays/kubernetes/k8s-theory-netfilter-conntrack.md",
+      "title": "Netfilter와 conntrack — Service의 주소 변환을 기억하는 곳",
+      "series": "k8s-theory-kernel",
+      "order": 2,
+      "sha256": "449d3c4fdb8b1380a8ae755e101ca070d5b4e8edc6f044ef984e6fdb55c8d894",
+      "lines": 268,
+      "review": "posts/k8s-theory-netfilter-conntrack.md"
+    },
+    {
+      "slug": "k8s-theory-mount-bind-mount",
+      "source": "src/content/essays/kubernetes/k8s-theory-mount-bind-mount.md",
+      "title": "mount와 bind mount — 같은 볼륨을 다른 경로에 제공하는 방법",
+      "series": "k8s-theory-kernel",
+      "order": 3,
+      "sha256": "65c1c02555234ecb8a90860715859cd730b487c4b8572250363e56339e4e0a10",
+      "lines": 204,
+      "review": "posts/k8s-theory-mount-bind-mount.md"
+    },
+    {
+      "slug": "k8s-theory-page-cache-reclaim-oom",
+      "source": "src/content/essays/kubernetes/k8s-theory-page-cache-reclaim-oom.md",
+      "title": "페이지 캐시·회수·OOM — working set이 limit 아래여도 느려지고 종료되는 이유",
+      "series": "k8s-theory-kernel",
+      "order": 4,
+      "sha256": "1fa4a86c24d87b622040786a10e70585533228f972f23fd55ecef43c8e431702",
+      "lines": 283,
+      "review": "posts/k8s-theory-page-cache-reclaim-oom.md"
+    },
+    {
+      "slug": "k8s-theory-namespace-lifetime",
+      "source": "src/content/essays/kubernetes/k8s-theory-namespace-lifetime.md",
+      "title": "Namespace 수명 — 프로세스가 없어도 남는 참조",
+      "series": "k8s-theory-kernel",
+      "order": 5,
+      "sha256": "f30f053f2a565908ab32f01c8cba56a5a4207df505335c6269ce2915f6de16a2",
+      "lines": 268,
+      "review": "posts/k8s-theory-namespace-lifetime.md"
+    },
+    {
+      "slug": "k8s-theory-cni-contract",
+      "source": "src/content/essays/kubernetes/k8s-theory-cni-contract.md",
+      "title": "CNI 호출 규약 — 런타임은 Pod 네트워크를 어떻게 준비할까",
+      "series": "k8s-theory-network",
+      "order": 1,
+      "sha256": "a9acfb913aa12f329ead888f566292f1542af16ae201c082e00b453a94f521f4",
+      "lines": 259,
+      "review": "posts/k8s-theory-cni-contract.md"
+    },
+    {
+      "slug": "k8s-theory-pod-sandbox-pause",
+      "source": "src/content/essays/kubernetes/k8s-theory-pod-sandbox-pause.md",
+      "title": "Pod sandbox와 pause — 네트워크를 앱 재시작과 분리하는 과정",
+      "series": "k8s-theory-network",
+      "order": 2,
+      "sha256": "162b4d996da5bfd24944de3c399d7febd1dd0d80c70fc3b461f70b278b4f9cf7",
+      "lines": 218,
+      "review": "posts/k8s-theory-pod-sandbox-pause.md"
+    },
+    {
+      "slug": "k8s-theory-overlay-native-routing",
+      "source": "src/content/essays/kubernetes/k8s-theory-overlay-native-routing.md",
+      "title": "Overlay와 native routing — 노드 간 경로와 주소 공급을 구분하기",
+      "series": "k8s-theory-network",
+      "order": 3,
+      "sha256": "5a5a183a1adb437d0961f2b66cbd5cabf727598cc1ae44b05dca8be7df9b1087",
+      "lines": 244,
+      "review": "posts/k8s-theory-overlay-native-routing.md"
+    },
+    {
+      "slug": "k8s-theory-service-kube-proxy",
+      "source": "src/content/essays/kubernetes/k8s-theory-service-kube-proxy.md",
+      "title": "Service와 kube-proxy — 고정 주소 뒤의 목록·규칙·연결 상태",
+      "series": "k8s-theory-network",
+      "order": 4,
+      "sha256": "6bec2d2cdfa572114289d9e909dba7ea8b611f2f64c21a1acef76d7492a464d5",
+      "lines": 288,
+      "review": "posts/k8s-theory-service-kube-proxy.md"
+    },
+    {
+      "slug": "k8s-theory-dns-ndots",
+      "source": "src/content/essays/kubernetes/k8s-theory-dns-ndots.md",
+      "title": "DNS와 ndots — 이름 하나가 여러 질의로 이어지는 조건",
+      "series": "k8s-theory-network",
+      "order": 5,
+      "sha256": "a4d6ab02382d3b58ce4b7384434761d980b51f9b1d7ac29892aef2ae1331d6bc",
+      "lines": 237,
+      "review": "posts/k8s-theory-dns-ndots.md"
+    },
+    {
+      "slug": "k8s-theory-ingress-gateway-api",
+      "source": "src/content/essays/kubernetes/k8s-theory-ingress-gateway-api.md",
+      "title": "Ingress와 Gateway API — 역할에 따라 라우팅 설정 나누기",
+      "series": "k8s-theory-network",
+      "order": 6,
+      "sha256": "96938d00ed29b51039bc769cc9dc73a7ef3ff50ea5699b404a8671f9f92762bc",
+      "lines": 230,
+      "review": "posts/k8s-theory-ingress-gateway-api.md"
+    },
+    {
+      "slug": "k8s-theory-network-policy",
+      "source": "src/content/essays/kubernetes/k8s-theory-network-policy.md",
+      "title": "NetworkPolicy — Pod와 방향을 고르고 허용 규칙을 합칩니다",
+      "series": "k8s-theory-network",
+      "order": 7,
+      "sha256": "79b7558fba0385bb3357d58d2d4c45b52af15bc22f4367f9cd97254a46bf86f0",
+      "lines": 266,
+      "review": "posts/k8s-theory-network-policy.md"
+    },
+    {
+      "slug": "k8s-theory-admin-network-policy",
+      "source": "src/content/essays/kubernetes/k8s-theory-admin-network-policy.md",
+      "title": "관리자 네트워크 정책 — 허용·거부와 다음 계층으로의 위임",
+      "series": "k8s-theory-network",
+      "order": 8,
+      "sha256": "621a832622785ee7a04301aa0d186527e8fac1405148ae4f1a740c7b782cbfc6",
+      "lines": 255,
+      "review": "posts/k8s-theory-admin-network-policy.md"
+    },
+    {
+      "slug": "k8s-theory-cloud-controller-boundary",
+      "source": "src/content/essays/kubernetes/k8s-theory-cloud-controller-boundary.md",
+      "title": "CCM과 클라우드 경계 — 노드 초기화와 외부 자원 정리",
+      "series": "k8s-theory-network",
+      "order": 9,
+      "sha256": "55bb661ac4761c36ede4a930ddcf0e3f2dce77303f0c4ff1dcc148aa5c271300",
+      "lines": 297,
+      "review": "posts/k8s-theory-cloud-controller-boundary.md"
+    },
+    {
+      "slug": "k8s-theory-traffic-locality-dual-stack",
+      "source": "src/content/essays/kubernetes/k8s-theory-traffic-locality-dual-stack.md",
+      "title": "트래픽 지역성과 dual-stack — 후보 제한과 선호, 주소군별 경로",
+      "series": "k8s-theory-network",
+      "order": 10,
+      "sha256": "8a3adf7822a920dce5df7ecd3312133d690fcc57337570df66c73c99e26b7807",
+      "lines": 276,
+      "review": "posts/k8s-theory-traffic-locality-dual-stack.md"
+    },
+    {
+      "slug": "k8s-theory-service-cidr-ip-address",
+      "source": "src/content/essays/kubernetes/k8s-theory-service-cidr-ip-address.md",
+      "title": "ServiceCIDR와 IPAddress — 주소를 확보한 뒤 Service를 저장합니다",
+      "series": "k8s-theory-network",
+      "order": 11,
+      "sha256": "dae637b8512c526fafd4c8d161761b6049d6604ed1bbc6854ae12ab24c42b748",
+      "lines": 276,
+      "review": "posts/k8s-theory-service-cidr-ip-address.md"
+    },
+    {
+      "slug": "k8s-theory-scheduling-binding-cycles",
+      "source": "src/content/essays/kubernetes/k8s-theory-scheduling-binding-cycles.md",
+      "title": "스케줄링과 바인딩 사이클 — 노드 선택과 기록을 나누는 이유",
+      "series": "k8s-theory-node",
+      "order": 1,
+      "sha256": "6f30ba56ff77bfd7e9e2af100916e500e95312e01afca37a6b2647753edc147b",
+      "lines": 318,
+      "review": "posts/k8s-theory-scheduling-binding-cycles.md"
+    },
+    {
+      "slug": "k8s-theory-scheduling-constraints",
+      "source": "src/content/essays/kubernetes/k8s-theory-scheduling-constraints.md",
+      "title": "Pod 배치 제약 — 노드를 제외하는 조건과 점수를 높이는 조건",
+      "series": "k8s-theory-node",
+      "order": 2,
+      "sha256": "cf4060ff490e9d140ef5432494f68cd8e56d876f2d5b7290e8315a4eb55d71ad",
+      "lines": 322,
+      "review": "posts/k8s-theory-scheduling-constraints.md"
+    },
+    {
+      "slug": "k8s-theory-preemption-pdb",
+      "source": "src/content/essays/kubernetes/k8s-theory-preemption-pdb.md",
+      "title": "Preemption과 PDB — 희생자 선정과 삭제 허용은 다른 판단입니다",
+      "series": "k8s-theory-node",
+      "order": 3,
+      "sha256": "2af803995b5319af53efdb8ba402409dcca61fa8e4ae8fa57fec4246f57bb1ec",
+      "lines": 334,
+      "review": "posts/k8s-theory-preemption-pdb.md"
+    },
+    {
+      "slug": "k8s-theory-kubelet-pod-lifecycle",
+      "source": "src/content/essays/kubernetes/k8s-theory-kubelet-pod-lifecycle.md",
+      "title": "kubelet과 Pod 수명주기 — 실행 중과 준비 완료는 다릅니다",
+      "series": "k8s-theory-node",
+      "order": 4,
+      "sha256": "8f62a9ed025d860f5e27e0cf373587ef442846a11b5a594ff922ec9d0008a57c",
+      "lines": 309,
+      "review": "posts/k8s-theory-kubelet-pod-lifecycle.md"
+    },
+    {
+      "slug": "k8s-theory-qos-cgroups",
+      "source": "src/content/essays/kubernetes/k8s-theory-qos-cgroups.md",
+      "title": "QoS와 cgroup — request가 배치 계산에, limit이 실행 상한에 쓰이는 과정",
+      "series": "k8s-theory-node",
+      "order": 5,
+      "sha256": "3fb3bbb3aef803beade4f323d6824b131c7c50df23b2ca478bd072fd8876a9d8",
+      "lines": 326,
+      "review": "posts/k8s-theory-qos-cgroups.md"
+    },
+    {
+      "slug": "k8s-theory-eviction-oom",
+      "source": "src/content/essays/kubernetes/k8s-theory-eviction-oom.md",
+      "title": "Eviction과 OOM — 컨테이너 종료와 Pod 삭제를 구분합니다",
+      "series": "k8s-theory-node",
+      "order": 6,
+      "sha256": "58cfd6bab4d3aaa30b48f2a940a349c05cd8c504ed5c12338ca4049a99b0fd2b",
+      "lines": 282,
+      "review": "posts/k8s-theory-eviction-oom.md"
+    },
+    {
+      "slug": "k8s-theory-node-observability-sources",
+      "source": "src/content/essays/kubernetes/k8s-theory-node-observability-sources.md",
+      "title": "Kubernetes 자원 지표 — 같은 Pod의 숫자가 다른 이유",
+      "series": "k8s-theory-node",
+      "order": 7,
+      "sha256": "230c9acb53d7ca9fb5682d29d1deb3249cc661612956eee003f2770382c9c4f2",
+      "lines": 222,
+      "review": "posts/k8s-theory-node-observability-sources.md"
+    },
+    {
+      "slug": "k8s-theory-workload-rollout-revisions",
+      "source": "src/content/essays/kubernetes/k8s-theory-workload-rollout-revisions.md",
+      "title": "Deployment와 DaemonSet — 롤아웃의 가용성과 되돌리기 이력",
+      "series": "k8s-theory-node",
+      "order": 8,
+      "sha256": "6dada9bde500b39a009f85a22ae459828d2f5b87d72da391f7f37a837ad0c402",
+      "lines": 302,
+      "review": "posts/k8s-theory-workload-rollout-revisions.md"
+    },
+    {
+      "slug": "k8s-theory-job-cronjob-completion",
+      "source": "src/content/essays/kubernetes/k8s-theory-job-cronjob-completion.md",
+      "title": "Job과 CronJob — 성공 집계와 실행 시각은 다른 판단입니다",
+      "series": "k8s-theory-node",
+      "order": 9,
+      "sha256": "3c9647689ed9166cf7cf8e022da101058004f37411e3b6b857d550b1c1346232",
+      "lines": 303,
+      "review": "posts/k8s-theory-job-cronjob-completion.md"
+    },
+    {
+      "slug": "k8s-theory-node-heartbeat-taint-eviction",
+      "source": "src/content/essays/kubernetes/k8s-theory-node-heartbeat-taint-eviction.md",
+      "title": "노드 하트비트와 taint 축출 — 관찰 실패와 실제 종료는 다릅니다",
+      "series": "k8s-theory-node",
+      "order": 10,
+      "sha256": "21c8dce7da0422136fc0981d746551fd2e9ae9812df62f66c6356299aa3a9461",
+      "lines": 336,
+      "review": "posts/k8s-theory-node-heartbeat-taint-eviction.md"
+    },
+    {
+      "slug": "k8s-theory-configmap-secret-delivery",
+      "source": "src/content/essays/kubernetes/k8s-theory-configmap-secret-delivery.md",
+      "title": "ConfigMap과 Secret 전달 — 환경 변수와 볼륨 파일의 갱신 경계",
+      "series": "k8s-theory-node",
+      "order": 11,
+      "sha256": "d860ad00bdef5abc1d4671d07a95ff9c10c9dd8b7f2bec3bb20e4409db5901f4",
+      "lines": 302,
+      "review": "posts/k8s-theory-configmap-secret-delivery.md"
+    },
+    {
+      "slug": "k8s-theory-cri-oci-boundary",
+      "source": "src/content/essays/kubernetes/k8s-theory-cri-oci-boundary.md",
+      "title": "CRI와 OCI — 실행 요청과 bundle 설정의 경계를 구분합니다",
+      "series": "k8s-theory-node",
+      "order": 12,
+      "sha256": "15a43c343c2135a9984636ae16e18ad230af0f23a4bc56addb0ada2cdc04c585",
+      "lines": 277,
+      "review": "posts/k8s-theory-cri-oci-boundary.md"
+    },
+    {
+      "slug": "k8s-theory-device-resource-allocation",
+      "source": "src/content/essays/kubernetes/k8s-theory-device-resource-allocation.md",
+      "title": "장치 자원 할당 — 수량에 따른 노드 선택과 DRA의 장치 선택",
+      "series": "k8s-theory-node",
+      "order": 13,
+      "sha256": "97193f697f7c6eae473eaac01fe386ea1dfa960e12ce2bdbb996192607df502b",
+      "lines": 324,
+      "review": "posts/k8s-theory-device-resource-allocation.md"
+    },
+    {
+      "slug": "k8s-theory-runtime-isolation",
+      "source": "src/content/essays/kubernetes/k8s-theory-runtime-isolation.md",
+      "title": "런타임 격리 — 생략한 보안 설정은 필드마다 다르게 적용됩니다",
+      "series": "k8s-theory-node",
+      "order": 14,
+      "sha256": "974cd690cb877aa61f34d57c56f9b743b0d9fde7d57dbc2b624842e60c074f42",
+      "lines": 284,
+      "review": "posts/k8s-theory-runtime-isolation.md"
+    },
+    {
+      "slug": "k8s-theory-resource-accounting-scoring",
+      "source": "src/content/essays/kubernetes/k8s-theory-resource-accounting-scoring.md",
+      "title": "자원 계산과 점수 전략 — Pod 요청을 세고 노드를 고르는 기준",
+      "series": "k8s-theory-node",
+      "order": 15,
+      "sha256": "601bd123230b31563daacb57ed4319d5f4ac0edeaec8acde1b6d73459964f915",
+      "lines": 297,
+      "review": "posts/k8s-theory-resource-accounting-scoring.md"
+    },
+    {
+      "slug": "k8s-theory-node-swap",
+      "source": "src/content/essays/kubernetes/k8s-theory-node-swap.md",
+      "title": "노드 swap — 기동 허용과 컨테이너 한도, 배치 계산을 구분하기",
+      "series": "k8s-theory-node",
+      "order": 16,
+      "sha256": "6a42e3f64ed96c2cf63014a64a373d7de36bbac2f1c9d6828570b605f2d75838",
+      "lines": 279,
+      "review": "posts/k8s-theory-node-swap.md"
+    },
+    {
+      "slug": "k8s-theory-container-log-files",
+      "source": "src/content/essays/kubernetes/k8s-theory-container-log-files.md",
+      "title": "컨테이너 로그 파일: 경로를 정한 쪽은 그 파일을 쓰지 않습니다",
+      "series": "k8s-theory-node",
+      "order": 17,
+      "sha256": "259e9d9863edeb7d7d31630513f0244847e356ccdb4cac974d8d6cf0a62ea87f",
+      "lines": 266,
+      "review": "posts/k8s-theory-container-log-files.md"
+    },
+    {
+      "slug": "k8s-theory-hpa-scale-subresource",
+      "source": "src/content/essays/kubernetes/k8s-theory-hpa-scale-subresource.md",
+      "title": "HPA와 scale subresource — replica 계산과 필드 소유권의 경계",
+      "series": "k8s-theory-node",
+      "order": 18,
+      "sha256": "27febd7282ef8c2e9d76e33b8dc4b8a716a43baf047b00246a6002812a07a96c",
+      "lines": 292,
+      "review": "posts/k8s-theory-hpa-scale-subresource.md"
+    },
+    {
+      "slug": "k8s-theory-ephemeral-containers",
+      "source": "src/content/essays/kubernetes/k8s-theory-ephemeral-containers.md",
+      "title": "임시 컨테이너 — 추가 전용 API와 실행·상태 집계의 경계",
+      "series": "k8s-theory-node",
+      "order": 19,
+      "sha256": "5e5500a95dfe07fe1250dbcd085301d570a192a681325032ebfadbdd2c3026db",
+      "lines": 292,
+      "review": "posts/k8s-theory-ephemeral-containers.md"
+    },
+    {
+      "slug": "k8s-theory-pvc-storageclass-binding",
+      "source": "src/content/essays/kubernetes/k8s-theory-pvc-storageclass-binding.md",
+      "title": "PVC 바인딩과 StorageClass — PV의 claimRef를 먼저 쓰는 이유",
+      "series": "k8s-theory-storage",
+      "order": 1,
+      "sha256": "baacb76fe4ecff8d920b6e71076afe907ad38dd8767159dcda0e4c9f0471e02a",
+      "lines": 300,
+      "review": "posts/k8s-theory-pvc-storageclass-binding.md"
+    },
+    {
+      "slug": "k8s-theory-csi-architecture",
+      "source": "src/content/essays/kubernetes/k8s-theory-csi-architecture.md",
+      "title": "CSI 구조 — sidecar의 Controller 호출과 kubelet의 Node 호출",
+      "series": "k8s-theory-storage",
+      "order": 2,
+      "sha256": "7f983ff67e7b3f01dd23220370918f8e0bb99137db2bb62e354523e30398f729",
+      "lines": 251,
+      "review": "posts/k8s-theory-csi-architecture.md"
+    },
+    {
+      "slug": "k8s-theory-volume-attach-stage-publish",
+      "source": "src/content/essays/kubernetes/k8s-theory-volume-attach-stage-publish.md",
+      "title": "attach·stage·publish — 볼륨 연결부터 Pod가 사용할 경로까지",
+      "series": "k8s-theory-storage",
+      "order": 3,
+      "sha256": "4c51359e2fd1b9fadee8da093299ba44e29bfa5bda9981859b9b297774851b33",
+      "lines": 244,
+      "review": "posts/k8s-theory-volume-attach-stage-publish.md"
+    },
+    {
+      "slug": "k8s-theory-statefulset-volume-lifecycle",
+      "source": "src/content/essays/kubernetes/k8s-theory-statefulset-volume-lifecycle.md",
+      "title": "StatefulSet과 볼륨 수명 — PVC를 지우기 전에 주인을 정합니다",
+      "series": "k8s-theory-storage",
+      "order": 4,
+      "sha256": "3e2207b865646db99abe87f33f6145e31bca555340a7eb2de7cfc482c614e78f",
+      "lines": 242,
+      "review": "posts/k8s-theory-statefulset-volume-lifecycle.md"
+    },
+    {
+      "slug": "k8s-theory-volume-expansion-snapshots-ephemeral",
+      "source": "src/content/essays/kubernetes/k8s-theory-volume-expansion-snapshots-ephemeral.md",
+      "title": "확장·스냅샷·임시 볼륨 — 요청 뒤의 주체와 수명",
+      "series": "k8s-theory-storage",
+      "order": 5,
+      "sha256": "63af892b5665b44037d3790bedfb8b1aefa3d6e31fe517858cc94637dc1814d5",
+      "lines": 276,
+      "review": "posts/k8s-theory-volume-expansion-snapshots-ephemeral.md"
+    },
+    {
+      "slug": "k8s-theory-volume-attachment-limits",
+      "source": "src/content/essays/kubernetes/k8s-theory-volume-attachment-limits.md",
+      "title": "볼륨 개수 상한 — 드라이버가 말한 숫자를 누가 고치나",
+      "series": "k8s-theory-storage",
+      "order": 6,
+      "sha256": "f8a1711b67e96036d6ddb9d218afd84202930f179b9ad0d07e31111e3b013359",
+      "lines": 241,
+      "review": "posts/k8s-theory-volume-attachment-limits.md"
+    },
+    {
+      "slug": "k8s-theory-storage-capacity-scheduling",
+      "source": "src/content/essays/kubernetes/k8s-theory-storage-capacity-scheduling.md",
+      "title": "용량 기반 스케줄링 — 아직 없는 볼륨의 크기를 무엇과 비교하나",
+      "series": "k8s-theory-storage",
+      "order": 7,
+      "sha256": "266243d9f2be9ade903180835adfc48c6cbd5afc69ff4f63aeea66f49be3857c",
+      "lines": 252,
+      "review": "posts/k8s-theory-storage-capacity-scheduling.md"
+    }
+  ]
+}

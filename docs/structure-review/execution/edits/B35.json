@@ -1,0 +1,16 @@
+{
+  "batch": "B35",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-netfilter-conntrack",
+      "edit_status": "completed",
+      "sha256": "5504acbe7913b8277deac62f9e0ec9bf7111804ddda747ea91f1704843909a13"
+    },
+    {
+      "slug": "k8s-theory-namespace-lifetime",
+      "edit_status": "completed",
+      "sha256": "e48783b93e197e42199333428183956fcc3c57be562595ee36b2311122977d49"
+    }
+  ]
+}

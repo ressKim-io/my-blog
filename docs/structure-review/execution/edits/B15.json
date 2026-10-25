@@ -1,0 +1,21 @@
+{
+  "batch": "B15",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-kubelet-pod-lifecycle",
+      "edit_status": "completed",
+      "sha256": "63677c955737466d3073a543c82578f10b86fc5d39ea25af942d8e8ad82826c4"
+    },
+    {
+      "slug": "k8s-theory-cri-oci-boundary",
+      "edit_status": "completed",
+      "sha256": "e573eb65f2f3d406bb16bb22d1f4d023a4640f497c581f4d10e958d8f713cab8"
+    },
+    {
+      "slug": "k8s-theory-runtime-isolation",
+      "edit_status": "completed",
+      "sha256": "d51a19bd497a1264511e03aa0a03e0f9e8a60ea942013f1f25501c5164647ae1"
+    }
+  ]
+}

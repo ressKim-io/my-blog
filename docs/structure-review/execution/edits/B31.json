@@ -1,0 +1,11 @@
+{
+  "batch": "B31",
+  "editor": "editor_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-controller-runtime-reconcile",
+      "edit_status": "completed",
+      "sha256": "0b086f523dc9288fbeb5f25d3d65ef6a0733ba45245373f9f9c79f940029e32c"
+    }
+  ]
+}

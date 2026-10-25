@@ -1,0 +1,21 @@
+{
+  "batch": "B16",
+  "editor": "editor_b",
+  "posts": [
+    {
+      "slug": "k8s-theory-qos-cgroups",
+      "edit_status": "completed",
+      "sha256": "f2327304dde1c823696a4a80cd185d29fb5695637e998518376e67372d41e135"
+    },
+    {
+      "slug": "k8s-theory-resource-accounting-scoring",
+      "edit_status": "completed",
+      "sha256": "ebf4c7008038d4e0f53a46c0a106b24057ff6b57876e764b1222178e3085a183"
+    },
+    {
+      "slug": "k8s-theory-node-swap",
+      "edit_status": "completed",
+      "sha256": "5d92076d9f00b5ffc72e640d6c9eda9d35a20c87487be9d97b5924d2ce3bd779"
+    }
+  ]
+}

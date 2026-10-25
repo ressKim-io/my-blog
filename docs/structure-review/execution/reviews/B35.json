@@ -1,0 +1,18 @@
+{
+  "batch": "B35",
+  "reviewer": "review_pilot",
+  "posts": [
+    {
+      "slug": "k8s-theory-netfilter-conntrack",
+      "review_status": "completed",
+      "sha256": "5504acbe7913b8277deac62f9e0ec9bf7111804ddda747ea91f1704843909a13",
+      "open_findings": 0
+    },
+    {
+      "slug": "k8s-theory-namespace-lifetime",
+      "review_status": "completed",
+      "sha256": "e48783b93e197e42199333428183956fcc3c57be562595ee36b2311122977d49",
+      "open_findings": 0
+    }
+  ]
+}

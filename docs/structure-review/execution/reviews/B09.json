@@ -1,0 +1,12 @@
+{
+  "batch": "B09",
+  "reviewer": "review_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-reconcile",
+      "review_status": "completed",
+      "sha256": "2bb4132307c23bffb09901f63b87f4ef699ef573980d2eef749a44a6cf8f516f",
+      "open_findings": 0
+    }
+  ]
+}

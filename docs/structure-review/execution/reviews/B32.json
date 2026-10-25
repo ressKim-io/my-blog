@@ -1,0 +1,12 @@
+{
+  "batch": "B32",
+  "reviewer": "review_a",
+  "posts": [
+    {
+      "slug": "k8s-theory-aggregated-api-server",
+      "review_status": "completed",
+      "sha256": "f4c1f3e390c3302d07497e8288d5049fcedf37fc1050a0e87054b86269cbb99f",
+      "open_findings": 0
+    }
+  ]
+}
