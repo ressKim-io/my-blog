@@ -154,6 +154,8 @@ CPU 초기화 기간은 기본 5분, initial readiness delay는 기본 30초입�
 기본 scale down 창은 최근 추천의 최댓값을 골라 줄이기를 늦춥니다
 예를 들어 창 안에 추천 7과 3이 남아 있다면 7을 선택하므로 낮아진 추천 3에 바로 맞추지 않습니다
 
+![축소 안정화 창 안에 추천 7과 3이 함께 있으면 7을 고르고 오래된 7이 창 밖으로 나간 뒤 더 큰 새 추천이 없으면 3을 고르는 두 시점|tall](/diagrams/k8s-theory-hpa-scale-subresource-3.svg)
+
 기본 scale up 창은 0초입니다
 `behavior.scaleUp.stabilizationWindowSeconds`를 0보다 크게 설정하면 그 창의 추천 최솟값을 사용해 확대도 늦출 수 있습니다
 

@@ -34,6 +34,10 @@ restartable init container인 sidecar는 `restartPolicy: Always`로 선언하며
 각 자원에서 더 큰 값을 선택하므로 CPU 최대량과 메모리 최대량이 서로 다른 실행 단계에서 나올 수도 있습니다
 sidecar를 일반 init처럼 최대값 하나로만 계산하거나, 모든 init을 동시에 실행하는 것처럼 더하면 이 계산과 달라집니다
 
+다음은 일반 init A 뒤에 sidecar S, 일반 init B, 앱 C·D를 두는 가정입니다
+
+![일반 init A·B의 순차 실행과 sidecar S의 후속 구간 겹침을 비교하고 각 단계의 요청 합계에서 자원별 최댓값을 고르는 예시|tall](/diagrams/k8s-theory-resource-accounting-scoring-3.svg)
+
 기본 활성인 `PodLevelResources`를 사용하는 호출에서는 지원되는 자원의 Pod-level request가 해당 자원의 컨테이너 집계값을 대체합니다
 현재 지원 대상은 CPU·메모리·hugepages이며, Pod-level request가 없는 자원까지 일괄 대체하는 것은 아닙니다
 overhead는 이 선택을 마친 뒤 더합니다

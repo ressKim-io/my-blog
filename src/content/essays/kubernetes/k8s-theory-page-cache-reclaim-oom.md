@@ -31,6 +31,8 @@ working set은 사용량을 가공한 관측값입니다
 working set = max(usage - inactive_file, 0)
 ```
 
+![usage에서 inactive_file을 계산상 제외해 working set을 표시하지만 제외한 캐시는 여전히 메모리를 사용 중이라는 회계 관계|tall](/diagrams/k8s-theory-page-cache-reclaim-oom-3.svg)
+
 여기서 제외된 캐시도 회수와 재접근에 비용이 듭니다
 working set이 limit 아래라는 사실만으로 할당이 즉시 성공하거나 OOM이 없을 것이라고 보장할 수는 없습니다
 

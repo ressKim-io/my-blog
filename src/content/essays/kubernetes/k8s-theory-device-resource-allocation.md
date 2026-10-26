@@ -204,6 +204,8 @@ DRA의 kubelet 경로는 준비 응답에서 CDI 이름을 모아 CRI `Container
 **NUMA node**는 한 서버 안에서 CPU·메모리·I/O의 위치 관계를 구분하는 하드웨어 자원 단위입니다
 Pod를 실행할 서버를 나타내는 Kubernetes Node와 다르며 한 Kubernetes Node 안에 여러 NUMA node가 있을 수 있습니다
 
+![한 Kubernetes Node 안의 두 NUMA 영역에 CPU 집합·메모리·GPU가 나뉘고 같은 위치와 다른 위치의 접근을 구분하는 배치 가정|tall](/diagrams/k8s-theory-device-resource-allocation-4.svg)
+
 CPU가 어느 위치의 메모리나 장치에 접근하는지에 따라 접근 거리와 비용이 달라집니다
 따라서 GPU 두 개가 남았다는 사실과 CPU·메모리·장치를 가까운 위치에 함께 할당할 수 있다는 사실은 다른 조건입니다
 

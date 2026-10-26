@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="848" viewBox="0 0 560 848" role="img" aria-labelledby="title desc">
+<title id="title">usage와 working set의 회계 차이</title>
+<desc id="desc">확인한 cAdvisor/lib v0.60.5 cgroup v2에서 inactive_file 항목이 있을 때 working set은 max(usage - inactive_file, 0)으로 계산합니다. 두 막대는 같은 메모리 상태이며 해칭한 inactive_file은 계산에서 제외해도 여전히 사용 중인 캐시입니다. 빈 메모리나 비용 없이 즉시 회수할 양을 뜻하지 않습니다. 그림은 inactive_file이 usage 이하인 개념 예이고 폭은 축척이 아닙니다.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+<pattern id="cache-hatch" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#F8FAFC"/><path d="M-3 3 L3 -3 M0 12 L12 0 M9 15 L15 9" stroke="#CBD5E1" stroke-width="2"/></pattern>
+</defs>
+<rect width="560" height="848" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="280" y="44" font-size="24" fill="#0A0A0A" text-anchor="middle" font-weight="700">통계에서 빼도 캐시는 남아 있습니다</text>
+<text x="280" y="84" font-size="21" fill="#334155" text-anchor="middle">같은 메모리 상태 · 두 가지 표시</text>
+<text x="32" y="136" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">usage: 이미 사용 중인 양</text>
+<rect x="32" y="160" width="288" height="112" rx="0" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2" />
+<rect x="320" y="160" width="208" height="112" fill="url(#cache-hatch)" stroke="#475569" stroke-width="2"/>
+<text x="176" y="224" font-size="22" fill="#6D28D9" text-anchor="middle">계산에 남는 몫</text>
+<text x="424" y="206" font-size="21" fill="#334155" text-anchor="middle">inactive_file</text>
+<text x="424" y="242" font-size="21" fill="#334155" text-anchor="middle">사용 중인 캐시</text>
+<path d="M176 280 V400" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M424 280 V400" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<rect x="96" y="323" width="160" height="34" fill="#FAFAFA"/>
+<rect x="344" y="323" width="160" height="34" fill="#FAFAFA"/>
+<text x="176" y="348" font-size="22" fill="#6D28D9" text-anchor="middle">집계에 포함</text>
+<text x="424" y="348" font-size="21" fill="#334155" text-anchor="middle">집계에서 제외</text>
+<rect x="32" y="424" width="288" height="112" rx="0" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2" />
+<rect x="320" y="424" width="208" height="112" fill="url(#cache-hatch)" stroke="#475569" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="176" y="488" font-size="24" fill="#6D28D9" text-anchor="middle" font-weight="700">working set</text>
+<text x="424" y="470" font-size="21" fill="#334155" text-anchor="middle">사용 중인 캐시</text>
+<text x="424" y="506" font-size="21" fill="#334155" text-anchor="middle">그대로</text>
+<text x="280" y="576" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="700">제외한 부분도 빈 메모리가 아닙니다</text>
+<text x="280" y="628" font-size="22" fill="#334155" text-anchor="middle">max(usage - inactive_file, 0)</text>
+<text x="280" y="660" font-size="21" fill="#334155" text-anchor="middle">계산 결과의 하한은 0</text>
+<text x="280" y="712" font-size="20" fill="#334155" text-anchor="middle">해칭: inactive_file · 점선: 집계 제외</text>
+<text x="280" y="754" font-size="21" fill="#334155" text-anchor="middle">cAdvisor/lib v0.60.5 · cgroup v2</text>
+<text x="280" y="786" font-size="20" fill="#334155" text-anchor="middle">inactive_file 항목이 있는 계산 경로</text>
+<text x="280" y="818" font-size="20" fill="#334155" text-anchor="middle">가정: inactive_file ≤ usage · 폭은 축척 아님</text>
+</g>
+</svg>

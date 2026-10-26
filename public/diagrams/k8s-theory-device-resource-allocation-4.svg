@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="976" viewBox="0 0 560 976" role="img" aria-labelledby="title desc">
+<title id="title">한 Kubernetes Node 안의 NUMA 자원 위치</title>
+<desc id="desc">하나의 Kubernetes Node 안에 NUMA A와 B가 있고 각 위치에 CPU 집합, 메모리, GPU 하나씩이 있는 가정입니다. 실선은 CPU A가 같은 위치의 메모리에 접근하는 관계이고 점선은 CPU A에서 다른 위치의 GPU B로 접근하는 관계입니다. NUMA 영역을 소켓이나 CPU 칩 하나로 고정하지 않습니다. 수량과 위치 조건을 구분하는 그림이며 자원 가용성, 전용 할당, 정책별 admission 결과를 표시하지 않습니다.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+
+</defs>
+<rect width="560" height="976" rx="16" fill="#FAFAFA"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif">
+<text x="280" y="44" font-size="24" fill="#0A0A0A" text-anchor="middle" font-weight="700">서버 한 대 안의 자원 위치</text>
+<text x="280" y="84" font-size="22" fill="#334155" text-anchor="middle">가정: NUMA 두 곳에 GPU 하나씩</text>
+<rect x="24" y="120" width="512" height="632" rx="16" fill="#FFFBEB" stroke="#D97706" stroke-width="2" />
+<text x="280" y="166" font-size="24" fill="#B45309" text-anchor="middle" font-weight="700">Kubernetes Node 한 대</text>
+<rect x="48" y="200" width="208" height="408" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2" />
+<rect x="304" y="200" width="208" height="408" rx="12" fill="#F8FAFC" stroke="#475569" stroke-width="2" />
+<text x="152" y="242" font-size="23" fill="#334155" text-anchor="middle" font-weight="700">NUMA A</text>
+<text x="408" y="242" font-size="23" fill="#334155" text-anchor="middle" font-weight="700">NUMA B</text>
+<path d="M152 332 V404" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M224 300 H280 V664 H408 V580" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+<circle cx="224" cy="300" r="4" fill="#475569" />
+<rect x="80" y="268" width="144" height="64" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="2" />
+<text x="152" y="310" font-size="21" fill="#334155" text-anchor="middle">CPU 집합 A</text>
+<rect x="80" y="404" width="144" height="64" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2" />
+<text x="152" y="446" font-size="22" fill="#6D28D9" text-anchor="middle">메모리 A</text>
+<rect x="96" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="120" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="144" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="168" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="192" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="80" y="524" width="144" height="56" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="2" />
+<text x="152" y="560" font-size="23" fill="#B45309" text-anchor="middle">GPU A</text>
+<rect x="104" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="128" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="152" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="176" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="336" y="268" width="144" height="64" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="2" />
+<text x="408" y="310" font-size="21" fill="#334155" text-anchor="middle">CPU 집합 B</text>
+<rect x="336" y="404" width="144" height="64" rx="4" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2" />
+<text x="408" y="446" font-size="22" fill="#6D28D9" text-anchor="middle">메모리 B</text>
+<rect x="352" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="376" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="400" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="424" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="448" y="468" width="12" height="8" fill="#7C3AED"/>
+<rect x="336" y="524" width="144" height="56" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="2" />
+<text x="408" y="560" font-size="23" fill="#B45309" text-anchor="middle">GPU B</text>
+<rect x="360" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="384" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="408" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="432" y="580" width="12" height="8" fill="#D97706"/>
+<rect x="92" y="352" width="120" height="32" fill="#F8FAFC"/>
+<text x="152" y="376" font-size="21" fill="#334155" text-anchor="middle">같은 위치</text>
+<text x="280" y="708" font-size="21" fill="#334155" text-anchor="middle">다른 위치 접근: CPU A → GPU B</text>
+<text x="280" y="738" font-size="20" fill="#334155" text-anchor="middle">연결선은 접근 관계의 예시</text>
+<text x="280" y="798" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="700">GPU 개수와 같은 위치의 조합은</text>
+<text x="280" y="830" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="700">별도로 확인합니다</text>
+<text x="280" y="876" font-size="20" fill="#334155" text-anchor="middle">NUMA와 소켓·칩의 경계는 항상 같지 않음</text>
+<text x="280" y="910" font-size="20" fill="#334155" text-anchor="middle">실선: 같은 위치 · 점선: 다른 위치 접근</text>
+<text x="280" y="944" font-size="20" fill="#334155" text-anchor="middle">배치·선 길이는 실측 거리·지연이 아님</text>
+</g>
+</svg>
