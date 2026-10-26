@@ -187,6 +187,8 @@ spec:
 external-provisioner가 스냅샷을 소스로 하는 CreateVolume을 요청해 새 볼륨을 준비합니다
 현재 [getSnapshotSource](https://github.com/kubernetes-csi/external-provisioner/blob/72f13ee46fb93c11a72ef91549e70158283c03af/pkg/controller/controller.go)는 바인딩 참조·드라이버 일치·readyToUse·snapshot handle 등을 확인합니다
 
+![원본 PVC·PV와 원본 볼륨, VolumeSnapshot·VolumeSnapshotContent와 실제 스냅샷, dataSource로 복원한 새 PVC·PV와 새 볼륨의 대응 관계|tall](/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg)
+
 `dataSource`는 VolumeSnapshot과 PVC를 받을 수 있고, `dataSourceRef`는 더 넓은 non-core 소스도 표현합니다
 더 넓은 참조 필드가 있다고 어떤 소스든 자동으로 복원되는 것은 아닙니다
 해당 타입을 처리하는 provisioner·populator와 기능 조건이 필요합니다
