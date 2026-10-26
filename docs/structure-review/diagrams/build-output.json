@@ -1,0 +1,63 @@
+{
+  "posts": [
+    {
+      "slug": "k8s-theory-resource-accounting-scoring",
+      "html": "out/essays/k8s-theory-resource-accounting-scoring/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-resource-accounting-scoring-3.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "c7d9219896f397ba6490d59e4fd98d2867581bc36661516f6dfefd842f1b3ce1"
+    },
+    {
+      "slug": "k8s-theory-hpa-scale-subresource",
+      "html": "out/essays/k8s-theory-hpa-scale-subresource/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-hpa-scale-subresource-3.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "0b10609464ca4333111801f398b6d8c7773858ea8183d8635589eb4f4650715b"
+    },
+    {
+      "slug": "k8s-theory-page-cache-reclaim-oom",
+      "html": "out/essays/k8s-theory-page-cache-reclaim-oom/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-page-cache-reclaim-oom-3.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "4d328cd20fe30b5d6967843d8785de555fffd7491c49bb307a25d5feca17f274"
+    },
+    {
+      "slug": "k8s-theory-device-resource-allocation",
+      "html": "out/essays/k8s-theory-device-resource-allocation/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-device-resource-allocation-4.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "0a22bc80f0e14fedea1aa54ce4504e588e8678a2074699ce83e0d095180599fd"
+    },
+    {
+      "slug": "k8s-theory-netfilter-conntrack",
+      "html": "out/essays/k8s-theory-netfilter-conntrack/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-netfilter-conntrack-3.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "08365316112075b0aa2c1b4501311defefe75825736c2262ac68bdde2d91d7b7"
+    },
+    {
+      "slug": "k8s-theory-overlay-native-routing",
+      "html": "out/essays/k8s-theory-overlay-native-routing/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-overlay-native-routing-2.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "14e5344abd4f478817f9e9dcd027bcd16a95bb95bb075f5d50321e3e33c4efeb"
+    },
+    {
+      "slug": "k8s-theory-crd-schema-pruning",
+      "html": "out/essays/k8s-theory-crd-schema-pruning/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-crd-schema-pruning-3.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "32a68a59f274c12029a0b7a5d32aed501457b62c3337a5ff06828922f54a1629"
+    },
+    {
+      "slug": "k8s-theory-volume-expansion-snapshots-ephemeral",
+      "html": "out/essays/k8s-theory-volume-expansion-snapshots-ephemeral/index.html",
+      "image": "/my-blog/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg",
+      "builtSvgEqualsSource": true,
+      "sha256": "5da83ed6b177fa9354bdaf880268a6cd4b8c847d5dd69ff10f299ff9b4296551"
+    }
+  ],
+  "errors": [],
+  "seriesPosts": 71,
+  "seriesUniqueSvg": 153
+}

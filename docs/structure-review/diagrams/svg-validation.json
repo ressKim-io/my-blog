@@ -1,0 +1,93 @@
+{
+  "svg": [
+    {
+      "file": "public/diagrams/k8s-theory-resource-accounting-scoring-3.svg",
+      "sha256": "c7d9219896f397ba6490d59e4fd98d2867581bc36661516f6dfefd842f1b3ce1",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        896.0
+      ],
+      "textNodes": 22
+    },
+    {
+      "file": "public/diagrams/k8s-theory-hpa-scale-subresource-3.svg",
+      "sha256": "0b10609464ca4333111801f398b6d8c7773858ea8183d8635589eb4f4650715b",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        976.0
+      ],
+      "textNodes": 21
+    },
+    {
+      "file": "public/diagrams/k8s-theory-page-cache-reclaim-oom-3.svg",
+      "sha256": "4d328cd20fe30b5d6967843d8785de555fffd7491c49bb307a25d5feca17f274",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        848.0
+      ],
+      "textNodes": 18
+    },
+    {
+      "file": "public/diagrams/k8s-theory-device-resource-allocation-4.svg",
+      "sha256": "0a22bc80f0e14fedea1aa54ce4504e588e8678a2074699ce83e0d095180599fd",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        976.0
+      ],
+      "textNodes": 19
+    },
+    {
+      "file": "public/diagrams/k8s-theory-netfilter-conntrack-3.svg",
+      "sha256": "08365316112075b0aa2c1b4501311defefe75825736c2262ac68bdde2d91d7b7",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        1176.0
+      ],
+      "textNodes": 36
+    },
+    {
+      "file": "public/diagrams/k8s-theory-overlay-native-routing-2.svg",
+      "sha256": "14e5344abd4f478817f9e9dcd027bcd16a95bb95bb075f5d50321e3e33c4efeb",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        1184.0
+      ],
+      "textNodes": 44
+    },
+    {
+      "file": "public/diagrams/k8s-theory-crd-schema-pruning-3.svg",
+      "sha256": "32a68a59f274c12029a0b7a5d32aed501457b62c3337a5ff06828922f54a1629",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        1200.0
+      ],
+      "textNodes": 27
+    },
+    {
+      "file": "public/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg",
+      "sha256": "5da83ed6b177fa9354bdaf880268a6cd4b8c847d5dd69ff10f299ff9b4296551",
+      "viewBox": [
+        0.0,
+        0.0,
+        560.0,
+        1240.0
+      ],
+      "textNodes": 46
+    }
+  ],
+  "errors": []
+}

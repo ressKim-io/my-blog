@@ -1,0 +1,13 @@
+{
+  "implementationComplete": 8,
+  "independentReviewComplete": 8,
+  "reviewedRenders": 16,
+  "currentSourceAndSvgAndRenderHashesMatchReview": true,
+  "mdxCompiled": 8,
+  "newSvgBuilt": 8,
+  "seriesUniqueSvg": 153,
+  "protectedTrackedFiles": 1952,
+  "errors": [],
+  "verificationPhase": "pre-publication local validation",
+  "commitPushDeploymentAtVerification": "not performed"
+}

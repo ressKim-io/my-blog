@@ -1,0 +1,35 @@
+src/content/essays/kubernetes/k8s-theory-resource-accounting-scoring.md
+    —  △ [문장길이] 100자 초과 줄 20곳 — 분리 검토
+  L 39 △ [SVG] /diagrams/k8s-theory-resource-accounting-scoring-3.svg — <text> 22개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-hpa-scale-subresource.md
+    —  △ [문장길이] 100자 초과 줄 20곳 — 분리 검토
+  L157 △ [SVG] /diagrams/k8s-theory-hpa-scale-subresource-3.svg — <text> 21개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-page-cache-reclaim-oom.md
+    —  △ [문장길이] 100자 초과 줄 6곳 — 분리 검토
+  L 34 △ [SVG] /diagrams/k8s-theory-page-cache-reclaim-oom-3.svg — <text> 18개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-device-resource-allocation.md
+    —  △ [문장길이] 100자 초과 줄 19곳 — 분리 검토
+  L207 △ [SVG] /diagrams/k8s-theory-device-resource-allocation-4.svg — <text> 19개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-netfilter-conntrack.md
+    —  △ [문장길이] 100자 초과 줄 9곳 — 분리 검토
+  L 25 △ [SVG] /diagrams/k8s-theory-netfilter-conntrack-1.svg — <text> 28개 > 목표 16
+  L 97 △ [SVG] /diagrams/k8s-theory-netfilter-conntrack-3.svg — <text> 36개 > 목표 16
+  요약: error 0 · warn 3
+src/content/essays/kubernetes/k8s-theory-overlay-native-routing.md
+    —  △ [문장길이] 100자 초과 줄 26곳 — 분리 검토
+  L114 △ [SVG] /diagrams/k8s-theory-overlay-native-routing-2.svg — <text> 44개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-crd-schema-pruning.md
+    —  △ [문장길이] 100자 초과 줄 14곳 — 분리 검토
+  L 92 △ [SVG] /diagrams/k8s-theory-crd-schema-pruning-3.svg — <text> 27개 > 목표 16
+  요약: error 0 · warn 2
+src/content/essays/kubernetes/k8s-theory-volume-expansion-snapshots-ephemeral.md
+    —  △ [문장길이] 100자 초과 줄 17곳 — 분리 검토
+  L190 △ [SVG] /diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg — <text> 46개 > 목표 16
+  요약: error 0 · warn 2
+
+전체: error 0 · warn 17 (파일 8개)

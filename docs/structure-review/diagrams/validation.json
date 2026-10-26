@@ -1,0 +1,140 @@
+{
+  "checkedAt": "2026-10-26T01:58:43.928Z",
+  "posts": [
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-resource-accounting-scoring.md",
+      "baselineSha256": "ebf4c7008038d4e0f53a46c0a106b24057ff6b57876e764b1222178e3085a183",
+      "sha256": "aa4996ade36376f41569a26134ad03126b92f36eeef75c96f3ba4132fa8e9d21",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-resource-accounting-scoring-3.svg"
+    },
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-hpa-scale-subresource.md",
+      "baselineSha256": "35d8a128e7745d74bc8e1f69edee56c8c36e06bf9b6e26c185451e153d675582",
+      "sha256": "6cd957d1b8b914a48d209352ebad383be122a90a01b76eacab4e24976cb643bb",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-hpa-scale-subresource-3.svg"
+    },
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-page-cache-reclaim-oom.md",
+      "baselineSha256": "7ca533863376ff671b8212a8404f749da2689c6bd6d2d7d8f30dcf5321e929eb",
+      "sha256": "f8fd041ed48f236abf9049b0e27722582d415bae99d141398aa55c4f882c725e",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-page-cache-reclaim-oom-3.svg"
+    },
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-device-resource-allocation.md",
+      "baselineSha256": "21787167339e3138654b891c6306d95a5362880b4695cd2c85b2953e5a002ca9",
+      "sha256": "f28baa98d0f84e4e8baf181d5658722ed20b04d78b31dbe3cb394651ef1b96ac",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-device-resource-allocation-4.svg"
+    },
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-netfilter-conntrack.md",
+      "baselineSha256": "5504acbe7913b8277deac62f9e0ec9bf7111804ddda747ea91f1704843909a13",
+      "sha256": "05187901f8fdb9bb47c9b859e043c8a0596f2a18b5cc8eff30f57fd72c94ceb9",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-netfilter-conntrack-3.svg"
+    },
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-overlay-native-routing.md",
+      "baselineSha256": "99f58b1d83233f09e5ea1f14856cfeea36ae7aa027a63c334dd5abced9c1fd4b",
+      "sha256": "85113a58290ca47040e79bfef40cbae79c1ece5d8d0e2eb193bdc58db54913e8",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-overlay-native-routing-2.svg"
+    },
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-crd-schema-pruning.md",
+      "baselineSha256": "275aba5d31d6636694b5c133083c0b1219ae3ab41c77f9a8619bdeaea3d11721",
+      "sha256": "6d7ac64f6f9dfcc9c425cb2de35e4716962eb3ac118fa4bd2cbde73a11a55f98",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-crd-schema-pruning-3.svg"
+    },
+    {
+      "file": "src/content/essays/kubernetes/k8s-theory-volume-expansion-snapshots-ephemeral.md",
+      "baselineSha256": "fee32567ac86b53b726550ea01c4e6bf91f9186412f9d9a0bb78c951180562aa",
+      "sha256": "9b2ec83f1ac8c5f21a29a54dc98af342846fd050cedc1975e73d2430ab31a0d5",
+      "preserved": {
+        "frontMatter": true,
+        "code": true,
+        "originalLinesInOrder": true
+      },
+      "addedImage": "/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg"
+    }
+  ],
+  "newSvg": [
+    {
+      "file": "public/diagrams/k8s-theory-resource-accounting-scoring-3.svg",
+      "sha256": "c7d9219896f397ba6490d59e4fd98d2867581bc36661516f6dfefd842f1b3ce1",
+      "bytes": 4615
+    },
+    {
+      "file": "public/diagrams/k8s-theory-hpa-scale-subresource-3.svg",
+      "sha256": "0b10609464ca4333111801f398b6d8c7773858ea8183d8635589eb4f4650715b",
+      "bytes": 4343
+    },
+    {
+      "file": "public/diagrams/k8s-theory-page-cache-reclaim-oom-3.svg",
+      "sha256": "4d328cd20fe30b5d6967843d8785de555fffd7491c49bb307a25d5feca17f274",
+      "bytes": 4056
+    },
+    {
+      "file": "public/diagrams/k8s-theory-device-resource-allocation-4.svg",
+      "sha256": "0a22bc80f0e14fedea1aa54ce4504e588e8678a2074699ce83e0d095180599fd",
+      "bytes": 5545
+    },
+    {
+      "file": "public/diagrams/k8s-theory-netfilter-conntrack-3.svg",
+      "sha256": "08365316112075b0aa2c1b4501311defefe75825736c2262ac68bdde2d91d7b7",
+      "bytes": 7398
+    },
+    {
+      "file": "public/diagrams/k8s-theory-overlay-native-routing-2.svg",
+      "sha256": "14e5344abd4f478817f9e9dcd027bcd16a95bb95bb075f5d50321e3e33c4efeb",
+      "bytes": 8488
+    },
+    {
+      "file": "public/diagrams/k8s-theory-crd-schema-pruning-3.svg",
+      "sha256": "32a68a59f274c12029a0b7a5d32aed501457b62c3337a5ff06828922f54a1629",
+      "bytes": 6392
+    },
+    {
+      "file": "public/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg",
+      "sha256": "5da83ed6b177fa9354bdaf880268a6cd4b8c847d5dd69ff10f299ff9b4296551",
+      "bytes": 10174
+    }
+  ],
+  "errors": [],
+  "mdx": 8,
+  "localLinks": 36,
+  "documentLinks": 46,
+  "protectedFiles": 1952
+}

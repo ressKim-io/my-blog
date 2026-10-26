@@ -1,0 +1,294 @@
+{
+  "scope": "8편의 신규 다이어그램과 본문 삽입에 대한 독립 검토",
+  "reviewer": "diagram_review",
+  "status": "independent_review_complete",
+  "method": "수정 본문 전문·렌더를 먼저 읽고 원문·기존 그림·승인 목업과 대조한다",
+  "execution_validation": "독립 검토자 실행: SVG XML 파싱 및 title/desc/role 확인 8/8, front matter·코드 보존 8/8, 기존 SVG 16개 해시 보존, 대상 본문 git diff --check 통과. 제작자가 만든 560/335px PNG 16개를 view_image로 실제 확인. 전체 문서·링크·MDX·lint·빌드는 메인 통합 검증 별도",
+  "posts": [
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-resource-accounting-scoring.md",
+      "baseline_sha256": "ebf4c7008038d4e0f53a46c0a106b24057ff6b57876e764b1222178e3085a183",
+      "diagram": "public/diagrams/k8s-theory-resource-accounting-scoring-3.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [
+        {
+          "id": "A-title-1",
+          "reported_by": "main",
+          "location": "public/diagrams/k8s-theory-resource-accounting-scoring-3.svg / 표시 제목",
+          "reason": "함께 실행되는 요청이라는 표현은 실행되는 컨테이너와 합산하는 요청을 혼동시킴",
+          "direction": "실행 구간별 요청을 더합니다로 바꾸고 접근성 title·두 렌더를 맞춤",
+          "status": "resolved",
+          "recheck": "수정된 표시 제목·접근성 title, desktop·335px 렌더, 본문 앞뒤 집계 조건을 재확인하여 해결 판정"
+        }
+      ],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "aa4996ade36376f41569a26134ad03126b92f36eeef75c96f3ba4132fa8e9d21",
+      "diagram_sha256": "c7d9219896f397ba6490d59e4fd98d2867581bc36661516f6dfefd842f1b3ce1",
+      "review_notes": "실행 구간·단계 합계·자원별 max가 일치하며 Pod-level 대체와 overhead가 바로 뒤에 보존됨. 메인 반송 제목 수정 후 두 크기 렌더와 앞뒤 본문 재검토 완료",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-resource-accounting-scoring-3-desktop.png",
+          "width": 560,
+          "height": 896,
+          "viewed_with_view_image": true,
+          "sha256": "9baa309cc17ff77cea8ea6918eb967dd24d4d7446df34ef3c2da985cef931ada"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-resource-accounting-scoring-3-mobile.png",
+          "width": 335,
+          "height": 536,
+          "viewed_with_view_image": true,
+          "sha256": "3621e82007202c5783979971a3c7f2e64ff63f3abe400e1a4e019b41b42e7a13"
+        }
+      ]
+    },
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-hpa-scale-subresource.md",
+      "baseline_sha256": "35d8a128e7745d74bc8e1f69edee56c8c36e06bf9b6e26c185451e153d675582",
+      "diagram": "public/diagrams/k8s-theory-hpa-scale-subresource-3.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "6cd957d1b8b914a48d209352ebad383be122a90a01b76eacab4e24976cb643bb",
+      "diagram_sha256": "0b10609464ca4333111801f398b6d8c7773858ea8183d8635589eb4f4650715b",
+      "review_notes": "같은 시간 좌표와 같은 창 폭, 창 밖 7과 창 안 3, 추가 추천 가정·실제 replica와 구분을 확인. 앞 추천 예시에서 자연스럽게 이어지고 뒤 scale up·기본값 설명을 유지",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-hpa-scale-subresource-3-desktop.png",
+          "width": 560,
+          "height": 976,
+          "viewed_with_view_image": true,
+          "sha256": "4bd4f598937273301e15d421c300fe0025a9af84595f6d73f6e3250cc81452d7"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-hpa-scale-subresource-3-mobile.png",
+          "width": 335,
+          "height": 584,
+          "viewed_with_view_image": true,
+          "sha256": "d1c997d607c81671447f49bbb1aa598e6ff4a769b657be9ed98fee3db366adfa"
+        }
+      ]
+    },
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-page-cache-reclaim-oom.md",
+      "baseline_sha256": "7ca533863376ff671b8212a8404f749da2689c6bd6d2d7d8f30dcf5321e929eb",
+      "diagram": "public/diagrams/k8s-theory-page-cache-reclaim-oom-3.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "f8fd041ed48f236abf9049b0e27722582d415bae99d141398aa55c4f882c725e",
+      "diagram_sha256": "4d328cd20fe30b5d6967843d8785de555fffd7491c49bb307a25d5feca17f274",
+      "review_notes": "usage의 일부를 계산에서 제외해도 두 표시의 해칭이 유지됨. 0 하한·cAdvisor/cgroup 범위·비축척 가정과 인접 회수 비용 문단을 확인",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-page-cache-reclaim-oom-3-desktop.png",
+          "width": 560,
+          "height": 848,
+          "viewed_with_view_image": true,
+          "sha256": "31a4cd96e6daa5d82e6556f1bf4da5dc29915b454d401b0837fc3cc2439c8daf"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-page-cache-reclaim-oom-3-mobile.png",
+          "width": 335,
+          "height": 507,
+          "viewed_with_view_image": true,
+          "sha256": "cb8ab8005b026550b93f1a2472e7474b2b0508f7e48393ca7b168c868715e475"
+        }
+      ]
+    },
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-device-resource-allocation.md",
+      "baseline_sha256": "21787167339e3138654b891c6306d95a5362880b4695cd2c85b2953e5a002ca9",
+      "diagram": "public/diagrams/k8s-theory-device-resource-allocation-4.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "f28baa98d0f84e4e8baf181d5658722ed20b04d78b31dbe3cb394651ef1b96ac",
+      "diagram_sha256": "0a22bc80f0e14fedea1aa54ce4504e588e8678a2074699ce83e0d095180599fd",
+      "review_notes": "Kubernetes Node 하나 안의 두 NUMA, CPU 집합→같은 위치 메모리 및 다른 위치 GPU의 방향, 소켓·칩과 1:1 고정이 아님을 확인. 다음 위치 비용·Topology Manager 설명과 연결됨",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-device-resource-allocation-4-desktop.png",
+          "width": 560,
+          "height": 976,
+          "viewed_with_view_image": true,
+          "sha256": "873e5f69a155bb3828d8f901f26baa37109280a585a45c896731dd50ac9f6961"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-device-resource-allocation-4-mobile.png",
+          "width": 335,
+          "height": 584,
+          "viewed_with_view_image": true,
+          "sha256": "00bbaa62e0f327dd57c1eccab55dacaee8b46bc6aade07813f3c0cdc3ab0416e"
+        }
+      ]
+    },
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-netfilter-conntrack.md",
+      "baseline_sha256": "5504acbe7913b8277deac62f9e0ec9bf7111804ddda747ea91f1704843909a13",
+      "diagram": "public/diagrams/k8s-theory-netfilter-conntrack-3.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "05187901f8fdb9bb47c9b859e043c8a0596f2a18b5cc8eff30f57fd72c94ceb9",
+      "diagram_sha256": "08365316112075b0aa2c1b4501311defefe75825736c2262ac68bdde2d91d7b7",
+      "review_notes": "원문 세 주소·port가 유지되고 요청 DST/응답 SRC만 변환됨. O/R 배지가 하나의 연결 기록을 조회하며 패킷이 기록 안으로 이동하는 화살표가 없음. 앞 튜플 설명과 뒤 바인딩 재사용 절이 중복 도입 없이 이어짐",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-netfilter-conntrack-3-desktop.png",
+          "width": 560,
+          "height": 1176,
+          "viewed_with_view_image": true,
+          "sha256": "b6a02f455e0c55aeec56463fdecf912becce7cd2b650408d910fc17d9d46c808"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-netfilter-conntrack-3-mobile.png",
+          "width": 335,
+          "height": 704,
+          "viewed_with_view_image": true,
+          "sha256": "9b3d0b0950af7972165bc03491d67c8dd16a9f48c2249021bbf2eabfa0e04bce"
+        }
+      ],
+      "resolved_main_review_findings": [
+        "B-voice-1",
+        "B-prose-1"
+      ]
+    },
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-overlay-native-routing.md",
+      "baseline_sha256": "99f58b1d83233f09e5ea1f14856cfeea36ae7aa027a63c334dd5abced9c1fd4b",
+      "diagram": "public/diagrams/k8s-theory-overlay-native-routing-2.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "85113a58290ca47040e79bfef40cbae79c1ece5d8d0e2eb193bdc58db54913e8",
+      "diagram_sha256": "14e5344abd4f478817f9e9dcd027bcd16a95bb95bb075f5d50321e3e33c4efeb",
+      "review_notes": "outer Ethernet은 1500 괄호 밖, inner Ethernet 14는 50/70 안에 있음. 1450/1430은 내부 IP 예산이고 앱 payload·Pod eth0 확정값과 구분됨. 표·헤더 설명 뒤에서 단면을 보고 다음 경로 MTU 절로 이어짐",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-overlay-native-routing-2-desktop.png",
+          "width": 560,
+          "height": 1184,
+          "viewed_with_view_image": true,
+          "sha256": "5e821769da3acb18217bde8e82fa924b455a06eb8cd2966ee9c5a8d3f3c08dad"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-overlay-native-routing-2-mobile.png",
+          "width": 335,
+          "height": 708,
+          "viewed_with_view_image": true,
+          "sha256": "55c1a2718a9cc3a958f5dde3727b410a8040d4196f7a7f321e3f601ddfbeed9a"
+        }
+      ],
+      "resolved_main_review_findings": [
+        "B-voice-1",
+        "B-prose-1"
+      ]
+    },
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-crd-schema-pruning.md",
+      "baseline_sha256": "275aba5d31d6636694b5c133083c0b1219ae3ab41c77f9a8619bdeaea3d11721",
+      "diagram": "public/diagrams/k8s-theory-crd-schema-pruning-3.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "6d7ac64f6f9dfcc9c425cb2de35e4716962eb3ac118fa4bd2cbde73a11a55f98",
+      "diagram_sha256": "32a68a59f274c12029a0b7a5d32aed501457b62c3337a5ff06828922f54a1629",
+      "review_notes": "스키마와 요청 데이터 트리를 분리하고 루트 someRandomField·typed.extra 제거, json.loose 보존을 확인. 가정 문장·Ignore/Warn·Strict 400·저장 바이트 한계를 유지하며 기존 YAML 자체를 바꾸지 않음",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-crd-schema-pruning-3-desktop.png",
+          "width": 560,
+          "height": 1200,
+          "viewed_with_view_image": true,
+          "sha256": "de163097dbefda4944918d2c915bb130b16cc0be8cf50449575780fb85c104df"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-crd-schema-pruning-3-mobile.png",
+          "width": 335,
+          "height": 718,
+          "viewed_with_view_image": true,
+          "sha256": "57dabb1992bfa830224b1dc69662a9670fde201eb6e5b236a91055c0fb24eb78"
+        }
+      ],
+      "resolved_main_review_findings": [
+        "B-voice-1"
+      ]
+    },
+    {
+      "source": "src/content/essays/kubernetes/k8s-theory-volume-expansion-snapshots-ephemeral.md",
+      "baseline_sha256": "fee32567ac86b53b726550ea01c4e6bf91f9186412f9d9a0bb78c951180562aa",
+      "diagram": "public/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg",
+      "implementation_status": "complete",
+      "independent_review_status": "complete",
+      "findings": [],
+      "body_read_full": true,
+      "baseline_compared": true,
+      "source_sha256": "9b2ec83f1ac8c5f21a29a54dc98af342846fd050cedc1975e73d2430ab31a0d5",
+      "diagram_sha256": "5da83ed6b177fa9354bdaf880268a6cd4b8c847d5dd69ff10f299ff9b4296551",
+      "review_notes": "API 사각형과 저장 실체 원통, source/dataSource 참조, 원본 소스 연결, CreateSnapshot/CreateVolume 주체를 구분함. 원본과 다른 새 볼륨을 만들고 readyToUse·driver·handle·일관성 한계를 표시. 앞 복원 조건과 뒤 dataSourceRef 설명이 자연스럽게 이어짐",
+      "renders": [
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-volume-expansion-snapshots-ephemeral-3-desktop.png",
+          "width": 560,
+          "height": 1240,
+          "viewed_with_view_image": true,
+          "sha256": "e5a5c0f49049aa113ef62d15b5e9dabb6d2f7ccc74db346358b9313aca978e28"
+        },
+        {
+          "path": "/tmp/k8s-diagram-renders/k8s-theory-volume-expansion-snapshots-ephemeral-3-mobile.png",
+          "width": 335,
+          "height": 742,
+          "viewed_with_view_image": true,
+          "sha256": "12c90f108967be2e1a4144655a9ed9521fc60dafa82fc1b69f722e2c2ab54131"
+        }
+      ],
+      "resolved_main_review_findings": [
+        "B-voice-1",
+        "B-prose-1",
+        "B-source-1"
+      ]
+    }
+  ],
+  "resolved_main_review_findings": [
+    {
+      "id": "B-source-1",
+      "location": "public/diagrams/k8s-theory-volume-expansion-snapshots-ephemeral-3.svg / 원본 볼륨과 CreateSnapshot 사이",
+      "reason": "입력 볼륨 관계가 API source 참조에만 의존하면 실제 스냅샷이 무엇을 소스로 생성되는지 찾기 어려움",
+      "direction": "입력 소스 관계와 csi-snapshotter의 RPC 호출 주체를 분리하여 연결",
+      "status": "resolved",
+      "recheck": "독립 검토에서 소스 라벨·연결선, csi-snapshotter → driver, 새 복원 볼륨 및 본문 앞뒤를 560/335px 렌더와 함께 확인"
+    },
+    {
+      "id": "B-prose-1",
+      "location": "Conntrack·MTU·Snapshot의 추가 연결 문장 3개",
+      "reason": "기존 설명과 alt를 다시 안내해 흐름만 늘어짐",
+      "direction": "중복 도입 3개를 삭제하고 새 가정이 필요한 CRD 문장만 유지",
+      "status": "resolved",
+      "recheck": "수정 본문 전문을 읽어 삭제 후 앞뒤 연결을 확인하고 기준 원문과 비교하여 원문 삭제 없음 확인"
+    },
+    {
+      "id": "B-voice-1",
+      "location": "B SVG 4개의 desc",
+      "reason": "신규 접근성 설명의 반말체가 공통 말투 기준과 다름",
+      "direction": "기술 조건을 보존하며 격식체로 수정",
+      "status": "resolved",
+      "recheck": "SVG XML의 desc 전체를 읽어 격식체와 조건·수치 보존을 확인"
+    }
+  ],
+  "limitations": "원문의 고정 버전 기술 주장을 외부 소스로 전수 재검증하거나 실제 Kubernetes·커널·CSI 실험을 수행한 검토가 아님. 내용·시각 검토와 사이트 실행 검증은 별도"
+}
