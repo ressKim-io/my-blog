@@ -87,6 +87,10 @@ properties:
 보존할 수 있는 데이터라도 CEL에서 필드로 참조할 수 있는 것은 아닙니다
 스키마가 모르는 보존 데이터는 CEL에서 접근할 수 없습니다
 
+아래는 `json`에서 미선언 값을 보존하되, 그 안의 `typed`에는 `enabled`만 선언한 가정 예시입니다
+
+![Ignore 또는 Warn으로 처리하는 가정 예시에서 루트의 미선언 필드는 제거하고 json의 임의 데이터는 보존하되 구조를 다시 선언한 typed 아래 extra는 제거하는 가지치기 범위|tall](/diagrams/k8s-theory-crd-schema-pruning-3.svg)
+
 CRD 전체의 옛 `spec.preserveUnknownFields`와 이 노드별 확장은 구분해야 합니다
 새 CRD에 전역 값을 true로 설정하는 경로는 거절하며, 기존 legacy CRD를 위한 호환 예외가 별도로 있습니다
 

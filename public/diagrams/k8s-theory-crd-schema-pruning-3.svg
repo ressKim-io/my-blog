@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="1200" viewBox="0 0 560 1200" role="img" aria-labelledby="k8s-theory-crd-schema-pruning-3-title k8s-theory-crd-schema-pruning-3-desc">
+  <title id="k8s-theory-crd-schema-pruning-3-title">CRD 가지치기의 보존 범위와 다시 선언한 하위 구조</title>
+  <desc id="k8s-theory-crd-schema-pruning-3-desc">설명을 위한 가정 스키마와 JSON 조각의 트리입니다. object인 루트는 json만 선언합니다. object인 json은 x-kubernetes-preserve-unknown-fields true로 미선언 값을 보존하며 properties 아래 typed object와 그 아래 enabled boolean을 선언합니다. 루트의 someRandomField 42와 typed의 extra drop은 미선언이므로 제거하고 json의 미선언 loose keep은 보존합니다. Ignore 또는 Warn으로 진행하는 가지치기 단계의 개념 예이며 Strict이면 미선언 필드 때문에 HTTP 400으로 요청을 거절합니다. 그림은 실제 etcd 저장 바이트나 mutating admission 이후의 최종 결과를 보장하지 않습니다</desc>
+  <defs><marker id="k8s-theory-crd-schema-pruning-3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="1200" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif" fill="#0A0A0A">
+    <text x="280" y="42" font-size="26" fill="#0A0A0A" text-anchor="middle" font-weight="700">보존 범위와 가지치기 경계</text>
+    <text x="280" y="80" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">가정 스키마 · JSON 조각의 트리</text>
+    <text x="32" y="128" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="600">스키마: 루트 object는 json만 선언</text>
+    <rect x="48" y="152" width="464" height="176" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="68" y="188" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">json: object</text>
+    <text x="68" y="220" font-size="22" fill="#6D28D9" text-anchor="start" font-weight="400">미선언 값 보존</text>
+    <rect x="80" y="240" width="408" height="64" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="100" y="266" font-size="21" fill="#0A0A0A" text-anchor="start" font-weight="600">typed: object → 구조 다시 선언</text>
+    <text x="100" y="294" font-size="20" fill="#0A0A0A" text-anchor="start" font-weight="400">그 아래 enabled: boolean만 선언</text>
+    <text x="32" y="376" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">① 요청 데이터</text>
+    <path d="M48 406 V494 H80" fill="none" stroke="#475569" stroke-width="2"/>
+    <path d="M48 446 H80" fill="none" stroke="#475569" stroke-width="2"/>
+    <text x="32" y="408" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="600">root</text>
+    <rect x="80" y="420" width="432" height="40" rx="5" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+    <text x="96" y="448" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">someRandomField: 42</text>
+    <text x="488" y="447" font-size="20" fill="#BE123C" text-anchor="end" font-weight="600">제거</text>
+    <text x="80" y="500" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">json</text>
+    <rect x="80" y="520" width="432" height="192" rx="8" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="492" y="546" font-size="19" fill="#6D28D9" text-anchor="end" font-weight="400">보존 범위</text>
+    <path d="M104 548 V600 H128" fill="none" stroke="#7C3AED" stroke-width="2"/>
+    <path d="M104 560 H128" fill="none" stroke="#7C3AED" stroke-width="2"/>
+    <text x="128" y="568" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">loose: &quot;keep&quot;</text>
+    <text x="488" y="574" font-size="20" fill="#6D28D9" text-anchor="end" font-weight="600">보존</text>
+    <text x="128" y="608" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="600">typed</text>
+    <rect x="144" y="620" width="344" height="76" rx="5" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <path d="M160 630 V678 H184" fill="none" stroke="#059669" stroke-width="2"/>
+    <path d="M160 644 H184" fill="none" stroke="#059669" stroke-width="2"/>
+    <text x="184" y="650" font-size="21" fill="#0A0A0A" text-anchor="start" font-weight="400">enabled: true</text>
+    <text x="184" y="684" font-size="21" fill="#0A0A0A" text-anchor="start" font-weight="400">extra: &quot;drop&quot;</text>
+    <text x="472" y="684" font-size="20" fill="#BE123C" text-anchor="end" font-weight="600">제거</text>
+    <path d="M280 720 V796" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#k8s-theory-crd-schema-pruning-3-arrow)"/>
+    <rect x="104" y="738" width="352" height="36" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="280" y="764" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">Ignore / Warn으로 진행하는 경우</text>
+    <text x="32" y="834" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">② 가지치기 결과의 개념 예시</text>
+    <rect x="48" y="856" width="464" height="216" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="72" y="894" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">json</text>
+    <path d="M88 910 V966 H120" fill="none" stroke="#7C3AED" stroke-width="2"/>
+    <path d="M88 928 H120" fill="none" stroke="#7C3AED" stroke-width="2"/>
+    <text x="120" y="934" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">loose: &quot;keep&quot;</text>
+    <text x="120" y="974" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="600">typed</text>
+    <path d="M136 990 V1022 H168" fill="none" stroke="#059669" stroke-width="2"/>
+    <text x="168" y="1028" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">enabled: true</text>
+    <text x="280" y="1112" font-size="21" fill="#BE123C" text-anchor="middle" font-weight="600">Strict는 미선언 필드 때문에 HTTP 400 거절</text>
+    <text x="280" y="1152" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">실제 etcd 저장 바이트를 그린 것은 아님</text>
+  </g>
+</svg>
