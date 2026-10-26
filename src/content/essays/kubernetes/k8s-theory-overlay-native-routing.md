@@ -111,6 +111,8 @@ IPv4의 50바이트는 바깥 IP 20, UDP 8, VXLAN 8, 안쪽 Ethernet 헤더 14�
 그 안에서 다시 내부 IP와 TCP 등의 헤더 공간을 사용합니다
 암호화나 추가 헤더가 있으면 해당 공간도 별도로 계산해야 합니다
 
+![underlay IP MTU 1500에서 VXLAN 바깥 IPv4 헤더 묶음 50바이트와 IPv6 헤더 묶음 70바이트를 제외해 내부 IP 예산 1450·1430을 구분한 단면|tall](/diagrams/k8s-theory-overlay-native-routing-2.svg)
+
 ### 인터페이스 MTU와 경로 MTU가 같은 값일 필요는 없습니다
 
 위 식에서 1450이 나왔다고 모든 Pod의 `eth0` MTU가 반드시 1450이라고 단정하면 안 됩니다

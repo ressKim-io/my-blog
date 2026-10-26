@@ -94,6 +94,8 @@ TCP·UDP에서는 출발지와 목적지 주소·포트, 프로토콜이 연결 
 두 키를 단순히 주소를 맞바꾼 사본으로 생각하면 이 차이를 놓칩니다
 NAT 설정의 `nf_nat_setup_info`는 실제 변환을 반영해 reply 튜플을 수정합니다
 
+![추가 SNAT이 없는 연결에서 요청은 Service 목적지에서 백엔드 목적지로 바뀌고, 백엔드 응답은 같은 conntrack 기록을 찾아 Service 출발지로 바뀌는 주소 대응|tall](/diagrams/k8s-theory-netfilter-conntrack-3.svg)
+
 ## 후속 패킷은 유지 중인 NAT 바인딩을 재사용합니다
 
 새 흐름의 첫 패킷은 NAT 규칙을 조회해 바인딩을 만들며 그 패킷도 변환합니다

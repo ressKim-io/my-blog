@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="1176" viewBox="0 0 560 1176" role="img" aria-labelledby="k8s-theory-netfilter-conntrack-3-title k8s-theory-netfilter-conntrack-3-desc">
+  <title id="k8s-theory-netfilter-conntrack-3-title">요청과 응답을 잇는 하나의 NAT 기록</title>
+  <desc id="k8s-theory-netfilter-conntrack-3-desc">Linux kube-proxy iptables의 일반 IPv4 ClusterIP에서 추가 SNAT이 없는 같은 프로토콜 연결의 가정 예시입니다. 요청은 출발지 10.244.1.5:33445를 유지하고 목적지가 Service 10.96.0.10:80에서 백엔드 10.244.2.9:8080으로 바뀝니다. Original 키는 변환 전 요청이며 Reply 키는 백엔드에서 클라이언트로 보낸 응답입니다. 두 키는 하나의 연결 객체와 NAT 상태에 대응합니다. 응답은 같은 NAT 상태로 출발지가 Service 주소로 역변환됩니다. 배지는 조회 관계이며 기록 안으로 패킷이 이동한다는 뜻이 아닙니다</desc>
+  <defs><marker id="k8s-theory-netfilter-conntrack-3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="1176" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif" fill="#0A0A0A">
+    <text x="280" y="42" font-size="26" fill="#0A0A0A" text-anchor="middle" font-weight="700">요청·응답을 잇는 NAT 기록</text>
+    <text x="280" y="80" font-size="20" fill="#0A0A0A" text-anchor="middle" font-weight="400">IPv4 ClusterIP · kube-proxy iptables</text>
+    <text x="280" y="110" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">같은 프로토콜 · 추가 SNAT 없는 가정</text>
+    <text x="32" y="153" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">① 클라이언트가 보낸 요청</text>
+    <rect x="48" y="176" width="464" height="88" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="64" y="208" font-size="21" fill="#334155" text-anchor="start" font-weight="400">SRC</text>
+    <text x="152" y="208" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.244.1.5:33445</text>
+    <text x="64" y="248" font-size="21" fill="#334155" text-anchor="start" font-weight="400">DST</text>
+    <text x="152" y="248" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.96.0.10:80</text>
+    <rect x="12" y="203" width="32" height="32" rx="16" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="28" y="226" font-size="22" fill="#6D28D9" text-anchor="middle" font-weight="700">O</text>
+    <path d="M280 264 V316" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#k8s-theory-netfilter-conntrack-3-arrow)"/>
+    <rect x="192" y="274" width="176" height="32" rx="4" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="280" y="297" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">목적지 DNAT</text>
+    <rect x="48" y="328" width="464" height="88" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <rect x="136" y="373" width="360" height="36" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="64" y="360" font-size="21" fill="#334155" text-anchor="start" font-weight="400">SRC</text>
+    <text x="152" y="360" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.244.1.5:33445</text>
+    <text x="64" y="400" font-size="21" fill="#334155" text-anchor="start" font-weight="400">DST</text>
+    <text x="152" y="400" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.244.2.9:8080</text>
+    <rect x="32" y="456" width="496" height="300" rx="16" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="280" y="494" font-size="24" fill="#0A0A0A" text-anchor="middle" font-weight="700">하나의 conntrack 연결 기록</text>
+    <rect x="48" y="514" width="32" height="32" rx="16" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="64" y="537" font-size="22" fill="#6D28D9" text-anchor="middle" font-weight="700">O</text>
+    <text x="94" y="540" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="700">Original 키</text>
+    <text x="96" y="572" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">SRC 10.244.1.5:33445</text>
+    <text x="96" y="604" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">DST 10.96.0.10:80</text>
+    <path d="M56 620 H504" fill="none" stroke="#7C3AED" stroke-width="1"/>
+    <rect x="48" y="632" width="32" height="32" rx="16" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="64" y="655" font-size="22" fill="#6D28D9" text-anchor="middle" font-weight="700">R</text>
+    <text x="94" y="658" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="700">Reply 키</text>
+    <text x="96" y="690" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">SRC 10.244.2.9:8080</text>
+    <text x="96" y="722" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">DST 10.244.1.5:33445</text>
+    <text x="280" y="786" font-size="20" fill="#0A0A0A" text-anchor="middle" font-weight="400">O·R은 같은 기록의 NAT 상태를 사용</text>
+    <text x="32" y="832" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="700">② 백엔드가 보낸 응답</text>
+    <rect x="48" y="852" width="464" height="88" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="64" y="884" font-size="21" fill="#334155" text-anchor="start" font-weight="400">SRC</text>
+    <text x="152" y="884" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.244.2.9:8080</text>
+    <text x="64" y="924" font-size="21" fill="#334155" text-anchor="start" font-weight="400">DST</text>
+    <text x="152" y="924" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.244.1.5:33445</text>
+    <rect x="12" y="879" width="32" height="32" rx="16" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+    <text x="28" y="902" font-size="22" fill="#6D28D9" text-anchor="middle" font-weight="700">R</text>
+    <path d="M280 940 V996" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#k8s-theory-netfilter-conntrack-3-arrow)"/>
+    <rect x="128" y="952" width="304" height="32" rx="4" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="280" y="975" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">같은 NAT 상태로 역변환</text>
+    <rect x="48" y="1008" width="464" height="88" rx="10" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <rect x="136" y="1013" width="360" height="36" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="64" y="1040" font-size="21" fill="#334155" text-anchor="start" font-weight="400">SRC</text>
+    <text x="152" y="1040" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.96.0.10:80</text>
+    <text x="64" y="1080" font-size="21" fill="#334155" text-anchor="start" font-weight="400">DST</text>
+    <text x="152" y="1080" font-size="23" fill="#0A0A0A" text-anchor="start" font-weight="400">10.244.1.5:33445</text>
+    <text x="280" y="1136" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="600">키는 두 방향 · 연결 객체는 하나</text>
+  </g>
+</svg>

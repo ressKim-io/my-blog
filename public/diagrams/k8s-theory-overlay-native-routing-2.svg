@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="1184" viewBox="0 0 560 1184" role="img" aria-labelledby="k8s-theory-overlay-native-routing-2-title k8s-theory-overlay-native-routing-2-desc">
+  <title id="k8s-theory-overlay-native-routing-2-title">VXLAN 헤더와 내부 IP 패킷의 MTU 예산</title>
+  <desc id="k8s-theory-overlay-native-routing-2-desc">underlay IP MTU 1500이며 추가 암호화와 IP 옵션이 없는 계산 예시입니다. 바깥 Ethernet은 IP MTU 밖에 있습니다. 바깥 IPv4 20, UDP 8, VXLAN 8, 안쪽 Ethernet 14바이트를 더하면 50바이트이고 내부 IP 예산은 1450바이트입니다. 바깥 IPv6 기본 헤더 40바이트이면 합계 70바이트이고 내부 IP 예산은 1430바이트입니다. 헤더 구간은 비례 없이 확대했습니다. 내부 IP 예산에는 내부 IP와 TCP 등 전송 헤더가 포함되므로 앱 데이터 크기와 다릅니다. 모든 Pod eth0의 MTU를 확정하거나 다른 터널과 추가 헤더에 일반화하는 값이 아닙니다</desc>
+  <defs><marker id="k8s-theory-overlay-native-routing-2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <rect width="560" height="1184" rx="16" fill="#FAFAFA"/>
+  <g font-family="Pretendard, Apple SD Gothic Neo, system-ui, sans-serif" fill="#0A0A0A">
+    <text x="280" y="42" font-size="26" fill="#0A0A0A" text-anchor="middle" font-weight="700">VXLAN과 IP 패킷 예산</text>
+    <text x="280" y="80" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="400">가정: underlay MTU 1500</text>
+    <text x="280" y="112" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">추가 암호화·IP 옵션 없음</text>
+    <text x="280" y="144" font-size="20" fill="#0A0A0A" text-anchor="middle" font-weight="400">헤더 구간 확대 · 길이 비례 아님</text>
+    <text x="112" y="192" font-size="24" fill="#0A0A0A" text-anchor="start" font-weight="700">바깥 IPv4</text>
+    <rect x="112" y="216" width="336" height="42" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="280" y="244" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">바깥 Ethernet · MTU 밖</text>
+    <path d="M96 280 H80 V504 H96" fill="none" stroke="#475569" stroke-width="2"/>
+    <text x="42" y="382" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="700">1500</text>
+    <text x="42" y="410" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">B</text>
+    <rect x="112" y="280" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="307" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">바깥 IPv4</text>
+    <text x="432" y="307" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">20 B</text>
+    <rect x="112" y="320" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="347" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">UDP</text>
+    <text x="432" y="347" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">8 B</text>
+    <rect x="112" y="360" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="387" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">VXLAN</text>
+    <text x="432" y="387" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">8 B</text>
+    <rect x="112" y="400" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="427" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">안쪽 Ethernet</text>
+    <text x="432" y="427" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">14 B</text>
+    <path d="M464 280 H480 V440 H464" fill="none" stroke="#D97706" stroke-width="2"/>
+    <text x="512" y="352" font-size="22" fill="#B45309" text-anchor="middle" font-weight="700">50</text>
+    <text x="512" y="382" font-size="21" fill="#B45309" text-anchor="middle" font-weight="400">B</text>
+    <rect x="112" y="440" width="336" height="64" rx="0" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="280" y="468" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="400">내부 IP 패킷</text>
+    <text x="280" y="494" font-size="23" fill="#047857" text-anchor="middle" font-weight="700">1450 B</text>
+    <text x="280" y="544" font-size="23" fill="#0A0A0A" text-anchor="middle" font-weight="600">1500 − 50 = 1450 B</text>
+    <text x="112" y="600" font-size="24" fill="#0A0A0A" text-anchor="start" font-weight="700">바깥 IPv6</text>
+    <rect x="112" y="624" width="336" height="42" rx="5" fill="#F8FAFC" stroke="#475569" stroke-width="1.5"/>
+    <text x="280" y="652" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">바깥 Ethernet · MTU 밖</text>
+    <path d="M96 688 H80 V912 H96" fill="none" stroke="#475569" stroke-width="2"/>
+    <text x="42" y="790" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="700">1500</text>
+    <text x="42" y="818" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">B</text>
+    <rect x="112" y="688" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="715" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">바깥 IPv6</text>
+    <text x="432" y="715" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">40 B</text>
+    <rect x="112" y="728" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="755" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">UDP</text>
+    <text x="432" y="755" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">8 B</text>
+    <rect x="112" y="768" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="795" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">VXLAN</text>
+    <text x="432" y="795" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">8 B</text>
+    <rect x="112" y="808" width="336" height="40" rx="0" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5"/>
+    <text x="128" y="835" font-size="22" fill="#0A0A0A" text-anchor="start" font-weight="400">안쪽 Ethernet</text>
+    <text x="432" y="835" font-size="22" fill="#0A0A0A" text-anchor="end" font-weight="600">14 B</text>
+    <path d="M464 688 H480 V848 H464" fill="none" stroke="#D97706" stroke-width="2"/>
+    <text x="512" y="760" font-size="22" fill="#B45309" text-anchor="middle" font-weight="700">70</text>
+    <text x="512" y="790" font-size="21" fill="#B45309" text-anchor="middle" font-weight="400">B</text>
+    <rect x="112" y="848" width="336" height="64" rx="0" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="280" y="876" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="400">내부 IP 패킷</text>
+    <text x="280" y="902" font-size="23" fill="#047857" text-anchor="middle" font-weight="700">1430 B</text>
+    <text x="280" y="952" font-size="23" fill="#0A0A0A" text-anchor="middle" font-weight="600">1500 − 70 = 1430 B</text>
+    <text x="280" y="1000" font-size="22" fill="#0A0A0A" text-anchor="middle" font-weight="600">내부 IP 패킷 안에도 헤더가 있습니다</text>
+    <rect x="32" y="1024" width="136" height="56" rx="0" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="100.0" y="1059" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">IP 헤더</text>
+    <rect x="168" y="1024" width="184" height="56" rx="0" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="260.0" y="1059" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">TCP 등 헤더</text>
+    <rect x="352" y="1024" width="176" height="56" rx="0" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+    <text x="440.0" y="1059" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">앱 데이터</text>
+    <text x="280" y="1116" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">바깥 주소군별 계산 · 추가 헤더는 별도</text>
+    <text x="280" y="1150" font-size="21" fill="#0A0A0A" text-anchor="middle" font-weight="400">앱 데이터·Pod eth0 MTU의 확정값 아님</text>
+  </g>
+</svg>
