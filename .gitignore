@@ -40,9 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# codex 사용자 환경 (MCP server PATH가 nvm 절대경로 의존)
-.codex/config.toml
-
 # claude design 와이어프레임 프로토타입 (블로그 소스 아님)
 /tmp-design/
 

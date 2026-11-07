@@ -97,6 +97,13 @@ logs 트랙(트러블슈팅 거친 노트)은 **URL을 직접 알아야만 접�
 
 격리 강화가 더 필요하면 `/logs/{slug}/` 페이지에 `robots: { index: false }` 추가(검색엔진 차단)도 고려 가능합니다.
 
+### 예약 게시와 k8s-theory 미리보기
+
+- **예약 게시**: frontmatter `date`가 오늘(KST, `src/lib/publication.mjs`)보다 미래인 글은 `getAllPosts`·`getPostBySlug`·sitemap·RSS에서 빠진다. 게시일 전에는 해당 URL도 빌드되지 않음
+- **매일 재빌드**: `.github/workflows/deploy.yml`의 `schedule` cron `5 15 * * *`(00:05 KST)로 정적 export를 다시 만들어 예약 글을 공개. 배포 전 `node --test scripts/publication.test.mjs` 실행
+- **k8s-theory 미리보기**: `src/lib/post-visibility.mjs`의 `PREVIEW_K8S_THEORY = true` 동안 `k8s-theory-*` 글은 홈·글 목록·검색·관련 글·sitemap·RSS에서 빠지고 `robots: noindex`. 대신 게시일과 무관하게 URL로 열린다(시리즈 이동 유지). 검토가 끝나면 `false`로 바꿔 게시일 기준 노출로 전환
+- 목록·검색용으로는 `getListedEssays()`를 쓰고, 직접 링크·시리즈 이동용으로는 `getEssays()`/`getSeriesPosts()`를 쓴다
+
 <!-- STATS:START -->
 <!-- 자동 생성: scripts/update-stats.mjs (prebuild 훅), 수동 편집 금지 -->
 ## Blog Content Stats (2026-10-22 기준, 자동 생성)
@@ -170,7 +177,7 @@ date: "2025-01-01"
 # 블로그 글 작성 핵심 규칙
 
 > 글을 작성·변환·검토하기 전에 [공통 말투·편집 기준](docs/writing-voice.md)을 반드시 읽습니다
-> Codex의 AGENTS.md와 같은 문서를 참조합니다. 문체·설명 분량은 이 공통 문서가 기존 스킬·시리즈 plan의 문체 예시보다 우선합니다
+> 문체·설명 분량은 이 공통 문서가 기존 스킬·시리즈 plan의 문체 예시보다 우선합니다
 > 이론·개념 글의 구조를 설계하거나 개선할 때는 [이론 글을 개선한 이유와 편집 기준](docs/theory-writing-rationale.md)을 함께 읽습니다. 선행 개념·기본 사례·조건 보존·그림 선택·독립 검토의 판단 근거를 이어갑니다
 > 변환 절차는 `.claude/skills/draft-to-post/SKILL.md`, 검토는 `.claude/agents/blog-reviewer.md`를 따릅니다
 

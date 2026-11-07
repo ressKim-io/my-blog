@@ -43,9 +43,9 @@ vault의 다른 참고 파일 (같은 `☸️ k8s-theory/` 아래).
 
 | 순서 | 파일 | 내용 |
 |---|---|---|
-| 1 | [AGENTS.md](../../../AGENTS.md) · [CLAUDE.md](../../../CLAUDE.md) · [공통 말투 기준](../../../docs/writing-voice.md) | Codex·Claude 공통 작성·검토 기준 |
-| 2 | 사용하는 도구의 `draft-to-post` 스킬 | 아래 저장소 참고의 진입점 사용 |
-| 3 | [plan.md](plan.md) | 말투 적용 · 3편 단위 절차 · 모델 참고 · 다음 배치와 진행 기록 |
+| 1 | [CLAUDE.md](../../../CLAUDE.md) · [공통 말투 기준](../../../docs/writing-voice.md) | 작성·검토 기준 |
+| 2 | [draft-to-post 스킬](../../skills/draft-to-post/SKILL.md) | 변환 절차 |
+| 3 | [plan.md](plan.md) | 말투 적용 · 3편 단위 절차 · 다음 배치와 진행 기록 |
 | 4 | [source-format.md](source-format.md) | 학습 노트를 블로그 해설로 재구성하는 기준 |
 | 5 | [inventory.md](inventory.md) | **2026-09-08 당시** 50편 목록과 재산출 방법. 현재 목록으로 취급하지 않음 |
 
@@ -110,8 +110,7 @@ push·배포·시리즈 카드 등록은 별도 요청으로 진행한다
 | 경로 | 쓸모 |
 |---|---|
 | [docs/writing-voice.md](../../../docs/writing-voice.md) | 공통 말투·편집·검토 기준. 과거 plan의 문체 예시보다 우선 |
-| [Codex draft-to-post](../../../.agents/skills/draft-to-post/SKILL.md) | Codex용 스킬 진입점 |
-| [Claude draft-to-post](../../skills/draft-to-post/SKILL.md) | 공통 변환 절차 상세 |
+| [draft-to-post](../../skills/draft-to-post/SKILL.md) | 변환 절차 상세 |
 | [SVG 가이드](../diagram-conversion/best-practices.md) | §1(색상) · §11(패턴 9종) |
 | `scripts/lint-post.mjs` | `npm run lint:post -- <file>` |
 | `src/content/essays/kubernetes/cloud-virtualization-double-tax.md` | 근거 등급 고지 블록의 선례 |

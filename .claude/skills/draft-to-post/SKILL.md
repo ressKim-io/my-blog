@@ -5,12 +5,11 @@ description: drafts/*.md 원본 로그·ADR·학습 정리를 src/content/{essay
 
 # Draft → Blog Post 변환
 
-## Codex·Claude 공통 기준
+## 공통 말투 기준
 
 작성 전에 [공통 말투·편집 기준](../../../docs/writing-voice.md)을 반드시 읽습니다
-이 파일은 양쪽이 사용하는 변환 절차이며, Codex의 `.agents/skills/draft-to-post/SKILL.md`에서도 이 파일을 읽습니다
 공통 말투 기준은 아래 문체 예시와 시리즈 plan의 오래된 문체·분량 요구보다 우선합니다
-시리즈 slug·order·기준 버전은 해당 plan을 따릅니다. 경로를 도구 이름에 맞춰 `.Codex/...` 등으로 바꾸지 않습니다
+시리즈 slug·order·기준 버전은 해당 plan을 따릅니다
 
 ## 입력/출력
 
@@ -20,7 +19,7 @@ description: drafts/*.md 원본 로그·ADR·학습 정리를 src/content/{essay
 
 ## 0단계: 시리즈 확인 (가장 먼저)
 
-- 진행 중인 시리즈는 시리즈별 plan 문서가 SSOT: `.claude/plans/kernel-runtime-series/plan.md` (커널·런타임 시리즈, 편별 slug·order·상태 표 포함)
+- 시리즈는 시리즈별 plan 문서가 SSOT: `.claude/plans/{series}/plan.md` (편별 slug·order·상태 표 포함). 완료된 선례: `kernel-runtime-series/`, `k8s-theory-series/`
 - **plan의 확정 규칙(slug·order·기준 버전)을 우선**합니다. 관련 plan을 읽고 편 완료 시 상태 표를 갱신합니다. 문체는 공통 말투·편집 기준을 따릅니다
 - 어느 시리즈에도 속하지 않으면 단독 글 (`series` 필드 생략)
 - 계획에 없는 시리즈성 draft를 만나면 **사용자에게 확인** (추측 금지)
@@ -194,7 +193,7 @@ happens) 류 영어 상투구 직역도 같은 계열 — "여기서 핵심이 �
 
 ## 참고 자료
 
-- 진행 중 시리즈 기준: `.claude/plans/kernel-runtime-series/plan.md` (편별 상태 표 포함)
+- 시리즈 plan 선례: `.claude/plans/kernel-runtime-series/plan.md`, `.claude/plans/k8s-theory-series/plan.md` (둘 다 완료, 편별 상태 표 포함)
 - 좋은 변환 예시(심화 시리즈): `src/content/essays/runtime/syscall-mode-switch-cost.md`
   (단, 이 글은 마침표 규칙 확정 전 발행이라 마침표가 있음 — 구조·깊이·다이어그램만 참고)
 - 좋은 변환 예시(ADR): `src/content/essays/argocd/goti-container-image-update-strategy-adr.md` (레거시 관례 — 구조만 참고)

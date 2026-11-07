@@ -8,10 +8,8 @@
 
 ## 다음 채팅의 시작점
 
-1. 저장소 [AGENTS.md](../../../AGENTS.md)와 [CLAUDE.md](../../../CLAUDE.md), [공통 말투·편집 기준](../../../docs/writing-voice.md)을 읽는다
-2. 사용하는 도구의 `draft-to-post` 스킬을 읽는다
-   - Codex: [스킬 진입점](../../../.agents/skills/draft-to-post/SKILL.md)
-   - Claude: [변환 스킬](../../skills/draft-to-post/SKILL.md)
+1. 저장소 [CLAUDE.md](../../../CLAUDE.md)와 [공통 말투·편집 기준](../../../docs/writing-voice.md)을 읽는다
+2. [draft-to-post 스킬](../../skills/draft-to-post/SKILL.md)을 읽는다
 3. 이 계획의 절대 제약·변환 절차와 [원본 변환 지침](source-format.md)을 읽고, 7절의 다음 배치를 진행한다
 
 문체는 공통 기준을 우선한다. 과거 계획의 문단 수·SVG 개수·고정 맺음말 요구는 적용하지 않는다
@@ -70,7 +68,7 @@ push·배포·시리즈 카드 등록은 범위 밖이다
 | 항목 | 결정 | 근거 |
 |---|---|---|
 | 원본 취급 | vault는 **읽기 전용**, 블로그 저장소로 복사해 변환 | 노트의 `종료 조건 판정`·`LAB TODO`·`SOURCE DIVE`는 학습 도구로서 가치가 있다. 블로그용으로 고치면 망가진다 |
-| ASCII 처리 | **선별 평탄화** — 표/인라인/` ```text `로 내리고 시각화가 필요한 흐름은 SVG | 현행 AGENTS.md·CLAUDE.md ASCII 정책 적용. `source-format.md` 5절은 과거 원본의 분류 사례 |
+| ASCII 처리 | **선별 평탄화** — 표/인라인/` ```text `로 내리고 시각화가 필요한 흐름은 SVG | 현행 CLAUDE.md ASCII 정책 적용. `source-format.md` 5절은 과거 원본의 분류 사례 |
 | 다이어그램 라벨 | **한글**, 기술 용어(authn·APF·GVR 등)는 원어 유지 | 본문이 한글이라 영어 라벨은 이질적. 원본의 영어는 학습용 표기였다 |
 | 진행 순서 | **Phase 1부터 원본 좌표 순서로 3편씩**, Phase별 시리즈 6개 | 한 배치에서 원본 확인·작성·검수·진행 기록까지 마친다 |
 | 트랙 | `essays` | 다듬은 개념 해설이다. 트러블슈팅 노트가 아니다 |
@@ -127,7 +125,7 @@ Vault 원본 편집 작업과 이 블로그 변환 작업은 별개다. 원본�
 ## 4. 이 시리즈에 적용할 말투
 
 상세 기준은 [docs/writing-voice.md](../../../docs/writing-voice.md)에만 유지한다
-Codex와 Claude 모두 같은 문서를 읽고 아래처럼 이론 해설에 적용한다
+이 문서를 아래처럼 이론 해설에 적용한다
 
 - 원본의 질문, 설명 순서, 판단 근거를 살린다. 개인 경험이 없는 글에는 실패담·감정·실습 경험을 만들지 않는다
 - 본문은 `~합니다`, `~입니다`로 쓴다. 짧은 원문 독백은 인용으로 남길 수 있지만 새로 꾸며 넣지 않는다
@@ -207,26 +205,10 @@ Codex와 Claude 모두 같은 문서를 읽고 아래처럼 이론 해설에 적
 
 ---
 
-## 6. 모델 운용 참고 (2026-10-21 조사)
+## 6. 작업 도구
 
-아래는 작업에 맞춘 추천이며 모델 설정 변경이나 사용자의 최종 선택을 뜻하지 않는다
-사용 가능한 모델과 설정은 다음 작업 시 실제 도구에서 확인한다
-
-| 용도 | 추천 출발점 | 적용 |
-|---|---|---|
-| Codex에서 3편 변환·소스 확인·파일 수정·검증 | GPT-6.1 Sol, High | 여러 자료와 도구를 다루는 기본 작업 |
-| Claude와 함께 글을 쓸 때 본문·말투 편집 | Claude Opus 5.5 | 같은 원본과 공통 말투 기준을 전달. Codex에서는 주장·버전·참조를 대조 |
-| 근거가 충돌하거나 기전 추론이 어려운 부분 | GPT-6 Astra | 해당 쟁점에 한정해 추가 검토. 모든 글을 높은 추론 강도로 돌릴 필요는 없음 |
-
-이 역할 분담은 공개 평가와 작업 성격을 바탕으로 한 판단이지 한국어 Kubernetes 글의 직접 비교 결과는 아니다
-첫 배치에서 원본 의미 보존, 과장·반복, 사용자가 다시 고친 문장을 보고 조정한다
-어느 모델이 검토했든 공식 자료 확인과 빌드를 대체하지 않는다
-
-- [OpenAI 모델 가이드](https://learn.chatgpt.com/docs/models): Sol은 반복적인 문서·코드 작업, Astra는 더 어려운 추론·도구 작업의 후보. High 추천은 이 작업에 대한 판단
-- [Anthropic Opus 5.5 소개](https://www.anthropic.com/claude-opus-5-5): 문체·명료성 개선에 대한 제작사 설명이며 독립 평가와 구분
-- [Towards AI ToneBench](https://benchmark.towardsai.com/thinking/claude-code-claude-opus-5-5.html): 10개 대본 과제의 모델별 최고 설정 비교에서 Opus 5.5가 1위. 특정 작가의 대본 재현과 자동 심사 결과이며 한국어 블로그 검증은 아님
-- [Braintrust MathTutorBench 비교](https://www.braintrust.dev/evals/gpt-6-1-sol-vs-gpt-6-sol-and-astra): Sol 6.1의 교육적 설명 점수는 개선됐지만 글쓰기 점수는 Sol 6과 비슷. 수학 지도 과제의 결과를 문체 전반의 우열로 확대하지 않음
-- [joonlab 개인 공개 실험](https://github.com/joonlab/gpt-6.1-sol-benchmark): 한국어 형식 지시 16개를 2회씩 시험해 Sol 6.1이 모두 통과. 상위 모델 대부분이 만점에 가까워 자연스러운 한국어 문체의 우열을 가리지 못함
+2026-10-21~26의 변환·편집은 Codex(GPT)로 진행했다. 2026-11-07부터 Claude Code만 사용한다
+당시 모델 운용 메모는 git 이력(`f355bcd`)에 남아 있다
 
 ---
 

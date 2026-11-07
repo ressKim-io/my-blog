@@ -5,7 +5,7 @@
 
 ## 한 번에 읽을 문서
 
-1. 저장소 `AGENTS.md`와 [공통 말투 기준](../writing-voice.md)
+1. 저장소 `CLAUDE.md`와 [공통 말투 기준](../writing-voice.md)
 2. [구조 판단 기준](principles.md)
 3. [작업 목록](index.md)에서 고른 글별 검토서
 4. 해당 원문 전문과 인접 그림, 필요한 선행 글의 해당 절

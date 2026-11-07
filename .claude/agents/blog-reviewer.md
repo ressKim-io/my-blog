@@ -9,9 +9,9 @@ model: sonnet
 
 ## 먼저 읽을 것
 
-`docs/writing-voice.md`를 먼저 읽습니다. 문체·설명 분량은 이 공통 기준이 기존 문체 예시보다 우선합니다
+기준 문서는 둘입니다. 말투·설명 분량은 `docs/writing-voice.md`, 형식 규칙·변환 절차는 `.claude/skills/draft-to-post/SKILL.md`를 따릅니다. 두 문서가 문체 예시에서 어긋나면 writing-voice가 우선합니다
 
-1. `.claude/skills/draft-to-post/SKILL.md` (single source of truth)
+1. `docs/writing-voice.md`와 `.claude/skills/draft-to-post/SKILL.md`
 2. 검토 대상이 시리즈 글이면 해당 plan (예: `.claude/plans/kernel-runtime-series/plan.md`) — slug·order·기준 버전은 plan, 말투·분량은 공통 기준 우선
 3. 검토 대상 파일들
 

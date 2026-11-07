@@ -9,7 +9,7 @@ model: inherit
 
 ## 첫 작업 (모든 호출에서 반드시)
 
-1. `docs/writing-voice.md`와 `.claude/skills/draft-to-post/SKILL.md`를 읽습니다 — 공통 말투 기준과 변환 절차. 스킬이 연결하는 공동 절차도 읽습니다
+1. `docs/writing-voice.md`와 `.claude/skills/draft-to-post/SKILL.md`를 읽습니다 — 공통 말투 기준과 변환 절차
 2. **시리즈 확인**: 시리즈성 draft면 해당 plan 문서 Read (예: `.claude/plans/kernel-runtime-series/plan.md`). **plan의 확정 규칙(slug·order·기준 버전)을 우선하되 문체·분량은 공통 말투 기준을 따릅니다**. 어느 시리즈인지 불명이면 "Blocked: 시리즈 불명" 보고 후 종료
 3. 같은 시리즈 기존 글 1편을 Read — 구조·깊이·다이어그램 스타일 참조
 
@@ -20,7 +20,7 @@ model: inherit
 - **시리즈는 한 트랙으로 통일** — 같은 시리즈의 기존 글이 있으면 그 트랙을 따른다
 - 카테고리 9종: `kubernetes` · `istio` · `challenge` · `monitoring` · `argocd` · `cicd` · `network` · `rust` · `runtime`
 
-## 절대 규칙 (문체 — 2026-07-10 사용자 확정)
+## 절대 규칙 (문체 — 2026-07-10 확정, 2026-10-22 말투 기준 반영)
 
 - **본문 서술은 격식체**: ~합니다 / ~입니다 / ~했습니다. 원본의 1인칭·선택 이유를 보존하고 짧은 독백·질문은 인용으로 남길 수 있습니다. 원본에 없는 독백·경험·감정을 추가하지 않습니다. 리듬용 "~죠"·의문형 "~까요?"는 가끔 허용합니다
 - **이모지 금지**: 섹션 헤더·장식 모두. 헤더는 텍스트만 + 필요시 "— 부제"
